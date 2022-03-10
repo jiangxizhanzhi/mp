@@ -1,17 +1,17 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.validation.stereotype.Length;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 public class Container extends CloudClient {
 
@@ -84,5 +84,26 @@ public class Container extends CloudClient {
         } catch (Exception e) {
             throw new MpRuntimeException(e.getMessage());
         }
+    }
+
+    public List<ContainerGetData> getAllContainer(Integer limit, Integer offset) {
+        CommonQueryParam param = new CommonQueryParam();
+        param.setLimit(limit);
+        param.setOffset(offset);
+        CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param, new TypeReference<>() {
+        }, true);
+        if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
+            return result.getData().getList();
+        }
+        return null;
+    }
+
+    public void deleteContainerById(String containerId) {
+        heavyConcurrentWait();
+
+        ContainerNewDeleteData data = new ContainerNewDeleteData();
+        data.setForce(true);
+        cloudDelete(CloudUrlConstant.DELETE_CONTAINER_URL.replace("{container_id}", containerId), data, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
     }
 }
