@@ -90,7 +90,8 @@ public class Container extends CloudClient {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
         param.setOffset(offset);
-        CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param, new TypeReference<>() {
+        CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param,
+                new TypeReference<CloudResponse<CloudListData<ContainerGetData>>>() {
         }, true);
         if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
             return result.getData().getList();

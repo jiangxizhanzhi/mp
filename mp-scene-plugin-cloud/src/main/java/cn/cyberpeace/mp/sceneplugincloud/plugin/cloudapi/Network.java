@@ -38,7 +38,7 @@ public class Network extends CloudClient {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
         param.setOffset(offset);
-        CloudResponse<CloudListData<NetworkData>> result = cloudGet(CloudUrlConstant.NETWORK_QUERY_URL, null, new TypeReference<>() {
+        CloudResponse<CloudListData<NetworkData>> result = cloudGet(CloudUrlConstant.NETWORK_QUERY_URL, param, new TypeReference<>() {
         }, true);
         if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
             return result.getData().getList();

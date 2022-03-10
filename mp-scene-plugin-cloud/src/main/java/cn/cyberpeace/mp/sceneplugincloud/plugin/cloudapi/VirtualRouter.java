@@ -45,7 +45,7 @@ public class VirtualRouter extends CloudClient {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
         param.setOffset(offset);
-        CloudResponse<CloudListData<VirtualRouterGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_ROUTER_URL, null, new TypeReference<>() {
+        CloudResponse<CloudListData<VirtualRouterGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_ROUTER_URL, param, new TypeReference<>() {
         }, true);
         if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
             return result.getData().getList();

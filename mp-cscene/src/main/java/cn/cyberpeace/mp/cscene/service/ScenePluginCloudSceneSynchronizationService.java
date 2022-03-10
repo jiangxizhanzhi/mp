@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -11,11 +9,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +33,10 @@ import java.util.concurrent.*;
 @Service
 @Slf4j
 public class ScenePluginCloudSceneSynchronizationService {
-    public static final long REFRESH_RATE = 60 * 24;
-
-    public static final long REFRESH_MINUTE = 60000;
 
     private static ExecutorService threadPool = null;
 
+    @Autowired
     private SceneElementMapper sceneElementMapper;
 
     private final Container containerClient = new Container();
@@ -45,7 +44,7 @@ public class ScenePluginCloudSceneSynchronizationService {
     private final Network netClient = new Network();
     private final VirtualRouter vrClient = new VirtualRouter();
 
-    @Scheduled(initialDelay = REFRESH_RATE * REFRESH_MINUTE, fixedRate = REFRESH_RATE * REFRESH_MINUTE)
+    @Scheduled(cron = "5 * * * * ?")
     public void scheduleNode() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
@@ -65,15 +64,16 @@ public class ScenePluginCloudSceneSynchronizationService {
             });
             containerName2Id.forEach((name, id) -> {
                 var condition = new HumanCondition().filterEqual(SceneElementModel::getId, name);
-                SceneElementModel element = sceneElementMapper.list(condition).get(0);
-                if (element == null) {
+                List<SceneElementModel> elements = sceneElementMapper.list(condition);
+                if (elements == null) {
                     return;
                 }
-                if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                    containerClient.deleteContainerById(id);
-                } else if (element.getEventStatus() == EventStatus.ABNORMAL && element.getEvent() == SceneElementModel.Event.CREATE) {
-                    containerClient.deleteContainerById(id);
-                }
+                elements.forEach(element -> {
+                    if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
+                        System.out.println("delete container,elementId:" + name);
+//                    containerClient.deleteContainerById(id);
+                    }
+                });
             });
         }
 
@@ -91,15 +91,70 @@ public class ScenePluginCloudSceneSynchronizationService {
             });
             vmName2Id.forEach((name, id) -> {
                 var condition = new HumanCondition().filterEqual(SceneElementModel::getId, name);
-                SceneElementModel element = sceneElementMapper.list(condition).get(0);
-                if (element == null) {
+                List<SceneElementModel> elements = sceneElementMapper.list(condition);
+                if (elements == null) {
                     return;
                 }
-                if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                    vmClient.deleteInstanceById(id);
-                } else if (element.getEventStatus() == EventStatus.ABNORMAL && element.getEvent() == SceneElementModel.Event.CREATE) {
-                    vmClient.deleteInstanceById(id);
+                elements.forEach(element -> {
+                    if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
+                        System.out.println("delete vm,elementId:" + name);
+//                    vmClient.deleteInstanceById(id);
+                    }
+                });
+            });
+        }
+
+        for (Integer offset = 1, limit = 10; ; offset++) {
+            List<VirtualRouterGetData> vrData = vrClient.getAllRouters(limit, offset);
+            Map<String, String> vrName2Id = new HashMap<>();
+            if (CollectionUtil.isEmpty(vrData)) {
+                break;
+            }
+            vrData.forEach(data -> {
+                if (data.getName() != null && data.getId() != null && data.getName().startsWith("MP_SCENE")) {
+                    String name = data.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                    vrName2Id.put(name, data.getId());
                 }
+            });
+            vrName2Id.forEach((name, id) -> {
+                var condition = new HumanCondition().filterEqual(SceneElementModel::getId, name);
+                List<SceneElementModel> elements = sceneElementMapper.list(condition);
+                if (elements == null) {
+                    return;
+                }
+                elements.forEach(element -> {
+                    if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
+                        System.out.println("delete router,elementId:" + name);
+//                    vrClient.deleteRouterById(id);
+                    }
+                });
+            });
+        }
+
+        for (Integer offset = 1, limit = 10; ; offset++) {
+            List<NetworkData> networkData = netClient.getAll(limit, offset);
+            Map<String, String> netName2Id = new HashMap<>();
+            if (CollectionUtil.isEmpty(networkData)) {
+                break;
+            }
+            networkData.forEach(netData -> {
+                if (netData.getName() != null && netData.getId() != null && netData.getName().startsWith("MP_SCENE")) {
+                    String name = netData.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                    netName2Id.put(name, netData.getId());
+                }
+            });
+            netName2Id.forEach((name, id) -> {
+                var condition = new HumanCondition().filterEqual(SceneElementModel::getId, name);
+                List<SceneElementModel> elements = sceneElementMapper.list(condition);
+                if (elements == null) {
+                    return;
+                }
+                elements.forEach(element -> {
+                    if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
+                        System.out.println("delete network,elementId:" + name);
+//                    netClient.deleteNetworkById(id);
+                    }
+                });
             });
         }
     }

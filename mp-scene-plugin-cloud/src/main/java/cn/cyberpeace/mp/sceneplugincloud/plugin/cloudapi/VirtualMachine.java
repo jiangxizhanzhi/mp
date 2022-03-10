@@ -73,7 +73,7 @@ public class VirtualMachine extends CloudClient {
         CommonQueryParam param = new CommonQueryParam();
         param.setLimit(limit);
         param.setOffset(offset);
-        CloudResponse<CloudListData<VirtualMachineGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_INSTANCE_URL, null, new TypeReference<>() {
+        CloudResponse<CloudListData<VirtualMachineGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_INSTANCE_URL, param, new TypeReference<>() {
         }, true);
         if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
             return result.getData().getList();
