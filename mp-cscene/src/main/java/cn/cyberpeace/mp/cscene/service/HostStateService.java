@@ -63,6 +63,9 @@ public class HostStateService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
+
     /**
      * 查询单个节点机器当前状态
      *
@@ -301,6 +304,7 @@ public class HostStateService {
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
     }
+
 
 
     private void checkListPageParams(ListPageInfoQueryParams params) {
