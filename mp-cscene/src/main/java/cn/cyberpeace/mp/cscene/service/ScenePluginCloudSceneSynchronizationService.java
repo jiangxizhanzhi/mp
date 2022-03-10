@@ -44,7 +44,7 @@ public class ScenePluginCloudSceneSynchronizationService {
     private final Network netClient = new Network();
     private final VirtualRouter vrClient = new VirtualRouter();
 
-    @Scheduled(cron = "5 * * * * ?")
+    @Scheduled(cron = "0 0 24 * * ?")
     public void scheduleNode() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
@@ -70,8 +70,7 @@ public class ScenePluginCloudSceneSynchronizationService {
                 }
                 elements.forEach(element -> {
                     if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                        System.out.println("delete container,elementId:" + name);
-//                    containerClient.deleteContainerById(id);
+                        containerClient.deleteContainerById(id);
                     }
                 });
             });
@@ -97,8 +96,7 @@ public class ScenePluginCloudSceneSynchronizationService {
                 }
                 elements.forEach(element -> {
                     if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                        System.out.println("delete vm,elementId:" + name);
-//                    vmClient.deleteInstanceById(id);
+                        vmClient.deleteInstanceById(id);
                     }
                 });
             });
@@ -124,8 +122,7 @@ public class ScenePluginCloudSceneSynchronizationService {
                 }
                 elements.forEach(element -> {
                     if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                        System.out.println("delete router,elementId:" + name);
-//                    vrClient.deleteRouterById(id);
+                        vrClient.deleteRouterById(id);
                     }
                 });
             });
@@ -151,8 +148,7 @@ public class ScenePluginCloudSceneSynchronizationService {
                 }
                 elements.forEach(element -> {
                     if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
-                        System.out.println("delete network,elementId:" + name);
-//                    netClient.deleteNetworkById(id);
+                        netClient.deleteNetworkById(id);
                     }
                 });
             });
