@@ -87,7 +87,7 @@ public class HypervisorConverter implements BaseConverter {
                 HypervisorPageConvertModel.Model.builder().name(hypervisor.getHostname())
                         .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed())
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 

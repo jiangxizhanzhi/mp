@@ -32,9 +32,15 @@ public class HypervisorPageResponse extends BaseCloudPlatformResponse {
     private String ip;
 
     /**
-     * 服务状态
+     * 物理主机服务状态
      */
-    @ApiModelProperty("服务状态")
+    @ApiModelProperty("物理主机服务状态")
+    private boolean serviceStatus;
+
+    /**
+     * 计算节点服务状态
+     */
+    @ApiModelProperty("计算节点服务状态")
     private String status;
 
     /**
