@@ -33,10 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -489,4 +486,18 @@ public class ImagesConverter implements BaseConverter{
         dto.setLikeName(request.getLikeName());
         return dto;
     }
+
+    /**
+     * 获取物理主机服务状态列表
+     * @return
+     */
+    public HypervisorServiceStatusModel listServiceStatus() {
+        HypervisorServiceStatusModel serviceStatusModel = scenariosService.listServiceStatus();
+        if (Objects.nonNull(serviceStatusModel) && CollectionUtils.isNotEmpty(serviceStatusModel.getData())) {
+            return serviceStatusModel;
+        } else {
+            return new HypervisorServiceStatusModel(new ArrayList<>());
+        }
+    }
+
 }
