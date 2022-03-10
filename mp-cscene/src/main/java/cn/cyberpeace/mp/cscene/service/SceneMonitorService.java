@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -173,9 +172,9 @@ public class SceneMonitorService {
         List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true);
 
         // cpu
-        Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparingDouble(e -> e.getHostState().getCpuPercent());
-        Comparator<ElementMonitorBasicInfo> sortByMemory = Comparator.comparingDouble(e -> e.getHostState().getMemoryPercent());
-        Comparator<ElementMonitorBasicInfo> sortByDisk = Comparator.comparingDouble(e -> e.getHostState().getDiskPercent());
+        Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> e.getHostState().getCpuPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByMemory = Comparator.comparing(e -> e.getHostState().getMemoryPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByDisk = Comparator.comparing(e -> e.getHostState().getDiskPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
 
         List<ElementMonitorBasicInfo> sortByCpuList = list.stream().sorted(sortByCpu.reversed()).limit(topCount).collect(Collectors.toList());
         List<ElementMonitorBasicInfo> sortByMemoryList = list.stream().sorted(sortByMemory.reversed()).limit(topCount).collect(Collectors.toList());
@@ -206,34 +205,6 @@ public class SceneMonitorService {
         }
         return supported;
     }
-
-    /**
-     *
-     * @param elementMonitorBasicInfo
-     * @param type 1:cpu  2:memory  3:disk
-     * @return
-     */
-    private Comparator<ElementMonitorBasicInfo> getComparator(ElementMonitorBasicInfo elementMonitorBasicInfo, Integer type) {
-        HostState hostState = elementMonitorBasicInfo.getHostState();
-        if (Objects.isNull(hostState)) {
-            return null;
-        }
-
-        switch (type) {
-            case 1:
-                Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> e.getHostState().getCpuPercent());
-                return sortByCpu;
-            case 2:
-                Comparator sortByRam = Comparator.comparing(HostState::getMemoryPercent);
-                return sortByRam;
-            case 3:
-                Comparator sortByDisk = Comparator.comparing(HostState::getDiskPercent);
-                return sortByDisk;
-        }
-
-        return null;
-    }
-
 
 
 }
