@@ -6,17 +6,20 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ElementHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -31,16 +34,8 @@ public class HandlerUtils {
     private final Map<String, List<String>> networkNodeIdPortIdsMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> networkNodeIdOuterExistIpsMap = new ConcurrentHashMap<>();
 
-    private final Map<String, ElementHandler> elementHandlerMap = new ConcurrentHashMap<>();
     private final Map<String, CloudPluginSceneElementNetworkBO> portId2network = new ConcurrentHashMap<>();
 
-    public void addElementHandler(CloudPluginSceneElementBO element) {
-        this.elementHandlerMap.put(element.getSrcElement().getId(), new ElementHandler(element, this.getPluginHandler(), this));
-    }
-
-    public ElementHandler getElementHandler(CloudPluginSceneElementBO element) {
-        return this.elementHandlerMap.get(element.getSrcElement().getId());
-    }
 
     public CloudPluginSceneElementNetworkBO getNetworkByPort(SceneElementPortBO port) {
         return this.portId2network.get(port.getId());

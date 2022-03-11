@@ -140,8 +140,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-        var elementHandler = getHandlerUtils().getElementHandler(cloudElement);
-        elementHandler.deriveNetworks.forEach(connectedNetwork -> {
+        cloudElement.getDeriveNetworks().forEach(connectedNetwork -> {
             if (StringUtils.isNotEmpty(connectedNetwork.network.getNetworkId())) {
                 return;
             }
@@ -283,7 +282,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private List<VirtualNic> genVirtualNic(CloudPluginSceneElementBO cloudElement, List<ElementHandler.ConnectedNetwork> deriveConnectedNetworks, List<ElementHandler.ConnectedNetwork> accessConnectedNetworks) {
+    private List<VirtualNic> genVirtualNic(CloudPluginSceneElementBO cloudElement, List<ConnectedNetworkBO> deriveConnectedNetworks, List<ConnectedNetworkBO> accessConnectedNetworks) {
         List<VirtualNic> virtualNics = new ArrayList<>();
         // 添加管理网卡
         if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
@@ -291,18 +290,10 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
-        for (ElementHandler.ConnectedNetwork connectedNetwork : deriveConnectedNetworks) {
+        for (ConnectedNetworkBO connectedNetwork : deriveConnectedNetworks) {
             var network = connectedNetwork.network;
-            List<SceneElementPortBO> fromPorts = new ArrayList<>();
-            List<SceneElementPortBO> toPorts = new ArrayList<>();
-            connectedNetwork.connectPorts.forEach(cp -> {
-                if (cp.from != null) {
-                    fromPorts.add(cp.from);
-                }
-                if (cp.to != null) {
-                    toPorts.add(cp.to);
-                }
-            });
+            List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+            List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
 
             SceneElementPortBO samplePort = fromPorts.get(0);
             CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
@@ -351,7 +342,7 @@ public class CreateHandler extends HandlerCommon {
             }
             virtualNics.add(virtualNic);
         }
-        for (ElementHandler.ConnectedNetwork connectedNetwork : accessConnectedNetworks) {
+        for (ConnectedNetworkBO connectedNetwork : accessConnectedNetworks) {
             var virtualNic = new VirtualNic();
             virtualNic.setNetworkId(connectedNetwork.network.getNetworkId());
             virtualNic.setFixedIp(connectedNetwork.connectPorts.get(0).from.getIp());
@@ -740,8 +731,8 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(
                 this.genVirtualNic(
                         cloudElement,
-                        getHandlerUtils().getElementHandler(cloudElement).deriveNetworks,
-                        getHandlerUtils().getElementHandler(cloudElement).accessNetworks
+                        cloudElement.getDeriveNetworks(),
+                        cloudElement.getAccessNetworks()
                 )
         ));
 
@@ -828,8 +819,8 @@ public class CreateHandler extends HandlerCommon {
         createData.setNetworks(CollectionUtils.emptyNull(
                 this.genVirtualNic(
                         cloudElement,
-                        getHandlerUtils().getElementHandler(cloudElement).deriveNetworks,
-                        getHandlerUtils().getElementHandler(cloudElement).accessNetworks
+                        cloudElement.getDeriveNetworks(),
+                        cloudElement.getAccessNetworks()
                 )
         ));
         var container = containerClient.create(createData);
@@ -866,7 +857,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
-                .filter(cloudElement -> !getHandlerUtils().getElementHandler(cloudElement).deriveNetworks.isEmpty())
+                .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
