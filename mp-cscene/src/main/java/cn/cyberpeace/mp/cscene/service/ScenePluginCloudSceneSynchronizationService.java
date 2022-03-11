@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
@@ -39,6 +40,8 @@ public class ScenePluginCloudSceneSynchronizationService {
     @Autowired
     private SceneElementMapper sceneElementMapper;
 
+    private static final String PREFIX = CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();
+
     private final Container containerClient = new Container();
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Network netClient = new Network();
@@ -57,8 +60,8 @@ public class ScenePluginCloudSceneSynchronizationService {
                 break;
             }
             containers.forEach(container -> {
-                if (container.getName() != null && container.getId() != null && container.getName().startsWith("MP_SCENE")) {
-                    String name = container.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                if (container.getName() != null && container.getId() != null && container.getName().startsWith(PREFIX)) {
+                    String name = container.getName().replace(PREFIX + "_", StringUtils.EMPTY);
                     containerName2Id.put(name, container.getId());
                 }
             });
@@ -83,8 +86,8 @@ public class ScenePluginCloudSceneSynchronizationService {
                 break;
             }
             vmData.forEach(vm -> {
-                if (vm.getName() != null && vm.getId() != null && vm.getName().startsWith("MP_SCENE")) {
-                    String name = vm.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                if (vm.getName() != null && vm.getId() != null && vm.getName().startsWith(PREFIX)) {
+                    String name = vm.getName().replace(PREFIX + "_", StringUtils.EMPTY);
                     vmName2Id.put(name, vm.getId());
                 }
             });
@@ -109,8 +112,8 @@ public class ScenePluginCloudSceneSynchronizationService {
                 break;
             }
             vrData.forEach(data -> {
-                if (data.getName() != null && data.getId() != null && data.getName().startsWith("MP_SCENE")) {
-                    String name = data.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                if (data.getName() != null && data.getId() != null && data.getName().startsWith(PREFIX)) {
+                    String name = data.getName().replace(PREFIX + "_", StringUtils.EMPTY);
                     vrName2Id.put(name, data.getId());
                 }
             });
@@ -135,8 +138,8 @@ public class ScenePluginCloudSceneSynchronizationService {
                 break;
             }
             networkData.forEach(netData -> {
-                if (netData.getName() != null && netData.getId() != null && netData.getName().startsWith("MP_SCENE")) {
-                    String name = netData.getName().replace("MP_SCENE_", StringUtils.EMPTY);
+                if (netData.getName() != null && netData.getId() != null && netData.getName().startsWith(PREFIX)) {
+                    String name = netData.getName().replace(PREFIX + "_", StringUtils.EMPTY);
                     netName2Id.put(name, netData.getId());
                 }
             });
