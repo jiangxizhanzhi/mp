@@ -364,7 +364,7 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 分配默认路由地址
-        List<String> defaultRouterIpPool = IpUtils.allocateDefaultRouterIps(cidr, defaultRouterRequireCount,
+        List<String> defaultRouterIpPool = IpUtils.newAllocateDefaultRouterIps(cidr, defaultRouterRequireCount,
                 new ArrayList<>(existIps),
                 auxiliaryNetworkCloudElement.getAllocationPools());
         // 选择最后一个地址设置为初始默认网关
@@ -388,7 +388,7 @@ public class InitiateHandler extends HandlerCommon {
                 // 如果分到了可能的dhcp地址，重新分配
                 if (defaultRouterIpPool.contains(possibleDhcpIp)) {
                     defaultRouterIpPool.remove(possibleDhcpIp);
-                    defaultRouterIpPool.addAll(IpUtils.allocateDefaultRouterIps(cidr, 1, new ArrayList<>(existIps),
+                    defaultRouterIpPool.addAll(IpUtils.newAllocateDefaultRouterIps(cidr, 1, new ArrayList<>(existIps),
                             auxiliaryNetworkCloudElement.getAllocationPools()));
                 }
             }
@@ -401,7 +401,7 @@ public class InitiateHandler extends HandlerCommon {
 
         // 分配普通地址
         existIps.addAll(defaultRouterIpPool);
-        List<String> ipPool = IpUtils.randomIps(cidr, requireCount, new ArrayList<>(existIps),
+        List<String> ipPool = IpUtils.newRandomIps(cidr, requireCount, new ArrayList<>(existIps),
                 auxiliaryNetworkCloudElement.getAllocationPools(),
                 BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
         // 默认路由地址在后
@@ -543,7 +543,7 @@ public class InitiateHandler extends HandlerCommon {
                 existIps.add(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
             }
 
-            var newIps = IpUtils.randomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
+            var newIps = IpUtils.newRandomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
                     new ArrayList<>(existIps),
                     srcPortAuxiliaryNetworkCloudElement.getAllocationPools(),
                     BoolUtils.bool(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));

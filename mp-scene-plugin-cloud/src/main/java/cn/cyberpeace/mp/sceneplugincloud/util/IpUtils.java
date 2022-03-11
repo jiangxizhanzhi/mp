@@ -16,6 +16,8 @@ public class IpUtils {
 
     private IpUtils() {}
 
+    private static final Random Random = new Random();
+
     /**
      * 随机网段 0/24
      * @param allCidrs cidr池
@@ -80,17 +82,20 @@ public class IpUtils {
             beginIp = newIps[0];
             lastIp = newIps[1];
         }
-        long size = Ipv4Util.ipv4ToLong(previousIp(lastIp)) - Ipv4Util.ipv4ToLong(nextIp(beginIp));
+        long beginIpLong = Ipv4Util.ipv4ToLong(nextIp(beginIp));
+        long size = Ipv4Util.ipv4ToLong(previousIp(lastIp)) - beginIpLong;
 
         // dhcp情况，默认地址池
         if (abandonDhcp && (allocationPools == null || allocationPools.isEmpty())) {
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
             for (int i = 0; i < count; i++) {
-                String randomIp = randomIp(nextIp(beginIp), previousIp(lastIp));
+                String randomIp = randomIp(beginIpLong, size);
                 if (excludeIps.contains(randomIp)) {
+                    i--;
                     continue;
                 }
                 if (ips.contains(randomIp)) {
+                    i--;
                     continue;
                 }
                 ips.add(randomIp);
@@ -98,23 +103,29 @@ public class IpUtils {
         } else if (allocationPools != null && !allocationPools.isEmpty()) {
             allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
             if (allocationPoolsIps.size() < size) {
+                long begin = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(0));
+                long newSize = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(allocationPoolsIps.size() - 1)) - begin;
                 for (int i = 0; i < count; i++) {
-                    String randomIp = randomIp(allocationPoolsIps.get(0), allocationPoolsIps.get(allocationPoolsIps.size() - 1));
+                    String randomIp = randomIp(begin, newSize);
                     if (excludeIps.contains(randomIp)) {
+                        i--;
                         continue;
                     }
                     if (ips.contains(randomIp)) {
+                        i--;
                         continue;
                     }
                     ips.add(randomIp);
                 }
             } else {
                 for (int i = 0; i < count; i++) {
-                    String randomIp = randomIp(nextIp(beginIp), previousIp(lastIp));
+                    String randomIp = randomIp(beginIpLong, size);
                     if (excludeIps.contains(randomIp)) {
+                        i--;
                         continue;
                     }
                     if (ips.contains(randomIp)) {
+                        i--;
                         continue;
                     }
                     ips.add(randomIp);
@@ -180,9 +191,11 @@ public class IpUtils {
         for (int i = 0; i < count; i++) {
             previousIp = IpUtils.previousIp(previousIp);
             if (allocationPoolsIps.contains(previousIp)) {
+                i--;
                 continue;
             }
             if (excludeIps != null && !excludeIps.isEmpty() && excludeIps.contains(previousIp)) {
+                i--;
                 continue;
             }
             ips.add(previousIp);
@@ -332,16 +345,12 @@ public class IpUtils {
 
     /**
      * 获取地址段内随机ip
-     * @param beginIp 第一个ip地址
-     * @param lastIp 最后一个ip地址
+     * @param begin 第一个ip地址long
+     * @param size 地址段大小
      * @return 随机ip地址
      */
-    public static String randomIp(String beginIp, String lastIp) {
-        long begin = Ipv4Util.ipv4ToLong(beginIp);
-        long last = Ipv4Util.ipv4ToLong(lastIp);
-        long size = last - begin;
-        Random random = new Random();
-        long randomData = random.nextInt((int) size);
+    public static String randomIp(long begin, long size) {
+        long randomData = Random.nextInt((int) size);
         return Ipv4Util.longToIpv4(randomData + begin);
     }
 }
