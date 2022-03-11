@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -18,8 +19,19 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.*;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
@@ -28,7 +40,12 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -123,47 +140,50 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-        if (!StringUtils.isEmpty(cloudElement.getAuxiliaryNetworkId())) {
-            return;
-        }
+        var elementHandler = getHandlerUtils().getElementHandler(cloudElement);
+        elementHandler.deriveNetworks.forEach(connectedNetwork -> {
+            if (StringUtils.isNotEmpty(connectedNetwork.network.getNetworkId())) {
+                return;
+            }
+            var srcElement = cloudElement.getSrcElement();
+            var createData = new VirtualSwitchCreateData();
+            createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+            createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+            if (Boolean.TRUE.equals(connectedNetwork.network.getVlan())) {
+                createData.setSegmentationId(IntUtils.zeroNull(connectedNetwork.network.getVlanId()));
+            }
+            var subnet = new VirtualSwitchCreateData.Subnet();
+            subnet.setCidr(connectedNetwork.network.getCidr());
+            subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
+            // 默认开启dhcp
+            var dhcp = connectedNetwork.network.getDhcp();
+            subnet.setEnableDhcp(dhcp == null || dhcp);
 
-        var srcElement = cloudElement.getSrcElement();
-        var createData = new VirtualSwitchCreateData();
-        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-        createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-        if (Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkVlan())) {
-            createData.setSegmentationId(IntUtils.zeroNull(cloudElement.getAuxiliaryNetworkVlanId()));
-        }
-        var subnet = new VirtualSwitchCreateData.Subnet();
-        subnet.setCidr(cloudElement.getAuxiliaryNetworkCidr());
-        subnet.setGatewayIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkGateway()));
-        // 默认开启dhcp
-        var dhcp = cloudElement.getAuxiliaryNetworkDhcp();
-        subnet.setEnableDhcp(dhcp == null || dhcp);
-        var srcAllocationPools = cloudElement.getAuxiliaryNetworkAllocationPools();
-        if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
-            List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
-            srcAllocationPools.forEach(srcAllocationPool -> {
-                allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
-                        srcAllocationPool.getEnd()));
-            });
-            subnet.setAllocationPools(allocationPools);
-        }
-        var srcHostRoutes = cloudElement.getAuxiliaryNetworkHostRoutes();
-        if (srcHostRoutes != null && !srcHostRoutes.isEmpty()) {
-            List<VirtualSwitchCreateData.Subnet.HostRoute> hostRoutes = new ArrayList<>();
-            srcHostRoutes.forEach(srcHostRoute -> {
-                hostRoutes.add(new VirtualSwitchCreateData.Subnet.HostRoute(srcHostRoute.getDestination(),
-                        srcHostRoute.getNexthop()));
-            });
-            subnet.setHostRoutes(hostRoutes);
-        }
-        subnet.setDnsNameservers(CollectionUtils.emptyNull(cloudElement.getAuxiliaryNetworkDnsNameservers()));
-        createData.setSubnet(subnet);
-        var virtualSwitch = vsClient.create(createData);
-        cloudElement.setAuxiliaryNetworkId(virtualSwitch.getId());
+            var srcAllocationPools = connectedNetwork.network.getAllocationPools();
+            if (srcAllocationPools != null && !srcAllocationPools.isEmpty()) {
+                List<VirtualSwitchCreateData.Subnet.AllocationPool> allocationPools = new ArrayList<>();
+                srcAllocationPools.forEach(srcAllocationPool -> {
+                    allocationPools.add(new VirtualSwitchCreateData.Subnet.AllocationPool(srcAllocationPool.getStart(),
+                            srcAllocationPool.getEnd()));
+                });
+                subnet.setAllocationPools(allocationPools);
+            }
 
-        createAuxiliaryNetworkRouter(cloudElement);
+            var srcHostRoutes = connectedNetwork.network.getHostRoutes();
+            if (srcHostRoutes != null && !srcHostRoutes.isEmpty()) {
+                List<VirtualSwitchCreateData.Subnet.HostRoute> hostRoutes = new ArrayList<>();
+                srcHostRoutes.forEach(srcHostRoute -> {
+                    hostRoutes.add(new VirtualSwitchCreateData.Subnet.HostRoute(srcHostRoute.getDestination(),
+                            srcHostRoute.getNexthop()));
+                });
+                subnet.setHostRoutes(hostRoutes);
+            }
+            subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
+            createData.setSubnet(subnet);
+            var virtualSwitch = vsClient.create(createData);
+            connectedNetwork.network.setNetworkId(virtualSwitch.getId());
+        });
+//      createAuxiliaryNetworkRouter(cloudElement);
     }
 
     private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {
@@ -261,6 +281,84 @@ public class CreateHandler extends HandlerCommon {
                 cloudPort.setFirewallResourceId(virtualFirewall.getId());
             });
         }
+    }
+
+    private List<VirtualNic> genVirtualNic(CloudPluginSceneElementBO cloudElement, List<ElementHandler.ConnectedNetwork> deriveConnectedNetworks, List<ElementHandler.ConnectedNetwork> accessConnectedNetworks) {
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        // 添加管理网卡
+        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
+            virtualNics.add(virtualNic);
+        }
+        for (ElementHandler.ConnectedNetwork connectedNetwork : deriveConnectedNetworks) {
+            var network = connectedNetwork.network;
+            List<SceneElementPortBO> fromPorts = new ArrayList<>();
+            List<SceneElementPortBO> toPorts = new ArrayList<>();
+            connectedNetwork.connectPorts.forEach(cp -> {
+                if (cp.from != null) {
+                    fromPorts.add(cp.from);
+                }
+                if (cp.to != null) {
+                    toPorts.add(cp.to);
+                }
+            });
+
+            SceneElementPortBO samplePort = fromPorts.get(0);
+            CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(network.getNetworkId());
+            virtualNic.setFixedIp(samplePort.getIp());
+            virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
+
+            List<VirtualNic.QosRule> qosRules = new ArrayList<>();
+            if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+                var qosRule = new VirtualNic.QosRule();
+                qosRule.setMaxKbps(samplePort.getIngress());
+                qosRule.setDirection(QosRuleDirection.INGRESS);
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
+                qosRules.add(qosRule);
+            }
+            if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+                var qosRule = new VirtualNic.QosRule();
+                qosRule.setMaxKbps(samplePort.getEgress());
+                qosRule.setDirection(QosRuleDirection.EGRESS);
+                qosRule.setDelayMs(samplePort.getDelay());
+                qosRule.setLossPercent(samplePort.getLoss());
+                qosRules.add(qosRule);
+            }
+            virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
+
+            if (!HandlerUtils.isExternalNetwork(network.getNetworkId())) {
+                virtualNic.setEnableExternal(sampleCloudPort.getNat());
+            }
+
+            virtualNic.setFirewallId(null);
+
+            var accessModes = sampleCloudPort.getAccessModes();
+            if (accessModes != null && !accessModes.isEmpty()) {
+                virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
+                    var accessModeParam = new VirtualNic.AccessMode();
+                    accessModeParam.setProtocol(accessMode.getProtocol());
+                    accessModeParam.setPort(accessMode.getPort());
+                    accessModeParam.setUsername(accessMode.getUsername());
+                    accessModeParam.setPassword(accessMode.getPassword());
+                    accessModeParam.setEnablePortMapping(accessMode.getProxy());
+                    accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
+                    return accessModeParam;
+                }).collect(Collectors.toList()));
+            }
+            virtualNics.add(virtualNic);
+        }
+        for (ElementHandler.ConnectedNetwork connectedNetwork : accessConnectedNetworks) {
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(connectedNetwork.network.getNetworkId());
+            virtualNic.setFixedIp(connectedNetwork.connectPorts.get(0).from.getIp());
+            virtualNic.setMacAddress(TextUtils.emptyNull(connectedNetwork.connectPorts.get(0).from.getMacAddr()));
+            virtualNics.add(virtualNic);
+        }
+        return virtualNics;
     }
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
@@ -632,12 +730,25 @@ public class CreateHandler extends HandlerCommon {
             });
             createData.setRoutes(staticRoutes);
         }
-        createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+        List<VirtualNic> virtualNics = new ArrayList<>();
+        // 添加管理网卡
+        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
+            var virtualNic = new VirtualNic();
+            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
+            virtualNics.add(virtualNic);
+        }
+        createData.setNetworks(CollectionUtils.emptyNull(
+                this.genVirtualNic(
+                        cloudElement,
+                        getHandlerUtils().getElementHandler(cloudElement).deriveNetworks,
+                        getHandlerUtils().getElementHandler(cloudElement).accessNetworks
+                )
+        ));
+
         var virtualRouter = vrClient.create(createData);
+
         cloudElement.setResourceId(virtualRouter.getId());
-
         receiveVirtualPortInfo(cloudElement, virtualRouter.getNetworks());
-
         createVirtualRouterFirewall(cloudElement);
     }
 
@@ -714,7 +825,13 @@ public class CreateHandler extends HandlerCommon {
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
 //        }
-        createData.setNetworks(CollectionUtils.emptyNull(genVirutalNics(cloudElement)));
+        createData.setNetworks(CollectionUtils.emptyNull(
+                this.genVirtualNic(
+                        cloudElement,
+                        getHandlerUtils().getElementHandler(cloudElement).deriveNetworks,
+                        getHandlerUtils().getElementHandler(cloudElement).accessNetworks
+                )
+        ));
         var container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());
         cloudElement.setHost(container.getHost());
@@ -749,7 +866,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
-                .filter(cloudElement -> Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn()))
+                .filter(cloudElement -> !getHandlerUtils().getElementHandler(cloudElement).deriveNetworks.isEmpty())
                 .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
