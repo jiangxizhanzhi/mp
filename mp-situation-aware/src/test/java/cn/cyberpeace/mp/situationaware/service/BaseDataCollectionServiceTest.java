@@ -162,38 +162,6 @@ public class BaseDataCollectionServiceTest {
 
     @Test
     public void testEventCount() {
-        //POST wazuh-alerts-4.x-2022.03.11/_count
-        //{
-        //  "query": {
-        //    "bool": {
-        //      "must": [
-        //        {
-        //          "range": {
-        //            "timestamp": {
-        //              "from": "2022-03-10T15:28:29.000+0800",
-        //              "to": "2022-03-11T20:37:06.482+0800",
-        //              "include_lower": true,
-        //              "include_upper": true,
-        //              "boost": 1
-        //            }
-        //          }
-        //        }
-        //      ],
-        //      "filter": [
-        //        {
-        //          "terms": {
-        //            "agent.name": [
-        //              "ceea0967056e417193fb8883f27e7186"
-        //            ],
-        //            "boost": 1
-        //          }
-        //        }
-        //      ],
-        //      "adjust_pure_negative": true,
-        //      "boost": 1
-        //    }
-        //  }
-        //}
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(Lists.newArrayList("ceea0967056e417193fb8883f27e7186", "46017f42971e403f88d17d51b07a74de", "aaaa"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

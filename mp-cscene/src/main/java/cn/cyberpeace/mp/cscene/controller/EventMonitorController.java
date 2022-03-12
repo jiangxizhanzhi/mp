@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
+import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
@@ -76,8 +76,8 @@ public class EventMonitorController {
      */
     @ApiOperation(value = "采集事件趋势图")
     @GetMapping("/event_trend")
-    public ServiceResult<List<HostState>> getEventTrend(EventTrendRequest eventTrendRequest) {
-//        List<HostState> hostStates = hostStateService.getElementHostStateTrend(eventTrendRequest);
+    public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
+        List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);
 
         return ServiceResult.successful();
     }

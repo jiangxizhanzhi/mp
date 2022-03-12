@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
+import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
@@ -85,6 +86,7 @@ public class EventMonitorService {
             }
         });
 
+        log.info("{}", eventPercents);
         return eventPercents;
     }
 
@@ -95,7 +97,7 @@ public class EventMonitorService {
      * @param trendRequest
      * @return
      */
-    public List<HostState> getEventTrend(EventTrendRequest trendRequest) {
+    public List<EventTimeCount> getEventTrend(EventTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
@@ -106,7 +108,7 @@ public class EventMonitorService {
 
 
 
-    private List<HostState> processEventTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+    private List<EventTimeCount> processEventTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
@@ -121,67 +123,29 @@ public class EventMonitorService {
             segmentCount = 10;
         }
 
-        /*List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> translatedSceneIds = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
+
+        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
-        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        List<EventTimeCount> eventTimeCounts = new ArrayList<>();
+        for (int i = 0; i < segmentCount; i++) {
+            LocalDateTime queryEndTime = endTime.minusSeconds(intervalSeconds * i);
+            LocalDateTime queryStartTime = endTime.minusSeconds(intervalSeconds * (i + 1));
 
-        List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
-        List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
-        List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
-
-        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
-        Map<LocalDateTime, HostState> hostStateMap = new HashMap<>();
-        for (LocalDateTime localDateTime : timeList) {
-            HostState hostState = new HostState();
-            // 初始化
-            hostState.setTime(localDateTime);
-            hostState.setCpuPercent(0.0);
-            hostState.setMemoryPercent(0.0);
-            // todo diskPercent
-            hostState.setDiskPercent(0.0);
-            hostStateMap.put(localDateTime, hostState);
+            WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+            wazuhEventRequest.setAgentNames(agentNames);
+            wazuhEventRequest.setStartTime(queryStartTime);
+            wazuhEventRequest.setEndTime(queryEndTime);
+            long sum = dataCollectionService.countByAgentNames(wazuhEventRequest);
+            EventTimeCount timeCount = new EventTimeCount(queryEndTime, sum);
+            eventTimeCounts.add(timeCount);
         }
 
-        // cpu
-        if (Objects.nonNull(intervalCpuPercentBOs)) {
-            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalCpuPercentBOs) {
-                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setCpuPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
-                }
-            }
-        }
-
-        // 内存
-        if (Objects.nonNull(intervalMemPercentBOs)) {
-            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
-                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
-                    // todo 在这造磁盘模拟数据
-                    hostStateMap.get(bo.getStart()).setDiskPercent(30.0);
-                }
-            }
-        }*/
-
-        // 磁盘
-        /*if (Objects.nonNull(intervalDiskPercentBOs)) {
-            for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
-                if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
-                    hostStateMap.get(bo.getStart()).setDiskPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
-                }
-            }
-        }*/
-
-        List<HostState> hostStates = new ArrayList<>();
-        /*hostStateMap.entrySet().forEach(entry -> {
-            hostStates.add(entry.getValue());
-        });
-        hostStates.sort(Comparator.comparing(HostState::getTime));*/
-
-        return hostStates;
+        List<EventTimeCount> reversedList = CollectionUtil.reverse(eventTimeCounts);
+        log.info("{}", reversedList);
+        return reversedList;
     }
 
 
