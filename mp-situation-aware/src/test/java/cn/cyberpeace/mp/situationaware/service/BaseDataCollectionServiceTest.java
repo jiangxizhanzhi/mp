@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
-import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
@@ -27,10 +26,14 @@ import org.springframework.util.Assert;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
-@SpringBootTest(classes = TestSituationAwareApplciation.class)
+//@SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
+@SpringBootTest
+//@ActiveProfiles("prod")
 public class BaseDataCollectionServiceTest {
 
     @Autowired
@@ -155,5 +158,49 @@ public class BaseDataCollectionServiceTest {
             System.out.println(val);
         });
 
+    }
+
+    @Test
+    public void testEventCount() {
+        //POST wazuh-alerts-4.x-2022.03.11/_count
+        //{
+        //  "query": {
+        //    "bool": {
+        //      "must": [
+        //        {
+        //          "range": {
+        //            "timestamp": {
+        //              "from": "2022-03-10T15:28:29.000+0800",
+        //              "to": "2022-03-11T20:37:06.482+0800",
+        //              "include_lower": true,
+        //              "include_upper": true,
+        //              "boost": 1
+        //            }
+        //          }
+        //        }
+        //      ],
+        //      "filter": [
+        //        {
+        //          "terms": {
+        //            "agent.name": [
+        //              "ceea0967056e417193fb8883f27e7186"
+        //            ],
+        //            "boost": 1
+        //          }
+        //        }
+        //      ],
+        //      "adjust_pure_negative": true,
+        //      "boost": 1
+        //    }
+        //  }
+        //}
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ceea0967056e417193fb8883f27e7186", "46017f42971e403f88d17d51b07a74de", "aaaa"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhEventRequest.setStartTime(LocalDateTime.parse("2022-03-11 12:00:00", formatter));
+        wazuhEventRequest.setEndTime(LocalDateTime.parse("2022-03-11 12:15:00", formatter));
+        Map<String, Long> countMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
+        long count = dataCollectionService.countByAgentNames(wazuhEventRequest);
+        System.out.println(count);
     }
 }
