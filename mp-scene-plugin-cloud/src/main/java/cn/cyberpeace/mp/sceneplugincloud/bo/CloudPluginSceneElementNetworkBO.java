@@ -44,8 +44,4 @@ public class CloudPluginSceneElementNetworkBO {
     private String id = TextUtils.uuid();
 
     private List<String> ipPool = new ArrayList<>();
-
-    private List<CloudPluginSceneElementPortBO> fromPorts = new ArrayList<>();
-
-    private List<CloudPluginSceneElementPortBO> toPorts = new ArrayList<>();
 }
