@@ -104,7 +104,7 @@ public class DataCollectionService {
         //处理分页
         int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
-        log.info("elasticsearch JSON query:\n{}", searchRequest.source().toString());
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
@@ -138,7 +138,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query: {}", searchRequest.source().toString());
+        log.info("monitor JSON query index:{}, DSL: {}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -199,7 +199,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("queryMonitorEventsAgg JSON query: {}", searchRequest.source().toString());
+        log.info("queryMonitorEventsAgg JSON query index:{}, DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -248,7 +248,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query: {}", searchRequest.source().toString());
+        log.info("monitor JSON query index:{}, DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             log.info("es search start");
