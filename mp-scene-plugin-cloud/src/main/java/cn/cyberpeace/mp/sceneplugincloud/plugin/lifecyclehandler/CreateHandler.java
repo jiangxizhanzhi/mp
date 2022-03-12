@@ -181,6 +181,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
             connectedNetwork.network.setNetworkId(virtualSwitch.getId());
+            connectedNetwork.network.setResourceId(virtualSwitch.getId());
         });
 //      createAuxiliaryNetworkRouter(cloudElement);
     }

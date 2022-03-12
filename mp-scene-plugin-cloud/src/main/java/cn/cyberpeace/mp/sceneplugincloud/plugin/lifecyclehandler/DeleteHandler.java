@@ -104,15 +104,21 @@ public class DeleteHandler extends HandlerCommon {
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var flag = true;
-        var resourceId = cloudElement.getAuxiliaryNetworkId();
-        if (!StringUtils.isEmpty(resourceId)) {
+        cloudElement.getDeriveNetworks().forEach(n -> {
             var deleteData = new VirtualSwitchDeleteData();
             deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-            deleteData.setIds(List.of(resourceId));
-            flag = vsClient.delete(deleteData);
-        }
-
-        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
+            deleteData.setIds(List.of(n.getNetwork().getResourceId()));
+            vsClient.delete(deleteData);
+        });
+//        var resourceId = cloudElement.getAuxiliaryNetworkId();
+//        if (!StringUtils.isEmpty(resourceId)) {
+//            var deleteData = new VirtualSwitchDeleteData();
+//            deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+//            deleteData.setIds(List.of(resourceId));
+//            flag = vsClient.delete(deleteData);
+//        }
+//
+//        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
         return flag;
     }
 
@@ -248,7 +254,7 @@ public class DeleteHandler extends HandlerCommon {
         // 删除辅助网络(包含虚拟交换机)
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> {
-                    if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                    if (cloudElement.getDeriveNetworks().isEmpty()) {
                         return false;
                     }
 

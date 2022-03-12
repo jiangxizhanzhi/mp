@@ -480,6 +480,10 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
+        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+    }
+
     /**
      * 初始化节点
      * @param cloudElement 网元节点
@@ -493,7 +497,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.setAuxiliaryNetworkOn(true);
             cloudElement.setAuxiliaryNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
 
-            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO();
+            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
             network.setExternal(true);
             network.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
             cloudElement.getDeriveNetworks().add(new ConnectedNetworkBO(network, getHandlerUtils()));
@@ -523,7 +527,7 @@ public class InitiateHandler extends HandlerCommon {
                 CloudPluginSceneElementNetworkBO network = getHandlerUtils().getNetworkByPort(connectPort);
                 if (network != null) {
                     ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
-                    connectedNetwork.addPort(port, connectPort);
+                    connectedNetwork.addPort(port, connectPort, false);
                     cloudElement.getAccessNetworks().add(connectedNetwork);
                     continue;
                 }
@@ -542,20 +546,20 @@ public class InitiateHandler extends HandlerCommon {
                 String cidr = this.ip2Cidr24(cidrDivideIp);
                 ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
                 if (connectedNetwork == null) {
-                    var network = new CloudPluginSceneElementNetworkBO();
+                    var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     network.setCidr(cidr);
                     connectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
                     cidr2ConnectedNetwork.put(cidr, connectedNetwork);
                 }
-                connectedNetwork.addPort(port, connectPort);
+                connectedNetwork.addPort(port, connectPort, true);
             } else {
                 // 使用默认网络
                 if (defaultConnectedNetwork == null) {
-                    var network = new CloudPluginSceneElementNetworkBO();
+                    var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     this.loadProperties2Network(network, cloudElement);
                     defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
                 }
-                defaultConnectedNetwork.addPort(port, connectPort);
+                defaultConnectedNetwork.addPort(port, connectPort, true);
             }
         }
         if (defaultConnectedNetwork != null) {
@@ -563,10 +567,6 @@ public class InitiateHandler extends HandlerCommon {
         }
         cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
         initiateAuxiliaryNetwork(cloudElement);
-    }
-
-    public InitiateHandler(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
     }
 
     public void initCoreType(CloudPluginSceneElementBO element) {
@@ -605,6 +605,8 @@ public class InitiateHandler extends HandlerCommon {
                 initiateElementTasks.forEach(task -> task.run());
             });
         }
+
+        getPluginHandler().createElementNetworks();
 
         // 初始化ip池
         var initiateElementIpPoolTasks = cloudElements.stream()

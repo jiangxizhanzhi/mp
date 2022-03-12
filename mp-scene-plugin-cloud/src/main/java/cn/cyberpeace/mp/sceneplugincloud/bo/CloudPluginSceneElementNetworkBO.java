@@ -1,11 +1,19 @@
 package cn.cyberpeace.mp.sceneplugincloud.bo;
 
+import cn.cyberpeace.mp.base.bo.ModelBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +25,11 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class CloudPluginSceneElementNetworkBO {
+@NoArgsConstructor
+public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneElementNetworkModel, CloudPluginSceneElementNetworkBO> {
+    private String scene;
+    private String sceneElement;
+    private String id = TextUtils.uuid();
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
     @ApiModelProperty(value = "辅助网络id")
@@ -38,10 +50,56 @@ public class CloudPluginSceneElementNetworkBO {
     private Boolean vlan;
     @ApiModelProperty(value = "虚拟交换机vlanId")
     private Integer vlanId;
-
+    @ApiModelProperty(value = "是否外部网络")
     private Boolean external;
 
-    private String id = TextUtils.uuid();
-
     private List<String> ipPool = new ArrayList<>();
+
+    public CloudPluginSceneElementNetworkBO(String scene, String sceneElement) {
+        this.scene = scene;
+        this.sceneElement = sceneElement;
+    }
+
+    @Override
+    public CloudPluginSceneElementNetworkModel createModel() {
+        return new CloudPluginSceneElementNetworkModel();
+    }
+
+    @Override
+    public void fromModel(CloudPluginSceneElementNetworkModel obj, String... ignoreFields) {
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getDnsNameservers),
+                BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getAllocationPools),
+                BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getHostRoutes))
+        );
+        dnsNameservers = StringUtils.isEmpty(obj.getDnsNameservers()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getDnsNameservers(), new TypeReference<List<String>>() {
+        });
+        allocationPools = StringUtils.isEmpty(obj.getAllocationPools()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getAllocationPools(), new TypeReference<List<AllocationPool>>() {
+        });
+        hostRoutes = StringUtils.isEmpty(obj.getHostRoutes()) ? new ArrayList<>()
+                : JsonCommon.parse(obj.getHostRoutes(), new TypeReference<List<HostRoute>>() {
+        });
+    }
+
+    @Override
+    public CloudPluginSceneElementNetworkModel toModel(String... ignoreFields) {
+        var obj = super.toModel(
+                ArrayUtils.addAll(ignoreFields,
+                        BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getDnsNameservers),
+                        BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getAllocationPools),
+                        BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementNetworkModel::getHostRoutes))
+        );
+        if (this.dnsNameservers != null) {
+            obj.setDnsNameservers(JsonCommon.stringify(this.dnsNameservers));
+        }
+        if (this.allocationPools != null) {
+            obj.setAllocationPools(JsonCommon.stringify(this.allocationPools));
+        }
+        if (this.hostRoutes != null) {
+            obj.setHostRoutes(JsonCommon.stringify(this.hostRoutes));
+        }
+        return obj;
+    }
 }
