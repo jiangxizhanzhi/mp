@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
+import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
@@ -53,15 +54,15 @@ public class EventMonitorController {
     /**
      * 采集事件统计，查询各个节点事件的占比情况
      * 默认排序为前5个节点
-     * @param baseRequest
+     * @param eventPercentRequest
      * @return
      */
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
     @GetMapping("/aggr_top")
-    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(BaseTimeRangeRequest baseRequest) {
-        log.info("{}", baseRequest);
+    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
+        log.info("{}", eventPercentRequest);
 
-        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(baseRequest);
+        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
         List<ElementEventPercent> limitList = eventPercents.stream().limit(5).collect(Collectors.toList());
 //        List<ElementEventPercent> eventPercents = mockElementPercents();
         return ServiceResult.success(limitList);

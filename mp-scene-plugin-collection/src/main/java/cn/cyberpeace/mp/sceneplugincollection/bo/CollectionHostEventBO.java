@@ -22,6 +22,10 @@ public class CollectionHostEventBO {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
+    @ApiModelProperty(value = "节点类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 虚拟机, 5: 容器, 6: 实体设备")
+    // Ref: BaseCloudPluginSceneElementModel.VirtualType 中的枚举
+    private Integer virtualType;
+
     @ApiModelProperty("探针id")
     private String probeId;
 
@@ -35,7 +39,7 @@ public class CollectionHostEventBO {
     private Map<String, String> probeData;
 
     @ApiModelProperty("事件类型")
-    private String eventType;
+    private String type;
 
     @ApiModelProperty("事件描述")
     private String eventDesc;

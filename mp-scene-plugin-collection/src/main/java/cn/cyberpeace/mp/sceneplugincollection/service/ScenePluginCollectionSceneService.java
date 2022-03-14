@@ -10,11 +10,19 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
@@ -45,7 +53,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -235,13 +250,15 @@ public class ScenePluginCollectionSceneService {
             request.setKeyword(queryParams.getKeyword());
         }
 
+        // todo 查询事件类型
+
         var result = dataCollectionService.queryFileEvents(request);
 
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         result.getObjs().forEach(srcHostEvent -> {
             var hostEvent = new CollectionHostEventBO();
             hostEvent.setSceneId(sceneId);
-            hostEvent.setEventType(srcHostEvent.getFileEventType().name());
+            hostEvent.setType(srcHostEvent.getFileEventType().name());
             hostEvent.setEventDesc(srcHostEvent.getAction());
             hostEvent.setTime(srcHostEvent.getUpdateTime());
             hostEvent.setDescription(srcHostEvent.getDescription());
