@@ -57,6 +57,7 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private List<String> existCidrs;
+    private final Map<String, List<String>> networkNodeIdIpPool = new ConcurrentHashMap<>();
 
     // 辅助变量：需要重新分配的ip地址
     private Map<String, ReallocateIpInfo> reallocateIpInfos = new ConcurrentHashMap<>();
@@ -428,7 +429,7 @@ public class InitiateHandler extends HandlerCommon {
                 existIps.add(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkRouterIp());
             }
 
-            var newIps = IpUtils.randomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
+            var newIps = IpUtils.newRandomIps(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkCidr(), 1,
                     new ArrayList<>(existIps),
                     srcPortAuxiliaryNetworkCloudElement.getAllocationPools(),
                     BoolUtils.bool(srcPortAuxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));

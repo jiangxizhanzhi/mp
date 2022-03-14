@@ -326,7 +326,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             });
         }
 
-        var ips = IpUtils.randomIps(cidr, count, new ArrayList<>(existIps),
+        var ips = IpUtils.newRandomIps(cidr, count, new ArrayList<>(existIps),
                 auxiliaryNetworkCloudElement.getAllocationPools(),
                 BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
         handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);
