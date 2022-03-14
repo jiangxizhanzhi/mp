@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * 流量日志
  * @author wanggang
@@ -43,5 +45,10 @@ public class FlowLogBO {
      * 创建时间
      */
     private Long timestamp;
+
+    /**
+     * 协议类型
+     */
+    private List<String> protocol;
 
 }
