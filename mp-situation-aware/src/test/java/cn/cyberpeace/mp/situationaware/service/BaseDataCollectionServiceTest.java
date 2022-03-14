@@ -165,8 +165,8 @@ public class BaseDataCollectionServiceTest {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(Lists.newArrayList("ceea0967056e417193fb8883f27e7186", "46017f42971e403f88d17d51b07a74de", "aaaa"));
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        wazuhEventRequest.setStartTime(LocalDateTime.parse("2022-03-11 12:00:00", formatter));
-        wazuhEventRequest.setEndTime(LocalDateTime.parse("2022-03-11 12:15:00", formatter));
+        wazuhEventRequest.setStartTime(LocalDateTime.parse("2022-03-11 16:00:00", formatter));
+        wazuhEventRequest.setEndTime(LocalDateTime.parse("2022-03-12 10:15:00", formatter));
         Map<String, Long> countMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
         long count = dataCollectionService.countByAgentNames(wazuhEventRequest);
         System.out.println(count);

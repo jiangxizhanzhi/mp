@@ -79,7 +79,7 @@ public class EventMonitorController {
     public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
         List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);
 
-        return ServiceResult.successful();
+        return ServiceResult.success(eventTimeCounts);
     }
 
 
