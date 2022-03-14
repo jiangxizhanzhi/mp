@@ -116,6 +116,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
         var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
@@ -158,6 +159,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.sort("@timestamp", SortOrder.DESC);
+        searchSourceBuilder.trackTotalHits(true);
 
         if(Objects.nonNull(request.getPageSize()) && Objects.nonNull(request.getPageNum())){
             int  offset = (request.getPageNum() -1) * (request.getPageSize());
@@ -249,6 +251,7 @@ public class FlowAnalysisService extends AbstractBaseService {
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.trackTotalHits(true);
         TermsAggregationBuilder aggregationBuilder;
         if (aggregationTypeEnum == AggregationTypeEnum.SURICATA_CATEGORY) {
             aggregationBuilder = AggregationBuilders.terms("aggregationType")
@@ -375,7 +378,6 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(AggregationBuilders.sum("packageSize").field("network.bytes"));
         searchSourceBuilder.aggregation(AggregationBuilders.terms("attackWay").field("suricata.category").size(request.getTopSize()));
         //构造动态条件查询
-
         searchSourceBuilder.trackTotalHits(true);
         searchSourceBuilder.query(boolQueryBuilder);
 
@@ -420,9 +422,9 @@ public class FlowAnalysisService extends AbstractBaseService {
             var attack = attackResultVOS.get(i);
             if (i > 1 && i == attackResultVOS.size() - 1) {
                 BigDecimal beforeSum = attackResultVOS.subList(0, i).stream().map(AttackWayAggregationBO::getAttackNumberPercent).reduce((a, b) -> a.add(b)).get();
-                attack.setAttackNumberPercent(BigDecimal.valueOf(100).subtract(beforeSum));
+                attack.setAttackNumberPercent(BigDecimal.valueOf(100).compareTo(beforeSum) == -1 ? BigDecimal.ZERO : BigDecimal.valueOf(100).subtract(beforeSum));
             } else {
-                attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 2, RoundingMode.HALF_UP).multiply(BigDecimal.valueOf(100)));
+                attack.setAttackNumberPercent(BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)));
             }
         }
         attackResultVOS = attackResultVOS.stream().sorted(Comparator.comparing(AttackWayAggregationBO::getAttackNumberPercent).reversed()).collect(Collectors.toList());
@@ -481,7 +483,9 @@ public class FlowAnalysisService extends AbstractBaseService {
         if (CollectionUtils.isNotEmpty(request.getProtocols())) {
             boolQueryBuilder.must(QueryBuilders.termsQuery("protocol",request.getProtocols()));
         }
-
+        if (CollectionUtils.isNotEmpty(request.getFilterDestinationIps())) {
+            boolQueryBuilder.mustNot(QueryBuilders.termsQuery("destination.ip", request.getFilterDestinationIps()));
+        }
         if (Objects.nonNull(request.getStartDateTime()) && Objects.nonNull(request.getEndDateTime())
                 && request.getStartDateTime().isBefore(request.getEndDateTime())){
             RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("@timestamp");
@@ -489,6 +493,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             rangeQueryBuilder.lte(request.getEndDateTime().atZone(ZoneId.systemDefault()));
             boolQueryBuilder.must(rangeQueryBuilder);
         }
+
         return boolQueryBuilder;
     }
 

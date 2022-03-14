@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
@@ -76,7 +77,7 @@ public class FlowAnalysisController {
         return new ServiceResult(flowLogVOList).asResult();
     }
 
-    @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据",hidden = true)
+    @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据")
     @GetMapping("/top-By-aggregation-type")
     @Deprecated
     public ServiceResult<List<AttackWayAggregationVO>> topByAggregationTypeEnum(FlowAnalysisRequest request){
@@ -117,7 +118,7 @@ public class FlowAnalysisController {
     @GetMapping("/team_traffic_sum")
     @Deprecated
     public void queryAllTeamAttackList(FlowAnalysisRequest request){
-        flowAnalysisService.queryOneTeamAttackSumList(request);
+        TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(request);
 
 //        List<TeamBO> teamBOList = request.getTeamBOS();
 //        FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
