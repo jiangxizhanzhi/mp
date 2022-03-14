@@ -55,7 +55,7 @@ public class HostStateService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneIdTranslationService sceneIdTranslationService;
+    private SceneTranslationService sceneIdTranslationService;
 
     @Autowired
     private DataCollectionService dataCollectionService;

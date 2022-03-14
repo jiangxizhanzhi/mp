@@ -24,4 +24,7 @@ public class ElementEventPercent {
     @ApiModelProperty("事件占比")
     private Double percent;
 
+    @ApiModelProperty("事件数量")
+    private Long sum;
+
 }
