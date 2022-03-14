@@ -34,4 +34,10 @@ public class FlowQueryParams extends QueryParams {
      */
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
+
+    /**
+     * 强制过滤的目标IP集合
+     */
+    @ApiModelProperty("强制过滤的目标IP集合")
+    private List<String> filterDestinationIps;
 }

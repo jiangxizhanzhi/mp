@@ -56,6 +56,10 @@ public class CsceneCollectionFlowBO {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
+    @ApiModelProperty("时间戳毫秒级")
+    private Long timestamp;
+
+
     @ApiModelProperty("本条流量包含的攻击信息")
     private List<AttackInfo> attackInfos;
 

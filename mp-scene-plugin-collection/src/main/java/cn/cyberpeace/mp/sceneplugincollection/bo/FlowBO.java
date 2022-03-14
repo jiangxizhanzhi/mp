@@ -56,4 +56,7 @@ public class FlowBO {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
+    @ApiModelProperty("时间戳毫秒级")
+    private Long timestamp;
+
 }
