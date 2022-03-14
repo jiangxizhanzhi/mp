@@ -31,11 +31,8 @@ public class ConnectedNetworkBO {
 
     public void addPort(SceneElementPortBO from, SceneElementPortBO to, boolean create) {
         this.connectPorts.add(new ConnectPort(from, to));
-        if (from != null && create) {
+        if (create) {
             handlerUtils.getPluginHandler().getPort(from.getId()).setLogicNetworkId(this.network.getId());
-        }
-        if (to != null && create) {
-            handlerUtils.getPluginHandler().getPort(to.getId()).setLogicNetworkId(this.network.getId());
         }
         handlerUtils.addNetwork(from, network);
     }

@@ -14,7 +14,8 @@ import java.util.Random;
 @Slf4j
 public class IpUtils {
 
-    private IpUtils() {}
+    private IpUtils() {
+    }
 
     private static final Random Random = new Random();
 
@@ -70,7 +71,6 @@ public class IpUtils {
 
     public static List<String> newRandomIps(String cidr, int count, List<String> excludeIps,
                                             List<AllocationPool> allocationPools, boolean abandonDhcp) {
-        List<String> allocationPoolsIps = new ArrayList<>();
         List<String> ips = new ArrayList<>();
         String beginIp = null;
         String lastIp = null;
@@ -101,7 +101,7 @@ public class IpUtils {
                 ips.add(randomIp);
             }
         } else if (allocationPools != null && !allocationPools.isEmpty()) {
-            allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
+            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
             if (allocationPoolsIps.size() < size) {
                 long begin = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(0));
                 long newSize = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(allocationPoolsIps.size() - 1)) - begin;

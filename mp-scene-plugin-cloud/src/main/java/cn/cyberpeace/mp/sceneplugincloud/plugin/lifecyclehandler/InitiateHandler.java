@@ -321,7 +321,7 @@ public class InitiateHandler extends HandlerCommon {
                 String possibleDhcpIp = null;
                 List<String> excludeIps = new ArrayList<>(existIps);
                 for (int i = 0; i < 5; i++) {
-                    gateway = IpUtils.allocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
+                    gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
                     excludeIps.add(gateway);
                     possibleDhcpIp = IpUtils.nextIp(gateway);
                     if (!existIps.contains(possibleDhcpIp)) {
@@ -346,7 +346,7 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
             }
-            List<String> gatewayIpPool = IpUtils.allocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
+            List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             network.setIpPool(ipPool);
@@ -584,6 +584,8 @@ public class InitiateHandler extends HandlerCommon {
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 coreType = CoreType.FIREWALL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
                 coreType = CoreType.TERMINAL;
             }
         }

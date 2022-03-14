@@ -21,12 +21,14 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -57,6 +59,7 @@ public class CreateHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
+    private final Npc npcClient = new Npc();
 
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
@@ -73,6 +76,7 @@ public class CreateHandler extends HandlerCommon {
         public static final EventProcess CREATE_VIRTUAL_MACHINE = new EventProcess("create_virtual_machine", "sceneplugincloud.event.create_virtual_machine");
         public static final EventProcess CREATE_CONTAINER = new EventProcess("create_container", "sceneplugincloud.event.create_container");
         public static final EventProcess CREATE_ENTITY_NODE = new EventProcess("create_entity_node", "sceneplugincloud.event.create_entity_node");
+        public static final EventProcess CREATE_NPC = new EventProcess("create_npc", "sceneplugincloud.event.create_npc");
     }
 
     @Data
@@ -849,6 +853,28 @@ public class CreateHandler extends HandlerCommon {
         checkAccessModes(cloudElement);
     }
 
+    protected void createNpcNode(CloudPluginSceneElementBO cloudElement) {
+        String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+        List<NpcCreateData.NpcInfo> npcInfos = new ArrayList<>();
+        cloudElement.getAccessNetworks().forEach(net -> {
+            net.getFromPorts().forEach(port -> {
+                npcInfos.add(new NpcCreateData.NpcInfo(net.getNetwork().getResourceId(), npcName, port.getIp()));
+            });
+        });
+        cloudElement.getDeriveNetworks().forEach(net -> {
+            if (net.getFromPorts() != null && !net.getFromPorts().isEmpty()) {
+                npcInfos.add(new NpcCreateData.NpcInfo(net.getNetwork().getResourceId(), npcName, net.getFromPorts().get(0).getIp()));
+            }
+        });
+        NpcCreateData npcCreateData = new NpcCreateData();
+        npcCreateData.setNpcInfos(npcInfos);
+        try {
+            npcClient.create(npcCreateData);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
     }
@@ -922,6 +948,9 @@ public class CreateHandler extends HandlerCommon {
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_ENTITY_NODE,
                     () -> createEntityNode(cloudElement));
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC,
+                    () -> createNpcNode(cloudElement));
         }
     }
 
