@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import cn.cyberpeace.mp.situationaware.service.FlowPortProtocolService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
 import cn.cyberpeace.mp.situationaware.vo.AttackWayAggregationVO;
 import cn.cyberpeace.mp.situationaware.vo.FlowLogVO;
@@ -42,6 +43,9 @@ public class FlowAnalysisController {
     private static final String INDICES = "mp*sessions3*";
 
     private FlowAnalysisService flowAnalysisService;
+
+    @Autowired
+    private FlowPortProtocolService flowPortProtocolService;
 
 
     @Autowired
@@ -107,7 +111,7 @@ public class FlowAnalysisController {
         }
         List<AttackDateHistogramNetworkBytesVO> vos = bos.stream().map(bo -> {
             AttackDateHistogramNetworkBytesVO vo = new AttackDateHistogramNetworkBytesVO();
-            vo.setNetworkBytes(bo.getNetworkBytes());
+            vo.setNetworkBytes(bo.getTrafficSize());
             vo.setTime(bo.getTime());
             return vo;
         }).collect(Collectors.toList());
@@ -142,6 +146,12 @@ public class FlowAnalysisController {
 //        teamAttackResultVOS = buildPercent(teamAttackResultVOS);
 //        teamAttackResultVOS = teamAttackResultVOS.stream().sorted(Comparator.comparingLong(TeamAttackVO::getAttackNumber).reversed()).collect(Collectors.toList());
 //        return new ServiceResult<>(teamAttackResultVOS).asResult();
+    }
+
+    @ApiOperation(value = "测试")
+    @GetMapping("/test")
+    public void groupByDestinationPort(FlowAnalysisRequest request){
+        flowPortProtocolService.findAll();
     }
 
     /**

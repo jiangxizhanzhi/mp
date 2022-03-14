@@ -370,7 +370,7 @@ public class ScenePluginCollectionSceneService {
                             .atZone(ZoneOffset.UTC)
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime();
-                    return new IntervalSizeBO<>(time, time, bo.getNetworkBytes().longValue());
+                    return new IntervalSizeBO<>(time, time, bo.getTrafficSize().longValue());
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
         return new ServiceResult<>(result);
