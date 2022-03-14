@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.dto.event;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Description:
@@ -9,6 +11,8 @@ import lombok.Data;
  * @Date：2021/11/29 16:40
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ElementEventPercent {
 
     @ApiModelProperty("节点ID")

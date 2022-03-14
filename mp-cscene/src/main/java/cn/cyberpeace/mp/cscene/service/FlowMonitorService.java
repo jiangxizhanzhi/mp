@@ -215,7 +215,7 @@ public class FlowMonitorService {
             queryParams.setPage(1);
         }
         if (Objects.isNull(queryParams.getPerPage())) {
-            queryParams.setPerPage(1000);
+            queryParams.setPerPage(100);
         }
         queryParams.ensure();
 
@@ -236,7 +236,7 @@ public class FlowMonitorService {
                 // 没有攻击类型标签，全部设置为默认的低风险
                 FlowAttackDto flowAttackDto = new FlowAttackDto();
                 BeanUtils.copyProperties(flowBO, flowAttackDto);
-                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
+//                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
                 flowAttackDtos.add(flowAttackDto);
             }
         }
@@ -257,20 +257,19 @@ public class FlowMonitorService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔48小时
-            startTime = endTime.minusHours(24);
+            // todo 默认时间间隔8小时
+            startTime = endTime.minusHours(4);
         }
 
         if (Objects.isNull(segmentCount)) {
-            segmentCount = 10;
+            segmentCount = 40;
         }
 
         // todo 转好
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
-        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr),sourceIps);
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
         List<FlowTrend> flowTrends = new ArrayList<>();

@@ -18,6 +18,13 @@ import java.util.List;
 public class SegmentCount2IntervalSecondsUtil {
 
 
+    /**
+     * 按照给定分段数平均切分时间段，并计算分段之后的秒数
+     * @param start
+     * @param end
+     * @param segmentCount
+     * @return
+     */
     public static Long calculateIntervalSeconds(LocalDateTime start, LocalDateTime end, int segmentCount) {
         if (segmentCount < 1) {
             log.error("segmentCount should not less than 1! {}", segmentCount);

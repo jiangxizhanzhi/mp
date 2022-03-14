@@ -63,6 +63,9 @@ public class HostStateService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
+
     /**
      * 查询单个节点机器当前状态
      *
@@ -209,7 +212,7 @@ public class HostStateService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔48小时
+            // todo 默认时间间隔24小时
             startTime = endTime.minusHours(24);
         }
 
@@ -219,11 +222,10 @@ public class HostStateService {
 
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
-        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
 
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
@@ -301,6 +303,7 @@ public class HostStateService {
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
     }
+
 
 
     private void checkListPageParams(ListPageInfoQueryParams params) {

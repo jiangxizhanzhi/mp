@@ -37,6 +37,8 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allIp2ElementMap = new HashMap<>();
 
+    private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
+
     private Map<String, String> allMac2SceneIdMap = new HashMap<>();
 
     private Map<String, String> allIp2SceneIdMap = new HashMap<>();
@@ -119,6 +121,10 @@ public class BatchSceneHandler {
         return nodeId2NodenameMap;
     }
 
+    public SceneElementBO getNodeByEid(String eid) {
+        return this.allEid2ElementMap.get(eid);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -141,6 +147,7 @@ public class BatchSceneHandler {
 
     private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
         srcElements.forEach(srcElement -> {
+            this.allEid2ElementMap.put(srcElement.getEid(), srcElement);
             var srcPorts = srcElement.getPorts();
             if (srcPorts == null) {
                 return;

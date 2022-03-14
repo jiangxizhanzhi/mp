@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -14,7 +16,10 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -152,6 +157,36 @@ public class SceneMonitorService {
         return basicInfos;
     }
 
+    /**
+     * 查看top N的节点状态
+     */
+    public Map<String, List<ElementMonitorBasicInfo>> topAggrByHoststates(String sceneId, Integer topCount) {
+        if (Objects.isNull(topCount)) {
+            topCount = 5;
+        }
+        if (topCount < 1) {
+            log.error("topCount:{} should not be less than 1", topCount);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        List<ElementMonitorBasicInfo> list = getAllSceneElements(sceneId, true);
+
+        // cpu
+        Comparator<ElementMonitorBasicInfo> sortByCpu = Comparator.comparing(e -> e.getHostState().getCpuPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByMemory = Comparator.comparing(e -> e.getHostState().getMemoryPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+        Comparator<ElementMonitorBasicInfo> sortByDisk = Comparator.comparing(e -> e.getHostState().getDiskPercent(), Comparator.nullsFirst(Comparator.naturalOrder()));
+
+        List<ElementMonitorBasicInfo> sortByCpuList = list.stream().sorted(sortByCpu.reversed()).limit(topCount).collect(Collectors.toList());
+        List<ElementMonitorBasicInfo> sortByMemoryList = list.stream().sorted(sortByMemory.reversed()).limit(topCount).collect(Collectors.toList());
+        List<ElementMonitorBasicInfo> sortByDiskList = list.stream().sorted(sortByDisk.reversed()).limit(topCount).collect(Collectors.toList());
+
+        Map<String, List<ElementMonitorBasicInfo>> result = new HashMap<>();
+        result.put("cpu", sortByCpuList);
+        result.put("memory", sortByMemoryList);
+        result.put("disk", sortByDiskList);
+        return result;
+    }
+
 
     /**
      * 是否是需要的节点
@@ -170,7 +205,6 @@ public class SceneMonitorService {
         }
         return supported;
     }
-
 
 
 }
