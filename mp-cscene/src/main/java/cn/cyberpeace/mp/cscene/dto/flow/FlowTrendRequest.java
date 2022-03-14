@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Description:
@@ -25,5 +26,13 @@ public class FlowTrendRequest extends BaseSceneElementRequest {
 
     @ApiModelProperty("分段数")
     private Integer segmentCount;
+
+    /**
+     * 源IP集合
+     */
+    @ApiModelProperty("源IP集合")
+    private List<String> sourceIps;
+
+
 
 }

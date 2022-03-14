@@ -241,7 +241,21 @@ public class CsceneDataModifier {
     public static void correctReturnCsceneData(CsceneBO csceneBO) {
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
+        correctVlanId(csceneBO);
         csceneBO.setEnableRecording(getOutputEnableRecording(csceneBO.getSceneConfig()));
+    }
+
+    public static void correctVlanId(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.values().forEach(e -> {
+                    if (e.get("vlan_id") != null && e.get("vlan_id").equals(0)) {
+                        e.put("vlan_id", StringUtils.EMPTY);
+                    }
+                });
+            }
+        }
     }
 
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
@@ -349,6 +363,19 @@ public class CsceneDataModifier {
                         if (JsonCommon.stringify(flows).getBytes(StandardCharsets.UTF_8).length > 65535) {
                             throw new MpRuntimeException(CsceneErrorCode.PARAMS_FLOWS_DATA_TOO_LONG);
                         }
+                    }
+                });
+            }
+        }
+    }
+
+    public static void checkVlanId(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.values().forEach(e -> {
+                    if (e.get("vlan_id") == null || e.get("vlan_id").equals(StringUtils.EMPTY)) {
+                        e.put("vlan_id", 0);
                     }
                 });
             }

@@ -1,18 +1,27 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -50,6 +59,12 @@ public class HostStateService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
 
     /**
      * 查询单个节点机器当前状态
@@ -197,7 +212,7 @@ public class HostStateService {
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔48小时
+            // todo 默认时间间隔24小时
             startTime = endTime.minusHours(24);
         }
 
@@ -207,11 +222,10 @@ public class HostStateService {
 
         List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
-        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
 
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
@@ -266,6 +280,49 @@ public class HostStateService {
         hostStates.sort(Comparator.comparing(HostState::getTime));
 
         return hostStates;
+    }
+
+    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
+        if (!checkCsceneIsRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
+
+        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
+    }
+
+    public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
+        if (!checkCsceneIsRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
+
+        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+    }
+
+
+
+    private void checkListPageParams(ListPageInfoQueryParams params) {
+        List<String> sceneIds = params.getSceneIds();
+        if (CollectionUtil.isEmpty(sceneIds)) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
+        }
+
+        List<String> nodeIds = params.getNodeIds();
+        if (CollectionUtil.isEmpty(nodeIds)) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.ELEMENT_LIST)));
+        }
+
+    }
+
+    private boolean checkCsceneIsRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        return sceneStateInfo.isRunning();
     }
 
 }

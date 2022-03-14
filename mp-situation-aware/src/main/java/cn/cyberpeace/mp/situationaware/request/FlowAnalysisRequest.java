@@ -82,6 +82,12 @@ public class FlowAnalysisRequest {
     private List<String> destinationIps;
 
     /**
+     * 强制过滤的目标IP集合
+     */
+    @ApiModelProperty("强制过滤的目标IP集合")
+    private List<String> filterDestinationIps;
+
+    /**
      * 支持多协议
      */
     @ApiModelProperty("多协议")

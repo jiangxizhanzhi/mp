@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -50,11 +51,22 @@ public class SceneMonitorController {
         return ServiceResult.success(basicInfoList);
     }
 
+
+    @ApiOperation(value = "查询场景top5节点状态")
+    @GetMapping("/elements/top_by_states/{sceneId}")
+    public ServiceResult<Map<String, List<ElementMonitorBasicInfo>>> topByHoststates(@PathVariable String sceneId, @RequestParam(required = false) Integer topCount) {
+        log.info("sceneId:{}", sceneId);
+        Map<String, List<ElementMonitorBasicInfo>> result = sceneMonitorService.topAggrByHoststates(sceneId, 5);
+
+        return ServiceResult.success(result);
+    }
+
 //    @ApiOperation(value = "查询场景所有主机信息，不含实时内存，cpu等数据")
 //    @GetMapping("/all_hosts/{sceneId}")
 //    public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllHosts(@PathVariable String sceneId) {
 //        List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId);
 //        return ServiceResult.success(basicInfoList);
 //    }
+
 
 }

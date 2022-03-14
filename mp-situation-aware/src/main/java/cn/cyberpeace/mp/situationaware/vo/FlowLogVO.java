@@ -10,6 +10,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * 流量日志
  * @author wanggang
@@ -48,6 +50,6 @@ public class FlowLogVO {
      * 创建时间
      */
     @ApiModelProperty(value = "创建时间")
-    private Long timestamp;
+    private LocalDateTime timestamp;
 
 }

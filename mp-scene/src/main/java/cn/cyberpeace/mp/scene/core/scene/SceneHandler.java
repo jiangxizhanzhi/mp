@@ -4,21 +4,48 @@ import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
-import cn.cyberpeace.mp.scene.core.bo.*;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
+import cn.cyberpeace.mp.scene.core.bo.ScenePieceBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventHandler;
 import cn.cyberpeace.mp.scene.core.event.SceneEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventFlag;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
-import cn.cyberpeace.mp.scene.model.*;
-import cn.cyberpeace.mp.scene.repository.*;
+import cn.cyberpeace.mp.scene.model.SceneAreaModel;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortConnectionModel;
+import cn.cyberpeace.mp.scene.model.SceneElementPortModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.model.ScenePieceModel;
+import cn.cyberpeace.mp.scene.repository.SceneAreaMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPluginMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortConnectionMapper;
+import cn.cyberpeace.mp.scene.repository.SceneElementPortMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.scene.repository.ScenePieceMapper;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -219,6 +246,17 @@ public class SceneHandler extends BaseSceneHandler<
     public CollectedSceneBO getCollectedSceneBO() {
         var collectedSceneBO = new CollectedSceneBO();
         collectedSceneBO.setScene(getScene());
+        String message = null;
+        if (collectedSceneBO.getScene() != null && collectedSceneBO.getScene().getProcessMessage() != null) {
+            message = collectedSceneBO.getScene().getProcessMessage();
+        }
+        if (message != null && message.length() >= 1) {
+            String newMessage = message.substring(0, 1).toUpperCase();
+            if (message.length() > 1) {
+                newMessage = newMessage + message.substring(1).toLowerCase();
+            }
+            collectedSceneBO.getScene().setProcessMessage(newMessage);
+        }
         Map<String, Object> pluginData = new HashMap<>();
         getPlugins().forEach(plugin -> {
             var pluginScene = plugin.getScene();
@@ -236,6 +274,17 @@ public class SceneHandler extends BaseSceneHandler<
         var sceneElement = getElement(nodeId);
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();
+        String message = null;
+        if (sceneElement.getProcessMessage() != null) {
+            message = sceneElement.getProcessMessage();
+        }
+        if (message != null && message.length() >= 1) {
+            String newMessage = message.substring(0, 1).toUpperCase();
+            if (message.length() > 1) {
+                newMessage = newMessage + message.substring(1).toLowerCase();
+            }
+            sceneElement.setProcessMessage(newMessage);
+        }
 
         Map<String, Object> pluginData = new HashMap<>();
         Map<String, Map<String, Object>> portPluginData = new HashMap<>();

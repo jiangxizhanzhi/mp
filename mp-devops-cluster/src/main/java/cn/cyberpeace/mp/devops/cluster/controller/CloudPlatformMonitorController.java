@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorServiceStatusModel;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -52,16 +54,20 @@ public class CloudPlatformMonitorController {
 
     private HypervisorConverter hypervisorConverter;
 
+    private ImagesConverter imagesConverter;
+
     @Autowired
     public CloudPlatformMonitorController(InstanceConverter instanceConverter, ContainerConverter containerConverter,
                                           RouterConverter routerConverter,
                                           RealEquipmentConverter realEquipmentConverter,
-                                          HypervisorConverter hypervisorConverter) {
+                                          HypervisorConverter hypervisorConverter,
+                                          ImagesConverter imagesConverter) {
         this.instanceConverter = instanceConverter;
         this.containerConverter = containerConverter;
         this.routerConverter = routerConverter;
         this.realEquipmentConverter = realEquipmentConverter;
         this.hypervisorConverter = hypervisorConverter;
+        this.imagesConverter = imagesConverter;
     }
 
     /**
@@ -125,16 +131,22 @@ public class CloudPlatformMonitorController {
                 HypervisorPageResponse.builder().name(hypervisor.getName())
                         .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
-                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed())
+                        .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
+        // 获取所有物理主机服务状态
+        HypervisorServiceStatusModel serviceStatusModel = imagesConverter.listServiceStatus();
+
         hypervisorPageResponses.forEach(v -> {
             String name = v.getName();
+            Optional<HypervisorServiceStatusModel.ServiceStatus> serviceStatus =
+                    serviceStatusModel.getData().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
+            // 设置物理主机服务状态
+            v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
+
             HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
-            Integer totalInstances = instanceConverter.getTotalInstances(new InstancePageRequest(name));
             Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageRequest(name));
-            v.setTotalInstances(totalInstances);
             v.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());

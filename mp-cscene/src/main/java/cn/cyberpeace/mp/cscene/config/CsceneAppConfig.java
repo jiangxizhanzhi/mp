@@ -9,7 +9,11 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+
+import javax.annotation.PostConstruct;
 
 @Slf4j
 @Configuration
@@ -43,6 +47,15 @@ public class CsceneAppConfig {
 
     @Value("${mp.cscene.scene-enable-recording:false}")
     private Boolean sceneEnableRecording;
+
+    @Autowired
+    private MessageSource messageSource;
+
+    @PostConstruct
+    public void addBaseNames() {
+        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
+        msgSrc.addBasenames("classpath:i18n/cscene");
+    }
 
     public int getSceneEditNodeLimit() {
         String value = null;

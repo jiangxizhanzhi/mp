@@ -14,7 +14,7 @@ public class IpAddressValidator implements ConstraintValidator<IpAddress, CharSe
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext constraintValidatorContext) {
         if (StringUtils.isEmpty(value)) {
-            return true;
+            return false;
         }
         return Validator.isIpv4(value);
     }

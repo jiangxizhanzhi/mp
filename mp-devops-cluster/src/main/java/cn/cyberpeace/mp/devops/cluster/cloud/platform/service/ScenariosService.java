@@ -73,4 +73,13 @@ public class ScenariosService extends BaseOpenStackService {
     public BaseCloudPlatformModel delete(ImagesDeleteInstanceCloudPlatform cloudPlatform){
         return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformModel.class);
     }
+
+    /**
+     * 获取物理主机服务状态
+     * @return
+     */
+    public HypervisorServiceStatusModel listServiceStatus() {
+        return super.sendGet(URL_VERSION + SCENARIOS + "/service_status", HypervisorServiceStatusModel.class);
+    }
+
 }

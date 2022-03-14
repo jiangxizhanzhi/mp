@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 靶标信息
@@ -158,5 +159,17 @@ public class DeviceVO implements Serializable {
 
     @ApiModelProperty("容器信息")
     private ExtDocker extDocker;
+
+    /**
+     * 是否内置镜像
+     */
+    @ApiModelProperty("是否内置镜像")
+    private Boolean isBuildIn;
+
+    public Boolean getIsBuildIn() {
+        boolean tmpImport = !Objects.isNull(isImport) && isImport;
+        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
+        return tmpImport || tmpInternal;
+    }
 
 }
