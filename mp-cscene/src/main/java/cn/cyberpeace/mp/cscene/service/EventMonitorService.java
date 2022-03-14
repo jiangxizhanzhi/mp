@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
+import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
@@ -68,7 +69,7 @@ public class EventMonitorService {
      * @param
      * @return
      */
-    public List<ElementEventPercent> topElementByEventPercent(BaseTimeRangeRequest request) {
+    public List<ElementEventPercent> topElementByEventPercent(EventPercentRequest request) {
         log.info("{}", request);
 
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
@@ -83,6 +84,8 @@ public class EventMonitorService {
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(request.getStartTime());
         wazuhEventRequest.setEndTime(request.getEndTime());
+        // TODO 处理事件类型
+//        wazuhEventRequest.setCatagories(null);
 
         Map<String, Long> aggsMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
 
@@ -98,7 +101,7 @@ public class EventMonitorService {
                 String nodeId = elementBOOptional.get().getId();
                 String nodeName = elementBOOptional.get().getName();
                 BigDecimal bigDecimal = NumberUtil.round(count.doubleValue() / sum.doubleValue(), 2);
-                ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, bigDecimal.doubleValue(), count);
+                ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, bigDecimal.doubleValue(), count, request.getType());
                 eventPercents.add(eventPercent);
             }
         });
