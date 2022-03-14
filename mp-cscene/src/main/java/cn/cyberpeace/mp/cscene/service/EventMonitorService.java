@@ -100,7 +100,12 @@ public class EventMonitorService {
             if (elementBOOptional.isPresent()) {
                 String nodeId = elementBOOptional.get().getId();
                 String nodeName = elementBOOptional.get().getName();
-                BigDecimal bigDecimal = NumberUtil.round(count.doubleValue() / sum.doubleValue(), 2);
+
+                BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
+                if (sum > 0) {
+                    bigDecimal = NumberUtil.round(count.doubleValue() / sum.doubleValue(), 2);
+                }
+
                 ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, bigDecimal.doubleValue(), count, request.getType());
                 eventPercents.add(eventPercent);
             }
