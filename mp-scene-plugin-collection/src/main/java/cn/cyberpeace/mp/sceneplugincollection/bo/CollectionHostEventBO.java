@@ -39,7 +39,7 @@ public class CollectionHostEventBO {
     private Map<String, String> probeData;
 
     @ApiModelProperty("事件类型")
-    private String eventType;
+    private String type;
 
     @ApiModelProperty("事件描述")
     private String eventDesc;
