@@ -26,6 +26,12 @@ public class CollectionHostEventBO {
     // Ref: BaseCloudPluginSceneElementModel.VirtualType 中的枚举
     private Integer virtualType;
 
+    @ApiModelProperty(value = "操作系统ID")
+    private String systemType;
+
+    @ApiModelProperty(value = "操作系统名称")
+    private String systemTypeName;
+
     @ApiModelProperty("探针id")
     private String probeId;
 

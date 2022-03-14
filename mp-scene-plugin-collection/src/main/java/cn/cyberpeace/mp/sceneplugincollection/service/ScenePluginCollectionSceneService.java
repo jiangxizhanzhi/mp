@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
@@ -269,6 +270,8 @@ public class ScenePluginCollectionSceneService {
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
+                hostEvent.setSystemType(srcElement.getSystemType());
+                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
             }
             hostEvents.add(hostEvent);
         });
