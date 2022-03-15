@@ -39,6 +39,8 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
 
+    private Map<String, List<String>> nodeId2Ips = new HashMap<>();
+
     private Map<String, String> allMac2SceneIdMap = new HashMap<>();
 
     private Map<String, String> allIp2SceneIdMap = new HashMap<>();
@@ -125,6 +127,14 @@ public class BatchSceneHandler {
         return this.allEid2ElementMap.get(eid);
     }
 
+    public List<String> getAllIps() {
+        return new ArrayList<>(this.allIp2ElementMap.keySet());
+    }
+
+    public List<String> getIpsByNodeId(String nodeId) {
+        return this.nodeId2Ips.get(nodeId);
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -175,6 +185,9 @@ public class BatchSceneHandler {
                 if (StringUtils.isNotEmpty(ipAddr)) {
                     this.allIp2SceneIdMap.put(ipAddr, sceneId);
                     this.allIp2ElementMap.put(ipAddr, srcElement);
+                    List<String> ips = this.nodeId2Ips.getOrDefault(ipAddr, new ArrayList<>());
+                    ips.add(ipAddr);
+                    this.nodeId2Ips.put(srcElement.getId(), ips);
                     if (flowCollectedEnabled) {
                         this.flowCollectEnabledIpAddrs.add(ipAddr);
                     }
