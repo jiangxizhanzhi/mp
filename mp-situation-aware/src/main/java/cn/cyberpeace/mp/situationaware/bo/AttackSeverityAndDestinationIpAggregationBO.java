@@ -20,7 +20,7 @@ public class AttackSeverityAndDestinationIpAggregationBO {
    /**
     * 危险等级
     */
-   private String severity;
+   private Integer severity;
 
    /**
     * 目的IP集合

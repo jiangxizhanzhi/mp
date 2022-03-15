@@ -19,4 +19,9 @@ public class AttackPortAggregationBO extends BaseBO{
     * 端口
     */
    private String port;
+
+   /**
+    * 协议
+    */
+   private String protocol;
 }
