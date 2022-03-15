@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class EventMonitorService {
 
     @Autowired
-    private SceneTranslationService sceneIdTranslationService;
+    private SceneTranslationService sceneTranslationService;
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -54,7 +54,7 @@ public class EventMonitorService {
         log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         BaseRequestUtil.processDefaultTimeRange(request);
-        List<String> agentNames = sceneIdTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
 
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
@@ -76,7 +76,7 @@ public class EventMonitorService {
         BaseRequestUtil.processDefaultTimeRange(request);
 
         List<String> sceneIds = CollectionUtil.toList(request.getSceneId());
-        List<String> translatedSceneIds = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 
         List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
@@ -140,7 +140,7 @@ public class EventMonitorService {
             segmentCount = 10;
         }
 
-        List<String> translatedSceneIds = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 
         List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
