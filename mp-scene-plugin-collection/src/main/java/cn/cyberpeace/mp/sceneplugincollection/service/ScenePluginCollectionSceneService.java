@@ -124,6 +124,15 @@ public class ScenePluginCollectionSceneService {
         if (Objects.nonNull(queryParams.getPerPage())) {
             request.setTopSize(queryParams.getPerPage());
         }
+
+        if (StringUtils.isNotBlank(queryParams.getSourcePort())) {
+            request.setSourcePort(queryParams.getSourcePort());
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getTargetPort())) {
+            request.setDestinationPort(queryParams.getTargetPort());
+        }
+
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
