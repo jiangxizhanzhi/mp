@@ -287,7 +287,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private List<VirtualNic> genVirtualNic(CloudPluginSceneElementBO cloudElement, List<ConnectedNetworkBO> deriveConnectedNetworks, List<ConnectedNetworkBO> accessConnectedNetworks) {
+    private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
         List<VirtualNic> virtualNics = new ArrayList<>();
         // 添加管理网卡
         if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
@@ -295,6 +295,8 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
+        List<ConnectedNetworkBO> deriveConnectedNetworks = cloudElement.getDeriveNetworks();
+        List<ConnectedNetworkBO> accessConnectedNetworks = cloudElement.getAccessNetworks();
         for (ConnectedNetworkBO connectedNetwork : deriveConnectedNetworks) {
             var network = connectedNetwork.network;
             List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
@@ -354,94 +356,6 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setMacAddress(TextUtils.emptyNull(connectedNetwork.connectPorts.get(0).from.getMacAddr()));
             virtualNics.add(virtualNic);
         }
-        return virtualNics;
-    }
-
-    private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
-        List<VirtualNic> virtualNics = new ArrayList<>();
-        // 添加管理网卡
-        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
-            virtualNics.add(virtualNic);
-        }
-
-        var srcElement = cloudElement.getSrcElement();
-        var ports = srcElement.getPorts();
-        if (ports == null) {
-            return virtualNics;
-        }
-
-        Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        var groupPortsMap = getHandlerUtils().getCloudElementGroupPorts(cloudElement);
-        for (var groupPorts : groupPortsMap.values()) {
-            var samplePort = groupPorts.get(0);
-            var auxiliaryNetworkCloudElement = getHandlerUtils().getPortAuxiliaryNetworkCloudElement(samplePort.getId());
-            if (auxiliaryNetworkCloudElement == null) {
-                continue;
-            }
-
-            var auxiliaryNetworkId = auxiliaryNetworkCloudElement.getAuxiliaryNetworkId();
-            for (var srcPort : groupPorts) {
-                // 没有定义的端口补全
-                var cloudPort = getPluginHandler().getPort(srcPort.getId());
-                if (cloudPort == null) {
-                    cloudPort = new CloudPluginSceneElementPortBO();
-                    getPluginHandler().addPort(srcPort.getId(), cloudPort);
-                }
-                cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkId);
-                var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
-                        auxiliaryNetworkId, new ArrayList<>());
-                networkIdCloudPorts.add(cloudPort);
-                networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
-            }
-            var sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
-
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(auxiliaryNetworkId);
-            virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
-            virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
-
-            List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-            if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
-                var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(samplePort.getIngress());
-                qosRule.setDirection(QosRuleDirection.INGRESS);
-                qosRule.setDelayMs(samplePort.getDelay());
-                qosRule.setLossPercent(samplePort.getLoss());
-                qosRules.add(qosRule);
-            }
-            if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
-                var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(samplePort.getEgress());
-                qosRule.setDirection(QosRuleDirection.EGRESS);
-                qosRule.setDelayMs(samplePort.getDelay());
-                qosRule.setLossPercent(samplePort.getLoss());
-                qosRules.add(qosRule);
-            }
-            virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
-            if (!HandlerUtils.isExternalNetwork(auxiliaryNetworkId)) {
-                virtualNic.setEnableExternal(sampleCloudPort.getNat());
-            }
-
-            virtualNic.setFirewallId(null);
-
-            var accessModes = sampleCloudPort.getAccessModes();
-            if (accessModes != null && !accessModes.isEmpty()) {
-                virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
-                    var accessModeParam = new VirtualNic.AccessMode();
-                    accessModeParam.setProtocol(accessMode.getProtocol());
-                    accessModeParam.setPort(accessMode.getPort());
-                    accessModeParam.setUsername(accessMode.getUsername());
-                    accessModeParam.setPassword(accessMode.getPassword());
-                    accessModeParam.setEnablePortMapping(accessMode.getProxy());
-                    accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
-                    return accessModeParam;
-                }).collect(Collectors.toList()));
-            }
-            virtualNics.add(virtualNic);
-        }
-
         return virtualNics;
     }
 
@@ -734,11 +648,7 @@ public class CreateHandler extends HandlerCommon {
             virtualNics.add(virtualNic);
         }
         createData.setNetworks(CollectionUtils.emptyNull(
-                this.genVirtualNic(
-                        cloudElement,
-                        cloudElement.getDeriveNetworks(),
-                        cloudElement.getAccessNetworks()
-                )
+                this.genVirutalNics(cloudElement)
         ));
 
         var virtualRouter = vrClient.create(createData);
@@ -822,11 +732,7 @@ public class CreateHandler extends HandlerCommon {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
 //        }
         createData.setNetworks(CollectionUtils.emptyNull(
-                this.genVirtualNic(
-                        cloudElement,
-                        cloudElement.getDeriveNetworks(),
-                        cloudElement.getAccessNetworks()
-                )
+                this.genVirutalNics(cloudElement)
         ));
         var container = containerClient.create(createData);
         cloudElement.setResourceId(container.getId());

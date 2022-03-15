@@ -152,12 +152,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
         var instanceHandler = new CsceneInstanceHandler(id, context);
-        String sceneId = null;
-        if (instanceHandler.getCscene() != null && instanceHandler.getCscene().getScene() != null &&
-                instanceHandler.getCscene().getScene().getTopology() != null &&
-                instanceHandler.getCscene().getScene().getTopology().getScene() != null) {
-            sceneId = instanceHandler.getCscene().getScene().getTopology().getScene().getEid();
-        }
+        String sceneId = this.getSceneId(id);
         var flag = instanceHandler.delete(logic);
         if (sceneId != null) {
             scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
