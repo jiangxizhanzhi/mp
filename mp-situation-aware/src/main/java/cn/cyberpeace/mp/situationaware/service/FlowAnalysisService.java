@@ -78,6 +78,9 @@ public class FlowAnalysisService extends AbstractBaseService {
     @Autowired
     private FlowClassificationsService flowClassificationsService;
 
+    @Autowired
+    private FlowPortProtocolService flowPortProtocolService;
+
     /**
      * 初始化攻击方式
      * @return
@@ -208,6 +211,24 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
+     * 统计受攻击端口-攻击次数&流量大小(端口映射协议)
+     * @param request
+     * @return
+     */
+    public List<AttackPortAggregationBO> groupByDestinationPortWithProtocol(FlowAnalysisRequest request){
+
+        List<AttackPortAggregationBO> boList = this.groupByDestinationPort(request);
+
+        Map<String, String> convertToMap = flowPortProtocolService.convertToMap();
+
+        boList.stream().forEach(v ->
+            v.setProtocol(convertToMap.get(v.getPort()))
+        );
+
+        return boList;
+    }
+
+    /**
      * 统计受攻击端口-攻击次数&流量大小
      * @param request
      *        属性secondsInterval不可为空且必须大于0;
@@ -302,7 +323,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
             attackTimestampBOS = buckets.stream().map(bucket -> {
                 AttackSeverityAndDestinationIpAggregationBO bo = new AttackSeverityAndDestinationIpAggregationBO();
-                bo.setSeverity(bucket.getKeyAsString());
+                bo.setSeverity(Integer.parseInt(bucket.getKeyAsString()));
                 Aggregations bucketAggregations = bucket.getAggregations();
                 ParsedTerms terms = bucketAggregations.get("destination_ip");
                 List<? extends Terms.Bucket> aggregationBuckets = terms.getBuckets();

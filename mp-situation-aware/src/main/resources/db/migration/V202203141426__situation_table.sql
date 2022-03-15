@@ -1,3 +1,5 @@
+drop table mp_situation_flow_port_protocol;
+
 create table mp_situation_flow_port_protocol
 (
     pk          bigint(8) auto_increment
