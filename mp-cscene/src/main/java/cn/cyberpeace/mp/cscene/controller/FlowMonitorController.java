@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,6 +50,34 @@ public class FlowMonitorController {
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
         return ServiceResult.success(flowTrends);
+    }
+
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     * @return
+     */
+    @ApiOperation(value = "场景受攻击端口")
+    @GetMapping("/scene_attacked_port")
+    public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
+        log.info("FlowCommonRequest:{}", request);
+        List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
+
+        return ServiceResult.success(list);
+    }
+
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     * @return
+     */
+    @ApiOperation(value = "场景主机状态")
+    @GetMapping("/scene_target_status")
+    public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
+        log.info("FlowCommonRequest:{}", request);
+        List<FlowGroupByDestinationIpAndSeverityVO> list = flowMonitorService.groupByDestinationIpAndSeverity(request);
+
+        return ServiceResult.success(list);
     }
 
 

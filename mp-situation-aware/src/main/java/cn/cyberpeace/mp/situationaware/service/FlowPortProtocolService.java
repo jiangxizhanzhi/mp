@@ -6,13 +6,17 @@ import cn.cyberpeace.mp.situationaware.model.FlowPortProtocolModel;
 import cn.cyberpeace.mp.situationaware.repository.FlowPortProtocolMapper;
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,7 +44,7 @@ public class FlowPortProtocolService {
      * @return
      */
     public List<FlowPortProtocolModel> findAll(){
-        String key = cache_prefix_model + "flow:port:protocol" + ServletUtils.getAcceptLanguage();
+        String key = cache_prefix_model + "flow:port:protocol:" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
         if (Objects.nonNull(cache)){
             return (List<FlowPortProtocolModel>)cache;
@@ -48,5 +52,17 @@ public class FlowPortProtocolService {
         List<FlowPortProtocolModel> modelList = flowPortProtocolMapper.list(new HumanCondition());
         lfuCache.put(key,modelList);
         return modelList;
+    }
+
+    /**
+     * 转成Map格式
+     * @return
+     */
+    public Map<String,String> convertToMap(){
+        List<FlowPortProtocolModel> modelList = this.findAll();
+        if (CollectionUtils.isEmpty(modelList)){
+            return Maps.newHashMap();
+        }
+        return modelList.stream().collect(Collectors.toMap(FlowPortProtocolModel::getPort,FlowPortProtocolModel::getProtocol));
     }
 }
