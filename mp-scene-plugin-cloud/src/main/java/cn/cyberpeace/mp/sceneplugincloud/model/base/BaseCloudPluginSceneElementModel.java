@@ -20,6 +20,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer virtualType;
     @DefaultBool
     private Boolean transparent;
+    @DefaultBool
+    private Boolean isBuildIn;
 
     /**
      * 云平台资源id
