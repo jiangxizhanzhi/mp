@@ -253,6 +253,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.from(0).size(request.getTopSize());
 
         var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
