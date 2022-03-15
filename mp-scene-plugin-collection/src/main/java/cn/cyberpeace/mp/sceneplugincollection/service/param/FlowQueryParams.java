@@ -29,6 +29,12 @@ public class FlowQueryParams extends QueryParams {
     @ApiModelProperty(value = "相邻数据间的时间间隔,单位：秒")
     private Integer interval;
 
+    @ApiModelProperty("源端口")
+    private String sourcePort;
+
+    @ApiModelProperty("目的端口")
+    private String targetPort;
+
     /**
      * 源IP集合
      */

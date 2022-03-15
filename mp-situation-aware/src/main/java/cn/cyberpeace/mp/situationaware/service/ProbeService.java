@@ -168,6 +168,18 @@ public class ProbeService {
         return probeModelMapper.updateByProbeId(probeModel);
     }
 
+
+    /**
+     * 清除探针数据，包括表，es索引，doc等
+     */
+    public void cleanProbeData() {
+        // 1. 清除es索引
+
+        // 2. wazuh api清除agent数据
+
+        // 3. 表数据？
+    }
+
     /**
      * 修改探针参数
      * @param probeRequest probeRequest

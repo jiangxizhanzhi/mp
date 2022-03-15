@@ -11,6 +11,12 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
@@ -106,6 +112,15 @@ public class ScenePluginCollectionSceneService {
         if (Objects.nonNull(queryParams.getPerPage())) {
             request.setTopSize(queryParams.getPerPage());
         }
+
+        if (StringUtils.isNotBlank(queryParams.getSourcePort())) {
+            request.setSourcePort(queryParams.getSourcePort());
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getTargetPort())) {
+            request.setDestinationPort(queryParams.getTargetPort());
+        }
+
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
@@ -252,6 +267,8 @@ public class ScenePluginCollectionSceneService {
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
+                hostEvent.setSystemType(srcElement.getSystemType());
+                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
             }
             hostEvents.add(hostEvent);
         });

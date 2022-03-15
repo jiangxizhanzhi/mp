@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -155,6 +156,17 @@ public class SceneMonitorService {
         }
 
         return basicInfos;
+    }
+
+
+    /**
+     * 查询场景IP
+     * @param request
+     * @return
+     */
+    public List<String> getIps(BaseSceneElementRequest request) {
+        // todo
+        return new ArrayList<>();
     }
 
     /**
