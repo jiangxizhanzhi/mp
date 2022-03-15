@@ -109,6 +109,13 @@ public class ScenePluginCollectionSceneService {
         }else {
             request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
+
+        if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())){
+            request.setDestinationIps(queryParams.getTargetIps());
+        } else {
+            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        }
+
         request.setSecondsInterval(queryParams.getInterval());
         // 查询时间段 默认使用场景创建到当前时间
         if (StringUtils.isBlank(queryParams.getStartTime())) {
@@ -133,7 +140,6 @@ public class ScenePluginCollectionSceneService {
             request.setDestinationPort(queryParams.getTargetPort());
         }
 
-        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
