@@ -243,36 +243,31 @@ public class InitiateHandler extends HandlerCommon {
                 network.setCidr(allocateCidrs(1).get(0));
             }
         }
-        // 重置资源id
-        cloudElement.setAuxiliaryNetworkId(StringUtils.EMPTY);
-        // 初始化cidr
-        if (StringUtils.isEmpty(cloudElement.getAuxiliaryNetworkCidr())) {
-            prepareExistCidrs();
-            cloudElement.setAuxiliaryNetworkCidr(allocateCidrs(1).get(0));
+        Integer virtualType = cloudElement.getVirtualType();
+        for (var connectNetwork : cloudElement.getDeriveNetworks()) {
+            if (!Boolean.TRUE.equals(connectNetwork.network.getVlan())) {
+                // 是否vlan模式(是否连接了实体节点)
+                var vlan = false;
+                if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                    // 本节点是实体节点
+                    vlan = true;
+                } else {
+                    // 连接节点有实体节点
+                    for (var p : connectNetwork.getFromPorts()) {
+                        var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
+                        var pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
+                        Integer connectedVirtualType = pluginConnectedCloudElement == null ? null : pluginConnectedCloudElement.getVirtualType();
+                        if (connectedVirtualType != null
+                                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                            vlan = true;
+                            break;
+                        }
+                    }
+                }
+                connectNetwork.network.setVlan(vlan);
+            }
         }
 
-
-//        var connectedOpaqueSrcElements = getHandlerUtils().getEleConnectedOpaqueSrcElements(cloudElement.getSrcElement().getId());
-//
-//        // 是否vlan模式(是否连接了实体节点)
-//        var vlan = false;
-//        Integer virtualType = cloudElement.getVirtualType();
-//        if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-//            // 本节点是实体节点
-//            vlan = true;
-//        } else {
-//            // 连接节点有实体节点
-//            for (var connectedSrcElement : connectedOpaqueSrcElements) {
-//                var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-//                Integer connectedVirtualType = connectedCloudElement == null ? null : connectedCloudElement.getVirtualType();
-//                if (connectedVirtualType != null
-//                        && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
-//                    vlan = true;
-//                    break;
-//                }
-//            }
-//        }
-//        cloudElement.setAuxiliaryNetworkVlan(vlan);
 //
 //        // 是否开启辅助路由(是否未连接默认路由)
 //        var routerOn = true;
