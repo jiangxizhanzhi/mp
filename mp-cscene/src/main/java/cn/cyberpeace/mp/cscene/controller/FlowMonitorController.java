@@ -139,6 +139,7 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "场景监控-流量分析: 统计场景流量，攻击流量，网络连接，带宽占用，攻击事件")
+    @GetMapping("/summary")
     public ServiceResult<FlowAnalysisSummary> getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         log.info("{}", timeRangeRequest);
         FlowAnalysisSummary summary = flowMonitorService.getFlowAnalysisSummary(timeRangeRequest);
