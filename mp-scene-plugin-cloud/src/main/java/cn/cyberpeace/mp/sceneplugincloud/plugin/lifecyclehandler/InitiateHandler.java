@@ -283,7 +283,7 @@ public class InitiateHandler extends HandlerCommon {
                         }
                     }
                 }
-                connectNetwork.network.setAuxiliaryNetworkRouterOn(true);
+                connectNetwork.network.setAuxiliaryNetworkRouterOn(routerOn);
             }
         }
     }
@@ -649,9 +649,7 @@ public class InitiateHandler extends HandlerCommon {
                 .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!initiateElementIpPoolTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> {
-                initiateElementIpPoolTasks.forEach(tast -> tast.run());
-            });
+            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> runTasks(initiateElementIpPoolTasks));
         }
 
         // 初始化端口, 先初始化路由端口, 再初始化其它端口
@@ -676,10 +674,10 @@ public class InitiateHandler extends HandlerCommon {
             }
         });
         if (!initiateRouterElementPortsTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> initiateRouterElementPortsTasks.forEach(task -> task.run()));
+            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateRouterElementPortsTasks));
         }
         if (!initiateOtherElementPortsTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> initiateOtherElementPortsTasks.forEach(task -> task.run()));
+            runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateOtherElementPortsTasks));
         }
 
         // 存在需要重新分配的ip，重新分配ip
