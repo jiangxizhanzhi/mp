@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import cn.cyberpeace.mp.situationaware.service.FlowPortProtocolService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
 import cn.cyberpeace.mp.situationaware.vo.AttackWayAggregationVO;
 import cn.cyberpeace.mp.situationaware.vo.FlowLogVO;
@@ -42,6 +44,9 @@ public class FlowAnalysisController {
 
     private FlowAnalysisService flowAnalysisService;
 
+    @Autowired
+    private FlowPortProtocolService flowPortProtocolService;
+
 
     @Autowired
     public FlowAnalysisController(FlowAnalysisService flowAnalysisService) {
@@ -76,7 +81,7 @@ public class FlowAnalysisController {
         return new ServiceResult(flowLogVOList).asResult();
     }
 
-    @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据",hidden = true)
+    @ApiOperation(value = "根据聚合类型聚合不同的TOP N数据")
     @GetMapping("/top-By-aggregation-type")
     @Deprecated
     public ServiceResult<List<AttackWayAggregationVO>> topByAggregationTypeEnum(FlowAnalysisRequest request){
@@ -106,7 +111,7 @@ public class FlowAnalysisController {
         }
         List<AttackDateHistogramNetworkBytesVO> vos = bos.stream().map(bo -> {
             AttackDateHistogramNetworkBytesVO vo = new AttackDateHistogramNetworkBytesVO();
-            vo.setNetworkBytes(bo.getNetworkBytes());
+            vo.setNetworkBytes(bo.getTrafficSize());
             vo.setTime(bo.getTime());
             return vo;
         }).collect(Collectors.toList());
@@ -117,7 +122,7 @@ public class FlowAnalysisController {
     @GetMapping("/team_traffic_sum")
     @Deprecated
     public void queryAllTeamAttackList(FlowAnalysisRequest request){
-        flowAnalysisService.queryOneTeamAttackSumList(request);
+        TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(request);
 
 //        List<TeamBO> teamBOList = request.getTeamBOS();
 //        FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
@@ -141,6 +146,12 @@ public class FlowAnalysisController {
 //        teamAttackResultVOS = buildPercent(teamAttackResultVOS);
 //        teamAttackResultVOS = teamAttackResultVOS.stream().sorted(Comparator.comparingLong(TeamAttackVO::getAttackNumber).reversed()).collect(Collectors.toList());
 //        return new ServiceResult<>(teamAttackResultVOS).asResult();
+    }
+
+    @ApiOperation(value = "测试")
+    @GetMapping("/test")
+    public void groupByDestinationPort(FlowAnalysisRequest request){
+        flowPortProtocolService.findAll();
     }
 
     /**

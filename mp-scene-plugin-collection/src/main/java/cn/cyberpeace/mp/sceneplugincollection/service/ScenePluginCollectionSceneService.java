@@ -10,12 +10,20 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.*;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
@@ -31,10 +39,12 @@ import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +97,18 @@ public class ScenePluginCollectionSceneService {
 
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())){
+            request.setSourceIps(queryParams.getSourceIps());
+        }else {
+            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        }
+
+        if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())){
+            request.setDestinationIps(queryParams.getTargetIps());
+        } else {
+            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        }
+
         request.setSecondsInterval(queryParams.getInterval());
         // 查询时间段 默认使用场景创建到当前时间
         if (StringUtils.isBlank(queryParams.getStartTime())) {
@@ -100,13 +121,31 @@ public class ScenePluginCollectionSceneService {
         } else {
             request.setEndDateTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
-        request.setSourceIps(queryParams.getSourceIps());
+        if (Objects.nonNull(queryParams.getPerPage())) {
+            request.setTopSize(queryParams.getPerPage());
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getSourcePort())) {
+            request.setSourcePort(queryParams.getSourcePort());
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getTargetPort())) {
+            request.setDestinationPort(queryParams.getTargetPort());
+        }
+
+        if (StringUtils.isNotBlank(queryParams.getProtocol())) {
+            request.setProtocols(CollectionUtil.toList(queryParams.getProtocol()));
+        }
+
+
+        request.setSeverityEnum(SeverityEnum.ALL);
+        request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOS)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMap(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
+        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMap(),batchSceneHandler.getAllIp2ElementMap(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
     }
 
@@ -225,13 +264,15 @@ public class ScenePluginCollectionSceneService {
             request.setKeyword(queryParams.getKeyword());
         }
 
+        // todo 查询事件类型
+
         var result = dataCollectionService.queryFileEvents(request);
 
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         result.getObjs().forEach(srcHostEvent -> {
             var hostEvent = new CollectionHostEventBO();
             hostEvent.setSceneId(sceneId);
-            hostEvent.setEventType(srcHostEvent.getFileEventType().name());
+            hostEvent.setType(srcHostEvent.getFileEventType().name());
             hostEvent.setEventDesc(srcHostEvent.getAction());
             hostEvent.setTime(srcHostEvent.getUpdateTime());
             hostEvent.setDescription(srcHostEvent.getDescription());
@@ -242,6 +283,8 @@ public class ScenePluginCollectionSceneService {
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
                 hostEvent.setNodeName(srcElement.getName());
+                hostEvent.setSystemType(srcElement.getSystemType());
+                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
             }
             hostEvents.add(hostEvent);
         });
@@ -326,7 +369,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> timeIntervalSumFlowSize(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
-            int intervalSeconds,List<String> sourceIps) {
+            int intervalSeconds,List<String> sourceIps,Integer type) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
@@ -339,14 +382,24 @@ public class ScenePluginCollectionSceneService {
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        if (CollectionUtils.isEmpty(sourceIps)) {
+            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        }else{
+            request.setSourceIps(sourceIps);
+        }
+        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
         request.setSecondsInterval(intervalSeconds);
-        request.setSourceIps(sourceIps);
-
+        request.setSeverityEnum(SeverityEnum.ALL);
         // 执行查询
-        List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
+        List<AttackDateHistogramNetworkBytesBO> bos;
+        if (Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type)) {
+            bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
+        }else{
+            bos = flowAnalysisService.countByDateHistogramTimestamp(request);
+        }
+
         if (CollectionUtils.isEmpty(bos)) {
             return new ServiceResult<>(new ArrayList<>());
         }
@@ -356,10 +409,123 @@ public class ScenePluginCollectionSceneService {
                             .atZone(ZoneOffset.UTC)
                             .withZoneSameInstant(ZoneId.systemDefault())
                             .toLocalDateTime();
-                    return new IntervalSizeBO<>(time, time, bo.getNetworkBytes().longValue());
+                    return Objects.isNull(type) || NumberUtils.INTEGER_ZERO.equals(type) ?
+                            new IntervalSizeBO<>(time, time, bo.getTrafficSize().longValue()) :
+                            new IntervalSizeBO<>(time, time, bo.getAttackNumber());
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
         return new ServiceResult<>(result);
+    }
+
+    /**
+     * 统计受攻击端口信息
+     * @param params
+     * @return
+     */
+    public ServiceResult<List<FlowGroupPortWithProtocolBO>> groupByDestinationPortWithProtocol(FlowGroupByDestinationPortParams params){
+        List<String> sceneIds = params.getSceneIds();
+
+        List<String> nodeIds = params.getNodeIds();
+
+        List<String> sourceIps = params.getSourceIps();
+
+        LocalDateTime startTime = params.getStartTime();
+
+        LocalDateTime endTime = params.getEndTime();
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        // 构造参数
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        if (CollectionUtils.isEmpty(sourceIps)) {
+            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        }else{
+            request.setSourceIps(sourceIps);
+        }
+        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
+        request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
+        request.setSeverityEnum(SeverityEnum.ALL);
+        request.setTopSize(params.getTopSize());
+        // 执行查询
+        List<AttackPortAggregationBO> boList = flowAnalysisService.groupByDestinationPortWithProtocol(request);
+
+        List<FlowGroupPortWithProtocolBO> result = boList.stream().map(v -> {
+            FlowGroupPortWithProtocolBO bo = new FlowGroupPortWithProtocolBO();
+            bo.setProtocol(v.getProtocol());
+            bo.setPort(v.getPort());
+            bo.setAttackNumber(v.getAttackNumber());
+            bo.setTrafficSize(v.getTrafficSize());
+            return bo;
+        }).collect(Collectors.toList());
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 统计主机状态
+     * @param params
+     * @return
+     */
+    public ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> groupByDestinationIpAndSeverity(FlowGroupByDestinationPortParams params){
+        List<String> sceneIds = params.getSceneIds();
+
+        List<String> nodeIds = params.getNodeIds();
+
+        List<String> sourceIps = params.getSourceIps();
+
+        LocalDateTime startTime = params.getStartTime();
+
+        LocalDateTime endTime = params.getEndTime();
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectedMacAddrs())) {
+            log.info("{} query time interval sum flow size,sceneIds:{},nodeIds:{},no enabled macAddr", LOG_PREFIX, JsonCommon.stringify(sceneIds), JsonCommon.stringify(nodeIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        // 构造参数
+        FlowAnalysisRequest request = new FlowAnalysisRequest();
+        request.setGroupList(batchSceneHandler.getFlowCollectors());
+        if (CollectionUtils.isEmpty(sourceIps)) {
+            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        }else{
+            request.setSourceIps(sourceIps);
+        }
+        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
+        request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
+        request.setSeverityEnum(SeverityEnum.ALL);
+        // 执行查询
+        List<AttackSeverityAndDestinationIpAggregationBO> boList = flowAnalysisService.groupByDestinationIpAndSeverity(request);
+
+        List<AttackSeverityAndDestinationIpAggregationBO> sortedList = boList.stream().sorted(Comparator.comparing(AttackSeverityAndDestinationIpAggregationBO::getSeverity)).collect(Collectors.toList());
+
+        List<String> destinationIpList = new ArrayList<>();
+
+        List<FlowGroupByDestinationIpAndSeverityBO> resultList = new ArrayList<>();
+        for (int i = 0; i < sortedList.size(); i++){
+            FlowGroupByDestinationIpAndSeverityBO result = new FlowGroupByDestinationIpAndSeverityBO();
+            AttackSeverityAndDestinationIpAggregationBO bo = boList.get(i);
+            result.setSeverity(bo.getSeverity());
+            List<String> ipList = bo.getDestinationIpList();
+            if (CollectionUtils.isNotEmpty(ipList)) {
+                List<String> ips = ipList.stream().filter(v -> !destinationIpList.contains(v)).collect(Collectors.toList());
+                result.setDestinationIpList(ips);
+                destinationIpList.addAll(ips);
+            }
+        }
+        return new ServiceResult<>(resultList);
     }
 
     /**
@@ -487,10 +653,11 @@ public class ScenePluginCollectionSceneService {
         return srcElements;
     }
 
-    private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, String> mac2SceneId) {
+    private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO>  ipElementMap,Map<String, String> mac2SceneId) {
         CollectionFlowBO flowBO = new CollectionFlowBO();
         if (flowLogBO.getTimestamp() != null) {
             flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
+            flowBO.setTimestamp(flowLogBO.getTimestamp());
         }
         if (flowLogBO.getSource() != null) {
             flowBO.setSourceIp(flowLogBO.getSource().getIp());
@@ -507,18 +674,24 @@ public class ScenePluginCollectionSceneService {
             }
         }
         if (flowLogBO.getDestination() != null) {
-            flowBO.setTargetIp(flowLogBO.getDestination().getIp());
-            if (CollectionUtils.isNotEmpty(flowLogBO.getSource().getMac())) {
-                for (int i = 0; i < flowLogBO.getDestination().getMac().size(); i++) {
-                    String mac = flowLogBO.getDestination().getMac().get(i);
-                    if (mac2ElementMap.containsKey(mac)) {
-                        flowBO.setTargetNodeId(mac2ElementMap.get(mac).getId());
-                        flowBO.setTargetNodeName(mac2ElementMap.get(mac).getName());
-                        flowBO.setSceneId(mac2SceneId.get(mac));
-                        break;
-                    }
-                }
+            String ip = flowLogBO.getDestination().getIp();
+            flowBO.setTargetIp(ip);
+            if (ipElementMap.containsKey(ip)){
+                flowBO.setTargetNodeId(ipElementMap.get(ip).getId());
+                flowBO.setTargetNodeName(ipElementMap.get(ip).getName());
+                flowBO.setSceneId(mac2SceneId.get(ip));
             }
+//            if (CollectionUtils.isNotEmpty(flowLogBO.getDestination().getMac())) {
+//                for (int i = 0; i < flowLogBO.getDestination().getMac().size(); i++) {
+//                    String mac = flowLogBO.getDestination().getMac().get(i);
+//                    if (mac2ElementMap.containsKey(mac)) {
+//                        flowBO.setTargetNodeId(mac2ElementMap.get(mac).getId());
+//                        flowBO.setTargetNodeName(mac2ElementMap.get(mac).getName());
+//                        flowBO.setSceneId(mac2SceneId.get(mac));
+//                        break;
+//                    }
+//                }
+//            }
         }
         if (flowLogBO.getSuricata() != null) {
             List<String> category = flowLogBO.getSuricata().getCategory();
@@ -600,8 +773,12 @@ public class ScenePluginCollectionSceneService {
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
-        request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
-        request.setSourceIps(sourceIps);
+        if (CollectionUtils.isNotEmpty(sourceIps)){
+            request.setSourceIps(sourceIps);
+        }else {
+            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+        }
+        request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
@@ -642,10 +819,11 @@ public class ScenePluginCollectionSceneService {
         if (GroupCountFlowField.SOURCE_IP.equals(params.getQueryType())) {
             request.setSourceIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
             queryTopSize = request.getSourceIps().size();
+            request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
             request.setAggregationTypeEnum(AggregationTypeEnum.SOURCE_IP);
             request.setSeverityEnum(SeverityEnum.ALL);
         } else if (GroupCountFlowField.DEST_IP.equals(params.getQueryType())) {
-            request.setDestinationIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getFlowCollectedIpAddrs());
+            request.setDestinationIps(CollectionUtils.isNotEmpty(paramsAddress) ? paramsAddress : batchSceneHandler.getAllIpAddrs());
             queryTopSize = request.getDestinationIps().size();
             request.setSourceIps(params.getSourceIps());
             request.setAggregationTypeEnum(AggregationTypeEnum.DESTINATION_IP);
@@ -694,6 +872,7 @@ public class ScenePluginCollectionSceneService {
                 .endDateTime(fEndTime)
                 .topSize(topSize)
                 .aggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY)
+                .destinationIps(batchSceneHandler.getAllIpAddrs())
                 .severityEnum(SeverityEnum.ALL)
                 .build();
         flowAnalysisRequest.setGroupList(batchSceneHandler.getFlowCollectors());
@@ -750,6 +929,43 @@ public class ScenePluginCollectionSceneService {
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
         pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+    }
+
+    /**
+     * 查询场景中所有启动探针的节点列表
+     * @param sceneId
+     * @return
+     */
+    public List<SceneElementBO> listProbeEnabledElementBOs(String sceneId) {
+        log.info("sceneId:{}", sceneId);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), null);
+        // 查询场景中所有开启探针的agentNames集合
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+
+        // 根据每一个有效的eid(agentName)查询ElementBO
+        List<SceneElementBO> elementBOS = nodeId2Eidmap.values().stream().map(eid -> batchSceneHandler.getNodeByEid(eid)).collect(Collectors.toList());
+        return elementBOS;
+    }
+
+
+    public List<String> listIPs(String sceneId, List<String> nodeIds) {
+        log.info("sceneId:{}, nodeIds:{}", sceneId, nodeIds);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), nodeIds);
+        return batchSceneHandler.getAllIps();
+    }
+
+    public List<SceneAssetsBO> listSceneAssets(List<String> sceneIds) {
+        List<SceneAssetsBO> sceneAssets = new ArrayList<>();
+        sceneIds.forEach(s -> {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(s), null);
+            SceneAssetsBO asset = new SceneAssetsBO();
+            asset.setSceneId(s);
+            asset.setIpCount(batchSceneHandler.getAllIps().size());
+            asset.setNodeCount(batchSceneHandler.getAllEid2ElementMap().keySet().size());
+            asset.setCategoryGroups(new ArrayList<>(batchSceneHandler.getCategory2CountInfo().values()));
+            sceneAssets.add(asset);
+        });
+        return sceneAssets;
     }
 
 }

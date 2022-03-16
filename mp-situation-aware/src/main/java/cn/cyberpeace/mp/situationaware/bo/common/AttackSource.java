@@ -17,6 +17,11 @@ public  class AttackSource{
     private String ip;
 
     /**
+     * 端口
+     */
+    private Integer port;
+
+    /**
      * mac地址
      */
     private List<String> mac;

@@ -3,11 +3,17 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
+import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
+import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
+import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
+import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -27,34 +34,68 @@ import java.util.List;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/event")
 public class EventMonitorController {
 
+    @Autowired
+    private EventMonitorService eventMonitorService;
+
     /**
-     * 忽略elementIds
-     *
+     * 查询事件总数
      * @param baseRequest
      * @return
      */
-    @ApiOperation(value = "根据事件占比多少，统计节点")
-    @GetMapping("/aggr_top")
-    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(BaseSceneElementRequest baseRequest) {
+    @ApiOperation(value = "查询一定时间范围内的事件总数")
+    @GetMapping("/sum")
+    public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
         log.info("{}", baseRequest);
-        List<ElementEventPercent> eventPercents = mockElementPercents();
-        return ServiceResult.success(eventPercents);
+        Long sum = eventMonitorService.sumEvent(baseRequest);
+        return ServiceResult.success(sum);
     }
 
 
     /**
-     * 查询场景所有事件统计，或者单个节点的事件统计（elementIds为多值，则只取第一个值）
+     * 采集事件统计，查询各个节点事件的占比情况
+     * 默认排序为前5个节点
+     * @param eventPercentRequest
+     * @return
+     */
+    @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
+    @GetMapping("/aggr_top")
+    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
+        log.info("{}", eventPercentRequest);
+
+        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
+        List<ElementEventPercent> limitList = eventPercents.stream().limit(5).collect(Collectors.toList());
+//        List<ElementEventPercent> eventPercents = mockElementPercents();
+        return ServiceResult.success(limitList);
+    }
+
+
+    /**
+     * 根据事件类型，统计饼图
      *
      * @param baseRequest
      * @return
      */
-    @ApiOperation(value = "场景采集事件统计, elementId为空表示查询场景所有事件统计")
+    @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-
+        // TODO 暂时还是测试数据
         EventAggr eventAggr = mockEventAggr();
         return ServiceResult.success(eventAggr);
+    }
+
+    /**
+     * 采集事件趋势图
+     *
+     * @param
+     * @return
+     */
+    @ApiOperation(value = "采集事件趋势图")
+    @GetMapping("/event_trend")
+    public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
+        List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);
+
+        return ServiceResult.success(eventTimeCounts);
     }
 
 

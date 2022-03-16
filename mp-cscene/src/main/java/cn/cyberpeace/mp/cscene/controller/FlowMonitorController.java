@@ -6,8 +6,19 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowCommonRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -48,6 +59,34 @@ public class FlowMonitorController {
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
         return ServiceResult.success(flowTrends);
+    }
+
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     * @return
+     */
+    @ApiOperation(value = "场景受攻击端口")
+    @GetMapping("/scene_attacked_port")
+    public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
+        log.info("FlowCommonRequest:{}", request);
+        List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
+
+        return ServiceResult.success(list);
+    }
+
+    /**
+     * 默认查询场景所有节点
+     * 忽略elementIds的值
+     * @return
+     */
+    @ApiOperation(value = "场景主机状态")
+    @GetMapping("/scene_target_status")
+    public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
+        log.info("FlowCommonRequest:{}", request);
+        List<FlowGroupByDestinationIpAndSeverityVO> list = flowMonitorService.groupByDestinationIpAndSeverity(request);
+
+        return ServiceResult.success(list);
     }
 
 
@@ -97,6 +136,14 @@ public class FlowMonitorController {
         log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
         TotalFlowAttackRatio attackTypeCounts = flowMonitorService.getAttackRatioCount(baseRequest);
         return ServiceResult.success(attackTypeCounts);
+    }
+
+    @ApiOperation(value = "场景监控-流量分析: 统计场景流量，攻击流量，网络连接，带宽占用，攻击事件")
+    @GetMapping("/summary")
+    public ServiceResult<FlowAnalysisSummary> getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
+        log.info("{}", timeRangeRequest);
+        FlowAnalysisSummary summary = flowMonitorService.getFlowAnalysisSummary(timeRangeRequest);
+        return ServiceResult.success(summary);
     }
 
 

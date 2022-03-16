@@ -19,4 +19,9 @@ import java.util.List;
 public class ExtGateway implements Serializable {
 
     private List<PortConfig> portConfigs;
+
+    /**
+     * console协议配置
+     */
+    private AccessProtocol consoleConfig;
 }
