@@ -146,6 +146,11 @@ public class ScenePluginCollectionSceneService {
             request.setDestinationPort(queryParams.getTargetPort());
         }
 
+        if (StringUtils.isNotBlank(queryParams.getProtocol())) {
+            request.setProtocols(CollectionUtil.toList(queryParams.getProtocol()));
+        }
+
+
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
