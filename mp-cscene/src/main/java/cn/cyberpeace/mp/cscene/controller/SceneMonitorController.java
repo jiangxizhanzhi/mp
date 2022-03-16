@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -49,6 +50,14 @@ public class SceneMonitorController {
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId, @RequestParam(required = false) Boolean realTimeHostState) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
         return ServiceResult.success(basicInfoList);
+    }
+
+
+    @ApiOperation(value = "查询场景所有IP列表")
+    @GetMapping("/ips")
+    public ServiceResult<List<String>> getIps(BaseSceneElementRequest baseRequest) {
+        List<String> ips = sceneMonitorService.getIps(baseRequest);
+        return ServiceResult.success(ips);
     }
 
 

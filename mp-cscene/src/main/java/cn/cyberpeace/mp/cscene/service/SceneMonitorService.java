@@ -3,11 +3,14 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,12 @@ public class SceneMonitorService {
 
     @Autowired
     private SceneElementMonitorService elementMonitorService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private SceneTranslationService sceneTranslationService;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -155,6 +164,24 @@ public class SceneMonitorService {
         }
 
         return basicInfos;
+    }
+
+
+    /**
+     * 查询场景IP
+     *
+     * @param request
+     * @return
+     */
+    public List<String> getIps(BaseSceneElementRequest request) {
+        log.info("{}", request);
+        BaseRequestUtil.checkBaseRequestWithSceneId(request);
+
+        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
+        if (CollectionUtil.isEmpty(translatedSceneIds)) {
+            return new ArrayList<>();
+        }
+        return scenePluginCollectionSceneService.listIPs(translatedSceneIds.get(0), request.getElementIds());
     }
 
     /**

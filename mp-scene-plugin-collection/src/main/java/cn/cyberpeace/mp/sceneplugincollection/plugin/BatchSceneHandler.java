@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin;
 
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import org.apache.commons.lang3.StringUtils;
 
@@ -39,6 +41,8 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
 
+    private Map<String, List<String>> nodeId2Ips = new HashMap<>();
+
     private Map<String, String> allMac2SceneIdMap = new HashMap<>();
 
     private Map<String, String> allIp2SceneIdMap = new HashMap<>();
@@ -46,6 +50,8 @@ public class BatchSceneHandler {
     private Map<String, String> probeEnabledNodeId2EidMap = new HashMap<>();
 
     private Map<String, String> nodeId2NodenameMap = new HashMap<>();
+
+    private Map<Integer, CategoryGroupBO> category2CountInfo = new HashMap<>();
 
     public BatchSceneHandler(List<String> sceneIds, List<String> nodeIds) {
         this.sceneIds = sceneIds;
@@ -125,6 +131,22 @@ public class BatchSceneHandler {
         return this.allEid2ElementMap.get(eid);
     }
 
+    public Map<String, SceneElementBO> getAllEid2ElementMap() {
+        return this.allEid2ElementMap;
+    }
+
+    public List<String> getAllIps() {
+        return new ArrayList<>(this.allIp2ElementMap.keySet());
+    }
+
+    public List<String> getIpsByNodeId(String nodeId) {
+        return this.nodeId2Ips.get(nodeId);
+    }
+
+    public Map<Integer, CategoryGroupBO> getCategory2CountInfo() {
+        return this.category2CountInfo;
+    }
+
     private void init() {
         for (String sceneId : sceneIds) {
             SceneHandler sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -132,6 +154,7 @@ public class BatchSceneHandler {
                 earliestStartTime = sceneHandler.getScene().getCreateTime();
             }
             CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             if (pluginHandler != null && pluginHandler.getScene() != null) {
                 if (StringUtils.isNotEmpty(pluginHandler.getScene().getFlowCollector())) {
                     this.flowCollectors.add(pluginHandler.getScene().getFlowCollector());
@@ -141,11 +164,11 @@ public class BatchSceneHandler {
                 }
             }
             List<SceneElementBO> srcElements = getSrcElements(sceneHandler, nodeIds);
-            this.handlerElement(sceneId, srcElements, pluginHandler);
+            this.handlerElement(sceneId, srcElements, pluginHandler, cloudPlugin);
         }
     }
 
-    private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler) {
+    private void handlerElement(String sceneId, List<SceneElementBO> srcElements, CollectionScenePluginHandler pluginHandler, CloudScenePluginHandler cloudPlugin) {
         srcElements.forEach(srcElement -> {
             this.allEid2ElementMap.put(srcElement.getEid(), srcElement);
             var srcPorts = srcElement.getPorts();
@@ -175,11 +198,21 @@ public class BatchSceneHandler {
                 if (StringUtils.isNotEmpty(ipAddr)) {
                     this.allIp2SceneIdMap.put(ipAddr, sceneId);
                     this.allIp2ElementMap.put(ipAddr, srcElement);
+                    List<String> ips = this.nodeId2Ips.getOrDefault(ipAddr, new ArrayList<>());
+                    ips.add(ipAddr);
+                    this.nodeId2Ips.put(srcElement.getId(), ips);
                     if (flowCollectedEnabled) {
                         this.flowCollectEnabledIpAddrs.add(ipAddr);
                     }
                 }
             });
+            if (cloudPlugin.getElement(srcElement.getId()) != null && cloudPlugin.getElement(srcElement.getId()).getCategory() != null) {
+                Integer category = cloudPlugin.getElement(srcElement.getId()).getCategory();
+                if (!category2CountInfo.containsKey(category)) {
+                    category2CountInfo.put(category, new CategoryGroupBO(category));
+                }
+                category2CountInfo.get(category).getElements().add(srcElement);
+            }
         });
     }
 

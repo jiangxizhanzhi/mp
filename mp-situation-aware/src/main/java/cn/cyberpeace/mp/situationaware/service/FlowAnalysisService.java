@@ -17,6 +17,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -34,13 +35,16 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.Histogram;
 import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
+import org.elasticsearch.search.aggregations.metrics.ParsedValueCount;
 import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -73,6 +77,9 @@ public class FlowAnalysisService extends AbstractBaseService {
 
     @Autowired
     private FlowClassificationsService flowClassificationsService;
+
+    @Autowired
+    private FlowPortProtocolService flowPortProtocolService;
 
     /**
      * 初始化攻击方式
@@ -138,7 +145,191 @@ public class FlowAnalysisService extends AbstractBaseService {
                 bo.setTime(bucket.getKeyAsString());
                 Aggregations bucketAggregations = bucket.getAggregations();
                 ParsedSum parsedSum = bucketAggregations.get("network_bytes");
-                bo.setNetworkBytes(parsedSum.getValue());
+                bo.setTrafficSize(parsedSum.getValue());
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("search attack way error",e);
+        }
+        return attackTimestampBOS;
+    }
+
+    /**
+     * 统计时间窗口里的攻击次数
+     * @param request
+     *        属性secondsInterval不可为空且必须大于0;
+     *        属性groupList不可为空;
+     *        属性startDateTime不可为空;
+     *        属性endDateTime不可为空；
+     * @return
+     */
+    public List<AttackDateHistogramNetworkBytesBO> countByDateHistogramTimestamp(FlowAnalysisRequest request){
+        Integer secondsInterval = request.getSecondsInterval();
+        if (Objects.isNull(secondsInterval) || secondsInterval <= 0
+                || CollectionUtils.isEmpty(request.getGroupList())
+                || Objects.isNull(request.getStartDateTime())
+                || Objects.isNull(request.getEndDateTime())
+                || request.getStartDateTime().isAfter(request.getEndDateTime()) ){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        AggregationBuilder aggregationBuilder = AggregationBuilders.dateHistogram("lastHourAttack").field("@timestamp")
+                .fixedInterval(DateHistogramInterval.seconds(secondsInterval))
+                .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
+
+        var boolQueryBuilder = buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("sumNetworkBytesByDateHistogramTimestamp >>> Search JSON query: {}", searchRequest.source().toString());
+
+        List<AttackDateHistogramNetworkBytesBO> attackTimestampBOS = new ArrayList();
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = searchResponse.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedDateHistogram parsedTerms = aggregations.get("lastHourAttack");
+            List<? extends Histogram.Bucket>  buckets = parsedTerms.getBuckets();
+            attackTimestampBOS = buckets.stream().map(bucket -> {
+                AttackDateHistogramNetworkBytesBO bo = new AttackDateHistogramNetworkBytesBO();
+                bo.setTime(bucket.getKeyAsString());
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedValueCount parsedValueCount = bucketAggregations.get("count");
+                bo.setAttackNumber(parsedValueCount.getValue());
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("search attack way error",e);
+        }
+        return attackTimestampBOS;
+    }
+
+    /**
+     * 统计受攻击端口-攻击次数&流量大小(端口映射协议)
+     * @param request
+     * @return
+     */
+    public List<AttackPortAggregationBO> groupByDestinationPortWithProtocol(FlowAnalysisRequest request){
+
+        List<AttackPortAggregationBO> boList = this.groupByDestinationPort(request);
+
+        Map<String, String> convertToMap = flowPortProtocolService.convertToMap();
+
+        boList.stream().forEach(v ->
+            v.setProtocol(convertToMap.get(v.getPort()))
+        );
+
+        return boList;
+    }
+
+    /**
+     * 统计受攻击端口-攻击次数&流量大小
+     * @param request
+     *        属性secondsInterval不可为空且必须大于0;
+     *        属性groupList不可为空;
+     *        属性startDateTime不可为空;
+     *        属性endDateTime不可为空；
+     * @return
+     */
+    public List<AttackPortAggregationBO> groupByDestinationPort(FlowAnalysisRequest request){
+        if (CollectionUtils.isEmpty(request.getGroupList())
+                || Objects.isNull(request.getStartDateTime())
+                || Objects.isNull(request.getEndDateTime())
+                || request.getStartDateTime().isAfter(request.getEndDateTime()) ){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        AggregationBuilder aggregationBuilder = AggregationBuilders.terms("destination_port").field("destination.port")
+                .subAggregation(AggregationBuilders.sum("network_bytes").field("network.bytes"))
+                .subAggregation(AggregationBuilders.count("count").field("destination.ip"));
+
+        var boolQueryBuilder = buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.from(0).size(request.getTopSize());
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("groupByDestinationPort  >>> Search JSON query: {}", searchRequest.source().toString());
+
+        List<AttackPortAggregationBO> attackTimestampBOS = new ArrayList();
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = searchResponse.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get("destination_port");
+            List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+            attackTimestampBOS = buckets.stream().map(bucket -> {
+                AttackPortAggregationBO bo = new AttackPortAggregationBO();
+                bo.setPort(bucket.getKeyAsString());
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedSum parsedSum = bucketAggregations.get("network_bytes");
+                bo.setTrafficSize(parsedSum.getValue());
+
+                ParsedValueCount valueCount = bucketAggregations.get("count");
+                bo.setAttackNumber(valueCount.getValue());
+                return bo;
+            }).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("search attack way error",e);
+        }
+        return attackTimestampBOS;
+    }
+
+    /**
+     *
+     * @param request
+     * @return
+     */
+    public List<AttackSeverityAndDestinationIpAggregationBO> groupByDestinationIpAndSeverity(FlowAnalysisRequest request){
+        if (CollectionUtils.isEmpty(request.getGroupList())
+                || Objects.isNull(request.getStartDateTime())
+                || Objects.isNull(request.getEndDateTime())
+                || request.getStartDateTime().isAfter(request.getEndDateTime()) ){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        AggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity").field("suricata.severity")
+                .subAggregation(AggregationBuilders.terms("destination_ip").field("destination.ip"));
+
+        var boolQueryBuilder = buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.aggregation(aggregationBuilder);
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.size(0);
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("groupByDestinationIpAndSeverity >>> Search JSON query: {}", searchRequest.source().toString());
+
+        List<AttackSeverityAndDestinationIpAggregationBO> attackTimestampBOS = new ArrayList();
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = searchResponse.getHits().getTotalHits().value;
+            if (totalHits == 0){
+                return Lists.newArrayList();
+            }
+            Aggregations aggregations = searchResponse.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get("suricata_severity");
+            List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+            attackTimestampBOS = buckets.stream().map(bucket -> {
+                AttackSeverityAndDestinationIpAggregationBO bo = new AttackSeverityAndDestinationIpAggregationBO();
+                bo.setSeverity(Integer.parseInt(bucket.getKeyAsString()));
+                Aggregations bucketAggregations = bucket.getAggregations();
+                ParsedTerms terms = bucketAggregations.get("destination_ip");
+                List<? extends Terms.Bucket> aggregationBuckets = terms.getBuckets();
+                List<String> destinationIpList = aggregationBuckets.stream().map(MultiBucketsAggregation.Bucket::getKeyAsString).collect(Collectors.toList());
+                bo.setDestinationIpList(destinationIpList);
                 return bo;
             }).collect(Collectors.toList());
         } catch (Exception e) {
@@ -408,6 +599,27 @@ public class FlowAnalysisService extends AbstractBaseService {
         }
 
         return teamAttackResultVO;
+    }
+
+    /**
+     * 删除对应场景流量数据
+     * @param groupList
+     * @return
+     */
+    public Boolean delete(List<String> groupList){
+        if (CollectionUtils.isEmpty(groupList)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        String[] indices = groupList.stream().filter(v -> v.startsWith("mp_")).map(v -> v.concat("_*")).toArray(String[]::new);
+        DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest();
+        deleteIndexRequest.indices(indices);
+        deleteIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        try {
+            restHighLevelClient.indices().delete(deleteIndexRequest,RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            log.error("delete error : {}",e.getMessage(),e);
+        }
+        return Boolean.TRUE;
     }
 
     /**

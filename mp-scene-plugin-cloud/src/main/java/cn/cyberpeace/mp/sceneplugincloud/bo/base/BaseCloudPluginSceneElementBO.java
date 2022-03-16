@@ -32,6 +32,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "是否透明模式")
     private Boolean transparent;
+    @ApiModelProperty(value = "是否云平台內置靶標")
+    private Boolean isBuildIn;
 
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;

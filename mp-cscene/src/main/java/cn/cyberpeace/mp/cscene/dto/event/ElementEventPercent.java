@@ -24,4 +24,10 @@ public class ElementEventPercent {
     @ApiModelProperty("事件占比")
     private Double percent;
 
+    @ApiModelProperty("事件数量")
+    private Long sum;
+
+    @ApiModelProperty("事件类型 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户")
+    private Integer type;
+
 }

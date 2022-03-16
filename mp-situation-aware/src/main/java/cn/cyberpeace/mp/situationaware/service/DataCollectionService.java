@@ -439,10 +439,12 @@ public class DataCollectionService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 
-            Terms terms = response.getAggregations().get(aggregationName);
-            terms.getBuckets().forEach(b -> {
-                map.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
-            });
+            if (Objects.nonNull(response.getAggregations())) {
+                Terms terms = response.getAggregations().get(aggregationName);
+                terms.getBuckets().forEach(b -> {
+                    map.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
+                });
+            }
 
             return map;
 

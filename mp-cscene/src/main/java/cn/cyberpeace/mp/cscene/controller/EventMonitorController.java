@@ -3,9 +3,11 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
+import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
@@ -36,17 +38,31 @@ public class EventMonitorController {
     private EventMonitorService eventMonitorService;
 
     /**
+     * 查询事件总数
+     * @param baseRequest
+     * @return
+     */
+    @ApiOperation(value = "查询一定时间范围内的事件总数")
+    @GetMapping("/sum")
+    public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
+        log.info("{}", baseRequest);
+        Long sum = eventMonitorService.sumEvent(baseRequest);
+        return ServiceResult.success(sum);
+    }
+
+
+    /**
      * 采集事件统计，查询各个节点事件的占比情况
      * 默认排序为前5个节点
-     * @param baseRequest
+     * @param eventPercentRequest
      * @return
      */
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
     @GetMapping("/aggr_top")
-    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
+    public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
+        log.info("{}", eventPercentRequest);
 
-        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(baseRequest);
+        List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
         List<ElementEventPercent> limitList = eventPercents.stream().limit(5).collect(Collectors.toList());
 //        List<ElementEventPercent> eventPercents = mockElementPercents();
         return ServiceResult.success(limitList);
@@ -63,7 +79,7 @@ public class EventMonitorController {
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-
+        // TODO 暂时还是测试数据
         EventAggr eventAggr = mockEventAggr();
         return ServiceResult.success(eventAggr);
     }
