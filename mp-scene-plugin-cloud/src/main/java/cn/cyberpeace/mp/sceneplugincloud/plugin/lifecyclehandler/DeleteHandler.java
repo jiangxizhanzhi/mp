@@ -253,6 +253,7 @@ public class DeleteHandler extends HandlerCommon {
             return true;
         }
         try {
+            // TODO maojun
             return npcClient.delete(npcCreateData);
         } catch (Exception e) {
             e.printStackTrace();

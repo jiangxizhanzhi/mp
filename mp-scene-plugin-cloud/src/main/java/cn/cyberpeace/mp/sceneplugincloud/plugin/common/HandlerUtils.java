@@ -57,7 +57,7 @@ public class HandlerUtils {
     }
 
     public static String genResourceName(String name) {
-        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name, "_mjtest");
+        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
     }
 
     /**

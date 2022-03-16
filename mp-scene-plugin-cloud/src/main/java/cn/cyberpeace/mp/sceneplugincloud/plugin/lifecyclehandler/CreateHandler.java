@@ -797,6 +797,7 @@ public class CreateHandler extends HandlerCommon {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNpcInfos(npcInfos);
         try {
+            // TODO maojun
             npcClient.create(npcCreateData);
         } catch (Exception e) {
             e.printStackTrace();
