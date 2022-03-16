@@ -132,6 +132,7 @@ public class FlowMonitorService {
         List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
+        params.setStartTime(startTime);
         params.setEndTime(endTime);
         params.setSourceIps(request.getSourceIps());
         params.setSceneIds(sceneIdList);
@@ -175,6 +176,7 @@ public class FlowMonitorService {
         List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
+        params.setStartTime(startTime);
         params.setEndTime(endTime);
         params.setSourceIps(request.getSourceIps());
         params.setSceneIds(sceneIdList);
@@ -187,12 +189,19 @@ public class FlowMonitorService {
         if (CollectionUtils.isEmpty(boList)) {
             return Lists.newArrayList();
         }
-        return boList.stream().map(v -> {
+        List<FlowGroupByDestinationIpAndSeverityVO> voList = boList.stream().map(v -> {
             FlowGroupByDestinationIpAndSeverityVO vo = new FlowGroupByDestinationIpAndSeverityVO();
             vo.setSeverity(v.getSeverity());
             vo.setNum(v.getDestinationIpList().size());
             return vo;
         }).collect(Collectors.toList());
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
+        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
+        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a,b) -> a + b).orElse(0);
+        int normalSize = allIpSize - severitySize;
+        voList.add(new FlowGroupByDestinationIpAndSeverityVO(0,normalSize));
+        return voList;
     }
 
 
