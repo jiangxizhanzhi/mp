@@ -9,16 +9,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowCommonRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
@@ -50,14 +41,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -193,15 +177,9 @@ public class FlowMonitorService {
         List<FlowGroupByDestinationIpAndSeverityVO> voList = boList.stream().map(v -> {
             FlowGroupByDestinationIpAndSeverityVO vo = new FlowGroupByDestinationIpAndSeverityVO();
             vo.setSeverity(v.getSeverity());
-            vo.setNum(v.getDestinationIpList().size());
+            vo.setNum(v.getNum());
             return vo;
         }).collect(Collectors.toList());
-
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
-        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
-        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a,b) -> a + b).orElse(0);
-        int normalSize = allIpSize - severitySize;
-        voList.add(new FlowGroupByDestinationIpAndSeverityVO(0,normalSize));
         return voList;
     }
 
