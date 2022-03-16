@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -172,8 +173,12 @@ public class ProbeService {
     /**
      * 清除探针数据，包括表，es索引，doc等
      */
-    public void cleanProbeData() {
-        // 1. 清除es索引
+    public void cleanProbeData(List<String> agentNames, LocalDateTime deleteTime) {
+        log.info("agentNames:{}, deleteTime:{}", agentNames, deleteTime);
+        if (Objects.isNull(deleteTime)) {
+            deleteTime = LocalDateTime.now();
+        }
+        // 1. 清除es索引?
 
         // 2. wazuh api清除agent数据
 

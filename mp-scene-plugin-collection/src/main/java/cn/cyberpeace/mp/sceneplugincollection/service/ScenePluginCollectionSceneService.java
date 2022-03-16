@@ -123,6 +123,11 @@ public class ScenePluginCollectionSceneService {
             request.setDestinationPort(queryParams.getTargetPort());
         }
 
+        if (StringUtils.isNotBlank(queryParams.getProtocol())) {
+            request.setProtocols(CollectionUtil.toList(queryParams.getProtocol()));
+        }
+
+
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
         List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
@@ -942,6 +947,20 @@ public class ScenePluginCollectionSceneService {
         log.info("sceneId:{}, nodeIds:{}", sceneId, nodeIds);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), nodeIds);
         return batchSceneHandler.getAllIps();
+    }
+
+    public List<SceneAssetsBO> listSceneAssets(List<String> sceneIds) {
+        List<SceneAssetsBO> sceneAssets = new ArrayList<>();
+        sceneIds.forEach(s -> {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(s), null);
+            SceneAssetsBO asset = new SceneAssetsBO();
+            asset.setSceneId(s);
+            asset.setIpCount(batchSceneHandler.getAllIps().size());
+            asset.setNodeCount(batchSceneHandler.getAllEid2ElementMap().keySet().size());
+            asset.setCategoryGroups(new ArrayList<>(batchSceneHandler.getCategory2CountInfo().values()));
+            sceneAssets.add(asset);
+        });
+        return sceneAssets;
     }
 
 }
