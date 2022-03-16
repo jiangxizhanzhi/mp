@@ -27,9 +27,9 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneElementNetworkModel, CloudPluginSceneElementNetworkBO> {
+    private String id;
     private String scene;
     private String sceneElement;
-    private String id = TextUtils.uuid();
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
     @ApiModelProperty(value = "辅助网络id")
@@ -52,10 +52,17 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private Integer vlanId;
     @ApiModelProperty(value = "是否外部网络")
     private Boolean external;
+    @ApiModelProperty(value = "辅助网络辅助路由是否开启", hidden = true)
+    private Boolean auxiliaryNetworkRouterOn;
+    @ApiModelProperty(value = "辅助网络辅助路由id", hidden = true)
+    private String auxiliaryNetworkRouterResourceId;
+    @ApiModelProperty(value = "辅助网络辅助路由ip", hidden = true)
+    private String auxiliaryNetworkRouterIp;
 
     private List<String> ipPool = new ArrayList<>();
 
     public CloudPluginSceneElementNetworkBO(String scene, String sceneElement) {
+        this.id = TextUtils.uuid();
         this.scene = scene;
         this.sceneElement = sceneElement;
     }

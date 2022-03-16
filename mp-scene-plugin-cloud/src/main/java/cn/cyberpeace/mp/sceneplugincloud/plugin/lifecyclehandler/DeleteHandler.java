@@ -110,6 +110,12 @@ public class DeleteHandler extends HandlerCommon {
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var flag = true;
         cloudElement.getDeriveNetworks().forEach(n -> {
+            // 先删除辅助路由 再删除网络
+            if (StringUtils.isNotEmpty(n.network.getAuxiliaryNetworkRouterResourceId())) {
+                var virtualRouterDeleteData = new VirtualRouterDeleteData();
+                virtualRouterDeleteData.setIds(List.of(n.network.getAuxiliaryNetworkRouterResourceId()));
+                vrClient.delete(virtualRouterDeleteData);
+            }
             var deleteData = new VirtualSwitchDeleteData();
             deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
             deleteData.setIds(List.of(n.getNetwork().getResourceId()));
@@ -353,7 +359,6 @@ public class DeleteHandler extends HandlerCommon {
                     });
         }
     }
-
 
     protected void disableConnectUrl(String scene, String sceneElement) {
         CloudPluginSceneConnectionMapper mapper = BeanCommon.getBean(CloudPluginSceneConnectionMapper.class);

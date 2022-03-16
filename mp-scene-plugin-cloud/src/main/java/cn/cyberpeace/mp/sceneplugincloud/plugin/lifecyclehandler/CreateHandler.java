@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
@@ -186,8 +187,29 @@ public class CreateHandler extends HandlerCommon {
             var virtualSwitch = vsClient.create(createData);
             connectedNetwork.network.setNetworkId(virtualSwitch.getId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
+            createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         });
-//      createAuxiliaryNetworkRouter(cloudElement);
+    }
+
+    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network) {
+        if (!Boolean.TRUE.equals(network.getAuxiliaryNetworkRouterOn())) {
+            return;
+        }
+        // 创建辅助路由
+        var createData = new VirtualRouterCreateData();
+        createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
+        var virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(network.getNetworkId());
+        virtualNic.setFixedIp(TextUtils.emptyNull(network.getAuxiliaryNetworkRouterIp()));
+        createData.setNetworks(List.of(virtualNic));
+        var virtualRouter = vrClient.create(createData);
+        network.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
+        var routerVirtualNics = virtualRouter.getNetworks();
+        if (routerVirtualNics != null) {
+            routerVirtualNics.forEach(routerVirtualNic -> {
+                network.setAuxiliaryNetworkRouterIp(routerVirtualNic.getFixedIp());
+            });
+        }
     }
 
     private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {

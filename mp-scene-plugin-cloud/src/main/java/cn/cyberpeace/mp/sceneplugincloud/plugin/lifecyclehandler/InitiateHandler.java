@@ -265,27 +265,27 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
                 connectNetwork.network.setVlan(vlan);
+
+                // 是否开启辅助路由(是否未连接默认路由)
+                var routerOn = true;
+                if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                    // 本节点是默认路由
+                    routerOn = false;
+                } else {
+                    for (var p : connectNetwork.getFromPorts()) {
+                        var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
+                        var pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
+                        Integer connectedVirtualType = pluginConnectedCloudElement == null ? null : pluginConnectedCloudElement.getVirtualType();
+                        if (connectedVirtualType != null
+                                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                            routerOn = true;
+                            break;
+                        }
+                    }
+                }
+                connectNetwork.network.setAuxiliaryNetworkRouterOn(true);
             }
         }
-
-//
-//        // 是否开启辅助路由(是否未连接默认路由)
-//        var routerOn = true;
-//        if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-//            // 本节点是默认路由
-//            routerOn = false;
-//        } else {
-//            for (var connectedSrcElement : connectedOpaqueSrcElements) {
-//                var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-//                Integer connectedVirtualType = connectedCloudElement == null ? null : connectedCloudElement.getVirtualType();
-//                if (connectedVirtualType != null
-//                        && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-//                    routerOn = false;
-//                    break;
-//                }
-//            }
-//        }
-//        cloudElement.setAuxiliaryNetworkRouterOn(routerOn);
     }
 
     /**
@@ -360,7 +360,13 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
             }
+            if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
+                gatewayCount++;
+            }
             List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
+            if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
+                connectedNetwork.network.setAuxiliaryNetworkRouterIp(gatewayIpPool.remove(0));
+            }
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             network.setIpPool(ipPool);

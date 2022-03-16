@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneElementModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,4 +35,10 @@ public class CloudPluginSceneElementNetworkModel extends BasePluginSceneElementM
     private Integer vlanId;
     @DefaultBool
     private Boolean external;
+    @DefaultBool
+    private Boolean auxiliaryNetworkRouterOn;
+    @DefaultStr
+    private String auxiliaryNetworkRouterResourceId;
+    @DefaultStr
+    private String auxiliaryNetworkRouterIp;
 }
