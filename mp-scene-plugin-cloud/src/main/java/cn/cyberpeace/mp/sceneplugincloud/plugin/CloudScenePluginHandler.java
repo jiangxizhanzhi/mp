@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
@@ -11,10 +11,13 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
@@ -30,7 +33,12 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -56,6 +64,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     private InitiateHandler initiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
+
+    private volatile boolean networksCreated = false;
 
     private void loadRelated() {
         gatewayElementMap.clear();
@@ -104,6 +114,37 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     public void reload() {
         super.reload();
         loadRelated();
+        // 处理网络
+        List<CloudPluginSceneElementNetworkModel> networks = pluginModelHandler.readNetworks();
+        Map<String, ConnectedNetworkBO> networkBOMap = new HashMap<>();
+        networks.forEach(network -> {
+            CloudPluginSceneElementNetworkBO networkBO = new CloudPluginSceneElementNetworkBO();
+            networkBO.fromModel(network);
+            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBO, handlerUtils);
+            networkBOMap.put(networkBO.getId(), connectedNetworkBO);
+            this.getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
+        });
+        // 处理加入的网络
+        getElementMap().values().forEach(e -> {
+            e.getSrcElement().getPorts().forEach(p -> {
+                var pluginPort = this.getPort(p.getId());
+                var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                if (pluginPort != null) {
+                    if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
+                        // 自己构建网络直接加入
+                        networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                    } else if (to != null) {
+                        // 未构建网络看对端端口
+                        var pluginToPort = this.getPort(to.getId());
+                        if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
+                            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                            connectedNetworkBO.addPort(p, to, false);
+                            e.getAccessNetworks().add(connectedNetworkBO);
+                        }
+                    }
+                }
+            });
+        });
     }
 
     @Override
@@ -117,6 +158,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         pluginModelHandler.loadElementPorts(pluginModelHandler.readElementPorts(getElementPortIds()
                 .toArray(new String[0])));
     }
+
 
     @Override
     public void saveScene() {
@@ -136,6 +178,22 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void updateElements(String... elementIds) {
         pluginModelHandler.updateElements(elementIds);
+        if (networksCreated) {
+            for (String elementId : elementIds) {
+                updateElementNetworks(elementId);
+            }
+        }
+    }
+
+    public void createElementNetworks() {
+        List<ConnectedNetworkBO> networks = new ArrayList<>();
+        getElementMap().values().forEach(e -> networks.addAll(e.getDeriveNetworks()));
+        pluginModelHandler.createElementNetworks(networks);
+        this.networksCreated = true;
+    }
+
+    public void updateElementNetworks(String elementId) {
+        pluginModelHandler.updateElementNetworks(elementId);
     }
 
     @Override
@@ -268,7 +326,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             });
         }
 
-        var ips = IpUtils.randomIps(cidr, count, new ArrayList<>(existIps),
+        var ips = IpUtils.newRandomIps(cidr, count, new ArrayList<>(existIps),
                 auxiliaryNetworkCloudElement.getAllocationPools(),
                 BoolUtils.bool(auxiliaryNetworkCloudElement.getAuxiliaryNetworkDhcp()));
         handlerUtils.addOuterExistIps(auxiliaryNetworkCloudElement, ips);

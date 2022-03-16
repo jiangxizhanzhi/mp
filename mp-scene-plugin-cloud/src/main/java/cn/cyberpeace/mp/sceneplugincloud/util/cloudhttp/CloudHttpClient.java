@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpResult;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class CloudHttpClient {
         var objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             response = objectMapper.readValue(result.getResult(), valueTypeRef);
         } catch (Exception e) {
             log.error("Cloud {}[url - {}?{}, data - {}] parse result[{}] error: {}", method, url,
