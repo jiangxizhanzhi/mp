@@ -474,10 +474,6 @@ INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time
 ', '2022-02-28 07:10:29', null);
 INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time, update_time) VALUES (233, '233', 349, 'mftp
 ', '2022-02-28 07:10:29', null);
-INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time, update_time) VALUES (234, '234', 351, 'matip-type-b
-', '2022-02-28 07:10:29', null);
-INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time, update_time) VALUES (235, '235', 351, 'bhoetty
-', '2022-02-28 07:10:29', null);
 INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time, update_time) VALUES (236, '236', 353, 'ndsauth
 ', '2022-02-28 07:10:29', null);
 INSERT INTO mp_situation_flow_port_protocol (pk, id, port, protocol, create_time, update_time) VALUES (237, '237', 354, 'bh611
