@@ -54,14 +54,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -959,6 +952,20 @@ public class ScenePluginCollectionSceneService {
         log.info("sceneId:{}, nodeIds:{}", sceneId, nodeIds);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), nodeIds);
         return batchSceneHandler.getAllIps();
+    }
+
+    public List<SceneAssetsBO> listSceneAssets(List<String> sceneIds) {
+        List<SceneAssetsBO> sceneAssets = new ArrayList<>();
+        sceneIds.forEach(s -> {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(s), null);
+            SceneAssetsBO asset = new SceneAssetsBO();
+            asset.setSceneId(s);
+            asset.setIpCount(batchSceneHandler.getAllIps().size());
+            asset.setNodeCount(batchSceneHandler.getAllEid2ElementMap().keySet().size());
+            asset.setCategoryGroups(new ArrayList<>(batchSceneHandler.getCategory2CountInfo().values()));
+            sceneAssets.add(asset);
+        });
+        return sceneAssets;
     }
 
 }
