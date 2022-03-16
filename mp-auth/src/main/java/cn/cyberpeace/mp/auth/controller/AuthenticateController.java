@@ -46,8 +46,9 @@ public class AuthenticateController {
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         }
         if (user == null) {
-            log.info("user is null");
-            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+            log.warn("user from jwt token is null, token:{}", token);
+//            return new ServiceResult(AuthErrorCode.AUTHENTICATION_FAILED).asResult();
+            return ServiceResult.fail(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
         UserModel userModel = UserUtils.getUser(user.getId());
