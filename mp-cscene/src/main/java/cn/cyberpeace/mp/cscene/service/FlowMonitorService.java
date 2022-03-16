@@ -26,7 +26,6 @@ import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
@@ -193,15 +192,9 @@ public class FlowMonitorService {
         List<FlowGroupByDestinationIpAndSeverityVO> voList = boList.stream().map(v -> {
             FlowGroupByDestinationIpAndSeverityVO vo = new FlowGroupByDestinationIpAndSeverityVO();
             vo.setSeverity(v.getSeverity());
-            vo.setNum(v.getDestinationIpList().size());
+            vo.setNum(v.getNum());
             return vo;
         }).collect(Collectors.toList());
-
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
-        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
-        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a,b) -> a + b).orElse(0);
-        int normalSize = allIpSize - severitySize;
-        voList.add(new FlowGroupByDestinationIpAndSeverityVO(0,normalSize));
         return voList;
     }
 

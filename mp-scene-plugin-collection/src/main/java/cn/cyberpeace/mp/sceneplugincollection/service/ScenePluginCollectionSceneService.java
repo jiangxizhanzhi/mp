@@ -15,18 +15,8 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.*;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
-import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
+import cn.cyberpeace.mp.situationaware.bo.*;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -497,9 +487,7 @@ public class ScenePluginCollectionSceneService {
         // 构造参数
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
-        if (CollectionUtils.isEmpty(sourceIps)) {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
-        }else{
+        if (CollectionUtils.isNotEmpty(sourceIps)) {
             request.setSourceIps(sourceIps);
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
@@ -522,9 +510,16 @@ public class ScenePluginCollectionSceneService {
             if (CollectionUtils.isNotEmpty(ipList)) {
                 List<String> ips = ipList.stream().filter(v -> !destinationIpList.contains(v)).collect(Collectors.toList());
                 result.setDestinationIpList(ips);
+                result.setNum(ips.size());
                 destinationIpList.addAll(ips);
             }
+            resultList.add(result);
         }
+
+        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
+        int severitySize = resultList.stream().map(FlowGroupByDestinationIpAndSeverityBO::getNum).reduce((a,b) -> a + b).orElse(0);
+        int normalSize = allIpSize - severitySize;
+        resultList.add(new FlowGroupByDestinationIpAndSeverityBO(0,normalSize));
         return new ServiceResult<>(resultList);
     }
 
