@@ -299,7 +299,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         AggregationBuilder aggregationBuilder = AggregationBuilders.terms("suricata_severity").field("suricata.severity")
-                .subAggregation(AggregationBuilders.count("destination_ip").field("destination.ip"));
+                .subAggregation(AggregationBuilders.terms("destination_ip").field("destination.ip"));
 
         var boolQueryBuilder = buildBoolQueryBuilder(request);
 
