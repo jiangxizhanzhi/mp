@@ -25,11 +25,6 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     private Boolean external;
     @ApiModelProperty(value = "云平台虚拟化类型")
     private Integer virtualType;
-
-    public void setVirtualType(Integer virtualType) {
-        this.virtualType = virtualType;
-    }
-
     @ApiModelProperty(value = "是否透明模式")
     private Boolean transparent;
     @ApiModelProperty(value = "是否云平台內置靶標")
