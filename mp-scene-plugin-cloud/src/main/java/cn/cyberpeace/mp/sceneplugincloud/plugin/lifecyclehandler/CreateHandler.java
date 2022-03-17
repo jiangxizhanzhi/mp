@@ -187,6 +187,19 @@ public class CreateHandler extends HandlerCommon {
             var virtualSwitch = vsClient.create(createData);
             connectedNetwork.network.setNetworkId(virtualSwitch.getId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
+            // 向端口回写网络id
+            connectedNetwork.getFromPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
+            connectedNetwork.getToPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
             createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         });
     }
