@@ -283,43 +283,49 @@ public class CreateHandler extends HandlerCommon {
 
     private void createVirtualRouterGroupPortFirewall(CloudPluginSceneElementBO cloudElement) {
         // 单独创建端口防火墙
-        var groupPortsMap = getHandlerUtils().getCloudElementGroupPorts(cloudElement);
-        for (var groupPorts : groupPortsMap.values()) {
-            // 防火墙的虚拟路由端口
-            Set<String> targetPorts = new HashSet<>();
-            List<FirewallRule> srcRules = new ArrayList<>();
-            List<CloudPluginSceneElementPortBO> cloudPorts = new ArrayList<>();
-            groupPorts.forEach(srcPort -> {
-                var cloudPort = getPluginHandler().getPort(srcPort.getId());
-                if (cloudPort == null) {
-                    return;
-                }
-                cloudPorts.add(cloudPort);
-                if (!StringUtils.isEmpty(cloudPort.getResourceId())) {
-                    targetPorts.add(cloudPort.getResourceId());
-                }
-                var portSrcRules = cloudPort.getFirewallRules();
-                if (portSrcRules != null) {
-                    srcRules.addAll(portSrcRules);
-                }
-            });
-            if (targetPorts.isEmpty() || srcRules == null || srcRules.isEmpty()) {
-                continue;
-            }
-
-            var srcElement = cloudElement.getSrcElement();
-            var createData = new VirtualFirewallCreateData();
-            createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
-            var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
-            createData.setIngressRules(cloudFirewallRules.getIngressRules());
-            createData.setEgressRules(cloudFirewallRules.getEgressRules());
-            createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
-
-            var virtualFirewall = vfClient.create(createData);
-            cloudPorts.forEach(cloudPort -> {
-                cloudPort.setFirewallResourceId(virtualFirewall.getId());
-            });
+        for (ConnectedNetworkBO network : cloudElement.getDeriveNetworks()) {
+            createVirtualRouterPortsFirewall(cloudElement, network.getFromPorts());
         }
+        for (ConnectedNetworkBO network : cloudElement.getAccessNetworks()) {
+            createVirtualRouterPortsFirewall(cloudElement, network.getFromPorts());
+        }
+    }
+
+    public void createVirtualRouterPortsFirewall(CloudPluginSceneElementBO cloudElement, List<SceneElementPortBO> ports) {
+        // 防火墙的虚拟路由端口
+        Set<String> targetPorts = new HashSet<>();
+        List<FirewallRule> srcRules = new ArrayList<>();
+        List<CloudPluginSceneElementPortBO> cloudPorts = new ArrayList<>();
+        ports.forEach(srcPort -> {
+            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+            if (cloudPort == null) {
+                return;
+            }
+            cloudPorts.add(cloudPort);
+            if (!StringUtils.isEmpty(cloudPort.getResourceId())) {
+                targetPorts.add(cloudPort.getResourceId());
+            }
+            var portSrcRules = cloudPort.getFirewallRules();
+            if (portSrcRules != null) {
+                srcRules.addAll(portSrcRules);
+            }
+        });
+        if (targetPorts.isEmpty() || srcRules == null || srcRules.isEmpty()) {
+            return;
+        }
+
+        var srcElement = cloudElement.getSrcElement();
+        var createData = new VirtualFirewallCreateData();
+        createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+        var cloudFirewallRules = CloudFirewallRules.fromSrcRules(srcRules);
+        createData.setIngressRules(cloudFirewallRules.getIngressRules());
+        createData.setEgressRules(cloudFirewallRules.getEgressRules());
+        createData.setPorts(CollectionUtils.emptyNull(new ArrayList<>(targetPorts)));
+
+        var virtualFirewall = vfClient.create(createData);
+        cloudPorts.forEach(cloudPort -> {
+            cloudPort.setFirewallResourceId(virtualFirewall.getId());
+        });
     }
 
     private List<VirtualNic> genVirutalNics(CloudPluginSceneElementBO cloudElement) {
