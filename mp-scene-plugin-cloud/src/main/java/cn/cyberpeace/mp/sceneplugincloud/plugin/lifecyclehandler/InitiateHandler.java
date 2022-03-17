@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -236,7 +237,9 @@ public class InitiateHandler extends HandlerCommon {
     private void initiateAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var networks = cloudElement.getDeriveNetworks().stream().map(n -> n.network).collect(Collectors.toList());
         for (var network : networks) {
-            // todo 外部网络
+            if (Boolean.TRUE.equals(network.getExternal())) {
+                continue;
+            }
             network.setNetworkId(StringUtils.EMPTY);
             if (StringUtils.isEmpty(network.getCidr())) {
                 prepareExistCidrs();
@@ -550,7 +553,9 @@ public class InitiateHandler extends HandlerCommon {
         this.loadProperties2Network(network, cloudElement);
         ConnectedNetworkBO defaultConnectedNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
         // 需要的网络
-        var ports = cloudElement.getSrcElement().getPorts();
+        var ports = Optional
+                .ofNullable(cloudElement.getSrcElement().getPorts())
+                .orElse(new ArrayList<>());
         Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
         for (var port : ports) {
             var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
