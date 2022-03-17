@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.FlowPortProtocolService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
@@ -60,11 +61,17 @@ public class FlowAnalysisController {
         flowAnalysisService.initClassification();
     }
 
+    @ApiOperation("新增模拟流量")
+    @GetMapping("/add-simulation")
+    public void addSimulation(FlowSimulationRequest request) throws IOException {
+        flowAnalysisService.addSimulationFlow(request);
+    }
+
     @ApiOperation(value = "流量日志")
     @GetMapping("/log")
     @Deprecated
     public ServiceResult<List<FlowLogVO>> flowLog(FlowAnalysisRequest request){
-        request.setIndices(flowAnalysisService.getAllIndices(INDICES));
+//        request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<FlowLogBO> flowLogBOList = flowAnalysisService.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOList)){
             return new ServiceResult().asResult();

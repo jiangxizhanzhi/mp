@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateD
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class EntityNode extends CloudClient {
 
     public EntityNodeCreateData create(EntityNodeCreateData createData) {
@@ -20,8 +22,14 @@ public class EntityNode extends CloudClient {
     public boolean delete(EntityNodeDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
-        return true;
+        try {
+
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {}, true);
+            return true;
+        }catch (Exception e) {
+            log.error("failed to delete node,", e);
+            return true;
+        }
     }
 }

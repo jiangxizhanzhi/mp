@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseR
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -405,6 +407,60 @@ public class ScenePluginCollectionSceneService {
                 }).collect(Collectors.toList());
         Collections.sort(result, Comparator.comparing(IntervalSizeBO::getStart));
         return new ServiceResult<>(result);
+    }
+
+    /**
+     * 模拟流量
+     * @param params
+     * @return
+     */
+    public ServiceResult simulation(FlowSimulationParams params){
+        List<String> sceneIds = params.getSceneIds();
+
+        List<String> nodeIds = params.getNodeIds();
+
+        String sourceIp = params.getSourceIp();
+
+        List<String> sourceMacs = params.getSourceMacs();
+
+        String destinationIp = params.getDestinationIp();
+
+        List<String> destinationMacs = params.getDestinationMacs();
+
+        LocalDateTime dateTime = params.getDateTime();
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isEmpty(flowCollectors)) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+
+        // 构造参数
+        FlowSimulationRequest request = new FlowSimulationRequest();
+        request.setGroup(flowCollectors.get(0));
+        request.setSourceIp(sourceIp);
+        if (CollectionUtils.isEmpty(sourceMacs) && StringUtils.isNotBlank(sourceIp)){
+            request.setSourceMacs(Arrays.asList(batchSceneHandler.getMacByIp(sourceIp)));
+        }else{
+            request.setSourceMacs(sourceMacs);
+        }
+        request.setDestinationIp(destinationIp);
+        if (CollectionUtils.isEmpty(destinationMacs) && StringUtils.isNotBlank(destinationIp)){
+            request.setDestinationMacs(Arrays.asList(batchSceneHandler.getMacByIp(destinationIp)));
+        }else{
+            request.setDestinationMacs(destinationMacs);
+        }
+        request.setNetworkBytes(params.getNetworkBytes());
+        request.setDateTime(dateTime);
+
+        try {
+            flowAnalysisService.addSimulationFlow(request);
+        } catch (IOException e) {
+            log.error("simulation flow error : {}",e.getMessage(),e);
+        }
+
+        return new ServiceResult<>();
     }
 
     /**

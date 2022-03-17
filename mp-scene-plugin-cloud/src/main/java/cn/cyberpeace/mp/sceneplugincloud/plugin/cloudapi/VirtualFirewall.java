@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCr
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class VirtualFirewall extends CloudClient {
 
     public VirtualFirewallCreateData create(VirtualFirewallCreateData createData) {
@@ -20,8 +22,14 @@ public class VirtualFirewall extends CloudClient {
     public boolean delete(VirtualFirewallDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
-        return true;
+        try {
+
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {}, true);
+            return true;
+        }catch (Exception e) {
+            log.error("failed to delete node,", e);
+            return true;
+        }
     }
 }

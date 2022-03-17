@@ -7,9 +7,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 
+@Slf4j
 public class VirtualRouter extends CloudClient {
 
     public VirtualRouterCreateData create(VirtualRouterCreateData createData) {
@@ -34,8 +36,14 @@ public class VirtualRouter extends CloudClient {
     public boolean delete(VirtualRouterDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
-        return true;
+        try {
+
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {}, true);
+            return true;
+        }catch (Exception e) {
+            log.error("failed to delete node,", e);
+            return true;
+        }
     }
 }

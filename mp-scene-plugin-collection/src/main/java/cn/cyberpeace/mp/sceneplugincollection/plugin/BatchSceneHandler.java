@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -230,5 +231,17 @@ public class BatchSceneHandler {
             });
         }
         return srcElements;
+    }
+
+    public String getMacByIp(String ip) {
+        SceneElementBO elementBO = this.allIp2ElementMap.get(ip);
+        if (elementBO != null && CollectionUtils.isNotEmpty(elementBO.getPorts())) {
+            for (var p : elementBO.getPorts()) {
+                if (ip.equals(p.getIp()) && StringUtils.isNotEmpty(p.getMacAddr())) {
+                    return p.getMacAddr();
+                }
+            }
+        }
+        return null;
     }
 }
