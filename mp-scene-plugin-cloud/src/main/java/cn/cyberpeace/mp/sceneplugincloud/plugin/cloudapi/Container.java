@@ -3,15 +3,21 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerArchiveData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerExecuteResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Map;
 
 public class Container extends CloudClient {
 
@@ -27,10 +33,17 @@ public class Container extends CloudClient {
     public boolean delete(ContainerDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {
-                }, true);
-        return true;
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (MpRuntimeException e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {

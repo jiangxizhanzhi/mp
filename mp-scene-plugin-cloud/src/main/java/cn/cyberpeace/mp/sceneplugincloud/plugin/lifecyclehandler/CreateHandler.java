@@ -187,6 +187,19 @@ public class CreateHandler extends HandlerCommon {
             var virtualSwitch = vsClient.create(createData);
             connectedNetwork.network.setNetworkId(virtualSwitch.getId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
+            // 向端口回写网络id
+            connectedNetwork.getFromPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
+            connectedNetwork.getToPorts().forEach(p -> {
+                var pluginPort = getPluginHandler().getPort(p.getId());
+                if (pluginPort != null) {
+                    pluginPort.setAuxiliaryNetworkId(virtualSwitch.getId());
+                }
+            });
             createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
         });
     }
@@ -318,67 +331,66 @@ public class CreateHandler extends HandlerCommon {
             virtualNics.add(virtualNic);
         }
         List<ConnectedNetworkBO> deriveConnectedNetworks = cloudElement.getDeriveNetworks();
-        List<ConnectedNetworkBO> accessConnectedNetworks = cloudElement.getAccessNetworks();
         for (ConnectedNetworkBO connectedNetwork : deriveConnectedNetworks) {
-            var network = connectedNetwork.network;
-            List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
-            List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
-
-            SceneElementPortBO samplePort = fromPorts.get(0);
-            CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(network.getNetworkId());
-            virtualNic.setFixedIp(samplePort.getIp());
-            virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
-
-            List<VirtualNic.QosRule> qosRules = new ArrayList<>();
-            if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
-                var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(samplePort.getIngress());
-                qosRule.setDirection(QosRuleDirection.INGRESS);
-                qosRule.setDelayMs(samplePort.getDelay());
-                qosRule.setLossPercent(samplePort.getLoss());
-                qosRules.add(qosRule);
-            }
-            if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
-                var qosRule = new VirtualNic.QosRule();
-                qosRule.setMaxKbps(samplePort.getEgress());
-                qosRule.setDirection(QosRuleDirection.EGRESS);
-                qosRule.setDelayMs(samplePort.getDelay());
-                qosRule.setLossPercent(samplePort.getLoss());
-                qosRules.add(qosRule);
-            }
-            virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
-
-            if (!HandlerUtils.isExternalNetwork(network.getNetworkId())) {
-                virtualNic.setEnableExternal(sampleCloudPort.getNat());
-            }
-
-            virtualNic.setFirewallId(null);
-
-            var accessModes = sampleCloudPort.getAccessModes();
-            if (accessModes != null && !accessModes.isEmpty()) {
-                virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
-                    var accessModeParam = new VirtualNic.AccessMode();
-                    accessModeParam.setProtocol(accessMode.getProtocol());
-                    accessModeParam.setPort(accessMode.getPort());
-                    accessModeParam.setUsername(accessMode.getUsername());
-                    accessModeParam.setPassword(accessMode.getPassword());
-                    accessModeParam.setEnablePortMapping(accessMode.getProxy());
-                    accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
-                    return accessModeParam;
-                }).collect(Collectors.toList()));
-            }
+            VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
             virtualNics.add(virtualNic);
         }
+        List<ConnectedNetworkBO> accessConnectedNetworks = cloudElement.getAccessNetworks();
         for (ConnectedNetworkBO connectedNetwork : accessConnectedNetworks) {
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(connectedNetwork.network.getNetworkId());
-            virtualNic.setFixedIp(connectedNetwork.connectPorts.get(0).from.getIp());
-            virtualNic.setMacAddress(TextUtils.emptyNull(connectedNetwork.connectPorts.get(0).from.getMacAddr()));
+            VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
             virtualNics.add(virtualNic);
         }
         return virtualNics;
+    }
+
+    private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
+        var network = connectedNetwork.network;
+        List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+        SceneElementPortBO samplePort = fromPorts.get(0);
+        CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
+        var virtualNic = new VirtualNic();
+        virtualNic.setNetworkId(network.getNetworkId());
+        virtualNic.setFixedIp(samplePort.getIp());
+        virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
+        List<VirtualNic.QosRule> qosRules = new ArrayList<>();
+        if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+            var qosRule = new VirtualNic.QosRule();
+            qosRule.setMaxKbps(samplePort.getIngress());
+            qosRule.setDirection(QosRuleDirection.INGRESS);
+            qosRule.setDelayMs(samplePort.getDelay());
+            qosRule.setLossPercent(samplePort.getLoss());
+            qosRules.add(qosRule);
+        }
+        if (samplePort.getEgress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
+            var qosRule = new VirtualNic.QosRule();
+            qosRule.setMaxKbps(samplePort.getEgress());
+            qosRule.setDirection(QosRuleDirection.EGRESS);
+            qosRule.setDelayMs(samplePort.getDelay());
+            qosRule.setLossPercent(samplePort.getLoss());
+            qosRules.add(qosRule);
+        }
+        virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
+
+        if (!HandlerUtils.isExternalNetwork(network.getNetworkId())) {
+            virtualNic.setEnableExternal(sampleCloudPort.getNat());
+        }
+
+        virtualNic.setFirewallId(null);
+
+        var accessModes = sampleCloudPort.getAccessModes();
+        if (accessModes != null && !accessModes.isEmpty()) {
+            virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
+                var accessModeParam = new VirtualNic.AccessMode();
+                accessModeParam.setProtocol(accessMode.getProtocol());
+                accessModeParam.setPort(accessMode.getPort());
+                accessModeParam.setUsername(accessMode.getUsername());
+                accessModeParam.setPassword(accessMode.getPassword());
+                accessModeParam.setEnablePortMapping(accessMode.getProxy());
+                accessModeParam.setPortMappingProtocol(TextUtils.emptyNull(accessMode.getBaseProtocol()));
+                return accessModeParam;
+            }).collect(Collectors.toList()));
+        }
+        return virtualNic;
     }
 
     private List<EntityNodeCreateData.Interface> genEntityInterfaces(CloudPluginSceneElementBO cloudElement) {
@@ -796,12 +808,7 @@ public class CreateHandler extends HandlerCommon {
         });
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNpcInfos(npcInfos);
-        try {
-            // TODO maojun
-            npcClient.create(npcCreateData);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        npcClient.create(npcCreateData);
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
