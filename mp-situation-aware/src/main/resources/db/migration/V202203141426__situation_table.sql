@@ -1,4 +1,4 @@
-drop table mp_situation_flow_port_protocol;
+drop table if exists mp_situation_flow_port_protocol;
 
 create table mp_situation_flow_port_protocol
 (
