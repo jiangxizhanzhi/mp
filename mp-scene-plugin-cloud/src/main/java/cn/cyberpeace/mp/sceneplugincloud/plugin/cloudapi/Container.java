@@ -7,12 +7,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 public class Container extends CloudClient {
 
     public ContainerCreateData create(ContainerCreateData createData) {
@@ -27,10 +29,16 @@ public class Container extends CloudClient {
     public boolean delete(ContainerDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {
-                }, true);
-        return true;
+        try {
+
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (Exception e) {
+            log.error("failed to delete node,", e);
+            return true;
+        }
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {
