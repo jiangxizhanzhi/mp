@@ -407,11 +407,13 @@ public class InitiateHandler extends HandlerCommon {
                 var pluginElement = getPluginHandler().getElement(port.getElement().getId());
                 Integer toVirtualType = pluginElement.getVirtualType();
                 if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
-                    // 并发处理？ todo
-                    port.setIp(ipPool.remove(ipPool.size() - 1));
+                    synchronized (ipPool) {
+                        port.setIp(ipPool.remove(ipPool.size() - 1));
+                    }
                 } else {
-                    // 并发处理？ todo
-                    port.setIp(ipPool.remove(0));
+                    synchronized (ipPool) {
+                        port.setIp(ipPool.remove(0));
+                    }
                 }
             }
         }
@@ -661,7 +663,9 @@ public class InitiateHandler extends HandlerCommon {
                 .map(cloudElement -> (Runnable) () -> initiateElementIpPoolProcess(cloudElement))
                 .collect(Collectors.toList());
         if (!initiateElementIpPoolTasks.isEmpty()) {
-            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> runTasks(initiateElementIpPoolTasks));
+            runSceneProgress(SceneProcess.INITIATE_IP_POOL, () -> {
+                initiateElementIpPoolTasks.forEach(task -> task.run());
+            });
         }
 
         // 初始化端口, 先初始化路由端口, 再初始化其它端口
