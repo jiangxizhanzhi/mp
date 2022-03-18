@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -13,7 +14,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -27,6 +33,17 @@ public class HandlerUtils {
     private final Map<String, CloudPluginSceneElementBO> portIdAuxiliaryNetworkCloudElementMap = new ConcurrentHashMap<>();
     private final Map<String, List<String>> networkNodeIdPortIdsMap = new ConcurrentHashMap<>();
     private final Map<String, Set<String>> networkNodeIdOuterExistIpsMap = new ConcurrentHashMap<>();
+
+    private final Map<String, CloudPluginSceneElementNetworkBO> portId2network = new ConcurrentHashMap<>();
+
+
+    public CloudPluginSceneElementNetworkBO getNetworkByPort(SceneElementPortBO port) {
+        return this.portId2network.get(port.getId());
+    }
+
+    public void addNetwork(SceneElementPortBO port, CloudPluginSceneElementNetworkBO network) {
+        this.portId2network.put(port.getId(), network);
+    }
 
     public HandlerUtils(CloudScenePluginHandler pluginHandler) {
         this.pluginHandler = pluginHandler;

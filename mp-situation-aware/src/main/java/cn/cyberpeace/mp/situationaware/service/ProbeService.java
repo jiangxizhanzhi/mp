@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
@@ -51,6 +53,9 @@ public class ProbeService {
 
     @Autowired
     private WazuhProbeManagerRepository wazuhProbeManagerRepository;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
 
     /**
      * 新增探针
@@ -172,17 +177,29 @@ public class ProbeService {
 
     /**
      * 清除探针数据，包括表，es索引，doc等
+     * @param agentNames
+     * @param sceneInstanceStartTime
      */
-    public void cleanProbeData(List<String> agentNames, LocalDateTime deleteTime) {
-        log.info("agentNames:{}, deleteTime:{}", agentNames, deleteTime);
-        if (Objects.isNull(deleteTime)) {
-            deleteTime = LocalDateTime.now();
+    public void cleanProbeData(List<String> agentNames, LocalDateTime sceneInstanceStartTime) {
+        log.info("agentNames:{}, deleteTime:{}", agentNames, sceneInstanceStartTime);
+        if (Objects.isNull(sceneInstanceStartTime)) {
+            log.error("scene instance startTime should not be null!");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        // 1. 清除es索引?
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(agentNames);
+        wazuhEventRequest.setStartTime(sceneInstanceStartTime);
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
 
-        // 2. wazuh api清除agent数据
+        // 1. 清除es 文档数据
+        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
+        log.info("deletedCount:{}", deletedCount);
 
-        // 3. 表数据？
+        // 2. 清除es索引?
+
+        // 3. wazuh api清除agent数据
+
+        // 4. 表数据？
     }
 
     /**

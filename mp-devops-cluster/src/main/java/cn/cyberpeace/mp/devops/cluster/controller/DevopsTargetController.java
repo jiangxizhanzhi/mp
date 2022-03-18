@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -149,6 +151,18 @@ public class DevopsTargetController {
     public ServiceResult<CommonTargetResponse> getCommonTargets(){
         List<Device> deviceList = targetConverter.getCommonTargets();
         List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(locale, Locale.CHINA)) {
+            // 常用靶标名称国际化处理
+            deviceVOList.forEach(device -> {
+                device.setImage(device.getName());
+                device.setName(
+                        Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
+                                CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
+            });
+        }
+
         return new Result(new CommonTargetResponse(deviceVOList));
     }
 

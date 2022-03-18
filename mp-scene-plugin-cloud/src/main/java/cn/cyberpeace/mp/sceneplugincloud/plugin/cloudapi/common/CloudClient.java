@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @Data
@@ -56,4 +57,11 @@ public abstract class CloudClient {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
     }
 
+    protected boolean excludeDeleteException(MpRuntimeException runtimeException) {
+        if (StringUtils.isNotEmpty(runtimeException.getMessage()) && runtimeException.getMessage().contains("could not be found")) {
+            // 删除时已不存在的错误可以视为删除成功
+            return true;
+        }
+        return false;
+    }
 }

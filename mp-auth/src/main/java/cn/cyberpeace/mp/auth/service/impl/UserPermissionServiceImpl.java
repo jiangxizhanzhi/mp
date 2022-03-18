@@ -253,6 +253,9 @@ public class UserPermissionServiceImpl
     @Override
     public List<TargetModel> listMenusByLoginUser() {
         UserModel user = UserUtils.getLoginUser();
+        if (Objects.isNull(user)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
         List<TargetModel> menus = listMenusByUserId(user.getId());
         return menus;
     }

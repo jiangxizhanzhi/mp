@@ -7,9 +7,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
-import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
-@Slf4j
 public class VirtualMachine extends CloudClient {
 
     public VirtualMachineCreateData create(VirtualMachineCreateData createData) {
@@ -25,14 +24,15 @@ public class VirtualMachine extends CloudClient {
         heavyConcurrentWait();
 
         try {
-
             CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
                     new TypeReference<CloudResponse<Object>>() {
                     }, true);
             return true;
-        }catch (Exception e) {
-            log.error("failed to delete node,", e);
-            return true;
+        } catch (MpRuntimeException e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
         }
     }
 

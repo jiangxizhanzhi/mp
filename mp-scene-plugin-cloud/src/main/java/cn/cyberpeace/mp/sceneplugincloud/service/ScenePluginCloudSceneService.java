@@ -11,7 +11,12 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -38,7 +43,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -516,4 +527,17 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
+    public List<String> getRecordingUsers(String sceneId) {
+        var list = cloudPluginSceneConnectionMapper.list(new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId));
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        Set<String> users = new HashSet<>();
+        list.forEach(model -> {
+            if (StringUtils.isNotEmpty(model.getAccessUser())) {
+                users.add(model.getAccessUser());
+            }
+        });
+        return new ArrayList<>(users);
+    }
 }

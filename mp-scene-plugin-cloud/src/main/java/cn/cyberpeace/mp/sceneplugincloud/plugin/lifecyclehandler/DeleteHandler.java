@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
@@ -21,6 +23,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import lombok.AllArgsConstructor;
@@ -44,6 +47,7 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualMachine vmClient = new VirtualMachine();
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
+    private final Npc npcClient = new Npc();
 
     public static class SceneProcess {
         public static final EventProcess DELETE_TERMINALS = new EventProcess("delete_terminals", "sceneplugincloud.event.delete_terminal");
@@ -61,6 +65,7 @@ public class DeleteHandler extends HandlerCommon {
         public static final EventProcess DELETE_VIRTUAL_MACHINE = new EventProcess("delete_virtual_machine", "sceneplugincloud.event.delete_virtual_machine");
         public static final EventProcess DELETE_CONTAINER = new EventProcess("delete_container", "sceneplugincloud.event.delete_container");
         public static final EventProcess DELETE_ENTITY_NODE = new EventProcess("delete_entity_node", "sceneplugincloud.event.delete_entity_node");
+        public static final EventProcess DELETE_NPC = new EventProcess("delete_npc", "sceneplugincloud.event.delete_npc");
     }
 
     @Data
@@ -104,15 +109,27 @@ public class DeleteHandler extends HandlerCommon {
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var flag = true;
-        var resourceId = cloudElement.getAuxiliaryNetworkId();
-        if (!StringUtils.isEmpty(resourceId)) {
+        cloudElement.getDeriveNetworks().forEach(n -> {
+            // 先删除辅助路由 再删除网络
+            if (StringUtils.isNotEmpty(n.network.getAuxiliaryNetworkRouterResourceId())) {
+                var virtualRouterDeleteData = new VirtualRouterDeleteData();
+                virtualRouterDeleteData.setIds(List.of(n.network.getAuxiliaryNetworkRouterResourceId()));
+                vrClient.delete(virtualRouterDeleteData);
+            }
             var deleteData = new VirtualSwitchDeleteData();
             deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
-            deleteData.setIds(List.of(resourceId));
-            flag = vsClient.delete(deleteData);
-        }
-
-        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
+            deleteData.setIds(List.of(n.getNetwork().getResourceId()));
+            vsClient.delete(deleteData);
+        });
+//        var resourceId = cloudElement.getAuxiliaryNetworkId();
+//        if (!StringUtils.isEmpty(resourceId)) {
+//            var deleteData = new VirtualSwitchDeleteData();
+//            deleteData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+//            deleteData.setIds(List.of(resourceId));
+//            flag = vsClient.delete(deleteData);
+//        }
+//
+//        flag = flag && deleteAuxiliaryNetworkRouter(cloudElement);
         return flag;
     }
 
@@ -217,6 +234,27 @@ public class DeleteHandler extends HandlerCommon {
         return enClient.delete(deleteData);
     }
 
+    protected boolean deleteNpcNode(CloudPluginSceneElementBO cloudElement) {
+        String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
+        List<NpcDeleteData.NpcInfo> npcInfos = new ArrayList<>();
+        cloudElement.getAccessNetworks().forEach(net -> {
+            net.getFromPorts().forEach(port -> {
+                npcInfos.add(new NpcDeleteData.NpcInfo(net.getNetwork().getResourceId(), npcName, port.getIp()));
+            });
+        });
+        cloudElement.getDeriveNetworks().forEach(net -> {
+            if (net.getFromPorts() != null && !net.getFromPorts().isEmpty()) {
+                npcInfos.add(new NpcDeleteData.NpcInfo(net.getNetwork().getResourceId(), npcName, net.getFromPorts().get(0).getIp()));
+            }
+        });
+        NpcDeleteData npcCreateData = new NpcDeleteData();
+        npcCreateData.setNpcInfos(npcInfos);
+        if (npcInfos.isEmpty()) {
+            return true;
+        }
+        return npcClient.delete(npcCreateData);
+    }
+
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
@@ -248,7 +286,7 @@ public class DeleteHandler extends HandlerCommon {
         // 删除辅助网络(包含虚拟交换机)
         var deleteAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> {
-                    if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkOn())) {
+                    if (cloudElement.getDeriveNetworks().isEmpty()) {
                         return false;
                     }
 
@@ -309,9 +347,13 @@ public class DeleteHandler extends HandlerCommon {
                         deleteEntityNode(cloudElement);
                         this.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
                     });
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
+            runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_NPC,
+                    () -> {
+                        deleteNpcNode(cloudElement);
+                    });
         }
     }
-
 
     protected void disableConnectUrl(String scene, String sceneElement) {
         CloudPluginSceneConnectionMapper mapper = BeanCommon.getBean(CloudPluginSceneConnectionMapper.class);
