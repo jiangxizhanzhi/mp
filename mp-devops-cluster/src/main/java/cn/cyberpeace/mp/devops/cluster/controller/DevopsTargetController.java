@@ -155,9 +155,12 @@ public class DevopsTargetController {
         Locale locale = LocaleContextHolder.getLocale();
         if (Objects.equals(locale, Locale.CHINA)) {
             // 常用靶标名称国际化处理
-            deviceVOList.forEach(device -> device.setName(
-                    Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
-                            CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName()));
+            deviceVOList.forEach(device -> {
+                device.setImage(device.getName());
+                device.setName(
+                        Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
+                                CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
+            });
         }
 
         return new Result(new CommonTargetResponse(deviceVOList));
