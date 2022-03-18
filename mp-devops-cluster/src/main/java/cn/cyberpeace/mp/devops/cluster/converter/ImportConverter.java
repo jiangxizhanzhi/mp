@@ -32,7 +32,7 @@ public class ImportConverter implements BaseConverter{
     /**
      * 承诺最大支持靶标的磁盘大小(G)
      */
-    @Value("${mp.devops.max-target-size}")
+    @Value("${mp.devops.max-target-size:100}")
     private String maxTargetSize;
 
     @Autowired
