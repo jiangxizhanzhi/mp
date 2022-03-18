@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -95,6 +96,36 @@ public class FlowMonitorService {
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
         return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), trendRequest.getSourceIps(), trendRequest.getType());
+    }
+
+    /**
+     * 模拟流量
+     * @param request
+     * @return
+     */
+    public ServiceResult simulation(FlowSceneSimulationRequest request) {
+        log.info("{}", request);
+
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
+
+
+        // todo 转好
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+
+        FlowSimulationParams params = new FlowSimulationParams();
+        params.setSceneIds(sceneIdList);
+        params.setSourceIp(request.getSourceIp());
+        params.setSourceMacs(request.getSourceMacs());
+        params.setDestinationIp(request.getDestinationIp());
+        params.setDestinationMacs(request.getDestinationMacs());
+        params.setNodeIds(request.getNodeIds());
+        params.setNetworkBytes(request.getNetworkBytes());
+        params.setDateTime(request.getDateTime());
+
+        scenePluginCollectionSceneService.simulation(params);
+
+        return ServiceResult.successful();
     }
 
     /**
@@ -180,6 +211,12 @@ public class FlowMonitorService {
             vo.setNum(v.getNum());
             return vo;
         }).collect(Collectors.toList());
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
+        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
+        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a, b) -> a + b).orElse(0);
+        int normalSize = allIpSize - severitySize;
+        voList.add(new FlowGroupByDestinationIpAndSeverityVO(0, normalSize));
         return voList;
     }
 
