@@ -346,7 +346,8 @@ public class InitiateHandler extends HandlerCommon {
                 connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
             }
 
-            int requireCount = 0;
+            // todo
+            int requireCount = 1;
             int gatewayCount = 0;
             for (var port : connectedNetwork.getFromPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
@@ -368,7 +369,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
-                connectedNetwork.network.setAuxiliaryNetworkRouterIp(gatewayIpPool.remove(0));
+                connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
