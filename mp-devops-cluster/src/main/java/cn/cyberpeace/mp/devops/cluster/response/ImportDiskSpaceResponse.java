@@ -19,11 +19,6 @@ import lombok.NoArgsConstructor;
 public class ImportDiskSpaceResponse extends BaseCloudPlatformResponse {
 
     /**
-     * 镜像空间
-     */
-    private Long dockerSpace;
-
-    /**
      * 虚拟机空间
      */
     private Long vmSpace;
