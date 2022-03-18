@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -10,6 +12,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +51,9 @@ public class SceneMonitorService {
 
     @Autowired
     private SceneTranslationService sceneTranslationService;
+
+    @Autowired
+    private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
     /**
      * CsceneInstanceBO转为SceneMonitorInfo
@@ -173,7 +179,7 @@ public class SceneMonitorService {
      * @param request
      * @return
      */
-    public List<String> getIps(BaseSceneElementRequest request) {
+    public List<String> listIps(BaseSceneElementRequest request) {
         log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
 
@@ -183,6 +189,19 @@ public class SceneMonitorService {
         }
         return scenePluginCollectionSceneService.listIPs(translatedSceneIds.get(0), request.getElementIds());
     }
+
+    /**
+     * 列出场景所有录屏的用户
+     * @param request
+     * @return
+     */
+    public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
+        log.info("{}", request);
+        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(request.getSceneId());
+        List<UserModel> users = userIds.stream().map(id -> UserUtils.getUser(id)).collect(Collectors.toList());
+        return users;
+    }
+
 
     /**
      * 查看top N的节点状态
