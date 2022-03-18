@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -60,6 +61,12 @@ public class DeviceVO implements Serializable {
      */
     @ApiModelProperty("名称")
     private String name;
+
+    /**
+     * 镜像名称（靶标的英文名称）
+     */
+    @ApiModelProperty("镜像名称")
+    private String image;
 
     /**
      * 描述
@@ -172,4 +179,8 @@ public class DeviceVO implements Serializable {
         return tmpImport || tmpInternal;
     }
 
+    public String getImage() {
+        // 镜像名称为空时，直接取靶标名称
+        return StringUtils.isBlank(image) ? name : image;
+    }
 }
