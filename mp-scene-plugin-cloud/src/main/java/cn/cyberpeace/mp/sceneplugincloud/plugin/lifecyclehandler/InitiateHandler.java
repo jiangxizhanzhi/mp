@@ -342,7 +342,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             existIps.add(network.getGateway());
             existIps.add(IpUtils.nextIp(network.getGateway()));
-            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                 connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
             }
 
@@ -373,6 +373,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
+            ipPool.add(network.getGateway());
             network.setIpPool(ipPool);
         });
     }
@@ -387,11 +388,16 @@ public class InitiateHandler extends HandlerCommon {
             List<String> ipPool = connectedNetwork.network.getIpPool();
             // 处理自己的端口
             List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+            String fromIp = null;
             for (var port : fromPorts) {
                 if (StringUtils.isNotEmpty(port.getIp())) {
                     continue;
+                } else {
+                    if (fromIp == null) {
+                        fromIp = ipPool.remove(0);
+                    }
+                    port.setIp(fromIp);
                 }
-                port.setIp(ipPool.remove(0));
             }
             List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
             for (var port : toPorts) {
