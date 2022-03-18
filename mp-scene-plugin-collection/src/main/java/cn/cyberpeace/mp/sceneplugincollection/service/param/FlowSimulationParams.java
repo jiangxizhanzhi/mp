@@ -43,6 +43,9 @@ public class FlowSimulationParams {
     @ApiModelProperty("流量大小")
     private Integer networkBytes;
 
+    @ApiModelProperty("随机生成攻击手法")
+    private Boolean shuffleCategory = Boolean.FALSE;
+
     @ApiModelProperty("时间")
     private LocalDateTime dateTime;
 

@@ -457,6 +457,7 @@ public class ScenePluginCollectionSceneService {
             request.setDestinationMacs(destinationMacs);
         }
         request.setNetworkBytes(params.getNetworkBytes());
+        request.setShuffleCategory(params.getShuffleCategory());
         request.setDateTime(dateTime);
 
         try {

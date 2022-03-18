@@ -44,6 +44,9 @@ public class FlowSceneSimulationRequest {
     @ApiModelProperty("流量大小")
     private Integer networkBytes;
 
+    @ApiModelProperty("随机生成攻击手法，默认: false")
+    private Boolean shuffleCategory = Boolean.FALSE;
+
     @ApiModelProperty("时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;

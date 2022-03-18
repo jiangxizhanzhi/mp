@@ -103,7 +103,7 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
     /**
-     *
+     * 模拟生成流量
      * @return
      * @throws IOException
      */
@@ -163,14 +163,16 @@ public class FlowAnalysisService extends AbstractBaseService {
             flow.setNetwork(network);
         }
 
-        List<FlowClassificationModel> classificationModels = flowClassificationsService.findAll();
-        if (CollectionUtils.isNotEmpty(classificationModels)){
-            Collections.shuffle(classificationModels);
-            FlowTemplateBO.SuricataDTO suricata = flow.getSuricata();
-            FlowClassificationModel classificationModel = classificationModels.get(0);
-            suricata.setCategory(Arrays.asList(classificationModel.getCategoryEn()));
-            suricata.setSeverity(Arrays.asList(classificationModel.getSeverity()));
-            flow.setSuricata(suricata);
+        if (Objects.nonNull(request.getShuffleCategory()) && request.getShuffleCategory()) {
+            List<FlowClassificationModel> classificationModels = flowClassificationsService.findAll();
+            if (CollectionUtils.isNotEmpty(classificationModels)) {
+                Collections.shuffle(classificationModels);
+                FlowTemplateBO.SuricataDTO suricata = flow.getSuricata();
+                FlowClassificationModel classificationModel = classificationModels.get(0);
+                suricata.setCategory(Arrays.asList(classificationModel.getCategoryEn()));
+                suricata.setSeverity(Arrays.asList(classificationModel.getSeverity()));
+                flow.setSuricata(suricata);
+            }
         }
 
 
