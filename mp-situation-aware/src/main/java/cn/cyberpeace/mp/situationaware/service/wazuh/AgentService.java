@@ -12,7 +12,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +35,7 @@ public class AgentService extends RequestProcessor {
 
     /**
      * 查询所有agent信息
+     *
      * @return
      */
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
@@ -44,21 +44,17 @@ public class AgentService extends RequestProcessor {
         var requestUri = "/agents";
         var requestUrl = wazuhUrl + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
-        try {
-            log.info("requestUrl:{}", requestUrl);
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-            BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>(){});
-            log.info("{}", result);
-            List<Agent> agents = result.getData().getAffectedItems();
+        log.info("requestUrl:{}", requestUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
+        });
+        log.info("{}", result);
+        List<Agent> agents = result.getData().getAffectedItems();
 
-            PageInfo pageInfo = new PageInfo(agents);
-            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+        PageInfo pageInfo = new PageInfo(agents);
+        pageInfo.setTotal(result.getData().getTotalAffectedItems());
 
-            return pageInfo;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        return pageInfo;
     }
 
     public List<Agent> listAgents(AgentRequest agentRequest) {
@@ -94,6 +90,7 @@ public class AgentService extends RequestProcessor {
 
     /**
      * 查询指定agentName的agentId
+     *
      * @param agentNames
      * @return
      */
@@ -116,6 +113,7 @@ public class AgentService extends RequestProcessor {
 
     /**
      * 查询指定agentName的agentId，agentName需要唯一
+     *
      * @param agentName
      * @return
      */
@@ -139,7 +137,6 @@ public class AgentService extends RequestProcessor {
         return null;
 
     }
-
 
 
     private List<NameValuePair> processRequestParams(AgentRequest agentRequest) {

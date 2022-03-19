@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.situationaware.utils;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import lombok.Cleanup;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -34,7 +36,7 @@ public class WazuhHttpsUtils {
             var sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
             return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         } catch (Exception e) {
-            log.error("{}",e);
+            log.error("{}", e);
             throw new MpRuntimeException("createIgnoreSSLHttpClient error");
         }
     }
@@ -46,9 +48,9 @@ public class WazuhHttpsUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGetWithAuthToken(String url, List<NameValuePair> params) throws IOException {
-        @Cleanup CloseableHttpResponse response = null;
-        @Cleanup CloseableHttpClient httpClient = null;
+    public static String sendGetWithAuthToken(String url, List<NameValuePair> params) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
         try {
             httpClient = createIgnoreSSLHttpClient();
 
@@ -65,9 +67,12 @@ public class WazuhHttpsUtils {
                 response = httpClient.execute(httpGet);
             }
             return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException e) {
+            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-            log.error("{}",e);
-            throw new MpRuntimeException("sendGetWithAuth 失败");
+            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("wazuh api query error!");
         }
     }
 
@@ -78,9 +83,9 @@ public class WazuhHttpsUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGetWithAuthToken(String url) throws IOException {
-        @Cleanup CloseableHttpResponse response = null;
-        @Cleanup CloseableHttpClient httpClient = null;
+    public static String sendGetWithAuthToken(String url) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
         try {
             httpClient = createIgnoreSSLHttpClient();
 
@@ -94,9 +99,13 @@ public class WazuhHttpsUtils {
                 response = httpClient.execute(httpGet);
             }
             return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException e) {
+            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-            log.error("{}",e);
-            throw new MpRuntimeException("sendGetWithAuth 失败");
+//            processException(e);
+            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("wazuh api query error!");
         }
     }
 
@@ -107,9 +116,9 @@ public class WazuhHttpsUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGetWithAuth(String url, String userName, String password) throws IOException {
-        @Cleanup CloseableHttpResponse response = null;
-        @Cleanup CloseableHttpClient httpClient = null;
+    public static String sendGetWithAuth(String url, String userName, String password) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
         try {
             var pass = userName + ":" + password;
             String encoding = Base64.getEncoder().encodeToString(pass.getBytes(StandardCharsets.UTF_8));
@@ -119,9 +128,13 @@ public class WazuhHttpsUtils {
             httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encoding);
             response = httpClient.execute(httpGet);
             return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException e) {
+            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new MpRuntimeException("sendGetWithAuth 失败");
+//            processException(e);
+            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("wazuh api query error!");
         }
     }
 
@@ -134,4 +147,16 @@ public class WazuhHttpsUtils {
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), "UTF-8");
     }
+
+//    private static void processException(Exception e) {
+//        if (e instanceof IOException) {
+//            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+//            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+//        }
+//
+//        if (e instanceof UncheckedExecutionException) {
+//            log.error("unchecked exception: {}", ExceptionUtil.stacktraceToString(e));
+//            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AUTHENTICATION_FAIL);
+//        }
+//    }
 }
