@@ -706,18 +706,24 @@ public class ScenePluginCollectionSceneService {
             flowBO.setTimestamp(flowLogBO.getTimestamp());
         }
         if (flowLogBO.getSource() != null) {
+            String ip = flowLogBO.getSource().getIp();
             flowBO.setSourceIp(flowLogBO.getSource().getIp());
-            if (CollectionUtils.isNotEmpty(flowLogBO.getSource().getMac())) {
-                for (int i = 0; i < flowLogBO.getSource().getMac().size(); i++) {
-                    String mac = flowLogBO.getSource().getMac().get(i);
-                    if (mac2ElementMap.containsKey(mac)) {
-                        flowBO.setSourceNodeId(mac2ElementMap.get(mac).getId());
-                        flowBO.setSourceNodeName(mac2ElementMap.get(mac).getName());
-                        flowBO.setSceneId(mac2SceneId.get(mac));
-                        break;
-                    }
-                }
+            if(ipElementMap.containsKey(ip)){
+                flowBO.setSourceNodeId(ipElementMap.get(ip).getId());
+                flowBO.setSourceNodeName(ipElementMap.get(ip).getName());
+                flowBO.setSceneId(mac2SceneId.get(ip));
             }
+//            if (CollectionUtils.isNotEmpty(flowLogBO.getSource().getMac())) {
+//                for (int i = 0; i < flowLogBO.getSource().getMac().size(); i++) {
+//                    String mac = flowLogBO.getSource().getMac().get(i);
+//                    if (mac2ElementMap.containsKey(mac)) {
+//                        flowBO.setSourceNodeId(mac2ElementMap.get(mac).getId());
+//                        flowBO.setSourceNodeName(mac2ElementMap.get(mac).getName());
+//                        flowBO.setSceneId(mac2SceneId.get(mac));
+//                        break;
+//                    }
+//                }
+//            }
         }
         if (flowLogBO.getDestination() != null) {
             String ip = flowLogBO.getDestination().getIp();
