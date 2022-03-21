@@ -22,6 +22,10 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
+    public static final int WAZUH_DEFAULT_REMOTE_PORT = 1514;
+
+    public static final int WAZUH_DEFAULT_AUTH_PORT = 1515;
+
     private WazuhCommon() {}
 
     public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost) {
@@ -43,6 +47,8 @@ public class WazuhCommon {
                             "install.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
+                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", WAZUH_DEFAULT_REMOTE_PORT),
+                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", WAZUH_DEFAULT_AUTH_PORT),
                             "cd C:\\wazuha",
                             "start.bat"
                     ));
@@ -56,8 +62,9 @@ public class WazuhCommon {
                             String.format("cd %s/agent-installer/agent-linux",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
                             "bash install.sh",
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s && echo " +
-                                    "$SIC_WAZUH_MANAGER_IP $SIC_WAZUH_AGENT_NAME", wazuhHost, agentName),
+                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                    wazuhHost, agentName, WAZUH_DEFAULT_REMOTE_PORT, WAZUH_DEFAULT_AUTH_PORT),
                             "cd /opt/wazuha",
                             "bash start.sh"
                     ));
