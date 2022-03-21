@@ -1,11 +1,14 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
+import cn.cyberpeace.mp.scene.core.bo.CollectedElementStatusBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.CollectedSceneStatusBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -122,6 +125,10 @@ public class SceneHandler extends BaseSceneHandler<
 
     private final List<SceneReporter> reporters = SceneReporter.getReporters();
 
+    private final StatusReporter<CollectedSceneStatusBO> sceneStatusReporter = (StatusReporter) BeanCommon.getBean("sceneStatusReporter");
+
+    private final StatusReporter<CollectedElementStatusBO> elementStatusReporter = (StatusReporter) BeanCommon.getBean("elementStatusReporter");
+
     private final SceneReportTaskPool reportTaskPool = SceneReportTaskPool.getInstance();
 
     private String genEventKey(String targetId, int event) {
@@ -158,6 +165,8 @@ public class SceneHandler extends BaseSceneHandler<
     private int startSceneEvent(int event) {
         var flag = getSceneEventHandler(event).startEvent();
         if (isTriggerEventSuccess(flag)) {
+            // 推送场景最新的事件状态
+            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
             asyncAckSceneChanged(false, false);
         }
         return flag;
@@ -166,6 +175,8 @@ public class SceneHandler extends BaseSceneHandler<
     private int startElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
+            // 推送节点最新的事件状态
+            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
             asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
@@ -175,6 +186,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).overEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
+            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
             asyncAckSceneChanged(false, false);
         }
         return flag;
@@ -183,6 +195,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int overElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overEvent();
         if (isTriggerEventSuccess(flag)) {
+            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
             asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
@@ -191,6 +204,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
+            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
             asyncAckSceneChanged(false, false);
             save();
         }
@@ -200,6 +214,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorElement(String nodeId, int event, String errorMessage) {
         var flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
+            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
             asyncAckElementChanged(nodeId, false, true);
         }
         return flag;
@@ -699,5 +714,30 @@ public class SceneHandler extends BaseSceneHandler<
             progressPercentageMap.put(getSceneId(), result);
             return result;
         }
+    }
+
+    private CollectedSceneStatusBO getCollectedSceneStatusBO() {
+        CollectedSceneStatusBO bo = new CollectedSceneStatusBO();
+        bo.setName(getScene().getName());
+        bo.setEvent(getScene().getEvent());
+        bo.setEventStatus(getScene().getEventStatus());
+        bo.setProcess(getScene().getProcess());
+        bo.setProcessStatus(getScene().getProcessStatus());
+        bo.setProcessMessage(getScene().getProcessMessage());
+        bo.setProgressPercentage(this.calculateProgressPercentage());
+        return bo;
+    }
+
+    private CollectedElementStatusBO getCollectedElementStatusBO(String nodeId) {
+        CollectedElementStatusBO bo = new CollectedElementStatusBO();
+        SceneElementBO element = getElement(nodeId);
+        bo.setName(getScene().getName());
+        bo.setNodeId(nodeId);
+        bo.setEvent(element.getEvent());
+        bo.setEventStatus(element.getEventStatus());
+        bo.setProcess(element.getProcess());
+        bo.setProcessStatus(element.getProcessStatus());
+        bo.setProcessMessage(element.getProcessMessage());
+        return bo;
     }
 }
