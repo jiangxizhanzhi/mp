@@ -10,9 +10,12 @@ import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,6 +47,9 @@ public class EventMonitorService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
 
 
     /**
@@ -87,11 +94,23 @@ public class EventMonitorService {
         // TODO 处理事件类型
 //        wazuhEventRequest.setCatagories(null);
 
-        Map<String, Long> aggsMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
+        Map<String, Long> aggsMap = new LinkedHashMap<>();
+        if (Objects.nonNull(request.getType()) && request.getType().equals(1)) {
+            // 进
+            log.info("aggregate process");
+            aggsMap = aggProcessCount(agentNames);
+        } else if (Objects.nonNull(request.getType()) && request.getType().equals(2)) {
+            // 端口
+            log.info("aggregate port");
+            aggsMap = aggPortCount(agentNames);
+        } else {
+            // 其他，包括类型：所有，网络连接，文件，用户
+            aggsMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
+        }
 
-        Long sum = aggsMap.values().stream().mapToLong(Long::longValue).sum();
 
         List<ElementEventPercent> eventPercents = new ArrayList<>();
+        Long sum = aggsMap.values().stream().mapToLong(Long::longValue).sum();
         aggsMap.entrySet().forEach(entry -> {
             String agentName = entry.getKey();
             Long count = entry.getValue();
@@ -165,6 +184,48 @@ public class EventMonitorService {
         return reversedList;
     }
 
+
+    /**
+     * 查询各个节点端口总数
+     * @return
+     */
+    private Map<String, Long> aggPortCount(List<String> agentNames) {
+        Map<String, Long> map = new LinkedHashMap<>();
+        agentNames.forEach(a -> map.put(a, 0L));
+
+        agentNames.forEach(agentName -> {
+            CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+            collectorBaseRequest.setAgentName(agentName);
+            PageInfo pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
+            Long total = pageInfo.getTotal();
+            map.put(agentName, total);
+        });
+        return map;
+    }
+
+
+    /**
+     * 查询各个节点进程总数
+     * @param agentName
+     * @return
+     */
+    /**
+     * 查询各个节点端口总数
+     * @return
+     */
+    private Map<String, Long> aggProcessCount(List<String> agentNames) {
+        Map<String, Long> map = new LinkedHashMap<>();
+        agentNames.forEach(a -> map.put(a, 0L));
+
+        agentNames.forEach(agentName -> {
+            CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+            collectorBaseRequest.setAgentName(agentName);
+            PageInfo pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
+            Long total = pageInfo.getTotal();
+            map.put(agentName, total);
+        });
+        return map;
+    }
 
 
 
