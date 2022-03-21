@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -53,7 +54,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -156,20 +163,26 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        String sceneId = this.getSceneId(id);
-        var flag = instanceHandler.delete(logic);
-        if (sceneId != null) {
-            scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+        if (ReentrantLockUtils.tryLock(id)) {
+            try {
+                var instanceHandler = new CsceneInstanceHandler(id, context);
+                String sceneId = this.getSceneId(id);
+                var flag = instanceHandler.delete(logic);
+                if (sceneId != null) {
+                    scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+                }
+                if (!logic) {
+                    screenshotService.batchDeleteBySceneId(id);
+                    scenePluginCollectionSceneService.asyncCleanProbeData(sceneId);
+                }
+                if (flag) {
+                    CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+                }
+            } finally {
+                ReentrantLockUtils.unLock(id);
+            }
         }
-        if (!logic) {
-            screenshotService.batchDeleteBySceneId(id);
-            scenePluginCollectionSceneService.asyncCleanProbeData(sceneId);
-        }
-        if (flag) {
-            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
-        }
-        return new ServiceResult<>(flag);
+        return new ServiceResult<>(true);
     }
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
