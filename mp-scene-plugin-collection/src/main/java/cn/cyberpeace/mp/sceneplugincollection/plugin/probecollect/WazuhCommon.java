@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -21,10 +23,6 @@ public class WazuhCommon {
     public static final String WAZUH_AGENT_WINDOWS_FILE_NAME = "agent-windows.zip";
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
-
-    public static final int WAZUH_DEFAULT_REMOTE_PORT = 1514;
-
-    public static final int WAZUH_DEFAULT_AUTH_PORT = 1515;
 
     private WazuhCommon() {}
 
@@ -47,8 +45,8 @@ public class WazuhCommon {
                             "install.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
-                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", WAZUH_DEFAULT_REMOTE_PORT),
-                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", WAZUH_DEFAULT_AUTH_PORT),
+                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", CollectionSingleton.collectionAppConfig.getWazuhDefaultRemotePort()),
+                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", CollectionSingleton.collectionAppConfig.getWazuhDefaultAuthPort()),
                             "cd C:\\wazuha",
                             "start.bat"
                     ));
@@ -64,7 +62,8 @@ public class WazuhCommon {
                             "bash install.sh",
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, WAZUH_DEFAULT_REMOTE_PORT, WAZUH_DEFAULT_AUTH_PORT),
+                                    wazuhHost, agentName, CollectionSingleton.collectionAppConfig.getWazuhDefaultRemotePort(),
+                                    CollectionSingleton.collectionAppConfig.getWazuhDefaultAuthPort()),
                             "cd /opt/wazuha",
                             "bash start.sh"
                     ));
