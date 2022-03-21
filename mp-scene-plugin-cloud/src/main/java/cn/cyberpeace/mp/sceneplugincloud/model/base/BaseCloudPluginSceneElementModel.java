@@ -20,6 +20,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private Integer virtualType;
     @DefaultBool
     private Boolean transparent;
+    @DefaultBool
+    private Boolean isBuildIn;
 
     /**
      * 云平台资源id
@@ -112,8 +114,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_MACHINE = 4;
         public static final int CONTAINER = 5;
         public static final int ENTITY_NODE = 6;
+        public static final int NPC = 7;
 
-        private VirtualType() {}
+        private VirtualType() {
+        }
     }
 
     public static class ElectricPortType {
@@ -152,6 +156,7 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
         public static final int VIRTUAL_TERMINAL = 4;
         public static final int VIRTUAL_TRANSPARENT_GATEWAY = 5;
         public static final int VIRTUAL_GATEWAY = 6;
+        public static final int NPC = 7;
         public static final int VIRTUAL_LAYER_3_IMAGE_GATEWAY = 20;
         public static final int VIRTUAL_LAYER_3_SIMPLE_ROUTER = 21;
         public static final int VIRTUAL_LAYER_3_SIMPLE_SWITCH = 22;

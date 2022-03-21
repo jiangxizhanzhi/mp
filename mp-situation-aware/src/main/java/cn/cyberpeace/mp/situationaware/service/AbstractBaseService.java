@@ -2,20 +2,31 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import com.google.common.collect.Lists;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
  * 基础Service
  * @author wanggang
  */
+@Slf4j
 public abstract class AbstractBaseService {
 
-    private static final String SESSION3 = "sessions3";
+    protected static final String SESSION3 = "sessions3";
+
+    private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
+
+    @Autowired
+    private MessageSource messageSource;
 
     /**
      * 索引
@@ -24,6 +35,9 @@ public abstract class AbstractBaseService {
      * @return
      */
     protected String[] indices(List<String> groupList,LocalDateTime startDate, LocalDateTime endDate){
+        if (CollectionUtils.isEmpty(groupList)){
+            return new String[]{};
+        }
         List<String> indexList = indexListBuilder(groupList,startDate,endDate);
         var indexArray = new String[indexList.size()];
         return indexList.toArray(indexArray);
@@ -61,5 +75,25 @@ public abstract class AbstractBaseService {
         sessionIndexBuilder.append(groupId).append("_").append(SESSION3).append("-")
                 .append(dateString);
         return sessionIndexBuilder.toString();
+    }
+
+    /**
+     *
+     * @param locale
+     * @param msgKey
+     * @param params
+     * @return
+     */
+    protected String getLocalMessage(Locale locale, String msgKey, String... params) {
+        if (Objects.isNull(locale) || locale.toLanguageTag().equals("und")) {
+            locale = Locale.forLanguageTag(DEFAULT_LANGUAGE_TAG);
+        }
+        try {
+            return messageSource.getMessage(msgKey, params, locale);
+        } catch (Exception e) {
+            log.error("Get message by key `{}` params `{}` on locale {} failed: {}", msgKey, params,
+                    locale, e.getMessage());
+            return msgKey;
+        }
     }
 }

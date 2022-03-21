@@ -7,23 +7,32 @@ import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devops.cluster.response.CommonTargetResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
+import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
+import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
+import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,16 +58,20 @@ public class DevopsTargetController {
 
     private IpAddressConfig ipAddressConfig;
 
+    private DeviceVoConverter deviceVoConverter;
+
     @Autowired
     private ITask asyncTargetTask;
 
     @Autowired
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
-                                  ImagesService imagesService,IpAddressConfig ipAddressConfig) {
+                                  ImagesService imagesService,IpAddressConfig ipAddressConfig,
+                                  DeviceVoConverter deviceVoConverter) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
         this.ipAddressConfig = ipAddressConfig;
+        this.deviceVoConverter = deviceVoConverter;
     }
 
     /**
@@ -84,10 +97,13 @@ public class DevopsTargetController {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
-        List<Device> deviceList = targetConverter.allTarget(request);
-        if (CollectionUtils.isEmpty(deviceList)){
+        request.setPage(null);
+        request.setPerPage(null);
+        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
             return ServiceResult.successful();
         }
+        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
         List<TargetScene> targetScenes = new ArrayList<>();
         if (Objects.nonNull(request.getCategory())) {
             firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(request.getCategory())).collect(Collectors.toList());
@@ -114,6 +130,42 @@ public class DevopsTargetController {
 
         return new Result<>(new TargetSceneResponse(targetScenes));
     }
+
+    @ApiOperation("分页查询靶标信息")
+    @GetMapping("/page")
+    public PageResult<DeviceVO> page(TargetSceneRequest request){
+
+        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+        }
+        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
+
+        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+
+        return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
+    }
+
+    @ApiOperation("查询常用靶标信息")
+    @GetMapping("/common-targets")
+    public ServiceResult<CommonTargetResponse> getCommonTargets(){
+        List<Device> deviceList = targetConverter.getCommonTargets();
+        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+
+        Locale locale = LocaleContextHolder.getLocale();
+        if (Objects.equals(locale, Locale.CHINA)) {
+            // 常用靶标名称国际化处理
+            deviceVOList.forEach(device -> {
+                device.setImage(device.getName());
+                device.setName(
+                        Objects.nonNull(CommonTargetNameEnum.map.get(device.getName())) ?
+                                CommonTargetNameEnum.map.get(device.getName()).toValue() : device.getName());
+            });
+        }
+
+        return new Result(new CommonTargetResponse(deviceVOList));
+    }
+
 
     @ApiOperation("上传文件")
     @PostMapping("/upload")

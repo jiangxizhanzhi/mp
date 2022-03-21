@@ -1,5 +1,9 @@
 package cn.cyberpeace.mp.situationaware.bo;
 
+import cn.cyberpeace.mp.situationaware.bo.common.AttackDestination;
+import cn.cyberpeace.mp.situationaware.bo.common.AttackNetwork;
+import cn.cyberpeace.mp.situationaware.bo.common.AttackSource;
+import cn.cyberpeace.mp.situationaware.bo.common.AttackSuricata;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 聚合攻击方式
+ * 流量日志
  * @author wanggang
  */
 @Data
@@ -42,71 +46,9 @@ public class FlowLogBO {
      */
     private Long timestamp;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class AttackSource{
+    /**
+     * 协议类型
+     */
+    private List<String> protocol;
 
-        /**
-         * 源IP
-         */
-        private String ip;
-
-        /**
-         * mac地址
-         */
-        private List<String> mac;
-
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class AttackDestination{
-
-        /**
-         * 目标IP
-         */
-        private String ip;
-
-        /**
-         * mac地址
-         */
-        private List<String> mac;
-
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class AttackNetwork{
-
-        /**
-         * 流量大小
-         */
-        private Long bytes;
-
-    }
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static final class AttackSuricata{
-
-        /**
-         * 分类
-         */
-        private List<String> category;
-
-        /**
-         * 分类名称
-         */
-        private List<String> categoryZh;
-
-        /**
-         * 严重性
-         */
-        private List<Integer> severity;
-
-    }
 }

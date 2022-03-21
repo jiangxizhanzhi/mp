@@ -6,12 +6,12 @@
         select * from mp_front_admin_activ_ctl
     </select>
 
-    <select id="selectFirst" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
-        select * from mp_front_admin_activ_ctl where id = '1'
+    <select id="selectValid" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
+        select * from mp_front_admin_activ_ctl where status = 1
     </select>
 
-<!--    <insert id="save">-->
-<!--        insert into mp_front_admin_activ_ctl-->
-<!--    </insert>-->
+    <update id="invalidOtherExceptOne">
+        update mp_front_admin_activ_ctl set status = 0 where id != #{exceptedId}
+    </update>
 
 </mapper>

@@ -155,7 +155,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         if (StringUtils.isBlank(noticeModel.getPublisher())) {
             UserModel currentUser = UserUtils.getLoginUser();
-            noticeModel.setPublisher(currentUser.getId());
+            if (Objects.nonNull(currentUser)) {
+                noticeModel.setPublisher(currentUser.getId());
+            }
         }
 
         ObjServiceResult<SysNoticeModel> result = create(noticeModel);
@@ -329,7 +331,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     public int getCurrentUserNoticeMessagesUnreadCount() {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
-            log.error("user not logi!");
+            log.error("user not login!");
             return 0;
         }
 
@@ -429,14 +431,16 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // 检查当前用户对此条公告是否已读
         if (checkCurrentUserIsRead) {
             UserModel userModel = UserUtils.getLoginUser();
-            String currentUserId = userModel.getId();
-            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(currentUserId, noticeModel.getId());
-            if (Objects.isNull(noticeReadModel)) {
-                // 未读
-                noticeDto.setIsRead(0);
-            } else {
-                // 已读
-                noticeDto.setIsRead(1);
+            if (Objects.nonNull(userModel)) {
+                String currentUserId = userModel.getId();
+                SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(currentUserId, noticeModel.getId());
+                if (Objects.isNull(noticeReadModel)) {
+                    // 未读
+                    noticeDto.setIsRead(0);
+                } else {
+                    // 已读
+                    noticeDto.setIsRead(1);
+                }
             }
         }
 

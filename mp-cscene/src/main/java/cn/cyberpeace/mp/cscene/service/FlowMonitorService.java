@@ -1,34 +1,49 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
+import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
+import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
+import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.unit.DataSize;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -46,7 +61,10 @@ public class FlowMonitorService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneIdTranslationService sceneIdTranslationService;
+    private SceneTranslationService sceneTranslationService;
+
+    @Autowired
+    private FlowAnalysisService flowAnalysisService;
 
 
     /**
@@ -61,7 +79,7 @@ public class FlowMonitorService {
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
 
-        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        return processFlowTrend(sceneIds, nodeIds, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), null, trendRequest.getType());
     }
 
 
@@ -74,9 +92,132 @@ public class FlowMonitorService {
     public List<FlowTrend> getSceneFlowTrend(FlowTrendRequest trendRequest) {
         log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
-        List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
 
-        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+        return processFlowTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount(), trendRequest.getSourceIps(), trendRequest.getType());
+    }
+
+    /**
+     * 模拟流量
+     * @param request
+     * @return
+     */
+    public ServiceResult simulation(FlowSceneSimulationRequest request) {
+        log.info("{}", request);
+
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
+
+
+        // todo 转好
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+
+        FlowSimulationParams params = new FlowSimulationParams();
+        params.setSceneIds(sceneIdList);
+        params.setSourceIp(request.getSourceIp());
+        params.setSourceMacs(request.getSourceMacs());
+        params.setDestinationIp(request.getDestinationIp());
+        params.setDestinationMacs(request.getDestinationMacs());
+        params.setNodeIds(request.getNodeIds());
+        params.setNetworkBytes(request.getNetworkBytes());
+        params.setDateTime(request.getDateTime());
+        params.setShuffleCategory(request.getShuffleCategory());
+        scenePluginCollectionSceneService.simulation(params);
+
+        return ServiceResult.successful();
+    }
+
+    /**
+     * 统计受攻击端口信息
+     *
+     * @param request
+     * @return
+     */
+    public List<FlowGroupPortWithProtocolVO> groupByDestinationPortWithProtocol(FlowCommonRequest request) {
+        log.info("{}", request);
+        BaseRequestUtil.checkBaseRequestWithSceneId(request);
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
+
+        LocalDateTime endTime = request.getEndTime();
+
+        LocalDateTime startTime = request.getStartTime();
+
+        // todo 转好
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+
+        FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
+        params.setStartTime(startTime);
+        params.setEndTime(endTime);
+        params.setSourceIps(request.getSourceIps());
+        params.setSceneIds(sceneIdList);
+        params.setTopSize(request.getTopSize());
+
+        ServiceResult<List<FlowGroupPortWithProtocolBO>> serviceResult = scenePluginCollectionSceneService.groupByDestinationPortWithProtocol(params);
+
+        List<FlowGroupPortWithProtocolBO> boList = serviceResult.getSource();
+
+        if (CollectionUtils.isEmpty(boList)) {
+            return Lists.newArrayList();
+        }
+        return boList.stream().map(v -> {
+            FlowGroupPortWithProtocolVO vo = new FlowGroupPortWithProtocolVO();
+            vo.setProtocol(v.getProtocol());
+            vo.setPort(v.getPort());
+            vo.setAttackNumber(v.getAttackNumber());
+            vo.setTrafficSize(v.getTrafficSize());
+            return vo;
+        }).collect(Collectors.toList());
+    }
+
+
+    /**
+     * 统计主机状态
+     *
+     * @param request
+     * @return
+     */
+    public List<FlowGroupByDestinationIpAndSeverityVO> groupByDestinationIpAndSeverity(FlowCommonRequest request) {
+        log.info("{}", request);
+        BaseRequestUtil.checkBaseRequestWithSceneId(request);
+        // 逗号分割
+        List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
+
+        LocalDateTime endTime = request.getEndTime();
+
+        LocalDateTime startTime = request.getStartTime();
+
+        // todo 转好
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+
+        FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
+        params.setStartTime(startTime);
+        params.setEndTime(endTime);
+        params.setSourceIps(request.getSourceIps());
+        params.setSceneIds(sceneIdList);
+        params.setTopSize(request.getTopSize());
+
+        ServiceResult<List<FlowGroupByDestinationIpAndSeverityBO>> serviceResult = scenePluginCollectionSceneService.groupByDestinationIpAndSeverity(params);
+
+        List<FlowGroupByDestinationIpAndSeverityBO> boList = serviceResult.getSource();
+
+        if (CollectionUtils.isEmpty(boList)) {
+            return Lists.newArrayList();
+        }
+        List<FlowGroupByDestinationIpAndSeverityVO> voList = boList.stream().map(v -> {
+            FlowGroupByDestinationIpAndSeverityVO vo = new FlowGroupByDestinationIpAndSeverityVO();
+            vo.setSeverity(v.getSeverity());
+            vo.setNum(v.getNum());
+            return vo;
+        }).collect(Collectors.toList());
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
+        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
+        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a, b) -> a + b).orElse(0);
+        int normalSize = allIpSize - severitySize;
+        voList.add(new FlowGroupByDestinationIpAndSeverityVO(0, normalSize));
+        return voList;
     }
 
 
@@ -96,7 +237,7 @@ public class FlowMonitorService {
         LocalDateTime startTime = endTime.minusMinutes(10);
 
         // todo 转好
-        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, startTime, endTime);
         Map<String, Integer> map = mapResult.getSource();
@@ -111,6 +252,97 @@ public class FlowMonitorService {
             riskCount.setLowCount(low1 + low2);
         }
         return riskCount;
+    }
+
+    public List<FlowAttackTypeCount> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
+        log.info("baseRequest:{}", baseRequest);
+
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+
+        List<String> nodeIds = null;
+        if (!CollectionUtil.isEmpty(baseRequest.getElementIds())) {
+            nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
+        }
+
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps());
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTypeCount> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(new FlowAttackTypeCount(type, num)));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
+    public List<FlowAttackTime> getAttackTimeCountNoName(AttackCountRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
+        Map<String, Integer> map = mapResult.getSource();
+        List<FlowAttackTime> result = new ArrayList<>();
+        if (map != null && !map.isEmpty()) {
+            map.forEach((type, num) -> result.add(FlowAttackTime.builder()
+                    .ip(type)
+                    .times(num)
+                    .build()));
+            Collections.sort(result, (c1, c2) -> c2.getTimes() - c1.getTimes());
+        }
+        return result;
+    }
+
+    public List<FlowAttackTime> getAttackIpCount(AttackCountRequest baseRequest) {
+        log.info("baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        String groupField = baseRequest.getIpType() == 0 ?
+                ScenePluginCollectionSceneService.GroupCountFlowField.SOURCE_IP :
+                ScenePluginCollectionSceneService.GroupCountFlowField.DEST_IP;
+        FlowGroupCountParams params = new FlowGroupCountParams(groupField);
+        params.setQueryAddress(baseRequest.getIps());
+        params.setStartTime(baseRequest.getStartTime());
+        params.setEndTime(baseRequest.getEndTime());
+        params.setTopSize(baseRequest.getTopSize());
+        params.setSourceIps(baseRequest.getSourceIps());
+        var result = scenePluginCollectionSceneService.groupCountFlowAndNodeInfo(sceneIdList, params).getSource();
+        return result.stream()
+                .map(bo -> FlowAttackTime.builder()
+                        .times(bo.getTimes())
+                        .nodeName(bo.getNodeName())
+                        .ip(bo.getIp())
+                        .build()
+                ).collect(Collectors.toList());
+    }
+
+    public TotalFlowAttackRatio getAttackRatioCount(AttackCountRequest baseRequest) {
+        log.info("getAttackRatioCount baseRequest:{}", JsonCommon.stringify(baseRequest));
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
+        TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
+        totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
+        totalFlowAttackRatio.setTotalTrafficSize(countResult.getTrafficSize());
+        totalFlowAttackRatio.setAttackWayList(new ArrayList<>());
+        if (CollectionUtils.isNotEmpty(countResult.getAttackWayList())) {
+            countResult.getAttackWayList().stream()
+                    .forEach(v -> totalFlowAttackRatio.getAttackWayList()
+                            .add(FlowAttackRatio.builder()
+                                    .attackTrafficPercent(v.getAttackNumberPercent().doubleValue())
+                                    .type(v.getAggregationType())
+                                    .build())
+                    );
+        }
+        return totalFlowAttackRatio;
     }
 
 
@@ -128,16 +360,16 @@ public class FlowMonitorService {
             queryParams.setPage(1);
         }
         if (Objects.isNull(queryParams.getPerPage())) {
-            queryParams.setPerPage(1000);
+            queryParams.setPerPage(100);
         }
         queryParams.ensure();
 
-        ListObjServiceResult<CollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
-        List<CollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
+        ListObjServiceResult<CsceneCollectionFlowBO> flowBOResult = csceneInstanceService.listFlows(id, queryParams);
+        List<CsceneCollectionFlowBO> flowBOS = flowBOResult.getSource().getObjs();
 
         List<FlowAttackDto> flowAttackDtos = new ArrayList<>();
 
-        for (CollectionFlowBO flowBO : flowBOS) {
+        for (CsceneCollectionFlowBO flowBO : flowBOS) {
             if (Objects.nonNull(flowBO.getAttackInfos())) {
                 for (AttackInfo attackInfo : flowBO.getAttackInfos()) {
                     FlowAttackDto flowAttackDto = new FlowAttackDto();
@@ -149,7 +381,7 @@ public class FlowMonitorService {
                 // 没有攻击类型标签，全部设置为默认的低风险
                 FlowAttackDto flowAttackDto = new FlowAttackDto();
                 BeanUtils.copyProperties(flowBO, flowAttackDto);
-                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
+//                flowAttackDto.setAttackInfo(new AttackInfo(4, "Abnormal links"));
                 flowAttackDtos.add(flowAttackDto);
             }
         }
@@ -163,27 +395,26 @@ public class FlowMonitorService {
     }
 
 
-    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+    private List<FlowTrend> processFlowTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount, List<String> sourceIps, Integer type) {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
         }
 
         if (Objects.isNull(startTime)) {
-            // todo 默认时间间隔48小时
-            startTime = endTime.minusHours(24);
+            // todo 默认时间间隔8小时
+            startTime = endTime.minusHours(4);
         }
 
         if (Objects.isNull(segmentCount)) {
-            segmentCount = 10;
+            segmentCount = 40;
         }
 
         // todo 转好
-        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
-        String intervalSecondStr = intervalSeconds + "";
 
-        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, Integer.valueOf(intervalSecondStr));
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type);
 
         List<IntervalSizeBO<LocalDateTime, Long>> intervalFlowSizeBOs = flowResult.getSource();
         List<FlowTrend> flowTrends = new ArrayList<>();
@@ -219,6 +450,57 @@ public class FlowMonitorService {
         return flowTrends;
     }
 
+    /**
+     * @param timeRangeRequest
+     */
+    public FlowAnalysisSummary getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
+        BaseRequestUtil.processDefaultTimeRange(timeRangeRequest);
+
+        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, timeRangeRequest.getElementIds());
+
+        FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()
+                .groupList(batchSceneHandler.getFlowCollectors())
+                .startDateTime(timeRangeRequest.getStartTime())
+                .endDateTime(timeRangeRequest.getEndTime()).build();
+
+        // 总流量
+        Double totalFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
+
+        // 攻击流量
+        flowAnalysisRequest.setSeverityEnum(SeverityEnum.ALL);
+        Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
+
+        // 攻击事件
+        flowAnalysisRequest.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
+        List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.queryTopByAggregationTypeEnum(flowAnalysisRequest);
+        Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
+
+        // 网络连接
+        Integer netConnSize = 400;
+
+        // 带宽占用
+        Double bandwith = 30.0;
+
+        Long totalFlowMB = DataSize.ofBytes(totalFlowBytes.longValue()).toMegabytes();
+        Long totalAttackFlowMB = DataSize.ofBytes(totalAttackFlowBytes.longValue()).toMegabytes();
+        Double totalFlowGB = BigDecimal.valueOf(totalFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
+        Double totalAttackFlowGB = BigDecimal.valueOf(totalAttackFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
+
+
+        FlowAnalysisSummary summary =
+                FlowAnalysisSummary.builder()
+                        .totalFlowSize(totalFlowGB)
+                        .totalAttackFlowSize(totalAttackFlowGB)
+                        .attackCount(attackCount)
+                        .netConnSize(netConnSize)
+                        .bandwith(bandwith)
+                        .build();
+
+        return summary;
+
+    }
+
 
     private FlowTrend getClosest(LocalDateTime time, Map<LocalDateTime, FlowTrend> flowTrendMap) {
         LocalDateTime closestTime = null;
@@ -234,5 +516,6 @@ public class FlowMonitorService {
         log.info("time:{}, closestTime:{}", time, closestTime);
         return flowTrendMap.get(closestTime);
     }
+
 
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
@@ -333,8 +334,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping(value = "/node_sessions", params = "ids")
     public ServiceResult<List<UserNodeSessionInfo>> getNodeSessions(@RequestParam List<String> ids,
                                                                     @RequestParam(required = false) List<String> nodeIds,
-                                                                    @RequestParam(required = false) List<String> userIds) {
-        return modelService.getNodeSessions(ids, nodeIds, userIds).asResult();
+                                                                    @RequestParam(required = false) List<String> userIds,
+                                                                    @RequestParam(required = false) String type) {
+        return modelService.getNodeSessions(ids, nodeIds, userIds, type).asResult();
     }
 
     @ApiOperation("场景实例获取分页录屏列表")
@@ -357,7 +359,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
     @GetMapping(value = "/list_flows", params = "id")
-    public ListObjServiceResult<CollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
+    public ListObjServiceResult<CsceneCollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
         handleQueryParams("listFlows", queryParams);
         return modelService.listFlows(id, queryParams).asResult();
     }

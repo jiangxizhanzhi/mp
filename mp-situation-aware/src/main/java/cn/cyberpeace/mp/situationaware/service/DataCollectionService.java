@@ -33,6 +33,11 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,20 +48,21 @@ import org.springframework.util.MultiValueMap;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
 
@@ -100,7 +106,7 @@ public class DataCollectionService {
         //处理分页
         int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
-        log.info("elasticsearch JSON query:\n{}", searchRequest.source().toString());
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
@@ -134,7 +140,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query: {}", searchRequest.source().toString());
+        log.info("monitor JSON query index:{}, DSL: {}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -195,7 +201,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("queryMonitorEventsAgg JSON query: {}", searchRequest.source().toString());
+        log.info("queryMonitorEventsAgg JSON query index:{}, DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -244,7 +250,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        log.info("monitor JSON query: {}", searchRequest.source().toString());
+        log.info("monitor JSON query index:{}, DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
             log.info("es search start");
@@ -396,6 +402,122 @@ public class DataCollectionService {
         });
 
         return agentSet;
+    }
+
+    /**
+     * 统计每个节点的采集事件总数，并排序
+     * 如：node5:100  node4:85  node3:60  node2:50  node1: 10
+     * @param wazuhEventRequest
+     * @return
+     */
+    public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+        String aggregationName = "aggs_count_by_agent_name";
+        Map<String, Long> map = new LinkedHashMap<>();
+        wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
+
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(0);
+
+        // build the aggregation
+        TermsAggregationBuilder aggregation = AggregationBuilders.terms(aggregationName)
+                .field("agent.name");
+
+        sourceBuilder.aggregation(aggregation);
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            if (Objects.nonNull(response.getAggregations())) {
+                Terms terms = response.getAggregations().get(aggregationName);
+                terms.getBuckets().forEach(b -> {
+                    map.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
+                });
+            }
+
+            return map;
+
+        } catch (IOException e) {
+            log.error("es query error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+
+    /**
+     * 所有节点的采集事件总数
+     * @param wazuhEventRequest
+     * @return
+     */
+    public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var countRequest = new CountRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        countRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.query().toString());
+
+        try {
+            CountResponse response = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
+            long count = response.getCount();
+            return count;
+        } catch (IOException e) {
+            log.error("es query error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 场景删除之后，删除对应es文档数据
+     * @param wazuhEventRequest
+     */
+    public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        deleteByQueryRequest.setQuery(boolQueryBuilder);
+
+        //配置索引为空
+        deleteByQueryRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch delete by query quest... index:{}, JSON query:\n{}", indexArray, deleteByQueryRequest.getSearchRequest().source().toString());
+
+        try {
+            BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            return response.getUpdated();
+        } catch (IOException e) {
+            log.error("es delete by query error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
     }
 
     /**
@@ -608,14 +730,19 @@ public class DataCollectionService {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        long betweenDay = ChronoUnit.DAYS.between(startTime, endTime);
-        long month = ChronoUnit.MONTHS.between(startTime, endTime);
-        int days = (int) betweenDay;
-        if (month > 1) {
-            return IntStream.range(0, days + 2).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.*")))
-                .distinct().collect(Collectors.toList());
+        log.info("startTime:{}, endTime:{}", startTime, endTime);
+        LocalDate startDate = startTime.toLocalDate();
+        LocalDate endDate = endTime.toLocalDate();
+        List<String> dayList = new ArrayList<>();
+        while (true) {
+            if (startDate.isAfter(endDate)) {
+                break;
+            }
+            dayList.add(startDate.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")));
+            startDate = startDate.plusDays(1);
         }
-        return IntStream.range(0, days + 1).boxed().map(startTime::plusDays).map((time) -> time.format(DateTimeFormatter.ofPattern("yyyy.MM.dd")))
-            .distinct().collect(Collectors.toList());
+        log.info("dayList:{}", dayList);
+        return dayList;
     }
+
 }

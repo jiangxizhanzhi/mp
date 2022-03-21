@@ -40,6 +40,7 @@ public class SystemTypeUtils {
             new SystemTypeItem("105", "Windows-Server2010", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010),
             new SystemTypeItem("106", "Windows10", BaseSceneElementModel.SystemType.WINDOWS_10),
             new SystemTypeItem("107", "Windows7", BaseSceneElementModel.SystemType.WINDOWS_7),
+            new SystemTypeItem("108", "Windows-Server2000", BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000),
 
             new SystemTypeItem("201", "FreeBSD", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("202", "OpenBSD", BaseSceneElementModel.SystemType.LINUX),
@@ -59,6 +60,7 @@ public class SystemTypeUtils {
             new SystemTypeItem("311", "Android", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("312", "Redhat", BaseSceneElementModel.SystemType.LINUX),
             new SystemTypeItem("313", "SUSE", BaseSceneElementModel.SystemType.LINUX),
+            new SystemTypeItem("314", "Other", BaseSceneElementModel.SystemType.OTHER),
 
             new SystemTypeItem("401", "IOS", BaseSceneElementModel.SystemType.LINUX)
     ));

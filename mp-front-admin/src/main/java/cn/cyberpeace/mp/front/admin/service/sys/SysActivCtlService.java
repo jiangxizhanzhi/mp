@@ -11,6 +11,13 @@ import cn.cyberpeace.mp.front.admin.model.SysActivCtlModel;
  */
 public interface SysActivCtlService extends BaseModelService<SysActivCtlModel, QueryParams> {
 
-    SysActivCtlModel selectFirst();
+    SysActivCtlModel selectValid();
+
+    /**
+     * set all records' status = 0 except ${exceptedId}
+     * @param exceptedId
+     * @return
+     */
+    void invalidOtherExceptOne(String exceptedId);
 
 }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -10,7 +11,11 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
@@ -20,10 +25,28 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorServiceStatusModel;
+import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
+import cn.cyberpeace.mp.devops.cluster.model.ImagesCreateInstanceCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.ImagesDeleteInstanceCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel;
+import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
-import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImageAsyncRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagesAuthRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagesBuildRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagesDeleteInstanceRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagesDeleteRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ImagesRebootInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +56,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -252,7 +276,10 @@ public class ImagesConverter implements BaseConverter{
         //再新增权限数据
         List<String> userIds = request.getUserIds();
         if (PublicEnum.PRIVATE == isAllPublic){
-            userIds.add(UserUtils.getLoginUser().getId());
+            UserModel user = UserUtils.getLoginUser();
+            if (Objects.nonNull(user)) {
+                userIds.add(user.getId());
+            }
         }
         if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
             imageIds.forEach(imageId -> {
@@ -365,9 +392,13 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
         }
-        List<Device> deviceList = this.findByIds(diffList);
+        DeviceCloudPlatformModel model = deviceService.findByIds(diffList);
+        if (Objects.isNull(model) || !model.isSuccess()){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        List<Device> deviceList = model.getItems();
         if (CollectionUtils.isEmpty(deviceList)){
-            return 0;
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         return devopsTargetService.insert(deviceList);
     }
@@ -485,4 +516,18 @@ public class ImagesConverter implements BaseConverter{
         dto.setLikeName(request.getLikeName());
         return dto;
     }
+
+    /**
+     * 获取物理主机服务状态列表
+     * @return
+     */
+    public HypervisorServiceStatusModel listServiceStatus() {
+        HypervisorServiceStatusModel serviceStatusModel = scenariosService.listServiceStatus();
+        if (Objects.nonNull(serviceStatusModel) && CollectionUtils.isNotEmpty(serviceStatusModel.getData())) {
+            return serviceStatusModel;
+        } else {
+            return new HypervisorServiceStatusModel(new ArrayList<>());
+        }
+    }
+
 }

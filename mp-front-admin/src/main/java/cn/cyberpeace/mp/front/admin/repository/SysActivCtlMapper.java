@@ -20,6 +20,8 @@ public interface SysActivCtlMapper extends BaseModelMapper<SysActivCtlModel> {
 
     List<SysActivCtlModel> selectAll();
 
-    SysActivCtlModel selectFirst();
+    SysActivCtlModel selectValid();
+
+    void invalidOtherExceptOne(String exceptedId);
 
 }

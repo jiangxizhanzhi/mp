@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.core;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -20,11 +21,14 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -46,6 +50,7 @@ import java.util.stream.Collectors;
         CsceneMapper.class,
         CsceneRoleMapper.class,
 })
+@Slf4j
 public class CsceneHandler extends BaseCsceneHandler<
         CsceneModel, CsceneRoleModel, CsceneRoleBO,
         CsceneBO, CsceneMapper, CsceneRoleMapper> {
@@ -130,6 +135,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             // 测试模式下,需要默认可以有console登录协议
             CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
+        this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
         if (!NodeLimitUtils.addLimitedNodeCount(instanceHandler)) {
@@ -300,6 +306,27 @@ public class CsceneHandler extends BaseCsceneHandler<
     public void deleteScene(String sceneId, boolean logic) {
         if (sceneId != null) {
             sceneConfigService.delete(sceneId, logic, null);
+        }
+    }
+
+    private void checkVlanIds(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
+            if (elements != null && !elements.isEmpty()) {
+                elements.values().forEach(e -> {
+                    if (e.get("image") != null && e.get("virtual_type") != null && e.get("virtual_type").equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+                        String image = e.get("image").toString();
+                        CsceneSpecialService csceneSpecialService = BeanCommon.getBean(CsceneSpecialService.class);
+                        var serviceResult = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image });
+                        if (serviceResult != null && serviceResult.getSource() != null && !serviceResult.getSource().isEmpty()) {
+                            throw new MpRuntimeException(CsceneErrorCode.ENTITY_HAS_BEEN_USED.format(JsonCommon.stringify(image)));
+                        }
+                    }
+                });
+            }
         }
     }
 }

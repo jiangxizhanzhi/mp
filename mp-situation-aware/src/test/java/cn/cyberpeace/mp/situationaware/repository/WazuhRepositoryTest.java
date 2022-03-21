@@ -1,23 +1,16 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
-import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.WazuhAgentModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
-import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import javax.validation.constraints.AssertTrue;
-import org.assertj.core.util.Lists;
+import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
@@ -27,21 +20,30 @@ public class WazuhRepositoryTest {
     @Autowired
     private WazuhRepository wazuhRepository;
 
+    @Autowired
+    private AgentService agentService;
+
+    @Autowired
+    private SysCollectorService collectorService;
+
+    @Autowired
+    private
+
     @Test
-    public void testWazuhToken() throws IOException, ExecutionException {
+    void testWazuhToken() throws IOException, ExecutionException {
 //        var token = wazuhDao.queryWazuhToken();
 //        System.out.println("token" +  token);
 
-        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
-        SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
-        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
-                var token = wazuhRepository.queryWazuhToken();
+//        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+//        SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
+//        System.out.println(SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+//                var token = wazuhRepository.queryWazuhToken();
     }
 
     @Test
     public void testWazuhRamRoot() throws IOException{
-        WazuhRamRoot wazuhRamRoot = wazuhRepository.queryRamByAgentId("006");
-        Assert.isTrue(Objects.nonNull(wazuhRamRoot.getData()), "error");
+//        WazuhRamRoot wazuhRamRoot = collectorService.queryRamByAgentId("006");
+//        Assert.isTrue(Objects.nonNull(wazuhRamRoot.getData()), "error");
     }
 
     @Test
@@ -52,32 +54,16 @@ public class WazuhRepositoryTest {
 
     @Test
     public void testQueryAllAgentMac() {
-        WazuhNetifaceRoot wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
-        Assert.isTrue(Objects.nonNull(wazuhNetifaceRoot), "查询mac地址为空");
+//        WazuhNetifaceRoot wazuhNetifaceRoot = wazuhRepository.queryAllAgentMac();
+//        Assert.isTrue(Objects.nonNull(wazuhNetifaceRoot), "查询mac地址为空");
     }
 
     @Test
     public void testQueryAgentsPorts() {
-        List<String> agentIds = Lists.newArrayList("windows_agent1");
-        List<WazuhAgentPortsModel> wazuhAgentModels =wazuhRepository.queryAgentsPorts(agentIds);
-        Assert.isTrue(wazuhAgentModels.size() > 0, "");
+//        List<String> agentIds = Lists.newArrayList("windows_agent1");
+//        List<WazuhAgentPortsModel> wazuhAgentModels = collectorService.queryAgentsPorts(agentIds);
+//        Assert.isTrue(wazuhAgentModels.size() > 0, "");
     }
 
 
-    @Test
-    public void testQueryAllAgents() {
-         wazuhRepository.queryAllAgents();
-
-    }
-
-    @Test
-    public void queryAgentIdByAgentName() {
-        List<String> agentIds= wazuhRepository.queryAgentIdByAgentName(Lists.newArrayList("windows_agent1"));
-        Assert.isTrue(agentIds.size() > 0, "");
-    }
-
-    @Test
-    public void testQueryAgentsProcesses() {
-        wazuhRepository.queryAgentsProcesses(Lists.newArrayList("windows_agent1", "ubuntu2"));
-    }
 }
