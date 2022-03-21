@@ -35,7 +35,6 @@ import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -55,12 +54,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, FlowTaskMapper, FlowTaskFields,
         QueryParams> implements FlowTaskService {
-
-    /**
-     * 流量发生平台资源地址
-     */
-    @Value("${mp.flow.actuator-resource-url}")
-    private String actuatorResourceUrl;
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -231,6 +224,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         boolean isSuccess = true;
         try {
+            String actuatorId = flowTaskModel.getActuatorId();
+            FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+            String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
+
             // 判断是pcap包还是脚本
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 // 获取pcap流量包
@@ -239,7 +236,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 JSONObject object = new JSONObject();
                 object.put("fileName",
                         flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
-                String pcapRsp = HttpUtils.postFile(actuatorResourceUrl + "/pcap/import", fileByte, "file", object);
+                String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/import", fileByte, "file", object);
                 JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
                 log.info("upload pcap file response:{}", jsonObject.toJSONString());
 
@@ -251,7 +248,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     // 再向流量发生平台创建pcap管理
                     AddPcapRequest addPcapRequest = new AddPcapRequest();
                     addPcapRequest.setFileName(fileName);
-                    String addPcapRsp = HttpUtils.sendPost(actuatorResourceUrl + "/pcap",
+                    String addPcapRsp = HttpUtils.sendPost(resourceUrl + "/pcap",
                             JsonUtils.snakeStringify(addPcapRequest));
 
                     JSONObject addPcapObj = JSONObject.parseObject(addPcapRsp);
@@ -296,7 +293,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 object.put("fileName", flowName);
 
                 // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.postFile(actuatorResourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
+                String scriptRsp = HttpUtils.postFile(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
                         object);
                 JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
                 log.info("add script file response:{}", scriptObj.toJSONString());
@@ -372,6 +369,10 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
         }
         FlowTaskModel oldTaskModel = flowTaskResult.asResult();
+        // 查询流量执行器地址
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
 
         ObjResult<FlowInfoModel> oldFlowInfoResult = flowInfoService.get(oldTaskModel.getFlowId()).getSource();
 
@@ -382,7 +383,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 if (!oldTaskModel.getFlowId().equals(flowTaskModel.getFlowId())) {
                     // 更新了流量文件，需要删除流量发生平台原流量文件
                     if (!this.deleteFlowFile(oldFlowInfoModel.getResourceType(),
-                            Collections.singletonList(oldTaskModel.getThirdFlowId()))) {
+                            Collections.singletonList(oldTaskModel.getThirdFlowId()), resourceUrl)) {
                         log.warn("delete old flow file error");
                     }
 
@@ -439,10 +440,15 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
             if (Objects.nonNull(flowInfoResult)) {
                 if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
+                    // 查询流量执行器地址
+                    String actuatorId = flowTaskModel.getActuatorId();
+                    FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+                    String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
+
                     FlowInfoModel oldModel = flowInfoResult.asResult();
                     // 删除流量任务，同时需要删除该任务关联的流量发生平台流量文件
                     if (this.deleteFlowFile(oldModel.getResourceType(),
-                            Collections.singletonList(flowTaskModel.getThirdFlowId()))) {
+                            Collections.singletonList(flowTaskModel.getThirdFlowId()), resourceUrl)) {
                         log.info("delete flow file success");
                     } else {
                         log.error("delete flow file error");
@@ -497,8 +503,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 pcapTaskModels = flowTaskList.stream().filter(task ->
                                 FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
                                         pcapIdList.contains(task.getFlowId())).collect(Collectors.toList());
-                List<String> pcapThirdFlowIds =
-                        pcapTaskModels.stream().map(FlowTaskModel::getThirdFlowId).collect(Collectors.toList());
 
                 // 过滤出所有script数据
                 List<String> scriptIdList =
@@ -506,16 +510,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 scriptTaskModels = flowTaskList.stream().filter(task ->
                                 FlowPlatformEnum.TREX.toValue() == task.getFlowPlatform() &&
                                         scriptIdList.contains(task.getFlowId())).collect(Collectors.toList());
-                List<String> scriptThirdFlowIds =
-                        scriptTaskModels.stream().map(FlowTaskModel::getThirdFlowId).collect(Collectors.toList());
-
-                // 分别批量删除流量执行平台的pcap数据和script数据
-                if (this.deleteFlowFile(ResourceTypeEnum.PACP.toValue(), pcapThirdFlowIds) &&
-                        this.deleteFlowFile(ResourceTypeEnum.SCRIPT.toValue(), scriptThirdFlowIds)) {
-                    log.info("batch delete flow file success");
-                } else {
-                    log.error("batch delete flow file error");
-                }
             } else {
                 log.warn("no flow file to delete");
             }
@@ -544,7 +538,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param thirdFlowIds
      * @return
      */
-    private boolean deleteFlowFile(int resourceType, List<String> thirdFlowIds) {
+    private boolean deleteFlowFile(int resourceType, List<String> thirdFlowIds, String resourceUrl) {
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete pcap");
@@ -566,7 +560,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         object.put("uuids", array);
 
         try {
-            String rsp = HttpDeleteUtil.sendDelete(actuatorResourceUrl + delUrl, object.toJSONString());
+            String rsp = HttpDeleteUtil.sendDelete(resourceUrl + delUrl, object.toJSONString());
             JSONObject rspObject = JSONObject.parseObject(rsp);
             log.info("delete flow file response: {}", rspObject.toJSONString());
 

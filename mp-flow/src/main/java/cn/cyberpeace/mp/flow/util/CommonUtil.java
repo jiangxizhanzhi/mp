@@ -20,4 +20,14 @@ public class CommonUtil {
     }
 
 
+    /**
+     * 获取资源服务url
+     * @param host
+     * @return
+     */
+    public static String getResourcetUrl(String host) {
+        return "http://" + host + "/api/v1/resource";
+    }
+
+
 }

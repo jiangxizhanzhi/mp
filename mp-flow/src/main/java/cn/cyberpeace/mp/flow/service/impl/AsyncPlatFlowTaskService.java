@@ -246,11 +246,11 @@ public class AsyncPlatFlowTaskService {
         String delUrl = "";
         if (ResourceTypeEnum.PACP.toValue() == resourceType) {
             log.info("start to delete app task");
-            // 删除pcap包地址
+            // 删除pcap包任务地址
             delUrl = "/tasks/app";
         } else {
             log.info("start to delete standard task");
-            // 删除脚本文件地址
+            // 删除脚本文件任务地址
             delUrl = "/tasks/standards";
         }
 
