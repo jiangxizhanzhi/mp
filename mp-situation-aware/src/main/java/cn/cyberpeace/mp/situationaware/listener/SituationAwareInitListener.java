@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
@@ -20,7 +19,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -29,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 public class SituationAwareInitListener implements ApplicationListener<ApplicationReadyEvent> {
-
 
 
     @Autowired
@@ -49,31 +46,27 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
 
         //初始化
         SituationalAwareConstant.groupIdSessionUrlCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterWrite(30, TimeUnit.DAYS)
-            .build(new CacheLoader<String, String>() {
-                @Override public String load(String key)  {
-                    GroupModel groupModel = service.queryGroupById(key);
-                    return groupModel.getUrl();
-                }
-            });
+                .maximumSize(1000)
+                .expireAfterWrite(30, TimeUnit.DAYS)
+                .build(new CacheLoader<String, String>() {
+                    @Override
+                    public String load(String key) {
+                        GroupModel groupModel = service.queryGroupById(key);
+                        return groupModel.getUrl();
+                    }
+                });
 
         //定时更新token初始化
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
-            .maximumSize(1)
-            .expireAfterWrite(14, TimeUnit.MINUTES)
-            .build(new CacheLoader<String, String>() {
-                @Override public String load(String key)  {
-                    String token;
-                    try {
-                        token = securityService.authenticate();
-                    } catch (IOException e) {
-                        log.error("查询wazuhToken失败 : " + e);
-                        throw new MpRuntimeException("查询wazuhToken失败");
+                .maximumSize(1)
+                .expireAfterWrite(14, TimeUnit.MINUTES)
+                .build(new CacheLoader<String, String>() {
+                    @Override
+                    public String load(String key) {
+                        String token = securityService.authenticate();
+                        return token;
                     }
-                    return token;
-                }
-            });
+                });
 
         initArkimeNetwork();
     }
@@ -87,7 +80,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
             String result = HttpUtils.sendGet(cpCloudUrl + "/networks?fetch_all=true");
             log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
-            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network ->{
+            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network -> {
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
                 log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
             });

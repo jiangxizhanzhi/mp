@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -16,8 +17,9 @@ public class VirtualRouter extends CloudClient {
         heavyConcurrentWait();
 
         CloudResponse<VirtualRouterCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_ROUTER_CREATE_URL, createData,
-                null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {}, true);
-        var virtualRouterData =  result.getData();
+                null, new TypeReference<CloudResponse<VirtualRouterCreateData>>() {
+                }, true);
+        var virtualRouterData = result.getData();
         var externalGatewayInfo = virtualRouterData.getExternalGatewayInfo();
         if (externalGatewayInfo != null) {
             var networks = virtualRouterData.getNetworks();
@@ -34,8 +36,16 @@ public class VirtualRouter extends CloudClient {
     public boolean delete(VirtualRouterDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
-        return true;
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (MpRuntimeException e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
     }
 }

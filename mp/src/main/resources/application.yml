@@ -79,6 +79,7 @@ mp:
 #    cp-url: http://10.100.7.1:111 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
+    max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
   situationaware:
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1

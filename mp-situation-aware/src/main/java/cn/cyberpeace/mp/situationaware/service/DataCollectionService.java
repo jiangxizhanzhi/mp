@@ -33,6 +33,8 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -476,7 +478,7 @@ public class DataCollectionService {
         //配置索引为空
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.source().toString());
+        log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.query().toString());
 
         try {
             CountResponse response = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
@@ -484,6 +486,36 @@ public class DataCollectionService {
             return count;
         } catch (IOException e) {
             log.error("es query error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 场景删除之后，删除对应es文档数据
+     * @param wazuhEventRequest
+     */
+    public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        deleteByQueryRequest.setQuery(boolQueryBuilder);
+
+        //配置索引为空
+        deleteByQueryRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch delete by query quest... index:{}, JSON query:\n{}", indexArray, deleteByQueryRequest.getSearchRequest().source().toString());
+
+        try {
+            BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            return response.getUpdated();
+        } catch (IOException e) {
+            log.error("es delete by query error: {} ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }

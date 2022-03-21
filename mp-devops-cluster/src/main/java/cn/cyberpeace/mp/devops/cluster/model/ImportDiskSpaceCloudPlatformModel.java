@@ -25,11 +25,6 @@ public class ImportDiskSpaceCloudPlatformModel extends BaseCloudPlatformModel im
     public static final class DiskSpace implements Serializable {
 
         /**
-         * 镜像空间
-         */
-        private Long dockerSpace;
-
-        /**
          * 虚拟机空间
          */
         private Long vmSpace;

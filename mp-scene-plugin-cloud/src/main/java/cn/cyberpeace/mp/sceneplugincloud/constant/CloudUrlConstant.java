@@ -42,8 +42,8 @@ public class CloudUrlConstant {
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";
     public static final String GET_RECORDING_NAME_URL = "/cpcloud/guacamole/v1/recordfile";
 
-    public static final String CREATE_NPC_URL = "/knapsack/npc_node/v1/node";
-    public static final String DELETE_NPC_URL = "/knapsack/npc_node/v1/node";
+    public static final String CREATE_NPC_URL = "/cpcloud/npc_node/v1/node";
+    public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";
 
     private CloudUrlConstant() {}
 }

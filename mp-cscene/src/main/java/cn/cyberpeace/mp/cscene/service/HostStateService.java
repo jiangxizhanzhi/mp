@@ -28,6 +28,7 @@ import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -301,7 +302,22 @@ public class HostStateService {
         }
 
         listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-        return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+        ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+        List<Process> processes = listResult.getSource().getList();
+        // KB -> MB
+        processes.forEach(p -> {
+            if (Objects.nonNull(p.getSize())) {
+                Long megabytes = DataSize.ofKilobytes(p.getSize()).toMegabytes();
+                p.setSize(megabytes);
+            }
+
+            if (Objects.nonNull(p.getVmSize())) {
+                Long megabytes = DataSize.ofKilobytes(p.getVmSize()).toMegabytes();
+                p.setVmSize(megabytes);
+            }
+        });
+
+        return listResult;
     }
 
 

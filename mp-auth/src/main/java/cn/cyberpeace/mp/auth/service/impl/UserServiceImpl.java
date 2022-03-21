@@ -139,7 +139,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public UserDto getCurrentUserDto() {
         UserModel userModel = UserUtils.getLoginUser();
-
+        if (Objects.isNull(userModel)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
         UserDto userDto = userModel2UserDto(userModel);
 
         return userDto;

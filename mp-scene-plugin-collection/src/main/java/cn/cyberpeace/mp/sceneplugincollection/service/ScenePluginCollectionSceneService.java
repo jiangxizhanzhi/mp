@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -26,8 +27,10 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseR
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
+import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
@@ -38,6 +41,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -73,6 +77,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private SysCollectorService sysCollectorService;
+
+    @Autowired
+    private ProbeService probeService ;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
@@ -408,6 +415,61 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 模拟流量
+     * @param params
+     * @return
+     */
+    public ServiceResult simulation(FlowSimulationParams params){
+        List<String> sceneIds = params.getSceneIds();
+
+        List<String> nodeIds = params.getNodeIds();
+
+        String sourceIp = params.getSourceIp();
+
+        List<String> sourceMacs = params.getSourceMacs();
+
+        String destinationIp = params.getDestinationIp();
+
+        List<String> destinationMacs = params.getDestinationMacs();
+
+        LocalDateTime dateTime = params.getDateTime();
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, nodeIds);
+        List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
+        if (CollectionUtils.isEmpty(flowCollectors)) {
+            log.info("{} query time interval sum flow size,sceneId:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
+            return new ServiceResult<>(new ArrayList<>());
+        }
+
+        // 构造参数
+        FlowSimulationRequest request = new FlowSimulationRequest();
+        request.setGroup(flowCollectors.get(0));
+        request.setSourceIp(sourceIp);
+        if (CollectionUtils.isEmpty(sourceMacs) && StringUtils.isNotBlank(sourceIp)){
+            request.setSourceMacs(Arrays.asList(batchSceneHandler.getMacByIp(sourceIp)));
+        }else{
+            request.setSourceMacs(sourceMacs);
+        }
+        request.setDestinationIp(destinationIp);
+        if (CollectionUtils.isEmpty(destinationMacs) && StringUtils.isNotBlank(destinationIp)){
+            request.setDestinationMacs(Arrays.asList(batchSceneHandler.getMacByIp(destinationIp)));
+        }else{
+            request.setDestinationMacs(destinationMacs);
+        }
+        request.setNetworkBytes(params.getNetworkBytes());
+        request.setShuffleCategory(params.getShuffleCategory());
+        request.setDateTime(dateTime);
+
+        try {
+            flowAnalysisService.addSimulationFlow(request);
+        } catch (IOException e) {
+            log.error("simulation flow error : {}",e.getMessage(),e);
+        }
+
+        return new ServiceResult<>();
+    }
+
+    /**
      * 统计受攻击端口信息
      * @param params
      * @return
@@ -502,7 +564,7 @@ public class ScenePluginCollectionSceneService {
         List<String> destinationIpList = new ArrayList<>();
 
         List<FlowGroupByDestinationIpAndSeverityBO> resultList = new ArrayList<>();
-        for (int i = 0; i < sortedList.size(); i++){
+        for (int i = 0; i < sortedList.size(); i++) {
             FlowGroupByDestinationIpAndSeverityBO result = new FlowGroupByDestinationIpAndSeverityBO();
             AttackSeverityAndDestinationIpAggregationBO bo = boList.get(i);
             result.setSeverity(bo.getSeverity());
@@ -517,9 +579,9 @@ public class ScenePluginCollectionSceneService {
         }
 
         int allIpSize = batchSceneHandler.getAllIpAddrs().size();
-        int severitySize = resultList.stream().map(FlowGroupByDestinationIpAndSeverityBO::getNum).reduce((a,b) -> a + b).orElse(0);
+        int severitySize = resultList.stream().map(FlowGroupByDestinationIpAndSeverityBO::getNum).reduce((a, b) -> a + b).orElse(0);
         int normalSize = allIpSize - severitySize;
-        resultList.add(new FlowGroupByDestinationIpAndSeverityBO(0,normalSize));
+        resultList.add(new FlowGroupByDestinationIpAndSeverityBO(0, normalSize));
         return new ServiceResult<>(resultList);
     }
 
@@ -648,7 +710,7 @@ public class ScenePluginCollectionSceneService {
         return srcElements;
     }
 
-    private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO>  ipElementMap,Map<String, String> mac2SceneId) {
+    private CollectionFlowBO buildCollectionFlowBOFrom(FlowLogBO flowLogBO, Map<String, SceneElementBO> mac2ElementMap, Map<String, SceneElementBO> ipElementMap, Map<String, String> mac2SceneId) {
         CollectionFlowBO flowBO = new CollectionFlowBO();
         if (flowLogBO.getTimestamp() != null) {
             flowBO.setTime(TimeUtils.timestampToLocalDateTime(flowLogBO.getTimestamp()));
@@ -671,7 +733,7 @@ public class ScenePluginCollectionSceneService {
         if (flowLogBO.getDestination() != null) {
             String ip = flowLogBO.getDestination().getIp();
             flowBO.setTargetIp(ip);
-            if (ipElementMap.containsKey(ip)){
+            if (ipElementMap.containsKey(ip)) {
                 flowBO.setTargetNodeId(ipElementMap.get(ip).getId());
                 flowBO.setTargetNodeName(ipElementMap.get(ip).getName());
                 flowBO.setSceneId(mac2SceneId.get(ip));
@@ -753,7 +815,7 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
-            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps) {
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
@@ -768,9 +830,9 @@ public class ScenePluginCollectionSceneService {
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         request.setStartDateTime(Optional.ofNullable(startTime).orElse(batchSceneHandler.getEarliestStartTime()));
         request.setEndDateTime(Optional.ofNullable(endTime).orElse(LocalDateTime.now()));
-        if (CollectionUtils.isNotEmpty(sourceIps)){
+        if (CollectionUtils.isNotEmpty(sourceIps)) {
             request.setSourceIps(sourceIps);
-        }else {
+        } else {
             request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
@@ -961,6 +1023,21 @@ public class ScenePluginCollectionSceneService {
             sceneAssets.add(asset);
         });
         return sceneAssets;
+    }
+
+    /**
+     * 清楚探针采集的数据
+     * @param sceneId
+     */
+    public void asyncCleanProbeData(String sceneId) {
+        TaskCommon.executeTask(() -> {
+            BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
+            // 删除采集的数据
+            List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
+            if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
+                probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
+            }
+        });
     }
 
 }

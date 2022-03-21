@@ -3,6 +3,8 @@ dependencies {
 
     implementation project(':mp-auth')
 
+    implementation project(':mp-front-admin')
+
     implementation project(':mp-devops-log')
 
     implementation project(':mp-cscene')

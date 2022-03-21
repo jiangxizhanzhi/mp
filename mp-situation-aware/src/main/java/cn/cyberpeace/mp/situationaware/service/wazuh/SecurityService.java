@@ -27,15 +27,15 @@ public class SecurityService {
 
     /**
      * 查询wazuhToken防止token失效
+     *
      * @return
      * @throws IOException
      */
-    public String authenticate() throws IOException {
+    public String authenticate() {
         log.info("retrieve wazuh token...");
         var requestUrl = wazuhUrl + "/security/user/authenticate?raw=true";
         return WazuhHttpsUtils.sendGetWithAuth(requestUrl, wazuhUsername, wazuhPassword);
     }
-
 
 
 }

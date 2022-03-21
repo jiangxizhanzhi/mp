@@ -252,13 +252,7 @@ public class DeleteHandler extends HandlerCommon {
         if (npcInfos.isEmpty()) {
             return true;
         }
-        try {
-            // TODO maojun
-            return npcClient.delete(npcCreateData);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return true;
-        }
+        return npcClient.delete(npcCreateData);
     }
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
