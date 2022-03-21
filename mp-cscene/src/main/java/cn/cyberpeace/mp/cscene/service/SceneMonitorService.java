@@ -201,7 +201,7 @@ public class SceneMonitorService {
         if (CollectionUtil.isEmpty(translatedSceneIds)) {
             return new ArrayList<>();
         }
-        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(translatedSceneIds.get(0));
+        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(translatedSceneIds.get(0), request.getElementIds());
         List<UserModel> users = userIds.stream().map(id -> UserUtils.getUser(id)).collect(Collectors.toList());
         return users;
     }

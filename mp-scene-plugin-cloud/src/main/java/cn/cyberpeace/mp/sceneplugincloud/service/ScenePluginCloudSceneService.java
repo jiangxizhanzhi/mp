@@ -527,8 +527,12 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
-    public List<String> getRecordingUsers(String sceneId) {
-        var list = cloudPluginSceneConnectionMapper.list(new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId));
+    public List<String> getRecordingUsers(String sceneId, List<String> nodeIds) {
+        HumanCondition humanCondition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            humanCondition.filterIn(CloudPluginSceneConnectionModel::getSceneElement, nodeIds.toArray(new String[]{}));
+        }
+        var list = cloudPluginSceneConnectionMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(list)) {
             return new ArrayList<>();
         }
