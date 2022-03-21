@@ -37,6 +37,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_server_host:127.0.0.1}")
     private String wazuhServerHost;
 
+    @Value("${mp.sceneplugincollection.wazuh_remote_port:1514}")
+    private Integer wazuhRemotePort;
+
+    @Value("${mp.sceneplugincollection.wazuh_auth_port:1515}")
+    private Integer wazuhAuthPort;
+
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
@@ -45,12 +51,6 @@ public class CollectionAppConfig {
 
     @Value("${mp.sceneplugincollection.enable_probe_collect:false}")
     private Boolean enableProbeCollect;
-
-    @Value("${mp.sceneplugincollection.wazuh_default_remote_port:1514}")
-    private int wazuhDefaultRemotePort;
-
-    @Value("${mp.sceneplugincollection.wazuh_default_auth_port:1515}")
-    private int wazuhDefaultAuthPort;
 
     @Autowired
     private BaseAppConfig baseAppConfig;
