@@ -46,6 +46,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.enable_probe_collect:false}")
     private Boolean enableProbeCollect;
 
+    @Value("${mp.sceneplugincollection.wazuh_default_remote_port:1514}")
+    private int wazuhDefaultRemotePort;
+
+    @Value("${mp.sceneplugincollection.wazuh_default_auth_port:1515}")
+    private int wazuhDefaultAuthPort;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

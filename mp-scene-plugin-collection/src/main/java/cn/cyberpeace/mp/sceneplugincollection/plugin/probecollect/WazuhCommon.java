@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -43,6 +45,8 @@ public class WazuhCommon {
                             "install.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
+                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", CollectionSingleton.collectionAppConfig.getWazuhDefaultRemotePort()),
+                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", CollectionSingleton.collectionAppConfig.getWazuhDefaultAuthPort()),
                             "cd C:\\wazuha",
                             "start.bat"
                     ));
@@ -56,8 +60,10 @@ public class WazuhCommon {
                             String.format("cd %s/agent-installer/agent-linux",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
                             "bash install.sh",
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s && echo " +
-                                    "$SIC_WAZUH_MANAGER_IP $SIC_WAZUH_AGENT_NAME", wazuhHost, agentName),
+                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                    wazuhHost, agentName, CollectionSingleton.collectionAppConfig.getWazuhDefaultRemotePort(),
+                                    CollectionSingleton.collectionAppConfig.getWazuhDefaultAuthPort()),
                             "cd /opt/wazuha",
                             "bash start.sh"
                     ));
