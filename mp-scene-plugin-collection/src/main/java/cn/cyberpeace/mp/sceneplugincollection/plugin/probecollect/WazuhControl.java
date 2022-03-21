@@ -61,6 +61,10 @@ public class WazuhControl {
     public static final String CONTROL_ACTION_TYPE_SCRIPT = "script";
     public static final String CONTROL_ACTION_TYPE_LOG = "log";
 
+    public static final String SCRIPT_SUFFIX_PY = "py";
+    public static final String SCRIPT_SUFFIX_BAT = "bat";
+    public static final String SCRIPT_SUFFIX_SH = "sh";
+
     private final HttpClient httpClient;
     private final RestHighLevelClient esClient;
 
