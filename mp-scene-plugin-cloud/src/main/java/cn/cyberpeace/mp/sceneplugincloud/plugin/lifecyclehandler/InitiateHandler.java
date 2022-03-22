@@ -268,10 +268,13 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
                 connectNetwork.network.setVlan(vlan);
+            }
 
+            // 未显式关闭
+            if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryRouterOff())) {
                 // 是否开启辅助路由(是否未连接默认路由)
                 var routerOn = true;
-                if (CoreType.ROUTER == cloudElement.getCoreType()) {
+                if (this.isRouter(cloudElement.getCoreType(), cloudElement.getVirtualType())) {
                     routerOn = false;
                 } else {
                     List<SceneElementPortBO> ports = new ArrayList<>();
@@ -280,15 +283,23 @@ public class InitiateHandler extends HandlerCommon {
                     for (var p : ports) {
                         var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
                         var pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
-                        if (pluginConnectedCloudElement != null && CoreType.ROUTER == pluginConnectedCloudElement.getCoreType()) {
-                            routerOn = false;
-                            break;
+                        if (pluginConnectedCloudElement != null) {
+                            if (this.isRouter(pluginConnectedCloudElement.getCoreType(), pluginConnectedCloudElement.getVirtualType())) {
+                                routerOn = false;
+                                break;
+                            }
                         }
                     }
                 }
                 connectNetwork.network.setAuxiliaryNetworkRouterOn(routerOn);
+            } else {
+                connectNetwork.network.setAuxiliaryNetworkRouterOn(false);
             }
         }
+    }
+
+    private boolean isRouter(CoreType coreType, Integer virtualType) {
+        return (coreType != null && coreType == CoreType.ROUTER) || (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER));
     }
 
     /**

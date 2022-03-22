@@ -224,28 +224,6 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement) {
-        if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryNetworkRouterOn())) {
-            return;
-        }
-
-        // 创建辅助路由
-        var createData = new VirtualRouterCreateData();
-        createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
-        var virtualNic = new VirtualNic();
-        virtualNic.setNetworkId(cloudElement.getAuxiliaryNetworkId());
-        virtualNic.setFixedIp(TextUtils.emptyNull(cloudElement.getAuxiliaryNetworkRouterIp()));
-        createData.setNetworks(List.of(virtualNic));
-        var virtualRouter = vrClient.create(createData);
-        cloudElement.setAuxiliaryNetworkRouterResourceId(virtualRouter.getId());
-        var routerVirtualNics = virtualRouter.getNetworks();
-        if (routerVirtualNics != null) {
-            routerVirtualNics.forEach(routerVirtualNic -> {
-                cloudElement.setAuxiliaryNetworkRouterIp(routerVirtualNic.getFixedIp());
-            });
-        }
-    }
-
     /**
      * 创建默认路由模拟的三层防火墙
      */
@@ -417,27 +395,21 @@ public class CreateHandler extends HandlerCommon {
             return entityInterfaces;
         }
 
-        for (var port : ports) {
-            var connectedSrcElement = getPluginHandler().getPortConnectedSrcElement(port.getId());
-            if (connectedSrcElement == null) {
-                continue;
-            }
-            var connectedCloudElement = getPluginHandler().getElement(connectedSrcElement.getId());
-            var auxiliaryNetworkCloudElement = HandlerUtils.confirmAuxiliaryNetworkCloudElement(cloudElement, connectedCloudElement);
-            if (auxiliaryNetworkCloudElement == null) {
-                continue;
-            }
-
+        List<ConnectedNetworkBO> networks = new ArrayList<>();
+        networks.addAll(cloudElement.getDeriveNetworks());
+        networks.addAll(cloudElement.getAccessNetworks());
+        for (var connectNetwork : networks) {
+            var port = connectNetwork.getFromPorts().get(0);
             var cloudPort = getPluginHandler().getPort(port.getId());
             // 没有定义的端口补全
             if (cloudPort == null) {
                 cloudPort = new CloudPluginSceneElementPortBO();
                 getPluginHandler().addPort(port.getId(), cloudPort);
             }
-            cloudPort.setAuxiliaryNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            cloudPort.setAuxiliaryNetworkId(connectNetwork.getNetwork().getResourceId());
 
             var entityInterface = new EntityNodeCreateData.Interface();
-            entityInterface.setNetworkId(auxiliaryNetworkCloudElement.getAuxiliaryNetworkId());
+            entityInterface.setNetworkId(connectNetwork.getNetwork().getResourceId());
             entityInterface.setInterfaceName(port.getName());
 
             var accessModes = cloudPort.getAccessModes();
