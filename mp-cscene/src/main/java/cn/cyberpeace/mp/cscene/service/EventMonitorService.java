@@ -122,7 +122,7 @@ public class EventMonitorService {
 
                 BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
                 if (sum > 0) {
-                    bigDecimal = NumberUtil.round(count.doubleValue() / sum.doubleValue(), 2);
+                    bigDecimal = NumberUtil.round(count.doubleValue() * 100 / sum.doubleValue(), 2);
                 }
 
                 ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, bigDecimal.doubleValue(), count, request.getType());

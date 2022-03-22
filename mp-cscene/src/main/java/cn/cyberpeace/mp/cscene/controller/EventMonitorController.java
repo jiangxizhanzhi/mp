@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +64,11 @@ public class EventMonitorController {
         log.info("{}", eventPercentRequest);
 
         List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
-        List<ElementEventPercent> limitList = eventPercents.stream().limit(5).collect(Collectors.toList());
+
+        if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
+            eventPercentRequest.setTopCount(5);
+        }
+        List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
 //        List<ElementEventPercent> eventPercents = mockElementPercents();
         return ServiceResult.success(limitList);
     }
