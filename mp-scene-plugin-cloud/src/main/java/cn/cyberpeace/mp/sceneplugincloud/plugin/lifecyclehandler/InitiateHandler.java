@@ -271,17 +271,17 @@ public class InitiateHandler extends HandlerCommon {
 
                 // 是否开启辅助路由(是否未连接默认路由)
                 var routerOn = true;
-                if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                    // 本节点是默认路由
+                if (CoreType.ROUTER == cloudElement.getCoreType()) {
                     routerOn = false;
                 } else {
-                    for (var p : connectNetwork.getFromPorts()) {
+                    List<SceneElementPortBO> ports = new ArrayList<>();
+                    ports.addAll(connectNetwork.getFromPorts());
+                    ports.addAll(connectNetwork.getToPorts());
+                    for (var p : ports) {
                         var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
                         var pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
-                        Integer connectedVirtualType = pluginConnectedCloudElement == null ? null : pluginConnectedCloudElement.getVirtualType();
-                        if (connectedVirtualType != null
-                                && connectedVirtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                            routerOn = true;
+                        if (pluginConnectedCloudElement != null && CoreType.ROUTER == pluginConnectedCloudElement.getCoreType()) {
+                            routerOn = false;
                             break;
                         }
                     }

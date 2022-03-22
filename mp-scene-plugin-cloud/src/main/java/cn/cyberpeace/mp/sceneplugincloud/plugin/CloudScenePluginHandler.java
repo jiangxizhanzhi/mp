@@ -133,7 +133,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                     if (pluginPort != null) {
                         if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
                             // 自己构建网络直接加入
-                            networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                            if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
+                                networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                            }
                         } else if (to != null) {
                             // 未构建网络看对端端口
                             var pluginToPort = this.getPort(to.getId());
