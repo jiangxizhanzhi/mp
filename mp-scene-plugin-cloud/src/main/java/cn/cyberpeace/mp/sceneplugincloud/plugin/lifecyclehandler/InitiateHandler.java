@@ -566,6 +566,7 @@ public class InitiateHandler extends HandlerCommon {
                 .ofNullable(cloudElement.getSrcElement().getPorts())
                 .orElse(new ArrayList<>());
         Map<String, ConnectedNetworkBO> cidr2ConnectedNetwork = new HashMap<>();
+        List<ConnectedNetworkBO> noCidrNetwork = new ArrayList<>();
         for (var port : ports) {
             var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
             if (connectPort != null) {
@@ -589,7 +590,18 @@ public class InitiateHandler extends HandlerCommon {
             }
             if (StringUtils.isEmpty(cidrDivideIp)) {
                 // 未设置ip值,使用默认网段的网络
-                defaultConnectedNetwork.addPort(port, connectPort, true);
+                boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+                        && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+                if (isCoreRouter) {
+                    // 如果是核心路由器 每个端口分配一个网络
+                    var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                    var connectedNetwork = new ConnectedNetworkBO(createNetwork, getHandlerUtils());
+                    connectedNetwork.addPort(port, connectPort, true);
+                    noCidrNetwork.add(connectedNetwork);
+                } else {
+                    // 否则加入默认网络即可
+                    defaultConnectedNetwork.addPort(port, connectPort, true);
+                }
             } else {
                 // 设置了ip值,根据ip值计算网段
                 String cidr = this.ip2Cidr24(cidrDivideIp);
@@ -613,6 +625,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
         }
         cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
+        cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
         initiateAuxiliaryNetwork(cloudElement);
     }
 
