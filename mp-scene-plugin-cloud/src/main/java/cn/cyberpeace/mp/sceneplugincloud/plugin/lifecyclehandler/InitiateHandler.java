@@ -304,7 +304,6 @@ public class InitiateHandler extends HandlerCommon {
      * @param element 辅助网络节点
      */
     private void initIpPool(CloudPluginSceneElementBO element) {
-        Integer virtualType = element.getVirtualType();
         element.getDeriveNetworks().forEach(connectedNetwork -> {
             CloudPluginSceneElementNetworkBO network = connectedNetwork.network;
             String cidr = network.getCidr();
@@ -325,18 +324,17 @@ public class InitiateHandler extends HandlerCommon {
 
             // 处理网关
             if (StringUtils.isEmpty(network.getGateway())) {
-                // 如果是路由 先从端口ip设置网关
-                if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                String gatewayIp = null;
+                if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
+                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
-                            // 取第一个端口的ip作为网关
-                            network.setGateway(p.getIp());
+                            gatewayIp = p.getIp();
                             break;
                         }
                     }
                 }
-                // 路由的方式处理之后仍没有网关 则给一个默认的网关
-                if (StringUtils.isEmpty(network.getGateway())) {
+                if (gatewayIp == null) {
                     String gateway = null;
                     String possibleDhcpIp = null;
                     List<String> excludeIps = new ArrayList<>(existIps);
@@ -349,65 +347,44 @@ public class InitiateHandler extends HandlerCommon {
                         }
                     }
                     network.setGateway(gateway);
+                } else {
+                    network.setGateway(gatewayIp);
                 }
             }
             existIps.add(network.getGateway());
             existIps.add(IpUtils.nextIp(network.getGateway()));
-            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
-                    || element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                 connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
             }
 
-            // todo 探针辅助路由的ip
+            // todo
             int requireCount = 1;
-            int defaultRouterRequireCount = 0;
-            String selfPortIp = null;
-            for (var p : connectedNetwork.getFromPorts()) {
-                if (StringUtils.isNotEmpty(p.getIp())) {
-                    selfPortIp = p.getIp();
-                }
-            }
-            // 辅助网络对网元自身只分配一个ip
-            if (StringUtils.isEmpty(selfPortIp)) {
-                if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                    // 自身是默认路由
-                    defaultRouterRequireCount++;
-                } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                        || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                    // 自身是虚拟机、容器
+            int gatewayCount = 0;
+            for (var port : connectedNetwork.getFromPorts()) {
+                if (StringUtils.isEmpty(port.getIp())) {
                     requireCount++;
                 }
-            } else {
-                // 修正端口ip
-                for (var selfPort : connectedNetwork.getFromPorts()) {
-                    selfPort.setIp(selfPortIp);
-                }
             }
-
-            // 给对端分配ip
             for (var port : connectedNetwork.getToPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
-                    Integer connectVirtualType = getPluginHandler().getElement(port.getElement().getId()).getVirtualType();
-                    if (connectVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
-                            || connectVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
-                        defaultRouterRequireCount++;
+                    Integer virtualType = getPluginHandler().getElement(port.getElement().getId()).getVirtualType();
+                    if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                        gatewayCount++;
                     } else {
                         requireCount++;
                     }
                 }
             }
-
-            // 辅助网络对辅助路由分配一个ip
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
-                defaultRouterRequireCount++;
+                gatewayCount++;
             }
-            List<String> defaultRouterIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), defaultRouterRequireCount, new ArrayList<>(existIps), network.getAllocationPools());
-            defaultRouterIpPool.add(connectedNetwork.network.getGateway());
+            List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
-                connectedNetwork.network.setAuxiliaryNetworkRouterIp(defaultRouterIpPool.remove(defaultRouterIpPool.size() - 1));
+                connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
-            ipPool.addAll(defaultRouterIpPool);
+            ipPool.addAll(gatewayIpPool);
+            ipPool.add(network.getGateway());
             network.setIpPool(ipPool);
         });
     }
