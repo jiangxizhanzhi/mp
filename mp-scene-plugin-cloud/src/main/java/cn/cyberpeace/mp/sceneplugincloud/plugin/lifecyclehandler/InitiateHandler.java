@@ -541,7 +541,15 @@ public class InitiateHandler extends HandlerCommon {
             CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
             network.setExternal(true);
             network.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
-            cloudElement.getDeriveNetworks().add(new ConnectedNetworkBO(network, getHandlerUtils()));
+            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+            var ports = Optional
+                    .ofNullable(cloudElement.getSrcElement().getPorts())
+                    .orElse(new ArrayList<>());
+            for (var port : ports) {
+                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+                connectNetwork.addPort(port, connectPort, true);
+            }
+            cloudElement.getDeriveNetworks().add(connectNetwork);
         }
 
         if (Boolean.TRUE.equals(cloudElement.getExternal())) {

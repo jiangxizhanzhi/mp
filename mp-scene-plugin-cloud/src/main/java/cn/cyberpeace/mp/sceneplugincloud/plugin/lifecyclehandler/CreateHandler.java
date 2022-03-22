@@ -367,7 +367,7 @@ public class CreateHandler extends HandlerCommon {
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(network.getNetworkId());
-        virtualNic.setFixedIp(samplePort.getIp());
+        virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
         if (samplePort.getIngress() > 0 || samplePort.getDelay() > 0 || samplePort.getLoss() > 0) {
@@ -567,13 +567,19 @@ public class CreateHandler extends HandlerCommon {
         }
 
         Map<String, List<CloudPluginSceneElementPortBO>> networkIdCloudPortsMap = new HashMap<>();
-        cloudPorts.forEach(cloudPort -> {
-            var auxiliaryNetworkId = cloudPort.getAuxiliaryNetworkId();
+        List<ConnectedNetworkBO> networks = new ArrayList<>();
+        networks.addAll(cloudElement.getDeriveNetworks());
+        networks.addAll(cloudElement.getAccessNetworks());
+        for (ConnectedNetworkBO network : networks) {
+            var auxiliaryNetworkId = network.getNetwork().getNetworkId();
             var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
                     auxiliaryNetworkId, new ArrayList<>());
-            networkIdCloudPorts.add(cloudPort);
+            network.getFromPorts().forEach(port -> {
+                var pluginPort = getPluginHandler().getPort(port.getId());
+                networkIdCloudPorts.add(pluginPort);
+            });
             networkIdCloudPortsMap.put(auxiliaryNetworkId, networkIdCloudPorts);
-        });
+        }
 
         virtualNics.forEach(virtualNic -> {
             var networkId = virtualNic.getNetworkId();
