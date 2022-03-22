@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
@@ -291,6 +292,7 @@ public class ScenePluginCollectionSceneService {
 
         var result = dataCollectionService.queryFileEvents(request);
 
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
         result.getObjs().forEach(srcHostEvent -> {
             var hostEvent = new CollectionHostEventBO();
@@ -308,6 +310,12 @@ public class ScenePluginCollectionSceneService {
                 hostEvent.setNodeName(srcElement.getName());
                 hostEvent.setSystemType(srcElement.getSystemType());
                 hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+                if (cloudScenePluginHandler != null) {
+                    var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
+                    if (cloudElement != null) {
+                        hostEvent.setVirtualType(cloudElement.getVirtualType());
+                    }
+                }
             }
             hostEvents.add(hostEvent);
         });
