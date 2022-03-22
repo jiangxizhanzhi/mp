@@ -240,7 +240,7 @@ public class InitiateHandler extends HandlerCommon {
             if (Boolean.TRUE.equals(network.getExternal())) {
                 continue;
             }
-            network.setNetworkId(StringUtils.EMPTY);
+            network.setResourceId(StringUtils.EMPTY);
             if (StringUtils.isEmpty(network.getCidr())) {
                 prepareExistCidrs();
                 network.setCidr(allocateCidrs(1).get(0));
@@ -540,7 +540,7 @@ public class InitiateHandler extends HandlerCommon {
 
             CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
             network.setExternal(true);
-            network.setNetworkId(CloudSingleton.cloudAppConfig.getExternalNetId());
+            network.setResourceId(CloudSingleton.cloudAppConfig.getExternalNetId());
             var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
             var ports = Optional
                     .ofNullable(cloudElement.getSrcElement().getPorts())

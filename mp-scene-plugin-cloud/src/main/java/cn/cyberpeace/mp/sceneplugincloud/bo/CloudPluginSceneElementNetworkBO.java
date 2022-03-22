@@ -32,8 +32,6 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private String sceneElement;
     @ApiModelProperty(value = "云平台虚拟化资源id")
     private String resourceId;
-    @ApiModelProperty(value = "辅助网络id")
-    private String networkId;
     @ApiModelProperty(value = "虚拟交换机cidr地址段")
     private String cidr;
     @ApiModelProperty(value = "虚拟交换机网关")
