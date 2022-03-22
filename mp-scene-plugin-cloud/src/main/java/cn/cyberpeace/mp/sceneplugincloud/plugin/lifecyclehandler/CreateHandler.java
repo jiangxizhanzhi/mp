@@ -146,7 +146,7 @@ public class CreateHandler extends HandlerCommon {
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         cloudElement.getDeriveNetworks().forEach(connectedNetwork -> {
-            if (StringUtils.isNotEmpty(connectedNetwork.network.getNetworkId())) {
+            if (StringUtils.isNotEmpty(connectedNetwork.network.getResourceId())) {
                 return;
             }
             var srcElement = cloudElement.getSrcElement();
@@ -185,7 +185,6 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
-            connectedNetwork.network.setNetworkId(virtualSwitch.getId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
             // 向端口回写网络id
             connectedNetwork.getFromPorts().forEach(p -> {
@@ -212,7 +211,7 @@ public class CreateHandler extends HandlerCommon {
         var createData = new VirtualRouterCreateData();
         createData.setName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
         var virtualNic = new VirtualNic();
-        virtualNic.setNetworkId(network.getNetworkId());
+        virtualNic.setNetworkId(network.getResourceId());
         virtualNic.setFixedIp(TextUtils.emptyNull(network.getAuxiliaryNetworkRouterIp()));
         createData.setNetworks(List.of(virtualNic));
         var virtualRouter = vrClient.create(createData);
@@ -366,7 +365,7 @@ public class CreateHandler extends HandlerCommon {
         SceneElementPortBO samplePort = fromPorts.get(0);
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
-        virtualNic.setNetworkId(network.getNetworkId());
+        virtualNic.setNetworkId(network.getResourceId());
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
@@ -388,7 +387,7 @@ public class CreateHandler extends HandlerCommon {
         }
         virtualNic.setQosRules(CollectionUtils.emptyNull(qosRules));
 
-        if (!HandlerUtils.isExternalNetwork(network.getNetworkId())) {
+        if (!HandlerUtils.isExternalNetwork(network.getResourceId())) {
             virtualNic.setEnableExternal(sampleCloudPort.getNat());
         }
 
@@ -571,7 +570,7 @@ public class CreateHandler extends HandlerCommon {
         networks.addAll(cloudElement.getDeriveNetworks());
         networks.addAll(cloudElement.getAccessNetworks());
         for (ConnectedNetworkBO network : networks) {
-            var auxiliaryNetworkId = network.getNetwork().getNetworkId();
+            var auxiliaryNetworkId = network.getNetwork().getResourceId();
             var networkIdCloudPorts = networkIdCloudPortsMap.getOrDefault(
                     auxiliaryNetworkId, new ArrayList<>());
             network.getFromPorts().forEach(port -> {
