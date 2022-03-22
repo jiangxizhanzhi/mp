@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
+import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
 import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
@@ -67,8 +68,9 @@ public class EventMonitorService {
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(request.getStartTime());
         wazuhEventRequest.setEndTime(request.getEndTime());
-        long sum = dataCollectionService.countByAgentNames(wazuhEventRequest);
-        return sum;
+        // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
+        long sumFromES = dataCollectionService.countByAgentNames(wazuhEventRequest);
+        return sumFromES;
     }
 
     /**
@@ -87,6 +89,7 @@ public class EventMonitorService {
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 
         List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
         wazuhEventRequest.setStartTime(request.getStartTime());
@@ -120,18 +123,51 @@ public class EventMonitorService {
                 String nodeId = elementBOOptional.get().getId();
                 String nodeName = elementBOOptional.get().getName();
 
-                BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
-                if (sum > 0) {
-                    bigDecimal = NumberUtil.round(count.doubleValue() * 100 / sum.doubleValue(), 2);
-                }
+//                BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
+//                if (sum > 0) {
+//                    bigDecimal = NumberUtil.round(count.doubleValue() * 100 / sum.doubleValue(), 2);
+//                }
 
-                ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, bigDecimal.doubleValue(), count, request.getType());
+                Double percent =  toRoundPercent(count, sum);
+
+                ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, percent, count, request.getType());
                 eventPercents.add(eventPercent);
             }
         });
 
         log.info("{}", eventPercents);
         return eventPercents;
+    }
+
+
+    /**
+     * 根据事件类型，统计百分比
+     * @param request
+     * @return
+     */
+    public EventAggr aggrByEventType(BaseTimeRangeRequest request) {
+        Long sumFromEs = sumEvent(request);
+
+        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+
+        Map<String, Long> aggsProcessesMap = aggProcessCount(agentNames);
+        Map<String, Long> aggsPortsMap = aggPortCount(agentNames);
+
+        Long processSum = aggsProcessesMap.values().stream().mapToLong(Long::longValue).sum();
+        Long portSum = aggsPortsMap.values().stream().mapToLong(Long::longValue).sum();
+
+        Long sum = sumFromEs + processSum + portSum;
+
+
+
+        EventAggr eventAggr = new EventAggr();
+        eventAggr.setProcess(toRoundPercent(processSum, sum));
+        eventAggr.setFile(22.62);
+        eventAggr.setPort(toRoundPercent(portSum, sum));
+        eventAggr.setNetwork(17.86);
+        eventAggr.setUser(16.67);
+
+        return eventAggr;
     }
 
 
@@ -159,10 +195,12 @@ public class EventMonitorService {
             segmentCount = 10;
         }
 
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
-        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
+//        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
+//        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
+//
+//        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
+        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(sceneIds.get(0), elementIds);
 
-        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
         List<EventTimeCount> eventTimeCounts = new ArrayList<>();
@@ -225,6 +263,21 @@ public class EventMonitorService {
             map.put(agentName, total);
         });
         return map;
+    }
+
+
+    /**
+     * 计算百分比
+     * @param value
+     * @param sum
+     * @return
+     */
+    private double toRoundPercent(Long value, Long sum) {
+        BigDecimal bigDecimal = BigDecimal.valueOf(0.0);
+        if (sum > 0) {
+            bigDecimal = NumberUtil.round(value.doubleValue() * 100 / sum.doubleValue(), 2);
+        }
+        return bigDecimal.doubleValue();
     }
 
 

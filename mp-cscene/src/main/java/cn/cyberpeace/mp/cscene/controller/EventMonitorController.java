@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
@@ -82,10 +81,12 @@ public class EventMonitorController {
      */
     @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
-    public ServiceResult<EventAggr> getEventAggr(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         // TODO 暂时还是测试数据
-        EventAggr eventAggr = mockEventAggr();
+        EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
+//        EventAggr eventAggr = mockEventAggr();
+
         return ServiceResult.success(eventAggr);
     }
 
