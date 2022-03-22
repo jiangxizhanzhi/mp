@@ -277,7 +277,12 @@ public class WazuhControl {
     }
 
     public static String genControlConfigCommand(String osType, List<ControlProbeParam> controlProbeParams,
-                                            List<ControlLogCollectParam> controlLogCollectParams) {
+                                                 List<ControlLogCollectParam> controlLogCollectParams) {
+        return genControlConfigCommand(osType, controlProbeParams, controlLogCollectParams, false);
+    }
+    public static String genControlConfigCommand(String osType, List<ControlProbeParam> controlProbeParams,
+                                                 List<ControlLogCollectParam> controlLogCollectParams,
+                                                 boolean restart) {
         String controlScriptPath;
         if (OS_TYPE_WINDOWS.equals(osType)) {
             controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
@@ -299,7 +304,11 @@ public class WazuhControl {
             return StringUtils.EMPTY;
         }
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
-        return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
+        if (restart) {
+            return String.format("%s \"%s\" -r", controlScriptPath, scriptParamsStr);
+        } else {
+            return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
+        }
     }
 
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
@@ -334,7 +343,7 @@ public class WazuhControl {
         var runCommandItem = new RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
-        runCommandItem.setCommand(genControlConfigCommand(osType, controlProbeParams, controlLogCollectParams));
+        runCommandItem.setCommand(genControlConfigCommand(osType, controlProbeParams, controlLogCollectParams, true));
         runCommand(List.of(runCommandItem));
         return runCommandItem;
     }
