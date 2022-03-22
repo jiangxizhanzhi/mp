@@ -336,13 +336,24 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
             virtualNics.add(virtualNic);
         }
-        List<ConnectedNetworkBO> deriveConnectedNetworks = cloudElement.getDeriveNetworks();
-        for (ConnectedNetworkBO connectedNetwork : deriveConnectedNetworks) {
-            VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
-            virtualNics.add(virtualNic);
+        List<ConnectedNetworkBO> allNetworks = new ArrayList<>();
+        allNetworks.addAll(cloudElement.getDeriveNetworks());
+        allNetworks.addAll(cloudElement.getAccessNetworks());
+        if (cloudElement.getSrcElement().getPorts() != null && cloudElement.getSrcElement().getPorts().size() > 0) {
+            Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
+            allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
+            List<ConnectedNetworkBO> orderNetwork = new ArrayList<>();
+            for (var port : cloudElement.getSrcElement().getPorts()) {
+                if (portId2Net.containsKey(port.getId())) {
+                    orderNetwork.add(portId2Net.remove(port.getId()));
+                }
+            }
+            if (!portId2Net.isEmpty()) {
+                orderNetwork.addAll(portId2Net.values());
+            }
+            allNetworks = orderNetwork;
         }
-        List<ConnectedNetworkBO> accessConnectedNetworks = cloudElement.getAccessNetworks();
-        for (ConnectedNetworkBO connectedNetwork : accessConnectedNetworks) {
+        for (ConnectedNetworkBO connectedNetwork : allNetworks) {
             VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
             virtualNics.add(virtualNic);
         }
