@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +32,10 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
+    public static final String WAZUH_PROBE_NAME = "get_virtual_info.py";
+
+    public static final String INTERVAL = "180s";
+
     private WazuhCommon() {}
 
     public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost) {
@@ -38,6 +43,22 @@ public class WazuhCommon {
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
+
+        String osType = SystemTypeCommandUtils.getOsType(systemType);
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                nameFileMap.getOrDefault(WAZUH_PROBE_NAME, StringUtils.EMPTY));
+        WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
+        controlProbeParam.setId(TextUtils.uuid());
+        controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+        controlProbeParam.setGroup(agentName);
+        controlProbeParam.setScriptUrl(url);
+        controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+        controlProbeParam.setOutputFormat(WazuhControl.CMD_OUTPUT_FORMAT_PLAIN);
+        controlProbeParam.setInterval(INTERVAL);
+        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+        controlProbeParams.add(controlProbeParam);
+        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlProbeParams, new ArrayList<>());
 
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
@@ -55,6 +76,8 @@ public class WazuhCommon {
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
                             "cd C:\\wazuha",
+                            "config.bat",
+                            probeCommand,
                             "start.bat"
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
@@ -71,6 +94,8 @@ public class WazuhCommon {
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             "cd /opt/wazuha",
+                            "bash config.sh",
+                            probeCommand,
                             "bash start.sh"
                     ));
         }

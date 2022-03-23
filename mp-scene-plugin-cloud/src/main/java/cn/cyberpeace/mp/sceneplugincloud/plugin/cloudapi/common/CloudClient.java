@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -57,7 +59,11 @@ public abstract class CloudClient {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
     }
 
-    protected boolean excludeDeleteException(MpRuntimeException runtimeException) {
+    protected boolean excludeDeleteException(Exception runtimeException) {
+        Boolean ignoreDeleteException = BeanCommon.getBean(CloudAppConfig.class).getIgnoreDeleteException();
+        if (Boolean.TRUE.equals(ignoreDeleteException)) {
+            return true;
+        }
         if (StringUtils.isNotEmpty(runtimeException.getMessage()) && runtimeException.getMessage().contains("could not be found")) {
             // 删除时已不存在的错误可以视为删除成功
             return true;
