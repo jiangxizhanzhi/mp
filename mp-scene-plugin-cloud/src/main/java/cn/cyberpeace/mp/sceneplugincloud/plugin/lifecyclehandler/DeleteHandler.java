@@ -12,13 +12,14 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.NpcDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
@@ -35,7 +36,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,7 +52,10 @@ public class DeleteHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
 
+    private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+
     public static class SceneProcess {
+        public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
         public static final EventProcess DELETE_TERMINALS = new EventProcess("delete_terminals", "sceneplugincloud.event.delete_terminal");
         public static final EventProcess DELETE_FIREWALLS = new EventProcess("delete_firewalls", "sceneplugincloud.event.delete_firewall");
         public static final EventProcess DELETE_GATEWAYS = new EventProcess("delete_gateways", "sceneplugincloud.event.delete_gateway");
@@ -234,25 +240,26 @@ public class DeleteHandler extends HandlerCommon {
         return enClient.delete(deleteData);
     }
 
-    protected boolean deleteNpcNode(CloudPluginSceneElementBO cloudElement) {
+    protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        List<NpcDeleteData.NpcInfo> npcInfos = new ArrayList<>();
         cloudElement.getAccessNetworks().forEach(net -> {
+            String networkId = net.network.getResourceId();
+            if (!network2Info.containsKey(networkId)) {
+                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+            }
             net.getFromPorts().forEach(port -> {
-                npcInfos.add(new NpcDeleteData.NpcInfo(net.getNetwork().getResourceId(), npcName, port.getIp()));
+                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
             });
         });
         cloudElement.getDeriveNetworks().forEach(net -> {
-            if (net.getFromPorts() != null && !net.getFromPorts().isEmpty()) {
-                npcInfos.add(new NpcDeleteData.NpcInfo(net.getNetwork().getResourceId(), npcName, net.getFromPorts().get(0).getIp()));
+            String networkId = net.network.getResourceId();
+            if (!network2Info.containsKey(networkId)) {
+                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
             }
+            net.getFromPorts().forEach(port -> {
+                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+            });
         });
-        NpcDeleteData npcCreateData = new NpcDeleteData();
-        npcCreateData.setNpcInfos(npcInfos);
-        if (npcInfos.isEmpty()) {
-            return true;
-        }
-        return npcClient.delete(npcCreateData);
     }
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
@@ -267,6 +274,11 @@ public class DeleteHandler extends HandlerCommon {
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
         if (!deleteTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
+        }
+
+        // 删除npc节点
+        if (network2Info.values().size() > 0) {
+            runSceneProgress(SceneProcess.DELETE_NPCS, () -> deleteNpcElements(new ArrayList<>(network2Info.values())));
         }
 
         // 删除防火墙
@@ -305,6 +317,12 @@ public class DeleteHandler extends HandlerCommon {
         if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
+    }
+
+    private void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
+        NpcDeleteData npcDeleteData = new NpcDeleteData();
+        npcDeleteData.setNetWorkNpcInfos(list);
+        npcClient.delete(npcDeleteData);
     }
 
     public void deleteAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
@@ -350,7 +368,7 @@ public class DeleteHandler extends HandlerCommon {
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.DELETE_NPC,
                     () -> {
-                        deleteNpcNode(cloudElement);
+                        recordNpcNode(cloudElement);
                     });
         }
     }

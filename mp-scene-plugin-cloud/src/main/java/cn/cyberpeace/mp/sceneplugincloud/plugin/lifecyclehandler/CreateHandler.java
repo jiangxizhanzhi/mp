@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
@@ -63,7 +64,7 @@ public class CreateHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
 
-    private Map<String, NpcCreateData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+    private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
@@ -796,7 +797,7 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.getAccessNetworks().forEach(net -> {
             String networkId = net.network.getResourceId();
             if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new NpcCreateData.NetWorkNpcInfo(networkId));
+                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
             }
             net.getFromPorts().forEach(port -> {
                 network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
@@ -805,7 +806,7 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.getDeriveNetworks().forEach(net -> {
             String networkId = net.network.getResourceId();
             if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new NpcCreateData.NetWorkNpcInfo(networkId));
+                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
             }
             net.getFromPorts().forEach(port -> {
                 network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
@@ -855,7 +856,7 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
-    public void createNpcElements(List<NpcCreateData.NetWorkNpcInfo> list) {
+    public void createNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
         npcClient.create(npcCreateData);

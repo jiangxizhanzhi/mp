@@ -140,9 +140,11 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                             // 未构建网络看对端端口
                             var pluginToPort = this.getPort(to.getId());
                             if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
-                                ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
-                                connectedNetworkBO.addPort(p, to, false);
-                                e.getAccessNetworks().add(connectedNetworkBO);
+                                if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
+                                    ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                                    connectedNetworkBO.addPort(p, to, false);
+                                    e.getAccessNetworks().add(connectedNetworkBO);
+                                }
                             }
                         }
                     }

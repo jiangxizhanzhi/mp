@@ -38,7 +38,7 @@ public class Container extends CloudClient {
                     new TypeReference<CloudResponse<Object>>() {
                     }, true);
             return true;
-        } catch (MpRuntimeException e) {
+        } catch (Exception e) {
             if (super.excludeDeleteException(e)) {
                 return true;
             }

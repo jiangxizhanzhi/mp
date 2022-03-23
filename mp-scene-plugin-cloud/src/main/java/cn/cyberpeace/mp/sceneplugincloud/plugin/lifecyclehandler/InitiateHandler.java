@@ -397,19 +397,7 @@ public class InitiateHandler extends HandlerCommon {
         var connectedNetworks = cloudElement.getDeriveNetworks();
         for (ConnectedNetworkBO connectedNetwork : connectedNetworks) {
             List<String> ipPool = connectedNetwork.network.getIpPool();
-            // 处理自己的端口
-            List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
-            String fromIp = null;
-            for (var port : fromPorts) {
-                if (StringUtils.isNotEmpty(port.getIp())) {
-                    continue;
-                } else {
-                    if (fromIp == null) {
-                        fromIp = ipPool.remove(0);
-                    }
-                    port.setIp(fromIp);
-                }
-            }
+            // 先处理连接的端口
             List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
             for (var port : toPorts) {
                 if (StringUtils.isNotEmpty(port.getIp())) {
@@ -425,6 +413,34 @@ public class InitiateHandler extends HandlerCommon {
                     synchronized (ipPool) {
                         port.setIp(ipPool.remove(0));
                     }
+                }
+            }
+
+            // 处理自己的端口
+            List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+            String fromIp = null;
+            for (var port : fromPorts) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    continue;
+                } else {
+                    if (fromIp == null) {
+                        var pluginElement = getPluginHandler().getElement(port.getElement().getId());
+                        Integer toVirtualType = pluginElement.getVirtualType();
+                        if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                            synchronized (ipPool) {
+                                if (fromIp == null) {
+                                    fromIp = ipPool.remove(ipPool.size() - 1);
+                                }
+                            }
+                        } else {
+                            synchronized (ipPool) {
+                                if (fromIp == null) {
+                                    fromIp = ipPool.remove(0);
+                                }
+                            }
+                        }
+                    }
+                    port.setIp(fromIp);
                 }
             }
         }

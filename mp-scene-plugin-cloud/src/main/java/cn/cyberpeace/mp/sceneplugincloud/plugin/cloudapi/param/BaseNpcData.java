@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
+package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
@@ -16,31 +16,48 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NpcDeleteData implements CloudHttpData {
-    public List<NpcInfo> npcInfos;
+public class BaseNpcData implements CloudHttpData {
+    public List<NetWorkNpcInfo> netWorkNpcInfos;
+
+    @Getter
+    public static class NetWorkNpcInfo {
+        private String networkId;
+        private List<NpcInfo> npcInfos;
+
+        public NetWorkNpcInfo(String networkId) {
+            this.networkId = networkId;
+            this.npcInfos = new ArrayList<>();
+        }
+
+        public void addNpcInfo(String npcName, String npcIp) {
+            this.npcInfos.add(new NpcInfo(npcName, npcIp));
+        }
+    }
 
     @Getter
     public static class NpcInfo {
-        private String networkId;
         private String npcName;
         private String npcIp;
 
-        public NpcInfo(String networkId, String npcName, String npcIp) {
-            this.networkId = networkId;
+        public NpcInfo(String npcName, String npcIp) {
             this.npcName = npcName;
             this.npcIp = npcIp;
         }
+
+
     }
 
     @Override
     public String toContent() {
         Map<String, List<Map<String, String>>> npcs = new HashMap<>();
-        npcInfos.forEach(npcInfo -> {
-            String networkId = npcInfo.getNetworkId();
+        netWorkNpcInfos.forEach(netWorkNpcInfo -> {
+            String networkId = netWorkNpcInfo.getNetworkId();
             if (!npcs.containsKey(networkId)) {
                 npcs.put(networkId, new ArrayList<>());
             }
-            npcs.get(networkId).add(Collections.singletonMap(npcInfo.getNpcName(), npcInfo.getNpcIp()));
+            netWorkNpcInfo.npcInfos.forEach(n -> {
+                npcs.get(networkId).add(Collections.singletonMap(n.getNpcName(), n.getNpcIp()));
+            });
         });
         return JsonCommon.stringify(Collections.singletonMap("npc_data", npcs));
     }
