@@ -49,6 +49,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -62,11 +63,14 @@ public class CreateHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
 
+    private Map<String, NpcCreateData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
         public static final EventProcess CREATE_GATEWAYS = new EventProcess("create_gateways", "sceneplugincloud.event.create_gateway");
         public static final EventProcess CREATE_FIREWALLS = new EventProcess("create_firewalls", "sceneplugincloud.event.create_firewall");
         public static final EventProcess CREATE_TERMINALS = new EventProcess("create_terminals", "sceneplugincloud.event.create_terminal");
+        public static final EventProcess CREATE_NPCS = new EventProcess("create_npcs", "sceneplugincloud.event.create_npcs");
     }
 
     public static class ElementProcess {
@@ -787,22 +791,26 @@ public class CreateHandler extends HandlerCommon {
         checkAccessModes(cloudElement);
     }
 
-    protected void createNpcNode(CloudPluginSceneElementBO cloudElement) {
+    protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        List<NpcCreateData.NpcInfo> npcInfos = new ArrayList<>();
         cloudElement.getAccessNetworks().forEach(net -> {
+            String networkId = net.network.getResourceId();
+            if (!network2Info.containsKey(networkId)) {
+                network2Info.put(networkId, new NpcCreateData.NetWorkNpcInfo(networkId));
+            }
             net.getFromPorts().forEach(port -> {
-                npcInfos.add(new NpcCreateData.NpcInfo(net.getNetwork().getResourceId(), npcName, port.getIp()));
+                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
             });
         });
         cloudElement.getDeriveNetworks().forEach(net -> {
-            if (net.getFromPorts() != null && !net.getFromPorts().isEmpty()) {
-                npcInfos.add(new NpcCreateData.NpcInfo(net.getNetwork().getResourceId(), npcName, net.getFromPorts().get(0).getIp()));
+            String networkId = net.network.getResourceId();
+            if (!network2Info.containsKey(networkId)) {
+                network2Info.put(networkId, new NpcCreateData.NetWorkNpcInfo(networkId));
             }
+            net.getFromPorts().forEach(port -> {
+                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+            });
         });
-        NpcCreateData npcCreateData = new NpcCreateData();
-        npcCreateData.setNpcInfos(npcInfos);
-        npcClient.create(npcCreateData);
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {
@@ -841,6 +849,16 @@ public class CreateHandler extends HandlerCommon {
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }
+        // 批量创建NPC节点
+        if (network2Info.values().size() > 0) {
+            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
+        }
+    }
+
+    public void createNpcElements(List<NpcCreateData.NetWorkNpcInfo> list) {
+        NpcCreateData npcCreateData = new NpcCreateData();
+        npcCreateData.setNetWorkNpcInfos(list);
+        npcClient.create(npcCreateData);
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
@@ -880,7 +898,7 @@ public class CreateHandler extends HandlerCommon {
                     () -> createEntityNode(cloudElement));
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.NPC)) {
             runElementProgress(cloudElement.getSrcElement().getId(), ElementProcess.CREATE_NPC,
-                    () -> createNpcNode(cloudElement));
+                    () -> recordNpcNode(cloudElement));
         }
     }
 
