@@ -37,10 +37,10 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_server_host:127.0.0.1}")
     private String wazuhServerHost;
 
-    @Value("${mp.sceneplugincollection.wazuh_remote_port:1514}")
+    @Value("${mp.sceneplugincollection.wazuh_remote_port:51514}")
     private Integer wazuhRemotePort;
 
-    @Value("${mp.sceneplugincollection.wazuh_auth_port:1515}")
+    @Value("${mp.sceneplugincollection.wazuh_auth_port:51515}")
     private Integer wazuhAuthPort;
 
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
