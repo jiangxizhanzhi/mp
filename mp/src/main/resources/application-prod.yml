@@ -3,7 +3,7 @@ ip:
   fdfs: ${FDFS_IP:10.100.1.26}           # FastDFS地址
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   moloch: ${MOLOCH_IP:10.100.0.101}        # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.7.179}          # wazuh的IP地址
+  wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
   trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
@@ -94,15 +94,15 @@ mp:
     es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
     wazuh:
       #wazuh 开放接口地址
-      base-url: https://${ip.wazuh}:${WAZUH_PORT:55000}
+      base-url: http://${ip.wazuh}:${WAZUH_PORT:55000}
       #wazuh 开放接口用户名密码
-      username: ${WAZUH_USERNAME:wazuh-api}
-      password: ${WAZUH_PASSWORD:Wazuh123#}
+      username: ${WAZUH_USERNAME:wazuh}
+      password: ${WAZUH_PASSWORD:wazuh}
       #wazuh es地址用户名密码
-      es-url: ${ip.wazuh}
-      es-port: ${WAZUH_ES_PORT:9200}
-      es-username: ${WAZUH_ES_USERNAME:admin}
-      es-password: ${WAZUH_ES_PASSWORD:admin}
+#       es-url: ${ip.wazuh}
+#       es-port: ${WAZUH_ES_PORT:9200}
+#       es-username: ${WAZUH_ES_USERNAME:admin}
+#       es-password: ${WAZUH_ES_PASSWORD:admin}
     wazuh-probe-manager:
       url: http://${ip.wazuh}:${WAZUH_PORT:8002}
       agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
