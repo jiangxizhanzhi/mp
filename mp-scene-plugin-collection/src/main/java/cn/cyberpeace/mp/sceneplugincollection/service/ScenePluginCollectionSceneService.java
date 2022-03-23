@@ -1041,16 +1041,19 @@ public class ScenePluginCollectionSceneService {
     public void asyncCleanProbeData(String sceneId) {
         TaskCommon.executeTask(() -> {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(Arrays.asList(sceneId), null);
-            // 删除采集的数据
-            List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
-            if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
-                probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
-            }
+
             //删除流量采集数据
             List<String> flowCollectors = batchSceneHandler.getFlowCollectors();
             if (CollectionUtils.isNotEmpty(flowCollectors)) {
                 flowAnalysisService.delete(flowCollectors);
             }
+
+            // 删除采集的数据
+            List<String> probeEnabledEid = new ArrayList<>(batchSceneHandler.getProbeEnabledNodeId2EidMap().values());
+            if (CollectionUtils.isNotEmpty(probeEnabledEid)) {
+                probeService.cleanProbeData(probeEnabledEid, batchSceneHandler.getEarliestStartTime());
+            }
+
         });
     }
 

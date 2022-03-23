@@ -714,7 +714,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             restHighLevelClient.indices().delete(deleteIndexRequest,RequestOptions.DEFAULT);
         } catch (IOException e) {
-            log.error("delete error : {}",e.getMessage(),e);
+            log.error("delete flow error : {},group:{}",e.getMessage(),e,groupList);
         }
         return Boolean.TRUE;
     }
