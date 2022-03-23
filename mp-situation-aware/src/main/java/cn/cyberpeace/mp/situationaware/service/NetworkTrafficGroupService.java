@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -123,7 +122,6 @@ public class NetworkTrafficGroupService {
         deleteParam.put("containers", containerArray);
         try {
             HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
-            flowAnalysisService.delete(Arrays.asList(groupId));
 
         } catch (IOException e) {
             log.error("deleete  arkime Image instance error");
