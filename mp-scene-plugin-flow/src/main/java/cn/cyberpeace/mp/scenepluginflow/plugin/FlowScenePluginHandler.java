@@ -13,9 +13,11 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
+import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -121,7 +123,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flows = flowElement.getFlows();
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+
         if (flows == null) {
             return false;
         }
@@ -147,7 +151,8 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flows = flowElement.getFlows();
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
         if (flows == null) {
             return false;
         }
