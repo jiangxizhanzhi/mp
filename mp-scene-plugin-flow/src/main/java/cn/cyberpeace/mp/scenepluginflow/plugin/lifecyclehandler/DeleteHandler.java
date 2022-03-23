@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
-import cn.cyberpeace.mp.scenepluginflow.util.SceneHandlerCacheUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,8 +51,6 @@ public class DeleteHandler extends HandlerCommon {
             });
         }
 
-        // 清理缓存
-        SceneHandlerCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }
 
     private Runnable createDeleteFlowTask(String nodeId, Flow flow) {
