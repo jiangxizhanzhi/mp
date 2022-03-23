@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
@@ -40,6 +41,8 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer loss;
     @DefaultStr
     private String accessModes;
+    @DefaultInt
+    private Integer order;
 
     public static class Type {
         public static final int IP_PORT = 1;
