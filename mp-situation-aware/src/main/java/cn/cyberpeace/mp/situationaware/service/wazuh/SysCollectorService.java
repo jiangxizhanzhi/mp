@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentProcessModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
@@ -21,7 +19,6 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +36,7 @@ import java.util.List;
  */
 @Service
 @Slf4j
-public class SysCollectorService extends RequestProcessor  {
+public class SysCollectorService extends RequestProcessor {
 
 
     @Value("${mp.situationaware.wazuh.base-url}")
@@ -50,7 +47,8 @@ public class SysCollectorService extends RequestProcessor  {
 
     /**
      * 查询端口
-     * @return  端口号
+     *
+     * @return 端口号
      */
     public PageInfo<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
@@ -63,27 +61,24 @@ public class SysCollectorService extends RequestProcessor  {
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
-        try {
-            log.info("requestUrl:{}", requestUrl);
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-            BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>(){});
-            log.info("{}", result);
-            List<Port> ports = result.getData().getAffectedItems();
+        log.info("requestUrl:{}", requestUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<Port> ports = result.getData().getAffectedItems();
 
-            PageInfo pageInfo = new PageInfo(ports);
-            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+        PageInfo pageInfo = new PageInfo(ports);
+        pageInfo.setTotal(result.getData().getTotalAffectedItems());
 
-            return pageInfo;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        return pageInfo;
     }
 
 
     /**
      * 查询进程
-     * @return  进程集合
+     *
+     * @return 进程集合
      */
     public PageInfo<Process> pageProcesses(CollectorBaseRequest collectorBaseRequest) {
         String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
@@ -96,24 +91,19 @@ public class SysCollectorService extends RequestProcessor  {
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
-        try {
-            log.info("requestUrl:{}", requestUrl);
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-            BaseResponse<Process> result = JSONObject.parseObject(res, new TypeReference<>(){});
-            log.info("{}", result);
-            List<Process> processes = result.getData().getAffectedItems();
-            PageInfo pageInfo = new PageInfo(processes);
-            pageInfo.setTotal(result.getData().getTotalAffectedItems());
+        log.info("requestUrl:{}", requestUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        BaseResponse<Process> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<Process> processes = result.getData().getAffectedItems();
+        PageInfo pageInfo = new PageInfo(processes);
+        pageInfo.setTotal(result.getData().getTotalAffectedItems());
 
-            return pageInfo;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PROCESS_ERROR.getMessage());
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PROCESS_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        return pageInfo;
     }
 
     /**
-     *
      * @param
      * @return
      */
@@ -127,22 +117,19 @@ public class SysCollectorService extends RequestProcessor  {
 
         var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
 
-        try {
-            String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-            BaseResponse<Hardware> result = JSONObject.parseObject(res, new TypeReference<>(){});
-            log.info("{}", result);
-            List<Hardware> hardwares = result.getData().getAffectedItems();
-            return hardwares;
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_HARDWARE_ERROR.getMessage());
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_HARDWARE_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        BaseResponse<Hardware> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<Hardware> hardwares = result.getData().getAffectedItems();
+        return hardwares;
     }
 
     /**
      * 查询agentPort
+     *
      * @param agents agents
-     * @return  端口号
+     * @return 端口号
      */
     @Deprecated
     public List<WazuhAgentPortsModel> queryAgentsPorts(List<String> agents) {
@@ -154,14 +141,9 @@ public class SysCollectorService extends RequestProcessor  {
         var requestUri = "/experimental/syscollector/ports";
         var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
 
-        try {
-            var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-            JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
-            agentPortsModels = agentArray.toJavaList(WazuhAgentPortsModel.class);
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
+        agentPortsModels = agentArray.toJavaList(WazuhAgentPortsModel.class);
         return agentPortsModels;
     }
 
@@ -171,26 +153,20 @@ public class SysCollectorService extends RequestProcessor  {
         if (CollectionUtils.isEmpty(agents)) {
             return wazuhAgentProcessModels;
         }
-        var res = "";
         List<String> agentIds = agentService.listAgentIds(agents);
         var requestUri = "/experimental/syscollector/processes";
         var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
-        try {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-            JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
-            wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
-        } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR.getMessage());
-            throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_PORT_ERROR, ExceptionUtils.getStackTrace(e));
-        }
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
+        wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
 
         return wazuhAgentProcessModels;
     }
 
 
-
     /**
      * 查询hardware信息
+     *
      * @param agentId
      * @return
      * @throws IOException
@@ -198,13 +174,7 @@ public class SysCollectorService extends RequestProcessor  {
     @Deprecated
     public WazuhRamRoot queryRamByAgentId(String agentId) {
         var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
-        String res;
-        try {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        } catch (Exception e) {
-            log.error("查询ram信息失败:" + e);
-            throw new MpRuntimeException("查询ram信息失败");
-        }
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhRamRoot.class);
     }
 

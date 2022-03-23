@@ -22,7 +22,7 @@ public class CollectionHostEventBO {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
-    @ApiModelProperty(value = "节点类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 虚拟机, 5: 容器, 6: 实体设备")
+    @ApiModelProperty(value = "实例类型  1: 交换机, 2: 路由器, 3: 防火墙, 4: 虚拟机, 5: 容器, 6: 实体设备")
     // Ref: BaseCloudPluginSceneElementModel.VirtualType 中的枚举
     private Integer virtualType;
 

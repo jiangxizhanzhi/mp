@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.base.util.basic;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -11,6 +13,10 @@ public class TextUtils {
     private static final Pattern humpPattern = Pattern.compile("\\B(\\p{Upper})(\\p{Lower}*)");
 
     private static final Pattern chinesePattern = Pattern.compile("[\u4E00-\u9FA5|\\！|\\，|\\。|\\（|\\）|\\《|\\》|\\“|\\”|\\？|\\：|\\；|\\【|\\】]");
+
+    private static final Base64.Decoder base64Decoder = Base64.getDecoder();
+
+    private static final Base64.Encoder base64Encoder = Base64.getEncoder();
 
     private TextUtils() {}
 
@@ -77,5 +83,14 @@ public class TextUtils {
     public static boolean containChinese(String str) {
         return chinesePattern.matcher(str).find();
     }
+
+    public static String encodeBase64(String str) {
+        return base64Encoder.encodeToString(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static String decodeBase64(String str) {
+        return new String(base64Decoder.decode(str), StandardCharsets.UTF_8);
+    }
+
 }
 

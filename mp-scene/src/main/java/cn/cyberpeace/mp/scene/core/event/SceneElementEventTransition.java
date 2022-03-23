@@ -249,7 +249,7 @@ public class SceneElementEventTransition {
                     SceneElementModel.Event.RESUME, SceneElementModel.Event.DELETE
             ),
                     EventTransition.genKey(SceneElementModel.Event.RESUME, EventStatus.OVER), List.of(
-                    SceneElementModel.Event.STOP, SceneElementModel.Event.RESTART, SceneElementModel.Event.SUSPEND,
+                    SceneElementModel.Event.STOP, SceneElementModel.Event.RESTART, SceneElementModel.Event.RECREATE, SceneElementModel.Event.SUSPEND,
                     SceneElementModel.Event.SNAPSHOT, SceneElementModel.Event.MODIFY, SceneElementModel.Event.DELETE, SceneElementModel.Event.PAUSE
             ),
                     EventTransition.genKey(SceneElementModel.Event.RESUME, EventStatus.ABNORMAL), List.of(

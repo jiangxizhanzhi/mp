@@ -197,7 +197,11 @@ public class SceneMonitorService {
      */
     public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
         log.info("{}", request);
-        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(request.getSceneId());
+        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
+        if (CollectionUtil.isEmpty(translatedSceneIds)) {
+            return new ArrayList<>();
+        }
+        List<String> userIds = scenePluginCloudSceneService.getRecordingUsers(translatedSceneIds.get(0), request.getElementIds());
         List<UserModel> users = userIds.stream().map(id -> UserUtils.getUser(id)).collect(Collectors.toList());
         return users;
     }
