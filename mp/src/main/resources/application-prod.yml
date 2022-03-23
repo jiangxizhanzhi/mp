@@ -108,6 +108,12 @@ mp:
       agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
       agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       task-enable: true
+  collection:
+    #自定义探针配置
+    default-interval: 180s
+    probes:
+      - probe-name: get_virtual_info.py
+        interval: 180s
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
