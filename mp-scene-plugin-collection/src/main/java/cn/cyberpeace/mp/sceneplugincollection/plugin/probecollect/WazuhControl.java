@@ -44,6 +44,9 @@ public class WazuhControl {
     public static final String OS_TYPE_WINDOWS = "windows";
     public static final String OS_TYPE_LINUX = "linux";
 
+    public static final String COMMAND_MATCHER_AR = "ar";
+    public static final String COMMAND_MATCHER_CMD = "cmd";
+
     public static final String CMD_OUTPUT_FORMAT_JSON = "json";
     public static final String CMD_OUTPUT_FORMAT_PLAIN = "plain";
     public static final String CMD_OUTPUT_FORMAT_NONE = "none";
@@ -189,7 +192,7 @@ public class WazuhControl {
             activeResponseHttpData.setCommand("!ar-launcher.py");
         }
         var launchInput = new LaunchInput();
-        launchInput.setMatcher("ar");
+        launchInput.setMatcher(COMMAND_MATCHER_AR);
         launchInput.setGroup(launchInput.getMatcher());
         launchInput.setId(runCommandItem.getRunId());
         launchInput.setOutputFormat(runCommandItem.getOutputFormat());
@@ -354,6 +357,7 @@ public class WazuhControl {
         private String action;
         private final String type = CONTROL_ACTION_TYPE_SCRIPT;
         private String group;
+        private final String matcher = COMMAND_MATCHER_CMD;
         private String scriptUrl;
         private String scriptContent;
         private String scriptSuffix;
