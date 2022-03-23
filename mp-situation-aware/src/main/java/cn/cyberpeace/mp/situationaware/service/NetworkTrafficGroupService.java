@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -52,6 +53,9 @@ public class NetworkTrafficGroupService {
      * 索引前缀
      */
     private static String indexPrefix = "mp_";
+
+    @Autowired
+    private FlowAnalysisService flowAnalysisService;
 
     /**
      * 查询底层所有分组数据
@@ -119,6 +123,8 @@ public class NetworkTrafficGroupService {
         deleteParam.put("containers", containerArray);
         try {
             HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
+            flowAnalysisService.delete(Arrays.asList(groupId));
+
         } catch (IOException e) {
             log.error("deleete  arkime Image instance error");
             log.error(SituationalAwareErrorCode.ARKIME_DELETE_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
