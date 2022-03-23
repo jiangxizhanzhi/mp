@@ -108,6 +108,12 @@ mp:
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
+  collection:
+    #自定义探针配置
+    default-interval: 180s
+    probes:
+      - probe-name: get_virtual_info.py
+        interval: 180s
 
   log:
     es-nodes: ${ip.es}:9205
