@@ -60,6 +60,10 @@ public class HandlerUtils {
         return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
     }
 
+    public static String genResourceName(String name, int index) {
+        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name, index);
+    }
+
     /**
      * 确认连接使用的辅助网络所在节点
      * @param cloudElement 源节点

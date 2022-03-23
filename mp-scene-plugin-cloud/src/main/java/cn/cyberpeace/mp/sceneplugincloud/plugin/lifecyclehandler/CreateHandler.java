@@ -27,9 +27,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
@@ -150,13 +150,15 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-        cloudElement.getDeriveNetworks().forEach(connectedNetwork -> {
+        List<ConnectedNetworkBO> networks = cloudElement.getDeriveNetworks();
+        int index = 1;
+        for (ConnectedNetworkBO connectedNetwork : networks) {
             if (StringUtils.isNotEmpty(connectedNetwork.network.getResourceId())) {
                 return;
             }
             var srcElement = cloudElement.getSrcElement();
             var createData = new VirtualSwitchCreateData();
-            createData.setName(HandlerUtils.genResourceName(srcElement.getEid()));
+            createData.setName(HandlerUtils.genResourceName(srcElement.getEid(), index++));
             createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
             if (Boolean.TRUE.equals(connectedNetwork.network.getVlan())) {
                 createData.setSegmentationId(IntUtils.zeroNull(connectedNetwork.network.getVlanId()));
@@ -205,7 +207,7 @@ public class CreateHandler extends HandlerCommon {
                 }
             });
             createAuxiliaryNetworkRouter(cloudElement, connectedNetwork.network);
-        });
+        }
     }
 
     private void createAuxiliaryNetworkRouter(CloudPluginSceneElementBO cloudElement, CloudPluginSceneElementNetworkBO network) {
