@@ -69,6 +69,9 @@ public class WazuhControl {
     public static final String CONTROL_ACTION_TYPE_SCRIPT = "script";
     public static final String CONTROL_ACTION_TYPE_LOG = "log";
 
+    public static final String SCRIPT_DISABLED_NO = "no";
+    public static final String SCRIPT_DISABLED_YES = "yes";
+
     public static final String SCRIPT_SUFFIX_PY = "py";
     public static final String SCRIPT_SUFFIX_BAT = "bat";
     public static final String SCRIPT_SUFFIX_SH = "sh";
@@ -430,6 +433,7 @@ public class WazuhControl {
         private final String type = CONTROL_ACTION_TYPE_SCRIPT;
         private String group;
         private final String matcher = COMMAND_MATCHER_CMD;
+        private String disabled = SCRIPT_DISABLED_NO;
         private String scriptUrl;
         private String scriptContent;
         private String scriptSuffix;
