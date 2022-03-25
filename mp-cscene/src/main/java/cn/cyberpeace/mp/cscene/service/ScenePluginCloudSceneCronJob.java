@@ -17,7 +17,7 @@ import java.util.List;
  * @Author hewei
  * @Date：2022/3/9 16:37
  */
-@Component
+//@Component
 @Slf4j
 public class ScenePluginCloudSceneCronJob {
     private final ContainerClearJob containerClearJob = new ContainerClearJob();
