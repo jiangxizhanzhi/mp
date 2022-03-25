@@ -98,11 +98,6 @@ mp:
       #wazuh 开放接口用户名密码
       username: ${WAZUH_USERNAME:wazuh}
       password: ${WAZUH_PASSWORD:wazuh}
-      #wazuh es地址用户名密码
-#       es-url: ${ip.wazuh}
-#       es-port: ${WAZUH_ES_PORT:9200}
-#       es-username: ${WAZUH_ES_USERNAME:admin}
-#       es-password: ${WAZUH_ES_PASSWORD:admin}
     wazuh-probe-manager:
       url: http://${ip.wazuh}:${WAZUH_PORT:8002}
       agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
