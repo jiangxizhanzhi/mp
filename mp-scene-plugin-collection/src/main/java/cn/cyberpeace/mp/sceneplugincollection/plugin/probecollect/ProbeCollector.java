@@ -42,8 +42,9 @@ public class ProbeCollector {
     public void deleteCollector(String collectorId) {
     }
 
-    public String generateProbeInstallScript(String systemType, String agentName, String collectorId) {
-        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId));
+    public String generateProbeInstallScript(String systemType, String agentName, String collectorId,
+                                             List<WazuhControl.ControlProbeParam> controlProbeParams) {
+        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlProbeParams);
     }
 
 }

@@ -116,6 +116,15 @@
         </if>
     </select>
 
+    <select id="queryByProbeIds" parameterType="java.util.List"
+            resultMap="ResultMapWithBLOBs">
+        select * from mp_situation_probe
+        where del_flag != 1 AND id IN
+        <foreach collection="probeIds" item="probeId" index="index" open="(" close=")" separator=",">
+            #{probeId}
+        </foreach>
+    </select>
+
     <update id="updateByProbeId" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
         update mp_situation_probe
         set probe_name       = #{probeName,jdbcType=VARCHAR},

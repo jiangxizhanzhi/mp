@@ -23,6 +23,10 @@ public class Probe {
     private Integer status;
     @ApiModelProperty(value = "状态描述")
     private String statusText;
+    @ApiModelProperty(value = "采集时间间隔,单位:秒")
+    private Integer interval;
+    @ApiModelProperty(value = "是否开启探针")
+    private Boolean disabled;
 
     @Data
     public static class Param {
@@ -34,6 +38,8 @@ public class Probe {
         private String description;
         @ApiModelProperty(value = "默认值")
         private String defaultValue;
+        @ApiModelProperty(value = "自定义值")
+        private String value;
     }
 
     public static class Status {

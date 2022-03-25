@@ -23,6 +23,8 @@ public class WazuhProbeConfig {
     @Data
     public static class NewProbe {
         private String probeName;
+        private String id;
         private String interval;
+        private String outputFormat;
     }
 }
