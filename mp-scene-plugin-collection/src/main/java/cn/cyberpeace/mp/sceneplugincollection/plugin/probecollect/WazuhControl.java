@@ -47,6 +47,8 @@ public class WazuhControl {
     public static final String COMMAND_MATCHER_AR = "ar";
     public static final String COMMAND_MATCHER_CMD = "cmd";
 
+    public static final String COMMAND_RAW_OUTPUT_KEY = "raw_output";
+
     public static final String CMD_OUTPUT_FORMAT_JSON = "json";
     public static final String CMD_OUTPUT_FORMAT_PLAIN = "plain";
     public static final String CMD_OUTPUT_FORMAT_NONE = "none";
@@ -57,12 +59,18 @@ public class WazuhControl {
     public static final String WINDOWS_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\probe-control.bat";
     public static final String LINUX_CONTROL_SCRIPT_PATH = "/var/ossec/bin/probe-control.py";
 
+    public static final String WINDOWS_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\probe-query.bat";
+    public static final String LINUX_QUERY_SCRIPT_PATH = "/var/ossec/bin/probe-query.py";
+
     public static final String CONTROL_ACTION_ADD = "add";
     public static final String CONTROL_ACTION_REMOVE = "remove";
     public static final String CONTROL_ACTION_ENABLE = "enable";
     public static final String CONTROL_ACTION_DISABLE = "disable";
     public static final String CONTROL_ACTION_TYPE_SCRIPT = "script";
     public static final String CONTROL_ACTION_TYPE_LOG = "log";
+
+    public static final String SCRIPT_DISABLED_NO = "no";
+    public static final String SCRIPT_DISABLED_YES = "yes";
 
     public static final String SCRIPT_SUFFIX_PY = "py";
     public static final String SCRIPT_SUFFIX_BAT = "bat";
@@ -214,21 +222,23 @@ public class WazuhControl {
 
         handleFailResult(response);
 
-        Integer waitOutputSeconds = runCommandItem.getWaitOutputSeconds();
-        if (waitOutputSeconds != null && waitOutputSeconds.compareTo(0) > 0) {
-            try {
-                Thread.sleep(waitOutputSeconds * 1000L);
-            } catch (InterruptedException e) {
-                log.error("Wait wazuh agent command output interrupted: ", e);
-            }
+        if (Boolean.TRUE.equals(runCommandItem.getCheckOutput())) {
+            for (var i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
+                try {
+                    Thread.sleep(runCommandItem.getCheckOutputInterval());
+                } catch (InterruptedException e) {
+                    log.error("Wait wazuh agent command output interrupted: ", e);
+                }
 
-            var launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(),
-                    runCommandItem.getRunId());
-            if (launchAlert != null) {
-                runCommandItem.setOutput(launchAlert.getData().getSicLaunchOutput());
-                runCommandItem.setError(launchAlert.getData().getSicLaunchError());
-            } else {
-                runCommandItem.setError("Output not found, maybe you should wait a while");
+                var launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(),
+                        runCommandItem.getRunId());
+                if (launchAlert != null) {
+                    runCommandItem.setOutput(launchAlert.getData().getSicLaunchOutput());
+                    runCommandItem.setError(launchAlert.getData().getSicLaunchError());
+                    break;
+                } else {
+                    runCommandItem.setError("Output not found, maybe you should wait a while");
+                }
             }
         }
     }
@@ -314,6 +324,16 @@ public class WazuhControl {
         }
     }
 
+    public static String genQueryConfigCommand(String osType) {
+        String queryScriptPath;
+        if (OS_TYPE_WINDOWS.equals(osType)) {
+            queryScriptPath = WINDOWS_QUERY_SCRIPT_PATH;
+        } else {
+            queryScriptPath = LINUX_QUERY_SCRIPT_PATH;
+        }
+        return String.format("%s", queryScriptPath);
+    }
+
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
         Map<String, List<RunCommandItem>> nameItemsMap = new HashMap<>();
         for (var runCommandItem : runCommandItems) {
@@ -351,6 +371,61 @@ public class WazuhControl {
         return runCommandItem;
     }
 
+    public QueryConfigData queryConfig(String agentName, String osType) {
+        var runCommandItem = new RunCommandItem();
+        runCommandItem.setAgentName(agentName);
+        runCommandItem.setOsType(osType);
+        runCommandItem.setCommand(genQueryConfigCommand(osType));
+        runCommandItem.setCheckOutput(true);
+        runCommandItem.setCheckOutputTime(5);
+        runCommandItem.setCheckOutputInterval(5000);
+        runCommand(List.of(runCommandItem));
+
+        var error = runCommandItem.getError();
+        if (!StringUtils.isEmpty(error)) {
+            log.error("Query agent({}) osType({}) config error: {}", agentName, osType, error);
+        }
+
+        var output = runCommandItem.getOutput();
+        if (output == null) {
+            return null;
+        }
+        var rawOutput = output.getOrDefault(COMMAND_RAW_OUTPUT_KEY, null);
+        if (rawOutput == null) {
+            return null;
+        }
+
+        QueryConfigData configData = null;
+        try {
+            configData = JsonCommon.snakeParse((String) rawOutput, new TypeReference<QueryConfigData>(){});
+        } catch (Exception e) {
+            log.error("Query agent({}) osType({}) config parse raw output({}) error: {}", agentName, osType, rawOutput,
+                    e);
+        }
+
+        return configData;
+    }
+
+    @Data
+    public static class QueryConfigData {
+        private List<QueryConfigScriptInfo> scriptInfo;
+        private List<QueryConfigLogInfo> logInfo;
+    }
+
+    @Data
+    public static class QueryConfigScriptInfo {
+        private String key;
+        private String disabled;
+        private String interval;
+    }
+
+    @Data
+    public static class QueryConfigLogInfo {
+        private String key;
+        private String logFormat;
+        private String location;
+    }
+
     @Data
     public static class ControlProbeParam {
         private String id;
@@ -358,6 +433,7 @@ public class WazuhControl {
         private final String type = CONTROL_ACTION_TYPE_SCRIPT;
         private String group;
         private final String matcher = COMMAND_MATCHER_CMD;
+        private String disabled = SCRIPT_DISABLED_NO;
         private String scriptUrl;
         private String scriptContent;
         private String scriptSuffix;
@@ -458,7 +534,9 @@ public class WazuhControl {
         /** required */
         private String command;
         private String outputFormat;
-        private Integer waitOutputSeconds;
+        private Boolean checkOutput;
+        private Integer checkOutputTime;
+        private Integer checkOutputInterval;
 
         private String runId;
         private String agentId;
@@ -471,6 +549,12 @@ public class WazuhControl {
             }
             if (StringUtils.isEmpty(outputFormat)) {
                 outputFormat = CMD_OUTPUT_FORMAT_NONE;
+            }
+            if (checkOutputTime == null) {
+                checkOutputTime = 1;
+            }
+            if (checkOutputInterval == null) {
+                checkOutputTime = 5000;
             }
         }
     }

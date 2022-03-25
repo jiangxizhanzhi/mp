@@ -3,9 +3,13 @@ package cn.cyberpeace.mp.base.util.basic;
 import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 public class TextUtils {
     private static final Pattern linePattern = Pattern.compile("_([a-z])");
@@ -89,7 +93,47 @@ public class TextUtils {
     }
 
     public static String decodeBase64(String str) {
-        return new String(base64Decoder.decode(str), StandardCharsets.UTF_8);
+        return new String(rawDecodeBase64(str), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] rawDecodeBase64(String str) {
+        return base64Decoder.decode(str);
+    }
+
+    public static byte[] rawDecompress(byte[] bytesToDecompress) {
+        byte[] returnValues = null;
+
+        var inflater = new Inflater();
+        int numberOfBytesToDecompress = bytesToDecompress.length;
+        inflater.setInput(bytesToDecompress, 0, numberOfBytesToDecompress);
+        int bufferSizeInBytes = numberOfBytesToDecompress;
+        int numberOfBytesDecompressedSoFar = 0;
+        List<Byte> bytesDecompressedSoFar = new ArrayList<>();
+        try {
+            while (!inflater.needsInput()) {
+                var bytesDecompressedBuffer = new byte[bufferSizeInBytes];
+                int numberOfBytesDecompressedThisTime = inflater.inflate(bytesDecompressedBuffer);
+                numberOfBytesDecompressedSoFar += numberOfBytesDecompressedThisTime;
+                for (var b = 0; b < numberOfBytesDecompressedThisTime; b++) {
+                    bytesDecompressedSoFar.add(bytesDecompressedBuffer[b]);
+                }
+            }
+
+            returnValues = new byte[bytesDecompressedSoFar.size()];
+            for (var b = 0; b < returnValues.length; b++) {
+                returnValues[b] = (byte)(bytesDecompressedSoFar.get(b));
+            }
+        } catch (DataFormatException dfe) {
+            dfe.printStackTrace();
+        }
+        inflater.end();
+
+        return returnValues;
+    }
+
+    public static String decompress(byte[] bytesToDecompress) {
+        byte[] bytesDecompressed = rawDecompress(bytesToDecompress);
+        return new String(bytesDecompressed, StandardCharsets.UTF_8);
     }
 
 }

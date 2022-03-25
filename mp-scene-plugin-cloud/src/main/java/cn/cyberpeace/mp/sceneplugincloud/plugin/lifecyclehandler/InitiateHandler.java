@@ -744,6 +744,14 @@ public class InitiateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.INITIATE_PORTS, () -> runTasks(initiateOtherElementPortsTasks));
         }
 
+        // 核心路由器连接的网络需要关闭dhcp
+        cloudElements.forEach(cloudElement -> {
+            if (cloudElement.getCoreType() == CoreType.ROUTER && cloudElement.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+                cloudElement.getDeriveNetworks().forEach(n -> n.network.setDhcp(false));
+                cloudElement.getAccessNetworks().forEach(n -> n.network.setDhcp(false));
+            }
+        });
+
         // 存在需要重新分配的ip，重新分配ip
         var requireReallocateIpPorts = getReallocateIpPorts();
         if (!requireReallocateIpPorts.isEmpty()) {

@@ -7,6 +7,7 @@ import javax.net.SocketFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -48,6 +49,9 @@ public abstract class ProtocolProbe {
             return this.checkServerInfo(result);
         } catch (SocketTimeoutException e) {
             log.info("failed to connect {}//{}:{} , read timeout", protocol, host, port);
+            return false;
+        } catch (ConnectException e) {
+            log.info("failed to connect {}//{}:{} , connect exception", protocol, host, port);
             return false;
         } catch (Exception e) {
             log.error("failed to connect {}//{}:{}", protocol, host, port, e);

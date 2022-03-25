@@ -587,6 +587,7 @@ public abstract class BaseSceneHandler<
         }
         Map<String, E> elementIdElementBOMap = elementMap.values().stream().collect(
                 Collectors.toMap(EidBO::getEid, element -> element));
+        Collections.sort(elementPorts, Comparator.comparingInt(BaseSceneElementPortModel::getOrder));
         elementPorts.forEach(elementPort -> {
             var elementBO = elementIdElementBOMap.getOrDefault(elementPort.getSceneElement(), null);
             if (elementBO == null) {
@@ -970,7 +971,9 @@ public abstract class BaseSceneHandler<
             if (elementPorts == null) {
                 return;
             }
-
+            for (int i = 0; i < elementPorts.size(); i++) {
+                elementPorts.get(i).setOrder(i + 1);
+            }
             String elementId = element.getEid();
             elementPorts.forEach(elementPortBO -> {
                 P0 elementPort = elementPortBO.toModel();
