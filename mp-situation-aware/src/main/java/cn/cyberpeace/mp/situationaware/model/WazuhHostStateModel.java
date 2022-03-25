@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WazuhModel {
+public class WazuhHostStateModel {
 
     @JSONField(name = "MemoryTotal")
     @ApiModelProperty("总内存")

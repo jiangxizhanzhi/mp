@@ -18,7 +18,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
-import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -56,7 +56,7 @@ public class HostStateService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneTranslationService sceneIdTranslationService;
+    private SceneTranslationService sceneTranslationService;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -147,7 +147,7 @@ public class HostStateService {
 
         // 执行查询
         log.info("dataCollection query start");
-        List<WazuhModel> result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
+        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         log.info("dataCollection query end");
         List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
@@ -225,7 +225,7 @@ public class HostStateService {
             segmentCount = 10;
         }
 
-        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
@@ -292,7 +292,7 @@ public class HostStateService {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
-        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
     }
 
@@ -303,7 +303,7 @@ public class HostStateService {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
-        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
         List<Process> processes = listResult.getSource().getList();
         // KB -> MB

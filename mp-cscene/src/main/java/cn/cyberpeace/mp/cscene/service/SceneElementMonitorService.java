@@ -1,17 +1,25 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +54,12 @@ public class SceneElementMonitorService {
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private SceneTranslationService sceneTranslationService;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -75,6 +90,29 @@ public class SceneElementMonitorService {
         elementMonitorBasicInfo.setRtInfo(rtInfo);
 
         return elementMonitorBasicInfo;
+    }
+
+    public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.ensure();
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+        if (!checkCsceneIsRunning(pageRequest.getSceneId())) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
+
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+        listPageInfoQueryParams.setPage(pageRequest.getPage());
+        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
+        ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
+
+        List<ConnectionState> connectionStates = new ArrayList<>();
+        if (Objects.nonNull(netConns.getSource()) && CollectionUtil.isNotEmpty(netConns.getSource().getList())) {
+            List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
+            connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
     }
 
 
@@ -201,4 +239,25 @@ public class SceneElementMonitorService {
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
+
+    private boolean checkCsceneIsRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        return sceneStateInfo.isRunning();
+    }
+
+    private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
+        ConnectionState connectionState = new ConnectionState();
+        connectionState.setState(model.getStatus());
+        connectionState.setProtocol(model.getProto());
+        connectionState.setPid(model.getPid());
+
+        connectionState.setLocalAddress(model.getLaddrIp());
+        connectionState.setLocalPort(model.getLaddrPort());
+
+        connectionState.setForeignAddress(model.getRaddrIp());
+        connectionState.setForeignPort(model.getRaddrPort());
+
+        return connectionState;
+    }
 }
