@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,11 @@ import java.util.Map;
  */
 public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
 
-    private final VirtualMachine vmClient = new VirtualMachine();
+    private VirtualMachine vmClient = new VirtualMachine();
+
+    public VmClearJob(SceneElementMapper sceneElementMapper) {
+        super(sceneElementMapper);
+    }
 
     @Override
     protected Map<String, VirtualMachineGetData> getEid2Node(List<VirtualMachineGetData> vms) {
