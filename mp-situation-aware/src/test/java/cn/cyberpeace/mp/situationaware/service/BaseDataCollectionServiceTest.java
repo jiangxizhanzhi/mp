@@ -133,7 +133,7 @@ public class BaseDataCollectionServiceTest {
     @Test
     public void testQueryMonitorEventsAgg() {
         WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
-        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "windows_agent1"));
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "controller1"));
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         dataCollectionService.queryMonitorEventsAgg(wazuhEventRequest);

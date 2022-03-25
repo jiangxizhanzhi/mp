@@ -38,8 +38,8 @@ public class SegmentCount2IntervalSecondsUtil {
 
         Duration duration = Duration.between(start, end);
         Long seconds = duration.toSeconds();
-        // 时间间隔(segmentCount -1)
-        Long intervalSeconds = seconds / (segmentCount - 1);
+        // 时间间隔(segmentCount -1)，为确保余数，再加上1
+        Long intervalSeconds = seconds / (segmentCount - 1) + 1;
 
         /*List<LocalDateTime> timeSegs = new ArrayList<>();
         for (int i = 0; i < segmentCount - 1; i++) {

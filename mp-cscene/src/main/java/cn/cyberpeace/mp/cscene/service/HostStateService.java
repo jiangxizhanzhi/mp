@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -91,11 +91,15 @@ public class HostStateService {
             HostState hs = new HostState();
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+
             hs.setMemoryFree(hostStateBO.getMemoryFree());
             hs.setMemoryTotal(hostStateBO.getMemoryTotal());
             // todo 节点内存利用率 统一为Double？
-//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
+            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
+
             hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setDiskPercent(hostStateBO.getDiskPercent());
+
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());
@@ -153,7 +157,7 @@ public class HostStateService {
             hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
             hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
             // 磁盘统一使用单位G
-            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskSpace()));
+            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
             hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
             hostStateBO.setTime(srcHostState.getTime());
             // todo 进程，端口，网络连接，磁盘使用率
@@ -233,16 +237,16 @@ public class HostStateService {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
 
         List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
-        Map<LocalDateTime, HostState> hostStateMap = new HashMap<>();
-        for (LocalDateTime localDateTime : timeList) {
+        Map<LocalDateTime, HostState> hostStateMap = new LinkedHashMap<>();
+        for (LocalDateTime time : timeList) {
             HostState hostState = new HostState();
             // 初始化
-            hostState.setTime(localDateTime);
+            hostState.setTime(time);
             hostState.setCpuPercent(0.0);
             hostState.setMemoryPercent(0.0);
             // todo diskPercent
             hostState.setDiskPercent(0.0);
-            hostStateMap.put(localDateTime, hostState);
+            hostStateMap.put(time, hostState);
         }
 
         // cpu
@@ -259,20 +263,18 @@ public class HostStateService {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
-                    // todo 在这造磁盘模拟数据
-                    hostStateMap.get(bo.getStart()).setDiskPercent(30.0);
                 }
             }
         }
 
         // 磁盘
-        /*if (Objects.nonNull(intervalDiskPercentBOs)) {
+        if (Objects.nonNull(intervalDiskPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setDiskPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
-        }*/
+        }
 
         List<HostState> hostStates = new ArrayList<>();
         hostStateMap.entrySet().forEach(entry -> {

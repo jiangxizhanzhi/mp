@@ -154,6 +154,7 @@ public class SceneElementMonitorService {
                 HostState hostState = hostStates.get(0);
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
+                resource.setMemoryFree(hostState.getMemoryFree());
                 resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
             }
             basicInfo.setHostState(resource);

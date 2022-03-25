@@ -13,12 +13,30 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -49,7 +67,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -174,8 +200,8 @@ public class ScenePluginCollectionSceneService {
         // 构建查询参数
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
-        // todo 暂时最多取 10000 条
-        request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(10000));
+        // todo 暂时最多取 1000 条
+        request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
         request.setAgentNames(new ArrayList<>(agentName2Element.keySet()));
         // 开始时间,默认为场景创建时间
         request.setStartTime(Optional.ofNullable(queryParams.getStartTime())
@@ -195,9 +221,10 @@ public class ScenePluginCollectionSceneService {
             // 内存统一使用单位M
             hostState.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
             hostState.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
-            // 磁盘统一使用单位G
-            hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskSpace()));
             hostState.setMemoryPercent(srcHostState.getMemoryPercent());
+            // 磁盘统一使用单位G
+            hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
+            hostState.setDiskPercent(srcHostState.getDiskPercent());
             hostState.setTime(srcHostState.getTime());
             // todo 进程，端口，网络连接，磁盘使用率
             var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
@@ -621,7 +648,7 @@ public class ScenePluginCollectionSceneService {
     public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgHostMemoryPercent(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
-        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent().doubleValue());
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getMemoryPercent());
         return new ServiceResult<>(result);
     }
 
@@ -638,7 +665,8 @@ public class ScenePluginCollectionSceneService {
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalNumber) {
         // todo 主机磁盘使用率
-        return new ServiceResult<>(null);
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgBy(sceneIds, nodeIds, startTime, endTime, intervalNumber, (state) -> state.getDiskPercent());
+        return new ServiceResult<>(result);
     }
 
     /**
