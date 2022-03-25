@@ -357,12 +357,15 @@ public class InitiateHandler extends HandlerCommon {
                 connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
             }
 
+            Set<String> portIps = new HashSet<>();
             // todo
             int requireCount = 1;
             int gatewayCount = 0;
             for (var port : connectedNetwork.getFromPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
                     requireCount++;
+                } else {
+                    portIps.add(port.getIp());
                 }
             }
             for (var port : connectedNetwork.getToPorts()) {
@@ -373,6 +376,8 @@ public class InitiateHandler extends HandlerCommon {
                     } else {
                         requireCount++;
                     }
+                } else {
+                    portIps.add(port.getIp());
                 }
             }
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
@@ -384,7 +389,10 @@ public class InitiateHandler extends HandlerCommon {
             }
             List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
-            ipPool.add(network.getGateway());
+            if (!portIps.contains(network.getGateway())) {
+                // 网关未分配 则放入地址池的最后等待分配
+                ipPool.add(network.getGateway());
+            }
             network.setIpPool(ipPool);
         });
     }
