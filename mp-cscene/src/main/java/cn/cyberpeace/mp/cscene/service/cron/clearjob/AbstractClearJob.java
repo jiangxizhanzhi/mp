@@ -27,8 +27,8 @@ public abstract class AbstractClearJob<Q> {
 
     private SceneElementMapper sceneElementMapper;
 
-    public AbstractClearJob() {
-        this.sceneElementMapper = BeanCommon.getBean(SceneElementMapper.class);
+    public AbstractClearJob(SceneElementMapper sceneElementMapper) {
+        this.sceneElementMapper = sceneElementMapper;
     }
 
     public void action() {

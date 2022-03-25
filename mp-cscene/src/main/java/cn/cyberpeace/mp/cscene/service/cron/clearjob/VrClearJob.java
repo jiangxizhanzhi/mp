@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterGetData;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,11 @@ import java.util.Map;
  */
 public class VrClearJob extends AbstractClearJob<VirtualRouterGetData> {
 
-    private final VirtualRouter vrClient = new VirtualRouter();
+    private VirtualRouter vrClient = new VirtualRouter();
+
+    public VrClearJob(SceneElementMapper sceneElementMapper) {
+        super(sceneElementMapper);
+    }
 
     @Override
     protected Map<String, VirtualRouterGetData> getEid2Node(List<VirtualRouterGetData> vrs) {

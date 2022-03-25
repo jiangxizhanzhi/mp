@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetData;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,11 @@ import java.util.Map;
  */
 public class ContainerClearJob extends AbstractClearJob<ContainerGetData> {
 
-    private final Container containerClient = new Container();
+    private Container containerClient = new Container();
+
+    public ContainerClearJob(SceneElementMapper sceneElementMapper) {
+        super(sceneElementMapper);
+    }
 
     @Override
     protected Map<String, ContainerGetData> getEid2Node(List<ContainerGetData> containers) {
