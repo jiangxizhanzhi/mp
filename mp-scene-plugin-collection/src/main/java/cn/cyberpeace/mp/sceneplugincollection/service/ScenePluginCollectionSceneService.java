@@ -307,7 +307,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByLevel(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime,null);
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.LEVEL, startTime, endTime,null,null);
     }
 
     /**
@@ -319,8 +319,8 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<安全等级, 该字段值统计数量>
      */
     public ServiceResult<Map<String, Integer>> groupCountFlowByType(
-            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps) {
-        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime,sourceIps);
+            List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,List<String> sourceIps, Integer topSize) {
+        return groupCountFlow(sceneIds, nodeIds, GroupCountFlowField.TYPE, startTime, endTime,sourceIps,topSize);
     }
 
 
@@ -824,7 +824,7 @@ public class ScenePluginCollectionSceneService {
      * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
      */
     private <T> ServiceResult<Map<T, Integer>> groupCountFlow(
-            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps) {
+            List<String> sceneIds, List<String> nodeIds, String groupField, LocalDateTime startTime, LocalDateTime endTime, List<String> sourceIps, Integer topSize) {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         if (GroupCountFlowField.LEVEL.equals(groupField)) {
             request.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_SEVERITY);
@@ -845,6 +845,7 @@ public class ScenePluginCollectionSceneService {
             request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
+        request.setTopSize(topSize);
         List<AttackWayAggregationBO> result = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(result)) {
             return new ServiceResult<>(new HashMap<>());
