@@ -112,8 +112,14 @@ mp:
     #自定义探针配置
     default-interval: 180s
     probes:
-      - probe-name: get_virtual_info.py
+      - probe-name: get_host_info.py
+        id: eda72998ba654c8d8625f61eaa918eb3
         interval: 180s
+        outputFormat: plain
+      - probe-name: get_net_conns.py
+        id: 09ffcc4a67ef4accb407a1555629d0f8
+        interval: 180s
+        outputFormat: none
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login

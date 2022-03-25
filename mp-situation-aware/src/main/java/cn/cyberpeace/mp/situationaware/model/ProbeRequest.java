@@ -50,4 +50,7 @@ public class ProbeRequest {
 
     @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换")
     private List<ProbeParamsRequest> paramsResultList;
+
+    @ApiModelProperty(value = "探针数据输出格式 json plain none")
+    private String outputFormat;
 }
