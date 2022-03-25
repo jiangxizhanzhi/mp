@@ -380,7 +380,10 @@ public class CreateHandler extends HandlerCommon {
 
         var accessModes = sampleCloudPort.getAccessModes();
         if (accessModes != null && !accessModes.isEmpty()) {
-            virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
+            var legalAccessModes = accessModes.stream()
+                    .filter(m -> StringUtils.isNotEmpty(m.getProtocol()))
+                    .collect(Collectors.toList());
+            virtualNic.setAccessModes(legalAccessModes.stream().map(accessMode -> {
                 var accessModeParam = new VirtualNic.AccessMode();
                 accessModeParam.setProtocol(accessMode.getProtocol());
                 accessModeParam.setPort(accessMode.getPort());

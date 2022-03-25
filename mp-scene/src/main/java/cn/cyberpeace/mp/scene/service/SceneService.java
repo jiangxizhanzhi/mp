@@ -44,6 +44,9 @@ public class SceneService {
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
             sceneHandler.setRealTimeUpdate(true);
+            if (sceneHandler.getScene() != null) {
+                sceneHandler.getScene().setCreateTime(null);
+            }
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
