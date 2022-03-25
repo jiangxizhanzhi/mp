@@ -31,9 +31,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -75,6 +73,7 @@ public class ProbeService {
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        probeModel.setOutputFormat(probeRequest.getOutputFormat());
         var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
         if (Boolean.TRUE.equals(probeExist)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
@@ -144,6 +143,26 @@ public class ProbeService {
         return probeResult;
     }
 
+    public List<ProbeResult> queryProbeByIds(List<String> ids) {
+        List<ProbeModel> probeModels = probeModelMapper.queryByProbeIds(ids);
+        if (Objects.isNull(probeModels)) {
+            return null;
+        }
+        Map<String, ProbeModel> probeId2Probe = new HashMap<>();
+        probeModels.forEach(probeModel -> {
+            probeId2Probe.put(probeModel.getId(), probeModel);
+        });
+        List<ProbeResult> results = probeModels.stream().map(m -> {
+            ProbeResult result = new ProbeResult();
+            BeanUtils.copyProperties(m, result);
+            return result;
+        }).collect(Collectors.toList());
+        results.forEach(result -> {
+            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
+        });
+        return results;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public int modifyProbe(ProbeRequest probeRequest) {
         ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
@@ -165,6 +184,7 @@ public class ProbeService {
         probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
         probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
+        probeModel.setOutputFormat(mergedRequest.getOutputFormat());
         //是否存在保证name去重
         var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
         if (Boolean.TRUE.equals(probeExist)) {
@@ -232,6 +252,7 @@ public class ProbeService {
         mergedRequest.setProbeCategory(queryModel.getProbeCategory());
         mergedRequest.setScriptType(ScriptType.values()[queryModel.getScriptType()]);
         mergedRequest.setScriptContent(new String(queryModel.getScriptContent(), StandardCharsets.UTF_8));
+        mergedRequest.setOutputFormat(queryModel.getOutputFormat());
         return mergedRequest;
     }
 

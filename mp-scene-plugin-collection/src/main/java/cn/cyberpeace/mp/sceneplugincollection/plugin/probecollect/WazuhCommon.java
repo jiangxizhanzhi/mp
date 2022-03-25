@@ -38,7 +38,8 @@ public class WazuhCommon {
 
     private WazuhCommon() {}
 
-    public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost) {
+    public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
+                                                         List<WazuhControl.ControlProbeParam> controlProbeParams) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -47,7 +48,6 @@ public class WazuhCommon {
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
 
-        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         String finalAgentName = agentName;
@@ -55,7 +55,7 @@ public class WazuhCommon {
             String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
                     nameFileMap.getOrDefault(newProbe.getProbeName(), StringUtils.EMPTY));
             WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
-            controlProbeParam.setId(TextUtils.uuid());
+            controlProbeParam.setId(newProbe.getId());
             controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
             controlProbeParam.setGroup(finalAgentName);
             controlProbeParam.setScriptUrl(url);
@@ -66,7 +66,7 @@ public class WazuhCommon {
             } else if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_SH)) {
                 controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
             }
-            controlProbeParam.setOutputFormat(WazuhControl.CMD_OUTPUT_FORMAT_PLAIN);
+            controlProbeParam.setOutputFormat(newProbe.getOutputFormat());
             if (newProbe.getInterval() != null) {
                 controlProbeParam.setInterval(newProbe.getInterval());
             } else {
@@ -86,15 +86,15 @@ public class WazuhCommon {
                                     SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
                             String.format("cd %s\\agent-installer\\agent-windows",
                                     SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
-                            "install.bat",
+                            "call install.bat",
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
                             String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
                             "cd C:\\wazuha",
-                            "config.bat",
-                            probeCommand,
-                            "start.bat"
+                            "call config.bat",
+                            "call " + probeCommand,
+                            "call start.bat"
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
