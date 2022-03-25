@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -315,6 +316,8 @@ public class WazuhControl {
         }
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
+        } else {
+            scriptParams = Arrays.asList(scriptParams.get(0));
         }
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
         if (restart) {
