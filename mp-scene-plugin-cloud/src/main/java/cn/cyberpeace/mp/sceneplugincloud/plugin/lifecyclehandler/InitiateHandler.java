@@ -633,8 +633,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             if (StringUtils.isEmpty(cidrDivideIp)) {
                 // 未设置ip值,使用默认网段的网络
-                boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
-                        && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+                boolean isCoreRouter = this.isCoreRouter(cloudElement);
                 if (isCoreRouter) {
                     // 如果是核心路由器 每个端口分配一个网络
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -664,12 +663,43 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-            cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+        List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
+        if (this.isCoreRouter(cloudElement)) {
+            // 核心路由 每个端口都接网络
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+            }
+            cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
+            cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+        } else {
+            // 其余 有连线才接网络
+            for (ConnectedNetworkBO n : noCidrNetwork) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
+                deriveNetworks.add(defaultConnectedNetwork);
+            }
+            // 至少有个网络
+            if (CollectionUtils.isEmpty(deriveNetworks)) {
+                deriveNetworks.add(defaultConnectedNetwork);
+            }
+            cloudElement.setDeriveNetworks(deriveNetworks);
         }
-        cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
-        cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+
         initiateAuxiliaryNetwork(cloudElement);
+    }
+
+    private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
+        boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+                && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+        return isCoreRouter;
     }
 
     public void initCoreType(CloudPluginSceneElementBO element) {
