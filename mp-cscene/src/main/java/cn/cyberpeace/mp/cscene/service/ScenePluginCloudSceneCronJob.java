@@ -25,7 +25,7 @@ public class ScenePluginCloudSceneCronJob {
     private final NetClearJob netClearJob = new NetClearJob();
     private final VrClearJob vrClearJob = new VrClearJob();
 
-    @Scheduled(cron = "0 0 0 * * ?")
+//    @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleNode() {
         List<AbstractClearJob> jobs = new ArrayList<>() {{
             this.add(containerClearJob);
