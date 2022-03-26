@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
@@ -35,7 +37,7 @@ public final class NodeLimitUtils {
      * @param instance
      * @return
      */
-    public static boolean addLimitedNodeCount(CsceneInstanceHandler instance) {
+    public static UpdateResult addLimitedNodeCount(CsceneInstanceHandler instance) {
         int limitedNodeCount = countVirtualElement(instance);
         return addLimitedNodeCount(limitedNodeCount);
     }
@@ -55,26 +57,40 @@ public final class NodeLimitUtils {
      * @param count
      * @return
      */
-    public static boolean addLimitedNodeCount(int count) {
+    public static UpdateResult addLimitedNodeCount(int count) {
         if (csceneAppConfig == null) {
             csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
         }
         return updateElementCount(count);
     }
 
-    private synchronized static boolean updateElementCount(int count) {
+    public synchronized static void refreshCount(int count) {
+        log.info("refresh node limit count , origin count: {} , {}", SCENE_USING_NODE_LIMIT, NODE_COUNT);
+        SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
+        NODE_COUNT = count;
+        log.info("refresh node limit count , new count: {} , {}", SCENE_USING_NODE_LIMIT, count);
+    }
+
+    private synchronized static UpdateResult updateElementCount(int count) {
         if (SCENE_USING_NODE_LIMIT < 0) {
             SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
         }
         log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, SCENE_USING_NODE_LIMIT);
         if (NODE_COUNT + count > SCENE_USING_NODE_LIMIT) {
-            return false;
+            UpdateResult updateResult = new UpdateResult();
+            updateResult.setSuccess(false);
+            updateResult.setLimitNode(csceneAppConfig.getSceneUsingNodeLimit());
+            updateResult.setCurrentNode(count);
+            updateResult.setExistNode(NODE_COUNT);
+            return updateResult;
         }
         NODE_COUNT = NODE_COUNT + count;
         if (NODE_COUNT < 0) {
             NODE_COUNT = 0;
         }
-        return true;
+        UpdateResult updateResult = new UpdateResult();
+        updateResult.setSuccess(true);
+        return updateResult;
     }
 
     /**
@@ -110,5 +126,14 @@ public final class NodeLimitUtils {
             }
         }
         return result;
+    }
+
+    @Getter
+    @Setter
+    public static class UpdateResult {
+        private boolean success;
+        private int limitNode;
+        private int currentNode;
+        private int existNode;
     }
 }
