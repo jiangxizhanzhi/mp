@@ -141,8 +141,10 @@ public class CsceneHandler extends BaseCsceneHandler<
         this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
         // 节点数量增加失败 说明已到达数量上限
-        if (!NodeLimitUtils.addLimitedNodeCount(instanceHandler)) {
-            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT);
+        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
+        if (!updateResult.isSuccess()) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
+                    String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
         instanceHandler.create();
         return instanceHandler.toData();
