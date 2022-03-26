@@ -360,17 +360,17 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void asyncAckSceneStatusChanged() {
-        CollectedSceneStatusBO sceneStatusBO = this.getCollectedSceneStatusBO();
-        delayTaskPool.execute(TextUtils.uuid(), () -> {
-            sceneStatusReporter.reportStatus(sceneStatusBO);
-        });
+//        CollectedSceneStatusBO sceneStatusBO = this.getCollectedSceneStatusBO();
+//        delayTaskPool.execute(TextUtils.uuid(), () -> {
+//            sceneStatusReporter.reportStatus(sceneStatusBO);
+//        });
     }
 
     public void asyncAckSceneElementStatusChanged(String nodeId) {
-        CollectedElementStatusBO elementStatusBO = this.getCollectedElementStatusBO(nodeId);
-        delayTaskPool.execute(TextUtils.uuid(), () -> {
-            elementStatusReporter.reportStatus(elementStatusBO);
-        });
+//        CollectedElementStatusBO elementStatusBO = this.getCollectedElementStatusBO(nodeId);
+//        delayTaskPool.execute(TextUtils.uuid(), () -> {
+//            elementStatusReporter.reportStatus(elementStatusBO);
+//        });
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
