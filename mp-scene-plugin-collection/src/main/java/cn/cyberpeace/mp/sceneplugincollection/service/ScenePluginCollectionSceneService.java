@@ -756,6 +756,8 @@ public class ScenePluginCollectionSceneService {
         }
         if (flowLogBO.getSource() != null) {
             flowBO.setSourceIp(flowLogBO.getSource().getIp());
+            flowBO.setSourcePort(String.valueOf(flowLogBO.getSource().getPort()));
+            flowBO.setSourceMac(flowLogBO.getSource().getMac());
             if (CollectionUtils.isNotEmpty(flowLogBO.getSource().getMac())) {
                 for (int i = 0; i < flowLogBO.getSource().getMac().size(); i++) {
                     String mac = flowLogBO.getSource().getMac().get(i);
@@ -770,6 +772,8 @@ public class ScenePluginCollectionSceneService {
         }
         if (flowLogBO.getDestination() != null) {
             String ip = flowLogBO.getDestination().getIp();
+            flowBO.setTargetPort(String.valueOf(flowLogBO.getDestination().getPort()));
+            flowBO.setTargetMac(flowLogBO.getDestination().getMac());
             flowBO.setTargetIp(ip);
             if (ipElementMap.containsKey(ip)) {
                 flowBO.setTargetNodeId(ipElementMap.get(ip).getId());
