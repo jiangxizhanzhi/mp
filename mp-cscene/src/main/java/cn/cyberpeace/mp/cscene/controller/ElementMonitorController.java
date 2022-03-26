@@ -71,9 +71,8 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点实时状态")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
-//        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
-        // todo 1201 mock data
-        return ServiceResult.success(mockElementRTInfo());
+        ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
+        return ServiceResult.success(rtInfo);
     }
 
 

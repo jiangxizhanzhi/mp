@@ -261,7 +261,8 @@ public class FlowMonitorService {
         }
 
         LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusMinutes(10);
+        // 默认6小时
+        LocalDateTime startTime = endTime.minusHours(6);
 
         // todo 转好
         List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);

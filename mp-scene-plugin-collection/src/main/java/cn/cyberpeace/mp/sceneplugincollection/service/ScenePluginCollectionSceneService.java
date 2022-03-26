@@ -1015,6 +1015,9 @@ public class ScenePluginCollectionSceneService {
         collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
         collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
+        if (Objects.isNull(collectorBaseRequest.getAgentName())) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
         pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
     }
@@ -1028,6 +1031,9 @@ public class ScenePluginCollectionSceneService {
         collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
         collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
         collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
+        if (Objects.isNull(collectorBaseRequest.getAgentName())) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
         pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
     }
@@ -1036,14 +1042,6 @@ public class ScenePluginCollectionSceneService {
     public ListObjServiceResult<WazuhNetworkConnectionModel> listNetworkConnections(ListPageInfoQueryParams listPageInfoQueryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
-//        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-//        PageInfo<Port> pageInfo = new PageInfo();
-//        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
-//        collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
-//        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
-//        collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
-//        pageInfo = dataCollectionService.queryNetConnEventsWithTimeRange(collectorBaseRequest);
-
 
         int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
         int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
@@ -1055,6 +1053,10 @@ public class ScenePluginCollectionSceneService {
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(24));
         wazuhRequest.setEndTime(endTime);
+
+        if (wazuhRequest.getAgentNames().contains(null)) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
 
         List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
 

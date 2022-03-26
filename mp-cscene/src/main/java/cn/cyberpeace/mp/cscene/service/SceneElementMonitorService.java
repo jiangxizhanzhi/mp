@@ -20,6 +20,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -116,13 +118,50 @@ public class SceneElementMonitorService {
     }
 
 
+    /**
+     * 获取节点实时数据
+     * @param baseRequest
+     * @return
+     */
     public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
 
-        // todo 1201 实时状态
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setProcessCount(0);
+        rtInfo.setPortsCount(0);
+        rtInfo.setConnectionCount(0);
+        // 以下为假数据
+        rtInfo.setUserCount(1);
+        rtInfo.setFileOpCount(5);
+        rtInfo.setRegistryOpCount(5);
+        rtInfo.setEnvOpCount(5);
 
-        return null;
+        ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+        params.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        params.setNodeIds(baseRequest.getElementIds());
+        // todo 1201 实时状态
+        ListObjServiceResult<Port> ports = hostStateService.pagePorts(params);
+        ListObjServiceResult<Process> processes = hostStateService.pageProcesses(params);
+
+        BaseSceneElementPageRequest pageRequest = new BaseSceneElementPageRequest();
+        pageRequest.setSceneId(baseRequest.getSceneId());
+        pageRequest.setElementIds(baseRequest.getElementIds());
+        ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
+
+        if (CollectionUtil.isNotEmpty(conns.getSource().getObjs())) {
+            rtInfo.setConnectionCount(conns.getSource().getObjs().size());
+        }
+
+        if (CollectionUtil.isNotEmpty(ports.getSource().getObjs())) {
+            rtInfo.setPortsCount(ports.getSource().getObjs().size());
+        }
+
+        if (CollectionUtil.isNotEmpty(processes.getSource().getObjs())) {
+            rtInfo.setProcessCount(processes.getSource().getObjs().size());
+        }
+
+        return rtInfo;
     }
 
 
