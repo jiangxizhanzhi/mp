@@ -212,7 +212,7 @@ public class FlowMonitorService {
             return vo;
         }).collect(Collectors.toList());
 
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIdList, request.getElementIds());
         int allIpSize = batchSceneHandler.getAllIpAddrs().size();
         int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a, b) -> a + b).orElse(0);
         int normalSize = allIpSize - severitySize;
