@@ -48,7 +48,7 @@ public class DeleteHandler extends HandlerCommon {
     private final VirtualRouter vrClient = new VirtualRouter();
     private final VirtualFirewall vfClient = new VirtualFirewall();
     private final VirtualMachine vmClient = new VirtualMachine();
-    private final Container containerClient = new Container();
+    protected final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
 
