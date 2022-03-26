@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -166,6 +167,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (ReentrantLockUtils.tryLock(id)) {
             try {
                 var instanceHandler = new CsceneInstanceHandler(id, context);
+                NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
                 String sceneId = this.getSceneId(id);
                 var flag = instanceHandler.delete(logic);
                 if (sceneId != null) {
