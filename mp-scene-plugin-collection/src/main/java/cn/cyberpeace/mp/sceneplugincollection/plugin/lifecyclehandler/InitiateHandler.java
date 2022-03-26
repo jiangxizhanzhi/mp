@@ -202,7 +202,7 @@ public class InitiateHandler extends HandlerCommon {
                             if (probeResult.getOutputFormat() != null) {
                                 controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
                             }
-                            controlProbeParams.add(controlProbeParam);
+//                            controlProbeParams.add(controlProbeParam);
                         });
                     }
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
