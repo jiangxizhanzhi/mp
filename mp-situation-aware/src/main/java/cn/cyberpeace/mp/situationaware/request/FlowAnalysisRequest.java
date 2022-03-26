@@ -3,11 +3,13 @@ package cn.cyberpeace.mp.situationaware.request;
 import cn.cyberpeace.mp.situationaware.bo.TeamBO;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
+import com.google.common.collect.Lists;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -125,5 +127,13 @@ public class FlowAnalysisRequest {
 
     public Integer getTopSize() {
         return Objects.isNull(topSize) ? 10 : topSize;
+    }
+
+    public List<String> getGroupList() {
+        if (CollectionUtils.isEmpty(groupList)){
+            groupList = Lists.newArrayList();
+        }
+        groupList.add("mp_es");
+        return groupList;
     }
 }
