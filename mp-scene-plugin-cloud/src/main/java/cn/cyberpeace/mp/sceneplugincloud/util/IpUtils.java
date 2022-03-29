@@ -47,28 +47,6 @@ public class IpUtils {
      * @param abandonDhcp 是否去除dhcp地址
      * @return 随机ip列表
      */
-    public static List<String> randomIps(String cidr, int count, List<String> excludeIps,
-                                         List<AllocationPool> allocationPools, boolean abandonDhcp) {
-        List<String> ips = getAvailableCidrIps(cidr);
-
-        // dhcp情况，默认地址池
-        if (abandonDhcp && (allocationPools == null || allocationPools.isEmpty())) {
-            allocationPools = List.of(new AllocationPool(ips.get(0), ips.get(ips.size() - 1)));
-        }
-        // 和地址池求交集
-        if (allocationPools != null && !allocationPools.isEmpty()) {
-            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
-            ips.retainAll(allocationPoolsIps);
-        }
-
-        // 移除指定过滤的ip
-        if (excludeIps != null && !excludeIps.isEmpty()) {
-            ips.removeAll(excludeIps);
-        }
-
-        return RandomUtils.sample(ips, count);
-    }
-
     public static List<String> newRandomIps(String cidr, int count, List<String> excludeIps,
                                             List<AllocationPool> allocationPools, boolean abandonDhcp) {
         List<String> ips = new ArrayList<>();
@@ -143,29 +121,6 @@ public class IpUtils {
      * @param allocationPools 地址池
      * @return 随机ip列表
      */
-    public static List<String> allocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
-                                                        List<AllocationPool> allocationPools) {
-        List<String> ips = getAvailableCidrIps(cidr);
-
-        if (allocationPools != null && !allocationPools.isEmpty()) {
-            // 包含dhcp地址以去除
-            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, false);
-            // 和地址池求差集
-            ips.removeAll(allocationPoolsIps);
-        }
-
-        // 移除指定过滤的ip
-        if (excludeIps != null && !excludeIps.isEmpty()) {
-            ips.removeAll(excludeIps);
-        }
-
-        if (ips.size() < count) {
-            throw new MpRuntimeException("No enough resource for default router address pick");
-        }
-
-        return ips.subList(ips.size() - count, ips.size());
-    }
-
     public static List<String> newAllocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
                                                            List<AllocationPool> allocationPools) {
         List<String> ips = new ArrayList<>();
@@ -286,10 +241,6 @@ public class IpUtils {
      * @param cidr cidr
      * @return ip是否在cidr内
      */
-    public static boolean isIpInCidr(String ip, String cidr) {
-        return getCidrIps(cidr).contains(ip);
-    }
-
     public static boolean newIsInCidr(String ip, String cidr) {
         String beginIp = null;
         String lastIp = null;
