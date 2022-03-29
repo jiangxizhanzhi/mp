@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
+import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,10 +71,16 @@ class NodeElementConverter implements IConverter {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.ROUTER);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+            if (StringUtils.isEmpty(node.getImage()) || node.getImage().equals("默认路由")) {
+                pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_ROUTER);
+            }
         } else if (node.getId().startsWith("firewall")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.FIREWALL);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+            if (StringUtils.isEmpty(node.getImage()) || node.getImage().equals("默认防火墙")) {
+                pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_FIREWALL);
+            }
         } else if (node.getId().startsWith("server")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.SERVER);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
@@ -81,18 +89,16 @@ class NodeElementConverter implements IConverter {
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
         // 路由器加入 static-routes
-        if (node.getId().startsWith("router")) {
-            if (CollectionUtils.isNotEmpty(node.getStaticRoutes())) {
-                List<StaticRoute> routes = node.getStaticRoutes().stream()
-                        .map(s -> {
-                            StaticRoute staticRoute = new StaticRoute();
-                            staticRoute.setDestination(s.getDestination());
-                            staticRoute.setNexthop(s.getGateway());
-                            return staticRoute;
-                        })
-                        .collect(Collectors.toList());
-                pluginElement.setStaticRoutes(routes);
-            }
+        if (CollectionUtils.isNotEmpty(node.getStaticRoutes())) {
+            List<StaticRoute> routes = node.getStaticRoutes().stream()
+                    .map(s -> {
+                        StaticRoute staticRoute = new StaticRoute();
+                        staticRoute.setDestination(s.getDestination());
+                        staticRoute.setNexthop(s.getGateway());
+                        return staticRoute;
+                    })
+                    .collect(Collectors.toList());
+            pluginElement.setStaticRoutes(routes);
         }
 
         if (CollectionUtils.isEmpty(node.getNet())) {
