@@ -387,7 +387,7 @@ public class InitiateHandler extends HandlerCommon {
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
-            List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
+            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
                 // 网关未分配 则放入地址池的最后等待分配
