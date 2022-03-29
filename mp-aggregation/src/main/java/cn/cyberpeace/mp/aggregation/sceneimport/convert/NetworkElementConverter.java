@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
+import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetworkElementParseResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -95,9 +96,11 @@ class NetworkElementConverter implements IConverter {
         if (network.getId().toLowerCase().startsWith("internet")) {
             // id以internet开头,则是外部网络
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
+            pluginElement.setImage(TargetConstant.DefaultTargetName.NETWORK_EXTERNAL);
         } else {
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+            pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_NETWORK);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
