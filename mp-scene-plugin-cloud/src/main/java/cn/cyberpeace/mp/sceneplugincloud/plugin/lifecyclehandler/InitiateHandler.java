@@ -828,5 +828,6 @@ public class InitiateHandler extends HandlerCommon {
         network.setHostRoutes(element.getHostRoutes());
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
+        network.setDhcp(element.getDhcp());
     }
 }
