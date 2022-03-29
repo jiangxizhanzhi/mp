@@ -64,7 +64,11 @@ public class IpUtils {
         long size = Ipv4Util.ipv4ToLong(previousIp(lastIp)) - beginIpLong;
 
         // dhcp情况，默认地址池
-        if (abandonDhcp && (allocationPools == null || allocationPools.isEmpty())) {
+        if (allocationPools == null || allocationPools.isEmpty()) {
+            if (abandonDhcp) {
+                beginIp = nextIp(beginIp);
+                beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
+            }
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
             for (int i = 0; i < count; i++) {
                 String randomIp = randomIp(beginIpLong, size);
@@ -78,7 +82,7 @@ public class IpUtils {
                 }
                 ips.add(randomIp);
             }
-        } else if (allocationPools != null && !allocationPools.isEmpty()) {
+        } else {
             List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
             if (allocationPoolsIps.size() < size) {
                 long begin = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(0));
