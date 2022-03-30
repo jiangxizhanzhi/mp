@@ -11,11 +11,13 @@ import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +26,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -108,10 +112,6 @@ public class SceneMonitorService {
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setEntityCount(sceneMonitorInfo.getEntityCount() + 1);
                 }
-                // 网络
-                if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH, elementBO.getVirtualType())) {
-                    sceneMonitorInfo.setSwitchCount(sceneMonitorInfo.getSwitchCount() + 1);
-                }
 
                 // todo 弹性IP 暂时没有
 
@@ -119,6 +119,7 @@ public class SceneMonitorService {
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER, elementBO.getVirtualType())) {
                     sceneMonitorInfo.setRouterCount(sceneMonitorInfo.getRouterCount() + 1);
                 }
+
 
                 // 防火墙规则
                 if (Objects.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL, elementBO.getVirtualType())) {
@@ -128,6 +129,19 @@ public class SceneMonitorService {
                 // todo 流表规则 暂时没有
 
             });
+
+            // 网络数量
+            Set<String> networkIds = new HashSet<>();
+            if (CollectionUtil.isNotEmpty(scenePluginDataBO.getElementPorts())) {
+                scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                    var port = JsonCommon.snakeMapToBean(p, CloudPluginSceneElementPortBO.class);
+                    if (StringUtils.isNotEmpty(port.getAuxiliaryNetworkId())) {
+                        networkIds.add(port.getAuxiliaryNetworkId());
+                    }
+                });
+                sceneMonitorInfo.setSwitchCount(networkIds.size());
+            }
+
         }
 
         return sceneMonitorInfo;

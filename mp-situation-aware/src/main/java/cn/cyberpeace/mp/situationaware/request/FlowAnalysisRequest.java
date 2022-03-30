@@ -108,7 +108,7 @@ public class FlowAnalysisRequest {
     /**
      * 严重性，1：高，2：中，3：中，4：低
      */
-    @ApiModelProperty("严重性，1：高，2：中，3：中，4：低")
+    @ApiModelProperty("严重性，1：高，2：中，3：低，4：低")
     private SeverityEnum severityEnum;
 
     /**

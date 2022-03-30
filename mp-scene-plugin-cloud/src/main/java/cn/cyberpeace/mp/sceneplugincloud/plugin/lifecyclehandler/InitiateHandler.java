@@ -687,7 +687,7 @@ public class InitiateHandler extends HandlerCommon {
                 deriveNetworks.add(defaultConnectedNetwork);
             }
             // 至少有个网络
-            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
+            if (CollectionUtils.isEmpty(deriveNetworks)) {
                 if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                     deriveNetworks.add(defaultConnectedNetwork);
                 }

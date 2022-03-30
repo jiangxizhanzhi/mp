@@ -57,8 +57,17 @@ public class InitiateHandler extends HandlerCommon {
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect())) {
+            CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                    .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
-                getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
+                cloudPluginHandler.getElementPortMap().forEach((portId, srcPort) -> {
+                    String nodeId = srcPort.getSrcPort().getElement().getId();
+                    CollectionPluginSceneElementBO collectionElement = getPluginHandler().getElement(nodeId);
+                    if (collectionElement == null) {
+                        collectionElement = new CollectionPluginSceneElementBO();
+                        collectionElement.setEnableProbeCollect(false);
+                        getPluginHandler().addElement(nodeId, collectionElement);
+                    }
                     var collectionPort = getPluginHandler().getPort(portId);
                     if (collectionPort == null) {
                         collectionPort = new CollectionPluginSceneElementPortBO();
