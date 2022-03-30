@@ -663,7 +663,6 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
         }
-        List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
         if (this.isCoreRouter(cloudElement)) {
             // 核心路由 每个端口都接网络
             if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
@@ -673,6 +672,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
         } else {
             // 其余 有连线才接网络
+            List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
             for (ConnectedNetworkBO n : noCidrNetwork) {
                 if (CollectionUtils.isNotEmpty(n.getToPorts())) {
                     deriveNetworks.add(n);
@@ -687,7 +687,7 @@ public class InitiateHandler extends HandlerCommon {
                 deriveNetworks.add(defaultConnectedNetwork);
             }
             // 至少有个网络
-            if (CollectionUtils.isEmpty(deriveNetworks)) {
+            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
                 if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                     deriveNetworks.add(defaultConnectedNetwork);
                 }
