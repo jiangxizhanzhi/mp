@@ -149,7 +149,7 @@ public class DevopsTargetController {
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
     public ServiceResult<CommonTargetResponse> getCommonTargets(){
-        List<Device> deviceList = targetConverter.getCommonTargets();
+        List<Device> deviceList = targetConverter.getCommonTargets("");
         List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
 
         Locale locale = LocaleContextHolder.getLocale();

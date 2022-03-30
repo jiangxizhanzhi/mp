@@ -116,11 +116,11 @@ public class TargetConverter{
     }
 
     /**
-     * 查询常用靶标信息
+     * 查询常用靶标信息,支持通过名称查询
      * @return
      */
-    public List<Device> getCommonTargets() {
-        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true");
+    public List<Device> getCommonTargets(String name) {
+        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
         if (Objects.isNull(model) || !model.isSuccess()){
             return Lists.newArrayList();
         }
