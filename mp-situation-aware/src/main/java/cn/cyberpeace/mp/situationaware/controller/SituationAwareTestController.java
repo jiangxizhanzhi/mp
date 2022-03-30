@@ -4,6 +4,9 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -114,6 +117,32 @@ public class SituationAwareTestController {
         Map<String, Long> countMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
         long count = dataCollectionService.countByAgentNames(wazuhEventRequest);
         System.out.println(count);
+    }
+
+
+    @GetMapping("/query/hoststate")
+    public ServiceResult queryHostState(@RequestParam String agentName) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("f7fb5620314a4a659ca4b82fd60a0da5"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-03-24 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.parse("2022-03-26 10:15:00", formatter));
+        wazuhRequest.setPageSize(1);
+        List<WazuhHostStateModel> list = dataCollectionService.queryHostStateEventsWithTimeRange(wazuhRequest);
+        return ServiceResult.success(list);
+    }
+
+
+    @GetMapping("/query/net_conns")
+    public ServiceResult queryNetConns(@RequestParam String agentName) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("f7fb5620314a4a659ca4b82fd60a0da5"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-03-24 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        List<WazuhNetworkConnectionModel> list = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
+        return ServiceResult.success(list);
     }
 
 }

@@ -98,11 +98,6 @@ mp:
       #wazuh 开放接口用户名密码
       username: ${WAZUH_USERNAME:wazuh}
       password: ${WAZUH_PASSWORD:wazuh}
-      #wazuh es地址用户名密码
-#       es-url: ${ip.wazuh}
-#       es-port: ${WAZUH_ES_PORT:9200}
-#       es-username: ${WAZUH_ES_USERNAME:admin}
-#       es-password: ${WAZUH_ES_PASSWORD:admin}
     wazuh-probe-manager:
       url: http://${ip.wazuh}:${WAZUH_PORT:8002}
       agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
@@ -112,8 +107,14 @@ mp:
     #自定义探针配置
     default-interval: 180s
     probes:
-      - probe-name: get_virtual_info.py
+      - probe-name: get_host_info.py
+        id: eda72998ba654c8d8625f61eaa918eb3
         interval: 180s
+        outputFormat: plain
+      - probe-name: get_net_conns.py
+        id: 09ffcc4a67ef4accb407a1555629d0f8
+        interval: 180s
+        outputFormat: none
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login

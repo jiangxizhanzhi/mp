@@ -36,4 +36,7 @@ public class ImportUser {
     // 角色ID，Excel中不存在，留待后端绑定用
     private List<String> roleIdList;
 
+    // 组织ID，Excel中不存在，留待后端绑定用
+    private List<String> orgIdList;
+
 }

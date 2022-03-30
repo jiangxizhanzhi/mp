@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -7,22 +9,29 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhControl;
+import cn.cyberpeace.mp.situationaware.model.ProbeResult;
+import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
+
+    private ProbeService probeService;
 
 
     public static class SceneProcess {
@@ -38,6 +47,7 @@ public class InitiateHandler extends HandlerCommon {
 
     public InitiateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+        this.probeService = BeanCommon.getBean(ProbeService.class);
     }
 
     public void initiate() {
@@ -145,9 +155,59 @@ public class InitiateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
+                    List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+                    if (collectionElement.getProbes() != null) {
+                        List<String> probeIds = collectionElement.getProbes().stream().map(p -> p.getId()).collect(Collectors.toList());
+                        List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
+                        Map<String, ProbeResult> probeId2Probe = new HashMap<>();
+                        probeResults.forEach(probe -> {
+                            probeId2Probe.put(probe.getId(), probe);
+                        });
+                        collectionElement.getProbes().forEach(probe -> {
+                            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
+                            controlProbeParam.setId(TextUtils.uuid());
+                            controlProbeParam.setGroup(srcElement.getEid());
+                            List<String> params = new ArrayList<>();
+                            if (probe.getParams() != null) {
+                                probe.getParams().forEach(param -> {
+                                    if (param.getValue() != null) {
+                                        params.add(param.getValue());
+                                    } else {
+                                        params.add(param.getDefaultValue());
+                                    }
+                                });
+                            }
+                            if (!CollectionUtil.isEmpty(params)) {
+                                controlProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+                            }
+                            if (!probeId2Probe.containsKey(probe.getId())) {
+                                return;
+                            }
+                            ProbeResult probeResult = probeId2Probe.get(probe.getId());
+                            if (probeResult.getScriptType() == 0) {
+                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+                            } else if (probeResult.getScriptType() == 1) {
+                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+                            } else if (probeResult.getScriptType() == 2) {
+                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
+                            }
+                            if (probe.getInterval() != null) {
+                                controlProbeParam.setInterval(probe.getInterval().toString() + "s");
+                            }
+                            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+                            controlProbeParam.setScriptContent(probeResult.getScriptContent());
+                            if (probe.getDisabled() != null && probe.getDisabled()) {
+                                controlProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
+                            }
+                            if (probeResult.getOutputFormat() != null) {
+                                controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
+                            }
+//                            controlProbeParams.add(controlProbeParam);
+                        });
+                    }
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId);
+                            srcElement.getEid(), collectionId, controlProbeParams);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();

@@ -5,10 +5,14 @@ import cn.cyberpeace.mp.cscene.service.cron.clearjob.ContainerClearJob;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.NetClearJob;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.VmClearJob;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.VrClearJob;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,21 +21,31 @@ import java.util.List;
  * @Author hewei
  * @Date：2022/3/9 16:37
  */
-//@Component
+@Component
 @Slf4j
 public class ScenePluginCloudSceneCronJob {
-    private final ContainerClearJob containerClearJob = new ContainerClearJob();
-    private final VmClearJob vmClearJob = new VmClearJob();
-    private final NetClearJob netClearJob = new NetClearJob();
-    private final VrClearJob vrClearJob = new VrClearJob();
 
-//    @Scheduled(cron = "0 0 0 * * ?")
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
+
+    @Resource
+    private CsceneService csceneService;
+
+    @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleNode() {
+
+        try {
+            int count = csceneService.getActiveVirtualDeviceCount();
+            NodeLimitUtils.refreshCount(count);
+        } catch (Exception e) {
+            log.error("faild to refresh node limit count");
+        }
+
         List<AbstractClearJob> jobs = new ArrayList<>() {{
-            this.add(containerClearJob);
-            this.add(vmClearJob);
-            this.add(vrClearJob);
-            this.add(netClearJob);
+            this.add(new ContainerClearJob(sceneElementMapper));
+            this.add(new VmClearJob(sceneElementMapper));
+            this.add(new VrClearJob(sceneElementMapper));
+            this.add(new NetClearJob(sceneElementMapper));
         }};
         for (AbstractClearJob job : jobs) {
             try {

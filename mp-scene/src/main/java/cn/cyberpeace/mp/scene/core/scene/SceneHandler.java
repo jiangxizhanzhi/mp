@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
@@ -166,7 +167,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).startEvent();
         if (isTriggerEventSuccess(flag)) {
             // 推送场景最新的事件状态
-            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
+            asyncAckSceneStatusChanged();
             asyncAckSceneChanged(false, false);
         }
         return flag;
@@ -176,7 +177,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getElementEventHandler(nodeId, event).startEvent();
         if (isTriggerEventSuccess(flag)) {
             // 推送节点最新的事件状态
-            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
+            asyncAckSceneElementStatusChanged(nodeId);
             asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
@@ -186,7 +187,7 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getSceneEventHandler(event).overEvent();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
+            asyncAckSceneStatusChanged();
             asyncAckSceneChanged(false, false);
         }
         return flag;
@@ -195,7 +196,7 @@ public class SceneHandler extends BaseSceneHandler<
     private int overElementEvent(String nodeId, int event) {
         var flag = getElementEventHandler(nodeId, event).overEvent();
         if (isTriggerEventSuccess(flag)) {
-            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
+            asyncAckSceneElementStatusChanged(nodeId);
             asyncAckElementChanged(nodeId, false, false);
         }
         return flag;
@@ -204,7 +205,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorScene(int event, String errorMessage) {
         var flag = getSceneEventHandler(event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
-            sceneStatusReporter.reportStatus(this.getCollectedSceneStatusBO());
+            asyncAckSceneStatusChanged();
             asyncAckSceneChanged(false, false);
             save();
         }
@@ -214,7 +215,7 @@ public class SceneHandler extends BaseSceneHandler<
     public int errorElement(String nodeId, int event, String errorMessage) {
         var flag = getElementEventHandler(nodeId, event).error(errorMessage);
         if (isTriggerEventSuccess(flag)) {
-            elementStatusReporter.reportStatus(this.getCollectedElementStatusBO(nodeId));
+            asyncAckSceneElementStatusChanged(nodeId);
             asyncAckElementChanged(nodeId, false, true);
         }
         return flag;
@@ -356,6 +357,20 @@ public class SceneHandler extends BaseSceneHandler<
             }
         }
         reportElementUpdated(nodeId);
+    }
+
+    public void asyncAckSceneStatusChanged() {
+//        CollectedSceneStatusBO sceneStatusBO = this.getCollectedSceneStatusBO();
+//        delayTaskPool.execute(TextUtils.uuid(), () -> {
+//            sceneStatusReporter.reportStatus(sceneStatusBO);
+//        });
+    }
+
+    public void asyncAckSceneElementStatusChanged(String nodeId) {
+//        CollectedElementStatusBO elementStatusBO = this.getCollectedElementStatusBO(nodeId);
+//        delayTaskPool.execute(TextUtils.uuid(), () -> {
+//            elementStatusReporter.reportStatus(elementStatusBO);
+//        });
     }
 
     public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {

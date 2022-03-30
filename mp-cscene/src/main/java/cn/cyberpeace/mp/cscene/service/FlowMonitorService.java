@@ -9,7 +9,20 @@ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowCommonRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowSceneSimulationRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
@@ -42,7 +55,14 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -65,6 +85,13 @@ public class FlowMonitorService {
 
     @Autowired
     private FlowAnalysisService flowAnalysisService;
+
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
+
+    @Autowired
+    private SceneElementMonitorService elementMonitorService;
+
 
 
     /**
@@ -212,7 +239,7 @@ public class FlowMonitorService {
             return vo;
         }).collect(Collectors.toList());
 
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, request.getElementIds());
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIdList, request.getElementIds());
         int allIpSize = batchSceneHandler.getAllIpAddrs().size();
         int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a, b) -> a + b).orElse(0);
         int normalSize = allIpSize - severitySize;
@@ -234,7 +261,8 @@ public class FlowMonitorService {
         }
 
         LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusMinutes(10);
+        // 默认6小时
+        LocalDateTime startTime = endTime.minusHours(6);
 
         // todo 转好
         List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
@@ -477,7 +505,17 @@ public class FlowMonitorService {
         Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
 
         // 网络连接
-        Integer netConnSize = 400;
+        Integer netConnSize = 0;
+        List<ElementMonitorBasicInfo> eles = sceneMonitorService.getAllSceneElements(timeRangeRequest.getSceneId(), false);
+
+        for (ElementMonitorBasicInfo ele : eles) {
+            BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
+            request.setSceneId(timeRangeRequest.getSceneId());
+            request.setElementIds(CollectionUtil.toList(ele.getId()));
+            ListObjServiceResult<ConnectionState> conns = elementMonitorService.pageNetworkConnections(request);
+            int total = conns.getSource().getTotal();
+            netConnSize = netConnSize + total;
+        }
 
         // 带宽占用
         Double bandwith = 30.0;

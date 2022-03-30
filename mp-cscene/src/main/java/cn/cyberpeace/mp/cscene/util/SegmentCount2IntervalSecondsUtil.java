@@ -37,9 +37,10 @@ public class SegmentCount2IntervalSecondsUtil {
         }
 
         Duration duration = Duration.between(start, end);
-        Long seconds = duration.toSeconds();
-        // 时间间隔(segmentCount -1)
-        Long intervalSeconds = seconds / (segmentCount - 1);
+        Long millis = duration.toMillis();
+        // 时间间隔(segmentCount -1)，为确保余数，再加上1
+        Long intervalMilis = millis / (segmentCount - 1);
+        Long intervalSeconds = intervalMilis / 1000;
 
         /*List<LocalDateTime> timeSegs = new ArrayList<>();
         for (int i = 0; i < segmentCount - 1; i++) {
@@ -58,11 +59,10 @@ public class SegmentCount2IntervalSecondsUtil {
 
     public static List<LocalDateTime> generateTimeList(LocalDateTime start, LocalDateTime end, long intervalSeconds) {
         List<LocalDateTime> timeList = new ArrayList<>();
-        while (start.isBefore(end)) {
+        while (!start.isAfter(end)) {
             timeList.add(start);
             start = start.plusSeconds(intervalSeconds);
         }
-        timeList.add(end);
         return timeList;
     }
 

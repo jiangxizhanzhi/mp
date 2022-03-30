@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+
 import java.util.Date;
 import java.util.List;
 
-public class WazuhMonitorRoot {
+public class WazuhMonitorRoot<T> {
 
     private Agent agent;
     private Manager manager;
@@ -16,6 +17,7 @@ public class WazuhMonitorRoot {
     private Date timestamp;
     private String location;
     private String id;
+    private T data;
 
     public Agent getAgent() {
         return agent;
@@ -204,5 +206,13 @@ public class WazuhMonitorRoot {
         public String getId() {
             return this.id;
         }
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
     }
 }

@@ -41,7 +41,7 @@ public class CollectionHostStateBO {
     private Long memoryFree;
 
     @ApiModelProperty("内存使用率")
-    private Integer memoryPercent;
+    private Double memoryPercent;
 
     @ApiModelProperty("cpu使用率")
     private Double cpuPercent;

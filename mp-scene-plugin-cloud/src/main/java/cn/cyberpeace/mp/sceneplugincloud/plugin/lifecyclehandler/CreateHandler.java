@@ -159,7 +159,7 @@ public class CreateHandler extends HandlerCommon {
             var srcElement = cloudElement.getSrcElement();
             var createData = new VirtualSwitchCreateData();
             createData.setName(HandlerUtils.genResourceName(srcElement.getEid(), index++));
-            createData.setEntityNetwork(cloudElement.getAuxiliaryNetworkVlan());
+            createData.setEntityNetwork(connectedNetwork.getNetwork().getVlan());
             if (Boolean.TRUE.equals(connectedNetwork.network.getVlan())) {
                 createData.setSegmentationId(IntUtils.zeroNull(connectedNetwork.network.getVlanId()));
             }
@@ -380,7 +380,10 @@ public class CreateHandler extends HandlerCommon {
 
         var accessModes = sampleCloudPort.getAccessModes();
         if (accessModes != null && !accessModes.isEmpty()) {
-            virtualNic.setAccessModes(accessModes.stream().map(accessMode -> {
+            var legalAccessModes = accessModes.stream()
+                    .filter(m -> StringUtils.isNotEmpty(m.getProtocol()))
+                    .collect(Collectors.toList());
+            virtualNic.setAccessModes(legalAccessModes.stream().map(accessMode -> {
                 var accessModeParam = new VirtualNic.AccessMode();
                 accessModeParam.setProtocol(accessMode.getProtocol());
                 accessModeParam.setPort(accessMode.getPort());

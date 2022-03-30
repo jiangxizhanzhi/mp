@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Network;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NetworkData;
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +16,11 @@ import java.util.Map;
  */
 public class NetClearJob extends AbstractClearJob<NetworkData> {
 
-    private final Network netClient = new Network();
+    private Network netClient = new Network();
+
+    public NetClearJob(SceneElementMapper sceneElementMapper) {
+        super(sceneElementMapper);
+    }
 
     @Override
     protected Map<String, NetworkData> getEid2Node(List<NetworkData> nets) {

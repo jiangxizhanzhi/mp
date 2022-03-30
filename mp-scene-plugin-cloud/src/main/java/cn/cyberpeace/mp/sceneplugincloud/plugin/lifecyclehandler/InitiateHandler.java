@@ -357,12 +357,15 @@ public class InitiateHandler extends HandlerCommon {
                 connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
             }
 
+            Set<String> portIps = new HashSet<>();
             // todo
             int requireCount = 1;
             int gatewayCount = 0;
             for (var port : connectedNetwork.getFromPorts()) {
                 if (StringUtils.isEmpty(port.getIp())) {
                     requireCount++;
+                } else {
+                    portIps.add(port.getIp());
                 }
             }
             for (var port : connectedNetwork.getToPorts()) {
@@ -373,6 +376,8 @@ public class InitiateHandler extends HandlerCommon {
                     } else {
                         requireCount++;
                     }
+                } else {
+                    portIps.add(port.getIp());
                 }
             }
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
@@ -382,9 +387,12 @@ public class InitiateHandler extends HandlerCommon {
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
-            List<String> ipPool = IpUtils.randomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
+            List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
-            ipPool.add(network.getGateway());
+            if (!portIps.contains(network.getGateway())) {
+                // 网关未分配 则放入地址池的最后等待分配
+                ipPool.add(network.getGateway());
+            }
             network.setIpPool(ipPool);
         });
     }
@@ -625,8 +633,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             if (StringUtils.isEmpty(cidrDivideIp)) {
                 // 未设置ip值,使用默认网段的网络
-                boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
-                        && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+                boolean isCoreRouter = this.isCoreRouter(cloudElement);
                 if (isCoreRouter) {
                     // 如果是核心路由器 每个端口分配一个网络
                     var createNetwork = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -656,12 +663,45 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
         }
-        if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
-            cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+        if (this.isCoreRouter(cloudElement)) {
+            // 核心路由 每个端口都接网络
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                cloudElement.getDeriveNetworks().add(defaultConnectedNetwork);
+            }
+            cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
+            cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+        } else {
+            // 其余 有连线才接网络
+            List<ConnectedNetworkBO> deriveNetworks = new ArrayList<>();
+            for (ConnectedNetworkBO n : noCidrNetwork) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                if (CollectionUtils.isNotEmpty(n.getToPorts())) {
+                    deriveNetworks.add(n);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getToPorts())) {
+                deriveNetworks.add(defaultConnectedNetwork);
+            }
+            // 至少有个网络
+            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
+                if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
+                    deriveNetworks.add(defaultConnectedNetwork);
+                }
+            }
+            cloudElement.setDeriveNetworks(deriveNetworks);
         }
-        cloudElement.getDeriveNetworks().addAll(cidr2ConnectedNetwork.values());
-        cloudElement.getDeriveNetworks().addAll(noCidrNetwork);
+
         initiateAuxiliaryNetwork(cloudElement);
+    }
+
+    private boolean isCoreRouter(CloudPluginSceneElementBO cloudElement) {
+        boolean isCoreRouter = (cloudElement.getRole() != null && cloudElement.getRole().equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER))
+                && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType());
+        return isCoreRouter;
     }
 
     public void initCoreType(CloudPluginSceneElementBO element) {
@@ -745,12 +785,12 @@ public class InitiateHandler extends HandlerCommon {
         }
 
         // 核心路由器连接的网络需要关闭dhcp
-        cloudElements.forEach(cloudElement -> {
-            if (cloudElement.getCoreType() == CoreType.ROUTER && cloudElement.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
-                cloudElement.getDeriveNetworks().forEach(n -> n.network.setDhcp(false));
-                cloudElement.getAccessNetworks().forEach(n -> n.network.setDhcp(false));
-            }
-        });
+//        cloudElements.forEach(cloudElement -> {
+//            if (cloudElement.getCoreType() == CoreType.ROUTER && cloudElement.getImageType().equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+//                cloudElement.getDeriveNetworks().forEach(n -> n.network.setDhcp(false));
+//                cloudElement.getAccessNetworks().forEach(n -> n.network.setDhcp(false));
+//            }
+//        });
 
         // 存在需要重新分配的ip，重新分配ip
         var requireReallocateIpPorts = getReallocateIpPorts();
@@ -788,5 +828,6 @@ public class InitiateHandler extends HandlerCommon {
         network.setHostRoutes(element.getHostRoutes());
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
+        network.setDhcp(element.getDhcp());
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
  * @Date：2021/12/2 20:11
  */
 @Data
-public class StatePageRequest extends PageRequest {
+public class BaseSceneElementPageRequest extends PageRequest {
 
     @ApiModelProperty("场景id")
     private String sceneId;

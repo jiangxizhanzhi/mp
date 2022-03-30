@@ -125,4 +125,15 @@ public class Container extends CloudClient {
         cloudDelete(CloudUrlConstant.DELETE_CONTAINER_URL.replace("{container_id}", containerId), data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
     }
+
+    public boolean portExists(String resourceId) {
+        CloudResponse<Object> result = cloudGet(CloudUrlConstant.QUERY_PORTS.replace("{resource_id}", resourceId), null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        if (result != null && result.isSuccess()) {
+            return true;
+        }
+        return false;
+    }
+
 }

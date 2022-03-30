@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import com.alibaba.fastjson.JSONObject;
@@ -103,7 +103,7 @@ public class BaseDataCollectionServiceTest {
         wazuhEventRequest.setAgentNames(Lists.newArrayList("000e100b-ecce-41a4-a09c-0643e68d3eb6"));
         wazuhEventRequest.setPageNum(1);
         wazuhEventRequest.setPageSize(10);
-        ListObjResult<WazuhModel> listObjResult= dataCollectionService.queryMonitorEvents(wazuhEventRequest);
+        ListObjResult<WazuhHostStateModel> listObjResult= dataCollectionService.queryMonitorEvents(wazuhEventRequest);
         Assert.isTrue(listObjResult.getObjs().size() > 1 , "查询文件监控分页有数据");
     }
 
@@ -120,8 +120,8 @@ public class BaseDataCollectionServiceTest {
         wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu1", "windows_agent1"));
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
-        List<WazuhModel> wazuhModelList = dataCollectionService.queryMonitorEventsWithTimeRange(wazuhEventRequest);
-        System.out.println(wazuhModelList);
+        List<WazuhHostStateModel> wazuhHostStateModelList = dataCollectionService.queryHostStateEventsWithTimeRange(wazuhEventRequest);
+        System.out.println(wazuhHostStateModelList);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class BaseDataCollectionServiceTest {
     @Test
     public void testQueryMonitorEventsAgg() {
         WazuhMonitorEventsRequest wazuhEventRequest = new WazuhMonitorEventsRequest();
-        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "windows_agent1"));
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("ubuntu2", "controller1"));
         wazuhEventRequest.setStartTime(LocalDateTime.now().minusDays(1));
         wazuhEventRequest.setEndTime(LocalDateTime.now());
         dataCollectionService.queryMonitorEventsAgg(wazuhEventRequest);

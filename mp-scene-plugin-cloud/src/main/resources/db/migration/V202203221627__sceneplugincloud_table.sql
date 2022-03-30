@@ -1,4 +1,4 @@
-alter table mp_sceneplugincloud_scene_element_port add COLUMN `logic_network_id` varchar(64) NOT NULL COMMENT '网络id'
+alter table mp_sceneplugincloud_scene_element_port add COLUMN `logic_network_id` varchar(64) NOT NULL COMMENT '网络id';
 CREATE TABLE `mp_sceneplugincloud_scene_element_network`
 (
     `pk`                                   int           NOT NULL AUTO_INCREMENT COMMENT '主键',

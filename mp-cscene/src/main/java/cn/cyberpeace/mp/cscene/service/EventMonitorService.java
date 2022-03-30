@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +100,7 @@ public class EventMonitorService {
 
         Map<String, Long> aggsMap = new LinkedHashMap<>();
         if (Objects.nonNull(request.getType()) && request.getType().equals(1)) {
-            // 进
+            // 进程
             log.info("aggregate process");
             aggsMap = aggProcessCount(agentNames);
         } else if (Objects.nonNull(request.getType()) && request.getType().equals(2)) {
@@ -113,10 +114,9 @@ public class EventMonitorService {
 
 
         List<ElementEventPercent> eventPercents = new ArrayList<>();
+        List<ElementEventPercent> finalEventPercents = eventPercents;
         Long sum = aggsMap.values().stream().mapToLong(Long::longValue).sum();
-        aggsMap.entrySet().forEach(entry -> {
-            String agentName = entry.getKey();
-            Long count = entry.getValue();
+        aggsMap.forEach((agentName, count) -> {
             Optional<SceneElementBO> elementBOOptional = elementBOs.stream().filter(e -> e.getEid().equals(agentName)).findFirst();
 
             if (elementBOOptional.isPresent()) {
@@ -128,13 +128,15 @@ public class EventMonitorService {
 //                    bigDecimal = NumberUtil.round(count.doubleValue() * 100 / sum.doubleValue(), 2);
 //                }
 
-                Double percent =  toRoundPercent(count, sum);
+                Double percent = toRoundPercent(count, sum);
 
                 ElementEventPercent eventPercent = new ElementEventPercent(nodeId, nodeName, percent, count, request.getType());
-                eventPercents.add(eventPercent);
+                finalEventPercents.add(eventPercent);
             }
         });
 
+        log.info("before {}", eventPercents);
+        eventPercents = eventPercents.stream().sorted(Comparator.comparing(ElementEventPercent::getPercent).reversed()).collect(Collectors.toList());
         log.info("{}", eventPercents);
         return eventPercents;
     }

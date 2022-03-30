@@ -39,7 +39,7 @@ public class SceneMonitorInfo {
     @ApiModelProperty(value = "运行时间（分钟）")
     private Long runMinutes;
     //
-    @ApiModelProperty(value = "场景属性 0:个人隔离 1:非隔离")
+    @ApiModelProperty(value = "场景属性 0:无隔离 1:个人隔离 2:团队隔离")
     private Integer sceneAttr;
 
     @ApiModelProperty(value = "运行节点统计-虚拟机总数")

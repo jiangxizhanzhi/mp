@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -7,6 +8,8 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.RecreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
 
@@ -100,6 +103,25 @@ public class RecreateHandler extends HandlerCommon {
                         () -> {
                             deleteContainer(cloudElement);
                             super.disableConnectUrl(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+                            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                    var pluginPort = getPluginHandler().getPort(p.getId());
+                                    if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
+                                        for (int i = 0; i < 5; i++) {
+                                            try {
+                                                Thread.sleep(1000);
+                                                if (!super.containerClient.portExists(pluginPort.getResourceId())) {
+                                                    break;
+                                                }
+                                            } catch (MpRuntimeException e) {
+                                                break;
+                                            } catch (Exception e) {
+                                                log.error("faild to query port {}", pluginPort.getResourceId());
+                                            }
+                                        }
+                                    }
+                                });
+                            }
                         });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
