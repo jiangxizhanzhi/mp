@@ -143,7 +143,8 @@ public class IpUtils {
             beginIp = newIps[0];
             previousIp = newIps[1];
         }
-        int ipSize = (int) (Ipv4Util.ipv4ToLong(previousIp) - Ipv4Util.ipv4ToLong(beginIp));
+        int ipTotalSize = (int) (Ipv4Util.ipv4ToLong(previousIp) - Ipv4Util.ipv4ToLong(beginIp));
+        int ipSize = ipTotalSize - 1 - excludeIps.size() - allocationPoolsIps.size();
         if (ipSize < count) {
             throw new MpRuntimeException("No enough resource for default router address pick");
         }
