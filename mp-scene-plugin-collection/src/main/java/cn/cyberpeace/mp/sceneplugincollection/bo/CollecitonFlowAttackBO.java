@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CollecitonFlowAttackBO {
 
-    @ApiModelProperty("告警等级(1:高,2:中,3:中,4:低)")
+    @ApiModelProperty("告警等级(1:高,2:中,3:低,4:低)")
     private Integer severity;
 
     @ApiModelProperty("攻击类型")
