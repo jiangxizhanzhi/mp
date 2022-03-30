@@ -76,6 +76,8 @@ class DeviceInfoConverter implements IConverter {
         if (StringUtils.isNotEmpty(device.getLogo())) {
             if (!device.getLogo().startsWith("/fdfs") && !device.getLogo().startsWith(CommonConstant.DefaultImagePrefix)) {
                 element.setIcon2(CommonConstant.DefaultImagePrefix + device.getLogo());
+            } else {
+                element.setIcon2(device.getLogo());
             }
         }
         element.setDescription(device.getDescription());
