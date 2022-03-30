@@ -247,14 +247,13 @@ public abstract class BaseSceneHandler<
             String pluginKey = pluginKeyAnnotation.value();
             List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, null);
             List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, null);
-//            if (elementIds == null && elementPortIds == null) {
-//                return;
-//            }
-
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
             beforeInitPlugin(plugin);
             plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
             afterInitPlugin(plugin);
+            if (elementIds == null && elementPortIds == null && plugin.getScene() == null) {
+                return;
+            }
             scenePluginData.put(pluginKey, plugin.toData());
             plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
