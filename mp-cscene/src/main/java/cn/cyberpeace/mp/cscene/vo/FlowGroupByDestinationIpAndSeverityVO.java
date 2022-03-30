@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class FlowGroupByDestinationIpAndSeverityVO {
 
-    @ApiModelProperty("危险等级,0:正常；1：高；2：中；3：中低；4：低")
+    @ApiModelProperty("危险等级,0:正常；1：高；2：中；3：中；4：低")
     private Integer severity;
 
     @ApiModelProperty("数量")

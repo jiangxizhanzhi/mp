@@ -106,9 +106,9 @@ public class FlowAnalysisRequest {
     private Integer secondsInterval;
 
     /**
-     * 严重性，1：高，2：中，3：中低，4：低
+     * 严重性，1：高，2：中，3：中，4：低
      */
-    @ApiModelProperty("严重性，1：高，2：中，3：中低，4：低")
+    @ApiModelProperty("严重性，1：高，2：中，3：中，4：低")
     private SeverityEnum severityEnum;
 
     /**

@@ -44,7 +44,6 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
@@ -340,9 +339,6 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             log.info("es search end");
 
-            for (SearchHit hit : response.getHits().getHits()) {
-                log.info("hit index id:{}", hit.getId());
-            }
             return response;
         } catch (IOException e) {
             log.error("es queryMonitorEventsWithTimeRange error: {}", e);
