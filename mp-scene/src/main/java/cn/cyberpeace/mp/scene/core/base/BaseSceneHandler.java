@@ -247,9 +247,9 @@ public abstract class BaseSceneHandler<
             String pluginKey = pluginKeyAnnotation.value();
             List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, null);
             List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, null);
-            if (elementIds == null && elementPortIds == null) {
-                return;
-            }
+//            if (elementIds == null && elementPortIds == null) {
+//                return;
+//            }
 
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
             beforeInitPlugin(plugin);
