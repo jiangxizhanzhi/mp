@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
+import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
@@ -72,7 +73,13 @@ class DeviceInfoConverter implements IConverter {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
 
-        element.setIcon2(device.getLogo());
+        if (StringUtils.isNotEmpty(device.getLogo())) {
+            if (!device.getLogo().startsWith("/fdfs") && !device.getLogo().startsWith(CommonConstant.DefaultImagePrefix)) {
+                element.setIcon2(CommonConstant.DefaultImagePrefix + device.getLogo());
+            } else {
+                element.setIcon2(device.getLogo());
+            }
+        }
         element.setDescription(device.getDescription());
         pluginElement.setCategory(device.getCategory());
         pluginElement.setCategory2(device.getSecondCategory());
