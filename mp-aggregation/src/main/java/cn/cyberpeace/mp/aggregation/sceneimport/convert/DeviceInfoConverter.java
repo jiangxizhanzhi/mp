@@ -60,10 +60,11 @@ class DeviceInfoConverter implements IConverter {
                     Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
                     this.loadDeviceInfo(params, devices.get(0));
                 }
+            } else {
+                List<Device> devices = targetSceneConvertModel.getDeviceList();
+                Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
+                this.loadDeviceInfo(params, devices.get(0));
             }
-            List<Device> devices = targetSceneConvertModel.getDeviceList();
-            Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
-            this.loadDeviceInfo(params, devices.get(0));
         }
     }
 
