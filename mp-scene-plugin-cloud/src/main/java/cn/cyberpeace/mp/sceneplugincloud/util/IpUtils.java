@@ -70,9 +70,17 @@ public class IpUtils {
                 beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
             }
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
+            int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
+            if (excludeIps != null && !excludeIps.isEmpty()) {
+                ipSize = ipSize - excludeIps.size();
+            }
+            ipSize = ipSize - 1;
+            if (ipSize < count) {
+                throw new MpRuntimeException("No enough resource for random ip address pick");
+            }
             for (int i = 0; i < count; i++) {
                 String randomIp = randomIp(beginIpLong, size);
-                if (excludeIps.contains(randomIp)) {
+                if (excludeIps != null && excludeIps.contains(randomIp)) {
                     i--;
                     continue;
                 }
@@ -87,6 +95,14 @@ public class IpUtils {
             if (allocationPoolsIps.size() < size) {
                 long begin = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(0));
                 long newSize = Ipv4Util.ipv4ToLong(allocationPoolsIps.get(allocationPoolsIps.size() - 1)) - begin;
+                int ipSize = (int) newSize;
+                if (excludeIps != null && !excludeIps.isEmpty()) {
+                    ipSize = ipSize - excludeIps.size();
+                }
+                ipSize = ipSize - 1;
+                if (ipSize < count) {
+                    throw new MpRuntimeException("No enough resource for random ip address pick");
+                }
                 for (int i = 0; i < count; i++) {
                     String randomIp = randomIp(begin, newSize);
                     if (excludeIps.contains(randomIp)) {
@@ -97,16 +113,32 @@ public class IpUtils {
                         i--;
                         continue;
                     }
+                    if (!allocationPoolsIps.contains(randomIp)) {
+                        i--;
+                        continue;
+                    }
                     ips.add(randomIp);
                 }
             } else {
+                int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
+                if (excludeIps != null && !excludeIps.isEmpty()) {
+                    ipSize = ipSize - excludeIps.size();
+                }
+                ipSize = ipSize - 1;
+                if (ipSize < count) {
+                    throw new MpRuntimeException("No enough resource for random ip address pick");
+                }
                 for (int i = 0; i < count; i++) {
                     String randomIp = randomIp(beginIpLong, size);
-                    if (excludeIps.contains(randomIp)) {
+                    if (excludeIps != null && excludeIps.contains(randomIp)) {
                         i--;
                         continue;
                     }
                     if (ips.contains(randomIp)) {
+                        i--;
+                        continue;
+                    }
+                    if (!allocationPoolsIps.contains(randomIp)) {
                         i--;
                         continue;
                     }
