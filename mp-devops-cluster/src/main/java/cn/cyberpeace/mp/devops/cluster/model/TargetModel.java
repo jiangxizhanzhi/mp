@@ -113,4 +113,9 @@ public class TargetModel extends BaseModel {
      * 是否支持cloud init
      */
     private Boolean initSupport;
+
+    /**
+     * 是否隐藏
+     */
+    private Boolean isHide = Boolean.FALSE;
 }

@@ -48,6 +48,7 @@ public class TargetAggregationService {
         request.setIgnoreUser(Boolean.TRUE);
         request.setPerPage(null);
         request.setPage(null);
+        request.setIsHide(Boolean.TRUE);
         TargetPageModel targetPageModel = targetConverter.page(request);
         if (Objects.isNull(targetPageModel) || CollectionUtils.isEmpty(targetPageModel.getTargetModels())){
             return;

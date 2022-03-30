@@ -134,7 +134,6 @@ public class DevopsTargetController {
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){
-
         TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
         if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);

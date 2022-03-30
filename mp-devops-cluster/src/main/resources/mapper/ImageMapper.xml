@@ -83,6 +83,9 @@
             <if test="targetCategory != null and targetCategory == 3">
                 and i.is_import = 0
             </if>
+            <if test="isHide != null and isHide == 0">
+                and i.is_hide = 0
+            </if>
         </where>
     </sql>
 
@@ -347,7 +350,7 @@
                                      role, image_type,is_public, quick_create_support,
                                      create_time, update_time, in_position,use_status,reference_status,
                                      system_type,system_architecure, language,image_status,base_image_support,
-                                     init_support,image_source,is_import)
+                                     init_support,image_source,is_import,is_hide)
         VALUES
         <foreach collection="list" item="item" index="index"  separator=",">
         (
@@ -358,7 +361,7 @@
             #{item.updateTime},#{item.inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.referenceStatus}, #{item.systemType}, #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
-            #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport}
+            #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport}, #{item.isHide}
         )
         </foreach>
     </insert>
