@@ -11,11 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
@@ -25,28 +21,10 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorServiceStatusModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
-import cn.cyberpeace.mp.devops.cluster.model.ImagesCreateInstanceCloudPlatform;
-import cn.cyberpeace.mp.devops.cluster.model.ImagesDeleteInstanceCloudPlatform;
-import cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel;
-import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
-import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImageAsyncRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagePageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagesAuthRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagesBuildRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagesDeleteRequest;
-import cn.cyberpeace.mp.devops.cluster.request.ImagesRebootInstanceRequest;
+import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,11 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -122,6 +96,7 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertPageModel page(ImagePageRequest request) {
         ImagePageDTO dto = convertImagePageRequest(request);
+        dto.setIsHide(Boolean.FALSE);
         Integer total = devopsTargetService.totalCount(dto);
 
         ImageConvertPageModel imageConvertPageModel = new ImageConvertPageModel();
@@ -388,6 +363,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Integer async(ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
+        Boolean isHide = request.getIsHide();
         List<Integer> diffList = targetConverter.getAsyncDeviceIds(requestIds);
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
@@ -400,6 +376,7 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(deviceList)){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
+        deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
         return devopsTargetService.insert(deviceList);
     }
 

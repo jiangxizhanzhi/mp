@@ -105,6 +105,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setSubCategory(device.getSecondCategory());
         targetModel.setThirdCategory(device.getL3Category());
         targetModel.setImageType(device.getImageType());
+        targetModel.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         String imageType = device.getImageType();
         targetModel.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();

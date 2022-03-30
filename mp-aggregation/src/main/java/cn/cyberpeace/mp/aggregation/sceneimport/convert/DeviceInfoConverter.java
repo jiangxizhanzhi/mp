@@ -51,6 +51,8 @@ class DeviceInfoConverter implements IConverter {
             request.setIgnoreUser(true);
             // 精确搜索
             request.setLikeName(false);
+            //不过滤隐藏靶标
+            request.setIsHide(Boolean.TRUE);
             TargetSceneConvertModel targetSceneConvertModel = this.targetConverter.allTarget(request);
             if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())) {
                 List<Device> devices = this.targetConverter.getCommonTargets(request.getName());

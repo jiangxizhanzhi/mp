@@ -46,4 +46,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
 
     @ApiModelProperty("是否模糊查询")
     private Boolean likeName = Boolean.TRUE;
+
+    @ApiModelProperty("是否查询隐藏数据，false:排除隐藏数据")
+    private Boolean isHide = Boolean.FALSE;
 }
