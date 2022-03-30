@@ -154,6 +154,18 @@ public class CreateHandler extends HandlerCommon {
         int index = 1;
         for (ConnectedNetworkBO connectedNetwork : networks) {
             if (StringUtils.isNotEmpty(connectedNetwork.network.getResourceId())) {
+                connectedNetwork.getFromPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(connectedNetwork.network.getResourceId());
+                    }
+                });
+                connectedNetwork.getToPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null) {
+                        pluginPort.setAuxiliaryNetworkId(connectedNetwork.network.getResourceId());
+                    }
+                });
                 return;
             }
             var srcElement = cloudElement.getSrcElement();
