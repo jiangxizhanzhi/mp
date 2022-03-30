@@ -52,8 +52,14 @@ class DeviceInfoConverter implements IConverter {
             request.setLikeName(false);
             TargetSceneConvertModel targetSceneConvertModel = this.targetConverter.allTarget(request);
             if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())) {
-                log.info("import scene ,no device find , image is {}", request.getName());
-                continue;
+                List<Device> devices = this.targetConverter.getCommonTargets(request.getName());
+                if (CollectionUtils.isEmpty(devices)) {
+                    log.info("import scene ,no device find , image is {}", request.getName());
+                    continue;
+                } else {
+                    Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
+                    this.loadDeviceInfo(params, devices.get(0));
+                }
             }
             List<Device> devices = targetSceneConvertModel.getDeviceList();
             Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
