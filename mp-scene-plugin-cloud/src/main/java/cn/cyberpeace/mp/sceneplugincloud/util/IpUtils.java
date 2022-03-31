@@ -60,7 +60,8 @@ public class IpUtils {
             beginIp = newIps[0];
             lastIp = newIps[1];
         }
-        long beginIpLong = Ipv4Util.ipv4ToLong(nextIp(beginIp));
+        beginIp = nextIp(beginIp);
+        long beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
         long size = Ipv4Util.ipv4ToLong(previousIp(lastIp)) - beginIpLong;
 
         // dhcp情况，默认地址池
@@ -105,7 +106,7 @@ public class IpUtils {
                 }
                 for (int i = 0; i < count; i++) {
                     String randomIp = randomIp(begin, newSize);
-                    if (excludeIps.contains(randomIp)) {
+                    if (excludeIps != null && excludeIps.contains(randomIp)) {
                         i--;
                         continue;
                     }
@@ -120,6 +121,10 @@ public class IpUtils {
                     ips.add(randomIp);
                 }
             } else {
+                if (abandonDhcp) {
+                    beginIp = nextIp(beginIp);
+                    beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
+                }
                 int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
                 if (excludeIps != null && !excludeIps.isEmpty()) {
                     ipSize = ipSize - excludeIps.size();
