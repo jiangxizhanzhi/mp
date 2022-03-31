@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
@@ -230,20 +231,73 @@ public class FlowMonitorService {
         List<FlowGroupByDestinationIpAndSeverityBO> boList = serviceResult.getSource();
 
         if (CollectionUtils.isEmpty(boList)) {
-            return Lists.newArrayList();
+            boList = Lists.newArrayList();
         }
-        List<FlowGroupByDestinationIpAndSeverityVO> voList = boList.stream().map(v -> {
-            FlowGroupByDestinationIpAndSeverityVO vo = new FlowGroupByDestinationIpAndSeverityVO();
-            vo.setSeverity(v.getSeverity());
-            vo.setNum(v.getNum());
-            return vo;
-        }).collect(Collectors.toList());
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIdList, request.getElementIds());
-        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
-        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce((a, b) -> a + b).orElse(0);
-        int normalSize = allIpSize - severitySize;
+        // 合并同一节点的多IP数据
+        List<FlowGroupByDestinationIpAndSeverityVO> voList = this.convertSeverityList(boList, batchSceneHandler);
+
+        int allNodeSize = batchSceneHandler.getAllEid2ElementMap().keySet().size();
+        int severitySize = voList.stream().map(FlowGroupByDestinationIpAndSeverityVO::getNum).reduce(Integer::sum).orElse(0);
+        int normalSize = allNodeSize - severitySize;
         voList.add(new FlowGroupByDestinationIpAndSeverityVO(0, normalSize));
+        return voList.stream().sorted(Comparator.comparing(FlowGroupByDestinationIpAndSeverityVO::getSeverity).reversed()).collect(Collectors.toList());
+    }
+
+    /**
+     * 合并同一节点的多IP数据
+     * @param boList
+     * @param batchSceneHandler
+     * @return
+     */
+    private List<FlowGroupByDestinationIpAndSeverityVO> convertSeverityList(List<FlowGroupByDestinationIpAndSeverityBO> boList, BatchSceneHandler batchSceneHandler) {
+        // 各节点风险等级map
+        Map<String, Integer> severityMap = new HashMap<>();
+        // 将ip转换成节点，整合风险等级，合并一个节点有多ip的数据
+        boList.forEach(bo -> {
+            List<String> destinationIpList = bo.getDestinationIpList();
+            destinationIpList.forEach(ip -> {
+                SceneElementBO nodeByIpAddr = batchSceneHandler.getNodeByIpAddr(ip);
+                // map中是否包含当前节点的风险等级
+                if (severityMap.containsKey(severityMap.get(nodeByIpAddr.getId()))) {
+                    // 已包含，只记录较高的风险等级
+                    if (severityMap.get(nodeByIpAddr.getId()) < bo.getSeverity()) {
+                        severityMap.put(nodeByIpAddr.getId(), bo.getSeverity());
+                    }
+                } else {
+                    severityMap.put(nodeByIpAddr.getId(), bo.getSeverity());
+                }
+            });
+        });
+
+        // 统计不同风险等级节点数量
+        Map<Integer, Integer> severityNumMap = new HashMap<>();
+        severityMap.forEach((key, value) -> {
+            if (severityNumMap.containsKey(value)) {
+                severityNumMap.put(value, severityNumMap.get(value) + 1);
+            } else {
+                severityNumMap.put(value, 1);
+            }
+        });
+
+        // 补充风险数量为0的数据
+        if (boList.size() > severityNumMap.size()) {
+            boList.forEach(bo -> {
+                if (!severityNumMap.containsKey(bo.getSeverity())) {
+                    severityNumMap.put(bo.getSeverity(), 0);
+                }
+            });
+        }
+
+        List<FlowGroupByDestinationIpAndSeverityVO> voList = new ArrayList<>();
+        severityNumMap.forEach((key, value) -> {
+            FlowGroupByDestinationIpAndSeverityVO severityVO = new FlowGroupByDestinationIpAndSeverityVO();
+            severityVO.setSeverity(key);
+            severityVO.setNum(value);
+            voList.add(severityVO);
+        });
+
         return voList;
     }
 
