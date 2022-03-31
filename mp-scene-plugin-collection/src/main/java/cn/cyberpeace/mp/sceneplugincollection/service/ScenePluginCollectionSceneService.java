@@ -620,10 +620,6 @@ public class ScenePluginCollectionSceneService {
             resultList.add(result);
         }
 
-        int allIpSize = batchSceneHandler.getAllIpAddrs().size();
-        int severitySize = resultList.stream().map(FlowGroupByDestinationIpAndSeverityBO::getNum).reduce((a, b) -> a + b).orElse(0);
-        int normalSize = allIpSize - severitySize;
-        resultList.add(new FlowGroupByDestinationIpAndSeverityBO(0, normalSize));
         return new ServiceResult<>(resultList);
     }
 

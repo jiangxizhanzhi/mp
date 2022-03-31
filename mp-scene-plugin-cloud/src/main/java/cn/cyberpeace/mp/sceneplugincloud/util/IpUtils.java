@@ -351,7 +351,7 @@ public class IpUtils {
      * @return 随机ip地址
      */
     public static String randomIp(long begin, long size) {
-        long randomData = Random.nextInt((int) size);
+        long randomData = Random.nextInt((int) size + 1);
         return Ipv4Util.longToIpv4(randomData + begin);
     }
 }
