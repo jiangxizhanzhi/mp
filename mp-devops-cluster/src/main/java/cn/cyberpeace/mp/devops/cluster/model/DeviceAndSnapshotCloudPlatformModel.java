@@ -19,6 +19,11 @@ public class DeviceAndSnapshotCloudPlatformModel extends BaseCloudPlatformModel{
     private String deviceName;
 
     /**
+     * 镜像名称
+     */
+    private String imageName;
+
+    /**
      * 快照列表
      */
     private List<Snapshot> snapshots;
