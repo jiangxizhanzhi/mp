@@ -69,6 +69,7 @@ public class IpUtils {
             if (abandonDhcp) {
                 beginIp = nextIp(beginIp);
                 beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
+                size = size - 1L;
             }
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
             int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
@@ -124,6 +125,7 @@ public class IpUtils {
                 if (abandonDhcp) {
                     beginIp = nextIp(beginIp);
                     beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
+                    size = size - 1L;
                 }
                 int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
                 if (excludeIps != null && !excludeIps.isEmpty()) {
