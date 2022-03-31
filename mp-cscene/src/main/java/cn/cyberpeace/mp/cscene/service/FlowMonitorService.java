@@ -260,7 +260,7 @@ public class FlowMonitorService {
             destinationIpList.forEach(ip -> {
                 SceneElementBO nodeByIpAddr = batchSceneHandler.getNodeByIpAddr(ip);
                 // map中是否包含当前节点的风险等级
-                if (severityMap.containsKey(severityMap.get(nodeByIpAddr.getId()))) {
+                if (severityMap.containsKey(nodeByIpAddr.getId())) {
                     // 已包含，只记录较高的风险等级
                     if (severityMap.get(nodeByIpAddr.getId()) < bo.getSeverity()) {
                         severityMap.put(nodeByIpAddr.getId(), bo.getSeverity());
