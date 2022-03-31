@@ -83,7 +83,6 @@ public class EventMonitorController {
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-        // TODO 暂时还是测试数据
         EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
 //        EventAggr eventAggr = mockEventAggr();
 

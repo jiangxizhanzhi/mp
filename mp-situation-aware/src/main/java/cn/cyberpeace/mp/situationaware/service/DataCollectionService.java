@@ -548,7 +548,7 @@ public class DataCollectionService {
         //配置索引为空
         countRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
-        log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.query().toString());
+        log.info("elasticsearch count quest query... index:{}, JSON query:\n{}", indexArray, countRequest.source().toString());
 
         try {
             CountResponse response = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
