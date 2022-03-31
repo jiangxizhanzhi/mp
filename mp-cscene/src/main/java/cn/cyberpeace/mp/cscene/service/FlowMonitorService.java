@@ -36,8 +36,6 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinati
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
@@ -260,14 +258,9 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
         }
 
-        LocalDateTime endTime = LocalDateTime.now();
-        // 默认6小时
-        LocalDateTime startTime = endTime.minusHours(6);
-
-        // todo 转好
         List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, startTime, endTime);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, null, null);
         Map<String, Integer> map = mapResult.getSource();
 
         // 风险等级 1,2,3,4 数字越低，级别越高
@@ -500,9 +493,13 @@ public class FlowMonitorService {
         Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
 
         // 攻击事件
-        flowAnalysisRequest.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
-        List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.queryTopByAggregationTypeEnum(flowAnalysisRequest);
-        Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
+//        flowAnalysisRequest.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
+//        List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.queryTopByAggregationTypeEnum(flowAnalysisRequest);
+//        Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
+
+        // 攻击事件
+        FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
+        Long attackCount = (long) (riskCount.getHighCount() + riskCount.getMediumCount() + riskCount.getLowCount());
 
         // 网络连接
         Integer netConnSize = 0;

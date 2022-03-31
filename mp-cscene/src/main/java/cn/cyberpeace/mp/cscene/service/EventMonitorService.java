@@ -22,6 +22,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +59,10 @@ public class EventMonitorService {
 
     @Autowired
     private SceneElementMonitorService elementMonitorService;
+
+    @Value("${mp.cscene.default.hours-range:24}")
+    private Integer hoursRange;
+
 
 
     /**
@@ -290,7 +295,7 @@ public class EventMonitorService {
                 wazuhRequest.setPageSize(1);
                 // 默认24小时
                 LocalDateTime endTime = LocalDateTime.now();
-                wazuhRequest.setStartTime(endTime.minusHours(24));
+                wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
                 wazuhRequest.setEndTime(endTime);
 
                 List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);

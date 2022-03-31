@@ -60,6 +60,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -97,6 +98,10 @@ public class ScenePluginCollectionSceneService {
         public static final String EVENT_TYPE = "eventType";
         public static final String NODE_NAME = "nodeName";
     }
+
+
+    @Value("${mp.cscene.default.hours-range:24}")
+    private Integer hoursRange;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -1051,7 +1056,7 @@ public class ScenePluginCollectionSceneService {
         wazuhRequest.setPageSize(1);
         // 默认24小时
         LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(endTime.minusHours(24));
+        wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
         wazuhRequest.setEndTime(endTime);
 
         if (wazuhRequest.getAgentNames().contains(null)) {
