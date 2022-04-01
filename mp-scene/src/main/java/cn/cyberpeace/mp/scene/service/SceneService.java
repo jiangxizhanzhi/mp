@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -44,6 +45,9 @@ public class SceneService {
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
             sceneHandler.setRealTimeUpdate(true);
+            if (Objects.nonNull(sceneHandler.getScene())){
+                sceneHandler.getScene().setCreateTime(null);
+            }
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
