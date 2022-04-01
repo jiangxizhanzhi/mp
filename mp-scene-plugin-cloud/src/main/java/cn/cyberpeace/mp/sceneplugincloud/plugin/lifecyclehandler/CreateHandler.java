@@ -166,7 +166,7 @@ public class CreateHandler extends HandlerCommon {
                         pluginPort.setAuxiliaryNetworkId(connectedNetwork.network.getResourceId());
                     }
                 });
-                return;
+                continue;
             }
             var srcElement = cloudElement.getSrcElement();
             var createData = new VirtualSwitchCreateData();

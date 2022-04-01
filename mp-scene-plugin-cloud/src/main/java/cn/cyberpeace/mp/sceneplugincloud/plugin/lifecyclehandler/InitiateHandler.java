@@ -363,12 +363,14 @@ public class InitiateHandler extends HandlerCommon {
             boolean fromPortsAdd = false;
             // 网络的from端口最多分一个
             for (var port : connectedNetwork.getFromPorts()) {
-                if (StringUtils.isEmpty(port.getIp()) && !fromPortsAdd) {
-                    Integer virtualType = element.getVirtualType();
-                    if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
-                        gatewayCount++;
-                    } else {
-                        requireCount++;
+                if (StringUtils.isEmpty(port.getIp())) {
+                    if (!fromPortsAdd) {
+                        Integer virtualType = element.getVirtualType();
+                        if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                            gatewayCount++;
+                        } else {
+                            requireCount++;
+                        }
                     }
                     fromPortsAdd = true;
                 } else {
@@ -437,9 +439,14 @@ public class InitiateHandler extends HandlerCommon {
             }
 
             // 处理自己的端口
-            List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+            List<ConnectedNetworkBO.ConnectPort> connectPorts = connectedNetwork.connectPorts;
             String fromIp = null;
-            for (var port : fromPorts) {
+            boolean noConnect = true;
+            for (var connectPort : connectPorts) {
+                var port = connectPort.from;
+                if (connectPort.to != null) {
+                    noConnect = false;
+                }
                 if (StringUtils.isNotEmpty(port.getIp())) {
                     continue;
                 } else {
@@ -460,7 +467,31 @@ public class InitiateHandler extends HandlerCommon {
                             }
                         }
                     }
-                    port.setIp(fromIp);
+                    if (connectPort.to != null) {
+                        port.setIp(fromIp);
+                    }
+                }
+            }
+            if (noConnect) {
+                // 网络没有任何连线
+                Integer virtualType = cloudElement.getVirtualType();
+                if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER
+                        || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                ) {
+                    // 路由或网络处理多个口
+                    for (var port : connectedNetwork.getFromPorts()) {
+                        if (StringUtils.isEmpty(port.getIp())) {
+                            port.setIp(fromIp);
+                        }
+                    }
+                } else {
+                    // 其他处理一个口即可
+                    for (var port : connectedNetwork.getFromPorts()) {
+                        if (StringUtils.isEmpty(port.getIp())) {
+                            port.setIp(fromIp);
+                            break;
+                        }
+                    }
                 }
             }
         }
