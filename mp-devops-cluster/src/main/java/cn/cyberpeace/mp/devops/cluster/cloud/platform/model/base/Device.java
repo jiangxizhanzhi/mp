@@ -151,6 +151,11 @@ public class Device extends BaseCloudPlatformModel {
      */
     private Boolean isHide = Boolean.FALSE;
 
+    /**
+     * 默认可运行的镜像名称
+     */
+    private String defaultLaunchImageName;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
