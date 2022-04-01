@@ -78,7 +78,11 @@ public class CreateHandler extends HandlerCommon {
             var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
             String networkId = null;
             if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
-                networkId = cloudElement.getDeriveNetworks().get(0).getNetwork().getResourceId();
+                for (var deriveNet : cloudElement.getDeriveNetworks()) {
+                    if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
+                        networkId = deriveNet.getNetwork().getResourceId();
+                    }
+                }
             }
             if (StringUtils.isEmpty(networkId)) {
                 return;
