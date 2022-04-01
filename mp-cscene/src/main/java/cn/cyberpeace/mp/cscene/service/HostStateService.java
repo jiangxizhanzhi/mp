@@ -27,6 +27,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
@@ -48,6 +49,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class HostStateService {
+
+
+    @Value("${mp.cscene.default.hours-range:24}")
+    private Integer hoursRange;
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -218,7 +223,7 @@ public class HostStateService {
 
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔24小时
-            startTime = endTime.minusHours(24);
+            startTime = endTime.minusHours(hoursRange);
         }
 
         if (Objects.isNull(segmentCount)) {
