@@ -156,6 +156,7 @@ public class ImagesConverter implements BaseConverter{
         if (Objects.isNull(device) || !device.isSuccess()){
             return device;
         }
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
@@ -429,6 +430,7 @@ public class ImagesConverter implements BaseConverter{
         }
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
         return device;
     }
 
