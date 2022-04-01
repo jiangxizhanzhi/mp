@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -124,29 +126,31 @@ public class InitiateHandler extends HandlerCommon {
                     if (Boolean.TRUE.equals(cloudElement.getExternal())) {
                         return;
                     }
-                    var network = cloudElement.getDeriveNetworks().get(0);
-                    var ips = network.getNetwork().getIpPool();
-                    if (ips.isEmpty()) {
-                        log.info("ip pool is empty when initate collection,node {}", cloudElement.getSrcElement().getName());
-                        return;
-                    }
-                    var ip = ips.get(0);
-                    var hostRoutes = network.getNetwork().getHostRoutes();
-                    if (hostRoutes == null) {
-                        hostRoutes = new ArrayList<>();
-                    }
-                    var hostRoute = new HostRoute();
-                    hostRoute.setDestination(externalNetCidr);
-                    hostRoute.setNexthop(ip);
-                    hostRoutes.add(hostRoute);
-                    network.getNetwork().setHostRoutes(hostRoutes);
+                    for (var network : cloudElement.getDeriveNetworks()) {
+                        var networkInfo = network.getNetwork();
+                        List<String> ips = IpUtils.newRandomIps(networkInfo.getCidr(), 1, new ArrayList<>(networkInfo.getExcloudIps()), networkInfo.getAllocationPools(), Boolean.TRUE.equals(networkInfo.getDhcp()));
+                        if (CollectionUtils.isEmpty(ips)) {
+                            log.info("ip pool is empty when initate collection,node {}", cloudElement.getSrcElement().getName());
+                            return;
+                        }
+                        var ip = ips.get(0);
+                        networkInfo.getExcloudIps().add(ip);
+                        var hostRoutes = network.getNetwork().getHostRoutes();
+                        if (hostRoutes == null) {
+                            hostRoutes = new ArrayList<>();
+                        }
+                        var hostRoute = new HostRoute();
+                        hostRoute.setDestination(externalNetCidr);
+                        hostRoute.setNexthop(ip);
+                        hostRoutes.add(hostRoute);
+                        network.getNetwork().setHostRoutes(hostRoutes);
 
-                    var routerPort = new CollectionPluginSceneProbeRouterPortModel();
-                    routerPort.setScene(getPluginHandler().getSrcScene().getEid());
-                    routerPort.setSceneElement(nodeId);
-                    routerPort.setIp(ip);
-                    routerPorts.add(routerPort);
-
+                        var routerPort = new CollectionPluginSceneProbeRouterPortModel();
+                        routerPort.setScene(getPluginHandler().getSrcScene().getEid());
+                        routerPort.setSceneElement(nodeId);
+                        routerPort.setIp(ip);
+                        routerPorts.add(routerPort);
+                    }
                 });
                 if (!routerPorts.isEmpty()) {
                     getSceneProbeRouterPortMapper().bulkCreate(routerPorts);

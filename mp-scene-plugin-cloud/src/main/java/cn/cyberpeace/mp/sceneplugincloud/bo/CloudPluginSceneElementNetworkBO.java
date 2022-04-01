@@ -16,7 +16,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @Description
@@ -58,6 +60,7 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private String auxiliaryNetworkRouterIp;
 
     private List<String> ipPool = new ArrayList<>();
+    private Set<String> excloudIps = new HashSet<>();
 
     public CloudPluginSceneElementNetworkBO(String scene, String sceneElement) {
         this.id = TextUtils.uuid();

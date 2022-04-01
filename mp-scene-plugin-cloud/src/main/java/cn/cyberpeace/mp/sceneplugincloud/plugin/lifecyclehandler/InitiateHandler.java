@@ -358,12 +358,19 @@ public class InitiateHandler extends HandlerCommon {
             }
 
             Set<String> portIps = new HashSet<>();
-            // todo
-            int requireCount = 1;
+            int requireCount = 0;
             int gatewayCount = 0;
+            boolean fromPortsAdd = false;
+            // 网络的from端口最多分一个
             for (var port : connectedNetwork.getFromPorts()) {
-                if (StringUtils.isEmpty(port.getIp())) {
-                    requireCount++;
+                if (StringUtils.isEmpty(port.getIp()) && !fromPortsAdd) {
+                    Integer virtualType = element.getVirtualType();
+                    if (virtualType != null && (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)) {
+                        gatewayCount++;
+                    } else {
+                        requireCount++;
+                    }
+                    fromPortsAdd = true;
                 } else {
                     portIps.add(port.getIp());
                 }
@@ -387,12 +394,17 @@ public class InitiateHandler extends HandlerCommon {
             if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
+            if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
+                existIps.addAll(gatewayIpPool);
+            }
             List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), requireCount, new ArrayList<>(existIps), network.getAllocationPools(), BoolUtils.bool(network.getDhcp()));
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
                 // 网关未分配 则放入地址池的最后等待分配
                 ipPool.add(network.getGateway());
             }
+            network.getExcloudIps().addAll(existIps);
+            network.getExcloudIps().addAll(ipPool);
             network.setIpPool(ipPool);
         });
     }
@@ -687,7 +699,7 @@ public class InitiateHandler extends HandlerCommon {
                 deriveNetworks.add(defaultConnectedNetwork);
             }
             // 至少有个网络
-            if (CollectionUtils.isEmpty(deriveNetworks)) {
+            if (CollectionUtils.isEmpty(cloudElement.getAccessNetworks()) && CollectionUtils.isEmpty(deriveNetworks)) {
                 if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                     deriveNetworks.add(defaultConnectedNetwork);
                 }
