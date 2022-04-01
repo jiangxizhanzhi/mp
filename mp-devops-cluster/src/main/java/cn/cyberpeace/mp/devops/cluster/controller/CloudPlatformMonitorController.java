@@ -56,9 +56,11 @@ public class CloudPlatformMonitorController {
 
     private ImagesConverter imagesConverter;
 
+    private NpcConverter npcConverter;
+
     @Autowired
     public CloudPlatformMonitorController(InstanceConverter instanceConverter, ContainerConverter containerConverter,
-                                          RouterConverter routerConverter,
+                                          RouterConverter routerConverter,NpcConverter npcConverter,
                                           RealEquipmentConverter realEquipmentConverter,
                                           HypervisorConverter hypervisorConverter,
                                           ImagesConverter imagesConverter) {
@@ -68,6 +70,7 @@ public class CloudPlatformMonitorController {
         this.realEquipmentConverter = realEquipmentConverter;
         this.hypervisorConverter = hypervisorConverter;
         this.imagesConverter = imagesConverter;
+        this.npcConverter = npcConverter;
     }
 
     /**
@@ -98,11 +101,16 @@ public class CloudPlatformMonitorController {
         routerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
         Integer totalRouters = routerConverter.getTotalRouters(routerPageRequest);
 
+        //NPC个数
+        NpcPageRequest npcPageRequest = new NpcPageRequest();
+        npcPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
+        Integer totalNpcs = npcConverter.getTotalNpcs(npcPageRequest);
+
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
         HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(BigDecimal.ZERO)
                 .netIo(BigDecimal.ZERO)
-                .totalNpc(0).totalInstances(totalInstances)
+                .totalNpc(totalNpcs).totalInstances(totalInstances)
                 .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
         if(Objects.isNull(hypervisorStatisticsConvertModel)){
             return new Result<>(response);
