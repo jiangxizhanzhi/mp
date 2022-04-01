@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
-import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 
 import java.util.List;
 
@@ -26,5 +26,7 @@ public interface SysConfigService extends BaseModelService<SysConfigModel, Query
      * @return
      */
     boolean isNewUserNeedAudit();
+
+    void publishConfigUpdateEvent(List<SysConfigModel> configs);
 
 }

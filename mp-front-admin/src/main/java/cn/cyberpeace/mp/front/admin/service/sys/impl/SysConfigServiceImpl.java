@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.constant.AdminBasei18nCode;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.constant.SysConfigConstant;
+import cn.cyberpeace.mp.front.admin.event.ConfigEventPublisher;
+import cn.cyberpeace.mp.front.admin.event.SysConfigUpdateEvent;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.cyberpeace.mp.front.admin.repository.SysConfigMapper;
 import cn.cyberpeace.mp.front.admin.service.fields.SysConfigFields;
@@ -23,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -44,6 +48,9 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ConfigEventPublisher configEventPublisher;
 
 
     @Override
@@ -140,6 +147,23 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void publishConfigUpdateEvent(List<SysConfigModel> configs) {
+        if (CollectionUtil.isNotEmpty(configs)) {
+            Map<String, String> configMap = configs2Map(configs);
+            SysConfigUpdateEvent event = new SysConfigUpdateEvent(configMap);
+            configEventPublisher.publishEvent(event);
+        }
+    }
+
+    private Map<String, String> configs2Map(List<SysConfigModel> configs) {
+        Map<String, String> configMap = new HashMap();
+        configs.forEach(model -> {
+            configMap.put(model.getKeyName(), model.getValue());
+        });
+        return configMap;
     }
 
 }
