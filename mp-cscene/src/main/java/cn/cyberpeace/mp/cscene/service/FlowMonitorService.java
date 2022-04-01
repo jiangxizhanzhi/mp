@@ -121,7 +121,7 @@ public class FlowMonitorService {
         params.setNodeIds(request.getNodeIds());
         params.setNetworkBytes(request.getNetworkBytes());
         params.setDateTime(request.getDateTime());
-
+        params.setShuffleCategory(request.getShuffleCategory());
         scenePluginCollectionSceneService.simulation(params);
 
         return ServiceResult.successful();

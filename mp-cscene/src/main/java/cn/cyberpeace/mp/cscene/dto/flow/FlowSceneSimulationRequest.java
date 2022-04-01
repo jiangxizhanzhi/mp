@@ -48,4 +48,8 @@ public class FlowSceneSimulationRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime dateTime;
 
+    @ApiModelProperty("随机生成攻击手法")
+    private Boolean shuffleCategory = Boolean.FALSE;
+
+
 }
