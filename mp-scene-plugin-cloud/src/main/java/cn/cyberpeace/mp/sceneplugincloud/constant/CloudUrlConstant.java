@@ -54,5 +54,7 @@ public class CloudUrlConstant {
     public static final String DELETE_ROUTER_URL = "/v1/routers/{router_id}";
     public static final String QUERY_PORTS = "/v1/ports/{resource_id}";
 
+    public static final String VLAN_RANGE = "/cpcloud/info/v1/vlan_range";
+
     private CloudUrlConstant() {}
 }

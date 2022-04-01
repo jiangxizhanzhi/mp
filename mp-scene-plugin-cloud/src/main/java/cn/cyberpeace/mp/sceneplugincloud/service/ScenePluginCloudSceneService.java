@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -543,5 +544,19 @@ public class ScenePluginCloudSceneService {
             }
         });
         return new ArrayList<>(users);
+    }
+
+    public void changeVlanRange(String vlanRange) {
+        TaskCommon.executeTask(() -> {
+            if (StringUtils.isEmpty(vlanRange)) {
+                return;
+            }
+            // 转换格式
+            String formatVlanRange = vlanRange.replace("-", ":");
+            boolean result = new Remote().changeVlanRange(formatVlanRange);
+            if (!result) {
+                log.error("change vlan range {} error", formatVlanRange);
+            }
+        });
     }
 }
