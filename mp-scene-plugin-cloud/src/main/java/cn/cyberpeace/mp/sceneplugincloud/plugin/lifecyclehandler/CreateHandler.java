@@ -593,8 +593,10 @@ public class CreateHandler extends HandlerCommon {
             // 多个端口连到同一个网络上的时候暂时当做一个端口处理
             networkCloudPorts.forEach(cloudPort -> {
                 var srcPort = cloudPort.getSrcPort();
-                srcPort.setIp(virtualNic.getFixedIp());
-                srcPort.setMacAddr(virtualNic.getMacAddress());
+                if (srcPort.isUsing()) {
+                    srcPort.setIp(virtualNic.getFixedIp());
+                    srcPort.setMacAddr(virtualNic.getMacAddress());
+                }
 
                 cloudPort.setResourceId(virtualNic.getPortId());
                 cloudPort.setQosId(virtualNic.getQosId());

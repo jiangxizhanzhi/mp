@@ -494,6 +494,11 @@ public class InitiateHandler extends HandlerCommon {
                     }
                 }
             }
+            for (var port : connectedNetwork.getFromPorts()) {
+                if (StringUtils.isEmpty(port.getIp())) {
+                    port.setUsing(false);
+                }
+            }
         }
     }
 
