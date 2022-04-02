@@ -1659,4 +1659,26 @@ public abstract class BaseSceneHandler<
         return getPortElement(connectedPortId);
     }
 
+    public void addElementPlugin(String pluginKey, String nodeId, Map<String, Object> pluginElement) {
+        ScenePluginDataBO scenePluginDataBO = scenePluginData.getOrDefault(pluginKey, null);
+        if (scenePluginDataBO == null) {
+            return;
+        }
+        if (scenePluginDataBO.getElements() == null) {
+            scenePluginDataBO.setElements(new HashMap<>());
+        }
+        scenePluginDataBO.getElements().put(nodeId, pluginElement);
+    }
+
+    public void addElementPortPlugin(String pluginKey, String portId, Map<String, Object> pluginPort) {
+        ScenePluginDataBO scenePluginDataBO = scenePluginData.getOrDefault(pluginKey, null);
+        if (scenePluginDataBO == null) {
+            return;
+        }
+        if (scenePluginDataBO.getElementPorts() == null) {
+            scenePluginDataBO.setElementPorts(new HashMap<>());
+        }
+        scenePluginDataBO.getElementPorts().put(portId, pluginPort);
+    }
+
 }

@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
-import cn.cyberpeace.mp.scene.model.SceneElementPluginModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -63,7 +63,6 @@ public class InitiateHandler extends HandlerCommon {
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect())) {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-            List<SceneElementPluginModel> pluginModels = new ArrayList<>();
             runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
                 cloudPluginHandler.getElementPortMap().forEach((portId, srcPort) -> {
                     String nodeId = srcPort.getSrcPort().getElement().getId();
@@ -72,22 +71,16 @@ public class InitiateHandler extends HandlerCommon {
                         collectionElement = new CollectionPluginSceneElementBO();
                         collectionElement.setEnableProbeCollect(false);
                         getPluginHandler().addElement(nodeId, collectionElement);
-                        SceneElementPluginModel model = new SceneElementPluginModel();
-                        model.setScene(scene.getSrcScene().getEid());
-                        model.setSceneElement(srcPort.getSrcPort().getElement().getEid());
-                        model.setPluginKey(PluginConstant.PLUGIN_KEY);
-                        pluginModels.add(model);
+                        getPluginHandler().getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(collectionElement));
                     }
                     var collectionPort = getPluginHandler().getPort(portId);
                     if (collectionPort == null) {
                         collectionPort = new CollectionPluginSceneElementPortBO();
                         getPluginHandler().addPort(portId, collectionPort);
+                        getPluginHandler().getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(collectionPort));
                     }
                     collectionPort.setEnableFlowCollect(true);
                 });
-                if (!pluginModels.isEmpty()) {
-                    getSceneElementPluginMapper().bulkCreate(pluginModels);
-                }
             });
         }
 
