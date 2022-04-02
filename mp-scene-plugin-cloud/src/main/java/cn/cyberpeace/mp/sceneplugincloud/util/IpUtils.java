@@ -431,26 +431,33 @@ public class IpUtils {
         int excludeSize = 0;
         int allocationPoolIpSize;
         List<String> newExcludeIps = new ArrayList<>(excludeIps);
-        if (!allocationPools.isEmpty()) {
-            for (AllocationPool allocationPool : allocationPools) {
-                long start = Ipv4Util.ipv4ToLong(allocationPool.getStart());
-                long end = Ipv4Util.ipv4ToLong(allocationPool.getEnd());
-                if (!newExcludeIps.isEmpty()) {
-                    for (String newExcludeIp : newExcludeIps) {
-                        long longExclude = Ipv4Util.ipv4ToLong(newExcludeIp);
+        if (!newExcludeIps.isEmpty()) {
+            if (!allocationPools.isEmpty()) {
+                boolean isInPool = false;
+                for (String newExcludeIp : newExcludeIps) {
+                    long longExclude = Ipv4Util.ipv4ToLong(newExcludeIp);
+                    for (AllocationPool allocationPool : allocationPools) {
+                        long start = Ipv4Util.ipv4ToLong(allocationPool.getStart());
+                        long end = Ipv4Util.ipv4ToLong(allocationPool.getEnd());
                         if (longExclude >= start && longExclude <= end) {
                             newExcludeIps.remove(newExcludeIp);
-                        } else {
-                            excludeSize++;
-                            newExcludeIps.remove(newExcludeIp);
+                            isInPool = true;
+                            break;
                         }
                     }
+                    if (!isInPool) {
+                        excludeSize++;
+                    }
+                    isInPool = false;
                 }
+                allocationPoolIpSize = getAvailableAllocationPoolIpSize(allocationPools, begin, last);
+                size = size - allocationPoolIpSize - excludeSize;
+            } else {
+                size = size - excludeIps.size();
             }
+        } else if (!allocationPools.isEmpty()) {
             allocationPoolIpSize = getAvailableAllocationPoolIpSize(allocationPools, begin, last);
-            size = size - allocationPoolIpSize - excludeSize;
-        } else if (!newExcludeIps.isEmpty()) {
-            size = size - newExcludeIps.size();
+            size = size - allocationPoolIpSize;
         }
         return size;
     }
