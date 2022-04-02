@@ -466,7 +466,7 @@ public class FlowMonitorService {
             finalList = flowAttackDtos.subList(0, queryParams.getPageSize());
         }
 
-        return new ListObjServiceResult(new ListObjResult(finalList, finalList.size()).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult(finalList, flowBOResult.getSource().getTotal()).asResult()).asResult();
     }
 
 

@@ -171,13 +171,13 @@ public class ScenePluginCollectionSceneService {
 
         request.setSeverityEnum(SeverityEnum.ALL);
         request.setFilterDestinationIps(queryParams.getFilterDestinationIps());
-        List<FlowLogBO> flowLogBOS = flowAnalysisService.flowLog(request);
-        if (CollectionUtils.isEmpty(flowLogBOS)) {
+        ListObjResult<FlowLogBO> flowLogBOSResult = flowAnalysisService.flowLogWithTotal(request);
+        if (CollectionUtils.isEmpty(flowLogBOSResult.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
-        List<CollectionFlowBO> list = flowLogBOS.stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMap(),batchSceneHandler.getAllIp2ElementMap(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
-        return new ListObjServiceResult<>(new ListObjResult<>(list, list.size()));
+        List<CollectionFlowBO> list = flowLogBOSResult.getObjs().stream().map(flowLogBO -> this.buildCollectionFlowBOFrom(flowLogBO, batchSceneHandler.getAllMac2ElementMap(),batchSceneHandler.getAllIp2ElementMap(), batchSceneHandler.getAllMac2SceneIdMap())).collect(Collectors.toList());
+        return new ListObjServiceResult<>(new ListObjResult<>(list, flowLogBOSResult.getTotal()));
     }
 
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(String sceneId, HostStateQueryParams queryParams) {
