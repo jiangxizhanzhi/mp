@@ -7,9 +7,7 @@ import cn.hutool.core.net.Ipv4Util;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 public class IpUtils {
@@ -72,11 +70,10 @@ public class IpUtils {
                 size = size - 1L;
             }
             allocationPools = List.of(new AllocationPool(nextIp(beginIp), previousIp(lastIp)));
-            int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
+            int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong) + 1;
             if (excludeIps != null && !excludeIps.isEmpty()) {
                 ipSize = ipSize - excludeIps.size();
             }
-            ipSize++;
             if (ipSize < count) {
                 throw new MpRuntimeException("No enough resource for random ip address pick");
             }
@@ -93,41 +90,60 @@ public class IpUtils {
                 ips.add(randomIp);
             }
         } else {
-            List<String> allocationPoolsIps = getAllocationPoolsIps(allocationPools, abandonDhcp);
-            if (allocationPoolsIps.size() < size) {
-                int ipSize = allocationPoolsIps.size();
+            long last = Ipv4Util.ipv4ToLong(previousIp(lastIp));
+            int allocationPoolsIpSize = getAvailableAllocationPoolIpSize(allocationPools, beginIpLong, last);
+            if (allocationPoolsIpSize < size) {
+                if (abandonDhcp) {
+                    allocationPoolsIpSize = allocationPoolsIpSize - allocationPools.size();
+                }
+                List<AllocationPool> newAllocationPools = getAvailableAllocationPool(allocationPools, beginIpLong, last);
                 if (excludeIps != null && !excludeIps.isEmpty()) {
                     for (String excludeIp : excludeIps) {
-                        if (allocationPoolsIps.contains(excludeIp)) {
-                            allocationPoolsIps.remove(excludeIp);
-                            ipSize--;
+                        long longExclude = Ipv4Util.ipv4ToLong(excludeIp);
+                        for (AllocationPool allocationPool : newAllocationPools) {
+                            if (longExclude >= Ipv4Util.ipv4ToLong(allocationPool.getStart()) &&
+                                    longExclude <= Ipv4Util.ipv4ToLong(allocationPool.getEnd())) {
+                                allocationPoolsIpSize--;
+                                break;
+                            }
                         }
                     }
                 }
-                for (String allocationPoolIp : allocationPoolsIps) {
-                    if (!newIsInCidr(allocationPoolIp, cidr)) {
-                        allocationPoolsIps.remove(allocationPoolIp);
-                        ipSize--;
-                    }
-                }
-                if (ipSize < count) {
+                if (allocationPoolsIpSize < count) {
                     throw new MpRuntimeException("No enough resource for random ip address pick");
                 }
-                ips.addAll(RandomUtils.sample(allocationPoolsIps, count));
+                for (int i = 0; i < count; i++) {
+                    int randomPool = randomPool(newAllocationPools.size());
+                    beginIpLong = Ipv4Util.ipv4ToLong(newAllocationPools.get(randomPool).getStart());
+                    size = Ipv4Util.ipv4ToLong(newAllocationPools.get(randomPool).getEnd()) - beginIpLong;
+                    if (abandonDhcp) {
+                        size--;
+                    }
+                    String randomIp = randomIp(beginIpLong, size);
+                    if (excludeIps != null && !excludeIps.isEmpty() && excludeIps.contains(randomIp)) {
+                        i--;
+                        continue;
+                    }
+                    if (ips.contains(randomIp)) {
+                        i--;
+                        continue;
+                    }
+                    ips.add(randomIp);
+                }
             } else {
                 if (abandonDhcp) {
                     beginIp = nextIp(beginIp);
                     beginIpLong = Ipv4Util.ipv4ToLong(beginIp);
-                    size = size - 1L;
+                    size = size - 1;
                 }
-                int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong);
+                int ipSize = (int) (Ipv4Util.ipv4ToLong(lastIp) - beginIpLong) + 1;
                 if (excludeIps != null && !excludeIps.isEmpty()) {
                     ipSize = ipSize - excludeIps.size();
                 }
-                ipSize++;
                 if (ipSize < count) {
                     throw new MpRuntimeException("No enough resource for random ip address pick");
                 }
+                boolean isInPool = false;
                 for (int i = 0; i < count; i++) {
                     String randomIp = randomIp(beginIpLong, size);
                     if (excludeIps != null && excludeIps.contains(randomIp)) {
@@ -138,11 +154,20 @@ public class IpUtils {
                         i--;
                         continue;
                     }
-                    if (!allocationPoolsIps.contains(randomIp)) {
+                    long longRandom = Ipv4Util.ipv4ToLong(randomIp);
+                    for (AllocationPool allocationPool : allocationPools) {
+                        if (longRandom >= Ipv4Util.ipv4ToLong(allocationPool.getStart()) ||
+                                longRandom <= Ipv4Util.ipv4ToLong(allocationPool.getEnd())) {
+                            isInPool = true;
+                            break;
+                        }
+                    }
+                    if (!isInPool) {
                         i--;
                         continue;
                     }
                     ips.add(randomIp);
+                    isInPool = false;
                 }
             }
         }
@@ -160,11 +185,6 @@ public class IpUtils {
     public static List<String> newAllocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
                                                            List<AllocationPool> allocationPools) {
         List<String> ips = new ArrayList<>();
-        List<String> allocationPoolsIps = new ArrayList<>();
-        if (allocationPools != null && !allocationPools.isEmpty()) {
-            // 包含dhcp地址以去除
-            allocationPoolsIps = getAllocationPoolsIps(allocationPools, false);
-        }
         String previousIp = null;
         String beginIp = null;
         if (cidr.contains(Ipv4Util.IP_MASK_SPLIT_MARK)) {
@@ -175,21 +195,26 @@ public class IpUtils {
             beginIp = newIps[0];
             previousIp = newIps[1];
         }
-        int ipSize = (int) (Ipv4Util.ipv4ToLong(previousIp) - Ipv4Util.ipv4ToLong(beginIp));
-        if (excludeIps != null && !excludeIps.isEmpty()) {
-            ipSize = ipSize - excludeIps.size();
-        }
-        if (!allocationPoolsIps.isEmpty()) {
-            ipSize = ipSize - allocationPoolsIps.size();
-        }
-        ipSize = ipSize - 1;
+        long begin = Ipv4Util.ipv4ToLong(nextIp(beginIp));
+        long last = Ipv4Util.ipv4ToLong(previousIp(previousIp));
+        int ipSize = getAvailableDefaultRouterIpSize(begin, last, excludeIps, allocationPools);
         if (ipSize < count) {
             throw new MpRuntimeException("No enough resource for default router address pick");
         }
+        boolean isInPool = false;
         for (int i = 0; i < count; i++) {
             previousIp = IpUtils.previousIp(previousIp);
-            if (allocationPoolsIps.contains(previousIp)) {
+            long longPrevious = Ipv4Util.ipv4ToLong(previousIp);
+            for (AllocationPool allocationPool : allocationPools) {
+                if (longPrevious >= Ipv4Util.ipv4ToLong(allocationPool.getStart()) &&
+                        longPrevious <= Ipv4Util.ipv4ToLong(allocationPool.getEnd())) {
+                    isInPool = true;
+                    break;
+                }
+            }
+            if (isInPool) {
                 i--;
+                isInPool = false;
                 continue;
             }
             if (excludeIps != null && !excludeIps.isEmpty() && excludeIps.contains(previousIp)) {
@@ -346,5 +371,114 @@ public class IpUtils {
     public static String randomIp(long begin, long size) {
         long randomData = Random.nextInt((int) size + 1);
         return Ipv4Util.longToIpv4(randomData + begin);
+    }
+
+    public static int randomPool(int size) {
+        return Random.nextInt(size);
+    }
+
+    /**
+     * 获取地址池Ip总数
+     * @param allocationPools 地址池集合
+     * @return 地址池Ip总数
+     */
+    public static int getAllocationPoolIpSize(List<AllocationPool> allocationPools) {
+        int size;
+        allocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
+        long[] starts = new long[allocationPools.size()];
+        long[] ends = new long[allocationPools.size()];
+        int i = 0;
+        for (AllocationPool allocationPool : allocationPools) {
+            starts[i] = Ipv4Util.ipv4ToLong(allocationPool.getStart());
+            ends[i] = Ipv4Util.ipv4ToLong(allocationPool.getEnd());
+            i++;
+        }
+        size = (int) (ends[0] - starts[0]) + 1;
+        for (i = 1; i < allocationPools.size(); i++) {
+            if (starts[i] > ends[i - 1]) {
+                size = size + (int) (ends[i] - starts[i]) + 1;
+            } else {
+                size = size + (int) (ends[i] - ends[i - 1]) + 1;
+            }
+        }
+        return size;
+    }
+
+    /**
+     *
+     * @param begin 开始ip long
+     * @param last 结束ip long
+     * @param excludeIps 排除的ip集合
+     * @param allocationPools ip地址池
+     * @return 默认路由可分配ip大小
+     */
+    public static int getAvailableDefaultRouterIpSize(long begin, long last, List<String> excludeIps, List<AllocationPool> allocationPools) {
+        int size = (int) (last - begin) + 1;
+        int excludeSize = 0;
+        int allocationPoolIpSize;
+        List<String> newExcludeIps = new ArrayList<>(excludeIps);
+        if (!allocationPools.isEmpty()) {
+            for (AllocationPool allocationPool : allocationPools) {
+                long start = Ipv4Util.ipv4ToLong(allocationPool.getStart());
+                long end = Ipv4Util.ipv4ToLong(allocationPool.getEnd());
+                if (!newExcludeIps.isEmpty()) {
+                    for (String newExcludeIp : newExcludeIps) {
+                        long longExclude = Ipv4Util.ipv4ToLong(newExcludeIp);
+                        if (longExclude >= start && longExclude <= end) {
+                            newExcludeIps.remove(newExcludeIp);
+                        } else {
+                            excludeSize++;
+                            newExcludeIps.remove(newExcludeIp);
+                        }
+                    }
+                }
+            }
+            allocationPoolIpSize = getAvailableAllocationPoolIpSize(allocationPools, begin, last);
+            size = size - allocationPoolIpSize - excludeSize;
+        } else if (!newExcludeIps.isEmpty()) {
+            size = size - newExcludeIps.size();
+        }
+        return size;
+    }
+
+    /**
+     *
+     * @param allocationPools 地址池集合
+     * @param begin cidr开始ip long
+     * @param last cidr结束ip long
+     * @return 地址池与cidr交集大小
+     */
+    public static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
+        int allocationPoolIpSize = getAllocationPoolIpSize(allocationPools);
+        List<AllocationPool> newAllocationPools = getAvailableAllocationPool(allocationPools, begin, last);
+        newAllocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
+        if (Ipv4Util.ipv4ToLong(newAllocationPools.get(newAllocationPools.size() - 1).getEnd()) > last) {
+            int endSize = (int) (Ipv4Util.ipv4ToLong(newAllocationPools.get(newAllocationPools.size() - 1).getEnd()) - last);
+            allocationPoolIpSize = allocationPoolIpSize - endSize;
+        }
+        newAllocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getStart())));
+        if (Ipv4Util.ipv4ToLong(newAllocationPools.get(0).getStart()) < begin) {
+            int startSize = (int) (begin - Ipv4Util.ipv4ToLong(newAllocationPools.get(0).getStart()));
+            allocationPoolIpSize = allocationPoolIpSize - startSize;
+        }
+        return allocationPoolIpSize;
+    }
+
+    /**
+     *
+     * @param allocationPools 地址池集合
+     * @param begin cidr开始ip long
+     * @param last cidr结束ip long
+     * @return 与cidr有交集的地址池集合
+     */
+    public static List<AllocationPool> getAvailableAllocationPool(List<AllocationPool> allocationPools, long begin, long last) {
+        List<AllocationPool> newAllocationPools = new ArrayList<>();
+        for (AllocationPool allocationPool : allocationPools) {
+            if ((Ipv4Util.ipv4ToLong(allocationPool.getStart()) >= begin && Ipv4Util.ipv4ToLong(allocationPool.getStart()) <= last)
+                    || (Ipv4Util.ipv4ToLong(allocationPool.getEnd()) >= begin && Ipv4Util.ipv4ToLong(allocationPool.getEnd()) <= last)) {
+                newAllocationPools.add(allocationPool);
+            }
+        }
+        return newAllocationPools;
     }
 }
