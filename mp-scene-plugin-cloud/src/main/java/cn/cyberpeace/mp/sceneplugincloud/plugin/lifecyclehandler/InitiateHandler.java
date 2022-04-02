@@ -336,13 +336,18 @@ public class InitiateHandler extends HandlerCommon {
                 }
                 if (gatewayIp == null) {
                     String gateway = null;
-                    String possibleDhcpIp = null;
                     List<String> excludeIps = new ArrayList<>(existIps);
                     for (int i = 0; i < 5; i++) {
                         gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
                         excludeIps.add(gateway);
-                        possibleDhcpIp = IpUtils.nextIp(gateway);
-                        if (!existIps.contains(possibleDhcpIp)) {
+                        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway);
+                        boolean conflict = false;
+                        for (String possibleDhcpIp : possibleDhcpIps) {
+                            if (existIps.contains(possibleDhcpIp)) {
+                                conflict = true;
+                            }
+                        }
+                        if (!conflict) {
                             break;
                         }
                     }
@@ -877,5 +882,14 @@ public class InitiateHandler extends HandlerCommon {
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
         network.setDhcp(element.getDhcp());
+    }
+
+    private List<String> getPossibleDhcpIps(String gateway) {
+        Set<String> possibleDhcpIps = new HashSet<>();
+        if (gateway.endsWith(".254")) {
+            possibleDhcpIps.add(gateway.replace(".254", ".1"));
+        }
+        possibleDhcpIps.add(IpUtils.nextIp(gateway));
+        return new ArrayList<>(possibleDhcpIps);
     }
 }
