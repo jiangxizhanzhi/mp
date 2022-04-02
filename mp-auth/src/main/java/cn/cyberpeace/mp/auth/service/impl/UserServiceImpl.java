@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.DefaultImgService;
+import cn.cyberpeace.mp.auth.service.OperatorPermissionCheckService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -118,6 +119,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private DefaultImgService defaultImgService;
+
+    @Autowired
+    private OperatorPermissionCheckService operatorPermissionCheckService;
 
 
     @Autowired
@@ -222,6 +226,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
+        operatorPermissionCheckService.check(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -415,6 +420,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(user)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_EXISTED);
         }
+
+        List<RoleModel> roles = userRoleService.listByUserId(userId);
+        operatorPermissionCheckService.check(roles.stream().map(RoleModel::getId).collect(Collectors.toList()));
 
         UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
