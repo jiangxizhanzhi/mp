@@ -373,6 +373,11 @@ public class IpUtils {
         return Ipv4Util.longToIpv4(randomData + begin);
     }
 
+    /**
+     *
+     * @param size 地址池大小
+     * @return 随机地址池序号
+     */
     public static int randomPool(int size) {
         return Random.nextInt(size);
     }
