@@ -82,10 +82,10 @@ public class InitiateHandler extends HandlerCommon {
                         getPluginHandler().addPort(portId, collectionPort);
                     }
                     collectionPort.setEnableFlowCollect(true);
-                    if (!pluginModels.isEmpty()) {
-                        getSceneElementPluginMapper().bulkCreate(pluginModels);
-                    }
                 });
+                if (!pluginModels.isEmpty()) {
+                    getSceneElementPluginMapper().bulkCreate(pluginModels);
+                }
             });
         }
 
