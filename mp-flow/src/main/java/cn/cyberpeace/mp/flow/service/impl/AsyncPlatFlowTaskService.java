@@ -299,7 +299,7 @@ public class AsyncPlatFlowTaskService {
      * 异步新增虚拟机、添加网口
      *
      */
-//    @Async
+    @Async
     public void addExecutor(String uuid) {
         this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()));
     }
