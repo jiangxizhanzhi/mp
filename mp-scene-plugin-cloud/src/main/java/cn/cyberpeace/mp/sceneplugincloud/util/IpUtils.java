@@ -112,11 +112,16 @@ public class IpUtils {
                 if (allocationPoolsIpSize < count) {
                     throw new MpRuntimeException("No enough resource for random ip address pick");
                 }
+                List<String> startIps = new ArrayList<>();
+                for (AllocationPool allocationPool : newAllocationPools) {
+                    startIps.add(allocationPool.getStart());
+                }
                 for (int i = 0; i < count; i++) {
                     int randomPool = randomPool(newAllocationPools.size());
                     beginIpLong = Ipv4Util.ipv4ToLong(newAllocationPools.get(randomPool).getStart());
                     size = Ipv4Util.ipv4ToLong(newAllocationPools.get(randomPool).getEnd()) - beginIpLong;
                     if (abandonDhcp) {
+                        beginIpLong++;
                         size--;
                     }
                     String randomIp = randomIp(beginIpLong, size);
@@ -125,6 +130,10 @@ public class IpUtils {
                         continue;
                     }
                     if (ips.contains(randomIp)) {
+                        i--;
+                        continue;
+                    }
+                    if (startIps.contains(randomIp)) {
                         i--;
                         continue;
                     }
@@ -403,7 +412,7 @@ public class IpUtils {
             if (starts[i] > ends[i - 1]) {
                 size = size + (int) (ends[i] - starts[i]) + 1;
             } else {
-                size = size + (int) (ends[i] - ends[i - 1]) + 1;
+                size = size + (int) (ends[i] - ends[i - 1]);
             }
         }
         return size;
