@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.auth.util;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
@@ -14,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
@@ -57,6 +56,7 @@ public class UserUtils {
      * 获取当前登录用户
      * @return
      */
+    @Nullable
     public static UserModel getLoginUser() {
         UserModel user = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -67,11 +67,13 @@ public class UserUtils {
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.error("Login account type is Client:{}", principal);
-            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
+            log.error("Login account type is Client:{}, return null!", principal);
+//            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
+            user = null;
         }
 
         return user;
+
     }
 
 }
