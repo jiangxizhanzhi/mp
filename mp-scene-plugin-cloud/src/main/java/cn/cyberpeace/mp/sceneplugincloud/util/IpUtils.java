@@ -193,6 +193,9 @@ public class IpUtils {
      */
     public static List<String> newAllocateDefaultRouterIps(String cidr, int count, List<String> excludeIps,
                                                            List<AllocationPool> allocationPools) {
+        if (allocationPools == null) {
+            allocationPools = new ArrayList<>();
+        }
         List<String> ips = new ArrayList<>();
         String previousIp = null;
         String beginIp = null;
