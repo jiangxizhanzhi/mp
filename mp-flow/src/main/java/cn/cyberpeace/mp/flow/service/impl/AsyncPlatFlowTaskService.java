@@ -364,7 +364,7 @@ public class AsyncPlatFlowTaskService {
                         null, 0, null, () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
-                throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR, addVmObj.getString(BaseConstants.STR_DETAIL));
+                throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
         } catch (MpRuntimeException e) {
             throw e;
