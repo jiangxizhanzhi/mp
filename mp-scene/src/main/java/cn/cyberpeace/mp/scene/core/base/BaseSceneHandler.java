@@ -247,14 +247,13 @@ public abstract class BaseSceneHandler<
             String pluginKey = pluginKeyAnnotation.value();
             List<String> elementIds = pluginKeyElementIds.getOrDefault(pluginKey, null);
             List<String> elementPortIds = pluginKeyElementPortIds.getOrDefault(pluginKey, null);
-            if (elementIds == null && elementPortIds == null) {
-                return;
-            }
-
             P2 plugin = (P2) ClassUtils.createInstance(pluginClass);
             beforeInitPlugin(plugin);
             plugin.init(sceneId, elementIds, elementPortIds, getPluginContext(pluginKey));
             afterInitPlugin(plugin);
+            if (elementIds == null && elementPortIds == null && plugin.getScene() == null) {
+                return;
+            }
             scenePluginData.put(pluginKey, plugin.toData());
             plugins.add(plugin);
             pluginMap.put(pluginKey, plugin);
@@ -1655,6 +1654,28 @@ public abstract class BaseSceneHandler<
     public E getPortConnectedElement(String portId) {
         var connectedPortId = portId != null ? portIdConnectedPortIdMap.getOrDefault(portId, null) : null;
         return getPortElement(connectedPortId);
+    }
+
+    public void addElementPlugin(String pluginKey, String nodeId, Map<String, Object> pluginElement) {
+        ScenePluginDataBO scenePluginDataBO = scenePluginData.getOrDefault(pluginKey, null);
+        if (scenePluginDataBO == null) {
+            return;
+        }
+        if (scenePluginDataBO.getElements() == null) {
+            scenePluginDataBO.setElements(new HashMap<>());
+        }
+        scenePluginDataBO.getElements().put(nodeId, pluginElement);
+    }
+
+    public void addElementPortPlugin(String pluginKey, String portId, Map<String, Object> pluginPort) {
+        ScenePluginDataBO scenePluginDataBO = scenePluginData.getOrDefault(pluginKey, null);
+        if (scenePluginDataBO == null) {
+            return;
+        }
+        if (scenePluginDataBO.getElementPorts() == null) {
+            scenePluginDataBO.setElementPorts(new HashMap<>());
+        }
+        scenePluginDataBO.getElementPorts().put(portId, pluginPort);
     }
 
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
@@ -46,12 +48,23 @@ public class InitiateHandler extends HandlerCommon {
         // 全局开启流量采集
         if (Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getEnableFlowCollect())
                 || Boolean.TRUE.equals(scene.getEnableFlowCollect())) {
+            CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                    .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_FLOW_COLLECTION, () -> {
-                getPluginHandler().getSceneHandler().getElementPortMap().forEach((portId, srcPort) -> {
+                cloudPluginHandler.getElementPortMap().forEach((portId, srcPort) -> {
+                    String nodeId = srcPort.getSrcPort().getElement().getId();
+                    CollectionPluginSceneElementBO collectionElement = getPluginHandler().getElement(nodeId);
+                    if (collectionElement == null) {
+                        collectionElement = new CollectionPluginSceneElementBO();
+                        collectionElement.setEnableProbeCollect(false);
+                        getPluginHandler().addElement(nodeId, collectionElement);
+                        getPluginHandler().getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(collectionElement));
+                    }
                     var collectionPort = getPluginHandler().getPort(portId);
                     if (collectionPort == null) {
                         collectionPort = new CollectionPluginSceneElementPortBO();
                         getPluginHandler().addPort(portId, collectionPort);
+                        getPluginHandler().getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(collectionPort));
                     }
                     collectionPort.setEnableFlowCollect(true);
                 });
