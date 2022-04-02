@@ -71,6 +71,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/auth/**").authenticated()
                 .antMatchers("/sys/notice/**").authenticated()
                 .antMatchers("/systemOperation/**").authenticated()
+                .antMatchers("/devops/cluster/screenrecord/**").authenticated()
                 .antMatchers("/unauth/**").permitAll()
                 .anyRequest().permitAll()
                 .and()
