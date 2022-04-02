@@ -299,7 +299,7 @@ public class AsyncPlatFlowTaskService {
      * 异步新增虚拟机、添加网口
      *
      */
-    @Async
+//    @Async
     public void addExecutor(String uuid) {
         this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()));
     }
@@ -364,8 +364,10 @@ public class AsyncPlatFlowTaskService {
                         null, 0, null, () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
-                throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
+                throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR, addVmObj.getString(BaseConstants.STR_DETAIL));
             }
+        } catch (MpRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             log.error("add vm instance error", e);
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
