@@ -152,8 +152,11 @@ public class ScenePluginCollectionSceneService {
         } else {
             request.setEndDateTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
+        if (Objects.nonNull(queryParams.getPage())) {
+            request.setPageNum(queryParams.getPage());
+        }
         if (Objects.nonNull(queryParams.getPerPage())) {
-            request.setTopSize(queryParams.getPerPage());
+            request.setPageSize(queryParams.getPerPage());
         }
 
         if (StringUtils.isNotBlank(queryParams.getSourcePort())) {
