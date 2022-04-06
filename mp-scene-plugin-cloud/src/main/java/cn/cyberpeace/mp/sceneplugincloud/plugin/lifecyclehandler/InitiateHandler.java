@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -846,10 +847,12 @@ public class InitiateHandler extends HandlerCommon {
 //        });
 
         // 存在需要重新分配的ip，重新分配ip
-        var requireReallocateIpPorts = getReallocateIpPorts();
-        if (!requireReallocateIpPorts.isEmpty()) {
+        List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
+                .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(networkElements)) {
             runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
-                reallocateIpPorts(requireReallocateIpPorts);
+                reallocateIpPorts(networkElements);
             });
         }
     }
@@ -882,6 +885,75 @@ public class InitiateHandler extends HandlerCommon {
         network.setVlan(element.getVlan());
         network.setVlanId(element.getVlanId());
         network.setDhcp(element.getDhcp());
+    }
+
+    private void reallocateIpPorts(List<CloudPluginSceneElementBO> networkElements) {
+        for (CloudPluginSceneElementBO element : networkElements) {
+            for (ConnectedNetworkBO network : element.getDeriveNetworks()) {
+                List<SceneElementPortBO> ports = new ArrayList<>();
+                ports.addAll(network.getFromPorts());
+                ports.addAll(network.getToPorts());
+                if (CollectionUtils.isEmpty(ports)) {
+                    continue;
+                }
+                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                Map<String, String> changeIp = new HashMap<>();
+                List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
+                excludeIps.addAll(possibleDhcpIps);
+                for (var port : ports) {
+                    if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
+                        // 和dhcp冲突 需要重新分配
+                        String newIp = changeIp.get(port.getIp());
+                        if (StringUtils.isEmpty(newIp)) {
+                            var portElement = getPluginHandler().getElement(port.getElement().getId());
+                            if (portElement != null) {
+                                newIp = this.getNewReallocateIp(portElement, network, excludeIps);
+                            }
+                        }
+                        if (StringUtils.isNotEmpty(newIp)) {
+                            changeIp.put(port.getIp(), newIp);
+                            excludeIps.add(newIp);
+                            port.setIp(newIp);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String getNewReallocateIp(CloudPluginSceneElementBO element, ConnectedNetworkBO network, List<String> excloudIps) {
+        // 重新选ip
+        if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH
+                || element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+            List<String> newIps = IpUtils.newAllocateDefaultRouterIps(network.getNetwork().getCidr(), 1,
+                    excloudIps,
+                    network.getNetwork().getAllocationPools());
+            if (CollectionUtils.isNotEmpty(newIps)) {
+                return newIps.get(0);
+            }
+        } else {
+            List<String> newIps = IpUtils.newRandomIps(network.getNetwork().getCidr(), 1,
+                    excloudIps,
+                    network.getNetwork().getAllocationPools(),
+                    Boolean.TRUE.equals(network.getNetwork().getDhcp()));
+            if (CollectionUtils.isNotEmpty(newIps)) {
+                return newIps.get(0);
+            }
+        }
+        return null;
+    }
+
+
+    private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools) {
+        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway);
+        if (CollectionUtils.isNotEmpty(allocationPools)) {
+            allocationPools.forEach(p -> {
+                if (StringUtils.isNotEmpty(p.getStart())) {
+                    possibleDhcpIps.add(p.getStart());
+                }
+            });
+        }
+        return possibleDhcpIps;
     }
 
     private List<String> getPossibleDhcpIps(String gateway) {
