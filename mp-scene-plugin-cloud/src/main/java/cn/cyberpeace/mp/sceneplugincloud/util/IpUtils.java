@@ -191,6 +191,9 @@ public class IpUtils {
         if (allocationPools == null) {
             allocationPools = new ArrayList<>();
         }
+        if (excludeIps == null) {
+            excludeIps = new ArrayList<>();
+        }
         List<String> ips = new ArrayList<>();
         String previousIp = null;
         String beginIp = null;
@@ -215,7 +218,7 @@ public class IpUtils {
                 i--;
                 continue;
             }
-            if (excludeIps != null && !excludeIps.isEmpty() && excludeIps.contains(previousIp)) {
+            if (!excludeIps.isEmpty() && excludeIps.contains(previousIp)) {
                 i--;
                 continue;
             }
@@ -328,7 +331,7 @@ public class IpUtils {
      * @param cidr cidr
      * @return 最后一个ip地址
      */
-    public static String lastIp(String cidr) {
+    private static String lastIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getEndIpStr(param[0], Integer.parseInt(param[1]));
     }
@@ -338,7 +341,7 @@ public class IpUtils {
      * @param ip ip地址
      * @return 上一个ip地址
      */
-    public static String previousIp(String ip) {
+    private static String previousIp(String ip) {
         var ipLong = Ipv4Util.ipv4ToLong(ip);
         var previousIpLong = ipLong - 1L;
         String previousIp = null;
@@ -355,7 +358,7 @@ public class IpUtils {
      * @param cidr cidr
      * @return 第一个ip地址
      */
-    public static String beginIp(String cidr) {
+    private static String beginIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getBeginIpStr(param[0], Integer.parseInt(param[1]));
     }
@@ -366,7 +369,7 @@ public class IpUtils {
      * @param size 地址段大小
      * @return 随机ip地址
      */
-    public static String randomIp(long begin, long size) {
+    private static String randomIp(long begin, long size) {
         long randomData = Random.nextInt((int) size + 1);
         return Ipv4Util.longToIpv4(randomData + begin);
     }
@@ -376,7 +379,7 @@ public class IpUtils {
      * @param size 地址池大小
      * @return 随机地址池序号
      */
-    public static int randomPool(int size) {
+    private static int randomPool(int size) {
         return Random.nextInt(size);
     }
 
@@ -385,7 +388,7 @@ public class IpUtils {
      * @param allocationPools 地址池集合
      * @return 地址池Ip总数
      */
-    public static int getAllocationPoolIpSize(List<AllocationPool> allocationPools) {
+    private static int getAllocationPoolIpSize(List<AllocationPool> allocationPools) {
         int size;
         allocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
         long[] starts = new long[allocationPools.size()];
@@ -415,7 +418,7 @@ public class IpUtils {
      * @param allocationPools ip地址池
      * @return 默认路由可分配ip大小
      */
-    public static int getAvailableDefaultRouterIpSize(long begin, long last, List<String> excludeIps, List<AllocationPool> allocationPools) {
+    private static int getAvailableDefaultRouterIpSize(long begin, long last, List<String> excludeIps, List<AllocationPool> allocationPools) {
         int size = (int) (last - begin) + 1;
         int excludeSize = 0;
         int allocationPoolIpSize;
@@ -446,7 +449,7 @@ public class IpUtils {
      * @param last cidr结束ip long
      * @return 地址池与cidr交集大小
      */
-    public static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
+    private static int getAvailableAllocationPoolIpSize(List<AllocationPool> allocationPools, long begin, long last) {
         int allocationPoolIpSize = getAllocationPoolIpSize(allocationPools);
         List<AllocationPool> newAllocationPools = getAvailableAllocationPool(allocationPools, begin, last);
         newAllocationPools.sort(Comparator.comparing(allocationPool -> Ipv4Util.ipv4ToLong(allocationPool.getEnd())));
@@ -469,7 +472,7 @@ public class IpUtils {
      * @param last cidr结束ip long
      * @return 与cidr有交集的地址池集合
      */
-    public static List<AllocationPool> getAvailableAllocationPool(List<AllocationPool> allocationPools, long begin, long last) {
+    private static List<AllocationPool> getAvailableAllocationPool(List<AllocationPool> allocationPools, long begin, long last) {
         List<AllocationPool> newAllocationPools = new ArrayList<>();
         for (AllocationPool allocationPool : allocationPools) {
             long start = Ipv4Util.ipv4ToLong(allocationPool.getStart());
@@ -485,24 +488,11 @@ public class IpUtils {
 
     /**
      *
-     * @param ip 需要判断的地址 long
-     * @param start 地址段起始ip long
-     * @param end 地址段结束ip long
-     * @return ip是否在地址段内
-     */
-    public static boolean isInRange(long ip, long start, long end) {
-        boolean isOverStart = (ip >= start);
-        boolean isBeyondEnd = (ip <= end);
-        return (isOverStart && isBeyondEnd);
-    }
-
-    /**
-     *
      * @param allocationPools 地址池
      * @param ip ip地址
      * @return ip是否在地址池内
      */
-    public static boolean isInPools(List<AllocationPool> allocationPools, String ip) {
+    private static boolean isInPools(List<AllocationPool> allocationPools, String ip) {
         long ipLong = Ipv4Util.ipv4ToLong(ip);
         for (AllocationPool allocationPool : allocationPools) {
             long start = Ipv4Util.ipv4ToLong(allocationPool.getStart());
@@ -513,5 +503,18 @@ public class IpUtils {
             }
         }
         return false;
+    }
+
+    /**
+     *
+     * @param ip 需要判断的地址 long
+     * @param start 地址段起始ip long
+     * @param end 地址段结束ip long
+     * @return ip是否在地址段内
+     */
+    private static boolean isInRange(long ip, long start, long end) {
+        boolean isOverStart = (ip >= start);
+        boolean isBeyondEnd = (ip <= end);
+        return (isOverStart && isBeyondEnd);
     }
 }
