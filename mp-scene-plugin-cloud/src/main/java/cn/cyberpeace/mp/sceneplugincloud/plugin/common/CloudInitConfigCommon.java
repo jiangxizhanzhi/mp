@@ -68,7 +68,9 @@ public class CloudInitConfigCommon {
             list.add(SSH_PWAUTH);
             list.add(DISABLE_ROOT);
             if (!this.users.isEmpty()) {
+                list.add("groups: ");
                 list.addAll(this.getGroups());
+                list.add("users: ");
                 list.addAll(this.getUsers());
             }
             if (!this.initCommands.isEmpty()) {
@@ -93,8 +95,10 @@ public class CloudInitConfigCommon {
 
         private List<String> getGroups() {
             List<String> list = new ArrayList<>();
-            list.add("groups: ");
             for (User user : users) {
+                if (user.username.equals("root")) {
+                    continue;
+                }
                 list.add(this.getGroup(user.username));
             }
             return list;
@@ -103,6 +107,9 @@ public class CloudInitConfigCommon {
         private List<String> getUsers() {
             List<String> list = new ArrayList<>();
             for (User user : users) {
+                if (user.username.equals("root")) {
+                    continue;
+                }
                 list.addAll(this.getUser(user));
             }
             return list;

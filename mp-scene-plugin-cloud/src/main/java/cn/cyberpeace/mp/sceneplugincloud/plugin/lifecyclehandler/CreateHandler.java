@@ -36,6 +36,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCre
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
@@ -490,14 +491,35 @@ public class CreateHandler extends HandlerCommon {
 //
 //        }
 
-        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, commands.toArray(new String[0]));
-        if (!StringUtils.isEmpty(command)) {
-            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-                command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
-            } else {
-                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
-            }
+        CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(standardSystemType);
+        if (cloudElement.getSrcElement() != null && cloudElement.getSrcElement().getPorts() != null) {
+            Map<String, String> userAndPassword = new HashMap<>();
+            cloudElement.getSrcElement().getPorts().forEach(p -> {
+                if (p.getAccessModes() != null) {
+                    p.getAccessModes().forEach(ac -> {
+                        if (StringUtils.isNotEmpty(ac.getUsername()) && StringUtils.isNotEmpty(ac.getPassword())) {
+                            userAndPassword.put(ac.getUsername(), ac.getPassword());
+                            if (ac.getUsername().equals("root")) {
+                                builder.setRootPassword(ac.getPassword());
+                            }
+                        }
+                    });
+                }
+            });
+            userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
         }
+        builder.addAllInitCommands(commands);
+        List<String> cloudInitCommands = builder.build();
+        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
+
+//        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, commands.toArray(new String[0]));
+//        if (!StringUtils.isEmpty(command)) {
+//            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+//                command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
+//            } else {
+//                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
+//            }
+//        }
 
         return command;
     }
