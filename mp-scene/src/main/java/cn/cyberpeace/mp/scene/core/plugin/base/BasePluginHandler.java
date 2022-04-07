@@ -103,6 +103,10 @@ public abstract class BasePluginHandler<S, E, P, C> {
         validateData.setScene(scene);
         validateData.setElements(elementMap);
         validateData.setElementPorts(elementPortMap);
+        this.validateData(validateData);
+    }
+
+    protected void validateData(BaseScenePluginDataBO validateData) {
         var validateResult = ValidationCommon.validate(validateData);
         ValidationCommon.handleValidateResult(validateResult);
     }
