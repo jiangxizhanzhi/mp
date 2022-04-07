@@ -41,7 +41,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.unit.DataSize;
+import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,8 +50,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -547,11 +545,6 @@ public class FlowMonitorService {
         Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
 
         // 攻击事件
-//        flowAnalysisRequest.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
-//        List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.queryTopByAggregationTypeEnum(flowAnalysisRequest);
-//        Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
-
-        // 攻击事件
         FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
         Long attackCount = (long) (riskCount.getHighCount() + riskCount.getMediumCount() + riskCount.getLowCount());
 
@@ -571,10 +564,25 @@ public class FlowMonitorService {
         // 带宽占用
         Double bandwith = 30.0;
 
-        Long totalFlowMB = DataSize.ofBytes(totalFlowBytes.longValue()).toMegabytes();
-        Long totalAttackFlowMB = DataSize.ofBytes(totalAttackFlowBytes.longValue()).toMegabytes();
-        Double totalFlowGB = BigDecimal.valueOf(totalFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
-        Double totalAttackFlowGB = BigDecimal.valueOf(totalAttackFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
+        // Byte -> GB
+        long deno = 1024 * 1024 * 1024;
+        double totalFlowGB = 0.0;
+        if (totalFlowBytes != 0) {
+            totalFlowGB = NumberUtil.round(totalFlowBytes / deno, 3).doubleValue();
+        }
+        double totalAttackFlowGB = 0.0;
+        if (totalAttackFlowBytes != 0) {
+            totalAttackFlowGB = NumberUtil.round(totalAttackFlowBytes / deno, 3).doubleValue();
+        }
+
+        // 有数值的话，不足0.001GB的显示0.001GB
+        if (totalFlowBytes > 0 && totalFlowGB == 0) {
+            totalFlowGB = 0.001;
+        }
+
+        if (totalAttackFlowBytes > 0 && totalAttackFlowGB == 0) {
+            totalAttackFlowGB = 0.001;
+        }
 
 
         FlowAnalysisSummary summary =
