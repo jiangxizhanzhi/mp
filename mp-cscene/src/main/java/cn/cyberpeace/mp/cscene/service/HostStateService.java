@@ -99,7 +99,6 @@ public class HostStateService {
 
             hs.setMemoryFree(hostStateBO.getMemoryFree());
             hs.setMemoryTotal(hostStateBO.getMemoryTotal());
-            // todo 节点内存利用率 统一为Double？
             hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
 
             hs.setDiskSpace(hostStateBO.getDiskSpace());

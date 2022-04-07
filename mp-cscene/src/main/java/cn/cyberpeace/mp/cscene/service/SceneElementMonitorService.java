@@ -210,25 +210,17 @@ public class SceneElementMonitorService {
                 resource = new HostState();
             }
 
-            resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
-
-            // 内存大小
-            Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
-            //        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
-            resource.setMemoryTotal(Long.valueOf(memSize));
-
-            // 磁盘大小
-            Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
-            resource.setDiskSpace(Long.valueOf(diskSize));
-
             BaseSceneElementRequest request = new BaseSceneElementRequest();
             request.setSceneId(basicInfo.getSceneId());
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
 
             List<HostState> hostStates = hostStateService.getHostStates(request);
-//            List<HostState> hostStates = hostStateService.getHostStatesFromWazuh(basicInfo.getSceneId(), sceneElementBO.getEid(), csceneInstanceBO.getCreateTime(), LocalDateTime.now());
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);
+                resource.setCpuCount(hostState.getCpuCount());
+                resource.setMemoryTotal(hostState.getMemoryTotal());
+                resource.setDiskSpace(hostState.getDiskSpace());
+
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryFree(hostState.getMemoryFree());
