@@ -299,7 +299,12 @@ public class ScenePluginCollectionSceneService {
             request.setKeyword(queryParams.getKeyword());
         }
 
-        // todo 查询事件类型
+        // todo 查询事件类型，暂时只支持所有，文件两种类型。用户，进程，端口，网络连接事件暂不支持 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
+        if (Objects.nonNull(queryParams.getType())) {
+            if (queryParams.getType().equals(1) || queryParams.getType().equals(2) || queryParams.getType().equals(3) || queryParams.getType().equals(5)) {
+                return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
+            }
+        }
 
         var result = dataCollectionService.queryFileEvents(request);
 
