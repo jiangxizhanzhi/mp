@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
+
 /**
  * @Description
  * @Author maojun
@@ -56,7 +58,32 @@ public class CloudInitConfigCommon {
         }
 
         private List<String> buildForWindows() {
-            return new ArrayList<>();
+            if (users == null || users.isEmpty()) {
+                return initCommands;
+            }
+            List<String> list = new ArrayList<>();
+            String userData = null;
+            for (User user : users) {
+                if (userData == null) {
+                    userData = StringUtils.joinWith(WINDOWS_LINE_BREAK,
+                            String.format("net user %s /add /y", user.username),
+                            String.format("net localgroup Administrators \"%s\" /add /y", user.username),
+                            String.format("net localgroup \"Remote Desktop Users\" \"%s\" /add /y", user.username),
+                            String.format("net user %s \"%s\" /y", user.username, user.password));
+                } else {
+                    userData = StringUtils.joinWith(WINDOWS_LINE_BREAK,
+                            userData,
+                            String.format("net user %s /add /y", user.username),
+                            String.format("net localgroup Administrators \"%s\" /add /y", user.username),
+                            String.format("net localgroup \"Remote Desktop Users\" \"%s\" /add /y", user.username),
+                            String.format("net user %s \"%s\" /y", user.username, user.password));
+                }
+            }
+            list.add(userData);
+            if (!this.initCommands.isEmpty()) {
+                list.addAll(initCommands);
+            }
+            return list;
         }
 
         private List<String> buildForLinux() {
