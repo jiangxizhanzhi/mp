@@ -116,7 +116,7 @@ public class ScenePluginCollectionSceneService {
     private ProbeService probeService ;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
