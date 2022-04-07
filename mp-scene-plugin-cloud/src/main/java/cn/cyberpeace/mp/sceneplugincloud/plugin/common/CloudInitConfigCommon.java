@@ -19,7 +19,6 @@ import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
  * @Date 2022/4/6
  */
 public class CloudInitConfigCommon {
-    private static final String HEAD = "#cloud-config";
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";
 
@@ -88,7 +87,6 @@ public class CloudInitConfigCommon {
 
         private List<String> buildForLinux() {
             List<String> list = new ArrayList<>();
-            list.add(HEAD);
             if (rootPassword != null) {
                 list.addAll(this.getChpasswd(rootPassword));
             }

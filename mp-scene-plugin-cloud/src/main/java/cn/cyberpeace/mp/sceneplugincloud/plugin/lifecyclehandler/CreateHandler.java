@@ -511,15 +511,13 @@ public class CreateHandler extends HandlerCommon {
         builder.addAllInitCommands(commands);
         List<String> cloudInitCommands = builder.build();
         var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
-
-//        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, commands.toArray(new String[0]));
-//        if (!StringUtils.isEmpty(command)) {
-//            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
-//                command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
-//            } else {
-//                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
-//            }
-//        }
+        if (!StringUtils.isEmpty(command)) {
+            if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
+            } else {
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", standardSystemType);
+            }
+        }
 
         return command;
     }
