@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -44,7 +45,9 @@ public class SceneTranslationService {
      * @param elementIds
      * @return
      */
+    @Cacheable(cacheManager = "csceneCacheManager", value = "query_agentnames_by_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
+        log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
         List<String> translatedSceneIds = translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
