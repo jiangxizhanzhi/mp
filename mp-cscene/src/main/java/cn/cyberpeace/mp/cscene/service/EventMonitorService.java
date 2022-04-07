@@ -164,6 +164,10 @@ public class EventMonitorService {
         Long sumFromEs = sumEvent(request);
 
         List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+        EventAggr eventAggr = new EventAggr();
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return eventAggr;
+        }
 
         Map<String, Long> aggsProcessesMap = aggProcessCount(agentNames);
         Map<String, Long> aggsPortsMap = aggPortCount(agentNames);
@@ -175,13 +179,13 @@ public class EventMonitorService {
 
         Long sum = sumFromEs + processSum + portSum + netConnsSum;
 
-        EventAggr eventAggr = new EventAggr();
         eventAggr.setProcess(toRoundPercent(processSum, sum));
-        // todo 文件和用户类型事件区分
-        eventAggr.setFile(22.62);
         eventAggr.setPort(toRoundPercent(portSum, sum));
         eventAggr.setNetwork(toRoundPercent(netConnsSum, sum));
-        eventAggr.setUser(16.67);
+
+        // todo 文件和用户类型事件区分
+        eventAggr.setFile(toRoundPercent(sumFromEs, sum));
+        eventAggr.setUser(0.0);
 
         return eventAggr;
     }
