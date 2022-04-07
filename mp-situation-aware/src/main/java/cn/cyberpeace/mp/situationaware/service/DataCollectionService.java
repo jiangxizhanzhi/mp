@@ -105,6 +105,10 @@ public class DataCollectionService {
      */
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhEventRequest);
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -140,6 +144,10 @@ public class DataCollectionService {
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
@@ -201,6 +209,10 @@ public class DataCollectionService {
      */
     @Deprecated
     public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
+        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+            return Collections.emptyList();
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
@@ -244,6 +256,10 @@ public class DataCollectionService {
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+            return Collections.emptyList();
+        }
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, HOST_STATE_LAUNCH_ID);
         List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
@@ -268,7 +284,10 @@ public class DataCollectionService {
 
 
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-
+        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+            return Collections.emptyList();
+        }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
 
@@ -482,8 +501,12 @@ public class DataCollectionService {
      */
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
-        String aggregationName = "aggs_count_by_agent_name";
         Map<String, Long> map = new LinkedHashMap<>();
+        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+            log.warn("agentNames is empty: {}", wazuhEventRequest);
+            return map;
+        }
+        String aggregationName = "aggs_count_by_agent_name";
         wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
 
         //根据日期构造索引
@@ -534,6 +557,9 @@ public class DataCollectionService {
      */
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+            return 0;
+        }
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
@@ -566,6 +592,9 @@ public class DataCollectionService {
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+            return 0L;
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);

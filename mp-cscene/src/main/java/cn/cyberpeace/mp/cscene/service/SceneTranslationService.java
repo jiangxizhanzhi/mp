@@ -49,7 +49,7 @@ public class SceneTranslationService {
         List<String> translatedSceneIds = translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 
-        List<String> agentNames = null;
+        List<String> agentNames = new ArrayList<>();
         if (CollectionUtil.isEmpty(elementIds)) {
             agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
         } else {
