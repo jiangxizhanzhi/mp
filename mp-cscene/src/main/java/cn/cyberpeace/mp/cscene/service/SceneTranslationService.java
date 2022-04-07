@@ -27,6 +27,7 @@ public class SceneTranslationService {
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
+    @Cacheable(cacheManager = "csceneCacheManager", value = "translate_sceneids")
     public List<String> translateSceneIds(List<String> sceneIds) {
         log.info("before translate: {}", sceneIds);
         List<String> translatedScendIds = new ArrayList<>();
