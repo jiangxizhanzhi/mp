@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -892,32 +893,39 @@ public class InitiateHandler extends HandlerCommon {
     private void reallocateIpPorts(List<CloudPluginSceneElementBO> networkElements) {
         for (CloudPluginSceneElementBO element : networkElements) {
             for (ConnectedNetworkBO network : element.getDeriveNetworks()) {
-                List<SceneElementPortBO> ports = new ArrayList<>();
-                ports.addAll(network.getFromPorts());
-                ports.addAll(network.getToPorts());
-                if (CollectionUtils.isEmpty(ports)) {
-                    continue;
-                }
-                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
-                Map<String, String> changeIp = new HashMap<>();
-                List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
-                excludeIps.addAll(possibleDhcpIps);
-                for (var port : ports) {
-                    if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
-                        // 和dhcp冲突 需要重新分配
-                        String newIp = changeIp.get(port.getIp());
-                        if (StringUtils.isEmpty(newIp)) {
-                            var portElement = getPluginHandler().getElement(port.getElement().getId());
-                            if (portElement != null) {
-                                newIp = this.getNewReallocateIp(portElement, network, excludeIps);
+                try {
+                    if (Boolean.TRUE.equals(network.getNetwork().getExternal())) {
+                        continue;
+                    }
+                    List<SceneElementPortBO> ports = new ArrayList<>();
+                    ports.addAll(network.getFromPorts());
+                    ports.addAll(network.getToPorts());
+                    if (CollectionUtils.isEmpty(ports)) {
+                        continue;
+                    }
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    Map<String, String> changeIp = new HashMap<>();
+                    List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
+                    excludeIps.addAll(possibleDhcpIps);
+                    for (var port : ports) {
+                        if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
+                            // 和dhcp冲突 需要重新分配
+                            String newIp = changeIp.get(port.getIp());
+                            if (StringUtils.isEmpty(newIp)) {
+                                var portElement = getPluginHandler().getElement(port.getElement().getId());
+                                if (portElement != null) {
+                                    newIp = this.getNewReallocateIp(portElement, network, excludeIps);
+                                }
+                            }
+                            if (StringUtils.isNotEmpty(newIp)) {
+                                changeIp.put(port.getIp(), newIp);
+                                excludeIps.add(newIp);
+                                port.setIp(newIp);
                             }
                         }
-                        if (StringUtils.isNotEmpty(newIp)) {
-                            changeIp.put(port.getIp(), newIp);
-                            excludeIps.add(newIp);
-                            port.setIp(newIp);
-                        }
                     }
+                } catch (Exception e) {
+                    log.error("reallocate ip error , network is {} ", JsonCommon.stringify(network), e);
                 }
             }
         }
