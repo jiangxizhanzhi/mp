@@ -284,7 +284,7 @@ public class TypeConverter {
      */
     private TypeAllConvertModel convertModel(TypeIdIntegerCloudPlatformModel list){
         List<TypeIdIntegerConvertModel> modelList = list.getItems().stream()
-                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
+                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName(), item.getParentId(), item.getChild())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
         model.setIdIntegerModelList(modelList);
         return model;
