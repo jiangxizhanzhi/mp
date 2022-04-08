@@ -27,6 +27,8 @@ public class NodeRecordingBO {
     private String filename;
     @ApiModelProperty(value = "录屏文件地址")
     private String fileUrl;
+    @ApiModelProperty(value = "录屏播放地址")
+    private String playUrl;
     @ApiModelProperty(value = "录屏大小")
     private Integer filesize;
     @ApiModelProperty(value = "录屏时长")
