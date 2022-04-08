@@ -775,6 +775,8 @@ public class InitiateHandler extends HandlerCommon {
                 coreType = CoreType.TERMINAL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
                 coreType = CoreType.TERMINAL;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+                coreType = CoreType.TERMINAL;
             }
         }
         element.setCoreType(coreType);
