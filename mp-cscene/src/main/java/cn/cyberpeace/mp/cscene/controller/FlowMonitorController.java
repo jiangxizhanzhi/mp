@@ -51,6 +51,9 @@ public class FlowMonitorController {
     @Autowired
     private FlowMonitorService flowMonitorService;
 
+    @Autowired
+    private SceneTranslationService sceneTranslationService;
+
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
@@ -176,9 +179,6 @@ public class FlowMonitorController {
         return result;
     }
 
-
-    @Autowired
-    private SceneTranslationService sceneTranslationService;
 
     @ApiOperation(value = "资产统计", notes = "资产统计")
     @GetMapping("/assets_statistics")

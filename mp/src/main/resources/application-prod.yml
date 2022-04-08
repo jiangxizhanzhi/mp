@@ -136,7 +136,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, mappings
+        include: health, info, mappings, caches, env, scheduledtasks
   info:
     git:
       mode: full
