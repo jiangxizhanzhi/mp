@@ -51,6 +51,10 @@ public class AddAppTaskRequest {
         private String srcIpRange;
         private String dstIpRange;
         private List<CapList> capList;
+        // 流量协议
+        private String flowProtocol;
+        // 流量内容
+        private String content;
     }
 
     @Data
@@ -90,6 +94,8 @@ public class AddAppTaskRequest {
         }
         specifics.setDstIpRange(dstIpRange);
         specifics.setCapList(Collections.singletonList(capList));
+        specifics.setFlowProtocol(flowTaskModel.getFlowProtocol());
+        specifics.setContent(flowTaskModel.getContent());
 
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
         client.setIp(flowPortModel.getClientIp());

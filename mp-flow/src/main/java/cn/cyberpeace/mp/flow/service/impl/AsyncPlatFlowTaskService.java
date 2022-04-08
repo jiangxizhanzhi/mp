@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
@@ -112,11 +113,20 @@ public class AsyncPlatFlowTaskService {
             }
         }
 
-        // 流量信息存在校验
-        FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
-        if (Objects.isNull(flowInfoModel)) {
-            log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-            return;
+        // 是否自定义流量
+        Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
+        FlowInfoModel flowInfoModel = new FlowInfoModel();
+        if (isCustom) {
+            flowTaskModel.setCustomFlag(CustomFlagEnum.YES.toValue());
+            // 流量信息存在校验
+            flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
+            if (Objects.isNull(flowInfoModel)) {
+                log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
+                return;
+            }
+        } else {
+            flowTaskModel.setCustomFlag(CustomFlagEnum.NO.toValue());
+            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
 
         // 流量执行器信息查询

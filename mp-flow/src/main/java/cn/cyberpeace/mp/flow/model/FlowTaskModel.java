@@ -135,5 +135,25 @@ public class FlowTaskModel extends BaseModel {
     @DefaultStr
     private String targetIps;
 
+    /**
+     * 自定义流量任务标志 0：否， 1：是
+     */
+    @ApiModelProperty(value = "自定义流量任务标志 0：否， 1：是")
+    @DefaultInt()
+    private Integer customFlag;
+
+    /**
+     * 流量协议
+     */
+    @ApiModelProperty(value = "流量协议")
+    @DefaultStr
+    private String flowProtocol;
+
+    /**
+     * 流量内容
+     */
+    @ApiModelProperty(value = "流量内容")
+    @DefaultStr
+    private String content;
 
 }
