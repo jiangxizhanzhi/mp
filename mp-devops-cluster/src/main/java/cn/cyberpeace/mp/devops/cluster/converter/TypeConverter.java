@@ -69,7 +69,20 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdIntegerByType(String type) {
-        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type);
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type,Boolean.FALSE);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
+
+    /**
+     * 查询ID为数字类型的枚举数据
+     * @param type
+     * @return
+     */
+    public TypeAllConvertModel findIdIntegerByType(String type,Boolean isAll) {
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type,isAll);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
@@ -82,7 +95,20 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdStringByType(String type) {
-        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type);
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type,Boolean.FALSE);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
+
+    /**
+     * 查询ID为字符串类型的枚举数据
+     * @param type
+     * @return
+     */
+    public TypeAllConvertModel findIdStringByType(String type,Boolean isAll) {
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type,isAll);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
@@ -95,6 +121,14 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findRoles() {
         return this.findIdIntegerByType("role");
+    }
+
+    /**
+     * 查询角色枚举值
+     * @return
+     */
+    public TypeAllConvertModel findRoles(Boolean isAll) {
+        return this.findIdIntegerByType("role",isAll);
     }
 
     /**
@@ -119,6 +153,14 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findImageType() {
         return this.findIdStringByType("image_type");
+    }
+
+    /**
+     * 查询镜像类型枚举值
+     * @return
+     */
+    public TypeAllConvertModel findImageType(Boolean isAll) {
+        return this.findIdStringByType("image_type",isAll);
     }
 
     /**
