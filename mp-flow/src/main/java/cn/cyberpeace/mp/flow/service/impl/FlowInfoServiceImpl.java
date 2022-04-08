@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -379,6 +380,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 paramModel.setParamValue(paramArray.getString(1));
                 // 参数描述
                 paramModel.setParamDesc(paramArray.getString(2));
+
+                // 参数校验
+                if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 ||
+                        paramModel.getParamDesc().length() > 2048) {
+                    log.error("param length is invalid");
+                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                }
+
                 scriptParamModels.add(paramModel);
             });
 

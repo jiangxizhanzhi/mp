@@ -95,9 +95,12 @@ public class TypeController {
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/image-mg-categories")
     public Result<TypeAllResponse> imageCategories(Boolean isAll){
-        TypeAllConvertModel roles = typeConverter.findRoles();
+        if (Objects.isNull(isAll)){
+            isAll = Boolean.FALSE;
+        }
+        TypeAllConvertModel roles = typeConverter.findRoles(isAll);
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
-        TypeAllConvertModel imageType = typeConverter.findImageType();
+        TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
         TypeAllResponse allResponse = new TypeAllResponse();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
