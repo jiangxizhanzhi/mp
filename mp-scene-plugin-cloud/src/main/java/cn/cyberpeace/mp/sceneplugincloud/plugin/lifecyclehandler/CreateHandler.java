@@ -399,7 +399,11 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setAccessModes(legalAccessModes.stream().map(accessMode -> {
                 var accessModeParam = new VirtualNic.AccessMode();
                 accessModeParam.setProtocol(accessMode.getProtocol());
-                accessModeParam.setPort(accessMode.getPort());
+                if (accessMode.getPort() == null) {
+                    accessModeParam.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.getOrDefault(accessMode.getProtocol(), null));
+                } else {
+                    accessModeParam.setPort(accessMode.getPort());
+                }
                 accessModeParam.setUsername(accessMode.getUsername());
                 accessModeParam.setPassword(accessMode.getPassword());
                 accessModeParam.setEnablePortMapping(accessMode.getProxy());
@@ -440,7 +444,11 @@ public class CreateHandler extends HandlerCommon {
                 entityInterface.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new EntityNodeCreateData.Interface.AccessMode();
                     accessModeParam.setProtocol(accessMode.getProtocol());
-                    accessModeParam.setPort(accessMode.getPort());
+                    if (accessMode.getPort() == null) {
+                        accessModeParam.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.getOrDefault(accessMode.getProtocol(), null));
+                    } else {
+                        accessModeParam.setPort(accessMode.getPort());
+                    }
                     accessModeParam.setUsername(accessMode.getUsername());
                     accessModeParam.setPassword(accessMode.getPassword());
                     if (StringUtils.isNotBlank(accessMode.getAccessIp())) {
