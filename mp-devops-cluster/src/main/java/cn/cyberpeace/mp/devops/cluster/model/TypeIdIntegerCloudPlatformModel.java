@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemModel;
 import lombok.*;
 
 import java.io.Serializable;
@@ -18,21 +19,6 @@ public class TypeIdIntegerCloudPlatformModel extends BaseCloudPlatformModel impl
     /**
      * 数据列表
      */
-    private List<Item> items;
+    private List<TypeItemModel> items;
 
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Data
-    public static final class Item implements Serializable{
-
-        /**
-         * ID
-         */
-       private Integer id;
-
-        /**
-         * 名称
-         */
-       private String name;
-    }
 }
