@@ -702,6 +702,14 @@ public class DataCollectionService {
      */
     private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
         BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
+
+        if(Objects.isNull(wazuhEventRequest.getPageNum())) {
+            wazuhEventRequest.setPageNum(1);
+        }
+        if(Objects.isNull(wazuhEventRequest.getPageSize())) {
+            wazuhEventRequest.setPageSize(100);
+        }
+
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhEventRequest.getPageSize());
