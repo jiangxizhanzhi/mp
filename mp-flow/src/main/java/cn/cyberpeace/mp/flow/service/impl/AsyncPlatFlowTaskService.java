@@ -116,8 +116,8 @@ public class AsyncPlatFlowTaskService {
         // 是否自定义流量
         Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
         FlowInfoModel flowInfoModel = new FlowInfoModel();
-        if (isCustom) {
-            flowTaskModel.setCustomFlag(CustomFlagEnum.YES.toValue());
+        if (!isCustom) {
+            flowTaskModel.setCustomFlag(CustomFlagEnum.NO.toValue());
             // 流量信息存在校验
             flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
             if (Objects.isNull(flowInfoModel)) {
@@ -125,7 +125,8 @@ public class AsyncPlatFlowTaskService {
                 return;
             }
         } else {
-            flowTaskModel.setCustomFlag(CustomFlagEnum.NO.toValue());
+            log.info("create custom flow task");
+            flowTaskModel.setCustomFlag(CustomFlagEnum.YES.toValue());
             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
 
@@ -169,7 +170,7 @@ public class AsyncPlatFlowTaskService {
         }
 
         String thirdTaskId = "";
-        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+        if (isCustom || ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
             // 构建保存app任务请求
             AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
 

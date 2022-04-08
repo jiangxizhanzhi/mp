@@ -621,13 +621,21 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Runnable errorCallback) {
-        // 流量信息存在校验
-        ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
-        if (Objects.isNull(flowInfoResult)) {
-            log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-            return ServiceResult.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
+        FlowInfoModel flowInfoModel = new FlowInfoModel();
+        // 是否自定义流量
+        boolean isCustom = false;
+        if (Objects.equals(CustomFlagEnum.NO.toValue(), flowTaskModel.getCustomFlag())) {
+            isCustom = true;
+            // 流量信息存在校验
+            ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+            if (Objects.isNull(flowInfoResult)) {
+                log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
+                return ServiceResult.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
+            }
+            flowInfoModel = flowInfoResult.getObj();
+        } else {
+            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
-        FlowInfoModel flowInfoModel = flowInfoResult.getObj();
 
         // 流量执行器信息查询
         String actuatorId = flowTaskModel.getActuatorId();
@@ -669,7 +677,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 执行任务地址
         String urlPath = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-            urlPath = "/tasks/action";
+            if (isCustom) {
+                // 自定义流量
+                urlPath = "/tasks/custom/action";
+            } else {
+                // 背景流量
+                urlPath = "/tasks/action";
+            }
 
             // 判断是否关联流量平台任务，没有则新增
             if (StringUtils.isBlank(thirdTaskId)) {
