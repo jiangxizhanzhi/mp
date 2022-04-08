@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.SceneTranslationService;
@@ -210,10 +209,10 @@ public class FlowMonitorController {
                     .sceneId(id)
                     .assetsTotal(sceneAssetsBO.getNodeCount())
                     .ipTotal(sceneAssetsBO.getIpCount())
-                    .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.size() : 0)
-                    .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.size() : 0)
-                    .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.size() : 0)
-                    .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.size() : 0)
+                    .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
+                    .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
+                    .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                    .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
                     .build();
             responseList.add(response);
         });
