@@ -505,7 +505,7 @@ public class CreateHandler extends HandlerCommon {
             cloudElement.getSrcElement().getPorts().forEach(p -> {
                 if (p.getAccessModes() != null) {
                     p.getAccessModes().forEach(ac -> {
-                        if (StringUtils.isNotEmpty(ac.getUsername()) && StringUtils.isNotEmpty(ac.getPassword())) {
+                        if (StringUtils.isNotEmpty(ac.getUsername()) && StringUtils.isNotEmpty(ac.getPassword()) && CloudInitConfigCommon.canChangeUser(ac.getProtocol())) {
                             userAndPassword.put(ac.getUsername(), ac.getPassword());
                             if (ac.getUsername().equals("root")) {
                                 builder.setRootPassword(ac.getPassword());

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
@@ -21,6 +24,18 @@ import static cn.cyberpeace.mp.scene.util.CommandUtils.WINDOWS_LINE_BREAK;
 public class CloudInitConfigCommon {
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";
+
+    private static final Set<String> CHANGE_USER_PROTOCOL = new HashSet<>() {{
+        this.add(AccessMode.Protocol.CONSOLE);
+        this.add(AccessMode.Protocol.RDP);
+        this.add(AccessMode.Protocol.VNC);
+        this.add(AccessMode.Protocol.SSH);
+        this.add(AccessMode.Protocol.TELNET);
+    }};
+
+    public static boolean canChangeUser(String protocol) {
+        return CHANGE_USER_PROTOCOL.contains(protocol);
+    }
 
     public static Builder builder(String standardSystemType) {
         return new Builder(standardSystemType);
