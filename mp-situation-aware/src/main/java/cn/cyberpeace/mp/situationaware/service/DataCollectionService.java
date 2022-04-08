@@ -50,6 +50,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -96,6 +97,18 @@ public class DataCollectionService {
 
     public static final String NET_CONNS_LAUNCH_ID = "09ffcc4a67ef4accb407a1555629d0f8";
 
+    public static final String CACHE_KEY_FILE_EVENTS = "file_events";
+
+    public static final String CACHE_KEY_MONITOR_EVENTS = "monitor_events";
+
+    public static final String CACHE_KEY_HOST_STATE = "host_states";
+
+    public static final String CACHE_KEY_NET_CONN = "net_conn";
+
+    public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
+
+    public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
+
 
     /**
      * 查询文件事件分页
@@ -103,6 +116,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
@@ -143,6 +157,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
@@ -255,6 +270,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
@@ -282,7 +298,7 @@ public class DataCollectionService {
         return wazuhModelList;
     }
 
-
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
@@ -499,6 +515,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
@@ -555,6 +572,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {

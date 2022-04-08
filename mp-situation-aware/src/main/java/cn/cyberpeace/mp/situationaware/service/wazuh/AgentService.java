@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AgentService extends RequestProcessor {
 
+    public static final String CACHE_KEY_AGENTS = "agents";
+
     @Value("${mp.situationaware.wazuh.base-url}")
     private String wazuhUrl;
 
@@ -38,6 +41,7 @@ public class AgentService extends RequestProcessor {
      *
      * @return
      */
+    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         log.info("agentRequest:{}", agentRequest);

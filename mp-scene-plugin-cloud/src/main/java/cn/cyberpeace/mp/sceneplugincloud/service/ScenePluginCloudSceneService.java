@@ -335,6 +335,8 @@ public class ScenePluginCloudSceneService {
             recording.setOrgName(rawRecording.getDepartment());
             recording.setFileUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                     String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
+            recording.setPlayUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
+                    String.format(CloudUrlConstant.RECORDING_PLAY_URL, rawRecording.getRecordingFile())));
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
