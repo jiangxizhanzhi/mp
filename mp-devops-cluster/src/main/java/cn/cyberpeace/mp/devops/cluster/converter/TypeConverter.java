@@ -31,7 +31,19 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type() {
-        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type();
+        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
+        if (Objects.isNull(l1AndL2AndL3Type) || CollectionUtils.isEmpty(l1AndL2AndL3Type.getItems())){
+            return null;
+        }
+        return convertModel(l1AndL2AndL3Type);
+    }
+
+    /**
+     * 查询所有类型数据
+     * @return
+     */
+    public TypeAllConvertModel findL1AndL2AndL3Type(Boolean isAll) {
+        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(isAll);
         if (Objects.isNull(l1AndL2AndL3Type) || CollectionUtils.isEmpty(l1AndL2AndL3Type.getItems())){
             return null;
         }
