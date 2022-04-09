@@ -31,6 +31,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -110,7 +111,8 @@ public class DeleteHandler extends HandlerCommon {
                 floatingIpIds.add(floatingIpId);
             }
         });
-        return new ElementExtraCloudInfo(new ArrayList<>(qosIds), new ArrayList<>(), new ArrayList<>(proxyIds), new ArrayList<>(floatingIpIds));
+        Set<String> connectionIds = this.getConnectionIds(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+        return new ElementExtraCloudInfo(new ArrayList<>(qosIds), new ArrayList<>(connectionIds), new ArrayList<>(proxyIds), new ArrayList<>(floatingIpIds));
     }
 
     private boolean deleteAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
@@ -382,5 +384,22 @@ public class DeleteHandler extends HandlerCommon {
                 .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElement)
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
         );
+    }
+
+    private Set<String> getConnectionIds(String scene, String sceneElement) {
+        CloudPluginSceneConnectionMapper mapper = BeanCommon.getBean(CloudPluginSceneConnectionMapper.class);
+        var connectionModels = mapper.list(new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getScene, scene)
+                .filterEqual(CloudPluginSceneConnectionModel::getSceneElement, sceneElement)
+        );
+        Set<String> result = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(connectionModels)) {
+            List<String> connectionIds = connectionModels.stream()
+                    .filter(connectionModel -> connectionModel.getConnectionId() != null)
+                    .map(connectionModel -> connectionModel.getConnectionId())
+                    .collect(Collectors.toList());
+            result.addAll(connectionIds);
+        }
+        return result;
     }
 }
