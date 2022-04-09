@@ -224,6 +224,23 @@ public class CloudSceneConnectionCommon {
         return flag;
     }
 
+    public static boolean convertRecording(CloudPluginSceneConnectionModel sceneConnection) {
+        var connectionId = sceneConnection.getConnectionId();
+        if (StringUtils.isEmpty(connectionId)) {
+            return false;
+        }
+
+        var remoteClient = new Remote();
+        var result = remoteClient.convertRecording(connectionId);
+        var flag = !StringUtils.isEmpty(result);
+        if (flag) {
+            sceneConnection.setConnectionRecordingName(result);
+            cloudPluginSceneConnectionMapper.save(sceneConnection);
+        }
+
+        return flag;
+    }
+
     public static String getContainerConsoleUrl(String resourceId) {
         String url = new Remote().getContainerConsoleUrl(resourceId);
         if (StringUtils.isEmpty(url)) {
