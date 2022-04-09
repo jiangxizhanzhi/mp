@@ -379,7 +379,8 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+//        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+        CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
