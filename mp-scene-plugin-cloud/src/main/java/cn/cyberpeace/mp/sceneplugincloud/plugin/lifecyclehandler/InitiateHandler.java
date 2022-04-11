@@ -918,6 +918,7 @@ public class InitiateHandler extends HandlerCommon {
                                 }
                             }
                             if (StringUtils.isNotEmpty(newIp)) {
+                                log.info("Port {} reallocate ip {} to {}", port.getId(), port.getIp(), newIp);
                                 changeIp.put(port.getIp(), newIp);
                                 excludeIps.add(newIp);
                                 port.setIp(newIp);
