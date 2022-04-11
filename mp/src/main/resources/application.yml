@@ -115,6 +115,9 @@ mp:
         id: 09ffcc4a67ef4accb407a1555629d0f8
         interval: 180s
         outputFormat: none
+      - probe-name: get_env_values.py
+        id: 32e9c4db9729440290e843bb6d80295b
+        outputFormat: none
 
   log:
     es-nodes: ${ip.es}:9205
