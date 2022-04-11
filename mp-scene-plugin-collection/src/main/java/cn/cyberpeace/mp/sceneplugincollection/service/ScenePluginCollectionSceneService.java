@@ -1080,6 +1080,26 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(resultList, totalList.size()).asResult()).asResult();
     }
 
+
+
+    public int sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+
+//        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
+//        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
+        wazuhRequest.setEndTime(endTime);
+
+        int changedCount = dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+
+        return changedCount;
+    }
+
     /**
      * 查询场景中所有启动探针的节点列表
      * @param sceneId

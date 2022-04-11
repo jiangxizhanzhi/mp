@@ -118,6 +118,20 @@ public class SceneElementMonitorService {
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
     }
 
+    public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+//        String sceneId = baseRequest.getSceneId();
+//        String elementId = baseRequest.getElementIds().get(0);
+
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+//        listPageInfoQueryParams.setPage(pageRequest.getPage());
+//        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
+        int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams);
+        return sum;
+    }
+
 
     /**
      * 获取节点实时数据
@@ -321,6 +335,8 @@ public class SceneElementMonitorService {
 
         // todo 文件操作，注册表变动，环境变量变动
         // todo 环境变量
+        int envVarChangedCount = sumEnvVarChangedCount(baseRequest);
+        rtInfo.setEnvOpCount(envVarChangedCount);
 
         return rtInfo;
     }
