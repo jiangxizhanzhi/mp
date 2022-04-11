@@ -285,7 +285,7 @@ public class InstallerUtils {
      * @param systemType 系统类型
      * @return 安装命令
      */
-    public static String generateInstallerInstallCommand(String systemType, List<Installer> installers) {
+    public static List<String> generateInstallerInstallCommand(String systemType, List<Installer> installers) {
         List<String> installCommands = new ArrayList<>();
         installCommands.add(generateBaseDirCreateCommand(systemType));
 
@@ -391,7 +391,7 @@ public class InstallerUtils {
             installCommands.addAll(subInstallCommands);
         }
 
-        return SystemTypeCommandUtils.joinCommands(systemType, installCommands.toArray(new String[0]));
+        return installCommands;
     }
 
     @Data
