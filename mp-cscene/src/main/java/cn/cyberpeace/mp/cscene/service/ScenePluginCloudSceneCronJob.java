@@ -41,6 +41,7 @@ public class ScenePluginCloudSceneCronJob {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleNode() {
+        log.info("start cloud plugin scene cron job");
 
         try {
             int count = csceneService.getActiveVirtualDeviceCount();
@@ -63,5 +64,6 @@ public class ScenePluginCloudSceneCronJob {
                 log.error("faild to execute clear job {} ", job.getClass().getName(), e);
             }
         }
+        log.info("end cloud plugin scene cron job");
     }
 }

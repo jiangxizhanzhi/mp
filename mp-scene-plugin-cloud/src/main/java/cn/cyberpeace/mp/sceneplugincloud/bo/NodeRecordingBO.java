@@ -17,8 +17,10 @@ public class NodeRecordingBO {
     private String nodeId;
     @ApiModelProperty(value = "节点名称")
     private String nodeName;
-    @ApiModelProperty(value = "会话用户")
+    @ApiModelProperty(value = "会话用户ID")
     private String user;
+    @ApiModelProperty(value = "会话用户名")
+    private String username;
     @ApiModelProperty(value = "会话协议")
     private String protocol;
     @ApiModelProperty(value = "录屏名称")

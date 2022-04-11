@@ -172,14 +172,13 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteVirtualRouter(CloudPluginSceneElementBO cloudElement) {
-        var flag = true;
+        boolean flag = deleteVirtualRouterFirewall(cloudElement);
         var resourceId = cloudElement.getResourceId();
         if (!StringUtils.isEmpty(resourceId)) {
             var deleteData = new VirtualRouterDeleteData();
             deleteData.setIds(List.of(resourceId));
-            flag = vrClient.delete(deleteData);
+            flag = flag && vrClient.delete(deleteData);
         }
-        flag = flag && deleteVirtualRouterFirewall(cloudElement);
         return flag;
     }
 

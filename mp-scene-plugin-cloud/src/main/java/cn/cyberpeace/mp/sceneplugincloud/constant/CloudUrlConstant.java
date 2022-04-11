@@ -40,6 +40,7 @@ public class CloudUrlConstant {
     public static final String RECORDING_PLAY_URL = "/cpcloud/guacamole/v1/video?recordfilename=%s";
     public static final String ENABLE_RECORDING_URL = "/cpcloud/guacamole/v1/enable_record";
     public static final String DISABLE_RECORDING_URL = "/cpcloud/guacamole/v1/disable_record";
+    public static final String CONVERT_RECORDING_URL = "/cpcloud/guacamole/v1/convert_record";
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";
     public static final String GET_RECORDING_NAME_URL = "/cpcloud/guacamole/v1/recordfile";
 
