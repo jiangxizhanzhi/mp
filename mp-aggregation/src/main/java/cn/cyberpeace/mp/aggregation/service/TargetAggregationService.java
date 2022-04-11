@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class TargetAggregationService {
@@ -44,10 +46,14 @@ public class TargetAggregationService {
         TargetSceneRequest request = new TargetSceneRequest();
         request.setImageType(ImageTypeEnum.ENTITY);
         request.setIgnoreUser(Boolean.TRUE);
-        List<TargetModel> targetModels = targetConverter.page(request);
-        if (CollectionUtils.isEmpty(targetModels)){
+        request.setPerPage(null);
+        request.setPage(null);
+        request.setIsHide(Boolean.TRUE);
+        TargetPageModel targetPageModel = targetConverter.page(request);
+        if (Objects.isNull(targetPageModel) || CollectionUtils.isEmpty(targetPageModel.getTargetModels())){
             return;
         }
+        List<TargetModel> targetModels =  targetPageModel.getTargetModels();
         String[] imageNames = targetModels.stream().map(TargetModel::getName).toArray(String[]::new);
 
         //引用

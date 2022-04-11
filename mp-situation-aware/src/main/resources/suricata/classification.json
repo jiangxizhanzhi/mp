@@ -3,212 +3,254 @@
     {
       "name" : "not-suspicious",
       "en_desc" : "Not Suspicious Traffic",
-      "zh_desc" : "非可疑流量"
+      "zh_desc" : "非可疑流量",
+      "severity": 3
     },
     {
       "name" : "unknown",
       "en_desc" : "Unknown Traffic",
-      "zh_desc" : "未知流量"
+      "zh_desc" : "未知流量",
+      "severity": 3
     },
     {
       "name" : "bad-unknown",
       "en_desc" : "Potentially Bad Traffic",
-      "zh_desc" : "构造流量攻击"
+      "zh_desc" : "构造流量攻击",
+      "severity": 2
     },
     {
       "name" : "attempted-recon",
       "en_desc" : "Attempted Information Leak",
-      "zh_desc" : "信息泄露"
+      "zh_desc" : "信息泄露",
+      "severity": 2
     },
     {
       "name" : "successful-recon-limited",
       "en_desc" : "Information Leak",
-      "zh_desc" : "小规模信息泄漏"
+      "zh_desc" : "小规模信息泄漏",
+      "severity": 2
     },
     {
       "name" : "successful-recon-largescale",
       "en_desc" : "Large Scale Information Leak",
-      "zh_desc" : "大规模信息泄露"
+      "zh_desc" : "大规模信息泄露",
+      "severity": 2
     },
     {
       "name" : "attempted-dos",
       "en_desc" : "Attempted Denial of Service",
-      "zh_desc" : "尝试拒绝服务攻击"
+      "zh_desc" : "尝试拒绝服务攻击",
+      "severity": 2
     },
     {
       "name" : "successful-dos",
       "en_desc" : "Denial of Service",
-      "zh_desc" : "成功拒绝服务攻击"
+      "zh_desc" : "成功拒绝服务攻击",
+      "severity": 2
     },
     {
       "name" : "attempted-user",
       "en_desc" : "Attempted User Privilege Gain",
-      "zh_desc" : "提权攻击尝试"
+      "zh_desc" : "提权攻击尝试",
+      "severity": 1
     },
     {
       "name" : "unsuccessful-user",
       "en_desc" : "Unsuccessful User Privilege Gain",
-      "zh_desc" : "提权攻击失败"
+      "zh_desc" : "提权攻击失败",
+      "severity": 1
     },
     {
       "name" : "successful-user",
       "en_desc" : "Successful User Privilege Gain",
-      "zh_desc" : "提权攻击成功"
+      "zh_desc" : "提权攻击成功",
+      "severity": 1
     },
     {
       "name" : "attempted-admin",
       "en_desc" : "Attempted Administrator Privilege Gain",
-      "zh_desc" : "ROOT提权攻击尝试"
+      "zh_desc" : "ROOT提权攻击尝试",
+      "severity": 1
     },
     {
       "name" : "successful-admin",
       "en_desc" : "Successful Administrator Privilege Gain",
-      "zh_desc" : "ROOT提权攻击成功"
+      "zh_desc" : "ROOT提权攻击成功",
+      "severity": 1
     },
     {
       "name" : "rpc-portmap-decode",
       "en_desc" : "Decode of an RPC Query",
-      "zh_desc" : "远程桌面连接"
+      "zh_desc" : "远程桌面连接",
+      "severity": 2
     },
     {
       "name" : "shellcode-detect",
       "en_desc" : "Executable code was detected",
-      "zh_desc" : "代码注入"
+      "zh_desc" : "代码注入",
+      "severity": 1
     },
     {
       "name" : "string-detect",
       "en_desc" : "A suspicious string was detected",
-      "zh_desc" : "可疑字符串"
+      "zh_desc" : "可疑字符串",
+      "severity": 3
     },
     {
       "name" : "suspicious-filename-detect",
-      "en_desc" : ",A suspicious filename was detected",
-      "zh_desc" : "文件攻击"
+      "en_desc" : "A suspicious filename was detected",
+      "zh_desc" : "文件攻击",
+      "severity": 2
     },
     {
       "name" : "suspicious-login",
       "en_desc" : "An attempted login using a suspicious username was detected",
-      "zh_desc" : "异常登录"
+      "zh_desc" : "异常登录",
+      "severity": 2
     },
     {
       "name" : "system-call-detect",
       "en_desc" : "A system call was detected",
-      "zh_desc" : "系统调用检测"
+      "zh_desc" : "系统调用检测",
+      "severity": 2
     },
     {
       "name" : "tcp-connection",
       "en_desc" : "A TCP connection was detected",
-      "zh_desc" : "异常链接"
+      "zh_desc" : "异常链接",
+      "severity": 4
     },
     {
       "name" : "trojan-activity",
       "en_desc" : "A Network Trojan was detected",
-      "zh_desc" : "木马攻击"
+      "zh_desc" : "木马攻击",
+      "severity": 1
     },
     {
       "name" : "unusual-client-port-connection",
       "en_desc" : "A client was using an unusual port",
-      "zh_desc" : "异常客户端攻击"
+      "zh_desc" : "异常客户端攻击",
+      "severity": 2
     },
     {
       "name" : "network-scan",
       "en_desc" : "Detection of a Network Scan",
-      "zh_desc" : "网络扫描"
+      "zh_desc" : "网络扫描",
+      "severity": 3
     },
     {
       "name" : "denial-of-service",
       "en_desc" : "Detection of a Denial of Service Attack",
-      "zh_desc" : "拒绝服务攻击"
+      "zh_desc" : "拒绝服务攻击",
+      "severity": 2
     },
     {
       "name" : "non-standard-protocol",
       "en_desc" : "Detection of a non-standard protocol or event",
-      "zh_desc" : "fuzzing"
+      "zh_desc" : "检测非标准协议或事件",
+      "severity": 2
     },
     {
       "name" : "protocol-command-decode",
       "en_desc" : "Generic Protocol Command Decode",
-      "zh_desc" : "通用协议命令解码"
+      "zh_desc" : "通用协议命令解码",
+      "severity": 3
     },
     {
       "name" : "web-application-activity",
       "en_desc" : "access to a potentially vulnerable web application",
-      "zh_desc" : "web漏洞尝试利用"
+      "zh_desc" : "web漏洞尝试利用",
+      "severity": 2
     },
     {
       "name" : "web-application-attack",
       "en_desc" : "Web Application Attack",
-      "zh_desc" : "Web应用攻击"
+      "zh_desc" : "Web应用攻击",
+      "severity": 1
     },
     {
       "name" : "misc-activity",
       "en_desc" : "Misc activity",
-      "zh_desc" : "其他攻击"
+      "zh_desc" : "其他攻击",
+      "severity": 3
     },
     {
       "name" : "misc-attack",
       "en_desc" : "Misc Attack",
-      "zh_desc" : "Misc攻击"
+      "zh_desc" : "Misc攻击",
+      "severity": 2
     },
     {
       "name" : "icmp-event",
       "en_desc" : "Generic ICMP event",
-      "zh_desc" : "ICMP攻击"
+      "zh_desc" : "ICMP攻击",
+      "severity": 3
     },
     {
       "name" : "kickass-porn",
       "en_desc" : "SCORE! Get the lotion!",
-      "zh_desc" : "色情内容"
+      "zh_desc" : "色情内容",
+      "severity": 1
     },
     {
       "name" : "policy-violation",
       "en_desc" : "Potential Corporate Privacy Violation",
-      "zh_desc" : "违反隐私策略"
+      "zh_desc" : "违反隐私策略",
+      "severity": 1
     },
     {
       "name" : "default-login-attempt",
       "en_desc" : "Attempt to login by a default username and password",
-      "zh_desc" : "密码爆破"
+      "zh_desc" : "密码爆破",
+      "severity": 2
     },
     {
       "name" : "targeted-activity",
       "en_desc" : "Targeted Malicious Activity was Detected",
-      "zh_desc" : "恶意行为"
+      "zh_desc" : "恶意行为",
+      "severity": 1
     },
     {
       "name" : "exploit-kit",
       "en_desc" : "Exploit Kit Activity Detected",
-      "zh_desc" : "恶意工具包"
+      "zh_desc" : "恶意工具包",
+      "severity": 1
     },
     {
       "name" : "external-ip-check",
       "en_desc" : "Device Retrieving External IP Address Detected",
-      "zh_desc" : "外部域名解析"
+      "zh_desc" : "外部域名解析",
+      "severity": 2
     },
     {
       "name" : "domain-c2",
       "en_desc" : "Domain Observed Used for C2 Detected",
-      "zh_desc" : "被感染域"
+      "zh_desc" : "被感染域",
+      "severity": 1
     },
     {
       "name" : "pup-activity",
       "en_desc" : "Possibly Unwanted Program Detected",
-      "zh_desc" : "无用程序"
+      "zh_desc" : "无用程序",
+      "severity": 2
     },
     {
       "name" : "credential-theft",
       "en_desc" : "Successful Credential Theft Detected",
-      "zh_desc" : "凭证窃取"
+      "zh_desc" : "凭证窃取",
+      "severity": 1
     },
     {
       "name" : "social-engineering",
       "en_desc" : "Possible Social Engineering Attempted",
-      "zh_desc" : "社会工程"
+      "zh_desc" : "社会工程",
+      "severity": 2
     },
     {
       "name" : "coin-mining",
       "en_desc" : "Crypto Currency Mining Activity Detected",
-      "zh_desc" : "挖矿病毒"
+      "zh_desc" : "挖矿病毒",
+      "severity": 2
     }
   ]
 }

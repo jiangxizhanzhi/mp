@@ -20,6 +20,8 @@ public enum DefaultImgDirEnum  {
 
     SCENES_EDITOR("/scenes-editor"),
 
+    COMMON_TARGET("/common-target"),
+
     TARGET("");
 
     private final String endPathName;

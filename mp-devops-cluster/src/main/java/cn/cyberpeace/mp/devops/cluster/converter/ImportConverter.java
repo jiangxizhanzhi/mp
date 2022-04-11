@@ -1,0 +1,84 @@
+package cn.cyberpeace.mp.devops.cluster.converter;
+
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImportService;
+import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
+import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
+import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+
+/**
+ * 靶标导入管理
+ * @author qiaokang
+ */
+@Service
+@Slf4j
+public class ImportConverter implements BaseConverter{
+
+    private ImportService importService;
+
+    private SysActivationService sysActivationService;
+
+    /**
+     * 承诺最大支持靶标的磁盘大小(G)
+     */
+    @Value("${mp.devops.max-target-size:100}")
+    private String maxTargetSize;
+
+    @Autowired
+    public ImportConverter(ImportService importService, SysActivationService sysActivationService) {
+        this.importService = importService;
+        this.sysActivationService = sysActivationService;
+    }
+
+    @Override
+    public String[] getDefaultPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
+    }
+
+    @Override
+    public String[] getTotalPageIgnoreField() {
+        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
+                BasePageRequest::getPage,BasePageRequest::getPerPage);
+    }
+
+    /**
+     * 获取磁盘剩余空间
+     * @return
+     */
+    public ImportDiskSpaceResponse getDiskSpace() {
+        ImportDiskSpaceCloudPlatformModel diskSpaceModel = importService.getDiskSpace();
+
+        try {
+            // 获取最大并发启动场景节点数
+            ActivationResponse activationResponse = sysActivationService.status();
+            ActivationItem activationItem = activationResponse.getItems().stream().filter(item ->
+                    ("LCS-RES-CR-ACTIVENODES").equals(item.getKey())).findFirst().get();
+            BigDecimal maxCount = new BigDecimal(activationItem.getValue());
+            BigDecimal maxSize = new BigDecimal(maxTargetSize);
+            // 单位换算倍数
+            BigDecimal multi = new BigDecimal(1024);
+            // 预留容量
+            Long reserveSize = maxSize.multiply(maxCount).multiply(multi).multiply(multi).multiply(multi).longValue();
+            // 剩余空间 = 实际磁盘空间 - 预留容量
+            diskSpaceModel.getData().setVmSpace(diskSpaceModel.getData().getVmSpace() - reserveSize);
+        } catch (Exception e) {
+            log.error("get disk space error", e);
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+        }
+
+        return ImportDiskSpaceResponse.builder()
+                .vmSpace(diskSpaceModel.getData().getVmSpace())
+                .build();
+    }
+}

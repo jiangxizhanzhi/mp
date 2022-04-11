@@ -50,6 +50,7 @@ public class DeleteHandler extends HandlerCommon {
                 getHandlerUtils().deleteExecutor(executorId);
             });
         }
+
     }
 
     private Runnable createDeleteFlowTask(String nodeId, Flow flow) {

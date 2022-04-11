@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 /**
  * @author wanggang
  */
@@ -21,5 +23,15 @@ public class BaseBO {
      * 流量大小，单位B
      */
     private Double trafficSize;
+
+    /**
+     * 攻击次数比例
+     */
+    private BigDecimal attackNumberPercent;
+
+    /**
+     * 攻击流量比例
+     */
+    private BigDecimal attackTrafficPercent;
 
 }

@@ -1,7 +1,7 @@
 
 
 plugins {
-    id 'org.springframework.boot' version '2.4.4'
+    id 'org.springframework.boot' version '2.5.12'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
@@ -13,8 +13,20 @@ plugins {
 
 
 
-
+ext['tomcat.version'] = '9.0.58'
+ext['logback.version'] = '1.2.10'
+ext['log4j2.version'] = '2.17.1'
 apply from: 'mp/config.gradle'
+
+allprojects {
+    repositories {
+        maven {
+            url 'https://maven.aliyun.com/repository/public/'
+        }
+        mavenLocal()
+        mavenCentral()
+    }
+}
 
 //引入 mybatis-generator 插件
 subprojects {
@@ -54,8 +66,10 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-aop'
         implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.0'
         implementation 'org.springframework.boot:spring-boot-starter-amqp'
-        implementation 'org.elasticsearch:elasticsearch:7.10.2'
-        implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.10.2'
+        implementation 'org.springframework.boot:spring-boot-starter-cache'
+        implementation 'com.github.ben-manes.caffeine:caffeine'
+        implementation 'org.elasticsearch:elasticsearch:7.14.2'
+        implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.14.2'
         implementation 'org.flywaydb:flyway-core:8.0.5'
         implementation 'com.google.guava:guava:30.1.1-jre'
         implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
@@ -75,7 +89,6 @@ subprojects {
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'junit:junit:4.13.2'
         implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-        implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.2.3'
         testImplementation'org.mybatis.generator:mybatis-generator-core:1.3.7'
     }
 

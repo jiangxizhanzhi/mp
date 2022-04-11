@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -11,7 +12,12 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.sceneplugincloud.bo.*;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
@@ -38,7 +44,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -191,6 +203,36 @@ public class ScenePluginCloudSceneService {
         return connectionLinkInfoMap;
     }
 
+    private List<String> collectRecordingName(String sceneId) {
+        List<String> connectionIds = new ArrayList<>();
+        HumanCondition condition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
+        var sceneConnections = cloudPluginSceneConnectionMapper.list(condition);
+        if (CollectionUtils.isEmpty(sceneConnections)) {
+            return new ArrayList<>();
+        }
+        sceneConnections.forEach(sceneConnection -> {
+            if (sceneConnection.getConnectionId() != null) {
+                connectionIds.add(sceneConnection.getConnectionId());
+            }
+        });
+        if (CollectionUtils.isNotEmpty(connectionIds)) {
+            var remoteClient = new Remote();
+            return remoteClient.getRecords(connectionIds);
+        }
+        return new ArrayList<>();
+    }
+
+    public void deleteSceneRecords(String sceneId, boolean logic) {
+        if (logic) {
+            return;
+        }
+        List<String> recordingNames = this.collectRecordingName(sceneId);
+        if (CollectionUtils.isNotEmpty(recordingNames)) {
+            var remoteClient = new Remote();
+            remoteClient.deleteRecords(recordingNames);
+        }
+    }
+
     @Autowired
     public ScenePluginCloudSceneService(CloudSceneStatCommon cloudSceneStatCommon,
                                         CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
@@ -232,6 +274,7 @@ public class ScenePluginCloudSceneService {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
                     nodeSession.setAssistanceUrl(assistanceData.getAssistanceUrl());
+                    nodeSession.setUser(assistanceData.getUsername());
                     connectionIdSessionMap.put(connectionId, nodeSession);
                 });
             }
@@ -292,6 +335,8 @@ public class ScenePluginCloudSceneService {
             recording.setOrgName(rawRecording.getDepartment());
             recording.setFileUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                     String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
+            recording.setPlayUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
+                    String.format(CloudUrlConstant.RECORDING_PLAY_URL, rawRecording.getRecordingFile())));
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
@@ -334,7 +379,8 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+//        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+        CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
@@ -485,4 +531,35 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
+    public List<String> getRecordingUsers(String sceneId, List<String> nodeIds) {
+        HumanCondition humanCondition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
+        if (CollectionUtils.isNotEmpty(nodeIds)) {
+            humanCondition.filterIn(CloudPluginSceneConnectionModel::getSceneElement, nodeIds.toArray(new String[]{}));
+        }
+        var list = cloudPluginSceneConnectionMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ArrayList<>();
+        }
+        Set<String> users = new HashSet<>();
+        list.forEach(model -> {
+            if (StringUtils.isNotEmpty(model.getAccessUser())) {
+                users.add(model.getAccessUser());
+            }
+        });
+        return new ArrayList<>(users);
+    }
+
+    public void changeVlanRange(String vlanRange) {
+        TaskCommon.executeTask(() -> {
+            if (StringUtils.isEmpty(vlanRange)) {
+                return;
+            }
+            // 转换格式
+            String formatVlanRange = vlanRange.replace("-", ":");
+            boolean result = new Remote().changeVlanRange(formatVlanRange);
+            if (!result) {
+                log.error("change vlan range {} error", formatVlanRange);
+            }
+        });
+    }
 }

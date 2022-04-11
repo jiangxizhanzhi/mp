@@ -5,14 +5,18 @@
     <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.FlowClassificationModel">
         <id column="pk" property="pk"/>
         <result column="id"  property="id"/>
+        <result column="name" property="name"/>
         <result column="category_en"  property="categoryEn"/>
         <result column="category_zh"  property="categoryZh"/>
+        <result column="severity" property="severity"/>
     </resultMap>
 
     <sql id="baseColumn">
         id,
+        name,
         category_en,
-        category_zh
+        category_zh,
+        severity
     </sql>
 
     <select id="findAll" resultMap="BaseResultMap">
@@ -24,11 +28,11 @@
     </delete>
 
     <insert id="batchInsert" parameterType="java.util.List">
-        insert into mp_situation_flow_classification( id, category_en,category_zh,create_time)
+        insert into mp_situation_flow_classification( id,name, category_en,category_zh,severity,create_time)
         VALUES
         <foreach collection="list" item="item" index="index"  separator=",">
         (
-            #{item.id},#{item.categoryEn},#{item.categoryZh},now()
+            #{item.id},#{item.name},#{item.categoryEn},#{item.categoryZh},#{item.severity},now()
         )
         </foreach>
     </insert>

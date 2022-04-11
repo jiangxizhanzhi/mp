@@ -27,6 +27,8 @@ public interface ProbeModelMapper {
 
     ProbeModel queryByProbeId(@Param("probeId") String probeId);
 
+    List<ProbeModel> queryByProbeIds(@Param("probeIds") List<String> probeIds);
+
     int updateByProbeId(ProbeModel record);
 
     int countQueryByProbeName(@Param("probeName") String probeName);

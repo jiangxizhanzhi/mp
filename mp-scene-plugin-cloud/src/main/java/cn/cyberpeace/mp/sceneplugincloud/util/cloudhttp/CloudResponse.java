@@ -19,6 +19,7 @@ public class CloudResponse<T> {
     private Object detail;
     private Integer timestamp;
     private Float timeElapse;
+    private Boolean success;
 
     public void setRequestError() {
         setCode(EXCEPTION_CODE);
@@ -31,6 +32,6 @@ public class CloudResponse<T> {
     }
 
     public boolean isSuccess() {
-        return SUCCESS_CODE.equals(code) || SUCCESS_CODE0.equals(code);
+        return SUCCESS_CODE.equals(code) || SUCCESS_CODE0.equals(code) || Boolean.TRUE.equals(success);
     }
 }

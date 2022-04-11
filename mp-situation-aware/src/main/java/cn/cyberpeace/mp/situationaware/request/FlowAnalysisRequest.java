@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.request;
 
+import cn.cyberpeace.mp.situationaware.bo.TeamBO;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import io.swagger.annotations.ApiModelProperty;
@@ -81,6 +82,12 @@ public class FlowAnalysisRequest {
     private List<String> destinationIps;
 
     /**
+     * 强制过滤的目标IP集合
+     */
+    @ApiModelProperty("强制过滤的目标IP集合")
+    private List<String> filterDestinationIps;
+
+    /**
      * 支持多协议
      */
     @ApiModelProperty("多协议")
@@ -99,9 +106,9 @@ public class FlowAnalysisRequest {
     private Integer secondsInterval;
 
     /**
-     * 严重性，1：高，2：中，3：中低，4：低
+     * 严重性，1：高，2：中，3：中，4：低
      */
-    @ApiModelProperty("严重性，1：高，2：中，3：中低，4：低")
+    @ApiModelProperty("严重性，1：高，2：中，3：低，4：低")
     private SeverityEnum severityEnum;
 
     /**
@@ -109,6 +116,12 @@ public class FlowAnalysisRequest {
      */
     @ApiModelProperty("聚合类型")
     private AggregationTypeEnum aggregationTypeEnum;
+
+    @ApiModelProperty(value = "索引",hidden = true)
+    private String[] indices;
+
+    @ApiModelProperty("队伍数据")
+    private List<TeamBO> teamBOS;
 
     public Integer getTopSize() {
         return Objects.isNull(topSize) ? 10 : topSize;

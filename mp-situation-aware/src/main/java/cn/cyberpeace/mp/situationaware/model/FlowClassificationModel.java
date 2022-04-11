@@ -15,7 +15,11 @@ import lombok.NoArgsConstructor;
 @Table("mp_situation_flow_classification")
 public class FlowClassificationModel extends BaseModel {
 
+    private String name;
+
     private String categoryEn;
 
     private String categoryZh;
+
+    private Integer severity;
 }

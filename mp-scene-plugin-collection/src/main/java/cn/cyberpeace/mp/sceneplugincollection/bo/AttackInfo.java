@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class AttackInfo {
 
-    @ApiModelProperty("告警等级(1:高,2:中,3:中低,4:低)")
+    @ApiModelProperty("告警等级(1:高,2:中,3:低,4:低)")
     private Integer severity;
 
     @ApiModelProperty("攻击类型")

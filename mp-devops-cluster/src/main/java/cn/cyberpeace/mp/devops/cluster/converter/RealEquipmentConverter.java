@@ -104,7 +104,7 @@ public class RealEquipmentConverter implements BaseConverter{
         dto.setInPosition(request.getInPosition());
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
-
+        dto.setIsHide(Boolean.FALSE);
         Integer total = imageMapper.totalCount(dto);
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();

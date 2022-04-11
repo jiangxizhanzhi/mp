@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.repository.FlowClassificationsMapper;
+import cn.hutool.cache.Cache;
+import cn.hutool.cache.CacheUtil;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -11,8 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -21,6 +26,18 @@ import java.util.stream.Collectors;
 public class FlowClassificationsService {
 
     private FlowClassificationsMapper flowClassificationsMapper;
+
+    private static final String cache_prefix_model = "situation:";
+
+    private Cache<String, Object> lfuCache = null;
+
+    private static final Long TIME_OUT = 2 * 60 * 60 * 1000L;
+
+    @PostConstruct
+    public void init(){
+        lfuCache = CacheUtil.newLFUCache(100);
+    }
+
 
     @Autowired
     public FlowClassificationsService(FlowClassificationsMapper flowClassificationsMapper) {
@@ -32,7 +49,14 @@ public class FlowClassificationsService {
      * @return
      */
     public List<FlowClassificationModel> findAll(){
-        return flowClassificationsMapper.findAll();
+        String key = cache_prefix_model + "flow:" + ServletUtils.getAcceptLanguage();
+        Object cache = lfuCache.get(key);
+        if (Objects.nonNull(cache)){
+            return (List<FlowClassificationModel>)cache;
+        }
+        List<FlowClassificationModel> modelList = flowClassificationsMapper.findAll();
+        lfuCache.put(key,modelList);
+        return modelList;
     }
 
     /**
@@ -67,8 +91,10 @@ public class FlowClassificationsService {
         List<FlowClassificationModel> categoryDicList = classifications.stream().map(classification -> {
             FlowClassificationModel categoryDic = new FlowClassificationModel();
             categoryDic.setId(TextUtils.uuid());
+            categoryDic.setName(classification.getName());
             categoryDic.setCategoryEn(classification.getEn_desc());
             categoryDic.setCategoryZh(classification.getZh_desc());
+            categoryDic.setSeverity(classification.getSeverity());
             return categoryDic;
         }).collect(Collectors.toList());
         return flowClassificationsMapper.batchInsert(categoryDicList);

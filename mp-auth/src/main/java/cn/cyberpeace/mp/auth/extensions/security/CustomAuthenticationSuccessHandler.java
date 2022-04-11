@@ -166,6 +166,17 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         return errorCode;
     }
 
+    /**
+     * 检查系统激活状态
+     * @return
+     */
+    private boolean checkSysActivationStatus() {
+        // 通过spring事件机制，检测系统激活状态
+        // 固定每天晚上24时检查激活状态，提前15天，7天，3天，1天提醒，如果过期，则不再允许登录系统，同时考虑撤销所有用户的token授权
+        // todo
+        return false;
+    }
+
 
     private void recordLoginLog(UserModel user, HttpServletRequest request) {
         OperationLogRequest logModel = new OperationLogRequest();

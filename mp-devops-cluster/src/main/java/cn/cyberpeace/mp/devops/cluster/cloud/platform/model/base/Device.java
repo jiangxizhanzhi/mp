@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 靶标信息
@@ -52,6 +53,11 @@ public class Device extends BaseCloudPlatformModel {
      * 名称
      */
     private String name;
+
+    /**
+     * 镜像名称（靶标的英文名称）
+     */
+    private String image;
 
     /**
      * 描述
@@ -135,4 +141,24 @@ public class Device extends BaseCloudPlatformModel {
 
     private ExtDocker extDocker;
 
+    /**
+     * 是否内置镜像
+     */
+    private Boolean isBuildIn;
+
+    /**
+     * 是否隐藏
+     */
+    private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 默认可运行的镜像名称
+     */
+    private String defaultLaunchImageName;
+
+    public Boolean getIsBuildIn() {
+        boolean tmpImport = !Objects.isNull(isImport) && isImport;
+        boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;
+        return tmpImport || tmpInternal;
+    }
 }

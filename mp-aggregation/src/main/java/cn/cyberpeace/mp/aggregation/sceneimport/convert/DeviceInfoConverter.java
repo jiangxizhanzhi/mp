@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -14,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @Description 写入设备信息
@@ -49,13 +51,23 @@ class DeviceInfoConverter implements IConverter {
             request.setIgnoreUser(true);
             // 精确搜索
             request.setLikeName(false);
-            List<Device> devices = this.targetConverter.allTarget(request);
-            if (CollectionUtils.isEmpty(devices)) {
-                log.info("import scene ,no device find , image is {}", request.getName());
-                continue;
+            //不过滤隐藏靶标
+            request.setIsHide(Boolean.TRUE);
+            TargetSceneConvertModel targetSceneConvertModel = this.targetConverter.allTarget(request);
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())) {
+                List<Device> devices = this.targetConverter.getCommonTargets(request.getName());
+                if (CollectionUtils.isEmpty(devices)) {
+                    log.info("import scene ,no device find , image is {}", request.getName());
+                    continue;
+                } else {
+                    Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
+                    this.loadDeviceInfo(params, devices.get(0));
+                }
+            } else {
+                List<Device> devices = targetSceneConvertModel.getDeviceList();
+                Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
+                this.loadDeviceInfo(params, devices.get(0));
             }
-            Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
-            this.loadDeviceInfo(params, devices.get(0));
         }
     }
 
@@ -63,10 +75,19 @@ class DeviceInfoConverter implements IConverter {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
 
-        element.setIcon2(device.getLogo());
+        if (StringUtils.isNotEmpty(device.getLogo())) {
+            if (!device.getLogo().startsWith("/fdfs") && !device.getLogo().startsWith(CommonConstant.DefaultImagePrefix)) {
+                element.setIcon2(CommonConstant.DefaultImagePrefix + device.getLogo());
+            } else {
+                element.setIcon2(device.getLogo());
+            }
+        }
         element.setDescription(device.getDescription());
         pluginElement.setCategory(device.getCategory());
+        pluginElement.setCategory2(device.getSecondCategory());
+        pluginElement.setCategory3(device.getL3Category());
         pluginElement.setImageType(device.getImageType());
+        pluginElement.setIsBuildIn(device.getIsBuildIn());
         // 云平台数据库大小写不敏感,这里名字不能覆盖
 //        pluginElement.setImage(device.getName());
         pluginElement.setRole(device.getRole());

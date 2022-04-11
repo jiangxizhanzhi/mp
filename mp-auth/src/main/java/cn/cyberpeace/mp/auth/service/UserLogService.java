@@ -27,7 +27,7 @@ public class UserLogService {
     public List<OperationLogPageResponse> listOpLog(OperationLogPageRequest request) {
         ListObjServiceResult<OperationLogPageResponse> response = operateLogController.page(request);
         if (Objects.nonNull(response.getData().getList())) {
-            List<OperationLogPageResponse> list = response.getData().getList();
+            List<OperationLogPageResponse> list = response.getSource().getList();
             return list;
         }
         return new ArrayList<>();

@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Slf4j
 @Component
 public class UserCommon {
@@ -16,12 +18,12 @@ public class UserCommon {
     private static UserService userService;
 
     public static UserModel getCurrentUser() {
-        UserModel user = null;
-        try {
-            user = UserUtils.getLoginUser();
-        } catch (Exception e) {
-            log.error("Get current user failed: ", e);
+
+        UserModel user = UserUtils.getLoginUser();
+        if (Objects.isNull(user)) {
+            log.error("Get current user failed!");
         }
+
         return user;
     }
 

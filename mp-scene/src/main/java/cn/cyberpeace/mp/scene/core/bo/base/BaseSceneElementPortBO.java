@@ -44,6 +44,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer loss;
     @ApiModelProperty(value = "【即将废弃】接入方式")
     private List<AccessMode> accessModes;
+    @ApiModelProperty(value = "端口顺序")
+    private Integer order;
 
     @JsonIgnore
     private E element;

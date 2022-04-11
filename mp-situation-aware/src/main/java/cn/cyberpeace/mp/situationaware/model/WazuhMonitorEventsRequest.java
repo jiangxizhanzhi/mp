@@ -2,9 +2,10 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.Data;
 
 @Data
 @ApiModel("系统监控事件变更查询条件")
@@ -12,8 +13,8 @@ public class WazuhMonitorEventsRequest {
     /**
      * 查询条数默认限制
      */
-    @ApiModelProperty("预警消息默认展示500条")
-    private Integer pageSize = 500;
+    @ApiModelProperty("预警消息默认展示100条")
+    private Integer pageSize = 100;
 
     /**
      * 分页页码

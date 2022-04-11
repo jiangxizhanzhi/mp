@@ -1,11 +1,15 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -71,6 +75,18 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementRequest baseRequest) {
         List<HostState> hostStates = hostStateService.getHostStates(baseRequest);
         return ServiceResult.success(hostStates);
+    }
+
+    @ApiOperation(value = "节点端口信息")
+    @GetMapping("/element_port")
+    public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
+        return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
+    }
+
+    @ApiOperation(value = "节点进程信息")
+    @GetMapping("/element_process")
+    public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
+        return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
 
 }

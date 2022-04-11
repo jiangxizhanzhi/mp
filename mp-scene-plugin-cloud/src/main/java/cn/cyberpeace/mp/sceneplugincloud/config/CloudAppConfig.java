@@ -114,6 +114,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cloud_heavy_concurrent_delay:10}")
     private Integer cloudHeavyConcurrentDelay;
 
+    @Value("${mp.sceneplugincloud.ignore_delete_exception:true}")
+    private Boolean ignoreDeleteException;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

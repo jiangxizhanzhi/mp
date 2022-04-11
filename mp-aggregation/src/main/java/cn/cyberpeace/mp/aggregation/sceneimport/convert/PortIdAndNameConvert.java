@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.HashMap;
@@ -23,6 +24,19 @@ public class PortIdAndNameConvert implements IConverter {
                     // 设置电口数量
                     CloudPluginSceneConfigElementBO cloudElement = cloudElementMap.get(e.getId());
                     cloudElement.setElectricPortNumber(e.getPorts().size());
+                    // 设置网卡数量
+                    e.setMaxPortNumber(e.getPorts().size());
+                    // 如果是核心路由 设置wan口数量
+                    Integer role = cloudElement.getRole();
+                    if (role != null) {
+                        if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER
+                                    && BaseCloudPluginSceneElementModel.ImageType.VM.equals(cloudElement.getImageType())
+                                    && Boolean.TRUE.equals(cloudElement.getIsBuildIn())
+                        ) {
+                            cloudElement.setWanPortNumber(e.getPorts().size());
+                            cloudElement.setWanPortType("E");
+                        }
+                    }
                 }
             });
         }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
@@ -13,15 +14,24 @@ public class VirtualFirewall extends CloudClient {
         heavyConcurrentWait();
 
         CloudResponse<VirtualFirewallCreateData> result = cloudPost(CloudUrlConstant.VIRTUAL_FIREWALL_CREATE_URL, createData,
-                null, new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {}, true);
+                null, new TypeReference<CloudResponse<VirtualFirewallCreateData>>() {
+                }, true);
         return result.getData();
     }
 
     public boolean delete(VirtualFirewallDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
-        return true;
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_FIREWALL_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (Exception e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
     }
 }

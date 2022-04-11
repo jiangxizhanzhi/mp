@@ -62,7 +62,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -139,7 +138,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public UserDto getCurrentUserDto() {
         UserModel userModel = UserUtils.getLoginUser();
-
+        if (Objects.isNull(userModel)) {
+            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
+        }
         UserDto userDto = userModel2UserDto(userModel);
 
         return userDto;
@@ -561,12 +562,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             Locale locale = LocaleContextHolder.getLocale();
 
-            String res = "excel/import_template.xls";
-            String fileName = "用户列表.xls";
+            String res = "excel/import_template.xlsx";
+            String fileName = "用户列表.xlsx";
 
             if (Objects.equals(locale, Locale.US)) {
-                res = "excel/import_template_en.xls";
-                fileName = "UserList.xls";
+                res = "excel/import_template_en.xlsx";
+                fileName = "UserList.xlsx";
             }
 
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(res);
@@ -613,56 +614,28 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             UserModel userCreated = result.getSource().getObj();
             String userId = userCreated.getId();
 
-            // 2. 保存用户-角色关系
-            if (StringUtils.isNotBlank(importUser.getRoles())) {
-                String roles = importUser.getRoles().trim();
-                Arrays.stream(StringUtils.split(roles, ",")).forEach(rname -> {
-                    RoleModel roleModel = roleService.getByName(rname.trim());
-                    if (Objects.nonNull(roleModel)) {
-                        UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(roleModel.getId()).build();
-                        var re = userRoleService.create(userRoleModel);
-                        ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-                    }
-                });
-            }
-
-            // todo http://10.10.10.10/biz/bug-view-4861.html
+            // http://10.10.10.10/biz/bug-view-4861.html
             // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
-            /*if (CollectionUtil.isNotEmpty(importUser.getRoleIdList())) {
+            if (CollectionUtil.isNotEmpty(importUser.getRoleIdList())) {
                 importUser.getRoleIdList().forEach(rid -> {
                             UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(rid).build();
                             var re = userRoleService.create(userRoleModel);
                             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
                         }
                 );
-            }*/
+            }
 
             // 3. 保存组织-用户关系
-            if (StringUtils.isNotBlank(importUser.getOrgpath())) {
-                String orgPaths = importUser.getOrgpath().trim();
-                Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
-                    OrgModel orgModel = orgService.getByPath(path);
-                    if (Objects.nonNull(orgModel)) {
-                        OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(orgModel.getId()).build();
-                        var re = orgUserService.create(orgUserModel);
-                        ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-                    }
-                });
+            // http://10.10.10.10/biz/bug-view-4861.html
+            if (CollectionUtil.isNotEmpty(importUser.getOrgIdList())) {
+                importUser.getOrgIdList().forEach(oid -> {
+                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(oid).build();
+                            var re = orgUserService.create(orgUserModel);
+                            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
+                        }
+                );
             }
-            // todo http://10.10.10.10/biz/bug-view-4861.html
-            /*else {
-                // 组织为空则默认一级组织
-                log.info("org not specified! use default org!");
-                List<OrgModel> orgs = orgService.listParents();
-                OrgModel defaultTopOrg = orgs.get(0);
-                if (Objects.isNull(defaultTopOrg)) {
-                    log.error("默认一级组织不存在！");
-                    throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
-                }
-                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(defaultTopOrg.getId()).build();
-                var re = orgUserService.create(orgUserModel);
-                ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
-            }*/
+
             log.info("import success...");
         }
     }

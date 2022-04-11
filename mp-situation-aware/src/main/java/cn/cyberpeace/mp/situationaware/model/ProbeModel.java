@@ -36,6 +36,16 @@ public class ProbeModel implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private String outputFormat;
+
+    public String getOutputFormat() {
+        return outputFormat;
+    }
+
+    public void setOutputFormat(String outputFormat) {
+        this.outputFormat = outputFormat;
+    }
+
     public Integer getPk() {
         return pk;
     }

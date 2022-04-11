@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.SceneConfigPluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ConfigHandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudSceneConfigPluginModelHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.validation.CloudScenePluginValidation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -113,6 +115,8 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
             srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        }else if(role.equals(BaseCloudPluginSceneElementModel.Role.NPC)){
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         }
     }
 
@@ -160,7 +164,7 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     } else {
                         cidr = auxiliaryNetworkCloudElement.getCidr();
                     }
-                    if (!StringUtils.isEmpty(cidr) && !IpUtils.isIpInCidr(ip, cidr)) {
+                    if (!StringUtils.isEmpty(cidr) && !IpUtils.newIsInCidr(ip, cidr)) {
                         throw new MpRuntimeException(CloudErrorCode.INVALID_IP_ON_CIDR.format(ip, cidr));
                     }
                 }
@@ -242,5 +246,11 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
             log.error("failed to set connToExtNet , scene id is {}", getSceneHandler().getSceneId(), e);
         }
         return super.toData();
+    }
+
+    @Override
+    protected void validateData(BaseScenePluginDataBO validateData) {
+        var validateResult = CloudScenePluginValidation.validate(validateData);
+        CloudScenePluginValidation.handleValidateResult(validateResult);
     }
 }

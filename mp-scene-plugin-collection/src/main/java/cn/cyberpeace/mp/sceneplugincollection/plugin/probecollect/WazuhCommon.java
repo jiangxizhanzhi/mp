@@ -1,84 +1,118 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
-import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class WazuhCommon {
 
+    private static WazuhProbeConfig wazuhProbeConfig;
+
+    private static Integer getWazuhRemotePort(){
+        return CollectionSingleton.collectionAppConfig.getWazuhRemotePort();
+    }
+
+    private static Integer getWazuhAuthPort(){
+        return CollectionSingleton.collectionAppConfig.getWazuhAuthPort();
+    }
+
     public static final String WAZUH_AGENT_GROUP = "wazuh_agent_installer";
 
-    public static final String WAZUH_AGENT_WINDOWS_FILE_NAME = "agent-windows-installer.zip";
+    public static final String WAZUH_AGENT_WINDOWS_FILE_NAME = "agent-windows.zip";
 
-    public static final String WAZUH_AGENT_UBUNTU_FILE_NAME = "agent-ubuntu-installer.zip";
-
-    public static final String WAZUH_AGENT_CENTOS_FILE_NAME = "agent-centos-installer.zip";
+    public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
     private WazuhCommon() {}
 
-    public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost) {
+    public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
+                                                         List<WazuhControl.ControlProbeParam> controlProbeParams) {
+        if (wazuhProbeConfig == null) {
+            wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
+        }
         agentName = StringUtils.isEmpty(agentName) ? TextUtils.uuid() : agentName;
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
 
+        String osType = SystemTypeCommandUtils.getOsType(systemType);
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String finalAgentName = agentName;
+        wazuhProbeConfig.getProbes().forEach(newProbe -> {
+            String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                    nameFileMap.getOrDefault(newProbe.getProbeName(), StringUtils.EMPTY));
+            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
+            controlProbeParam.setId(newProbe.getId());
+            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+            controlProbeParam.setGroup(finalAgentName);
+            controlProbeParam.setScriptUrl(url);
+            if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_BAT)) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_PY)) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_SH)) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+            }
+            controlProbeParam.setOutputFormat(newProbe.getOutputFormat());
+            if (newProbe.getInterval() != null) {
+                controlProbeParam.setInterval(newProbe.getInterval());
+            } else {
+                controlProbeParam.setInterval(wazuhProbeConfig.getDefaultInterval());
+            }
+            controlProbeParams.add(controlProbeParam);
+        });
+        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlProbeParams, new ArrayList<>());
+
         InstallerUtils.Installer resource = null;
-        if (List.of(BaseSceneElementModel.SystemType.WINDOWS_10,
-                BaseSceneElementModel.SystemType.WINDOWS_8,
-                BaseSceneElementModel.SystemType.WINDOWS_7,
-                BaseSceneElementModel.SystemType.WINDOWS_XP,
-                BaseSceneElementModel.SystemType.WINDOWS_VISTA,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2019,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2016,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2012,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2010,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2008,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2003,
-                BaseSceneElementModel.SystemType.WINDOWS_SERVER_2000,
-                BaseSceneElementModel.SystemType.WINDOWS).contains(systemType)) {
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
             resource = new InstallerUtils.Installer();
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                    String.format("unzip {this} -d %s\\agent-installer",
-                            SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
-                    String.format("cd %s\\agent-installer\\windows",
-                            SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
-                    String.format(".\\wazuh-install.exe --server=%s --agent=%s", wazuhHost, agentName)
-            ));
-        } else if (List.of(BaseSceneElementModel.SystemType.CENTOS,
-                BaseSceneElementModel.SystemType.LINUX).contains(systemType)) {
+                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s\\agent-installer",
+                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            String.format("cd %s\\agent-installer\\agent-windows",
+                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            "call install.bat",
+                            String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
+                            String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
+                            String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
+                            String.format("set SIC_WAZUH_MANAGER_AUTH_PORT=%d", getWazuhAuthPort()),
+                            "cd C:\\wazuha",
+                            "call config.bat",
+                            "call " + probeCommand,
+                            "call start.bat"
+                    ));
+        } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
-            resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_CENTOS_FILE_NAME, StringUtils.EMPTY));
-            resource.setInstallCommand(
-                StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                        String.format("unzip {this} -d %s/agent-installer",
-                                SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                        String.format("cd %s/agent-installer/centos",
-                                SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                        String.format("./wazuh-install --server=%s --agent=%s", wazuhHost, agentName)
-                ));
-        } else if (List.of(BaseSceneElementModel.SystemType.UBUNTU,
-                BaseSceneElementModel.SystemType.KALI).contains(systemType)) {
-            resource = new InstallerUtils.Installer();
-            resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_UBUNTU_FILE_NAME, StringUtils.EMPTY));
+            resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip {this} -d %s/agent-installer",
+                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s/agent-installer",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            String.format("cd %s/agent-installer/ubuntu",
+                            String.format("cd %s/agent-installer/agent-linux",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            String.format("./wazuh-install --server=%s --agent=%s", wazuhHost, agentName)
+                            "bash install.sh",
+                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                            "cd /opt/wazuha",
+                            "bash config.sh",
+                            probeCommand,
+                            "bash start.sh"
                     ));
         }
         return resource == null ? StringUtils.EMPTY :

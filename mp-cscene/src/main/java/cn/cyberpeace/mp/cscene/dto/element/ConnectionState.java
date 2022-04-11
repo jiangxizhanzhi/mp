@@ -13,14 +13,23 @@ import lombok.Data;
 @Data
 public class ConnectionState {
 
+    @ApiModelProperty("进程ID")
+    private String pid;
+
     @ApiModelProperty("协议")
     private String protocol;
 
-    @ApiModelProperty("本机地址")
+    @ApiModelProperty("本地地址")
     private String localAddress;
+
+    @ApiModelProperty("本地端口")
+    private String localPort;
 
     @ApiModelProperty("远程地址")
     private String foreignAddress;
+
+    @ApiModelProperty("远程端口")
+    private String foreignPort;
 
     @ApiModelProperty("状态")
     private String state;

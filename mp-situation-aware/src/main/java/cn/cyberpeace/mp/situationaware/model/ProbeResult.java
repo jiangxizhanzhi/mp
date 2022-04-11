@@ -51,4 +51,7 @@ public class ProbeResult {
     private Integer probeStatus;
 
     private List<ProbeParamsResult> paramsResultList;
+
+    @ApiModelProperty(value = "探针数据输出格式 json plain none")
+    private String outputFormat;
 }
