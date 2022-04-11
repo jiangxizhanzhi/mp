@@ -117,7 +117,8 @@ mp:
         outputFormat: none
       - probe-name: get_env_values.py
         id: 32e9c4db9729440290e843bb6d80295b
-        outputFormat: none
+        interval: 300s
+        outputFormat: json
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
