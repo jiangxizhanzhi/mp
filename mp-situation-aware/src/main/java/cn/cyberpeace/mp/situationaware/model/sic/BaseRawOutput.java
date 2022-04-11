@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2022/3/25 10:41
  */
 @Data
-public class NetConnOutput {
+public class BaseRawOutput {
 
     @JSONField(name = "raw_output")
     private String rawOutput;

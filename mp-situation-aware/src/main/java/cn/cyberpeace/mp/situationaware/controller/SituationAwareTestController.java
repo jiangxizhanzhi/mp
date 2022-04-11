@@ -145,4 +145,17 @@ public class SituationAwareTestController {
         return ServiceResult.success(list);
     }
 
+
+    @GetMapping("/query/envvar")
+    public ServiceResult queryEnvVar(@RequestParam String agentName) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("4526756ff79e413ca28080289eb1f78e"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-10 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+        return ServiceResult.successful();
+    }
+
 }
