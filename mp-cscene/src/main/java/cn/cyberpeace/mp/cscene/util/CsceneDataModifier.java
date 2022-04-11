@@ -456,6 +456,26 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkIngressAndEgress(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getElements() != null) {
+            var elements = csceneBO.getSceneConfig().getTopology().getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.forEach(e -> {
+                    if (e.getPorts() != null && e.getPorts().size() > 0) {
+                        e.getPorts().forEach(p -> {
+                            if (p.getIngress() == null) {
+                                p.setIngress(-1);
+                            }
+                            if (p.getEgress() == null) {
+                                p.setEgress(-1);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
     static private class CpcloudPortData {
         private List<AccessMode> accessModes;
 

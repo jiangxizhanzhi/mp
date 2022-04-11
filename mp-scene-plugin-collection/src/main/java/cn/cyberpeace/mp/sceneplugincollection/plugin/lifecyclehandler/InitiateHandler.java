@@ -229,7 +229,9 @@ public class InitiateHandler extends HandlerCommon {
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
                     }
-                    initCommands.add(probeInstallScript);
+                    if (CollectionUtils.isNotEmpty(probeInstallScript)) {
+                        initCommands.addAll(probeInstallScript);
+                    }
                     srcElement.setInitCommands(initCommands);
                 });
             });

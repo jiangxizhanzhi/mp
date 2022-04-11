@@ -38,7 +38,7 @@ public class WazuhCommon {
 
     private WazuhCommon() {}
 
-    public static String generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
+    public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
                                                          List<WazuhControl.ControlProbeParam> controlProbeParams) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
@@ -115,7 +115,7 @@ public class WazuhCommon {
                             "bash start.sh"
                     ));
         }
-        return resource == null ? StringUtils.EMPTY :
+        return resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
     }
 
