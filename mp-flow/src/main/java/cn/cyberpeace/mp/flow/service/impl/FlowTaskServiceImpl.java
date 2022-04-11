@@ -190,29 +190,41 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             // 设置默认来源ip
             request.setOriginIps("127.0.0.1-127.0.0.1");
         }
+
         FlowTaskModel flowTaskModel = request;
-        ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
-        if (Objects.nonNull(flowInfoObjResult)) {
-            FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
+        // 是否自定义流量
+        Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
 
-            if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-                if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
-                    create(flowTaskModel);
+        if (isCustom) {
+            // 自定义流量，没有流量文件
+            create(flowTaskModel);
+            // 异步新增流量发生平台流量任务
+            asyncPlatFlowTaskService.savePlatFlowTask(request, false);
+            return ServiceResult.success(flowTaskModel);
+        } else {
+            ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+            if (Objects.nonNull(flowInfoObjResult)) {
+                FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
 
-                    // 异步新增流量发生平台流量任务
-                    asyncPlatFlowTaskService.savePlatFlowTask(request, false);
-                    return ServiceResult.success(flowTaskModel);
+                if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
+                    if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
+                        create(flowTaskModel);
+
+                        // 异步新增流量发生平台流量任务
+                        asyncPlatFlowTaskService.savePlatFlowTask(request, false);
+                        return ServiceResult.success(flowTaskModel);
+                    } else {
+                        return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
+                    }
                 } else {
-                    return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
+                    // 暂无其他流量发生器，直接保存
+                    create(flowTaskModel);
+                    return ServiceResult.success(flowTaskModel);
                 }
             } else {
-                // 暂无其他流量发生器，直接保存
-                create(flowTaskModel);
-                return ServiceResult.success(flowTaskModel);
+                log.error("flow file be chosen not existed");
+                return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
             }
-        } else {
-            log.error("flow file be chosen not existed");
-            return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
         }
     }
 
@@ -625,7 +637,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 是否自定义流量
         boolean isCustom = false;
         if (Objects.equals(CustomFlagEnum.NO.toValue(), flowTaskModel.getCustomFlag())) {
-            isCustom = true;
             // 流量信息存在校验
             ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
             if (Objects.isNull(flowInfoResult)) {
@@ -634,6 +645,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             }
             flowInfoModel = flowInfoResult.getObj();
         } else {
+            isCustom = true;
             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
 

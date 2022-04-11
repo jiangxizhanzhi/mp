@@ -48,7 +48,7 @@ public class FlowTaskModel extends BaseModel {
      * 流量id
      */
     @ApiModelProperty(value = "流量id")
-    @NotBlank(message = "flowId can not be empty")
+    @DefaultStr
     private String flowId;
 
     /**
