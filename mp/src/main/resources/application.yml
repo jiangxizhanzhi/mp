@@ -117,6 +117,7 @@ mp:
         outputFormat: none
       - probe-name: get_env_values.py
         id: 32e9c4db9729440290e843bb6d80295b
+        interval: 300s
         outputFormat: none
 
   log:
