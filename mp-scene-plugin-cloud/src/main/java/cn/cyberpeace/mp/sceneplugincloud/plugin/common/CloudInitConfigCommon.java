@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -115,7 +116,16 @@ public class CloudInitConfigCommon {
             }
             if (!this.initCommands.isEmpty()) {
                 list.add("runcmd:");
-                List<String> formatCommands = initCommands.stream()
+                List<String> splitCmds = new ArrayList<>();
+                initCommands.forEach(cmd -> {
+                    String[] splitResult = StringUtils.split(cmd, CommandUtils.LINUX_LINE_BREAK);
+                    if (splitResult != null && splitResult.length > 0) {
+                        for (String s : splitResult) {
+                            splitCmds.add(s);
+                        }
+                    }
+                });
+                List<String> formatCommands = splitCmds.stream()
                         .filter(s -> StringUtils.isNotEmpty(s))
                         .map(s -> "  - " + s)
                         .collect(Collectors.toList());
