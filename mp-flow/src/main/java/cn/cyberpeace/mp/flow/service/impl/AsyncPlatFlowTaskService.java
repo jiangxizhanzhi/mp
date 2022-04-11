@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
+import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -618,6 +619,12 @@ public class AsyncPlatFlowTaskService {
      * @param call
      */
     private void taskJobStoppedCallback(String taskId, Runnable call) {
+        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
+        if (Objects.isNull(oldFlowTaskModel)) {
+            log.info("flowTaskModel is empty for taskId:{}", taskId);
+            return;
+        }
+
         FlowTaskModel flowTaskModel = new FlowTaskModel();
         flowTaskModel.setId(taskId);
         flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
@@ -631,6 +638,24 @@ public class AsyncPlatFlowTaskService {
             log.info("start to run callback function");
             call.run();
         }
+
+        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
+            // 自定义流量，运行后直接删除网口
+            String actuatorId = oldFlowTaskModel.getActuatorId();
+            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
+            if (Objects.isNull(flowActuatorModel)) {
+                log.error("del ports failed for actuator is empty");
+                return;
+            }
+
+            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
+            this.delPorts(flowActuatorModel, flowPortIds);
+
+            flowTaskModel.setFlowPortId(Strings.EMPTY);
+            // 删除任务关联网口
+            flowTaskMapper.updateTaskInfo(flowTaskModel);
+        }
+
     }
 
     /**
