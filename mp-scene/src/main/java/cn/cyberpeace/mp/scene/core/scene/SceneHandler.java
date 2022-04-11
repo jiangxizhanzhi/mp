@@ -715,6 +715,8 @@ public class SceneHandler extends BaseSceneHandler<
             this.add(SceneModel.Event.SNAPSHOT);
             this.add(SceneModel.Event.DELETE);
             this.add(SceneModel.Event.MODIFY);
+            this.add(SceneModel.Event.SUSPEND);
+            this.add(SceneModel.Event.RESUME);
         }};
         return terminateStates.contains(state);
     }
