@@ -129,8 +129,7 @@ public class DataCollectionService {
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
-        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
         //根据日期构造索引
@@ -169,8 +168,7 @@ public class DataCollectionService {
      */
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
         //根据日期构造索引
@@ -234,8 +232,7 @@ public class DataCollectionService {
      */
     @Deprecated
     public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
-        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         //根据日期构造索引
@@ -282,8 +279,7 @@ public class DataCollectionService {
      */
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_HOST_STATE);
@@ -310,8 +306,7 @@ public class DataCollectionService {
 
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
         // 只取一条数据，做假分页处理
@@ -351,8 +346,7 @@ public class DataCollectionService {
 
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-        if (CollectionUtil.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhMonitorEventsRequest);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
         }
 
@@ -404,8 +398,10 @@ public class DataCollectionService {
     }
 
 
-
     public int aggsEnvVarCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -590,8 +586,7 @@ public class DataCollectionService {
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
-        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
-            log.warn("agentNames is empty: {}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
         }
         String aggregationName = "aggs_count_by_agent_name";
@@ -646,7 +641,7 @@ public class DataCollectionService {
     @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
-        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0;
         }
 
@@ -681,7 +676,7 @@ public class DataCollectionService {
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
-        if (CollectionUtil.isEmpty(wazuhEventRequest.getAgentNames())) {
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0L;
         }
         //根据日期构造索引
@@ -992,6 +987,25 @@ public class DataCollectionService {
         Double doubleVal = Double.valueOf(val);
         Long longVal = BigDecimal.valueOf(doubleVal).longValue();
         return longVal;
+    }
+
+    /**
+     * 剔除null
+     * @param agentNames
+     * @return
+     */
+    private List<String> agentNamesExcludeNullValue(List<String> agentNames) {
+        List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        return nullExcludedAgentNames;
+    }
+
+    private boolean isAgentNamesEmpty(List<String> agentNames) {
+        List processedAgentNames = agentNamesExcludeNullValue(agentNames);
+        boolean isEmpty = CollectionUtil.isEmpty(processedAgentNames);
+        if(isEmpty) {
+            log.warn("agentNames is empty:{}", agentNames);
+        }
+        return isEmpty;
     }
 
 }
