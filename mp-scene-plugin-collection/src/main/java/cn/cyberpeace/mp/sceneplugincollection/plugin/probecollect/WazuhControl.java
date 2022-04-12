@@ -68,9 +68,14 @@ public class WazuhControl {
     public static final String CONTROL_ACTION_DISABLE = "disable";
     public static final String CONTROL_ACTION_TYPE_SCRIPT = "script";
     public static final String CONTROL_ACTION_TYPE_LOG = "log";
+    public static final String CONTROL_ACTION_TYPE_SYSCHECK = "syscheck";
+    public static final String CONTROL_ACTION_TYPE_FILE_MODIFY = "file_modify";
+    public static final String CONTROL_ACTION_TYPE_REGISTRY_MODIFY = "registry_modify";
 
     public static final String SCRIPT_DISABLED_NO = "no";
     public static final String SCRIPT_DISABLED_YES = "yes";
+    public static final String SYSCHECK_DISABLED_NO = "no";
+    public static final String SYSCHECK_DISABLED_YES = "yes";
 
     public static final String SCRIPT_SUFFIX_PY = "py";
     public static final String SCRIPT_SUFFIX_BAT = "bat";
@@ -205,7 +210,7 @@ public class WazuhControl {
         launchInput.setId(runCommandItem.getRunId());
         launchInput.setOutputFormat(runCommandItem.getOutputFormat());
         launchInput.setCommand(runCommandItem.getCommand());
-        activeResponseHttpData.setArguments(List.of(TextUtils.encodeBase64(JsonCommon.snakeStringify(launchInput))));
+        activeResponseHttpData.setArguments(List.of(TextUtils.encodeBase64(TextUtils.compress(JsonCommon.snakeStringify(launchInput))), "true"));
         var httpResult = httpClient.put("/active-response", activeResponseHttpData, agentsHttpParam,
                 genAuthHeaders(), null);
         if (!httpResult.isSuccess()) {
@@ -289,13 +294,11 @@ public class WazuhControl {
         esClient = new RestHighLevelClient(restClientBuilder);
     }
 
-    public static String genControlConfigCommand(String osType, List<ControlProbeParam> controlProbeParams,
-                                                 List<ControlLogCollectParam> controlLogCollectParams) {
-        return genControlConfigCommand(osType, controlProbeParams, controlLogCollectParams, false);
+    public static String genControlConfigCommand(String osType, ControlConfigData controlConfigData) {
+        return genControlConfigCommand(osType, controlConfigData, false);
     }
-    public static String genControlConfigCommand(String osType, List<ControlProbeParam> controlProbeParams,
-                                                 List<ControlLogCollectParam> controlLogCollectParams,
-                                                 boolean restart) {
+
+    public static String genControlConfigCommand(String osType, ControlConfigData controlConfigData, boolean restart) {
         String controlScriptPath;
         if (OS_TYPE_WINDOWS.equals(osType)) {
             controlScriptPath = WINDOWS_CONTROL_SCRIPT_PATH;
@@ -303,14 +306,27 @@ public class WazuhControl {
             controlScriptPath = LINUX_CONTROL_SCRIPT_PATH;
         }
         List<Map<String, Object>> scriptParams = new ArrayList<>();
-        if (controlProbeParams != null) {
-            for (var controlProbeParam : controlProbeParams) {
-                scriptParams.add(JsonCommon.beanToSnakeMap(controlProbeParam));
+        if (controlConfigData.getProbeParams() != null) {
+            for (var probeParam : controlConfigData.getProbeParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(probeParam));
             }
         }
-        if (controlLogCollectParams != null) {
-            for (var controlLogCollectParam : controlLogCollectParams) {
-                scriptParams.add(JsonCommon.beanToSnakeMap(controlLogCollectParam));
+        if (controlConfigData.getLogCollectParams() != null) {
+            for (var logCollectParam : controlConfigData.getLogCollectParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(logCollectParam));
+            }
+        }
+        if (controlConfigData.getSyscheckParam() != null) {
+            scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigData.getSyscheckParam()));
+        }
+        if (controlConfigData.getFileModifyParams() != null) {
+            for (var fileModifyParam : controlConfigData.getFileModifyParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(fileModifyParam));
+            }
+        }
+        if (controlConfigData.getRegistryModifyParams() != null) {
+            for (var registryModifyParam : controlConfigData.getRegistryModifyParams()) {
+                scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
         }
         if (scriptParams.isEmpty()) {
@@ -361,12 +377,11 @@ public class WazuhControl {
         return result;
     }
 
-    public RunCommandItem controlConfig(String agentName, String osType, List<ControlProbeParam> controlProbeParams,
-                                        List<ControlLogCollectParam> controlLogCollectParams) {
+    public RunCommandItem controlConfig(String agentName, String osType, ControlConfigData controlConfigData) {
         var runCommandItem = new RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
-        runCommandItem.setCommand(genControlConfigCommand(osType, controlProbeParams, controlLogCollectParams, true));
+        runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigData, true));
         runCommand(List.of(runCommandItem));
         return runCommandItem;
     }
@@ -410,6 +425,9 @@ public class WazuhControl {
     public static class QueryConfigData {
         private List<QueryConfigScriptInfo> scriptInfo;
         private List<QueryConfigLogInfo> logInfo;
+        private QuerySyscheckInfo syscheckInfo;
+        private List<QueryFileModifyInfo> fileModifyInfo;
+        private List<QueryRegistryModifyInfo> registryModifyInfo;
     }
 
     @Data
@@ -424,6 +442,41 @@ public class WazuhControl {
         private String key;
         private String logFormat;
         private String location;
+    }
+
+    @Data
+    public static class QuerySyscheckInfo {
+        private String disabled;
+        private String frequency;
+        private String windowsAuditInterval;
+    }
+
+    @Data
+    public static class QueryFileModifyInfo {
+        private String key;
+        private List<String> targets;
+        private List<String> realtimeTargets;
+        private List<String> ignores;
+        private List<String> sregexIgnores;
+        private List<String> nodiffs;
+        private List<String> sregexNodiffs;
+    }
+
+    @Data
+    public static class QueryRegistryModifyInfo {
+        private String key;
+        private List<String> targets;
+        private List<String> ignores;
+        private List<String> sregexIgnores;
+    }
+
+    @Data
+    public static class ControlConfigData {
+        private List<ControlProbeParam> probeParams;
+        private List<ControlLogCollectParam> logCollectParams;
+        private ControlSyscheckParam syscheckParam;
+        private List<ControlFileModifyParam> fileModifyParams;
+        private List<ControlRegistryModifyParam> registryModifyParams;
     }
 
     @Data
@@ -450,6 +503,39 @@ public class WazuhControl {
         private final String type = CONTROL_ACTION_TYPE_LOG;
         private String logFormat;
         private String location;
+    }
+
+    @Data
+    public static class ControlSyscheckParam {
+        private String id;
+        private String action;
+        private final String type = CONTROL_ACTION_TYPE_SYSCHECK;
+        private String disabled;
+        private String frequency;
+        private String windowsAuditInterval;
+    }
+
+    @Data
+    public static class ControlFileModifyParam {
+        private String id;
+        private String action;
+        private final String type = CONTROL_ACTION_TYPE_FILE_MODIFY;
+        private List<String> targets;
+        private List<String> realtimeTargets;
+        private List<String> ignores;
+        private List<String> sregexIgnores;
+        private List<String> nodiffs;
+        private List<String> sregexNodiffs;
+    }
+
+    @Data
+    public static class ControlRegistryModifyParam {
+        private String id;
+        private String action;
+        private final String type = CONTROL_ACTION_TYPE_REGISTRY_MODIFY;
+        private List<String> targets;
+        private List<String> ignores;
+        private List<String> sregexIgnores;
     }
 
     @Data

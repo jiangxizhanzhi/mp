@@ -74,7 +74,9 @@ public class WazuhCommon {
             }
             controlProbeParams.add(controlProbeParam);
         });
-        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlProbeParams, new ArrayList<>());
+        var controlConfigData = new WazuhControl.ControlConfigData();
+        controlConfigData.setProbeParams(controlProbeParams);
+        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlConfigData);
 
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
