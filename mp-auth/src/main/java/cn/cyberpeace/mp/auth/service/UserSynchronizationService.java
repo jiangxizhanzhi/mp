@@ -38,8 +38,6 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
     @Value("${mp.hld.users-url}")
     private String hldUsersUrl;
 
-    private final String hldUrl = hldUsersUrl + "/xinan-server/mhUser/getAllUserNopage";
-
     public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
 
     public static final String defaultRole = "5827ff7847504ffd806e0a85c417228d";
@@ -61,7 +59,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         String hldUsers = "";
         HLDUserResponse response = new HLDUserResponse();
         try {
-            hldUsers = HttpUtils.sendPost(hldUrl, "null");
+            hldUsers = HttpUtils.sendPost(hldUsersUrl + "/xinan-server/mhUser/getAllUserNopage", "null");
         } catch (IOException e) {
             log.error("get HLDUsers error,msg:{}", e);
         }
