@@ -77,6 +77,30 @@ mp:
   log:
     exclude-uri: /login
     exclude-method: OPTIONS
+  xss:
+    enabled: true
+    blacklist:
+      - urlpattern: /unauth/register
+        fields: name,username,nickname,email
+        methods: POST
+      - urlpattern: /auth/users/add*
+        fields: name,username,nickname,email,address,description
+        methods: POST
+      - urlpattern: /auth/users/modify
+        fields: name,username,nickname,email,address,description
+        methods: POST
+      - urlpattern: /auth/orgs*
+        fields: name
+        methods: POST,PATCH
+      - urlpattern: /auth/roles*
+        fields: name
+        methods: POST,PATCH
+      - urlpattern: /sys/config/*
+        fields: key_name,value
+        methods: POST,PATCH
+      - urlpattern: /devops/log/operate/add
+        fields: description,from,op_target,title,user_name
+        methods: POST
 
 
 management:
