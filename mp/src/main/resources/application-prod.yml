@@ -7,8 +7,9 @@ ip:
   trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
-  hld-users: ${HLD_USERS:192.168.12.13:85}           # hld查询用户地址
-  hld-login: ${HLD_LOGIN:192.168.12.72:85}           # hld获取登录session地址
+  hld-users: ${HLD_USERS:192.168.12.13}           # hld查询用户地址
+  hld-login: ${HLD_LOGIN:192.168.12.72}           # hld获取登录session地址
+  hld-port: ${HLD_PORT:85}
 server:
   servlet:
     context-path: /api/mp
@@ -130,8 +131,8 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
   hld:
-    users-url: http://${ip.hld-users}
-    login-url: http://${ip.hld-login}
+    users-url: http://${ip.hld-users}:${ip.hld-port}
+    login-url: http://${ip.hld-login}:${ip.hld-port}
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex:10.100.7.102}:${TREX_PORT:80}/api/v1/resource
