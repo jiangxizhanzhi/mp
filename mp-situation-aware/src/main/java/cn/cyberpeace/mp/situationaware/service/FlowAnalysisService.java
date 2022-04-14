@@ -676,20 +676,24 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             //设置战队攻击流量攻击次数
-            teamAttackResultVO.setTrafficSize(((ParsedSum) response.getAggregations().get("packageSize")).getValue());
             teamAttackResultVO.setAttackNumber(response.getHits().getTotalHits().value);
-            //设置攻击手法
-            List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
-                    .map(bucket -> {
-                        var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
-                        var attackResult = new AttackWayAggregationBO();
-                        attackResult.setAggregationType(parsedBucket.getKeyAsString());
-                        attackResult.setAttackNumber(parsedBucket.getDocCount());
-                        return attackResult;
-                    })
-                    .collect(Collectors.toList());
-            globalizedWithAttackWay(attackWayList);
-            teamAttackResultVO.setAttackWayList(buildTeamAttackWayPercent(attackWayList));
+            if (Objects.nonNull(response) && Objects.nonNull(response.getAggregations()) && Objects.nonNull(response.getAggregations().get("packageSize"))) {
+                teamAttackResultVO.setTrafficSize(((ParsedSum) response.getAggregations().get("packageSize")).getValue());
+            }
+            if (Objects.nonNull(response) && Objects.nonNull(response.getAggregations()) && Objects.nonNull(response.getAggregations().get("attackWay"))) {
+                //设置攻击手法
+                List<AttackWayAggregationBO> attackWayList = ((ParsedStringTerms) response.getAggregations().get("attackWay")).getBuckets().stream()
+                        .map(bucket -> {
+                            var parsedBucket = (ParsedStringTerms.ParsedBucket) bucket;
+                            var attackResult = new AttackWayAggregationBO();
+                            attackResult.setAggregationType(parsedBucket.getKeyAsString());
+                            attackResult.setAttackNumber(parsedBucket.getDocCount());
+                            return attackResult;
+                        })
+                        .collect(Collectors.toList());
+                globalizedWithAttackWay(attackWayList);
+                teamAttackResultVO.setAttackWayList(buildTeamAttackWayPercent(attackWayList));
+            }
         } catch (IOException e) {
             log.error("query one team error : {}", ExceptionUtils.getMessage(e));
             e.printStackTrace();
