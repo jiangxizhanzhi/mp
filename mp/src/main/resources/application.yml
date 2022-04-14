@@ -84,10 +84,10 @@ mp:
         fields: name,username,nickname,email
         methods: POST
       - urlpattern: /auth/users/add*
-        fields: name,username,nickname,email,address,description
+        fields: name,username,nickname,email,address,description,identifier,id_card
         methods: POST
       - urlpattern: /auth/users/modify
-        fields: name,username,nickname,email,address,description
+        fields: name,username,nickname,email,address,description,identifier,id_card
         methods: POST
       - urlpattern: /auth/orgs*
         fields: name
