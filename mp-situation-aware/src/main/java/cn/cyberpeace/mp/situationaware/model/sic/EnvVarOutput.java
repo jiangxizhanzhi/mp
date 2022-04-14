@@ -13,19 +13,19 @@ public class EnvVarOutput {
 
     // 是否有变动，综合
     @JSONField(name = "changed_count")
-    private Integer changedCount;
+    private String changedCount;
 
     @JSONField(name = "added_count")
-    private Integer addedCount;
+    private String addedCount;
 
     @JSONField(name = "values_count")
-    private Integer valuesCount;
+    private String valuesCount;
 
     @JSONField(name = "deleted_count")
-    private Integer deletedCount;
+    private String deletedCount;
 
     @JSONField(name = "modified_count")
-    private Integer modifiedCount;
+    private String modifiedCount;
 
     @JSONField(name = "data")
     private String data;

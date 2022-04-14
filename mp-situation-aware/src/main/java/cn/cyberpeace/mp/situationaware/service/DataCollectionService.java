@@ -350,9 +350,26 @@ public class DataCollectionService {
             return 0;
         }
 
-        int changedCount = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
-        log.info("{}", changedCount);
-        return changedCount;
+//        int changedCount = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+        List<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+                .getHits()).map(hit ->
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>>() {
+                })).collect(Collectors.toList());
+
+        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+            return 0;
+        }
+
+        int sum = wazuhFileRootList.stream().mapToInt(r -> {
+            String changedCount = r.getData().getOutput().getChangedCount();
+            int changeCnt = Integer.parseInt(changedCount);
+            return changeCnt;
+        }).sum();
+
+        log.info("{}", sum);
+        return sum;
     }
 
 
