@@ -129,7 +129,7 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
   hld:
-      users-url: http://192.168.12.13:85
+      users-url: http://192.168.12.72:85
       login-url: http://192.168.12.72:85
   flow:
     # 流量发生器资源地址

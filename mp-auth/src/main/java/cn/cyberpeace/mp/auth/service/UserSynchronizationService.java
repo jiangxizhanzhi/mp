@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.user.*;
+import cn.cyberpeace.mp.auth.dto.user.HLDUserDto;
+import cn.cyberpeace.mp.auth.dto.user.HLDUserResponse;
+import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -15,7 +17,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -41,6 +47,10 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
     public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
 
     public static final String defaultRole = "5827ff7847504ffd806e0a85c417228d";
+
+    public static final DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static final String defaultPassword = "Dx72000000";
 
     //    public static final String hld = "{\"msg\":\"成功\",\"code\":200,\"info\":[{\"id\":1,\"userName\":\"heweitest007\",\"name\":\"heweitest007\",\"passWord\":\"12345678\"},{\"id\":2,\"userName\":\"heweitest008\",\"name\":\"heweitest008\",\"passWord\":\"12345678\"}]}";
 
@@ -73,15 +83,24 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             return;
         }
         response.getInfo().forEach(in -> {
-            if (in.getId().toString() == null) {
+            if (in == null) {
+                log.error("this user is null");
+                return;
+            }
+            if (in.getId() == null) {
+                log.error("this userId is null:{}", in);
                 return;
             }
             String userId = in.getId().toString();
             userIds.add(in.getId().toString());
+            if (in.getUserUpdateTime() == null) {
+                in.setUserUpdateTime(LocalDateTime.now().toString().replace("T", " ").substring(0, 19));
+            }
+            LocalDateTime updateTime = LocalDateTime.parse(in.getUserUpdateTime(), df);
             if (getModelService().getUserDto(userId) == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in);
                 getModelService().add(createRequest);
-            } else if (!in.getUserUpdateTime().equals(getModelService().getUserDto(userId).getUpdateTime())) {
+            } else if (!updateTime.equals(getModelService().getUserDto(userId).getUpdateTime())) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in);
                 getModelService().modify(modifyRequest);
             }
@@ -121,9 +140,6 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getName() != null) {
             userRequest.setName(hldUserDto.getName());
         }
-        if (hldUserDto.getPassWord() != null) {
-            userRequest.setPassword(PasswordUtils.desEncrypt(hldUserDto.getPassWord()));
-        }
         if (hldUserDto.getIdCard() != null) {
             userRequest.setIdCard(hldUserDto.getIdCard());
         }
@@ -143,10 +159,12 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             userRequest.setDescription(hldUserDto.getMhDescribe());
         }
         if (hldUserDto.getUserUpdateTime() != null) {
-            userRequest.setUpdateTime(hldUserDto.getUserUpdateTime());
+            userRequest.setUpdateTime(LocalDateTime.parse(hldUserDto.getUserUpdateTime(), df));
         }
+        userRequest.setPassword(PasswordUtils.desEncrypt(defaultPassword));
         userRequest.setOrgIds(Arrays.asList(defaultOrg));
         userRequest.setRoleIds(Arrays.asList(defaultRole));
+        userRequest.setInitCheck(1);
         return userRequest;
     }
 }
