@@ -95,14 +95,14 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             String userId = in.getId().toString();
             userIds.add(in.getId().toString());
             if (in.getUserUpdateTime() == null) {
-                in.setUserUpdateTime(LocalDateTime.now().toString().replace("T", " ").substring(0, 19));
+                in.setUserUpdateTime(LocalDateTime.now().format(df));
             }
             LocalDateTime updateTime = LocalDateTime.parse(in.getUserUpdateTime(), df);
             if (getModelService().getUserDto(userId) == null) {
-                UserRequest createRequest = HLDUser2UserRequest(in);
+                UserRequest createRequest = HLDUser2UserRequest(in, true);
                 getModelService().add(createRequest);
             } else if (!updateTime.equals(getModelService().getUserDto(userId).getUpdateTime())) {
-                UserRequest modifyRequest = HLDUser2UserRequest(in);
+                UserRequest modifyRequest = HLDUser2UserRequest(in, false);
                 getModelService().modify(modifyRequest);
             }
         });
@@ -130,7 +130,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
                 new ArrayBlockingQueue(100), namedThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
     }
 
-    private UserRequest HLDUser2UserRequest(HLDUserDto hldUserDto) {
+    private UserRequest HLDUser2UserRequest(HLDUserDto hldUserDto, boolean changePassword) {
         UserRequest userRequest = new UserRequest();
         if (hldUserDto.getId().toString() != null) {
             userRequest.setId(hldUserDto.getId().toString());
@@ -162,7 +162,9 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getUserUpdateTime() != null) {
             userRequest.setUpdateTime(LocalDateTime.parse(hldUserDto.getUserUpdateTime(), df));
         }
-        userRequest.setPassword(PasswordUtils.desEncrypt(defaultPassword));
+        if (changePassword) {
+            userRequest.setPassword(PasswordUtils.desEncrypt(defaultPassword));
+        }
         userRequest.setOrgIds(Arrays.asList(defaultOrg));
         userRequest.setRoleIds(Arrays.asList(defaultRole));
         userRequest.setInitCheck(1);
