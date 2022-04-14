@@ -108,6 +108,12 @@ management:
     web:
       exposure:
         include: health, info, mappings
+  info:
+    git:
+      mode: full
+  health:
+    elasticsearch:
+      enabled: false
 
 ---
 spring:
