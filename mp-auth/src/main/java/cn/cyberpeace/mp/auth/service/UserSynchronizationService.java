@@ -66,7 +66,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-        String hldUsers = "";
+        String hldUsers = null;
         HLDUserResponse response = new HLDUserResponse();
         try {
             hldUsers = HttpUtils.sendPost(hldUsersUrl + "/xinan-server/mhUser/getAllUserNopage", "null");
@@ -75,6 +75,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         }
 //        hldUsers = hld;
         if (hldUsers == null) {
+            log.error("get HLDUsers failed");
             return;
         }
         response = JsonCommon.parse(hldUsers, HLDUserResponse.class);
