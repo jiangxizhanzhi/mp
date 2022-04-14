@@ -83,17 +83,20 @@ mp:
       - urlpattern: /unauth/register
         fields: name,username,nickname,email
         methods: POST
-      - urlpattern: /auth/users/add*
+      - urlpattern: /auth/users/*
         fields: name,username,nickname,email,address,description,identifier,id_card
         methods: POST
-      - urlpattern: /auth/users/modify
+      - urlpattern: /auth/users*
         fields: name,username,nickname,email,address,description,identifier,id_card
         methods: POST
       - urlpattern: /auth/orgs*
-        fields: name
+        fields: name,description
         methods: POST,PATCH
       - urlpattern: /auth/roles*
-        fields: name
+        fields: name,description
+        methods: POST,PATCH
+      - urlpattern: /auth/roles/*
+        fields: name,description
         methods: POST,PATCH
       - urlpattern: /sys/config/*
         fields: key_name,value

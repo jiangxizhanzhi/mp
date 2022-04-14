@@ -233,11 +233,11 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      * @return
      */
     private static String cleanXSS(String value) {
-        value = value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
         value = value.replaceAll("&", "&amp;");
+        value = value.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
         value = value.replaceAll("/", "&#x2F;");
-        value = value.replaceAll("'", "&#x27;");
-        value = value.replaceAll("\"", "&quot;");
+//        value = value.replaceAll("'", "&#x27;");
+//        value = value.replaceAll("\"", "&quot;");
 //        value = value.replaceAll("%3C", "&lt;").replaceAll("%3E", "&gt;");
 //        value = value.replaceAll("\\(", "&#40;").replaceAll("\\)", "&#41;");
 //        value = value.replaceAll("%28", "&#40;").replaceAll("%29", "&#41;");
