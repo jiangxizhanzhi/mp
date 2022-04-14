@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.user.HLDUserDto;
 import cn.cyberpeace.mp.auth.dto.user.HLDUserResponse;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -97,11 +99,12 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             if (in.getUserUpdateTime() == null) {
                 in.setUserUpdateTime(LocalDateTime.now().format(df));
             }
+            UserDto user = getModelService().getUserDto(userId);
             LocalDateTime updateTime = LocalDateTime.parse(in.getUserUpdateTime(), df);
-            if (getModelService().getUserDto(userId) == null) {
+            if (user == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in, true);
                 getModelService().add(createRequest);
-            } else if (!updateTime.equals(getModelService().getUserDto(userId).getUpdateTime())) {
+            } else if (!updateTime.equals(user.getUpdateTime())) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in, false);
                 getModelService().modify(modifyRequest);
             }
@@ -109,7 +112,8 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         List<UserModel> userModels = new ArrayList<>();
         userModels = userService.queryAllUsers();
         userModels.forEach(user -> {
-            if (!userIds.contains(user.getId()) || !user.getId().equals("3f655d87112f4ae094bbaf70830e20aa")) {
+            if (!userIds.contains(user.getId()) && !user.getId().equals(AuthConstant.ROOT_USER_ID)) {
+                log.info("delete user:{}", user.getId());
                 getModelService().delete(user.getId());
             }
         });
