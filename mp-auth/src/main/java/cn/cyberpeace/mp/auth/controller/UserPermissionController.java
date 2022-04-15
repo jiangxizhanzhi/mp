@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
@@ -14,6 +15,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,6 +81,7 @@ public class UserPermissionController extends BaseModelController<UserPermission
 
     @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
     @PostMapping("/bind")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult bindUserRoles(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = getModelService().bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);

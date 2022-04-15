@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthLogConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -48,6 +50,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     })
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "创建组织", target = AuthLogConstant.TARGET_ORG)
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
         return super.create(obj, fields);
     }
@@ -60,6 +63,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     })
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新组织", target = AuthLogConstant.TARGET_ORG)
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult update(@PathVariable String id, @RequestBody OrgModel obj,
                                       @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
@@ -72,6 +76,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     })
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除组织", target = AuthLogConstant.TARGET_ORG)
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }

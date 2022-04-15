@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -17,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +47,7 @@ public class UserExcelController {
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @PostMapping("/excel/export")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
         String[] ids = exportRequest.getIds();
         List<String> userIds = null;
@@ -66,6 +69,7 @@ public class UserExcelController {
     @ApiOperation(value = "通过excel导入用户数据", notes = "")
     @PostMapping("/excel/import")
     @ResponseBody
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult importUsers(MultipartFile file) throws IOException {
         EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService)).headRowNumber(2).sheet().doRead();
         return ResultUtils.commonResult(true, null);

@@ -46,7 +46,7 @@ public class RolePermissionController extends BaseModelController<RolePermission
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
     @PostMapping("/bind")
-    @PreAuthorize("hasAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "')")
+    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult bindOrgPermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = getModelService().bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);

@@ -32,6 +32,8 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private List<XssBlackListItem> blacklist;
 
+    private static List<String> commonSupportedMethods = Arrays.asList("POST", "PATCH");
+
     /*// 期待被过滤的url和字段 黑名单
     HashMap<String, List<String>> urlAndParamBlackList = new HashMap<String, List<String>>() {
         {
@@ -74,6 +76,11 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getParameter(String name) {
         String parameter = super.getParameter(name);
+
+        if (!isCommonSupportedMethod()) {
+            return parameter;
+        }
+
         if (StringUtils.isNotBlank(parameter)) {
 
             if (Objects.nonNull(getMatchedBlackListItem(name))) {
@@ -99,6 +106,10 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
             return null;
         }
 
+        if (!isCommonSupportedMethod()) {
+            return parameterValues;
+        }
+
         if (Objects.nonNull(getMatchedBlackListItem(name))) {
             for (int i = 0; i < parameterValues.length; ++i) {
                 String value = parameterValues[i];
@@ -118,6 +129,10 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      */
     @Override
     public ServletInputStream getInputStream() throws IOException {
+
+        if (!isCommonSupportedMethod()) {
+            return super.getInputStream();
+        }
 
         if (isUpData) {
             return super.getInputStream();
@@ -249,13 +264,22 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     }
 
     /**
-     * 是否是需要拦截的request method
+     * 是否是需要拦截的request method，比如POST,PATCH
      *
      * @return
      */
     private boolean isSupportedMethod(List<String> methods) {
         String method = this.getMethod();
         if (methods.contains(method)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    private boolean isCommonSupportedMethod() {
+        String method = this.getMethod();
+        if (commonSupportedMethods.contains(method)) {
             return true;
         }
         return false;
