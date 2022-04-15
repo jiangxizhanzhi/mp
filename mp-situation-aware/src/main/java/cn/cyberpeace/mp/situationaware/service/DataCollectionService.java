@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -49,10 +50,11 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.Sum;
-import org.elasticsearch.search.aggregations.metrics.SumAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -350,23 +352,24 @@ public class DataCollectionService {
             return 0;
         }
 
-//        int changedCount = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
 
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
-        List<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
-
-        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
-            return 0;
-        }
-
-        int sum = wazuhFileRootList.stream().mapToInt(r -> {
-            String changedCount = r.getData().getOutput().getChangedCount();
-            int changeCnt = Integer.parseInt(changedCount);
-            return changeCnt;
-        }).sum();
+        // todo
+//        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+//        List<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+//                .getHits()).map(hit ->
+//                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>>() {
+//                })).collect(Collectors.toList());
+//
+//        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+//            return 0;
+//        }
+//
+//        int sum = wazuhFileRootList.stream().mapToInt(r -> {
+//            String changedCount = r.getData().getOutput().getChangedCount();
+//            int changeCnt = Integer.parseInt(changedCount);
+//            return changeCnt;
+//        }).sum();
 
         log.info("{}", sum);
         return sum;
@@ -431,11 +434,15 @@ public class DataCollectionService {
             boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", launchId));
         }
 
-        String aggregationName = "aggs_count_by_changed_count";
+
+        BoolQueryBuilder nestedBoolQueryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("data.sic_launch_output.changed_count").gt(0L));
+        boolQueryBuilder.must(QueryBuilders.nestedQuery("data.sic_launch_output", nestedBoolQueryBuilder, ScoreMode.None));
+
+        String aggregationNested = "aggs_nested";
+        String aggregationSum = "aggs_changed_count_sum";
         // build the aggregation
         Script sumScript = new Script("Integer.parseInt(doc['data.sic_launch_output.changed_count'].value)");
-        SumAggregationBuilder sumAggregationBuilder = AggregationBuilders.sum(aggregationName)
-                .script(sumScript);
+        NestedAggregationBuilder sumAggregationBuilder = AggregationBuilders.nested(aggregationNested, "data.sic_launch_output").subAggregation(AggregationBuilders.sum(aggregationSum).script(sumScript));
 
         sourceBuilder.aggregation(sumAggregationBuilder);
 
@@ -454,7 +461,8 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
 
             if (Objects.nonNull(response.getAggregations())) {
-                Sum sum = response.getAggregations().get(aggregationName);
+                ParsedNested nested = response.getAggregations().get(aggregationNested);
+                ParsedSum sum = nested.getAggregations().get(aggregationSum);
                 changedCount = Double.valueOf(sum.getValue()).intValue();
             }
 
