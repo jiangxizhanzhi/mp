@@ -50,8 +50,6 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
 
     public static final String defaultRole = "5827ff7847504ffd806e0a85c417228d";
 
-    public static final DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
     public static final String defaultPassword = "Dx72000000";
 
     //    public static final String hld = "{\"msg\":\"成功\",\"code\":200,\"info\":[{\"id\":1,\"userName\":\"heweitest007\",\"name\":\"heweitest007\",\"passWord\":\"12345678\"},{\"id\":2,\"userName\":\"heweitest008\",\"name\":\"heweitest008\",\"passWord\":\"12345678\"}]}";
@@ -96,15 +94,12 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             }
             String userId = in.getId().toString();
             userIds.add(in.getId().toString());
-            if (in.getUserUpdateTime() == null) {
-                in.setUserUpdateTime(LocalDateTime.now().format(df));
-            }
             UserDto user = getModelService().getUserDto(userId);
-            LocalDateTime updateTime = LocalDateTime.parse(in.getUserUpdateTime(), df);
+            boolean needUpdate = this.checkUpdate(user, in);
             if (user == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in, true);
                 getModelService().add(createRequest);
-            } else if (!updateTime.equals(user.getUpdateTime())) {
+            } else if (needUpdate) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in, false);
                 getModelService().modify(modifyRequest);
             }
@@ -163,9 +158,6 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getMhDescribe() != null) {
             userRequest.setDescription(hldUserDto.getMhDescribe());
         }
-        if (hldUserDto.getUserUpdateTime() != null) {
-            userRequest.setUpdateTime(LocalDateTime.parse(hldUserDto.getUserUpdateTime(), df));
-        }
         if (changePassword) {
             userRequest.setPassword(PasswordUtils.desEncrypt(defaultPassword));
         }
@@ -173,5 +165,36 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         userRequest.setRoleIds(Arrays.asList(defaultRole));
         userRequest.setInitCheck(1);
         return userRequest;
+    }
+
+    private boolean checkUpdate(UserDto userDto, HLDUserDto hldUserDto) {
+        if (userDto == null) {
+            return false;
+        }
+        if (hldUserDto.getAccount() != null && !hldUserDto.getAccount().equals(userDto.getUsername())) {
+            return true;
+        }
+        if (hldUserDto.getName() != null && !hldUserDto.getName().equals(userDto.getName())) {
+            return true;
+        }
+        if (hldUserDto.getBirthday() != null && !hldUserDto.getBirthday().equals(userDto.getBirthday())) {
+            return true;
+        }
+        if (hldUserDto.getE_mail() != null && !hldUserDto.getE_mail().equals(userDto.getEmail())) {
+            return true;
+        }
+        if (hldUserDto.getIdCard() != null && !hldUserDto.getIdCard().equals(userDto.getIdCard())) {
+            return true;
+        }
+        if (hldUserDto.getMhDescribe() != null && !hldUserDto.getMhDescribe().equals(userDto.getDescription())) {
+            return true;
+        }
+        if (hldUserDto.getMobilePhone() != null && !hldUserDto.getMobilePhone().equals(userDto.getMobile())) {
+            return true;
+        }
+        if (hldUserDto.getPostalAddress() != null && !hldUserDto.getPostalAddress().equals(userDto.getAddress())) {
+            return true;
+        }
+        return false;
     }
 }
