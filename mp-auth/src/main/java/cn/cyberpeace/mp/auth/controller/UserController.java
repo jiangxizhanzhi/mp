@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -8,6 +9,8 @@ import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -17,6 +20,10 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import com.unionpay.common.userclient.UserInfoUtil;
+import com.unionpay.common.userclient.vo.BaseUserInfo;
+import com.unionpay.common.userclient.vo.User;
+import edu.yale.its.tp.cas.client.filter.CASFilter;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -33,6 +40,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 
 /**
  * @Description: 用户管理接口
@@ -55,6 +66,12 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public UserController(UserService modelService) {
         setModelService(modelService);
     }
+
+    private static final String sysIdstr = "F7EB8C529C1A503B79E729581EDBC95E";
+
+    public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
+
+    public static final String defaultRole = "5827ff7847504ffd806e0a85c417228d";
 
 
     @Override
@@ -138,4 +155,73 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         return ServiceResult.success(userModel);
     }
 
+    @ApiOperation(value = "银联用户定制化登录", notes = "")
+    @GetMapping("/yinlian/login")
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGIN, title = "用户登录", target = OpTargetEnums.USER)
+    public ServiceResult<LoginResp> newLogin(@RequestBody HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String userId = (String) session.getAttribute(CASFilter.CAS_FILTER_USER);
+        String institutedId = (String) session.getAttribute(CASFilter.CAS_FILTER_INSTITUTE);
+        BaseUserInfo userInfo = new BaseUserInfo();
+        boolean canLogin = false;
+        try {
+            userInfo = UserInfoUtil.getLoginUserAndPrivileges(userId, institutedId, sysIdstr);
+            canLogin = UserInfoUtil.authenticate(userInfo, null);
+        } catch (Exception e) {
+            log.error("get user failed,msg:{}", e);
+        }
+        if (!canLogin) {
+            return ServiceResult.fail("this user can not login");
+        }
+        if (userInfo != null) {
+            if (userInfo.getUser() != null && userInfo.getUser().getUsrId() != null) {
+                UserDto userDto = getModelService().getUserDto(userInfo.getUser().getUsrId());
+                if (userDto != null) {
+                    String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
+                    LoginResp loginResp = new LoginResp();
+                    loginResp.setUser(userDto);
+                    loginResp.setToken(jwt);
+                    return ServiceResult.success(loginResp);
+                }
+            }
+            UserRequest userRequest = this.convert2UserRequest(userInfo);
+            UserModel userModel = getModelService().add(userRequest);
+            if (userModel != null) {
+                String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
+                LoginResp loginResp = new LoginResp();
+                loginResp.setUser(userModel);
+                loginResp.setToken(jwt);
+                return ServiceResult.success(loginResp);
+            }
+        }
+        return ServiceResult.fail("login failed");
+    }
+
+    private UserRequest convert2UserRequest(BaseUserInfo userInfo) {
+        UserRequest userRequest = new UserRequest();
+        if (userInfo.getUserName() != null) {
+            userRequest.setUsername(userInfo.getUserName());
+        }
+        if (userInfo.getUser() != null) {
+            User user = userInfo.getUser();
+            if (user.getDescription() != null) {
+                userRequest.setDescription(user.getDescription());
+            }
+            if (user.getPwd() != null) {
+                userRequest.setPassword(PasswordUtils.desEncrypt(user.getPwd()));
+            }
+            if (user.getUsrId() != null) {
+                userRequest.setId(user.getUsrId());
+            }
+            if (user.getEmailBox() != null) {
+                userRequest.setEmail(user.getEmailBox());
+            }
+            if (user.getDetailAddress() != null) {
+                userRequest.setAddress(user.getDetailAddress());
+            }
+        }
+        userRequest.setOrgIds(Arrays.asList(defaultOrg));
+        userRequest.setRoleIds(Arrays.asList(defaultRole));
+        return userRequest;
+    }
 }

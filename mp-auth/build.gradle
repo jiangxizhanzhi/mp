@@ -12,6 +12,8 @@ dependencies {
     implementation project(':mp-base')
     implementation project(':mp-auth-base')
     implementation project(':mp-devops-log')
+
+    implementation fileTree(dir: 'libs', includes: ['*.jar'])
 }
 
 
