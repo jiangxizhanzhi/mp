@@ -131,7 +131,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())){
             request.setSourceIps(queryParams.getSourceIps());
         }else {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())){
@@ -434,7 +434,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }else{
             request.setSourceIps(sourceIps);
         }
@@ -552,7 +552,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }else{
             request.setSourceIps(sourceIps);
         }
@@ -889,7 +889,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(sourceIps)) {
             request.setSourceIps(sourceIps);
         } else {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setTopSize(topSize);
