@@ -156,4 +156,13 @@ public class FlowTaskModel extends BaseModel {
     @DefaultStr
     private String content;
 
+    /**
+     * 倍数：大于等于1的整数
+     * 默认为1，表示100pps
+     */
+    @ApiModelProperty(value = "倍数：大于等于1的整数")
+    @DefaultInt(1)
+    private Integer mult;
+
+
 }
