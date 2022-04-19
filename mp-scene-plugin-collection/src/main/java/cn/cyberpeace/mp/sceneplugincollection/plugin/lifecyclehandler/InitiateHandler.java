@@ -26,6 +26,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,11 +38,6 @@ import java.util.stream.Collectors;
 public class InitiateHandler extends HandlerCommon {
 
     private ProbeService probeService;
-
-    private static final Integer SCRIPT_TYPE_SH = 0;
-    private static final Integer SCRIPT_TYPE_PY = 1;
-    private static final Integer SCRIPT_TYPE_BAT = 2;
-
 
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
@@ -178,9 +174,9 @@ public class InitiateHandler extends HandlerCommon {
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
                     List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
-                    if (collectionElement.getProbes() != null) {
-                        customProbeParams = this.getControlProbeParams(collectionElement.getProbes(), srcElement.getEid());
-                    }
+//                    if (collectionElement.getProbes() != null) {
+//                        customProbeParams = this.getCustomProbeParams(collectionElement.getProbes(), srcElement.getEid());
+//                    }
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
                             srcElement.getEid(), collectionId, customProbeParams);
@@ -198,8 +194,8 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
-    private List<WazuhControl.ControlProbeParam> getControlProbeParams(List<Probe> probes, String agentName) {
-        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+    private List<WazuhControl.ControlProbeParam> getCustomProbeParams(List<Probe> probes, String agentName) {
+        List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<String> probeIds = probes.stream().map(p -> p.getId()).collect(Collectors.toList());
         List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
         if (probeResults == null) {
@@ -214,9 +210,9 @@ public class InitiateHandler extends HandlerCommon {
                 return;
             }
             ProbeResult probeResult = probeId2Probe.get(probe.getId());
-            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
-            controlProbeParam.setId(TextUtils.uuid());
-            controlProbeParam.setGroup(agentName);
+            WazuhControl.ControlProbeParam customProbeParam = new WazuhControl.ControlProbeParam();
+            customProbeParam.setId(TextUtils.uuid());
+            customProbeParam.setGroup(agentName);
             List<String> params = new ArrayList<>();
             if (probe.getParams() != null) {
                 probe.getParams().forEach(param -> {
@@ -228,29 +224,29 @@ public class InitiateHandler extends HandlerCommon {
                 });
             }
             if (!CollectionUtil.isEmpty(params)) {
-                controlProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+                customProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
             }
-            if (SCRIPT_TYPE_SH.equals(probeResult.getScriptType())) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-            } else if (SCRIPT_TYPE_PY.equals(probeResult.getScriptType())) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-            } else if (SCRIPT_TYPE_BAT.equals(probeResult.getScriptType())) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
+            if (NumberUtils.INTEGER_ZERO.equals(probeResult.getScriptType())) {
+                customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+            } else if (NumberUtils.INTEGER_ONE.equals(probeResult.getScriptType())) {
+                customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (NumberUtils.INTEGER_TWO.equals(probeResult.getScriptType())) {
+                customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
             }
             if (probe.getInterval() != null) {
-                controlProbeParam.setInterval(probe.getInterval() + "s");
+                customProbeParam.setInterval(probe.getInterval() + "s");
             }
-            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-            controlProbeParam.setScriptContent(probeResult.getScriptContent());
+            customProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+            customProbeParam.setScriptContent(probeResult.getScriptContent());
             if (probe.getDisabled() != null && probe.getDisabled()) {
-                controlProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
+                customProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
             }
             if (probeResult.getOutputFormat() != null) {
-                controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
+                customProbeParam.setOutputFormat(probeResult.getOutputFormat());
             }
-//                            controlProbeParams.add(controlProbeParam);
+            customProbeParams.add(customProbeParam);
         });
-        return controlProbeParams;
+        return customProbeParams;
     }
 
 }
