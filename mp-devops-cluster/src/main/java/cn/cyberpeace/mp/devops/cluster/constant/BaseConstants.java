@@ -10,11 +10,6 @@ public final class BaseConstants {
     }
 
     /**
-     * 逗号
-     */
-    public static final String COMMA = ",";
-
-    /**
      * 连接符
      */
     public static final String CONNECTOR = "&";

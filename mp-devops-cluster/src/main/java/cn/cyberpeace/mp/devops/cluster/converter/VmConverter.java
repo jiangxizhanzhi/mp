@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
-public class InstanceConverter implements BaseConverter{
+public class VmConverter implements BaseConverter{
 
     private VmService vmService;
 
     @Autowired
-    public InstanceConverter(VmService vmService) {
+    public VmConverter(VmService vmService) {
         this.vmService = vmService;
     }
 

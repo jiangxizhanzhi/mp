@@ -14,8 +14,6 @@ public final class ControllerConstant {
 
     public static final String STR_PER_PAGE = "per_page";
 
-    public static final String CODE = "0";
-
     public static final String ERROR_CODE_PREFIX = "devops.error_code.";
 
 }

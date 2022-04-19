@@ -17,7 +17,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
@@ -42,9 +41,7 @@ public class NetworkService extends BaseOpenStackService {
      */
     public NetworkCloudPlatformModel page(String getParams){
         NetworkPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + getParams, NetworkPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<NetworkModel> data = pageResult.getData();
         List<NetworkModel> list = data.getList();
         NetworkCloudPlatformModel model = new NetworkCloudPlatformModel();
@@ -61,9 +58,7 @@ public class NetworkService extends BaseOpenStackService {
      */
     public ElasticIpCloudPlatformModel pageElasticIp(String getParams){
         ElasticIpPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<ElasticIpModel> data = pageResult.getData();
         List<ElasticIpModel> list = data.getList();
         ElasticIpCloudPlatformModel model = new ElasticIpCloudPlatformModel();
@@ -79,9 +74,7 @@ public class NetworkService extends BaseOpenStackService {
      */
     public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
         NetworkAgentPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/agents", NetworkAgentPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<NetworkAgentModel> data = pageResult.getData();
         List<NetworkAgentModel> list = data.getList();
         NetworkAgentCloudPlatformModel model = new NetworkAgentCloudPlatformModel();
