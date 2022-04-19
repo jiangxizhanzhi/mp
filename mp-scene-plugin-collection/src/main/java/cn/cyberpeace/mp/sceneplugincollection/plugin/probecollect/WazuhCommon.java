@@ -39,7 +39,7 @@ public class WazuhCommon {
     private WazuhCommon() {}
 
     public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
-                                                         List<WazuhControl.ControlProbeParam> controlProbeParams) {
+                                                         List<WazuhControl.ControlProbeParam> customProbeParams) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -50,30 +50,10 @@ public class WazuhCommon {
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-        String finalAgentName = agentName;
-        wazuhProbeConfig.getProbes().forEach(newProbe -> {
-            String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
-                    nameFileMap.getOrDefault(newProbe.getProbeName(), StringUtils.EMPTY));
-            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
-            controlProbeParam.setId(newProbe.getId());
-            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-            controlProbeParam.setGroup(finalAgentName);
-            controlProbeParam.setScriptUrl(url);
-            if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_BAT)) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-            } else if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_PY)) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-            } else if (newProbe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_SH)) {
-                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-            }
-            controlProbeParam.setOutputFormat(newProbe.getOutputFormat());
-            if (newProbe.getInterval() != null) {
-                controlProbeParam.setInterval(newProbe.getInterval());
-            } else {
-                controlProbeParam.setInterval(wazuhProbeConfig.getDefaultInterval());
-            }
-            controlProbeParams.add(controlProbeParam);
-        });
+        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(customProbeParams);
+        List<WazuhControl.ControlProbeParam> defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer,
+                agentName, wazuhProbeConfig);
+        controlProbeParams.addAll(defaultProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(osType, controlProbeParams, new ArrayList<>());
 
         InstallerUtils.Installer resource = null;
@@ -117,6 +97,39 @@ public class WazuhCommon {
         }
         return resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+    }
+
+    private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
+                                                                              String metadataFileServer, String agentName,
+                                                                              WazuhProbeConfig wazuhProbeConfig) {
+        if (wazuhProbeConfig == null) {
+            return new ArrayList<>();
+        }
+        List<WazuhControl.ControlProbeParam> defaultProbeParams = new ArrayList<>();
+        wazuhProbeConfig.getProbes().forEach(probe -> {
+            String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                    nameFileMap.getOrDefault(probe.getProbeName(), StringUtils.EMPTY));
+            WazuhControl.ControlProbeParam defaultProbeParam = new WazuhControl.ControlProbeParam();
+            defaultProbeParam.setId(probe.getId());
+            defaultProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+            defaultProbeParam.setGroup(agentName);
+            defaultProbeParam.setScriptUrl(url);
+            if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_BAT)) {
+                defaultProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_PY)) {
+                defaultProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (probe.getProbeName().endsWith(WazuhControl.SCRIPT_SUFFIX_SH)) {
+                defaultProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+            }
+            defaultProbeParam.setOutputFormat(probe.getOutputFormat());
+            if (probe.getInterval() != null) {
+                defaultProbeParam.setInterval(probe.getInterval());
+            } else {
+                defaultProbeParam.setInterval(wazuhProbeConfig.getDefaultInterval());
+            }
+            defaultProbeParams.add(defaultProbeParam);
+        });
+        return defaultProbeParams;
     }
 
 }

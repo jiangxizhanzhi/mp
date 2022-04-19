@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
@@ -36,6 +37,10 @@ import java.util.stream.Collectors;
 public class InitiateHandler extends HandlerCommon {
 
     private ProbeService probeService;
+
+    private static final Integer SCRIPT_TYPE_SH = 0;
+    private static final Integer SCRIPT_TYPE_PY = 1;
+    private static final Integer SCRIPT_TYPE_BAT = 2;
 
 
     public static class SceneProcess {
@@ -172,59 +177,13 @@ public class InitiateHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
-                    List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+                    List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
                     if (collectionElement.getProbes() != null) {
-                        List<String> probeIds = collectionElement.getProbes().stream().map(p -> p.getId()).collect(Collectors.toList());
-                        List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
-                        Map<String, ProbeResult> probeId2Probe = new HashMap<>();
-                        probeResults.forEach(probe -> {
-                            probeId2Probe.put(probe.getId(), probe);
-                        });
-                        collectionElement.getProbes().forEach(probe -> {
-                            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
-                            controlProbeParam.setId(TextUtils.uuid());
-                            controlProbeParam.setGroup(srcElement.getEid());
-                            List<String> params = new ArrayList<>();
-                            if (probe.getParams() != null) {
-                                probe.getParams().forEach(param -> {
-                                    if (param.getValue() != null) {
-                                        params.add(param.getValue());
-                                    } else {
-                                        params.add(param.getDefaultValue());
-                                    }
-                                });
-                            }
-                            if (!CollectionUtil.isEmpty(params)) {
-                                controlProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
-                            }
-                            if (!probeId2Probe.containsKey(probe.getId())) {
-                                return;
-                            }
-                            ProbeResult probeResult = probeId2Probe.get(probe.getId());
-                            if (probeResult.getScriptType() == 0) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-                            } else if (probeResult.getScriptType() == 1) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-                            } else if (probeResult.getScriptType() == 2) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
-                            }
-                            if (probe.getInterval() != null) {
-                                controlProbeParam.setInterval(probe.getInterval().toString() + "s");
-                            }
-                            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-                            controlProbeParam.setScriptContent(probeResult.getScriptContent());
-                            if (probe.getDisabled() != null && probe.getDisabled()) {
-                                controlProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
-                            }
-                            if (probeResult.getOutputFormat() != null) {
-                                controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
-                            }
-//                            controlProbeParams.add(controlProbeParam);
-                        });
+                        customProbeParams = this.getControlProbeParams(collectionElement.getProbes(), srcElement.getEid());
                     }
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId, controlProbeParams);
+                            srcElement.getEid(), collectionId, customProbeParams);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
@@ -237,6 +196,58 @@ public class InitiateHandler extends HandlerCommon {
             });
         }
 
+    }
+
+    private List<WazuhControl.ControlProbeParam> getControlProbeParams(List<Probe> probes, String agentName) {
+        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+        List<String> probeIds = probes.stream().map(p -> p.getId()).collect(Collectors.toList());
+        List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
+        Map<String, ProbeResult> probeId2Probe = new HashMap<>();
+        probeResults.forEach(probe -> {
+            probeId2Probe.put(probe.getId(), probe);
+        });
+        probes.forEach(probe -> {
+            if (!probeId2Probe.containsKey(probe.getId())) {
+                return;
+            }
+            ProbeResult probeResult = probeId2Probe.get(probe.getId());
+            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
+            controlProbeParam.setId(TextUtils.uuid());
+            controlProbeParam.setGroup(agentName);
+            List<String> params = new ArrayList<>();
+            if (probe.getParams() != null) {
+                probe.getParams().forEach(param -> {
+                    if (param.getValue() != null) {
+                        params.add(param.getValue());
+                    } else {
+                        params.add(param.getDefaultValue());
+                    }
+                });
+            }
+            if (!CollectionUtil.isEmpty(params)) {
+                controlProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+            }
+            if (SCRIPT_TYPE_SH.equals(probeResult.getScriptType())) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
+            } else if (SCRIPT_TYPE_PY.equals(probeResult.getScriptType())) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+            } else if (SCRIPT_TYPE_BAT.equals(probeResult.getScriptType())) {
+                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
+            }
+            if (probe.getInterval() != null) {
+                controlProbeParam.setInterval(probe.getInterval() + "s");
+            }
+            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+            controlProbeParam.setScriptContent(probeResult.getScriptContent());
+            if (probe.getDisabled() != null && probe.getDisabled()) {
+                controlProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
+            }
+            if (probeResult.getOutputFormat() != null) {
+                controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
+            }
+//                            controlProbeParams.add(controlProbeParam);
+        });
+        return controlProbeParams;
     }
 
 }
