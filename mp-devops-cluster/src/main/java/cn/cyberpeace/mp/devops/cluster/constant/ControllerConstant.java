@@ -12,8 +12,6 @@ public final class ControllerConstant {
 
     public static final String BASE_API_PATH = "/devops/cluster";
 
-    public static final String STR_PER_PAGE = "per_page";
-
     public static final String ERROR_CODE_PREFIX = "devops.error_code.";
 
 }

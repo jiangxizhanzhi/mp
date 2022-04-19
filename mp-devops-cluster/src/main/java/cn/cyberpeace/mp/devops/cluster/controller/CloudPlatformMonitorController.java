@@ -51,7 +51,6 @@ public class CloudPlatformMonitorController {
 
     private RealEquipmentConverter realEquipmentConverter;
 
-
     private HypervisorConverter hypervisorConverter;
 
     private ImagesConverter imagesConverter;
