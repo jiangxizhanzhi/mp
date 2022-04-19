@@ -202,6 +202,9 @@ public class InitiateHandler extends HandlerCommon {
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
         List<String> probeIds = probes.stream().map(p -> p.getId()).collect(Collectors.toList());
         List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
+        if (probeResults == null) {
+            return new ArrayList<>();
+        }
         Map<String, ProbeResult> probeId2Probe = new HashMap<>();
         probeResults.forEach(probe -> {
             probeId2Probe.put(probe.getId(), probe);
