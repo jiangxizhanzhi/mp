@@ -53,7 +53,8 @@ public class ContainerController {
         List<ContainerPageResponse> list = model.getModelList().stream().map(containerModel ->
                 ContainerPageResponse.builder().name(containerModel.getName())
                 .image(containerModel.getImage()).node(containerModel.getNode())
-                .status(containerModel.getStatus()).addressList(containerModel.getAddressList()).build())
+                .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
+                        .vlanIdList(containerModel.getVlanIdList()).build())
                 .collect(Collectors.toList());
 
         return new PageResult<>(list, model.getTotal());

@@ -70,6 +70,7 @@ public class ContainerConverter implements BaseConverter {
                         .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v),ContainerModel.Address.class))
                         .flatMap(List::stream).collect(Collectors.toList());
                 response.setAddressList(addressList.stream().map(ContainerModel.Address::getAddr).collect(Collectors.toList()));
+                response.setVlanIdList(addressList.stream().filter(v -> Objects.nonNull(v.getVlanId())).map(ContainerModel.Address::getVlanId).collect(Collectors.toList()));
             }
             return response;
         }).collect(Collectors.toList());
