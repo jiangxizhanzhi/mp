@@ -658,8 +658,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         ObjResult<FlowPortModel> portObjResult = flowPortService.get(flowTaskModel.getFlowPortId()).getSource();
         if (Objects.isNull(portObjResult)) {
-            log.error("flow port info is empty");
-            return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            if (Objects.equals(CustomFlagEnum.YES.toValue(), flowTaskModel.getCustomFlag())) {
+                log.error("custom flow can only run once");
+                return ServiceResult.fail(FlowErrorCode.RECREATE_CUSTOM_FLOW_ERROR);
+            } else {
+                log.error("flow port info is empty");
+                return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
         }
         FlowPortModel flowPortModel = portObjResult.asResult();
 
