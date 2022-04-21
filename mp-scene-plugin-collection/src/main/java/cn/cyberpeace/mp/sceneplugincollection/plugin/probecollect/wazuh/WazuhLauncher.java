@@ -21,10 +21,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 public class WazuhLauncher {
@@ -139,25 +136,35 @@ public class WazuhLauncher {
     }
 
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
-        Map<String, List<RunCommandItem>> nameItemsMap = new HashMap<>();
+        Set<String> queryIdNames = new HashSet<>();
         for (var runCommandItem : runCommandItems) {
-            MapUtils.setDefault(nameItemsMap, runCommandItem.getAgentName(), new ArrayList<>()).add(runCommandItem);
-        }
-        Map<String, String> agentIds = wazuhClient.getAgentIds(new ArrayList<>(nameItemsMap.keySet()));
-
-        List<Runnable> tasks = new ArrayList<>();
-        List<RunCommandItem> result = new ArrayList<>();
-        for (var entry : agentIds.entrySet()) {
-            var agentName = entry.getKey();
-            var agentId = entry.getValue();
-            for (var runCommandItem : nameItemsMap.remove(agentName)) {
-                runCommandItem.setAgentId(agentId);
-                result.add(runCommandItem);
-                tasks.add(() -> runCommand(runCommandItem));
+            if (StringUtils.isEmpty(runCommandItem.getAgentId()) && !StringUtils.isEmpty(runCommandItem.getAgentName())) {
+                queryIdNames.add(runCommandItem.getAgentName());
             }
         }
-        if (!nameItemsMap.isEmpty()) {
-            log.warn("Could not find those wazuh agents: {}, can not run command", nameItemsMap.keySet());
+        Map<String, String> agentIds = wazuhClient.getAgentIds(new ArrayList<>(queryIdNames));
+
+        Set<String> notfoundNames = new HashSet<>();
+        List<Runnable> tasks = new ArrayList<>();
+        List<RunCommandItem> result = new ArrayList<>();
+        for (var runCommandItem : runCommandItems) {
+            var agentId = runCommandItem.getAgentId();
+            var agentName = runCommandItem.getAgentName();
+            if (StringUtils.isEmpty(agentId)) {
+                agentId = agentIds.getOrDefault(agentName, null);
+            }
+
+            if (StringUtils.isEmpty(agentId)) {
+                notfoundNames.add(agentName);
+            } else {
+                runCommandItem.setAgentId(agentId);
+                tasks.add(() -> runCommand(runCommandItem));
+                result.add(runCommandItem);
+            }
+        }
+
+        if (!notfoundNames.isEmpty()) {
+            log.warn("Could not find those wazuh agents: {}, can not run command", notfoundNames);
         }
 
         TaskCommon.runTasks(tasks);
