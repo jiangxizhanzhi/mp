@@ -16,6 +16,11 @@ spring:
     clean-disabled: true
   application:
     name: mp
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
 
 logging:
   config: classpath:logback-spring.xml
