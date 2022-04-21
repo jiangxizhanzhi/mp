@@ -366,7 +366,6 @@ public class WazuhControl {
 
         // action: download
         private String downloadUrl;
-        private String removeUrl; // download then remove
 
         // action: write, append
         private String fileContent;
@@ -390,14 +389,6 @@ public class WazuhControl {
             this.action = FILE_CONTROL_ACTION_DOWNLOAD;
             this.filepath = filepath;
             this.downloadUrl = downloadUrl;
-        }
-
-        public void configDownloadParam(String filepath, String downloadUrl, String removeUrl) {
-            configDownloadParam(filepath, downloadUrl);
-            this.removeUrl = removeUrl;
-            if (!StringUtils.isEmpty(this.removeUrl)) {
-                this.remoteType = FILE_CONTROL_REMOTE_TYPE_GOFDFS;
-            }
         }
 
         public void configReadParam(String filepath) {
