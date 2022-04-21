@@ -8,12 +8,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
-import java.lang.invoke.SerializedLambda;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -56,7 +60,7 @@ public class ClassUtils {
         try {
             value = field.get(obj);
         } catch (IllegalAccessException e) {
-            log.error("Get field `{}` value on instance {} failed: {}", field, obj, e.getMessage());
+            log.error("Get field `{}` value on instance obj failed: {}", field, e.getMessage());
             return null;
         } finally {
             if (!canAccess) {
@@ -77,7 +81,7 @@ public class ClassUtils {
         try {
             field.set(obj, value);
         } catch (IllegalAccessException e) {
-            log.error("Set field `{}` value {} on instance {} failed: {}", field, value, obj, e.getMessage());
+            log.error("Set field `{}` value {} on instance obj failed: {}", field, "***", e.getMessage());
             return false;
         } finally {
             if (!canAccess) {

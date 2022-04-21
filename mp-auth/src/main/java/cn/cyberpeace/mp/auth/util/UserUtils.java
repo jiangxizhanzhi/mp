@@ -53,14 +53,14 @@ public class UserUtils {
     public static UserModel getLoginUser() {
         UserModel user = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("authentication:{}  authentication type:{}", authentication, authentication.getClass());
+        log.info("authentication name:{}  authentication type:{}", authentication.getName(), authentication.getClass());
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
             user = ((AuthUserDetails) principal).getUser();
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.error("Login account type is Client:{}, return null!", principal);
+            log.error("Login account type is Client, ID:{}, return null!", ((ClientDetailsModel) principal).getClientId());
 //            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
             user = null;
         }

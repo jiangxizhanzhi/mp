@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
@@ -10,7 +9,11 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.base.service.result.*;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.service.stereotype.CustomConditionClass;
 import cn.cyberpeace.mp.base.util.JsonUtils;
 import lombok.Data;
@@ -21,7 +24,6 @@ import org.springframework.dao.DuplicateKeyException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 单表通用服务实现类，包含通用的增删改查能力
@@ -103,7 +105,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         try {
             customCondition = (CustomCondition) actualCustomConditionClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            log.error("Create custom condition by {} failed: {}", actualCustomConditionClass, e);
+            log.error("Create custom condition by failed: {}", e);
             customCondition = new CustomCondition();
         }
 
@@ -173,10 +175,10 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         try {
             result = getModelMapper().create(obj);
         } catch (DuplicateKeyException e) {
-            log.error("Service create {} failed: {}", obj, e.getMessage());
+            log.error("Service create failed: {}", e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
-            log.error("Service create {} error: {}", obj, e.getMessage());
+            log.error("Service create error: {}", e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
@@ -186,7 +188,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                     actualModelFields.getAvailableFields() : validModelFields;
             return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
-            log.error("Service create {} failed", obj);
+            log.error("Service create obj failed");
             return new ObjServiceResult<>(null, BaseErrorCode.ERROR);
         }
     }
@@ -202,10 +204,10 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         try {
             result = getModelMapper().update(obj);
         } catch (DuplicateKeyException e) {
-            log.error("Service update {} failed: {}", obj, e.getMessage());
+            log.error("Service update failed: {}", e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
-            log.error("Service update {} error: {}", obj, e.getMessage());
+            log.error("Service update error: {}", e.getMessage());
             return new ObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
         }
 
@@ -215,7 +217,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                     actualModelFields.getAvailableFields() : validModelFields;
             return new ObjServiceResult<>(new ObjResult<>(obj, resultFields));
         } else {
-            log.error("Service update {} failed, maybe not exist", obj);
+            log.error("Service update obj failed, maybe not exist");
             return new ObjServiceResult<>(null, BaseErrorCode.DATA_NOT_EXIST);
         }
     }
@@ -249,15 +251,15 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         try {
             result = getModelMapper().bulkCreate(objs);
         } catch (DuplicateKeyException e) {
-            log.error("Service bulk create {} failed: {}", objs, e.getMessage());
+            log.error("Service bulk create obj failed: {}", e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
-            log.error("Service bulk create {} error: {}", objs, e.getMessage());
+            log.error("Service bulk create objs error: {}", e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result < objs.size()) {
-            log.error("Service bulk create {} with some failed, maybe some not exist", objs);
+            log.error("Service bulk create objs with some failed, maybe some not exist");
             return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
             return new ServiceResult<>(result);
@@ -275,15 +277,15 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         try {
             result = getModelMapper().bulkUpdate(objs);
         } catch (DuplicateKeyException e) {
-            log.error("Service bulk update {} failed: {}", objs, e.getMessage());
+            log.error("Service bulk update obj failed: {}", e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
         } catch (Exception e) {
-            log.error("Service bulk update {} error: {}", objs, e.getMessage());
+            log.error("Service bulk update objs error: {}", e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());
         }
 
         if (result < objs.size()) {
-            log.error("Service bulk update {} with some failed, maybe some not exist", objs);
+            log.error("Service bulk update objs with some failed, maybe some not exist");
             return new ServiceResult<>(result, BaseErrorCode.DATA_PARTIAL_SUCCESS);
         } else {
             return new ServiceResult<>(result);

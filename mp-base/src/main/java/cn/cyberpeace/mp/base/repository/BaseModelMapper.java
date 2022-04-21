@@ -65,7 +65,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         try {
             actualModelClass = (Class<M>) actualModelClassSource;
         } catch (Exception e) {
-            log.error("Invalid model class[{}] for {}", actualModelClassSource, getClass());
+            log.error("Invalid model class actualModelClass for {}", getClass());
             return null;
         }
 
@@ -136,7 +136,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         try {
             obj = actualModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            log.error("Convert {} to {} instance failed: {}", map, actualModelClass, e);
+            log.error("Convert map to actualModelClass instance failed: {}", e);
             return null;
         }
 
@@ -299,7 +299,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     default boolean create(M obj) {
         Object[] createParams = convertCreateParams(List.of(obj));
         if (createParams.length == 0) {
-            log.error("Create {} has empty field", obj);
+            log.error("Create {} has empty field");
             return false;
         }
 
@@ -313,7 +313,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     default boolean update(M obj) {
         Object[] updateParams = convertUpdateParams(List.of(obj));
         if (updateParams.length == 0) {
-            log.error("Update {} has empty field", obj);
+            log.error("Update {} has empty field");
             return false;
         }
 
@@ -340,7 +340,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         Object[] createParams = convertCreateParams(objs);
         if (createParams.length == 0) {
-            log.error("Bulk create {} has empty field", objs);
+            log.error("Bulk create {} has empty field");
             return 0;
         }
 
@@ -358,7 +358,7 @@ public interface BaseModelMapper<M extends BaseModel> {
 
         Object[] updateParams = convertUpdateParams(objs);
         if (updateParams.length == 0) {
-            log.error("Service bulk update {} has empty field", objs);
+            log.error("Service bulk update {} has empty field");
             return 0;
         }
 
@@ -424,7 +424,7 @@ public interface BaseModelMapper<M extends BaseModel> {
         try {
             obj = actualModelClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            log.error("Create model obj by {} failed: {}", actualModelClass, e);
+            log.error("Create model obj by failed: {}", e);
             return false;
         }
         obj.setId(id);
@@ -468,7 +468,7 @@ public interface BaseModelMapper<M extends BaseModel> {
                 }
             }
         } catch (Exception e) {
-            log.error("Bulk logic delete {} on model {} failed: {}", ids, actualModelClass, e);
+            log.error("Bulk logic delete {} on model failed: {}", ids, e);
             return 0;
         }
 

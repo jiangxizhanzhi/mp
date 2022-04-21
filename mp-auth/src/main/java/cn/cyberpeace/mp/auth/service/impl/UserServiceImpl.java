@@ -780,7 +780,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
         String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
-        log.info("roles:{}", roles);
         exportUser.setRoles(roles);
 
         return exportUser;

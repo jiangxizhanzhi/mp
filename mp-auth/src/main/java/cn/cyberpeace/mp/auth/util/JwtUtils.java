@@ -21,7 +21,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -136,7 +135,13 @@ public class JwtUtils {
         try {
             jwt = JWT.decode(token);
         } catch (JWTDecodeException e) {
-            log.error("Decode jwt token {} error: {}", token, e.getMessage());
+            String tokenPrefix = "***";
+            try {
+                tokenPrefix = token.substring(1, 20);
+            } catch (Exception exception) {
+
+            }
+            log.error("Decode jwt token prefix:{} error: {}", tokenPrefix, e.getMessage());
             return null;
         }
 

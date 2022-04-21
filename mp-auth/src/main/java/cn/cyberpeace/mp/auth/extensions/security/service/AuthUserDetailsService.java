@@ -70,7 +70,7 @@ public class AuthUserDetailsService implements UserDetailsService {
         try {
             user = userService.getByMobile(mobile);
         } catch (Exception e) {
-            log.error("Get user by mobile[{}] error: {}", mobile, e.getMessage());
+            log.error("Get user by mobile, error: {}", e.getMessage());
             throw new UsernameNotFoundException(e.getMessage());
         }
         if (user == null) {

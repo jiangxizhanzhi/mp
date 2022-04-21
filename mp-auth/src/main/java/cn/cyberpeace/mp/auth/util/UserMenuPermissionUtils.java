@@ -42,7 +42,6 @@ public class UserMenuPermissionUtils {
     public boolean isClientPrincipal() {
         Object principal = getAuthenticatedPrincipal();
         if (principal instanceof ClientDetailsModel) {
-            log.info("Login user is Client:{}", principal);
             return true;
         }
         return false;

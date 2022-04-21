@@ -8,21 +8,15 @@ import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.hutool.core.lang.Validator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.security.authentication.AccountExpiredException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
-import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.AbstractUserDetailsAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.SpringSecurityMessageSource;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsChecker;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
 
@@ -77,7 +71,7 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         try {
             UserDetails loadedUser = userDetailsService.loadUserByMobile(mobile);
             if (loadedUser == null) {
-                log.error("user not existed! mobile:{}", mobile);
+                log.error("user not existed! mobile:{}", "***");
                 throw new IllegalArgumentException("UserDetailsService returned null, which is an interface contract violation");
             }
             return loadedUser;

@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     @Override
     public void invoke(ImportUser data, AnalysisContext context) {
-        log.info("解析到一条数据:{}", JSON.toJSONString(data));
+        log.info("解析到一条数据 username:{}, name:{}, orgpath:{}", data.getUsername(), data.getName(), data.getOrgpath());
         list.add(data);
         // 达到BATCH_COUNT了，需要去存储一次数据库，防止数据几万条数据在内存，容易OOM
         if (list.size() >= BATCH_COUNT) {

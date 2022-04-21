@@ -13,7 +13,13 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
 import java.util.List;
@@ -104,7 +110,6 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
     })
     @PostMapping
     public ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
-        log.info("obj:{}, fields:{}", obj, fields);
         return getModelService().create(obj, fields).asResult();
     }
 
@@ -123,7 +128,6 @@ public abstract class BaseModelController<M extends BaseModel, Q extends QueryPa
     @PatchMapping("/{id}")
     public ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
                                       @RequestParam(required = false) String[] fields) {
-        log.info("id:{}, obj:{}, fields:{}", id, obj, fields);
         obj.setId(id);
         return getModelService().update(obj, fields).asResult();
     }
