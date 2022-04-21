@@ -93,7 +93,7 @@ mp:
     es-nodes: ${ip.moloch}:9205
     wazuh:
       #wazuh 开放接口地址
-      base-url: http://${ip.wazuh}:55000
+      base-url: http://${ip.wazuh}:15500
       #wazuh 开放接口用户名密码
       username: wazuh
       password: wazuh
