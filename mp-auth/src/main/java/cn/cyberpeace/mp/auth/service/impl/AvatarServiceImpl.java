@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileTypeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +39,8 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }
+
+    public static final List<String> SUPPORTED_IMAGE_TYPES = Arrays.asList("jpg", "png", "mpg");
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -63,6 +67,15 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     public FileResponseData upload(MultipartFile file) {
         // todo 判断是否是图片
+        try {
+            String type = FileTypeUtil.getType(file.getInputStream());
+            if (!SUPPORTED_IMAGE_TYPES.contains(type.toLowerCase())) {
+                throw new MpRuntimeException("不支持的图片类型，请上传jpg, png, mpg格式的图片！");
+            }
+        } catch (IOException e) {
+            log.error("上传文件错误！{}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("上传文件错误");
+        }
 
         FileResponseData responseData = new FileResponseData();
         try {
