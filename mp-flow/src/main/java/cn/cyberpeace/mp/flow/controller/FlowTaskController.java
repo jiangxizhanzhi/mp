@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowTaskRequest;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import io.swagger.annotations.Api;
@@ -128,6 +129,17 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
     @PostMapping("/actuator/{id}/{taskAction}")
     public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
         return flowTaskService.actuator(id, taskAction, null, null);
+    }
+
+    /**
+     * 查询任务流量记录信息
+     * @param taskId
+     * @return
+     */
+    @ApiOperation("查询任务流量记录信息")
+    @GetMapping("/flow/records")
+    public ServiceResult<FlowRecordsResponse> queryFlowRecords(@RequestParam String taskId) {
+        return flowTaskService.queryFlowRecords(taskId);
     }
 
 }

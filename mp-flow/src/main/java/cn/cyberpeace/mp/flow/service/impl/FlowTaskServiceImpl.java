@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
@@ -789,6 +791,42 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
 
         return ServiceResult.success(true);
+    }
+
+    /**
+     * 查询流量执行记录
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
+        FlowRecordsResponse response = new FlowRecordsResponse();
+        FlowTaskModel flowTaskModel = getModelMapper().get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("task info is empty for taskId:{}", taskId);
+            // 流量任务不存在
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 流量执行器信息查询
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("flowActuatorModel is empty for actuatorId:{}", actuatorId);
+            // 流量任务异常
+            throw new MpRuntimeException(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+
+        JSONArray rows = this.queryTaskStatus(Collections.singletonList(flowTaskModel.getThirdTaskId()), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
+        if (Objects.nonNull(rows)) {
+            List<FlowRecords> flowRecordsList = new ArrayList<>();
+            JSONArray flowRecordsArray = rows.getJSONObject(0).getJSONArray("flow_records");
+            if (Objects.nonNull(flowRecordsArray)) {
+                flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
+            }
+            response.setFlowRecordsList(flowRecordsList);
+        }
+
+        return ServiceResult.success(response);
     }
 
     /**
