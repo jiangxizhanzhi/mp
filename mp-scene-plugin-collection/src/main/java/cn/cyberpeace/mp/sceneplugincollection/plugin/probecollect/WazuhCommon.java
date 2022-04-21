@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -74,9 +75,9 @@ public class WazuhCommon {
             }
             controlProbeParams.add(controlProbeParam);
         });
-        var controlConfigData = new WazuhControl.ControlConfigData();
-        controlConfigData.setProbeParams(controlProbeParams);
-        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlConfigData);
+        var controlConfigParam = new WazuhControl.ControlConfigParam();
+        controlConfigParam.setProbeParams(controlProbeParams);
+        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlConfigParam);
 
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
