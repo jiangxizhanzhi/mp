@@ -2,13 +2,23 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.situationaware.bo.*;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowTemplateBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
+import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +28,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -59,8 +70,17 @@ import org.springframework.util.ResourceUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -95,6 +115,98 @@ public class FlowAnalysisService extends AbstractBaseService {
         log.info("initClassification >>> attackClassificationBOS：{}",attackClassificationBOS);
         flowClassificationsService.deleteAll();
         flowClassificationsService.batchSave(attackClassificationBOS);
+    }
+
+    /**
+     * 模拟生成流量
+     * @return
+     * @throws IOException
+     */
+    public Boolean addSimulationFlow(FlowSimulationRequest request) throws IOException {
+
+        String group = request.getGroup();
+
+        if (StringUtils.isBlank(group) || !group.startsWith("mp_")){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        Resource[] resources = new PathMatchingResourcePatternResolver()
+                .getResources(ResourceUtils.CLASSPATH_URL_PREFIX + "suricata/flow.json");
+        String json = FileUtils.readLine(resources);
+
+        var flow = JSONObject.parseObject(json,FlowTemplateBO.class);
+
+        String destinationIp = request.getDestinationIp();
+
+        if (StringUtils.isNotBlank(destinationIp)){
+            FlowTemplateBO.DestinationDTO destination = flow.getDestination();
+            destination.setIp(destinationIp);
+            flow.setDestination(destination);
+        }
+
+        List<String> destinationMacs = request.getDestinationMacs();
+
+        if (CollectionUtils.isNotEmpty(destinationMacs)){
+            FlowTemplateBO.DestinationDTO destination = flow.getDestination();
+            destination.setMac(destinationMacs);
+            destination.setMaccnt(destinationMacs.size());
+            flow.setDestination(destination);
+        }
+
+        String sourceIp = request.getSourceIp();
+
+        if (StringUtils.isNotBlank(sourceIp)){
+            FlowTemplateBO.SourceDTO source = flow.getSource();
+            source.setIp(sourceIp);
+            flow.setSource(source);
+        }
+
+        List<String> sourceMacs = request.getSourceMacs();
+
+        if (CollectionUtils.isNotEmpty(sourceMacs)){
+            FlowTemplateBO.SourceDTO source = flow.getSource();
+            source.setMac(sourceMacs);
+            source.setMaccnt(sourceMacs.size());
+            flow.setSource(source);
+        }
+
+        Integer networkBytes = request.getNetworkBytes();
+
+        if (Objects.nonNull(networkBytes)){
+            FlowTemplateBO.NetworkDTO network = flow.getNetwork();
+            network.setBytes(networkBytes);
+            flow.setNetwork(network);
+        }
+
+        if (Objects.nonNull(request.getShuffleCategory()) && request.getShuffleCategory()) {
+            List<FlowClassificationModel> classificationModels = flowClassificationsService.findAll();
+            if (CollectionUtils.isNotEmpty(classificationModels)) {
+                Collections.shuffle(classificationModels);
+                FlowTemplateBO.SuricataDTO suricata = flow.getSuricata();
+                FlowClassificationModel classificationModel = classificationModels.get(0);
+                suricata.setCategory(Arrays.asList(classificationModel.getCategoryEn()));
+                suricata.setSeverity(Arrays.asList(classificationModel.getSeverity()));
+                flow.setSuricata(suricata);
+            }
+        }
+
+
+        Map<String,Object> source = JSON.parseObject(JSON.toJSONString(flow), Map.class);
+
+        LocalDateTime dateTime = request.getDateTime();
+
+        if (Objects.isNull(dateTime)){
+            dateTime = LocalDateTime.now();
+        }
+
+        source.put("@timestamp",dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+
+        var formatter = DateTimeFormatter.ofPattern("yyMMdd");
+
+        IndexRequest indexRequest = new IndexRequest(group.concat("_").concat(SESSION3).concat("-").concat(dateTime.format(formatter))).source(source);
+
+        restHighLevelClient.index(indexRequest,RequestOptions.DEFAULT);
+        return Boolean.TRUE;
     }
 
     /**
@@ -385,6 +497,50 @@ public class FlowAnalysisService extends AbstractBaseService {
         return flowLogBOList;
     }
 
+
+    public ListObjResult<FlowLogBO> flowLogWithTotal(FlowAnalysisRequest request){
+
+        var boolQueryBuilder = this.buildBoolQueryBuilder(request);
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.sort("@timestamp", SortOrder.DESC);
+        searchSourceBuilder.trackTotalHits(true);
+
+        if(Objects.nonNull(request.getPageSize()) && Objects.nonNull(request.getPageNum())){
+            int  offset = (request.getPageNum() -1) * (request.getPageSize());
+            searchSourceBuilder.from(offset);
+            searchSourceBuilder.size(request.getPageSize());
+        }else {
+            searchSourceBuilder.from(0).size(request.getTopSize());
+        }
+
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
+
+        log.info("flowLog >>>>> Search JSON query: {}", searchRequest.source().toString());
+
+        List<FlowLogBO> flowLogBOList = new ArrayList<>();
+        long totalHits = 0;
+        try {
+            SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchHits hits = searchResponse.getHits();
+            totalHits = hits.getTotalHits().value;
+            if (totalHits == 0){
+                return new ListObjResult<>(Lists.newArrayList(), 0);
+            }
+            SearchHit[] searchHits = hits.getHits();
+            flowLogBOList = Arrays.stream(searchHits).map(hit -> {
+                Map<String, Object> sourceAsMap = hit.getSourceAsMap();
+                FlowLogBO flowLogBO = JSONObject.parseObject(hit.getSourceAsString(), FlowLogBO.class);
+                flowLogBO.setTimestamp(Long.valueOf(sourceAsMap.get("@timestamp").toString()));
+                return flowLogBO;
+            } ).collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("search attack way error",e);
+        }
+        return new ListObjResult<>(flowLogBOList, Integer.valueOf(totalHits + ""));
+    }
+
     /**
      * 流量日志，国际化处理
      * @param request
@@ -617,7 +773,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             restHighLevelClient.indices().delete(deleteIndexRequest,RequestOptions.DEFAULT);
         } catch (IOException e) {
-            log.error("delete error : {}",e.getMessage(),e);
+            log.error("delete flow error : {},group:{}",e.getMessage(),e,groupList);
         }
         return Boolean.TRUE;
     }

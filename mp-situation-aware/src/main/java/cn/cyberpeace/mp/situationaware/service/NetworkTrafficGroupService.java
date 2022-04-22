@@ -53,6 +53,9 @@ public class NetworkTrafficGroupService {
      */
     private static String indexPrefix = "mp_";
 
+    @Autowired
+    private FlowAnalysisService flowAnalysisService;
+
     /**
      * 查询底层所有分组数据
      *
@@ -119,6 +122,7 @@ public class NetworkTrafficGroupService {
         deleteParam.put("containers", containerArray);
         try {
             HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
+
         } catch (IOException e) {
             log.error("deleete  arkime Image instance error");
             log.error(SituationalAwareErrorCode.ARKIME_DELETE_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));

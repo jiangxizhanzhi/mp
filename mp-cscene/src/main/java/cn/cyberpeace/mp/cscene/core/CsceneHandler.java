@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.SceneService;
@@ -133,9 +134,18 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {
             // 测试模式下,需要默认可以有console登录协议
             CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
+        } else if (type == CsceneInstanceModel.Type.APP && csceneInstance.getScene() != null) {
+            // 非测试模式,核心路由器需要加上console登录协议
+            CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
         }
         this.checkVlanIds(getCscene());
         var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+        // 节点数量增加失败 说明已到达数量上限
+        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
+        if (!updateResult.isSuccess()) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
+                    String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
+        }
         instanceHandler.create();
         return instanceHandler.toData();
     }

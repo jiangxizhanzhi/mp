@@ -2,8 +2,10 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,15 +46,18 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
     private RoleService roleService;
 
+    private OrgService orgService;
+
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
      */
-    public UploadDataListener(UserService userService, RoleService roleService) {
+    public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService) {
         log.info("New UploadDataListener Instance...");
         this.userService = userService;
         this.roleService = roleService;
+        this.orgService = orgService;
     }
 
     /**
@@ -118,8 +124,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
 
-                // todo http://10.10.10.10/biz/bug-view-4861.html
-                // checkRole(user, index);
+                checkOrgs(user, index);
+                checkRole(user, index);
             }
         }
     }
@@ -209,6 +215,41 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
             }
             user.getRoleIdList().add(roleModel.getId());
         }
+    }
+
+    /**
+     * 校验角色是否存在，如果存在则查出id留待后面绑定的时候用
+     *
+     * @param
+     * @param index
+     */
+    private void checkOrgs(ImportUser user, int index) {
+        String orgPaths = user.getOrgpath();
+        if (StringUtils.isBlank(orgPaths)) {
+            // 组织路径不存在，默认都存一级组织
+            // 组织为空则默认一级组织
+            List<OrgModel> orgs = orgService.listParents();
+            OrgModel defaultTopOrg = orgs.get(0);
+            if (Objects.isNull(defaultTopOrg)) {
+                log.error("默认一级组织不存在！");
+                throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
+            }
+
+            log.info("org not specified! use default org!");
+            user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
+            return;
+        }
+
+        user.setOrgIdList(new ArrayList<>());
+        Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+            OrgModel orgModel = orgService.getByPath(path.trim());
+            if (Objects.isNull(orgModel)) {
+                log.error("No {} row error! org {} not existed!", index, path.trim());
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ORG_NOT_EXISTED.format(String.valueOf(index), path.trim()));
+            } else {
+                user.getOrgIdList().add(orgModel.getId());
+            }
+        });
     }
 
 }

@@ -1,0 +1,1 @@
+alter table mp_devops_target add is_hide tinyint(1) default 0 not null comment '是否隐藏，0：false,1:true';

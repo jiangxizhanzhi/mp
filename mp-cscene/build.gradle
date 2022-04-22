@@ -7,4 +7,5 @@ dependencies {
     implementation project(':mp-auth')
     implementation project(':mp-front-admin')
     implementation project(':mp-situation-aware')
+    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
 }

@@ -1,0 +1,2 @@
+alter table mp_scene_scene_config_element modify column `init_commands` longtext NOT NULL COMMENT '初始化命令';
+alter table mp_scene_scene_element modify column `init_commands` longtext NOT NULL COMMENT '初始化命令';

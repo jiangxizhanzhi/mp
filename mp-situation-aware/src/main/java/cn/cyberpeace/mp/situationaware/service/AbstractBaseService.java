@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractBaseService {
 
-    private static final String SESSION3 = "sessions3";
+    protected static final String SESSION3 = "sessions3";
 
     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 

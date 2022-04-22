@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -95,6 +96,7 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertPageModel page(ImagePageRequest request) {
         ImagePageDTO dto = convertImagePageRequest(request);
+        dto.setIsHide(Boolean.FALSE);
         Integer total = devopsTargetService.totalCount(dto);
 
         ImageConvertPageModel imageConvertPageModel = new ImageConvertPageModel();
@@ -154,6 +156,7 @@ public class ImagesConverter implements BaseConverter{
         if (Objects.isNull(device) || !device.isSuccess()){
             return device;
         }
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
@@ -249,7 +252,10 @@ public class ImagesConverter implements BaseConverter{
         //再新增权限数据
         List<String> userIds = request.getUserIds();
         if (PublicEnum.PRIVATE == isAllPublic){
-            userIds.add(UserUtils.getLoginUser().getId());
+            UserModel user = UserUtils.getLoginUser();
+            if (Objects.nonNull(user)) {
+                userIds.add(user.getId());
+            }
         }
         if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
             imageIds.forEach(imageId -> {
@@ -358,6 +364,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Integer async(ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
+        Boolean isHide = request.getIsHide();
         List<Integer> diffList = targetConverter.getAsyncDeviceIds(requestIds);
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
@@ -370,6 +377,7 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(deviceList)){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
+        deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
         return devopsTargetService.insert(deviceList);
     }
 
@@ -422,6 +430,7 @@ public class ImagesConverter implements BaseConverter{
         }
         device.setExtVm(extVm);
         device.setExtDocker(extDocker);
+        device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE );
         return device;
     }
 

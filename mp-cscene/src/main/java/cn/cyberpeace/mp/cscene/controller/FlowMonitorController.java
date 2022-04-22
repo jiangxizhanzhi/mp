@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
 import cn.cyberpeace.mp.cscene.service.SceneTranslationService;
@@ -49,6 +50,16 @@ public class FlowMonitorController {
 
     @Autowired
     private FlowMonitorService flowMonitorService;
+
+    @ApiOperation(value = "模拟流量")
+    @GetMapping("/simulation")
+    public ServiceResult simulation(FlowSceneSimulationRequest request) {
+        log.info("FlowSceneSimulationRequest:{}", request);
+
+        flowMonitorService.simulation(request);
+
+        return ServiceResult.successful();
+    }
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;

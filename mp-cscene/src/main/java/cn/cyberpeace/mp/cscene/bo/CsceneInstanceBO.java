@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -40,6 +41,8 @@ public class CsceneInstanceBO extends BaseCsceneBO<CsceneInstanceModel, CsceneIn
     private LocalDateTime createTime;
     @ApiModelProperty(value = "透传字段")
     private Map<String, Object> passThrough;
+    @JsonIgnore
+    private Boolean deleted;
 
     @Override
     public CsceneInstanceModel createModel() {

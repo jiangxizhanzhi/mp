@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
@@ -55,11 +56,17 @@ public class SceneMonitorController {
 
     @ApiOperation(value = "查询场景所有IP列表")
     @GetMapping("/ips")
-    public ServiceResult<List<String>> getIps(BaseSceneElementRequest baseRequest) {
-        List<String> ips = sceneMonitorService.getIps(baseRequest);
+    public ServiceResult<List<String>> listIps(BaseSceneElementRequest baseRequest) {
+        List<String> ips = sceneMonitorService.listIps(baseRequest);
         return ServiceResult.success(ips);
     }
 
+    @ApiOperation(value = "查询场景所有录屏用户列表")
+    @GetMapping("/recording/users")
+    public ServiceResult<List<UserModel>> listRecordingUsers(BaseSceneElementRequest baseRequest) {
+        List<UserModel> users = sceneMonitorService.listSceneRecordingUsers(baseRequest);
+        return ServiceResult.success(users);
+    }
 
     @ApiOperation(value = "查询场景top5节点状态")
     @GetMapping("/elements/top_by_states/{sceneId}")

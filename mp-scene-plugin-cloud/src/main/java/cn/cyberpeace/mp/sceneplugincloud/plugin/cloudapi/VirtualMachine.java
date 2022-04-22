@@ -5,8 +5,12 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
 
 public class VirtualMachine extends CloudClient {
 
@@ -22,10 +26,17 @@ public class VirtualMachine extends CloudClient {
     public boolean delete(VirtualMachineDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {
-                }, true);
-        return true;
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {
+                    }, true);
+            return true;
+        } catch (Exception e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
     }
 
     public boolean pause(String instanceId) {
@@ -64,5 +75,24 @@ public class VirtualMachine extends CloudClient {
         } catch (Exception e) {
             throw new MpRuntimeException(e.getMessage());
         }
+    }
+
+    public List<VirtualMachineGetData> getAllInstance(Integer limit, Integer offset) {
+        CommonQueryParam param = new CommonQueryParam();
+        param.setLimit(limit);
+        param.setOffset(offset);
+        CloudResponse<CloudListData<VirtualMachineGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_INSTANCE_URL, param, new TypeReference<>() {
+        }, true);
+        if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
+            return result.getData().getList();
+        }
+        return null;
+    }
+
+    public void deleteInstanceById(String instanceId) {
+        heavyConcurrentWait();
+
+        cloudDelete(CloudUrlConstant.DELETE_INSTANCE_URL.replace("{instance_id}", instanceId), null, null, new TypeReference<CloudResponse<Object>>() {
+        }, true);
     }
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
@@ -183,29 +185,41 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             // 设置默认来源ip
             request.setOriginIps("127.0.0.1-127.0.0.1");
         }
+
         FlowTaskModel flowTaskModel = request;
-        ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
-        if (Objects.nonNull(flowInfoObjResult)) {
-            FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
+        // 是否自定义流量
+        Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
 
-            if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-                if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
-                    create(flowTaskModel);
+        if (isCustom) {
+            // 自定义流量，没有流量文件
+            create(flowTaskModel);
+            // 异步新增流量发生平台流量任务
+            asyncPlatFlowTaskService.savePlatFlowTask(request, false);
+            return ServiceResult.success(flowTaskModel);
+        } else {
+            ObjResult<FlowInfoModel> flowInfoObjResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+            if (Objects.nonNull(flowInfoObjResult)) {
+                FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
 
-                    // 异步新增流量发生平台流量任务
-                    asyncPlatFlowTaskService.savePlatFlowTask(request, false);
-                    return ServiceResult.success(flowTaskModel);
+                if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
+                    if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
+                        create(flowTaskModel);
+
+                        // 异步新增流量发生平台流量任务
+                        asyncPlatFlowTaskService.savePlatFlowTask(request, false);
+                        return ServiceResult.success(flowTaskModel);
+                    } else {
+                        return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
+                    }
                 } else {
-                    return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
+                    // 暂无其他流量发生器，直接保存
+                    create(flowTaskModel);
+                    return ServiceResult.success(flowTaskModel);
                 }
             } else {
-                // 暂无其他流量发生器，直接保存
-                create(flowTaskModel);
-                return ServiceResult.success(flowTaskModel);
+                log.error("flow file be chosen not existed");
+                return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
             }
-        } else {
-            log.error("flow file be chosen not existed");
-            return new ServiceResult<>(null, FlowErrorCode.ADD_TASK_ERROR);
         }
     }
 
@@ -615,13 +629,21 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Runnable errorCallback) {
-        // 流量信息存在校验
-        ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
-        if (Objects.isNull(flowInfoResult)) {
-            log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-            return ServiceResult.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
+        FlowInfoModel flowInfoModel = new FlowInfoModel();
+        // 是否自定义流量
+        boolean isCustom = false;
+        if (Objects.equals(CustomFlagEnum.NO.toValue(), flowTaskModel.getCustomFlag())) {
+            // 流量信息存在校验
+            ObjResult<FlowInfoModel> flowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
+            if (Objects.isNull(flowInfoResult)) {
+                log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
+                return ServiceResult.fail(FlowErrorCode.FLOW_IN_TASK_NOT_EXIST);
+            }
+            flowInfoModel = flowInfoResult.getObj();
+        } else {
+            isCustom = true;
+            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
-        FlowInfoModel flowInfoModel = flowInfoResult.getObj();
 
         // 流量执行器信息查询
         String actuatorId = flowTaskModel.getActuatorId();
@@ -632,8 +654,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         ObjResult<FlowPortModel> portObjResult = flowPortService.get(flowTaskModel.getFlowPortId()).getSource();
         if (Objects.isNull(portObjResult)) {
-            log.error("flow port info is empty");
-            return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            if (Objects.equals(CustomFlagEnum.YES.toValue(), flowTaskModel.getCustomFlag())) {
+                log.error("custom flow can only run once");
+                return ServiceResult.fail(FlowErrorCode.RECREATE_CUSTOM_FLOW_ERROR);
+            } else {
+                log.error("flow port info is empty");
+                return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+            }
         }
         FlowPortModel flowPortModel = portObjResult.asResult();
 
@@ -663,7 +690,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         // 执行任务地址
         String urlPath = "";
         if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-            urlPath = "/tasks/action";
+            if (isCustom) {
+                // 自定义流量
+                urlPath = "/tasks/custom/action";
+            } else {
+                // 背景流量
+                urlPath = "/tasks/action";
+            }
 
             // 判断是否关联流量平台任务，没有则新增
             if (StringUtils.isBlank(thirdTaskId)) {
@@ -752,6 +785,42 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
 
         return ServiceResult.success(true);
+    }
+
+    /**
+     * 查询流量执行记录
+     * @param taskId
+     * @return
+     */
+    public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
+        FlowRecordsResponse response = new FlowRecordsResponse();
+        FlowTaskModel flowTaskModel = getModelMapper().get(taskId);
+        if (Objects.isNull(flowTaskModel)) {
+            log.error("task info is empty for taskId:{}", taskId);
+            // 流量任务不存在
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        // 流量执行器信息查询
+        String actuatorId = flowTaskModel.getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            log.error("flowActuatorModel is empty for actuatorId:{}", actuatorId);
+            // 流量任务异常
+            throw new MpRuntimeException(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+
+        JSONArray rows = this.queryTaskStatus(Collections.singletonList(flowTaskModel.getThirdTaskId()), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
+        if (Objects.nonNull(rows)) {
+            List<FlowRecords> flowRecordsList = new ArrayList<>();
+            JSONArray flowRecordsArray = rows.getJSONObject(0).getJSONArray("flow_records");
+            if (Objects.nonNull(flowRecordsArray)) {
+                flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
+            }
+            response.setFlowRecordsList(flowRecordsList);
+        }
+
+        return ServiceResult.success(response);
     }
 
     /**

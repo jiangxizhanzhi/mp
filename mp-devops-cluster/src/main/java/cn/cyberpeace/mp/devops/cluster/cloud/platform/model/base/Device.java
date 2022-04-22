@@ -55,6 +55,11 @@ public class Device extends BaseCloudPlatformModel {
     private String name;
 
     /**
+     * 镜像名称（靶标的英文名称）
+     */
+    private String image;
+
+    /**
      * 描述
      */
     private String description;
@@ -140,6 +145,16 @@ public class Device extends BaseCloudPlatformModel {
      * 是否内置镜像
      */
     private Boolean isBuildIn;
+
+    /**
+     * 是否隐藏
+     */
+    private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 默认可运行的镜像名称
+     */
+    private String defaultLaunchImageName;
 
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;

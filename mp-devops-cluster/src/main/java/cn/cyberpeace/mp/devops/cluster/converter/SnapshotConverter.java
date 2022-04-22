@@ -62,7 +62,7 @@ public class SnapshotConverter {
             return null;
         }
         List<SnapshotConvertModel> resultList = new ArrayList<>();
-        SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getDeviceName(), model.getDeviceName(), model.getDeviceUuid(),
+        SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getImageName(), model.getDeviceName(), model.getDeviceUuid(),
                 "", null);
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
@@ -78,7 +78,7 @@ public class SnapshotConverter {
                         TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
         resultList.addAll(list);
-        resultList.add(snapshotConvertModel);
+        resultList.add(0,snapshotConvertModel);
         convertModel.setItems(resultList);
         return convertModel;
     }

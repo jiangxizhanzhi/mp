@@ -121,6 +121,7 @@ public class FdfsClient {
 
     public void delete(String fdfsFilepath) {
         try {
+            log.info("delete fdfs file,file path:{}", fdfsFilepath);
             getStorageClient().delete_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs delete %s error: %s", fdfsFilepath, e.getMessage());

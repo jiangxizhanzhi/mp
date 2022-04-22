@@ -78,7 +78,7 @@ public class Process {
     @ApiModelProperty(value = "进程组")
     private Integer pgrp;
 
-    @ApiModelProperty(value = "进程大小")
+    @ApiModelProperty(value = "进程大小(KB)")
     private Long size;
 
     @ApiModelProperty(value = "名称")

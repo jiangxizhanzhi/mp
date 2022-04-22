@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
   *@Date 9/3/21 10:22 上午
 **/
 public enum SituationalAwareErrorCode implements ErrorCode {
+    CONNECTION_FAIL("MP-110400", "connection_fail"),
     PROBE_DELETE_FAIL("MP-110401", "probe_delete_fail"),
     PROBE_MODIFY_FAIL("MP-110402", "probe_update_fail"),
     PROBE_MODIFY_PARAM_ERROR("MP-110403", "probe_update_param_error"),
@@ -25,7 +26,9 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     WAZUH_AGENTS_QUERY_PORT_ERROR("MP-110414", "wazuh_ports_query_error"),
     WAZUH_AGENTS_QUERY_PROCESS_ERROR("MP-110415", "wazuh_agent_process_query_error"),
     WAZUH_AGENTS_QUERY_EVENT_ERROR("MP-110416", "wazuh_agent_query_event_error"),
-    WAZUH_AGENTS_QUERY_HARDWARE_ERROR("MP-110417", "wazuh_agent_hardware_query_error");
+    WAZUH_AGENTS_QUERY_HARDWARE_ERROR("MP-110417", "wazuh_agent_hardware_query_error"),
+
+    WAZUH_AUTHENTICATION_FAIL("MP-110420","wazuh_authentication_fail");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, SituationalAwareConstant.ERROR_CODE_PREFIX + message);

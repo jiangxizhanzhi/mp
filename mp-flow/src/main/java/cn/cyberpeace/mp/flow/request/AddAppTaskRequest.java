@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 新增app任务请求
@@ -51,6 +52,12 @@ public class AddAppTaskRequest {
         private String srcIpRange;
         private String dstIpRange;
         private List<CapList> capList;
+        // 流量协议
+        private String flowProtocol;
+        // 流量内容
+        private String content;
+        // 倍数,默认为1
+        private Integer mult;
     }
 
     @Data
@@ -90,6 +97,9 @@ public class AddAppTaskRequest {
         }
         specifics.setDstIpRange(dstIpRange);
         specifics.setCapList(Collections.singletonList(capList));
+        specifics.setFlowProtocol(flowTaskModel.getFlowProtocol());
+        specifics.setContent(flowTaskModel.getContent());
+        specifics.setMult(Objects.isNull(flowTaskModel.getMult()) ? 1 : flowTaskModel.getMult());
 
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
         client.setIp(flowPortModel.getClientIp());

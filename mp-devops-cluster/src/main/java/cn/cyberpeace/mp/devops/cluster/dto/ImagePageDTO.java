@@ -114,6 +114,8 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Boolean likeName = Boolean.TRUE;
 
+    private Boolean isHide = Boolean.FALSE;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

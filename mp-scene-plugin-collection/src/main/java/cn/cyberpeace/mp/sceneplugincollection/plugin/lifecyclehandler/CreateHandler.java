@@ -76,7 +76,14 @@ public class CreateHandler extends HandlerCommon {
                 .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         routerPorts.forEach(routerPort -> {
             var cloudElement = cloudPluginHandler.getElement(routerPort.getSceneElement());
-            var networkId = cloudElement.getAuxiliaryNetworkId();
+            String networkId = null;
+            if (CollectionUtils.isNotEmpty(cloudElement.getDeriveNetworks())) {
+                for (var deriveNet : cloudElement.getDeriveNetworks()) {
+                    if (deriveNet.getNetwork().getExcloudIps().contains(routerPort.getIp())) {
+                        networkId = deriveNet.getNetwork().getResourceId();
+                    }
+                }
+            }
             if (StringUtils.isEmpty(networkId)) {
                 return;
             }

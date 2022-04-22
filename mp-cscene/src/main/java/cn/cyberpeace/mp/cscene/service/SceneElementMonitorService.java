@@ -1,17 +1,27 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +56,12 @@ public class SceneElementMonitorService {
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private SceneTranslationService sceneTranslationService;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -77,14 +94,74 @@ public class SceneElementMonitorService {
         return elementMonitorBasicInfo;
     }
 
+    public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.ensure();
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+        if (!checkCsceneIsRunning(pageRequest.getSceneId())) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
 
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+        listPageInfoQueryParams.setPage(pageRequest.getPage());
+        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
+        ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
+
+        List<ConnectionState> connectionStates = new ArrayList<>();
+        if (Objects.nonNull(netConns.getSource()) && CollectionUtil.isNotEmpty(netConns.getSource().getList())) {
+            List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
+            connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
+    }
+
+
+    /**
+     * 获取节点实时数据
+     * @param baseRequest
+     * @return
+     */
     public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
 
-        // todo 1201 实时状态
+        ElementRTInfo rtInfo = new ElementRTInfo();
+        rtInfo.setProcessCount(0);
+        rtInfo.setPortsCount(0);
+        rtInfo.setConnectionCount(0);
+        // 以下为假数据
+        rtInfo.setUserCount(1);
+        rtInfo.setFileOpCount(5);
+        rtInfo.setRegistryOpCount(5);
+        rtInfo.setEnvOpCount(5);
 
-        return null;
+        ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+        params.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        params.setNodeIds(baseRequest.getElementIds());
+        // todo 1201 实时状态
+        ListObjServiceResult<Port> ports = hostStateService.pagePorts(params);
+        ListObjServiceResult<Process> processes = hostStateService.pageProcesses(params);
+
+        BaseSceneElementPageRequest pageRequest = new BaseSceneElementPageRequest();
+        pageRequest.setSceneId(baseRequest.getSceneId());
+        pageRequest.setElementIds(baseRequest.getElementIds());
+        ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
+
+        if (CollectionUtil.isNotEmpty(conns.getSource().getObjs())) {
+            rtInfo.setConnectionCount(conns.getSource().getObjs().size());
+        }
+
+        if (CollectionUtil.isNotEmpty(ports.getSource().getObjs())) {
+            rtInfo.setPortsCount(ports.getSource().getObjs().size());
+        }
+
+        if (CollectionUtil.isNotEmpty(processes.getSource().getObjs())) {
+            rtInfo.setProcessCount(processes.getSource().getObjs().size());
+        }
+
+        return rtInfo;
     }
 
 
@@ -118,8 +195,8 @@ public class SceneElementMonitorService {
         var pluginEleOptional = pluginElements.entrySet().stream().filter(entry -> Objects.equals(entry.getKey(), elementId)).map(Map.Entry::getValue).findFirst();
 
         if (pluginEleOptional.isPresent()) {
-            CloudPluginSceneElementBO elementBO = JsonCommon.snakeMapToBean(pluginEleOptional.get(), CloudPluginSceneElementBO.class);
-            cpSceneElementBO2ElementMonitorBasicInfo(basicInfo, elementBO);
+            CloudPluginSceneElementBO cloudPluginSceneElementBO = JsonCommon.snakeMapToBean(pluginEleOptional.get(), CloudPluginSceneElementBO.class);
+            cpSceneElementBO2ElementMonitorBasicInfo(basicInfo, cloudPluginSceneElementBO);
         }
     }
 
@@ -154,6 +231,7 @@ public class SceneElementMonitorService {
                 HostState hostState = hostStates.get(0);
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
+                resource.setMemoryFree(hostState.getMemoryFree());
                 resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
             }
             basicInfo.setHostState(resource);
@@ -200,4 +278,25 @@ public class SceneElementMonitorService {
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
+
+    private boolean checkCsceneIsRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        return sceneStateInfo.isRunning();
+    }
+
+    private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
+        ConnectionState connectionState = new ConnectionState();
+        connectionState.setState(model.getStatus());
+        connectionState.setProtocol(model.getProto());
+        connectionState.setPid(model.getPid());
+
+        connectionState.setLocalAddress(model.getLaddrIp());
+        connectionState.setLocalPort(model.getLaddrPort());
+
+        connectionState.setForeignAddress(model.getRaddrIp());
+        connectionState.setForeignPort(model.getRaddrPort());
+
+        return connectionState;
+    }
 }

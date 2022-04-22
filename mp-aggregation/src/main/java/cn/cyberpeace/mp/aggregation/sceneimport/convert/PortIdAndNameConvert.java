@@ -23,6 +23,8 @@ public class PortIdAndNameConvert implements IConverter {
                     // 设置电口数量
                     CloudPluginSceneConfigElementBO cloudElement = cloudElementMap.get(e.getId());
                     cloudElement.setElectricPortNumber(e.getPorts().size());
+                    // 设置网卡数量
+                    e.setMaxPortNumber(e.getPorts().size());
                 }
             });
         }

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
@@ -32,6 +33,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
+import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,11 +114,21 @@ public class AsyncPlatFlowTaskService {
             }
         }
 
-        // 流量信息存在校验
-        FlowInfoModel flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
-        if (Objects.isNull(flowInfoModel)) {
-            log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
-            return;
+        // 是否自定义流量
+        Boolean isCustom = StringUtils.isNotBlank(flowTaskModel.getFlowProtocol());
+        FlowInfoModel flowInfoModel = new FlowInfoModel();
+        if (!isCustom) {
+            flowTaskModel.setCustomFlag(CustomFlagEnum.NO.toValue());
+            // 流量信息存在校验
+            flowInfoModel = flowInfoMapper.get(flowTaskModel.getFlowId());
+            if (Objects.isNull(flowInfoModel)) {
+                log.error("flow info in task not exist:{}", flowTaskModel.getFlowId());
+                return;
+            }
+        } else {
+            log.info("create custom flow task");
+            flowTaskModel.setCustomFlag(CustomFlagEnum.YES.toValue());
+            flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
         }
 
         // 流量执行器信息查询
@@ -159,7 +171,7 @@ public class AsyncPlatFlowTaskService {
         }
 
         String thirdTaskId = "";
-        if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
+        if (isCustom || ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
             // 构建保存app任务请求
             AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
 
@@ -364,8 +376,10 @@ public class AsyncPlatFlowTaskService {
                         null, 0, null, () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
-                throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
+                throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
+        } catch (MpRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             log.error("add vm instance error", e);
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
@@ -605,6 +619,12 @@ public class AsyncPlatFlowTaskService {
      * @param call
      */
     private void taskJobStoppedCallback(String taskId, Runnable call) {
+        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
+        if (Objects.isNull(oldFlowTaskModel)) {
+            log.info("flowTaskModel is empty for taskId:{}", taskId);
+            return;
+        }
+
         FlowTaskModel flowTaskModel = new FlowTaskModel();
         flowTaskModel.setId(taskId);
         flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
@@ -618,6 +638,24 @@ public class AsyncPlatFlowTaskService {
             log.info("start to run callback function");
             call.run();
         }
+
+        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
+            // 自定义流量，运行后直接删除网口
+            String actuatorId = oldFlowTaskModel.getActuatorId();
+            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
+            if (Objects.isNull(flowActuatorModel)) {
+                log.error("del ports failed for actuator is empty");
+                return;
+            }
+
+            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
+            this.delPorts(flowActuatorModel, flowPortIds);
+
+            flowTaskModel.setFlowPortId(Strings.EMPTY);
+            // 删除任务关联网口
+            flowTaskMapper.updateTaskInfo(flowTaskModel);
+        }
+
     }
 
     /**

@@ -173,6 +173,18 @@ public class DeviceVO implements Serializable {
     @ApiModelProperty("是否内置镜像")
     private Boolean isBuildIn;
 
+    /**
+     * 是否隐藏
+     */
+    @ApiModelProperty("是否隐藏")
+    private Boolean isHide;
+
+    /**
+     * 默认可运行的镜像名称
+     */
+    @ApiModelProperty("默认可运行的镜像名称")
+    private String defaultLaunchImageName;
+
     public Boolean getIsBuildIn() {
         boolean tmpImport = !Objects.isNull(isImport) && isImport;
         boolean tmpInternal = !Objects.isNull(isInternal) && isInternal;

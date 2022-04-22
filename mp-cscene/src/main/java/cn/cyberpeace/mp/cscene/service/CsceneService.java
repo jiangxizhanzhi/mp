@@ -78,7 +78,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return cscene.getSceneConfig();
     }
 
-    private int getActiveVirtualDeviceCount() {
+    public int getActiveVirtualDeviceCount() {
         List<String> sceneIds = this.getRunningSceneIds();
         if (CollectionUtils.isEmpty(sceneIds)) {
             return 0;

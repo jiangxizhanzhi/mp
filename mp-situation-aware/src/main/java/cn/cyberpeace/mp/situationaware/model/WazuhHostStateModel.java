@@ -2,7 +2,10 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WazuhModel {
+public class WazuhHostStateModel {
 
     @JSONField(name = "MemoryTotal")
     @ApiModelProperty("总内存")
@@ -23,7 +26,7 @@ public class WazuhModel {
 
     @JSONField(name = "MemoryPercent")
     @ApiModelProperty("内存利用率")
-    private int memoryPercent;
+    private double memoryPercent;
 
     @JSONField(name = "CPUTotalPercent")
     @ApiModelProperty("CPU利用率")
@@ -33,9 +36,14 @@ public class WazuhModel {
     @ApiModelProperty("CPU核数")
     private int cpuCount;
 
-    @JSONField(name = "DiskSpace")
-    @ApiModelProperty("磁盘空间")
-    private long diskSpace;
+    @ApiModelProperty("磁盘总空间")
+    private long diskTotal;
+
+    @ApiModelProperty("磁盘已用空间")
+    private long diskUsed;
+
+    @ApiModelProperty("磁盘使用率")
+    private double diskPercent;
 
     @ApiModelProperty("agentId")
     private String agentId;

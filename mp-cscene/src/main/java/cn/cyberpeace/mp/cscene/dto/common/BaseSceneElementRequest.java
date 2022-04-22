@@ -28,5 +28,9 @@ public class BaseSceneElementRequest {
     @ApiModelProperty("源IP集合")
     private List<String> sourceIps;
 
-
+    /**
+     * Top数量
+     */
+    @ApiModelProperty("Top数量")
+    private Integer topSize;
 }

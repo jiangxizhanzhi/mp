@@ -48,7 +48,7 @@ public class FlowTaskModel extends BaseModel {
      * 流量id
      */
     @ApiModelProperty(value = "流量id")
-    @NotBlank(message = "flowId can not be empty")
+    @DefaultStr
     private String flowId;
 
     /**
@@ -134,6 +134,35 @@ public class FlowTaskModel extends BaseModel {
     @ApiModelProperty(value = "目标ip范围")
     @DefaultStr
     private String targetIps;
+
+    /**
+     * 自定义流量任务标志 0：否， 1：是
+     */
+    @ApiModelProperty(value = "自定义流量任务标志 0：否， 1：是")
+    @DefaultInt()
+    private Integer customFlag;
+
+    /**
+     * 流量协议
+     */
+    @ApiModelProperty(value = "流量协议")
+    @DefaultStr
+    private String flowProtocol;
+
+    /**
+     * 流量内容
+     */
+    @ApiModelProperty(value = "流量内容")
+    @DefaultStr
+    private String content;
+
+    /**
+     * 倍数：大于等于1的整数
+     * 默认为1，表示100pps
+     */
+    @ApiModelProperty(value = "倍数：大于等于1的整数")
+    @DefaultInt(1)
+    private Integer mult;
 
 
 }

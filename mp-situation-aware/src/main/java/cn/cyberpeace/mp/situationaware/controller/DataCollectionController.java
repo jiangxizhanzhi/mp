@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import io.swagger.annotations.Api;
@@ -46,7 +46,7 @@ public class DataCollectionController {
 
     @PostMapping("/monitor_events")
     @ApiOperation(value = "查询场景系统指标信息", notes = "")
-    public ListObjServiceResult<WazuhModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+    public ListObjServiceResult<WazuhHostStateModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getMacIds()) && CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }

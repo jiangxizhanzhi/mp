@@ -62,6 +62,7 @@ public class TargetConverter{
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
         dto.setSearchPublicEnum(1);
+        dto.setIsHide(request.getIsHide());
         if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
             dto.setOffset((request.getPage() - 1) * request.getPerPage());
             dto.setLimit(request.getPerPage());
@@ -116,11 +117,11 @@ public class TargetConverter{
     }
 
     /**
-     * 查询常用靶标信息
+     * 查询常用靶标信息,支持通过名称查询
      * @return
      */
-    public List<Device> getCommonTargets() {
-        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true");
+    public List<Device> getCommonTargets(String name) {
+        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
         if (Objects.isNull(model) || !model.isSuccess()){
             return Lists.newArrayList();
         }

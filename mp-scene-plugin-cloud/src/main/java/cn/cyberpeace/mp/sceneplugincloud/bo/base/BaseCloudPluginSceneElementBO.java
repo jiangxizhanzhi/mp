@@ -112,36 +112,46 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
 
     @ApiModelProperty(value = "是否开启辅助网络", hidden = true)
     @JsonIgnore
+    @Deprecated
     private Boolean auxiliaryNetworkOn;
     @ApiModelProperty(value = "辅助网络id", hidden = true)
     @JsonIgnore
+    @Deprecated
     private String auxiliaryNetworkId;
     @ApiModelProperty(value = "辅助网络cidr", hidden = true)
     @JsonIgnore
+    @Deprecated
     private String auxiliaryNetworkCidr;
     @ApiModelProperty(value = "辅助网络网关", hidden = true)
     @JsonIgnore
+    @Deprecated
     private String auxiliaryNetworkGateway;
     @ApiModelProperty(value = "辅助网络dns", hidden = true)
     @JsonIgnore
+    @Deprecated
     private List<String> auxiliaryNetworkDnsNameservers;
     @ApiModelProperty(value = "辅助网络dhcp", hidden = true)
     @JsonIgnore
+    @Deprecated
     private Boolean auxiliaryNetworkDhcp;
     @ApiModelProperty(value = "辅助网络地址池", hidden = true)
     @JsonIgnore
     @Valid
+    @Deprecated
     private List<AllocationPool> auxiliaryNetworkAllocationPools;
     @ApiModelProperty(value = "辅助网络静态路由", hidden = true)
     @JsonIgnore
     @Valid
+    @Deprecated
     private List<HostRoute> auxiliaryNetworkHostRoutes;
     @ApiModelProperty(value = "辅助网络vlan模式", hidden = true)
     @JsonIgnore
+    @Deprecated
     private Boolean auxiliaryNetworkVlan;
     @ApiModelProperty(value = "辅助网络vlanId", hidden = true)
     @JsonIgnore
     @VlanId
+    @Deprecated
     private Integer auxiliaryNetworkVlanId;
     @ApiModelProperty(value = "是否开启辅助网络辅助路由", hidden = true)
     @JsonIgnore
@@ -152,6 +162,8 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @ApiModelProperty(value = "辅助网络辅助路由ip", hidden = true)
     @JsonIgnore
     private String auxiliaryNetworkRouterIp;
+    @ApiModelProperty(value = "关闭辅助路由")
+    private Boolean auxiliaryRouterOff;
 
     @ApiModelProperty(value = "是否开启管理网卡", hidden = true)
     @JsonIgnore

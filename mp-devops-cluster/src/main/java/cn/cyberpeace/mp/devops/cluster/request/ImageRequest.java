@@ -118,4 +118,7 @@ public class ImageRequest extends BaseRequest {
      */
     @ApiModelProperty(value = "Docker信息")
     private ExtDocker extDocker;
+
+    @ApiModelProperty(value = "是否隐藏")
+    private Boolean isHide = Boolean.FALSE;
 }

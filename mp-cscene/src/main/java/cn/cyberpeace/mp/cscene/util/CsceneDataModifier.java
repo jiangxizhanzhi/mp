@@ -111,6 +111,80 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void supplyProtocolForCoreRouter(CsceneInstanceBO csceneInstance, String protocol) {
+        ScenePluginDataBO cloudPlugin = Optional.ofNullable(csceneInstance.getScene().getPlugins()).orElse(new HashMap<>()).get("cpcloud");
+        if (cloudPlugin == null) {
+            return;
+        }
+        Map<String, Map<String, Object>> cloudElements = cloudPlugin.getElements();
+        if (cloudElements != null) {
+            for (SceneElementBO elementBO : csceneInstance.getScene().getTopology().getElements()) {
+                if (CollectionUtils.isEmpty(elementBO.getPorts())) {
+                    continue;
+                }
+                Map<String, Object> cloudElement = cloudElements.get(elementBO.getId());
+                if (cloudElement == null) {
+                    continue;
+                }
+                Object role = cloudElement.get("role");
+                Object imageType = cloudElement.get("image_type");
+                if (role == null || imageType == null) {
+                    continue;
+                }
+                if (Integer.parseInt(role.toString()) != BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER
+                        || !imageType.equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+                    continue;
+                }
+                Object virtualType = cloudElement.get("virtual_type");
+                if (virtualType == null) {
+                    continue;
+                }
+                int intVirtualType = Integer.parseInt(virtualType.toString());
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != intVirtualType &&
+                        BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != intVirtualType) {
+                    continue;
+                }
+                // 当前节点所有端口上指定协议数量不为0则跳出此次
+                boolean hasPro = false;
+                for (SceneElementPortBO portBO : elementBO.getPorts()) {
+                    hasPro = portBO.getAccessModes().stream().filter(m -> protocol.equals(m.getProtocol())).collect(Collectors.toList()).size() > 0;
+                    if (hasPro) {
+                        break;
+                    }
+                }
+                if (hasPro) {
+                    continue;
+                }
+                for (SceneElementPortBO portBO : elementBO.getPorts()) {
+                    // 取端口
+                    if (cloudPlugin.getElementPorts() == null) {
+                        continue;
+                    }
+                    Map<String, Object> portMap = cloudPlugin.getElementPorts().get(portBO.getId());
+                    if (portMap == null) {
+                        continue;
+                    }
+                    CpcloudPortData cpcloudPortData = JsonCommon.snakeMapToBean(portMap, CpcloudPortData.class);
+                    List<AccessMode> modes = Optional.ofNullable(cpcloudPortData.getAccessModes()).orElse(new ArrayList<>());
+                    boolean hasProtocol = modes.stream().filter(mode -> protocol.equals(mode.getProtocol())).collect(Collectors.toList()).size() > 0;
+                    if (!hasProtocol) {
+                        // 无指定协议则补充
+                        AccessMode mode = new AccessMode();
+                        mode.setProtocol(protocol);
+                        Map<String, Object> protocolMap = JsonCommon.beanToSnakeMap(mode);
+                        // 避免数据丢失,需要从element中获取原始的access_modes
+                        Object originModes = portMap.getOrDefault("access_modes", new LinkedList<>());
+                        List originModeList = (List) originModes;
+                        originModeList.add(protocolMap);
+                        portMap.put("access_modes", originModes);
+                        portBO.getAccessModes().add(mode);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 创建时去除多余的eid
      * @param csceneBO

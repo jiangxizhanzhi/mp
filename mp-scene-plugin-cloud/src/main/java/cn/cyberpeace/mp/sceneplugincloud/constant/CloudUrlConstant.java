@@ -42,5 +42,19 @@ public class CloudUrlConstant {
     public static final String DELETE_RECORDING_URL = "/cpcloud/guacamole/v1/filemanager";
     public static final String GET_RECORDING_NAME_URL = "/cpcloud/guacamole/v1/recordfile";
 
+    public static final String CREATE_NPC_URL = "/cpcloud/npc_node/v1/node";
+    public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";
+
+    public static final String GET_ALL_CONTAINER_URL = "/v1/containers";
+    public static final String DELETE_CONTAINER_URL = "/v1/containers/{container_id}";
+    public static final String GET_ALL_INSTANCE_URL = "/v1/instances";
+    public static final String DELETE_INSTANCE_URL = "/v1/instances/{instance_id}";
+    public static final String DELETE_NETWORK_URL = "/v1/networks/{network_id}";
+    public static final String GET_ALL_ROUTER_URL = "/v1/routers";
+    public static final String DELETE_ROUTER_URL = "/v1/routers/{router_id}";
+    public static final String QUERY_PORTS = "/v1/ports/{resource_id}";
+
+    public static final String VLAN_RANGE = "/cpcloud/info/v1/vlan_range";
+
     private CloudUrlConstant() {}
 }

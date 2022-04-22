@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.front.admin.business.service.SysConfigCheckService;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
+import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class SysConfigController {
 
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
+            sysConfigService.publishConfigUpdateEvent(CollectionUtil.toList(updateConfig));
             return ServiceResult.successful();
         } else {
             log.error("update config failed! {}", updateConfig);
@@ -71,6 +73,7 @@ public class SysConfigController {
 
         boolean success = sysConfigService.batchUpdateByKeyname(configs);
         if (success) {
+            sysConfigService.publishConfigUpdateEvent(configs);
             return ServiceResult.successful();
         } else {
             log.error("update config failed!");

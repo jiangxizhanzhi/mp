@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
@@ -21,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +63,11 @@ public class EventMonitorController {
         log.info("{}", eventPercentRequest);
 
         List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
-        List<ElementEventPercent> limitList = eventPercents.stream().limit(5).collect(Collectors.toList());
+
+        if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
+            eventPercentRequest.setTopCount(5);
+        }
+        List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
 //        List<ElementEventPercent> eventPercents = mockElementPercents();
         return ServiceResult.success(limitList);
     }
@@ -77,10 +81,11 @@ public class EventMonitorController {
      */
     @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
-    public ServiceResult<EventAggr> getEventAggr(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-        // TODO 暂时还是测试数据
-        EventAggr eventAggr = mockEventAggr();
+        EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
+//        EventAggr eventAggr = mockEventAggr();
+
         return ServiceResult.success(eventAggr);
     }
 

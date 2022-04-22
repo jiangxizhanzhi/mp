@@ -50,6 +50,14 @@ public class HttpResult {
         }
     }
 
+    public static <T> T snakeParseResultBean(String result, TypeReference<T> valueTypeRef) {
+        if (StringUtils.isNotBlank(result)) {
+            return JsonCommon.snakeParse(result, valueTypeRef);
+        } else {
+            return null;
+        }
+    }
+
     public void loadResult() throws IOException {
         result = parseResult(response, StandardCharsets.UTF_8);
     }
@@ -76,5 +84,9 @@ public class HttpResult {
 
     public <T> T getResultBean(TypeReference<T> valueTypeRef) {
         return parseResultBean(result, valueTypeRef);
+    }
+
+    public <T> T snakeGetResultBean(TypeReference<T> valueTypeRef) {
+        return snakeParseResultBean(result, valueTypeRef);
     }
 }

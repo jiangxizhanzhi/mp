@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -12,6 +13,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
@@ -29,9 +31,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,6 +52,9 @@ public class ProbeService {
     @Autowired
     private WazuhProbeManagerRepository wazuhProbeManagerRepository;
 
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
     /**
      * 新增探针
      *
@@ -70,6 +73,7 @@ public class ProbeService {
         probeModel.setOsType(probeRequest.getOsType().getTypeVal());
         probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        probeModel.setOutputFormat(probeRequest.getOutputFormat());
         var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
         if (Boolean.TRUE.equals(probeExist)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
@@ -139,6 +143,26 @@ public class ProbeService {
         return probeResult;
     }
 
+    public List<ProbeResult> queryProbeByIds(List<String> ids) {
+        List<ProbeModel> probeModels = probeModelMapper.queryByProbeIds(ids);
+        if (Objects.isNull(probeModels)) {
+            return null;
+        }
+        Map<String, ProbeModel> probeId2Probe = new HashMap<>();
+        probeModels.forEach(probeModel -> {
+            probeId2Probe.put(probeModel.getId(), probeModel);
+        });
+        List<ProbeResult> results = probeModels.stream().map(m -> {
+            ProbeResult result = new ProbeResult();
+            BeanUtils.copyProperties(m, result);
+            return result;
+        }).collect(Collectors.toList());
+        results.forEach(result -> {
+            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
+        });
+        return results;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public int modifyProbe(ProbeRequest probeRequest) {
         ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
@@ -160,6 +184,7 @@ public class ProbeService {
         probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
         probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
         probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
+        probeModel.setOutputFormat(mergedRequest.getOutputFormat());
         //是否存在保证name去重
         var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
         if (Boolean.TRUE.equals(probeExist)) {
@@ -172,17 +197,29 @@ public class ProbeService {
 
     /**
      * 清除探针数据，包括表，es索引，doc等
+     * @param agentNames
+     * @param sceneInstanceStartTime
      */
-    public void cleanProbeData(List<String> agentNames, LocalDateTime deleteTime) {
-        log.info("agentNames:{}, deleteTime:{}", agentNames, deleteTime);
-        if (Objects.isNull(deleteTime)) {
-            deleteTime = LocalDateTime.now();
+    public void cleanProbeData(List<String> agentNames, LocalDateTime sceneInstanceStartTime) {
+        log.info("agentNames:{}, deleteTime:{}", agentNames, sceneInstanceStartTime);
+        if (Objects.isNull(sceneInstanceStartTime)) {
+            log.error("scene instance startTime should not be null!");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        // 1. 清除es索引?
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(agentNames);
+        wazuhEventRequest.setStartTime(sceneInstanceStartTime);
+        wazuhEventRequest.setEndTime(LocalDateTime.now());
 
-        // 2. wazuh api清除agent数据
+        // 1. 清除es 文档数据
+        Long deletedCount = dataCollectionService.deleteDocByAgentNames(wazuhEventRequest);
+        log.info("deletedCount:{}", deletedCount);
 
-        // 3. 表数据？
+        // 2. 清除es索引?
+
+        // 3. wazuh api清除agent数据
+
+        // 4. 表数据？
     }
 
     /**
@@ -215,6 +252,7 @@ public class ProbeService {
         mergedRequest.setProbeCategory(queryModel.getProbeCategory());
         mergedRequest.setScriptType(ScriptType.values()[queryModel.getScriptType()]);
         mergedRequest.setScriptContent(new String(queryModel.getScriptContent(), StandardCharsets.UTF_8));
+        mergedRequest.setOutputFormat(queryModel.getOutputFormat());
         return mergedRequest;
     }
 

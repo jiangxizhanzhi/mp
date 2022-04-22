@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
@@ -29,6 +30,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
+import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -42,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
+import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +55,13 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -79,6 +89,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScreenshotServiceImpl screenshotService;
+
+    @Autowired
+    private ProbeService probeService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -151,24 +164,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteById(String id, boolean logic, CsceneContextBO context) {
-        var instanceHandler = new CsceneInstanceHandler(id, context);
-        String sceneId = null;
-        if (instanceHandler.getCscene() != null && instanceHandler.getCscene().getScene() != null &&
-                instanceHandler.getCscene().getScene().getTopology() != null &&
-                instanceHandler.getCscene().getScene().getTopology().getScene() != null) {
-            sceneId = instanceHandler.getCscene().getScene().getTopology().getScene().getEid();
+        if (ReentrantLockUtils.tryLock(id)) {
+            try {
+                var instanceHandler = new CsceneInstanceHandler(id, context);
+                NodeLimitUtils.substractLimitedNodeCount(instanceHandler);
+                String sceneId = this.getSceneId(id);
+                var flag = instanceHandler.delete(logic);
+                if (sceneId != null) {
+                    scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
+                }
+                if (!logic) {
+                    screenshotService.batchDeleteBySceneId(id);
+                    scenePluginCollectionSceneService.asyncCleanProbeData(sceneId);
+                }
+                if (flag) {
+                    CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
+                }
+            } finally {
+                ReentrantLockUtils.unLock(id);
+            }
         }
-        var flag = instanceHandler.delete(logic);
-        if (sceneId != null) {
-            scenePluginCloudSceneService.deleteSceneRecords(sceneId, logic);
-        }
-        if (!logic) {
-            screenshotService.batchDeleteBySceneId(id);
-        }
-        if (flag) {
-            CsceneReportTaskPool.getInstance().executeTask(() -> csceneReporter.reportDeleteCsceneInstance(id));
-        }
-        return new ServiceResult<>(flag);
+        return new ServiceResult<>(true);
     }
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, CsceneContextBO context) {
@@ -230,7 +246,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         sceneIds, nodeIds, userIds, true, false);
                 break;
             default:
-                return new ServiceResult<>();
+                throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         nodeSessionResult.getSource().forEach(nodeSession -> {
             var sceneId = nodeSession.getSceneId();

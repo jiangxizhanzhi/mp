@@ -1,0 +1,2 @@
+alter table mp_sceneplugincloud_scene_config_element add `auxiliary_router_off` tinyint(1) NOT NULL COMMENT '是否关闭辅助路由' ;
+alter table mp_sceneplugincloud_scene_element add `auxiliary_router_off` tinyint(1) NOT NULL COMMENT '是否关闭辅助路由' ;

@@ -18,7 +18,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
-import cn.cyberpeace.mp.situationaware.model.WazuhModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -27,13 +27,15 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +50,10 @@ import java.util.stream.Collectors;
 @Service
 public class HostStateService {
 
+
+    @Value("${mp.cscene.default.hours-range:24}")
+    private Integer hoursRange;
+
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
@@ -55,7 +61,7 @@ public class HostStateService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneTranslationService sceneIdTranslationService;
+    private SceneTranslationService sceneTranslationService;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -90,11 +96,15 @@ public class HostStateService {
             HostState hs = new HostState();
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+
             hs.setMemoryFree(hostStateBO.getMemoryFree());
             hs.setMemoryTotal(hostStateBO.getMemoryTotal());
             // todo 节点内存利用率 统一为Double？
-//            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
+            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
+
             hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setDiskPercent(hostStateBO.getDiskPercent());
+
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());
@@ -142,7 +152,7 @@ public class HostStateService {
 
         // 执行查询
         log.info("dataCollection query start");
-        List<WazuhModel> result = dataCollectionService.queryMonitorEventsWithTimeRange(request);
+        List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         log.info("dataCollection query end");
         List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
@@ -152,7 +162,7 @@ public class HostStateService {
             hostStateBO.setMemoryTotal(this.byte2MB(srcHostState.getMemoryTotal()));
             hostStateBO.setMemoryFree(this.byte2MB(srcHostState.getMemoryFree()));
             // 磁盘统一使用单位G
-            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskSpace()));
+            hostStateBO.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
             hostStateBO.setMemoryPercent(srcHostState.getMemoryPercent());
             hostStateBO.setTime(srcHostState.getTime());
             // todo 进程，端口，网络连接，磁盘使用率
@@ -213,14 +223,14 @@ public class HostStateService {
 
         if (Objects.isNull(startTime)) {
             // todo 默认时间间隔24小时
-            startTime = endTime.minusHours(24);
+            startTime = endTime.minusHours(hoursRange);
         }
 
         if (Objects.isNull(segmentCount)) {
             segmentCount = 10;
         }
 
-        List<String> sceneIdList = sceneIdTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
@@ -232,16 +242,16 @@ public class HostStateService {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
 
         List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
-        Map<LocalDateTime, HostState> hostStateMap = new HashMap<>();
-        for (LocalDateTime localDateTime : timeList) {
+        Map<LocalDateTime, HostState> hostStateMap = new LinkedHashMap<>();
+        for (LocalDateTime time : timeList) {
             HostState hostState = new HostState();
             // 初始化
-            hostState.setTime(localDateTime);
+            hostState.setTime(time);
             hostState.setCpuPercent(0.0);
             hostState.setMemoryPercent(0.0);
             // todo diskPercent
             hostState.setDiskPercent(0.0);
-            hostStateMap.put(localDateTime, hostState);
+            hostStateMap.put(time, hostState);
         }
 
         // cpu
@@ -258,20 +268,18 @@ public class HostStateService {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalMemPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setMemoryPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
-                    // todo 在这造磁盘模拟数据
-                    hostStateMap.get(bo.getStart()).setDiskPercent(30.0);
                 }
             }
         }
 
         // 磁盘
-        /*if (Objects.nonNull(intervalDiskPercentBOs)) {
+        if (Objects.nonNull(intervalDiskPercentBOs)) {
             for (IntervalSizeBO<LocalDateTime, Double> bo : intervalDiskPercentBOs) {
                 if (Objects.nonNull(hostStateMap.get(bo.getStart()))) {
                     hostStateMap.get(bo.getStart()).setDiskPercent(Objects.nonNull(bo.getSize()) ? NumberUtil.round(bo.getSize(), 2).doubleValue() : 0.0);
                 }
             }
-        }*/
+        }
 
         List<HostState> hostStates = new ArrayList<>();
         hostStateMap.entrySet().forEach(entry -> {
@@ -289,7 +297,7 @@ public class HostStateService {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
-        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         return scenePluginCollectionSceneService.listPagePorts(listPageInfoQueryParams).asResult();
     }
 
@@ -300,8 +308,23 @@ public class HostStateService {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
-        listPageInfoQueryParams.setSceneIds(sceneIdTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
-        return scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        ListObjServiceResult<Process> listResult = scenePluginCollectionSceneService.listPageProcess(listPageInfoQueryParams).asResult();
+        List<Process> processes = listResult.getSource().getList();
+        // KB -> MB
+        processes.forEach(p -> {
+            if (Objects.nonNull(p.getSize())) {
+                Long megabytes = DataSize.ofKilobytes(p.getSize()).toMegabytes();
+                p.setSize(megabytes);
+            }
+
+            if (Objects.nonNull(p.getVmSize())) {
+                Long megabytes = DataSize.ofKilobytes(p.getVmSize()).toMegabytes();
+                p.setVmSize(megabytes);
+            }
+        });
+
+        return listResult;
     }
 
 

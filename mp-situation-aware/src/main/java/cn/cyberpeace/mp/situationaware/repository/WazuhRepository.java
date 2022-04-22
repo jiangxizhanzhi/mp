@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
@@ -39,7 +38,6 @@ public class WazuhRepository {
     }
 
 
-
     /**
      * 查询文件监控
      * @param requestUri requestUri
@@ -47,13 +45,7 @@ public class WazuhRepository {
      */
     public WazuhFileRoot queryFileEvents(String requestUri){
         var requestUrl = wazuhUrl + requestUri;
-        String res;
-        try {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        } catch (Exception e) {
-            log.error("查询文件预警是失败 requestUri {}: stack: {}" , requestUri, e);
-            throw new MpRuntimeException("查询文件预警是失败 requestUri : " + requestUri);
-        }
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhFileRoot.class);
     }
 
@@ -64,13 +56,7 @@ public class WazuhRepository {
     public WazuhNetifaceRoot queryAllAgentMac() {
         var requestUri = "/experimental/syscollector/ports";
         var requestUrl = wazuhUrl + requestUri;
-        String res;
-        try {
-            res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        } catch (Exception e) {
-            log.error("查询文件预警是失败 requestUri {}: stack: {}" , requestUri, e);
-            throw new MpRuntimeException("查询文件预警是失败 requestUri : " + requestUri);
-        }
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhNetifaceRoot.class);
     }
 

@@ -4,7 +4,29 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeleteGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeleteGuacamoleRecordingResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DisableGuacamoleRecordingResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EnableGuacamoleRecordingResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleAssistanceData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleMonitorData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordsData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleAssistanceData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeResult;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -124,5 +146,15 @@ public class Remote extends CloudClient {
             }
         });
         return recordFiles;
+    }
+
+    public boolean changeVlanRange(String vlanRange) {
+        if (StringUtils.isEmpty(vlanRange)) {
+            return false;
+        }
+        VlanRangeData vlanRangeData = new VlanRangeData();
+        vlanRangeData.setVlans(vlanRange);
+        VlanRangeResult result = getHttpClient().post(CloudUrlConstant.VLAN_RANGE, vlanRangeData, null, VlanRangeResult.class);
+        return result.getStatus() == null ? false : result.getStatus();
     }
 }

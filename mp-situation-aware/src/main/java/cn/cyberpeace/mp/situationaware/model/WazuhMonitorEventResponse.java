@@ -20,7 +20,7 @@ import java.util.List;
 public class WazuhMonitorEventResponse {
 
     @ApiModelProperty("监控指标集合")
-    private List<WazuhModel> monitorEventModelList;
+    private List<WazuhHostStateModel> monitorEventModelList;
 
     @ApiModelProperty("指标总数")
     private int total;
