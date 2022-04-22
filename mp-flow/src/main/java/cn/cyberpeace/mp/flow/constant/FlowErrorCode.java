@@ -26,7 +26,8 @@ public enum FlowErrorCode implements ErrorCode {
     GET_TASK_STATUS_ERROR("MP-110319", "get_task_status_error"),
     ADD_FLOW_EXECUTOR_ERROR("MP-110320", "add_flow_executor_error"),
     GET_OUTER_NETWORK_ERROR("MP-110321", "get_outer_network_error"),
-    RECREATE_CUSTOM_FLOW_ERROR("MP-110322", "recreate_custom_flow");
+    RECREATE_CUSTOM_FLOW_ERROR("MP-110322", "recreate_custom_flow"),
+    ADD_PORT_ERROR("MP-110323", "add_port_error");
 
     FlowErrorCode(String code, String message) {
         setCode(code, "flow.error_code." + message);

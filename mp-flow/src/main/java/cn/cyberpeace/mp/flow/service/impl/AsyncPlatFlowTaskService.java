@@ -194,8 +194,9 @@ public class AsyncPlatFlowTaskService {
                     thirdTaskId = saveAppTaskObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
                 } else {
                     log.error("save app task failed");
+                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.error("save app task error", e);
             }
         } else {
@@ -219,8 +220,9 @@ public class AsyncPlatFlowTaskService {
                     thirdTaskId = saveStandTaskObj.getString(BaseConstants.STR_DATA);
                 } else {
                     log.error("save standard task failed");
+                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
                 }
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.error("save standard task error", e);
             }
         }
@@ -452,6 +454,7 @@ public class AsyncPlatFlowTaskService {
                     serverPortId = clientPortId;
                 } else {
                     log.error("add trex client port error");
+                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                 }
             } else {
                 // 给trex虚拟机添加server网口
@@ -467,6 +470,7 @@ public class AsyncPlatFlowTaskService {
                     serverPortId = serverDataObj.getString("port_id");
                 } else {
                     log.error("add trex server port error");
+                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                 }
             }
 
@@ -494,7 +498,7 @@ public class AsyncPlatFlowTaskService {
                     .clientGateway(gatewayIp)
                     .build();
             flowPortMapper.create(flowPortModel);
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error("add flow port error", e);
         }
 
