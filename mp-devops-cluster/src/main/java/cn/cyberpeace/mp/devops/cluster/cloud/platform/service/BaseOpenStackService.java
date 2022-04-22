@@ -139,7 +139,7 @@ public class BaseOpenStackService extends BaseService {
      * @param <T>
      */
     protected <T extends BaseCloudPlatformModel> void checkResult(T t){
-        if (Objects.isNull(t) || !BaseCloudPlatformConstant.CODE.equals(t.getCode())){
+        if (Objects.isNull(t) || (!BaseCloudPlatformConstant.CODE.equals(t.getCode()) && !t.isSuccess())){
             throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_ERROR);
         }
     }
