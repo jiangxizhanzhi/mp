@@ -124,7 +124,7 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
   flow:
-    trex-image: tgn-0424
+    trex-image: tgn-trex
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
   sceneplugincollection:
