@@ -1,160 +1,62 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
-import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
-import java.io.Serializable;
-import java.util.Date;
+import cn.cyberpeace.mp.base.model.BaseModel;
+import lombok.Data;
 
-public class ProbeModel implements Serializable {
-    private Integer pk;
+/**
+ * mp_situation_probe
+ * @author 
+ */
+@Data
+public class ProbeModel extends BaseModel {
 
-    private String id;
+    public static final int TYPE_COMMON = 0;
 
-    private String probeName;
+    public static final int TYPE_CUSTOM = 1;
 
-    private String des;
+    public static final int CATATORY_BASIC_INFO = 0;
 
-    private Integer osType;
+    public static final int CATATORY_EVENT = 1;
 
+    public static final int CATATORY_LOG = 2;
+
+
+    /**
+     * 探针名称
+     */
+    private String name;
+
+    /**
+     * 描述
+     */
+    private String description;
+
+    /**
+     * 0:信息类 1:事件类 2:日志类 
+     */
     private Integer probeCategory;
 
-    private SourceCategory sourceCategory;
+    /**
+     * 0:通用探针 1:自定义探针
+     */
+    private Integer type;
 
-    private Integer scriptType;
+    /**
+     * 自定义探针输出格式: none, json, plain
+     */
+    private String outputFormat;
 
-    private Date createTime;
+    /**
+     * 1:删除 0:未删除
+     */
+    private Integer isDeleted;
 
-    private Date updateTime;
+    /**
+     * (可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
+     */
+    private String osType;
 
-    private Integer delFlag;
-
-    private byte[] scriptContent;
-
-    private String commandInterval;
-
-    private ProbeStatus probeStatus;
 
     private static final long serialVersionUID = 1L;
 
-    private String outputFormat;
-
-    public String getOutputFormat() {
-        return outputFormat;
-    }
-
-    public void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat;
-    }
-
-    public Integer getPk() {
-        return pk;
-    }
-
-    public void setPk(Integer pk) {
-        this.pk = pk;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
-    }
-
-    public String getProbeName() {
-        return probeName;
-    }
-
-    public void setProbeName(String probeName) {
-        this.probeName = probeName == null ? null : probeName.trim();
-    }
-
-    public String getDes() {
-        return des;
-    }
-
-    public void setDes(String des) {
-        this.des = des == null ? null : des.trim();
-    }
-
-    public Integer getOsType() {
-        return osType;
-    }
-
-    public void setOsType(Integer osType) {
-        this.osType = osType;
-    }
-
-    public Integer getProbeCategory() {
-        return probeCategory;
-    }
-
-    public void setProbeCategory(Integer probeCategory) {
-        this.probeCategory = probeCategory;
-    }
-
-    public Integer getScriptType() {
-        return scriptType;
-    }
-
-    public void setScriptType(Integer scriptType) {
-        this.scriptType = scriptType;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public Integer getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(Integer delFlag) {
-        this.delFlag = delFlag;
-    }
-
-    public byte[] getScriptContent() {
-        return scriptContent;
-    }
-
-    public void setScriptContent(byte[] scriptContent) {
-        this.scriptContent = scriptContent;
-    }
-
-    public String getCommandInterval() {
-        return commandInterval;
-    }
-
-    public void setCommandInterval(String commandInterval) {
-        this.commandInterval = commandInterval;
-    }
-
-    public ProbeStatus getProbeStatus() {
-        return probeStatus;
-    }
-
-    public void setProbeStatus(ProbeStatus probeStatus) {
-        this.probeStatus = probeStatus;
-    }
-
-    public SourceCategory getSourceCategory() {
-        return sourceCategory;
-    }
-
-    public void setSourceCategory(SourceCategory sourceCategory) {
-        this.sourceCategory = sourceCategory;
-    }
 }

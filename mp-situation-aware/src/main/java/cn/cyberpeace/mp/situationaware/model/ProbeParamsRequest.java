@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 /**
@@ -16,17 +18,25 @@ import lombok.*;
 @NoArgsConstructor
 @ApiModel("探针脚本参数")
 public class ProbeParamsRequest {
-    private String probeId;
 
-    @ApiModelProperty(value = "参数类型", required = true)
-    private Integer paramType;
+    /**
+     * 参数名称
+     */
+    private String name;
 
-    @ApiModelProperty(value = "参数默认值", required = true)
-    private String defaultVal;
+    /**
+     * 0:number 1:string 2:bool 3:ip
+     */
+    private Integer type;
 
-    @ApiModelProperty(value = "参数描述", required = true)
-    private String paramDes;
+    /**
+     * 默认值
+     */
+    private String defaultValue;
 
-    @ApiModelProperty(value = "参数名称", required = true)
-    private String paramName;
+    /**
+     * 参数说明
+     */
+    private String description;
+
 }

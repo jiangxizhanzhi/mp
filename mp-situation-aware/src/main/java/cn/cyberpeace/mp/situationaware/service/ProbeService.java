@@ -2,25 +2,13 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamsRequest;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamsResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
-import cn.cyberpeace.mp.situationaware.model.ProbeSearchRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.enums.OsType;
-import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
-import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
-import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
-import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
-import cn.cyberpeace.mp.situationaware.repository.ProbeParamModelMapper;
-import cn.cyberpeace.mp.situationaware.repository.WazuhProbeManagerRepository;
+import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
+import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -44,13 +34,11 @@ import java.util.stream.Collectors;
 public class ProbeService {
 
     @Autowired
-    private ProbeModelMapper probeModelMapper;
+    private ProbeMapper probeMapper;
 
     @Autowired
-    private ProbeParamModelMapper probeParamModelMapper;
+    private ProbeParamMapper probeParamMapper;
 
-    @Autowired
-    private WazuhProbeManagerRepository wazuhProbeManagerRepository;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -65,22 +53,20 @@ public class ProbeService {
         var probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         //新增探针，默认为自定义探针
-        probeModel.setSourceCategory(SourceCategory.CUSTOM);
-        probeModel.setCreateTime(new Date());
-        probeModel.setUpdateTime(new Date());
-        probeModel.setId(TextUtils.uuid());
-        probeModel.setScriptContent(buildScriptContent(probeRequest).getBytes(StandardCharsets.UTF_8));
-        probeModel.setOsType(probeRequest.getOsType().getTypeVal());
-        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
-        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
+        probeModel.setType(ProbeModel.TYPE_CUSTOM);
+        probeModel.setDescription(probeRequest.getDescription());
+        probeModel.setOsType(probeRequest.getOsType());
+//        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
+//        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
         probeModel.setOutputFormat(probeRequest.getOutputFormat());
-        var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
-        if (Boolean.TRUE.equals(probeExist)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
-        }
-        probeModelMapper.insert(probeModel);
-        insertProbeParams(probeRequest, probeModel.getId());
-        probeRequest.setProbeId(probeModel.getId());
+//        var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
+//        if (Boolean.TRUE.equals(probeExist)) {
+//            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
+//        }
+        // todo params
+        probeMapper.insert(probeModel);
+//        insertProbeParams(probeRequest, probeModel.getId());
+//        probeRequest.setProbeId(probeModel.getId());
     }
 
     /**
@@ -94,13 +80,15 @@ public class ProbeService {
         if (CollectionUtils.isEmpty(probeIds) || probeIds.stream().anyMatch(ObjectUtils::isEmpty)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_DELETE_PARAM_ERROR);
         }
-        probeParamModelMapper.deleteParamByProbeIds(probeIds);
+        String[] probeIdArray = probeIds.toArray(new String[0]);
+        probeParamMapper.bulkDelete(probeIdArray);
+        return false;
 
+//        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
 
-        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
     }
 
-    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
         int count = probeModelMapper.countQuery(probeSearchRequest);
         List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
@@ -120,9 +108,9 @@ public class ProbeService {
         })).collect(Collectors.toList());
 
         return new ListObjServiceResult<ProbeResult>(new ListObjResult<>(probeResults, count));
-    }
+    }*/
 
-    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
     public ProbeResult queryProbeDetail(String probeId) {
         var probeResult = new ProbeResult();
         var probeModel = probeModelMapper.queryByProbeId(probeId);
@@ -141,10 +129,10 @@ public class ProbeService {
         probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
         probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
         return probeResult;
-    }
+    }*/
 
     public List<ProbeResult> queryProbeByIds(List<String> ids) {
-        List<ProbeModel> probeModels = probeModelMapper.queryByProbeIds(ids);
+        List<ProbeModel> probeModels = probeMapper.listByIds(ids);
         if (Objects.isNull(probeModels)) {
             return null;
         }
@@ -157,14 +145,14 @@ public class ProbeService {
             BeanUtils.copyProperties(m, result);
             return result;
         }).collect(Collectors.toList());
-        results.forEach(result -> {
-            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
-        });
+//        results.forEach(result -> {
+//            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
+//        });
         return results;
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public int modifyProbe(ProbeRequest probeRequest) {
+   /* public int modifyProbe(ProbeRequest probeRequest) {
         ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
         try {
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);
@@ -192,7 +180,7 @@ public class ProbeService {
         }
 
         return probeModelMapper.updateByProbeId(probeModel);
-    }
+    }*/
 
 
     /**
@@ -226,13 +214,13 @@ public class ProbeService {
      * 修改探针参数
      * @param probeRequest probeRequest
      */
-    private void modifyProbeParams(ProbeRequest probeRequest) {
+    /*private void modifyProbeParams(ProbeRequest probeRequest) {
         probeParamModelMapper.deleteParamByProbeId(probeRequest.getProbeId());
-        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
             return;
         }
         insertProbeParams(probeRequest, probeRequest.getProbeId());
-    }
+    }*/
 
 
     /**
@@ -240,7 +228,7 @@ public class ProbeService {
      * @param probeRequest probeRequest
      * @return ProbeRequest
      */
-    private ProbeRequest buildMergedRequest(ProbeRequest probeRequest) {
+    /*private ProbeRequest buildMergedRequest(ProbeRequest probeRequest) {
         var queryModel = probeModelMapper.queryByProbeId(probeRequest.getProbeId());
         var mergedRequest = new ProbeRequest();
 
@@ -262,10 +250,10 @@ public class ProbeService {
     }
 
     private void insertProbeParams(ProbeRequest probeRequest, String probeId) {
-        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
             return;
         }
-        List<ProbeParamModel> probeParamModels = probeRequest.getParamsResultList().stream()
+        List<ProbeParamModel> probeParamModels = probeRequest.getParams().stream()
             .map((probeParamRequest -> {
                 var probeParamModel = new ProbeParamModel();
                 BeanUtils.copyProperties(probeParamRequest, probeParamModel);
@@ -276,7 +264,7 @@ public class ProbeService {
                 return probeParamModel;
             })).collect(Collectors.toList());
         probeParamModelMapper.batchInsert(probeParamModels);
-    }
+    }*/
 
     /**
      * 替换参数
@@ -284,14 +272,14 @@ public class ProbeService {
      * @param probeRequest probeRequest
      * @return 脚本内容
      */
-    private String buildScriptContent(ProbeRequest probeRequest) {
-        if (CollectionUtils.isEmpty(probeRequest.getParamsResultList())) {
+   /* private String buildScriptContent(ProbeRequest probeRequest) {
+        if (CollectionUtils.isEmpty(probeRequest.getParams())) {
             return probeRequest.getScriptContent();
         }
         var scriptContent = probeRequest.getScriptContent();
-        for (ProbeParamsRequest param : probeRequest.getParamsResultList()) {
+        for (ProbeParamsRequest param : probeRequest.getParams()) {
             scriptContent = scriptContent.replace("$" + param.getParamName() + "$", param.getDefaultVal());
         }
         return scriptContent;
-    }
+    }*/
 }

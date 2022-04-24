@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
+import cn.cyberpeace.mp.situationaware.model.enums.ProbeType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.validation.constraints.Min;
-import lombok.*;
 
 @Data
 @Builder
@@ -33,5 +37,5 @@ public class ProbeSearchRequest {
     private String keyWord;
 
     @ApiModelProperty("是否是定制探针 0：默认探针 1：定制探针")
-    private SourceCategory sourceCategory;
+    private ProbeType probeType;
 }

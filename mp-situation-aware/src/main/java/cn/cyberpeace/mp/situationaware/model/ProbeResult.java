@@ -1,20 +1,20 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Date;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel("探针参数")
+@ApiModel("探针信息")
 public class ProbeResult {
     private Integer pk;
 

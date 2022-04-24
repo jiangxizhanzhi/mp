@@ -1,14 +1,16 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-public interface ProbeParamModelMapper {
+@ModelClass(ProbeParamModel.class)
+public interface ProbeParamMapper extends BaseModelMapper<ProbeParamModel> {
+
     int deleteByPrimaryKey(Integer pk);
 
     int insert(ProbeParamModel record);
@@ -20,13 +22,4 @@ public interface ProbeParamModelMapper {
     int updateByPrimaryKeySelective(ProbeParamModel record);
 
     int updateByPrimaryKey(ProbeParamModel record);
-
-    int batchInsert(@Param("paramModelList") List<ProbeParamModel> paramModelList);
-
-    int deleteParamByProbeId(@Param("probeId") String probeId);
-
-    int deleteParamByProbeIds(@Param("probeIds") List<String> probeIds);
-
-    List<ProbeParamModel> queryProbeParamList(@Param("probeId") String probeId);
-
 }

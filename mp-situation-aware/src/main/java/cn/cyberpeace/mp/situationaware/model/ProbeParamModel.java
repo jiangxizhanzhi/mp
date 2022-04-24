@@ -1,34 +1,46 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import java.io.Serializable;
-import java.util.Date;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import cn.cyberpeace.mp.base.model.BaseModel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
+/**
+ * mp_situation_probe_param
+ * @author 
+ */
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class ProbeParamModel implements Serializable {
-    private Integer pk;
+public class ProbeParamModel extends BaseModel implements Serializable {
 
-    private String id;
-
+    /**
+     * 探针id
+     */
     private String probeId;
 
-    private Integer paramType;
+    /**
+     * 采集模板id
+     */
+    private String templateId;
 
-    private String defaultVal;
+    /**
+     * 参数名称
+     */
+    private String name;
 
-    private String paramDes;
+    /**
+     * 0:number 1:string 2:bool 3:ip
+     */
+    private Integer type;
 
-    private Date createTime;
+    /**
+     * 默认值
+     */
+    private String defaultValue;
 
-    private Date updateTime;
+    /**
+     * 参数说明
+     */
+    private String description;
 
-    private Integer delFlag;
 
-    private String paramName;
 }
