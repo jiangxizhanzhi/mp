@@ -53,6 +53,7 @@ public class WazuhLauncher {
     private WazuhClient wazuhClient;
 
     public static void runCommandResultCall(LaunchAlert alertData) {
+        log.info("Wazuh run command({}) result call", alertData.getData().getSicLaunchId());
         runCommandResultPool.put(alertData.getData().getSicLaunchId(), alertData);
     }
 
@@ -79,9 +80,9 @@ public class WazuhLauncher {
             activeResponseHttpData.setCommand("!ar-launcher.py");
         }
 
-        boolean enableHttpCallback = Boolean.TRUE.equals(runCommandItem.getCheckOutput()
+        boolean enableHttpCallback = Boolean.TRUE.equals(runCommandItem.getCheckOutput())
                 && Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getWazuhEnableRunCommandHttpCallback())
-                && !StringUtils.isEmpty(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl()));
+                && !StringUtils.isEmpty(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl());
 
         var launchInput = new LaunchInput();
         launchInput.setMatcher(COMMAND_MATCHER_AR);
@@ -95,6 +96,9 @@ public class WazuhLauncher {
             launchInput.setHttpCallbacks(TextUtils.encodeBase64(JsonCommon.snakeStringify(List.of(httpCallback))));
         }
         activeResponseHttpData.setArguments(List.of(TextUtils.encodeBase64(TextUtils.compress(JsonCommon.snakeStringify(launchInput))), "true"));
+
+        log.info("Wazuh run command({}) on agent({}): {}", launchInput.getId(), runCommandItem.getAgentId(),
+                launchInput.getCommand());
         var httpResult = wazuhClient.getWazuhHttpClient().put("/active-response", activeResponseHttpData,
                 agentsHttpParam, wazuhClient.genWazuhAuthHeaders(), null);
         if (!httpResult.isSuccess()) {

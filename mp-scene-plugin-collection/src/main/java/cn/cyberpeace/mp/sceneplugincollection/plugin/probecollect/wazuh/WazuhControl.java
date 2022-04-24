@@ -258,7 +258,7 @@ public class WazuhControl {
         private String scriptParam;
         private String outputFormat;
         private String interval;
-        private Map<String, Object> extra;
+        private Map<String, String> extra;
     }
 
     @Data
