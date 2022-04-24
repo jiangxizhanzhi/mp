@@ -46,6 +46,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
+    @Value("${mp.sceneplugincollection.wazuh_enable_run_command_http_callback:true}")
+    private Boolean wazuhEnableRunCommandHttpCallback;
+
+    @Value("${mp.sceneplugincollection.wazuh_run_command_http_callback_url:}")
+    private String wazuhRunCommandHttpCallbackUrl;
+
     @Value("${mp.sceneplugincollection.enable_flow_collect:false}")
     private Boolean enableFlowCollect;
 

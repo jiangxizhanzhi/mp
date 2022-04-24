@@ -4,10 +4,12 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class WazuhLauncher {
@@ -41,8 +44,17 @@ public class WazuhLauncher {
     public static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
     public static final DateTimeFormatter WAZUH_ALERT_INDEX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
+    private static Cache<String, LaunchAlert> runCommandResultPool = CacheBuilder.newBuilder()
+            .maximumSize(120000)
+            .expireAfterWrite(30, TimeUnit.SECONDS)
+            .build();
+
     @Getter
     private WazuhClient wazuhClient;
+
+    public static void runCommandResultCall(LaunchAlert alertData) {
+        runCommandResultPool.put(alertData.getData().getSicLaunchId(), alertData);
+    }
 
     private String getAlertIndex(LocalDateTime time) {
         return String.format("%s%s", WAZUH_ALERT_INDEX_PREFIX,
@@ -66,12 +78,22 @@ public class WazuhLauncher {
         } else {
             activeResponseHttpData.setCommand("!ar-launcher.py");
         }
+
+        boolean enableHttpCallback = Boolean.TRUE.equals(runCommandItem.getCheckOutput()
+                && Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getWazuhEnableRunCommandHttpCallback())
+                && !StringUtils.isEmpty(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl()));
+
         var launchInput = new LaunchInput();
         launchInput.setMatcher(COMMAND_MATCHER_AR);
         launchInput.setGroup(launchInput.getMatcher());
         launchInput.setId(runCommandItem.getRunId());
         launchInput.setOutputFormat(runCommandItem.getOutputFormat());
         launchInput.setCommand(runCommandItem.getCommand());
+        if (enableHttpCallback) {
+            var httpCallback = new LaunchHttpCallback();
+            httpCallback.setUrl(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl());
+            launchInput.setHttpCallbacks(TextUtils.encodeBase64(JsonCommon.snakeStringify(List.of(httpCallback))));
+        }
         activeResponseHttpData.setArguments(List.of(TextUtils.encodeBase64(TextUtils.compress(JsonCommon.snakeStringify(launchInput))), "true"));
         var httpResult = wazuhClient.getWazuhHttpClient().put("/active-response", activeResponseHttpData,
                 agentsHttpParam, wazuhClient.genWazuhAuthHeaders(), null);
@@ -89,24 +111,55 @@ public class WazuhLauncher {
 
         wazuhClient.handleWazuhFailResult(response);
 
-        if (Boolean.TRUE.equals(runCommandItem.getCheckOutput())) {
+        if (!Boolean.TRUE.equals(runCommandItem.getCheckOutput())) {
+            return;
+        }
+
+        LaunchAlert launchAlert = null;
+        if (enableHttpCallback) {
+            // 轮询runCommandResultPool
+            long timeout = runCommandItem.getCheckOutputTime() * (long) runCommandItem.getCheckOutputInterval();
+            long checkConsumeMillis = 0;
+            var step = 250;
+            while (timeout >= checkConsumeMillis) {
+                try {
+                    Thread.sleep(step);
+                } catch (InterruptedException e) {
+                    log.error("Wait wazuh agent command output (http callback) interrupted: ", e);
+                }
+                checkConsumeMillis = checkConsumeMillis + step;
+
+                launchAlert = localCheckRunCommandLaunchAlert(runCommandItem.getRunId());
+                if (launchAlert != null) {
+                    break;
+                }
+            }
+
+            // 本地查不到，最后查一遍es
+            if (launchAlert == null) {
+                launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(), runCommandItem.getRunId());
+            }
+        } else {
+            // 轮询es
             for (var i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
                 try {
                     Thread.sleep(runCommandItem.getCheckOutputInterval());
                 } catch (InterruptedException e) {
                     log.error("Wait wazuh agent command output interrupted: ", e);
                 }
-
-                var launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(),
-                        runCommandItem.getRunId());
+                launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(), runCommandItem.getRunId());
                 if (launchAlert != null) {
-                    runCommandItem.setOutput(launchAlert.getData().getSicLaunchOutput());
-                    runCommandItem.setError(launchAlert.getData().getSicLaunchError());
                     break;
-                } else {
-                    runCommandItem.setError("Output not found, maybe you should wait a while");
                 }
             }
+        }
+
+        if (launchAlert != null) {
+            log.info("Check launch alert ok");
+            runCommandItem.setOutput(launchAlert.getData().getSicLaunchOutput());
+            runCommandItem.setError(launchAlert.getData().getSicLaunchError());
+        } else {
+            runCommandItem.setError("Output not found, maybe you should wait a while");
         }
     }
 
@@ -129,6 +182,17 @@ public class WazuhLauncher {
         } else {
             return null;
         }
+    }
+
+    private LaunchAlert localCheckRunCommandLaunchAlert(String runId) {
+        var launchAlert = runCommandResultPool.getIfPresent(runId);
+        if (launchAlert == null) {
+            return null;
+        }
+
+        runCommandResultPool.invalidate(runId);
+
+        return launchAlert;
     }
 
     public WazuhLauncher(String wazuhServer, String esServer) {
@@ -180,13 +244,15 @@ public class WazuhLauncher {
     @Data
     public static class LaunchData {
         private String sicLaunchId;
-        private String sicLaunchCommand;
-        private Integer sicLaunchReturncode;
-        private String sicLaunchStatus;
-        private String sicLaunchOutputFormat;
-        private Map<String, Object> sicLaunchOutput;
-        private String sicLaunchError;
+        private String sicLaunchGroup;
         private String sicLaunchTime;
+        private String sicLaunchStatus;
+        private LaunchInput sicLaunchInput;
+        private Map<String, Object> sicLaunchOutput;
+        private Integer sicLaunchReturncode;
+        private String sicLaunchError;
+        private Long sicLaunchSeconds;
+        private Long sicLaunchMilliseconds;
     }
 
     @Data
@@ -196,6 +262,13 @@ public class WazuhLauncher {
         private String matcher;
         private String command;
         private String outputFormat;
+        private String httpCallbacks;
+    }
+
+    @Data
+    public static class LaunchHttpCallback {
+        private String url;
+        private Map<String, Object> headers;
     }
 
     @Data
