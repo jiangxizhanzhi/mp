@@ -1,6 +1,7 @@
 drop table if exists mp_situation_probe;
 drop table if exists mp_situation_probe_param;
-drop table if exists mp_situation_script;
+drop table if exists mp_situation_collection_template;
+drop table if exists mp_situation_collection_template_probe;
 
 -- 探针表
 create table mp_situation_probe
@@ -25,12 +26,13 @@ create table mp_situation_probe
     comment '探针基本信息';
 
 
--- 探针参数表
+-- 探针/采集模板参数表
 create table mp_situation_probe_param
 (
     pk int auto_increment primary key,
     id varchar(64) not null,
-    probe_id varchar(64) not null comment '探针id',
+    probe_id varchar(64) null comment '探针id',
+    template_id varchar(64) not null comment '采集模板id',
     param_name varchar(32) null comment '参数名称',
     param_type int not null comment '0:number 1:string 2:bool 3:ip',
     default_val varchar(50) null comment '默认值',
@@ -39,7 +41,7 @@ create table mp_situation_probe_param
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     constraint mp_sita_probe_param_id unique (id)
 )
-    comment '探针的参数';
+    comment '探针或者采集模板的参数';
 
 
 
