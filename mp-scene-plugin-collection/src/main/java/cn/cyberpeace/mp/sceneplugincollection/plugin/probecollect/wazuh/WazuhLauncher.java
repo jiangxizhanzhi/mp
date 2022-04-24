@@ -155,7 +155,6 @@ public class WazuhLauncher {
         }
 
         if (launchAlert != null) {
-            log.info("Check launch alert ok");
             runCommandItem.setOutput(launchAlert.getData().getSicLaunchOutput());
             runCommandItem.setError(launchAlert.getData().getSicLaunchError());
         } else {
