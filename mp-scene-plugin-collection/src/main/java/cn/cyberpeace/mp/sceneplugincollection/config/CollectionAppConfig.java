@@ -46,8 +46,20 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
-    @Value("${mp.sceneplugincollection.wazuh_enable_run_command_http_callback:true}")
-    private Boolean wazuhEnableRunCommandHttpCallback;
+    @Value("${mp.sceneplugincollection.wazuh_api_server:http://127.0.0.1:55000}")
+    private String wazuhApiServer;
+
+    @Value("${mp.sceneplugincollection.wazuh_api_user:wazuh}")
+    private String wazuhApiUser;
+
+    @Value("${mp.sceneplugincollection.wazuh_api_pass:wazuh}")
+    private String wazuhApiPass;
+
+    @Value("${mp.sceneplugincollection.wazuh_es_server:http://127.0.0.1:9200}")
+    private String wazuhEsServer;
+
+    @Value("${mp.sceneplugincollection.wazuh_godfs_server:http://127.0.0.1:1888}")
+    private String wazuhGodfsServer;
 
     @Value("${mp.sceneplugincollection.wazuh_run_command_http_callback_url:}")
     private String wazuhRunCommandHttpCallbackUrl;

@@ -6,12 +6,13 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
@@ -52,6 +53,11 @@ public class WazuhLauncher {
     @Getter
     private WazuhClient wazuhClient;
 
+    @Getter
+    private List<RunCommandHttpCallback> httpCallbacks;
+    @Getter
+    private Boolean callbackSelf;
+
     public static void runCommandResultCall(LaunchAlert alertData) {
         log.info("Wazuh run command({}) result call", alertData.getData().getSicLaunchId());
         runCommandResultPool.put(alertData.getData().getSicLaunchId(), alertData);
@@ -80,20 +86,19 @@ public class WazuhLauncher {
             activeResponseHttpData.setCommand("!ar-launcher.py");
         }
 
-        boolean enableHttpCallback = Boolean.TRUE.equals(runCommandItem.getCheckOutput())
-                && Boolean.TRUE.equals(CollectionSingleton.collectionAppConfig.getWazuhEnableRunCommandHttpCallback())
-                && !StringUtils.isEmpty(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl());
-
         var launchInput = new LaunchInput();
         launchInput.setMatcher(COMMAND_MATCHER_AR);
         launchInput.setGroup(launchInput.getMatcher());
         launchInput.setId(runCommandItem.getRunId());
         launchInput.setOutputFormat(runCommandItem.getOutputFormat());
         launchInput.setCommand(runCommandItem.getCommand());
-        if (enableHttpCallback) {
-            var httpCallback = new LaunchHttpCallback();
-            httpCallback.setUrl(CollectionSingleton.collectionAppConfig.getWazuhRunCommandHttpCallbackUrl());
-            launchInput.setHttpCallbacks(TextUtils.encodeBase64(JsonCommon.snakeStringify(List.of(httpCallback))));
+
+        var runCommandHttpCallbacks = runCommandItem.getHttpCallbacks();
+        if (runCommandHttpCallbacks == null) {
+            runCommandHttpCallbacks = this.httpCallbacks;
+        }
+        if (runCommandHttpCallbacks != null && !runCommandHttpCallbacks.isEmpty()) {
+            launchInput.setHttpCallbacks(TextUtils.encodeBase64(JsonCommon.snakeStringify(runCommandHttpCallbacks)));
         }
         activeResponseHttpData.setArguments(List.of(TextUtils.encodeBase64(TextUtils.compress(JsonCommon.snakeStringify(launchInput))), "true"));
 
@@ -120,7 +125,11 @@ public class WazuhLauncher {
         }
 
         LaunchAlert launchAlert = null;
-        if (enableHttpCallback) {
+        var runCommandCallbackSelf = runCommandItem.getCallbackSelf();
+        if (runCommandCallbackSelf == null) {
+            runCommandCallbackSelf = this.callbackSelf;
+        }
+        if (Boolean.TRUE.equals(runCommandCallbackSelf)) {
             // 轮询runCommandResultPool
             long timeout = runCommandItem.getCheckOutputTime() * (long) runCommandItem.getCheckOutputInterval();
             long checkConsumeMillis = 0;
@@ -129,7 +138,7 @@ public class WazuhLauncher {
                 try {
                     Thread.sleep(step);
                 } catch (InterruptedException e) {
-                    log.error("Wait wazuh agent command output (http callback) interrupted: ", e);
+                    log.error("Wait wazuh agent command output callback interrupted: ", e);
                 }
                 checkConsumeMillis = checkConsumeMillis + step;
 
@@ -198,8 +207,48 @@ public class WazuhLauncher {
         return launchAlert;
     }
 
-    public WazuhLauncher(String wazuhServer, String esServer) {
-        wazuhClient = new WazuhClient(wazuhServer, esServer);
+    public static class WazuhLauncherBuilder {
+        private WazuhClient.WazuhClientBuilder wazuhClientBuilder;
+        private List<RunCommandHttpCallback> httpCallbacks;
+        private Boolean callbackSelf;
+
+        private WazuhLauncherBuilder () {
+            wazuhClientBuilder = WazuhClient.builder();
+        }
+
+        public WazuhLauncherBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
+            wazuhClientBuilder.configWazuh(wazuhServer, wazuhUser, wazuhPass);
+            return this;
+        }
+
+        public WazuhLauncherBuilder configEs(String esServer) {
+            wazuhClientBuilder.configEs(esServer);
+            return this;
+        }
+
+        public WazuhLauncherBuilder configCallbackSelf(boolean callbackSelf) {
+            this.callbackSelf = callbackSelf;
+            return this;
+        }
+
+        public WazuhLauncherBuilder configHttpCallbacks(RunCommandHttpCallback... httpCallbacks) {
+            this.httpCallbacks = Arrays.asList(httpCallbacks);
+            return this;
+        }
+
+        public WazuhLauncher build() {
+            return new WazuhLauncher(wazuhClientBuilder.build(), httpCallbacks, callbackSelf);
+        }
+    }
+
+    private WazuhLauncher(WazuhClient wazuhClient, List<RunCommandHttpCallback> httpCallbacks, boolean callbackSelf) {
+        this.wazuhClient = wazuhClient;
+        this.httpCallbacks = httpCallbacks;
+        this.callbackSelf = callbackSelf;
+    }
+
+    public static WazuhLauncherBuilder builder() {
+        return new WazuhLauncherBuilder();
     }
 
     public List<RunCommandItem> runCommand(List<RunCommandItem> runCommandItems) {
@@ -269,12 +318,6 @@ public class WazuhLauncher {
     }
 
     @Data
-    public static class LaunchHttpCallback {
-        private String url;
-        private Map<String, Object> headers;
-    }
-
-    @Data
     public static class ActiveResponseHttpData implements WazuhClient.WazuhHttpData {
         private String command;
         private List<String> arguments;
@@ -283,6 +326,14 @@ public class WazuhLauncher {
     @Data
     public static class AgentsActiveResponseHttpParam implements WazuhClient.WazuhHttpParam {
         private String agentsList;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RunCommandHttpCallback {
+        private String url;
+        private Map<String, Object> headers;
     }
 
     @Data
@@ -297,6 +348,8 @@ public class WazuhLauncher {
         private Boolean checkOutput;
         private Integer checkOutputTime;
         private Integer checkOutputInterval;
+        private List<RunCommandHttpCallback> httpCallbacks;
+        private Boolean callbackSelf;
 
         private String runId;
         private String agentId;

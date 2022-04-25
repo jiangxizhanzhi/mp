@@ -31,11 +31,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WazuhClient {
 
     @Getter
-    private final HttpClient wazuhHttpClient;
+    private HttpClient wazuhHttpClient;
     @Getter
-    private final RestHighLevelClient esClient;
+    private RestHighLevelClient esClient;
 
     private int wazuhTokenExpiredSeconds = 900;
+
+    private String wazuhUser;
+    private String wazuhPass;
 
     private String wazuhToken;
     private LocalDateTime wazuhTokenExpiredTime;
@@ -46,11 +49,8 @@ public class WazuhClient {
     private static final Map<String, String> agentNameIdMap = new ConcurrentHashMap<>();
 
     private Map<String, String> genWazuhBaseAuthHeaders() {
-        // TODO 配置化
-        var authUser = "wazuh";
-        var authPass = "wazuh";
         return Map.of("Authorization", String.format("Basic %s",
-                TextUtils.encodeBase64(String.format("%s:%s", authUser, authPass))));
+                TextUtils.encodeBase64(String.format("%s:%s", wazuhUser, wazuhPass))));
     }
 
     private String getWazuhApiToken() {
@@ -114,13 +114,42 @@ public class WazuhClient {
         });
     }
 
-    public WazuhClient(String wazuhServer, String esServer) {
-        wazuhHttpClient = new HttpClient(wazuhServer, 60000, 200, 200);
-        wazuhHttpClient.setLogRequest(true);
+    public static class WazuhClientBuilder {
+        private String wazuhServer;
+        private String wazuhUser;
+        private String wazuhPass;
+        private String esServer;
+
+        public WazuhClientBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
+            this.wazuhServer = wazuhServer;
+            this.wazuhUser = wazuhUser;
+            this.wazuhPass = wazuhPass;
+            return this;
+        }
+
+        public WazuhClientBuilder configEs(String esServer) {
+            this.esServer = esServer;
+            return this;
+        }
+
+        public WazuhClient build() {
+            return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer);
+        }
+    }
+
+    private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer) {
+        this.wazuhHttpClient = new HttpClient(wazuhServer, 60000, 200, 200);
+        this.wazuhHttpClient.setLogRequest(true);
+        this.wazuhUser = wazuhUser;
+        this.wazuhPass = wazuhPass;
 
         var esHostParts = esServer.split("://")[1].split(":");
         var restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
-        esClient = new RestHighLevelClient(restClientBuilder);
+        this.esClient = new RestHighLevelClient(restClientBuilder);
+    }
+
+    public static WazuhClientBuilder builder() {
+        return new WazuhClientBuilder();
     }
 
     public Map<String, String> genWazuhAuthHeaders() {

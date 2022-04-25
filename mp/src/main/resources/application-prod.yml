@@ -136,6 +136,10 @@ mp:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
+    wazuh-api-server: http://${ip.wazuh}:15500
+    wazuh-api-pass: Abcd123#
+    wazuh-es-server: http://${ip.es}:9205
+    wazuh-godfs-server: http://${ip.wazuh}:11888
     wazuh-run-command-http-callback-url: http://${ip.self}:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
 
 management:

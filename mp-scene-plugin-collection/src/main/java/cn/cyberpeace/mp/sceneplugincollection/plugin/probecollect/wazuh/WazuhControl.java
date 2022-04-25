@@ -55,7 +55,7 @@ public class WazuhControl {
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
 
     @Getter
-    private final HttpClient gofdsHttpClient;
+    private HttpClient godfsHttpClient;
 
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommand(osType, controlConfigParam, false);
@@ -136,20 +136,61 @@ public class WazuhControl {
     @Getter
     private WazuhLauncher wazuhLauncher;
 
-    public WazuhControl(String wazuhServer, String esServer, String gofdsServer) {
-        wazuhLauncher = new WazuhLauncher(wazuhServer, esServer);
+    public static class WazuhControlBuilder {
+        private WazuhLauncher.WazuhLauncherBuilder wazuhLauncherBuilder;
+        private String godfsServer;
 
-        gofdsHttpClient = new HttpClient(gofdsServer, 600000, 200, 200);
-        gofdsHttpClient.setLogRequest(true);
+        private WazuhControlBuilder () {
+            wazuhLauncherBuilder = WazuhLauncher.builder();
+        }
+
+        public WazuhControlBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
+            wazuhLauncherBuilder.configWazuh(wazuhServer, wazuhUser, wazuhPass);
+            return this;
+        }
+
+        public WazuhControlBuilder configEs(String esServer) {
+            wazuhLauncherBuilder.configEs(esServer);
+            return this;
+        }
+
+        public WazuhControlBuilder configCallbackSelf(boolean callbackSelf) {
+            wazuhLauncherBuilder.configCallbackSelf(callbackSelf);
+            return this;
+        }
+
+        public WazuhControlBuilder configHttpCallbacks(WazuhLauncher.RunCommandHttpCallback... httpCallbacks) {
+            wazuhLauncherBuilder.configHttpCallbacks(httpCallbacks);
+            return this;
+        }
+
+        public WazuhControlBuilder configGodfs(String godfsServer) {
+            this.godfsServer = godfsServer;
+            return this;
+        }
+
+        public WazuhControl build() {
+            return new WazuhControl(wazuhLauncherBuilder.build(), godfsServer);
+        }
     }
 
-    public WazuhLauncher.RunCommandItem controlConfig(String agentName, String osType, ControlConfigParam controlConfigParam) {
+    private WazuhControl(WazuhLauncher wazuhLauncher, String godfsServer) {
+        this.wazuhLauncher = wazuhLauncher;
+
+        this.godfsHttpClient = new HttpClient(godfsServer, 600000, 200, 200);
+        this.godfsHttpClient.setLogRequest(true);
+    }
+
+    public static WazuhControlBuilder builder() {
+        return new WazuhControlBuilder();
+    }
+
+    public void controlConfig(String agentName, String osType, ControlConfigParam controlConfigParam) {
         var runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
         runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigParam, true));
         wazuhLauncher.runCommand(List.of(runCommandItem));
-        return runCommandItem;
     }
 
     public QueryConfigData queryConfig(String agentName, String osType) {
