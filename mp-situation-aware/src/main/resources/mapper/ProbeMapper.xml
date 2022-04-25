@@ -8,6 +8,7 @@
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="probe_category" jdbcType="INTEGER" property="probeCategory" />
     <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
     <result column="output_format" jdbcType="VARCHAR" property="outputFormat" />
     <result column="is_deleted" jdbcType="INTEGER" property="isDeleted" />
     <result column="OS_type" jdbcType="VARCHAR" property="osType" />
@@ -15,7 +16,7 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    pk, id, `name`, description, probe_category, `type`, output_format,
+    pk, id, `name`, description, probe_category, `type`, interval_sec, output_format,
     is_deleted, OS_type, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -29,14 +30,14 @@
     where pk = #{pk,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
-    insert into mp_situation_probe (pk, id, `name`, 
+    insert into mp_situation_probe (pk, id, `name`,
       description, probe_category,
-      `type`, output_format, is_deleted, 
+      `type`, interval_sec, output_format, is_deleted,
       OS_type, create_time, update_time
       )
     values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{description,jdbcType=VARCHAR}, #{probeCategory,jdbcType=INTEGER},
-      #{type,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER}, 
+      #{type,jdbcType=INTEGER}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
       #{osType,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
@@ -60,6 +61,9 @@
       </if>
       <if test="type != null">
         `type`,
+      </if>
+      <if test="intervalSec != null">
+        interval_sec,
       </if>
       <if test="outputFormat != null">
         output_format,
@@ -96,6 +100,9 @@
       <if test="type != null">
         #{type,jdbcType=INTEGER},
       </if>
+      <if test="intervalSec != null">
+        #{intervalSec,jdbcType=INTEGER},
+      </if>
       <if test="outputFormat != null">
         #{outputFormat,jdbcType=VARCHAR},
       </if>
@@ -131,6 +138,9 @@
       <if test="type != null">
         `type` = #{type,jdbcType=INTEGER},
       </if>
+      <if test="intervalSec != null">
+        interval_sec = #{intervalSec,jdbcType=INTEGER},
+      </if>
       <if test="outputFormat != null">
         output_format = #{outputFormat,jdbcType=VARCHAR},
       </if>
@@ -156,6 +166,8 @@
       description = #{description,jdbcType=VARCHAR},
       probe_category = #{probeCategory,jdbcType=INTEGER},
       `type` = #{type,jdbcType=INTEGER},
+      interval_sec = #{intervalSec,jdbcType=INTEGER},
+      output_format = #{outputFormat,jdbcType=VARCHAR},
       output_format = #{outputFormat,jdbcType=VARCHAR},
       is_deleted = #{isDeleted,jdbcType=INTEGER},
       OS_type = #{osType,jdbcType=VARCHAR},

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.model;
+package cn.cyberpeace.mp.situationaware.model.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel("探针管理入参")
+@ApiModel("探针请求体")
 public class ProbeRequest {
 
     @ApiModelProperty(value = "探针id,新增的时候不需要传")

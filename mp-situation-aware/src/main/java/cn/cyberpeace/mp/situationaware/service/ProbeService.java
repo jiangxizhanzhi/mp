@@ -4,11 +4,13 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeResult;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -87,6 +90,31 @@ public class ProbeService {
 //        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
 
     }
+
+
+    /**
+     * 导入脚本文件，返回脚本内容
+     * @return 脚本内容
+     */
+    public String importScriptFileAndGetContent(MultipartFile scriptFile) {
+
+        return "";
+    }
+
+
+    /**
+     * 分页查询探针列表
+     *
+     * @return
+     */
+    public PageInfo<ProbeModel> pageProbes(ProbePageQueryRequest pageQueryRequest) {
+        pageQueryRequest.ensure();
+
+        // todo 通用探针
+
+        return null;
+    }
+
 
     /*@Transactional(rollbackFor = Exception.class, readOnly = true)
     public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {

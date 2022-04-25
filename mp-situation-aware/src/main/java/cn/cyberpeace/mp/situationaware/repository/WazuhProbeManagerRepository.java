@@ -4,7 +4,7 @@
 //import cn.cyberpeace.mp.base.util.HttpUtils;
 //import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 //import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-//import cn.cyberpeace.mp.situationaware.model.ProbeRequest;
+//import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
 //import cn.cyberpeace.mp.situationaware.model.enums.OsType;
 //import cn.cyberpeace.mp.situationaware.model.enums.ScriptType;
 //import com.alibaba.fastjson.JSONObject;
