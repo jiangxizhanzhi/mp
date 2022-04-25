@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
@@ -13,6 +14,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
 
     @ApiOperation(value = "绑定组织-权限关系，注意，该操作会清除原来绑定的所有权限， 如果targetIds为空，表示删除组织所有权限！", notes = "")
     @PostMapping("/bind")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
         boolean success = getModelService().bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds(), true);
         return ResultUtils.commonResult(success, null);
@@ -45,6 +48,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
 
     @ApiOperation(value = "查询组织所有权限")
     @GetMapping("/byorg")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getOrgPermissions(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgId(orgId);
         return ResultUtils.commonResult(true, targets);
@@ -53,6 +57,7 @@ public class OrgPermissionController extends BaseModelController<OrgPermissionMo
 
     @ApiOperation(value = "查询组织所有权限（继承上级组织权限）")
     @GetMapping("/byorg/includeparent")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getOrgPermission(@RequestParam String orgId) {
         Set<TargetModel> targets = getModelService().listTargetsByOrgIdIncludeAllParentsOrg(orgId);
         return ResultUtils.commonResult(true, null);

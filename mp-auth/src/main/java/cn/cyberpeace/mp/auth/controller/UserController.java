@@ -78,6 +78,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/api/mp/auth/org_users/page/byorg) 分页查询组织下的用户", notes = "")
     @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ListObjServiceResult<UserModel> list(UserQueryParams queryParams) {
         return super.list(queryParams);
     }
@@ -89,6 +90,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PostMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<UserModel> create(@RequestBody UserModel obj, @RequestParam(required = false) String[] fields) {
         return super.create(obj, fields);
     }
@@ -101,6 +103,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     })
     @PatchMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改用户", target = AuthLogConstant.TARGET_USER)
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<UserModel> update(@PathVariable String id, @RequestBody UserModel obj,
                                               @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
@@ -125,10 +128,12 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = getModelService().getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
     }
+
 
     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
@@ -239,6 +244,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "用户在线报告", notes = "")
     @GetMapping("/olreport")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult onlineReport(UserOnlineReportPageRequest pageRequest) {
         pageRequest.ensure();
         PageInfo pageInfo = userOnlineReportService.page(pageRequest);
@@ -262,4 +268,45 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         throw new MpRuntimeException("Not Support Method!");
     }
 
+
+
+
+    /**
+     * 通用批量创建
+     * @param objs 创建对象集
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量创建数据")
+    @PostMapping("/bulk_create")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkCreate(@RequestBody List<UserModel> objs) {
+        return getModelService().bulkCreate(objs).asResult();
+    }
+
+    /**
+     * 通用批量更新
+     * @param objs 更新对象集，需要更新的字段必须一致
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量更新数据")
+    @PatchMapping("/bulk_update")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkUpdate(@RequestBody List<UserModel> objs) {
+        return getModelService().bulkUpdate(objs).asResult();
+    }
+
+    /**
+     * 通用批量删除
+     * @param ids 数据id集
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量删除数据")
+    @DeleteMapping("/bulk_delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        return getModelService().bulkDelete(ids).asResult();
+    }
 }

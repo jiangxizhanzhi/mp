@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.service.AvatarService;
@@ -12,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
 
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getAll() {
         List<AvatarModel> avatars = getModelService().listAll();
         return ResultUtils.commonResult(true, avatars);
@@ -43,6 +46,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
     @ApiOperation(value = "上传头像，返回url", notes = "")
     @PostMapping("/upload")
     @ResponseBody
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult upload(MultipartFile file) {
         FileResponseData responseData = getModelService().upload(file);
         return ResultUtils.commonResult(true, responseData.getHttpUrl());

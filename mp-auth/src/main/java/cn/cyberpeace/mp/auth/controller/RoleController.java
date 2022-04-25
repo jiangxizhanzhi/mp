@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -52,6 +53,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
 
+    @Override
     @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
     @ApiIgnore
     @ApiImplicitParams({
@@ -92,6 +94,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @Override
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         RoleDto roleDto = getModelService().getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleDto);
@@ -103,6 +106,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @GetMapping("/perm/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult getRolePerm(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         RolePermDto rolePermDto = getModelService().getRolePermDto(id);
 
@@ -130,6 +134,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "根据租户查询所有角色", notes = "")
     @GetMapping("/bytenant")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getRoleByTenant(@RequestParam(required = false) String tenant) {
         List<RoleModel> roles;
         if (StringUtils.isNotBlank(tenant)) {
@@ -143,6 +148,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "分页查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
     @GetMapping("/page")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {
         pageRequest.ensure();
         PageInfo page = getModelService().getPageWithUserCnt(pageRequest);
@@ -153,10 +159,66 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
 
     @ApiOperation(value = "查询所有角色", notes = "")
     @GetMapping("/all")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getRoleByTenant() {
         List<RoleModel> roles = getModelService().listAll();
         return ServiceResult.builder().source(roles).build().asResult();
     }
 
+
+
+    /**
+     * 通用查询方法
+     * @param queryParams 查询参数
+     * @return 列表查询结果
+     */
+    @Override
+    @ApiOperation("获取分页数据")
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ListObjServiceResult<RoleModel> list(QueryParams queryParams) {
+        handleQueryParams("list", queryParams);
+        return getModelService().list(queryParams).asResult();
+    }
+
+
+    /**
+     * 通用批量创建
+     * @param objs 创建对象集
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量创建数据")
+    @PostMapping("/bulk_create")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkCreate(@RequestBody List<RoleModel> objs) {
+        return getModelService().bulkCreate(objs).asResult();
+    }
+
+    /**
+     * 通用批量更新
+     * @param objs 更新对象集，需要更新的字段必须一致
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量更新数据")
+    @PatchMapping("/bulk_update")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkUpdate(@RequestBody List<RoleModel> objs) {
+        return getModelService().bulkUpdate(objs).asResult();
+    }
+
+    /**
+     * 通用批量删除
+     * @param ids 数据id集
+     * @return 成功数量
+     */
+    @Override
+    @ApiOperation("批量删除数据")
+    @DeleteMapping("/bulk_delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        return getModelService().bulkDelete(ids).asResult();
+    }
 
 }
