@@ -24,7 +24,7 @@ public class JsonUtils {
      */
     public static String toUnderlineJSONString(Object object) {
         SerializeConfig config = new SerializeConfig();
-        config.propertyNamingStrategy = PropertyNamingStrategy.CamelCase;
+        config.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;
         return JSON.toJSONString(object, config);
     }
 
