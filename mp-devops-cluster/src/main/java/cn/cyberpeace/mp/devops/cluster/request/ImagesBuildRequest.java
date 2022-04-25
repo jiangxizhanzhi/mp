@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.request;
 
+import cn.cyberpeace.mp.devops.cluster.dto.InstallerDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,9 +29,9 @@ public class ImagesBuildRequest extends BaseRequest {
     private String imageName;
 
     /**
-     * 服务ID集合
+     * 服务集合
      */
-    private List<String> serviceIds;
+    private List<InstallerDTO> installerDTOList;
 
 
 }
