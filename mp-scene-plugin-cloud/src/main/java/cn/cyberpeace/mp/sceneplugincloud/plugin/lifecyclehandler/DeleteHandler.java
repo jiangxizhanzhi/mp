@@ -233,8 +233,11 @@ public class DeleteHandler extends HandlerCommon {
         closeAccessModes(cloudElement);
 
         var deleteData = new EntityNodeDeleteData();
-        List<String> interfaceNames = cloudElement.getSrcElement().getPorts().stream()
-                .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());
+        List<String> interfaceNames = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+            interfaceNames = cloudElement.getSrcElement().getPorts().stream()
+                    .map(BaseSceneElementPortBO::getName).collect(Collectors.toList());
+        }
         deleteData.setInterfaces(interfaceNames);
         var extraInfo = collectElementExtraCloudInfo(cloudElement);
         deleteData.setConnections(extraInfo.getConnectionIds());
