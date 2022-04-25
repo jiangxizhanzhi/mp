@@ -25,5 +25,6 @@ public class GuacamoleCreateConnectionData implements CloudHttpData {
         private String port;
         private String username;
         private String password;
+        private String privateKey;
     }
 }
