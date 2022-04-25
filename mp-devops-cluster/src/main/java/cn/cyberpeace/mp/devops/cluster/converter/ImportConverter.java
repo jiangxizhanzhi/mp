@@ -41,11 +41,13 @@ public class ImportConverter implements BaseConverter{
         this.sysActivationService = sysActivationService;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,

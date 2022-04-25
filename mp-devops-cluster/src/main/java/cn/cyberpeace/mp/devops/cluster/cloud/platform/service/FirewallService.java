@@ -11,7 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
@@ -34,9 +33,7 @@ public class FirewallService extends BaseOpenStackService {
      */
     public FirewallCloudPlatformModel page(String getParams) {
         FirewallPageResult pageResult = super.sendGet(URL_VERSION + "/firewalls" + getParams, FirewallPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<Firewall> data = pageResult.getData();
         List<Firewall> list = data.getList();
         FirewallCloudPlatformModel model = new FirewallCloudPlatformModel();

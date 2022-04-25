@@ -41,34 +41,35 @@ public class FileUtils {
         return fileList;
     }
 
-    /**
-     * 转换 MultipartFile to File,生成临时文件，原文件名称修改为uuid
-     * @param multipartFiles
-     * @return
-     * @throws IOException
-     */
     public static Map<String,File> transferToFileMap(List<MultipartFile> multipartFiles) throws IOException {
         if (CollectionUtils.isEmpty(multipartFiles)){
             return new HashMap<>();
         }
         Map<String,File> fileList = new HashMap<>();
-        String fileName;
+        String originalFilename;
         String prefix;
+        final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
+
         for (MultipartFile multipartFile : multipartFiles) {
             // 获取文件名
-            fileName = multipartFile.getOriginalFilename();
-            int index = StringUtils.isBlank(fileName) ? -1 : fileName.lastIndexOf(".");
+            originalFilename = multipartFile.getOriginalFilename();
+            int index = StringUtils.isBlank(originalFilename) ? -1 : originalFilename.lastIndexOf(".");
             // 获取文件后缀
             if (index < 0 ){
                 prefix = ".img";
             }else{
-                prefix = fileName.substring(index);
+                prefix = originalFilename.substring(index);
             }
-            // 用uuid作为文件名，防止生成的临时文件重复
-            final File file = File.createTempFile(UUID.randomUUID().toString(), prefix);
+            String dirName = UUID.randomUUID().toString();
+            File newTempDir = new File(sysTempDir, dirName);
+            if (!newTempDir.exists()){
+                newTempDir.mkdirs();
+            }
+            final File file = new File(newTempDir,originalFilename.substring(0,index).concat(prefix));
             // MultipartFile to File
             multipartFile.transferTo(file);
-            fileList.put(fileName,file);
+            file.deleteOnExit();
+            fileList.put(originalFilename,file);
         }
         return fileList;
     }
