@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileTypeUtil;
+import cn.hutool.core.io.file.FileNameUtil;
 import com.alibaba.excel.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     }
 
     public static final List<String> SUPPORTED_IMAGE_TYPES = Arrays.asList("jpg", "png", "mpg");
+
+    public static final List<String> SUPPORTED_IMAGE_SUFFIX = Arrays.asList("jpg", "jpeg", "png", "mpg", "bmp", "gif");
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -70,7 +73,9 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
         // todo 判断是否是图片
         try {
             String type = FileTypeUtil.getType(file.getInputStream());
-            if (StringUtils.isEmpty(type) || !SUPPORTED_IMAGE_TYPES.contains(type.toLowerCase())) {
+            String suffix = FileNameUtil.getSuffix(file.getOriginalFilename());
+            if (StringUtils.isEmpty(type) || !SUPPORTED_IMAGE_TYPES.contains(type.toLowerCase()) || !SUPPORTED_IMAGE_SUFFIX.contains(suffix.toLowerCase())) {
+                log.error("type:{}, suffix:{}", type, suffix);
                 throw new MpRuntimeException("不支持的图片类型，请上传jpg, png, mpg格式的图片！");
             }
         } catch (IOException e) {
