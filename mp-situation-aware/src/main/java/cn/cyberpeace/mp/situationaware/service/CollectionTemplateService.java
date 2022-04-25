@@ -36,7 +36,7 @@ public class CollectionTemplateService {
      * @return
      */
     public CollectionTemplateModel saveTemplate() {
-
+        return null;
     }
 
 
@@ -45,12 +45,12 @@ public class CollectionTemplateService {
      * @return
      */
     public CollectionTemplateModel modifyTemplate() {
-
+        return null;
     }
 
 
     public CollectionTemplateModel getById(String id) {
-
+        return null;
     }
 
 }

@@ -1,17 +1,24 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * mp_situation_collection_template_probe
  * @author 
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table("mp_situation_collection_template_probe")
 public class CollectionTemplateProbeModel extends BaseModel implements Serializable {
 
     /**
@@ -39,9 +46,9 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
     private Integer intervalSec;
 
     /**
-     * 探针配置，json串，数组
+     * 探针配置，json字符串
      */
     @ApiModelProperty(value = "探针配置，json串，数组")
-    private Map<String, String> config;
+    private String config;
 
 }

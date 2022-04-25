@@ -1,8 +1,13 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +16,10 @@ import java.io.Serializable;
  * @author 
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table("mp_situation_probe_script")
 public class ProbeScriptModel extends BaseModel implements Serializable {
 
     /**
@@ -29,12 +38,14 @@ public class ProbeScriptModel extends BaseModel implements Serializable {
      * 脚本版本
      */
     @ApiModelProperty(value = "脚本版本")
+    @DefaultInt(1)
     private Integer version;
 
     /**
      * 脚本状态
      */
     @ApiModelProperty(value = "脚本状态")
+    @DefaultInt(1)
     private Integer status;
 
     /**

@@ -1,8 +1,13 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +16,10 @@ import java.io.Serializable;
  * @author 
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table("mp_situation_probe_param")
 public class ProbeParamModel extends BaseModel implements Serializable {
 
     /**
@@ -23,6 +32,7 @@ public class ProbeParamModel extends BaseModel implements Serializable {
      * 采集模板id
      */
     @ApiModelProperty(value = "采集模板id")
+    @DefaultStr("")
     private String templateId;
 
     /**
@@ -41,12 +51,14 @@ public class ProbeParamModel extends BaseModel implements Serializable {
      * 默认值
      */
     @ApiModelProperty(value = "默认值")
+    @DefaultStr("")
     private String defaultValue;
 
     /**
      * 参数说明
      */
     @ApiModelProperty(value = "参数说明")
+    @DefaultStr("")
     private String description;
 
 

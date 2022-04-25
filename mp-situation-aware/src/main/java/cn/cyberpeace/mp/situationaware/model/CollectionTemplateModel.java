@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +15,10 @@ import java.io.Serializable;
  * @author 
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table("mp_situation_collection_template")
 public class CollectionTemplateModel extends BaseModel implements Serializable {
 
     /**

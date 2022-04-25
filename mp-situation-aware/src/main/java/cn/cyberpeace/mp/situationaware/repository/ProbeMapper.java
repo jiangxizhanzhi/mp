@@ -13,17 +13,17 @@ import java.util.List;
 @Repository
 @ModelClass(ProbeModel.class)
 public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
-    int deleteByPrimaryKey(Integer pk);
-
-    int insert(ProbeModel record);
-
-    int insertSelective(ProbeModel record);
-
-    ProbeModel selectByPrimaryKey(Integer pk);
-
-    int updateByPrimaryKeySelective(ProbeModel record);
-
-    int updateByPrimaryKey(ProbeModel record);
+//    int deleteByPrimaryKey(Integer pk);
+//
+//    int insert(ProbeModel record);
+//
+//    int insertSelective(ProbeModel record);
+//
+//    ProbeModel selectByPrimaryKey(Integer pk);
+//
+//    int updateByPrimaryKeySelective(ProbeModel record);
+//
+//    int updateByPrimaryKey(ProbeModel record);
 
     List<ProbeModel> listByIds(@Param("ids") List<String> ids);
 }

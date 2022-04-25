@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -21,6 +23,7 @@ public class ProbeRequest {
 
 
     @ApiModelProperty(value = "探针名称")
+    @NotBlank
     private String name;
 
 
@@ -37,13 +40,25 @@ public class ProbeRequest {
 
 
     @ApiModelProperty(value = "(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
-    private String osType;
+    private List<Integer> osTypes;
 
+
+    /**
+     * 0:shell 1:python 2:bat
+     */
+    @ApiModelProperty(value = "0:shell 1:python 2:bat")
+    @NotNull
+    private Integer scriptType;
 
     @ApiModelProperty(value = "探针脚本内容")
+    @NotBlank
     private String scriptContent;
 
-    @ApiModelProperty(value = "脚本参数 建议 ##包裹参数，方便替换")
+
+    @ApiModelProperty(value = "探针脚本Url")
+    private String scriptUrl;
+
+    @ApiModelProperty(value = "脚本参数列表")
     private List<ProbeParamsRequest> params;
 
 }

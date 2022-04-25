@@ -1,15 +1,23 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeParamsRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbeResult;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
+import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -20,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -42,6 +51,15 @@ public class ProbeService {
     @Autowired
     private ProbeParamMapper probeParamMapper;
 
+    @Autowired
+    private ProbeScriptMapper probeScriptMapper;
+
+    @Autowired
+    private FastDfsConfig fastDfsConfig;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
+
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -53,23 +71,42 @@ public class ProbeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void addProbe(ProbeRequest probeRequest) {
-        var probeModel = new ProbeModel();
+        ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         //新增探针，默认为自定义探针
         probeModel.setType(ProbeModel.TYPE_CUSTOM);
-        probeModel.setDescription(probeRequest.getDescription());
-        probeModel.setOsType(probeRequest.getOsType());
-//        probeModel.setScriptType(probeRequest.getScriptType().getTypeVal());
-//        probeModel.setCommandInterval(probeRequest.getCommandInterval() + "m");
-        probeModel.setOutputFormat(probeRequest.getOutputFormat());
-//        var probeExist = probeModelMapper.countQueryByProbeName(probeRequest.getProbeName()) > 0;
-//        if (Boolean.TRUE.equals(probeExist)) {
-//            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
-//        }
-        // todo params
-        probeMapper.insert(probeModel);
-//        insertProbeParams(probeRequest, probeModel.getId());
-//        probeRequest.setProbeId(probeModel.getId());
+
+        String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
+        probeModel.setOsType(osTypes);
+
+
+        String probeId = TextUtils.uuid();
+        probeModel.setId(probeId);
+
+        ProbeScriptModel scriptModel = ProbeScriptModel.builder()
+                .probeId(probeId)
+                .scriptType(probeRequest.getScriptType())
+                .scriptContent(probeRequest.getScriptContent())
+                .scriptUrl(probeRequest.getScriptUrl()).build();
+
+
+        List<ProbeParamsRequest> params = probeRequest.getParams();
+        List<ProbeParamModel> paramList =
+            params.stream().map(paramReq -> {
+                ProbeParamModel paramModel = ProbeParamModel.builder()
+                        .probeId(probeId)
+                        .templateId(null)
+                        .name(paramReq.getName())
+                        .defaultValue(paramReq.getDefaultValue())
+                        .description(paramReq.getDescription())
+                        .type(paramReq.getType())
+                        .build();
+                return paramModel;
+            }).collect(Collectors.toList());
+
+        probeMapper.create(probeModel);
+        probeScriptMapper.create(scriptModel);
+        probeParamMapper.bulkCreate(paramList);
     }
 
     /**
@@ -107,7 +144,7 @@ public class ProbeService {
      *
      * @return
      */
-    public PageInfo<ProbeModel> pageProbes(ProbePageQueryRequest pageQueryRequest) {
+    public PageInfo<ProbeModel> page(ProbePageQueryRequest pageQueryRequest) {
         pageQueryRequest.ensure();
 
         // todo 通用探针
@@ -310,4 +347,19 @@ public class ProbeService {
         }
         return scriptContent;
     }*/
+
+
+    /**
+     * 将脚本内容上传FDFS，返回上传文件url
+     * @param scriptContent
+     * @return
+     */
+    public String uploadScriptContent(String scriptContent) {
+        // 处理探针脚本
+        // todo 语法校验
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+        String filepath = fastDFSClient.upload(scriptContent, "script", null, FdfsGroupEnum.DEFAULT.toString());
+        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
+        return httpUrl;
+    }
 }
