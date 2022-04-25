@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.InstallerDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
@@ -209,7 +210,16 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public Device build(ImagesBuildRequest request) {
-        Device device =  imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+        DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
+        List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
+        List<DeviceQuickCreateCloudPlatformModel.QuickCreateParams> quickCreateParams = installerDTOList.stream().map(v -> {
+            DeviceQuickCreateCloudPlatformModel.QuickCreateParams params = new DeviceQuickCreateCloudPlatformModel.QuickCreateParams();
+            params.setInstallerUuid(v.getUuid());
+            params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
+            return params;
+        }).collect(Collectors.toList());
+        model.setQuickCreateParams(quickCreateParams);
+        Device device =  imagesService.quickCreate(model);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
