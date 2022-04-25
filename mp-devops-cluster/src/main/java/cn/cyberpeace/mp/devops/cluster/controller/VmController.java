@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
@@ -30,13 +30,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/instance")
 @Api(tags = "计算实例管理-虚拟机")
-public class InstanceController {
+public class VmController {
 
-    private InstanceConverter instanceConverter;
+    private VmConverter vmConverter;
 
     @Autowired
-    public InstanceController(InstanceConverter instanceConverter) {
-        this.instanceConverter = instanceConverter;
+    public VmController(VmConverter vmConverter) {
+        this.vmConverter = vmConverter;
     }
 
     /**
@@ -47,7 +47,7 @@ public class InstanceController {
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public PageResult<InstancePageResponse> page(InstancePageRequest request){
-        InstanceConvertModel model = instanceConverter.page(request);
+        InstanceConvertModel model = vmConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }

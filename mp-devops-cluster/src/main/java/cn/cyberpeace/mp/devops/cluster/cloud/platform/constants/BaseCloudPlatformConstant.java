@@ -60,4 +60,9 @@ public final class BaseCloudPlatformConstant {
      */
     public static final String SCREENRECORD_METHOD = CPCLOUD_URL + "/guacamole" + URL_VERSION;
 
+    /**
+     * 成功状态码
+     */
+    public static final String CODE = "0";
+
 }

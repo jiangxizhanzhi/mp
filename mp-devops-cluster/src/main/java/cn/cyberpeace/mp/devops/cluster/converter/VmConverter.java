@@ -24,20 +24,22 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
-public class InstanceConverter implements BaseConverter{
+public class VmConverter implements BaseConverter{
 
     private VmService vmService;
 
     @Autowired
-    public InstanceConverter(VmService vmService) {
+    public VmConverter(VmService vmService) {
         this.vmService = vmService;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
