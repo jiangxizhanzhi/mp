@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
@@ -19,15 +18,15 @@ import cn.cyberpeace.mp.situationaware.model.dto.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -82,50 +81,83 @@ public class ProbeService {
 
         String probeId = TextUtils.uuid();
         probeModel.setId(probeId);
+        probeMapper.create(probeModel);
 
-        ProbeScriptModel scriptModel = ProbeScriptModel.builder()
-                .probeId(probeId)
-                .scriptType(probeRequest.getScriptType())
-                .scriptContent(probeRequest.getScriptContent())
-                .scriptUrl(probeRequest.getScriptUrl()).build();
+        if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
+            ProbeScriptModel scriptModel = ProbeScriptModel.builder()
+                    .probeId(probeId)
+                    .scriptType(probeRequest.getScriptType())
+                    .scriptContent(probeRequest.getScriptContent())
+                    .scriptUrl(probeRequest.getScriptUrl()).build();
+            probeScriptMapper.create(scriptModel);
+        }
 
 
         List<ProbeParamsRequest> params = probeRequest.getParams();
-        List<ProbeParamModel> paramList =
-            params.stream().map(paramReq -> {
-                ProbeParamModel paramModel = ProbeParamModel.builder()
-                        .probeId(probeId)
-                        .templateId(null)
-                        .name(paramReq.getName())
-                        .defaultValue(paramReq.getDefaultValue())
-                        .description(paramReq.getDescription())
-                        .type(paramReq.getType())
-                        .build();
-                return paramModel;
-            }).collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(params)) {
+            List<ProbeParamModel> paramList =
+                    params.stream().map(paramReq -> {
+                        ProbeParamModel paramModel = ProbeParamModel.builder()
+                                .probeId(probeId)
+                                .templateId(null)
+                                .name(paramReq.getName())
+                                .defaultValue(paramReq.getDefaultValue())
+                                .description(paramReq.getDescription())
+                                .type(paramReq.getType())
+                                .build();
+                        return paramModel;
+                    }).collect(Collectors.toList());
 
-        probeMapper.create(probeModel);
-        probeScriptMapper.create(scriptModel);
-        probeParamMapper.bulkCreate(paramList);
+            probeParamMapper.bulkCreate(paramList);
+        }
     }
 
-    /**
-     * 根据probeId删除探针
-     *
-     * @param probeIds probeIds
-     * @return 是否删除成功
-     */
+
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteProbeById(List<String> probeIds) {
-        if (CollectionUtils.isEmpty(probeIds) || probeIds.stream().anyMatch(ObjectUtils::isEmpty)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_DELETE_PARAM_ERROR);
+    public void modifyProbe(ProbeRequest probeRequest) {
+        String probeId = probeRequest.getId();
+
+        ProbeModel probeModel = new ProbeModel();
+        BeanUtils.copyProperties(probeRequest, probeModel);
+        //新增探针，默认为自定义探针
+        probeModel.setType(ProbeModel.TYPE_CUSTOM);
+
+        String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
+        probeModel.setOsType(osTypes);
+
+        probeModel.setId(probeId);
+        probeMapper.update(probeModel);
+
+        if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
+            ProbeScriptModel scriptModel = ProbeScriptModel.builder()
+                    .probeId(probeId)
+                    .scriptType(probeRequest.getScriptType())
+                    .scriptContent(probeRequest.getScriptContent())
+                    .scriptUrl(probeRequest.getScriptUrl()).build();
+            probeScriptMapper.deleteByProbeId(probeId);
+            probeScriptMapper.create(scriptModel);
         }
-        String[] probeIdArray = probeIds.toArray(new String[0]);
-        probeParamMapper.bulkDelete(probeIdArray);
 
-        return false;
+        List<ProbeParamsRequest> params = probeRequest.getParams();
+        if (CollectionUtil.isNotEmpty(params)) {
+            List<ProbeParamModel> paramList =
+                    params.stream().map(paramReq -> {
+                        ProbeParamModel paramModel = ProbeParamModel.builder()
+                                .probeId(probeId)
+                                .templateId(null)
+                                .name(paramReq.getName())
+                                .defaultValue(paramReq.getDefaultValue())
+                                .description(paramReq.getDescription())
+                                .type(paramReq.getType())
+                                .build();
+                        return paramModel;
+                    }).collect(Collectors.toList());
 
-//        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
+            probeParamMapper.deleteByProbeIdAndTemplateId(probeId, null);
+            probeParamMapper.bulkCreate(paramList);
+        } else {
+            probeParamMapper.deleteByProbeIdAndTemplateId(probeId, null);
+        }
 
     }
 
@@ -140,6 +172,11 @@ public class ProbeService {
     }
 
     public ProbeDto getById(String id) {
+        log.info("id:{}", id);
+        return probeMapper.getById(id);
+    }
+
+    public ProbeDto delete(String id) {
         log.info("id:{}", id);
         return probeMapper.getById(id);
     }
@@ -164,69 +201,36 @@ public class ProbeService {
     }
 
 
-    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
-    public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
-        int count = probeModelMapper.countQuery(probeSearchRequest);
-        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
-        List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
-            var probeResult = new ProbeResult();
-            BeanUtils.copyProperties(model, probeResult);
-            probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
-            probeResult.setProbeStatus(model.getProbeStatus().ordinal());
-            List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(model.getId()).stream()
-                .map(paramModel -> {
-                    var paramsResult = new ProbeParamsResult();
-                    BeanUtils.copyProperties(paramModel, paramsResult);
-                    return paramsResult;
-                }).collect(Collectors.toList());
-            probeResult.setParamsResultList(probeParamsResults);
-            return probeResult;
-        })).collect(Collectors.toList());
 
-        return new ListObjServiceResult<ProbeResult>(new ListObjResult<>(probeResults, count));
-    }*/
-
-    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
-    public ProbeResult queryProbeDetail(String probeId) {
-        var probeResult = new ProbeResult();
-        var probeModel = probeModelMapper.queryByProbeId(probeId);
-        if (Objects.isNull(probeModel)) {
-            return null;
-        }
-        BeanUtils.copyProperties(probeModel, probeResult);
-        List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
-            .map(paramModel -> {
-                ProbeParamsResult paramsResult = new ProbeParamsResult();
-                BeanUtils.copyProperties(paramModel, paramsResult);
-                return paramsResult;
-            }).collect(Collectors.toList());
-        probeResult.setParamsResultList(probeParamsResults);
-        probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
-        probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
-        probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
-        return probeResult;
-    }*/
-
-    public List<ProbeDto> queryProbeByIds(List<String> ids) {
+    /**
+     * 根据ids查询列表
+     * @param ids
+     * @return
+     */
+    public List<ProbeDto> listByIds(List<String> ids) {
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setIds(ids.toArray(new String[0]));
+        condition.setNeedScriptContent(true);
         List<ProbeDto> probeDtos = probeMapper.listProbes(condition);
-//        if (Objects.isNull(probeModels)) {
-//            return null;
-//        }
-//        Map<String, ProbeModel> probeId2Probe = new HashMap<>();
-//        probeModels.forEach(probeModel -> {
-//            probeId2Probe.put(probeModel.getId(), probeModel);
-//        });
-//        List<ProbeResult> results = probeModels.stream().map(m -> {
-//            ProbeResult result = new ProbeResult();
-//            BeanUtils.copyProperties(m, result);
-//            return result;
-//        }).collect(Collectors.toList());
-//        results.forEach(result -> {
-//            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
-//        });
         return probeDtos;
+    }
+
+    /**
+     * 根据ids逻辑删除
+     * @param ids
+     * @return
+     */
+    public int deleteByIds(List<String> ids) {
+        List<ProbeModel> probesToUpdate =
+            ids.stream().map(id -> {
+                ProbeModel probeModel = new ProbeModel();
+                probeModel.setId(id);
+                probeModel.setIsDeleted(1);
+                return probeModel;
+            }).collect(Collectors.toList());
+
+        int cnt = probeMapper.bulkUpdate(probesToUpdate);
+        return cnt;
     }
 
      /*  @Transactional(rollbackFor = Exception.class)
@@ -287,6 +291,70 @@ public class ProbeService {
 
         // 4. 表数据？
     }
+
+
+
+    /**
+     * 将脚本内容上传FDFS，返回上传文件url
+     * @param scriptContent
+     * @return
+     */
+    public String uploadScriptContent(String scriptContent) {
+        // 处理探针脚本
+        // todo 语法校验
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+        String filepath = fastDFSClient.upload(scriptContent, "script", null, FdfsGroupEnum.DEFAULT.toString());
+        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
+        return httpUrl;
+    }
+
+
+
+
+    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
+    public ListObjServiceResult<ProbeResult> queryProbeListWithPageable(ProbeSearchRequest probeSearchRequest) {
+        int count = probeModelMapper.countQuery(probeSearchRequest);
+        List<ProbeModel> probeModelList = probeModelMapper.queryListWithPage(probeSearchRequest, (probeSearchRequest.getPage() - 1) * probeSearchRequest.getPerPage());
+        List<ProbeResult> probeResults = probeModelList.stream().map((model -> {
+            var probeResult = new ProbeResult();
+            BeanUtils.copyProperties(model, probeResult);
+            probeResult.setScriptContent(new String(model.getScriptContent(), StandardCharsets.UTF_8));
+            probeResult.setProbeStatus(model.getProbeStatus().ordinal());
+            List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(model.getId()).stream()
+                .map(paramModel -> {
+                    var paramsResult = new ProbeParamsResult();
+                    BeanUtils.copyProperties(paramModel, paramsResult);
+                    return paramsResult;
+                }).collect(Collectors.toList());
+            probeResult.setParamsResultList(probeParamsResults);
+            return probeResult;
+        })).collect(Collectors.toList());
+
+        return new ListObjServiceResult<ProbeResult>(new ListObjResult<>(probeResults, count));
+    }*/
+
+    /*@Transactional(rollbackFor = Exception.class, readOnly = true)
+    public ProbeResult queryProbeDetail(String probeId) {
+        var probeResult = new ProbeResult();
+        var probeModel = probeModelMapper.queryByProbeId(probeId);
+        if (Objects.isNull(probeModel)) {
+            return null;
+        }
+        BeanUtils.copyProperties(probeModel, probeResult);
+        List<ProbeParamsResult> probeParamsResults = probeParamModelMapper.queryProbeParamList(probeId).stream()
+            .map(paramModel -> {
+                ProbeParamsResult paramsResult = new ProbeParamsResult();
+                BeanUtils.copyProperties(paramModel, paramsResult);
+                return paramsResult;
+            }).collect(Collectors.toList());
+        probeResult.setParamsResultList(probeParamsResults);
+        probeResult.setScriptContent(new String(probeModel.getScriptContent(), StandardCharsets.UTF_8));
+        probeResult.setProbeStatus(probeModel.getProbeStatus().ordinal());
+        probeResult.setCommandInterval(Integer.parseInt(probeModel.getCommandInterval().replace("m", "")));
+        return probeResult;
+    }*/
+
+
 
     /**
      * 修改探针参数
@@ -361,18 +429,26 @@ public class ProbeService {
         return scriptContent;
     }*/
 
-
     /**
-     * 将脚本内容上传FDFS，返回上传文件url
-     * @param scriptContent
-     * @return
+     * 根据probeId删除探针
+     *
+     * @param probeIds probeIds
+     * @return 是否删除成功
      */
-    public String uploadScriptContent(String scriptContent) {
-        // 处理探针脚本
-        // todo 语法校验
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String filepath = fastDFSClient.upload(scriptContent, "script", null, FdfsGroupEnum.DEFAULT.toString());
-        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
-        return httpUrl;
+    /*
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteProbeById(List<String> probeIds) {
+        if (CollectionUtils.isEmpty(probeIds) || probeIds.stream().anyMatch(ObjectUtils::isEmpty)) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_DELETE_PARAM_ERROR);
+        }
+        String[] probeIdArray = probeIds.toArray(new String[0]);
+        probeParamMapper.bulkDelete(probeIdArray);
+
+        return false;
+
+//        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
+
     }
+    */
+
 }

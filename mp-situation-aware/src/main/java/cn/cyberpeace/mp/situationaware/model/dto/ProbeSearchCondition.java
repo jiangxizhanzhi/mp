@@ -28,4 +28,7 @@ public class ProbeSearchCondition {
 
     @ApiModelProperty(value = "null:全部, 0:shell 1:python 2:bat")
     private Integer[] scriptTypes;
+
+    // 是否显示脚本内容, 默认不显示
+    private Boolean needScriptContent = false;
 }

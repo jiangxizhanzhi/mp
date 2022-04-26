@@ -168,4 +168,7 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where pk = #{pk,jdbcType=INTEGER}
   </update>
+  <delete id="deleteByProbeId">
+    delete from mp_situation_probe_script where probe_id = #{probeId}
+  </delete>
 </mapper>

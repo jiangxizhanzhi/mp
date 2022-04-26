@@ -194,19 +194,21 @@
     from mp_situation_probe p
     left join mp_situation_probe_script ps
     on p.id = ps.probe_id
-    <where>
-        p.id = #{id}
-    </where>
+    where p.id = #{id} and p.is_deleted = 0
   </select>
 
 
   <select id="listProbes" resultType="cn.cyberpeace.mp.situationaware.model.dto.ProbeDto">
     select
       p.*, ps.script_type, ps.script_url
+    <if test="condition.needScriptContent != null and condition.needScriptContent == true">
+      , ps.script_content
+    </if>
     from mp_situation_probe p
     left join mp_situation_probe_script ps
     on p.id = ps.probe_id
     <where>
+      p.is_deleted = 0
       <if test="condition.ids != null and condition.ids.length > 0">
         AND p.id in
         <foreach item="pid" index="index" collection="condition.ids" open="(" separator="," close=")">
@@ -241,8 +243,5 @@
           </foreach>
       </if>
     </where>
-
-
-
   </select>
 </mapper>

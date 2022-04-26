@@ -150,4 +150,16 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where pk = #{pk,jdbcType=INTEGER}
   </update>
+  <delete id="deleteByProbeIdAndTemplateId">
+    delete from mp_situation_probe_param
+      <where>
+        probe_id = #{probeId}
+        <if test="templateId != null and templateId != ''">
+          AND template_id = #{templateId}
+        </if>
+        <if test="templateId == null or templateId = ''">
+          AND template_id = ''
+        </if>
+      </where>
+  </delete>
 </mapper>

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @ModelClass(ProbeScriptModel.class)
 public interface ProbeScriptMapper extends BaseModelMapper<ProbeScriptModel> {
-//    int deleteByPrimaryKey(Integer pk);
+    //    int deleteByPrimaryKey(Integer pk);
 //
 //    int insert(ProbeScriptModel record);
 //
@@ -23,4 +23,5 @@ public interface ProbeScriptMapper extends BaseModelMapper<ProbeScriptModel> {
 //    int updateByPrimaryKeyWithBLOBs(ProbeScriptModel record);
 //
 //    int updateByPrimaryKey(ProbeScriptModel record);
+    int deleteByProbeId(String probeId);
 }

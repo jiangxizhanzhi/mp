@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.model.dto;
 
+import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
+import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -19,11 +21,12 @@ import java.util.List;
 public class ProbeRequest {
 
     @ApiModelProperty(value = "探针id,新增的时候不需要传")
+    @NotBlank(groups = {UpdateGroup.class})
     private String id;
 
 
     @ApiModelProperty(value = "探针名称")
-    @NotBlank
+    @NotBlank(groups = {AddGroup.class})
     private String name;
 
 
@@ -47,11 +50,11 @@ public class ProbeRequest {
      * 0:shell 1:python 2:bat
      */
     @ApiModelProperty(value = "0:shell 1:python 2:bat")
-    @NotNull
+    @NotNull(groups = {AddGroup.class})
     private Integer scriptType;
 
     @ApiModelProperty(value = "探针脚本内容")
-    @NotBlank
+    @NotBlank(groups = {AddGroup.class})
     private String scriptContent;
 
 

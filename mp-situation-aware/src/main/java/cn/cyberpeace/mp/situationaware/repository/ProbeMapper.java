@@ -23,7 +23,7 @@ public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
 //
 //    ProbeModel selectByPrimaryKey(Integer pk);
 //
-//    int updateByPrimaryKeySelective(ProbeModel record);
+    int updateByPrimaryKeySelective(ProbeModel record);
 //
 //    int updateByPrimaryKey(ProbeModel record);
 
