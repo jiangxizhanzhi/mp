@@ -154,7 +154,10 @@ public class CloudSceneConnectionCommon {
             }
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
             if (Boolean.TRUE.equals(cloudAccessMode.getSecretEnable())) {
-                connectionParams.setPrivateKey(cloudAccessMode.getSecretPath());
+                connectionParams.setPrivateKeyPath(cloudAccessMode.getSecretPath());
+                if (StringUtils.isNotEmpty(sceneConnection.getUsername())) {
+                    connectionParams.setUsername(sceneConnection.getUsername());
+                }
             } else {
                 connectionParams.setUsername(sceneConnection.getUsername());
                 connectionParams.setPassword(sceneConnection.getPassword());
