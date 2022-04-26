@@ -20,6 +20,12 @@ public class AccessMode {
     @ApiModelProperty(value = "密码")
     private String password;
 
+    @ApiModelProperty(value = "是否开启ssh秘钥登录")
+    private Boolean secretEnable;
+
+    @ApiModelProperty(value = "ssh秘钥")
+    private String secretPath;
+
     @ApiModelProperty(value = "路径")
     private String path;
 

@@ -189,8 +189,8 @@ public class RealEquipmentController {
     @ApiOperation("删除")
     @DeleteMapping("/delete")
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
-        Boolean result = realEquipmentConverter.delete(request);
-        return new Result<>(result);
+        BaseCloudPlatformModel result = realEquipmentConverter.delete(request);
+        return new Result<>(result.isSuccess());
     }
 
     @ApiOperation("查询详情")
