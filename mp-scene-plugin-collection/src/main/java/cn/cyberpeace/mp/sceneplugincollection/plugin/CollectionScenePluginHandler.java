@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.DeleteHandler;
@@ -14,6 +15,9 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.InitiateHa
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionScenePluginModelHandler;
 import lombok.Data;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 
 @ClassFieldClasses({
@@ -34,8 +38,27 @@ public class CollectionScenePluginHandler extends ScenePluginHandler<CollectionP
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
 
+    private static final String EVENT = "1";
+    private static final String LOG = "2";
+
     @Override
     public void correctData() {
+        if (getElementMap() != null && !getElementMap().isEmpty()) {
+            getElementMap().values().forEach(e -> {
+                if (e.getProbes() == null || e.getProbes().isEmpty()) {
+                    return;
+                }
+                e.getProbes().forEach(probe -> {
+                    if (probe.getScriptUrl() != null) {
+                        probe.setExecType(Probe.ExecType.scriptProbe);
+                    } else if (probe.getCommon() && (EVENT.equals(probe.getType())) || LOG.equals(probe.getType())) {
+                        probe.setExecType(Probe.ExecType.fileProbe);
+                    } else {
+                        probe.setExecType(Probe.ExecType.baseProbe);
+                    }
+                });
+            });
+        }
         if (getScene() == null) {
             setScene(ClassUtils.createInstance(getSceneBOClass()));
         }

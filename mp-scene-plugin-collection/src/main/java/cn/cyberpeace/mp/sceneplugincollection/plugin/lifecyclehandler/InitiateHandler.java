@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -20,8 +20,6 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRo
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhControl;
-import cn.cyberpeace.mp.situationaware.model.ProbeResult;
-import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,15 +27,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
-
-    private ProbeService probeService;
 
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
@@ -52,7 +46,6 @@ public class InitiateHandler extends HandlerCommon {
 
     public InitiateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
-        this.probeService = BeanCommon.getBean(ProbeService.class);
     }
 
     public void initiate() {
@@ -174,9 +167,9 @@ public class InitiateHandler extends HandlerCommon {
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
                     List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
-//                    if (collectionElement.getProbes() != null) {
-//                        customProbeParams = this.getCustomProbeParams(collectionElement.getProbes(), srcElement.getEid());
-//                    }
+                    if (collectionElement.getProbes() != null) {
+                        customProbeParams = this.getCustomProbeParams(collectionElement.getProbes(), srcElement.getEid());
+                    }
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
                             srcElement.getEid(), collectionId, customProbeParams);
@@ -196,22 +189,13 @@ public class InitiateHandler extends HandlerCommon {
 
     private List<WazuhControl.ControlProbeParam> getCustomProbeParams(List<Probe> probes, String agentName) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
-        List<String> probeIds = probes.stream().map(p -> p.getId()).collect(Collectors.toList());
-        List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
-        if (probeResults == null) {
-            return new ArrayList<>();
-        }
-        Map<String, ProbeResult> probeId2Probe = new HashMap<>();
-        probeResults.forEach(probe -> {
-            probeId2Probe.put(probe.getId(), probe);
-        });
+        String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
         probes.forEach(probe -> {
-            if (!probeId2Probe.containsKey(probe.getId())) {
+            if (probe.getExecType() != Probe.ExecType.scriptProbe) {
                 return;
             }
-            ProbeResult probeResult = probeId2Probe.get(probe.getId());
             WazuhControl.ControlProbeParam customProbeParam = new WazuhControl.ControlProbeParam();
-            customProbeParam.setId(TextUtils.uuid());
+            customProbeParam.setId(probe.getId());
             customProbeParam.setGroup(agentName);
             List<String> params = new ArrayList<>();
             if (probe.getParams() != null) {
@@ -226,27 +210,29 @@ public class InitiateHandler extends HandlerCommon {
             if (!CollectionUtil.isEmpty(params)) {
                 customProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
             }
-            if (NumberUtils.INTEGER_ZERO.equals(probeResult.getScriptType())) {
+            if (NumberUtils.INTEGER_ZERO.equals(probe.getScriptType())) {
                 customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-            } else if (NumberUtils.INTEGER_ONE.equals(probeResult.getScriptType())) {
+            } else if (NumberUtils.INTEGER_ONE.equals(probe.getScriptType())) {
                 customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-            } else if (NumberUtils.INTEGER_TWO.equals(probeResult.getScriptType())) {
+            } else if (NumberUtils.INTEGER_TWO.equals(probe.getScriptType())) {
                 customProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
             }
-            if (probe.getInterval() != null) {
-                customProbeParam.setInterval(probe.getInterval() + "s");
-            }
+            customProbeParam.setInterval(getCollectInterval());
             customProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-            customProbeParam.setScriptContent(probeResult.getScriptContent());
+            String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());
+            customProbeParam.setScriptUrl(url);
             if (probe.getDisabled() != null && probe.getDisabled()) {
                 customProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
             }
-            if (probeResult.getOutputFormat() != null) {
-                customProbeParam.setOutputFormat(probeResult.getOutputFormat());
+            if (probe.getOutputFormat() != null) {
+                customProbeParam.setOutputFormat(probe.getOutputFormat());
             }
             customProbeParams.add(customProbeParam);
         });
         return customProbeParams;
     }
 
+    private static String getCollectInterval() {
+        return CollectionSingleton.collectionAppConfig.getCollectInterval();
+    }
 }

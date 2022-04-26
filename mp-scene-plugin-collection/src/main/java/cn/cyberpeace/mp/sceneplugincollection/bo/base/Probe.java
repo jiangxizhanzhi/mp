@@ -15,8 +15,12 @@ public class Probe {
     private String name;
     @ApiModelProperty(value = "描述")
     private String desc;
-    @ApiModelProperty(value = "分类")
+    @ApiModelProperty(value = "分类 0:信息类 1:事件类 2:日志类")
     private String type;
+    @ApiModelProperty(value = "探针驱动类型")
+    private Integer execType;
+    @ApiModelProperty(value = "系统类型 0:Linux 1:Windows")
+    private String osType;
     @ApiModelProperty(value = "参数")
     private List<Param> params;
     @ApiModelProperty(value = "状态")
@@ -27,6 +31,14 @@ public class Probe {
     private Integer interval;
     @ApiModelProperty(value = "是否开启探针")
     private Boolean disabled;
+    @ApiModelProperty(value = "探针数据输出格式 json plain none")
+    private String outputFormat;
+    @ApiModelProperty(value = "探针脚本类型 0:shell 1:python 2:bat")
+    private Integer scriptType;
+    @ApiModelProperty(value = "探针脚本文件地址")
+    private String scriptUrl;
+    @ApiModelProperty(value = "探针采集路径")
+    private List<String> collectPath;
 
     @Data
     public static class Param {
@@ -48,5 +60,14 @@ public class Probe {
         public static final int ERROR = 2;
 
         private Status() {}
+    }
+
+    public static class ExecType {
+        public static final int baseProbe = 0;
+        public static final int fileProbe = 1;
+        public static final int scriptProbe = 2;
+
+        private ExecType() {
+        }
     }
 }
