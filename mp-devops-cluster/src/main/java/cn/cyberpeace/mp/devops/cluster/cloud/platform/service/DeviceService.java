@@ -59,10 +59,9 @@ public class DeviceService extends BaseOpenStackService {
      * 批量删除
      * @param uuids
      */
-    public Boolean deleteByIds(List<String> uuids) {
+    public BaseCloudPlatformModel deleteByIds(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
-        BaseCloudPlatformModel model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
-        return model.isSuccess();
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
     }
 }
