@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
@@ -77,7 +78,7 @@ public class SceneHandlerUtils {
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
     }
 
-    public String createExecutor(String sceneEid) {
+    public String createExecutor(String sceneEid, List<String> networkIds) {
         return flowExecutor.createExecutor(sceneEid);
     }
 

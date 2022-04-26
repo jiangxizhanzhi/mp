@@ -2,15 +2,18 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
@@ -36,7 +39,15 @@ public class CreateHandler extends HandlerCommon {
         // 创建 trex 虚拟机
         runSceneProgress(SceneProcess.CREATE_EXECUTOR, () -> {
             FlowPluginSceneBO scene = getPluginHandler().getScene();
-            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId());
+            List<String> networkIds = new ArrayList<>();
+            CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                    .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            if (cloudPluginHandler != null && CollectionUtils.isNotEmpty(cloudPluginHandler.getHandlerUtils().getPortId2network().values())) {
+                cloudPluginHandler.getHandlerUtils().getPortId2network().values().forEach(net -> {
+                    networkIds.add(net.getResourceId());
+                });
+            }
+            var executorId = getHandlerUtils().createExecutor(getPluginHandler().getSourceSceneId(), networkIds);
             scene.setExecutor(executorId);
             getPluginHandler().saveScene();
         });
