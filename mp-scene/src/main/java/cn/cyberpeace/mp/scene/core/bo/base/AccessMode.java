@@ -21,10 +21,10 @@ public class AccessMode {
     private String password;
 
     @ApiModelProperty(value = "是否开启ssh秘钥登录")
-    private Boolean secretEnable;
+    private Boolean privateKeyEnable;
 
     @ApiModelProperty(value = "ssh秘钥")
-    private String secretPath;
+    private String privateKeyPath;
 
     @ApiModelProperty(value = "路径")
     private String path;

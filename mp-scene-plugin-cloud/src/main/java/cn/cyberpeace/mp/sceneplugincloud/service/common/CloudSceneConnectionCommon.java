@@ -153,8 +153,8 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setDisableGlyphCaching(true);
             }
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
-            if (Boolean.TRUE.equals(cloudAccessMode.getSecretEnable())) {
-                connectionParams.setPrivateKeyPath(cloudAccessMode.getSecretPath());
+            if (Boolean.TRUE.equals(cloudAccessMode.getPrivateKeyEnable())) {
+                connectionParams.setPrivateKeyPath(cloudAccessMode.getPrivateKeyPath());
                 if (StringUtils.isNotEmpty(sceneConnection.getUsername())) {
                     connectionParams.setUsername(sceneConnection.getUsername());
                 }
