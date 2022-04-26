@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionFlowTableService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
