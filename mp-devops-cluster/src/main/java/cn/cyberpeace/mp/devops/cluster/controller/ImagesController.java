@@ -209,8 +209,8 @@ public class ImagesController {
     @ApiOperation("删除")
     @DeleteMapping("/page")
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
-        Boolean result = imagesConverter.delete(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = imagesConverter.delete(request);
+        return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
     }
 
     /**
