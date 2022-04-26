@@ -11,13 +11,15 @@ import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbeParamsRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeResult;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -30,9 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -122,6 +122,7 @@ public class ProbeService {
         }
         String[] probeIdArray = probeIds.toArray(new String[0]);
         probeParamMapper.bulkDelete(probeIdArray);
+
         return false;
 
 //        return probeModelMapper.deleteByProbeIds(probeIds) > 0;
@@ -138,18 +139,28 @@ public class ProbeService {
         return "";
     }
 
+    public ProbeDto getById(String id) {
+        log.info("id:{}", id);
+        return probeMapper.getById(id);
+    }
 
     /**
      * 分页查询探针列表
      *
      * @return
      */
-    public PageInfo<ProbeModel> page(ProbePageQueryRequest pageQueryRequest) {
+    public PageInfo<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
+        log.info("pageQueryRequest:{}", pageQueryRequest);
         pageQueryRequest.ensure();
 
-        // todo 通用探针
+        ProbeSearchCondition condition = new ProbeSearchCondition();
+        BeanUtils.copyProperties(pageQueryRequest, condition);
 
-        return null;
+        PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
+        List<ProbeDto> probeDtos = probeMapper.listProbes(condition);
+        PageInfo pageInfo = new PageInfo(probeDtos);
+
+        return pageInfo;
     }
 
 
@@ -196,28 +207,30 @@ public class ProbeService {
         return probeResult;
     }*/
 
-    public List<ProbeResult> queryProbeByIds(List<String> ids) {
-        List<ProbeModel> probeModels = probeMapper.listByIds(ids);
-        if (Objects.isNull(probeModels)) {
-            return null;
-        }
-        Map<String, ProbeModel> probeId2Probe = new HashMap<>();
-        probeModels.forEach(probeModel -> {
-            probeId2Probe.put(probeModel.getId(), probeModel);
-        });
-        List<ProbeResult> results = probeModels.stream().map(m -> {
-            ProbeResult result = new ProbeResult();
-            BeanUtils.copyProperties(m, result);
-            return result;
-        }).collect(Collectors.toList());
+    public List<ProbeDto> queryProbeByIds(List<String> ids) {
+        ProbeSearchCondition condition = new ProbeSearchCondition();
+        condition.setIds(ids.toArray(new String[0]));
+        List<ProbeDto> probeDtos = probeMapper.listProbes(condition);
+//        if (Objects.isNull(probeModels)) {
+//            return null;
+//        }
+//        Map<String, ProbeModel> probeId2Probe = new HashMap<>();
+//        probeModels.forEach(probeModel -> {
+//            probeId2Probe.put(probeModel.getId(), probeModel);
+//        });
+//        List<ProbeResult> results = probeModels.stream().map(m -> {
+//            ProbeResult result = new ProbeResult();
+//            BeanUtils.copyProperties(m, result);
+//            return result;
+//        }).collect(Collectors.toList());
 //        results.forEach(result -> {
 //            result.setScriptContent(new String(probeId2Probe.get(result.getId()).getScriptContent(), StandardCharsets.UTF_8));
 //        });
-        return results;
+        return probeDtos;
     }
 
-    @Transactional(rollbackFor = Exception.class)
-   /* public int modifyProbe(ProbeRequest probeRequest) {
+     /*  @Transactional(rollbackFor = Exception.class)
+        public int modifyProbe(ProbeRequest probeRequest) {
         ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
         try {
             cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);

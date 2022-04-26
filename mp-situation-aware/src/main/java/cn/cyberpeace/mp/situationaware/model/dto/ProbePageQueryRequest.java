@@ -22,7 +22,7 @@ public class ProbePageQueryRequest extends BasePageRequest {
     private String name;
 
     @ApiModelProperty(value = "null:全部, 0:信息类 1:事件类 2:日志类")
-    private Integer[] probeCategorys;
+    private Integer[] probeCategories;
 
     @ApiModelProperty(value = "null:全部, 0:通用探针 1:自定义探针")
     private Integer[] types;

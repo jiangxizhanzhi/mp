@@ -2,11 +2,11 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeResult;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,12 +45,13 @@ public class ProbeManagerController {
         return ServiceResult.successful();
     }
 
-    @GetMapping
-    @ApiOperation(value = "分页查询探针")
-    public ListObjServiceResult<ProbeResult> page(ProbePageQueryRequest pageQueryRequest) {
-        PageInfo<ProbeModel> pageInfo = probeService.page(pageQueryRequest);
+    @GetMapping("/page")
+    @ApiOperation(value = "分页查询探针，不含探针脚本内容")
+    public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
+        PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
 
-        return null;
+//        return new ListObjServiceResult<ProbeDto>(new ListObjResult(pageInfo.getList(), Long.valueOf(pageInfo.getTotal()).intValue()));
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 //
 //    @DeleteMapping("")
@@ -68,9 +70,11 @@ public class ProbeManagerController {
 //
 
 //
-//    @GetMapping("/{probeId}")
-//    @ApiOperation(value = "查询探针详情")
-//    public ServiceResult<ProbeResult> queryProbeByProbeId(@PathVariable("probeId") String probeId) {
-//        return new ServiceResult<>(probeService.queryProbeDetail(probeId)).asResult();
-//    }
+    @GetMapping("/{id}")
+    @ApiOperation(value = "查询探针详情，包含探针脚本内容")
+    public ServiceResult<ProbeDto> queryProbeByProbeId(@PathVariable("id") String id) {
+
+        ProbeDto probeDto = probeService.getById(id);
+        return ServiceResult.success(probeDto);
+    }
 }

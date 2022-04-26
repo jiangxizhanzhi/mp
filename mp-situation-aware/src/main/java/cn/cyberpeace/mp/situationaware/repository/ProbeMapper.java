@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.situationaware.repository;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.ProbeSearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -25,5 +27,14 @@ public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
 //
 //    int updateByPrimaryKey(ProbeModel record);
 
-    List<ProbeModel> listByIds(@Param("ids") List<String> ids);
+    ProbeDto getById(@Param("id") String id);
+
+//    List<ProbeDto> listProbes(@Param("name") String name, @Param("types") List<Integer> types,
+//                                 @Param("osTypes") List<Integer> osTypes, @Param("catagories") List<String> catagories,
+//                                 @Param("scriptTypes") List<Integer> scriptTypes);
+
+    List<ProbeDto> listProbes(@Param("condition") ProbeSearchCondition condition);
+
+
 }
+

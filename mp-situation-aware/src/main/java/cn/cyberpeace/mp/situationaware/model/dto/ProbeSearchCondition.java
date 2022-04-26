@@ -1,0 +1,31 @@
+package cn.cyberpeace.mp.situationaware.model.dto;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2022/4/26 10:33
+ */
+@Data
+public class ProbeSearchCondition {
+
+    @ApiModelProperty(value = "探针id")
+    private String[] ids;
+
+    @ApiModelProperty(value = "探针名称，模糊匹配")
+    private String name;
+
+    @ApiModelProperty(value = "null:全部, 0:信息类 1:事件类 2:日志类")
+    private Integer[] probeCategories;
+
+    @ApiModelProperty(value = "null:全部, 0:通用探针 1:自定义探针")
+    private Integer[] types;
+
+    @ApiModelProperty(value = "null:全部, 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    private Integer[] osTypes;
+
+    @ApiModelProperty(value = "null:全部, 0:shell 1:python 2:bat")
+    private Integer[] scriptTypes;
+}

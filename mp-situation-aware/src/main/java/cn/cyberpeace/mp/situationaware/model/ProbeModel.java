@@ -59,6 +59,12 @@ public class ProbeModel extends BaseModel {
     private Integer type;
 
     /**
+     * 创建者用户名
+     */
+    @ApiModelProperty(value = "创建者用户名")
+    private Integer creator;
+    
+    /**
      * 探针执行间隔，为大于1的数值，单位秒，默认60秒
      */
     @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒")

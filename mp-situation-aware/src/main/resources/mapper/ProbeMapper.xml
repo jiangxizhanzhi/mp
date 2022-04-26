@@ -8,6 +8,7 @@
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="probe_category" jdbcType="INTEGER" property="probeCategory" />
     <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
     <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
     <result column="output_format" jdbcType="VARCHAR" property="outputFormat" />
     <result column="is_deleted" jdbcType="INTEGER" property="isDeleted" />
@@ -16,7 +17,7 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    pk, id, `name`, description, probe_category, `type`, interval_sec, output_format,
+    pk, id, `name`, description, probe_category, `type`, creator, interval_sec, output_format,
     is_deleted, OS_type, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -32,12 +33,12 @@
   <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
     insert into mp_situation_probe (pk, id, `name`,
       description, probe_category,
-      `type`, interval_sec, output_format, is_deleted,
+      `type`, creator, interval_sec, output_format, is_deleted,
       OS_type, create_time, update_time
       )
     values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{description,jdbcType=VARCHAR}, #{probeCategory,jdbcType=INTEGER},
-      #{type,jdbcType=INTEGER}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
+      #{type,jdbcType=INTEGER},  #{creator,jdbcType=VARCHAR}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
       #{osType,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
@@ -61,6 +62,9 @@
       </if>
       <if test="type != null">
         `type`,
+      </if>
+      <if test="creator != null">
+        creator,
       </if>
       <if test="intervalSec != null">
         interval_sec,
@@ -100,6 +104,9 @@
       <if test="type != null">
         #{type,jdbcType=INTEGER},
       </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
       <if test="intervalSec != null">
         #{intervalSec,jdbcType=INTEGER},
       </if>
@@ -138,6 +145,9 @@
       <if test="type != null">
         `type` = #{type,jdbcType=INTEGER},
       </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
       <if test="intervalSec != null">
         interval_sec = #{intervalSec,jdbcType=INTEGER},
       </if>
@@ -166,6 +176,7 @@
       description = #{description,jdbcType=VARCHAR},
       probe_category = #{probeCategory,jdbcType=INTEGER},
       `type` = #{type,jdbcType=INTEGER},
+      creator = #{creator,jdbcType=VARCHAR},
       interval_sec = #{intervalSec,jdbcType=INTEGER},
       output_format = #{outputFormat,jdbcType=VARCHAR},
       output_format = #{outputFormat,jdbcType=VARCHAR},
@@ -175,4 +186,63 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where pk = #{pk,jdbcType=INTEGER}
   </update>
+
+
+  <select id="getById" resultType="cn.cyberpeace.mp.situationaware.model.dto.ProbeDto">
+    select
+      p.*, ps.script_type, ps.script_content, ps.script_url
+    from mp_situation_probe p
+    left join mp_situation_probe_script ps
+    on p.id = ps.probe_id
+    <where>
+        p.id = #{id}
+    </where>
+  </select>
+
+
+  <select id="listProbes" resultType="cn.cyberpeace.mp.situationaware.model.dto.ProbeDto">
+    select
+      p.*, ps.script_type, ps.script_url
+    from mp_situation_probe p
+    left join mp_situation_probe_script ps
+    on p.id = ps.probe_id
+    <where>
+      <if test="condition.ids != null and condition.ids.length > 0">
+        AND p.id in
+        <foreach item="pid" index="index" collection="condition.ids" open="(" separator="," close=")">
+          #{pid}
+        </foreach>
+      </if>
+      <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
+        AND p.probe_category in
+        <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
+          #{category}
+        </foreach>
+      </if>
+      <if test="condition.types != null and condition.types.length > 0">
+        AND p.type in
+        <foreach item="type" index="index" collection="condition.types" open="(" separator="," close=")">
+          #{type}
+        </foreach>
+      </if>
+      <if test="condition.scriptTypes != null and condition.scriptTypes.length > 0">
+        AND ps.script_type in
+        <foreach item="scriptType" index="index" collection="condition.scriptTypes" open="(" separator="," close=")">
+          #{scriptType}
+        </foreach>
+      </if>
+      <if test="condition.name != null and condition.name != ''">
+        AND p.name like CONCAT('%', #{condition.name}, '%')
+      </if>
+      <if test="condition.osTypes != null and condition.osTypes.length > 0">
+        AND
+          <foreach item="osType" index="index" collection="condition.osTypes" open="(" separator="OR" close=")">
+            p.OS_type like CONCAT('%', #{osType}, '%')
+          </foreach>
+      </if>
+    </where>
+
+
+
+  </select>
 </mapper>
