@@ -42,18 +42,30 @@ public class FlowRecords {
     private Integer second;
 
     /**
-     * L1每秒发包率
-     * 单位为比特每秒
+     * 发包数量
      */
-    @ApiModelProperty(value = "L1每秒发包率")
-    private Double txBpsL1;
+    @ApiModelProperty(value = "发包数量")
+    private Integer opackets;
 
     /**
-     * L2每秒发包率
-     * 单位为比特每秒
+     * 发包大小
+     * 单位为 byte
      */
-    @ApiModelProperty(value = "L2每秒发包率")
-    private Double txBpsL2;
+    @ApiModelProperty(value = "发包大小 单位byte")
+    private Integer obytes;
+
+    /**
+     * 每秒发包率
+     * 单位为 byte/s
+     */
+    @ApiModelProperty(value = "每秒发包率 单位为byte/s")
+    private Double txBps;
+
+    /**
+     * 发包异常数量
+     */
+    @ApiModelProperty(value = "发包异常数量")
+    private Integer oerrors;
 
     /**
      * 流量发生时间
