@@ -11,7 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
@@ -34,9 +33,7 @@ public class RouterService extends BaseOpenStackService {
      */
     public RouterCloudPlatformModel page(String getParams) {
         RouterPageResult pageResult = super.sendGet(URL_VERSION + "/routers" + getParams, RouterPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<RouterModel> data = pageResult.getData();
         List<RouterModel> routerModels = data.getList();
         RouterCloudPlatformModel model = new RouterCloudPlatformModel();

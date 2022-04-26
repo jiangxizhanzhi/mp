@@ -45,6 +45,11 @@ public class ContainerConvertModel extends BasePageConvertModel{
         private List<String> addressList;
 
         /**
+         * vlan ID集合
+         */
+        private List<Integer> vlanIdList;
+
+        /**
          * 状态
          */
         private CloudPlatformEnum status;

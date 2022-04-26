@@ -32,11 +32,13 @@ public class ContainerConverter implements BaseConverter {
         this.containerService = containerService;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
@@ -68,6 +70,7 @@ public class ContainerConverter implements BaseConverter {
                         .map(v -> JSONArray.parseArray(JSONArray.toJSONString(v),ContainerModel.Address.class))
                         .flatMap(List::stream).collect(Collectors.toList());
                 response.setAddressList(addressList.stream().map(ContainerModel.Address::getAddr).collect(Collectors.toList()));
+                response.setVlanIdList(addressList.stream().filter(v -> Objects.nonNull(v.getVlanId())).map(ContainerModel.Address::getVlanId).collect(Collectors.toList()));
             }
             return response;
         }).collect(Collectors.toList());

@@ -101,6 +101,7 @@ public class TypeController {
         TypeAllConvertModel roles = typeConverter.findRoles(isAll);
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
         TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
+        TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
         TypeAllResponse allResponse = new TypeAllResponse();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
@@ -110,6 +111,7 @@ public class TypeController {
         allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
         allResponse.setHwVifModelList(typeConverter.findHwVifModel());
         allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
+        allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
         return new Result<>(allResponse);
     }
 

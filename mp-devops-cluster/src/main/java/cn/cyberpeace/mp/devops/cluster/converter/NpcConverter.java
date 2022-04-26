@@ -28,11 +28,13 @@ public class NpcConverter implements BaseConverter{
         this.npcService = npcService;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getPage,NpcPageRequest::getPerPage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getOffset,NpcPageRequest::getPage,NpcPageRequest::getPerPage);

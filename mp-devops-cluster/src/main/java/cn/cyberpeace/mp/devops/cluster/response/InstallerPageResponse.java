@@ -1,8 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.StartUpParameter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -46,4 +52,10 @@ public class InstallerPageResponse extends BaseCloudPlatformResponse{
      */
     @ApiModelProperty("服务类型")
     private Integer deployType;
+
+    /**
+     * 启动参数（包装对象）
+     */
+    @ApiModelProperty("启动参数")
+    private List<StartUpParameter> startUpParameterList;
 }

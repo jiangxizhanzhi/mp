@@ -44,6 +44,9 @@ public class ContainerPageResponse extends BaseCloudPlatformResponse {
     @ApiModelProperty("IP地址")
     private List<String> addressList;
 
+    @ApiModelProperty("Vlan ID集合")
+    private List<Integer> vlanIdList;
+
     /**
      * 状态
      */
