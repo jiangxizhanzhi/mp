@@ -153,8 +153,15 @@ public class CloudSceneConnectionCommon {
                 connectionParams.setDisableGlyphCaching(true);
             }
             connectionParams.setPort(sceneConnection.getAccessPort().toString());
-            connectionParams.setUsername(sceneConnection.getUsername());
-            connectionParams.setPassword(sceneConnection.getPassword());
+            if (Boolean.TRUE.equals(cloudAccessMode.getSecretEnable())) {
+                connectionParams.setPrivateKeyPath(cloudAccessMode.getSecretPath());
+                if (StringUtils.isNotEmpty(sceneConnection.getUsername())) {
+                    connectionParams.setUsername(sceneConnection.getUsername());
+                }
+            } else {
+                connectionParams.setUsername(sceneConnection.getUsername());
+                connectionParams.setPassword(sceneConnection.getPassword());
+            }
             connectionParams.setHostname(sceneConnection.getAccessIp());
             guacamoleCreateConnectionData.setConnectionParams(connectionParams);
             var result = remoteClient.createConnection(guacamoleCreateConnectionData);
