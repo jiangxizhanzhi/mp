@@ -188,7 +188,7 @@
   </update>
 
 
-  <select id="getById" resultType="cn.cyberpeace.mp.situationaware.model.dto.ProbeDto">
+  <select id="getById" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
     select
       p.*, ps.script_type, ps.script_content, ps.script_url
     from mp_situation_probe p
@@ -198,7 +198,7 @@
   </select>
 
 
-  <select id="listProbes" resultType="cn.cyberpeace.mp.situationaware.model.dto.ProbeDto">
+  <select id="listProbes" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
     select
       p.*, ps.script_type, ps.script_url
     <if test="condition.needScriptContent != null and condition.needScriptContent == true">

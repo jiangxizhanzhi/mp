@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
-import cn.cyberpeace.mp.situationaware.model.dto.CollectionTemplatePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageQueryRequest;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class CollectionTemplateService {
      * 新增采集模板
      * @return
      */
-    public CollectionTemplateModel saveTemplate() {
+    public CollectionTemplateModel addTemplate() {
         return null;
     }
 

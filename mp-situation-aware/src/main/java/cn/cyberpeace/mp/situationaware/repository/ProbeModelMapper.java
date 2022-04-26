@@ -1,7 +1,7 @@
 //package cn.cyberpeace.mp.situationaware.repository;
 //
 //import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-//import cn.cyberpeace.mp.situationaware.model.dto.ProbeSearchRequest;
+//import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchRequest;
 //import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
 //import java.util.List;
 //import org.apache.ibatis.annotations.Mapper;

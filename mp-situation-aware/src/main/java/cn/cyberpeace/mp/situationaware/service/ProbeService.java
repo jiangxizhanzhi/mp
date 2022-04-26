@@ -10,15 +10,18 @@ import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeParamsRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamsRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -162,15 +166,6 @@ public class ProbeService {
     }
 
 
-    /**
-     * 导入脚本文件，返回脚本内容
-     * @return 脚本内容
-     */
-    public String importScriptFileAndGetContent(MultipartFile scriptFile) {
-
-        return "";
-    }
-
     public ProbeDto getById(String id) {
         log.info("id:{}", id);
         return probeMapper.getById(id);
@@ -233,37 +228,6 @@ public class ProbeService {
         return cnt;
     }
 
-     /*  @Transactional(rollbackFor = Exception.class)
-        public int modifyProbe(ProbeRequest probeRequest) {
-        ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
-        try {
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);
-        } catch (Exception e) {
-            log.error("patch probe error probeId : {}", mergedRequest.getProbeId());
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
-        }
-
-        //修改探针参数
-        modifyProbeParams(probeRequest);
-        //修改探针参数
-        var probeModel = new ProbeModel();
-        BeanUtils.copyProperties(mergedRequest, probeModel);
-        probeModel.setUpdateTime(new Date());
-        probeModel.setId(mergedRequest.getProbeId());
-        probeModel.setScriptContent(buildScriptContent(mergedRequest).getBytes(StandardCharsets.UTF_8));
-        probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
-        probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
-        probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
-        probeModel.setOutputFormat(mergedRequest.getOutputFormat());
-        //是否存在保证name去重
-        var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
-        if (Boolean.TRUE.equals(probeExist)) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
-        }
-
-        return probeModelMapper.updateByProbeId(probeModel);
-    }*/
-
 
     /**
      * 清除探针数据，包括表，es索引，doc等
@@ -299,7 +263,7 @@ public class ProbeService {
      * @param scriptContent
      * @return
      */
-    public String uploadScriptContent(String scriptContent) {
+    public String uploadScriptContentToFDFS(String scriptContent) {
         // 处理探针脚本
         // todo 语法校验
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
@@ -309,6 +273,26 @@ public class ProbeService {
     }
 
 
+    /**
+     * 导入脚本文件，返回脚本内容
+     * @return 脚本内容
+     */
+    public String readScriptFileContent(MultipartFile scriptFile) {
+        if (Objects.isNull(scriptFile)) {
+            return "";
+        }
+        File file = null;
+        String content = "";
+        try {
+            file = FileUtils.multipartToFile(scriptFile, scriptFile.getOriginalFilename());
+            content = FileUtil.readUtf8String(file);
+        } catch (IOException e) {
+            log.error("error:{}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("parse script file error!");
+        }
+        file.deleteOnExit();
+        return content;
+    }
 
 
     /*@Transactional(rollbackFor = Exception.class, readOnly = true)
@@ -450,5 +434,36 @@ public class ProbeService {
 
     }
     */
+
+     /*  @Transactional(rollbackFor = Exception.class)
+        public int modifyProbe(ProbeRequest probeRequest) {
+        ProbeRequest mergedRequest = buildMergedRequest(probeRequest);
+        try {
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyPropertiesIgnoreNull(probeRequest, mergedRequest);
+        } catch (Exception e) {
+            log.error("patch probe error probeId : {}", mergedRequest.getProbeId());
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
+        }
+
+        //修改探针参数
+        modifyProbeParams(probeRequest);
+        //修改探针参数
+        var probeModel = new ProbeModel();
+        BeanUtils.copyProperties(mergedRequest, probeModel);
+        probeModel.setUpdateTime(new Date());
+        probeModel.setId(mergedRequest.getProbeId());
+        probeModel.setScriptContent(buildScriptContent(mergedRequest).getBytes(StandardCharsets.UTF_8));
+        probeModel.setOsType(mergedRequest.getOsType().getTypeVal());
+        probeModel.setScriptType(mergedRequest.getScriptType().getTypeVal());
+        probeModel.setCommandInterval(mergedRequest.getCommandInterval() + "m");
+        probeModel.setOutputFormat(mergedRequest.getOutputFormat());
+        //是否存在保证name去重
+        var probeExist = probeModelMapper.countQueryModifyByProbeName(mergedRequest.getProbeName(), probeModel.getId()) > 0;
+        if (Boolean.TRUE.equals(probeExist)) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXIST);
+        }
+
+        return probeModelMapper.updateByProbeId(probeModel);
+    }*/
 
 }

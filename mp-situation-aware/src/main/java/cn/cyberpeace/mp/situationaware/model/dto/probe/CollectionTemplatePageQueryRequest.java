@@ -1,24 +1,25 @@
-package cn.cyberpeace.mp.situationaware.model.dto;
+package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/26 10:33
- */
 @Data
-public class ProbeSearchCondition {
-
-    @ApiModelProperty(value = "探针id")
-    private String[] ids;
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ApiModel("采集模板查询请求体")
+public class CollectionTemplatePageQueryRequest extends BasePageRequest {
 
     @ApiModelProperty(value = "探针名称，模糊匹配")
     private String name;
 
     @ApiModelProperty(value = "null:全部, 0:信息类 1:事件类 2:日志类")
-    private Integer[] probeCategories;
+    private Integer[] probeCategorys;
 
     @ApiModelProperty(value = "null:全部, 0:通用探针 1:自定义探针")
     private Integer[] types;
@@ -29,6 +30,4 @@ public class ProbeSearchCondition {
     @ApiModelProperty(value = "null:全部, 0:shell 1:python 2:bat")
     private Integer[] scriptTypes;
 
-    // 是否显示脚本内容, 默认不显示
-    private Boolean needScriptContent = false;
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.model.dto;
+package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeType;
 import io.swagger.annotations.ApiModel;

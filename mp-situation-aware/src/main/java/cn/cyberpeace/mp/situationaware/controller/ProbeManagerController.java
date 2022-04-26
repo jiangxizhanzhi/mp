@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.List;
@@ -46,7 +48,7 @@ public class ProbeManagerController {
     @ApiOperation(value = "新增自定义探针")
     public ServiceResult<Void> addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-            String httpUrl = probeService.uploadScriptContent(probeRequest.getScriptContent());
+            String httpUrl = probeService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
             probeRequest.setScriptUrl(httpUrl);
         }
         probeService.addProbe(probeRequest);
@@ -61,7 +63,7 @@ public class ProbeManagerController {
         // 判断脚本内容是否有变动
         if (!Objects.equals(probeDto.getScriptContent(), probeRequest.getScriptContent())) {
             if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-                String httpUrl = probeService.uploadScriptContent(probeRequest.getScriptContent());
+                String httpUrl = probeService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
                 probeRequest.setScriptUrl(httpUrl);
             }
         } else {
@@ -77,25 +79,8 @@ public class ProbeManagerController {
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
         PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
-
-//        return new ListObjServiceResult<ProbeDto>(new ListObjResult(pageInfo.getList(), Long.valueOf(pageInfo.getTotal()).intValue()));
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
-//
-//    @DeleteMapping("")
-//    @ApiOperation(value = "探针脚本删除")
-//    public ServiceResult deleteProbeById(@RequestBody List<String> probeIds) {
-//        return probeService.deleteProbeById(probeIds) ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_DELETE_FAIL);
-//    }
-//
-//    @PatchMapping("/{probeId}")
-//    @ApiOperation(value = "修改探针脚本")
-//    public ServiceResult modifyProbe(@RequestBody ProbeRequest probeRequest, @PathVariable("probeId") String probeId){
-//        probeRequest.setProbeId(probeId);
-//        boolean updateSuccess = probeService.modifyProbe(probeRequest) > 0;
-//        return updateSuccess ? ServiceResult.successful(): ServiceResult.fail(SituationalAwareErrorCode.PROBE_MODIFY_FAIL);
-//    }
-//
 
     @GetMapping()
     @ApiOperation(value = "查询探针详情，包含探针脚本内容")
@@ -105,13 +90,19 @@ public class ProbeManagerController {
         return ServiceResult.success(probeDtos);
     }
 
-
-
     @DeleteMapping()
-    @ApiOperation(value = "查询探针详情，包含探针脚本内容")
+    @ApiOperation(value = "删除探针")
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
 
         int cnt = probeService.deleteByIds(Arrays.asList(ids));
         return ServiceResult.success(cnt);
+    }
+
+    @ApiOperation(value = "导入脚本文件，返回脚本内容", notes = "")
+    @PostMapping("/script/import")
+    @ResponseBody
+    public ServiceResult<String> upload(MultipartFile file) {
+        String content = probeService.readScriptFileContent(file);
+        return ServiceResult.success(content);
     }
 }

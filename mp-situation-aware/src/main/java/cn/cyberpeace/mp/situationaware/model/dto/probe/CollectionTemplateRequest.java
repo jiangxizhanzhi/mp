@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.situationaware.model.dto;
+package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
+import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,11 +10,11 @@ import java.util.List;
 /**
  * @Description:
  * @Author zhouxinghuai
- * @Date：2022/4/25 09:40
+ * @Date：2022/4/26 16:26
  */
 @Data
-@ApiModel(value = "采集模板")
-public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
+@ApiModel("采集模板请求体")
+public class CollectionTemplateRequest extends CollectionTemplateModel {
 
     @ApiModelProperty(value = "基础信息探针列表")
     private List<CollectionTemplateProbeDto> basicInfoProbes;
@@ -26,6 +27,5 @@ public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
 
     @ApiModelProperty(value = "自定义探针列表")
     private List<CollectionTemplateProbeDto> customProbes;
-
 
 }

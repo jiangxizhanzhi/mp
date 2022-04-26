@@ -19,7 +19,7 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRo
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhControl;
-import cn.cyberpeace.mp.situationaware.model.dto.ProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
