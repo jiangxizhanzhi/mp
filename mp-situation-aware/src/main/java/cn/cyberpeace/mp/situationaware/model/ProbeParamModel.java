@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
+ * 探针参数 实体， 跟探针一对多关系
  * mp_situation_probe_param
  * @author 
  */

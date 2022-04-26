@@ -38,6 +38,22 @@ public class ProbeManagerController {
     @Autowired
     private ProbeService probeService;
 
+
+    @GetMapping("/page")
+    @ApiOperation(value = "分页查询探针，不含探针脚本内容")
+    public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
+        PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @GetMapping()
+    @ApiOperation(value = "查询探针详情，包含探针脚本内容")
+    public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
+
+        List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(ids));
+        return ServiceResult.success(probeDtos);
+    }
+
     /**
      * 新增探针
      *
@@ -46,7 +62,7 @@ public class ProbeManagerController {
      */
     @PostMapping
     @ApiOperation(value = "新增自定义探针")
-    public ServiceResult<Void> addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
+    public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
             String httpUrl = probeService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
             probeRequest.setScriptUrl(httpUrl);
@@ -56,9 +72,9 @@ public class ProbeManagerController {
     }
 
 
-    @PatchMapping("/{id}")
+    @PatchMapping
     @ApiOperation(value = "修改自定义探针")
-    public ServiceResult<Void> modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
+    public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
         ProbeDto probeDto = probeService.getById(probeRequest.getId());
         // 判断脚本内容是否有变动
         if (!Objects.equals(probeDto.getScriptContent(), probeRequest.getScriptContent())) {
@@ -75,20 +91,6 @@ public class ProbeManagerController {
         return ServiceResult.successful();
     }
 
-    @GetMapping("/page")
-    @ApiOperation(value = "分页查询探针，不含探针脚本内容")
-    public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
-        PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
-    }
-
-    @GetMapping()
-    @ApiOperation(value = "查询探针详情，包含探针脚本内容")
-    public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
-
-        List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(ids));
-        return ServiceResult.success(probeDtos);
-    }
 
     @DeleteMapping()
     @ApiOperation(value = "删除探针")

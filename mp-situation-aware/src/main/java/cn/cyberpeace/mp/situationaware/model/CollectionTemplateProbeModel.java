@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
+ * 采集模板-探针关系 实体
  * mp_situation_collection_template_probe
  * @author 
  */
@@ -37,6 +39,7 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * 0:启用，1:禁用
      */
     @ApiModelProperty(value = "0:启用，1:禁用")
+    @DefaultInt(0)
     private Integer disabled;
 
     /**

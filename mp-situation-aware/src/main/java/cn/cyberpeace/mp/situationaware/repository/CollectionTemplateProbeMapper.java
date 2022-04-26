@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @ModelClass(CollectionTemplateProbeModel.class)
 public interface CollectionTemplateProbeMapper extends BaseModelMapper<CollectionTemplateProbeModel> {
-//    int deleteByPrimaryKey(Integer pk);
+    //    int deleteByPrimaryKey(Integer pk);
 //
 //    int insert(CollectionTemplateProbeModel record);
 //
@@ -22,4 +23,5 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 //    int updateByPrimaryKeySelective(CollectionTemplateProbeModel record);
 //
 //    int updateByPrimaryKey(CollectionTemplateProbeModel record);
+    int deleteByTemplateId(@Param("templateId") String templateId);
 }

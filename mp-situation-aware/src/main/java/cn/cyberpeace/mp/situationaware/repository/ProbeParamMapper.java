@@ -12,17 +12,19 @@ import org.springframework.stereotype.Repository;
 @ModelClass(ProbeParamModel.class)
 public interface ProbeParamMapper extends BaseModelMapper<ProbeParamModel> {
 
-    int deleteByPrimaryKey(Integer pk);
-
-    int insert(ProbeParamModel record);
-
-    int insertSelective(ProbeParamModel record);
-
-    ProbeParamModel selectByPrimaryKey(Integer pk);
-
-    int updateByPrimaryKeySelective(ProbeParamModel record);
-
-    int updateByPrimaryKey(ProbeParamModel record);
+//    int deleteByPrimaryKey(Integer pk);
+//
+//    int insert(ProbeParamModel record);
+//
+//    int insertSelective(ProbeParamModel record);
+//
+//    ProbeParamModel selectByPrimaryKey(Integer pk);
+//
+//    int updateByPrimaryKeySelective(ProbeParamModel record);
+//
+//    int updateByPrimaryKey(ProbeParamModel record);
 
     int deleteByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
+
+    int deleteByTemplateId(@Param("templateId") String templateId);
 }

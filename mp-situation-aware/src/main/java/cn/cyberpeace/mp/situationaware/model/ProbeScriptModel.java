@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
+ * 探针脚本 实体， 跟探针一对一关系
  * mp_situation_probe_script
  * @author 
  */

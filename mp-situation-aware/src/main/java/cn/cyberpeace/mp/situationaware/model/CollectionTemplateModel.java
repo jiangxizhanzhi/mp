@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
+ *  采集模板 实体
  * mp_situation_collection_template
  * @author 
  */

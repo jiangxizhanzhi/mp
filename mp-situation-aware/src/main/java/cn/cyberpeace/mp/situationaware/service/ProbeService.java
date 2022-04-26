@@ -189,7 +189,7 @@ public class ProbeService {
         BeanUtils.copyProperties(pageQueryRequest, condition);
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
-        List<ProbeDto> probeDtos = probeMapper.listProbes(condition);
+        List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         PageInfo pageInfo = new PageInfo(probeDtos);
 
         return pageInfo;
@@ -206,7 +206,7 @@ public class ProbeService {
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setIds(ids.toArray(new String[0]));
         condition.setNeedScriptContent(true);
-        List<ProbeDto> probeDtos = probeMapper.listProbes(condition);
+        List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         return probeDtos;
     }
 

@@ -138,4 +138,9 @@
       update_time = #{updateTime,jdbcType=TIMESTAMP}
     where pk = #{pk,jdbcType=INTEGER}
   </update>
+
+  <delete id="deleteByTemplateId">
+    delete from mp_situation_collection_template_probe
+    where template_id = #{templateId}
+  </delete>
 </mapper>

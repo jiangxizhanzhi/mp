@@ -162,4 +162,8 @@
         </if>
       </where>
   </delete>
+  <delete id="deleteByTemplateId">
+    delete from mp_situation_probe_param
+    where template_id = #{templateId}
+  </delete>
 </mapper>

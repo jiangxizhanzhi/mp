@@ -31,7 +31,7 @@ public class CollectionTemplateProbeDto extends ProbeModel {
     /**
      * 探针配置，json串，数组
      */
-    @ApiModelProperty(value = "探针配置，json串，数组")
+    @ApiModelProperty(value = "探针配置，json串，数组 {\"paths\": [\n\"/var/log/mp.log,/var/log/cr.log\",\n\"/etc/ossec\"]}")
     private Map<String, String> config;
 
     /**

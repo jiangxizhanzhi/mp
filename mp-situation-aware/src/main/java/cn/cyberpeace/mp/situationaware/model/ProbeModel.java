@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
+ * 探针 实体
  * mp_situation_probe
  * @author 
  */

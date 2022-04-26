@@ -33,7 +33,7 @@ public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
 //                                 @Param("osTypes") List<Integer> osTypes, @Param("catagories") List<String> catagories,
 //                                 @Param("scriptTypes") List<Integer> scriptTypes);
 
-    List<ProbeDto> listProbes(@Param("condition") ProbeSearchCondition condition);
+    List<ProbeDto> listProbeDtos(@Param("condition") ProbeSearchCondition condition);
 
 
 }
