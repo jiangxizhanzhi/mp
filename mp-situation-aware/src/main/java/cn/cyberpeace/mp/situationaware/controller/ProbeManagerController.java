@@ -7,12 +7,15 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.IoUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +31,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -39,6 +44,9 @@ public class ProbeManagerController {
 
     @Autowired
     private ProbeService probeService;
+
+    @Autowired
+    private ProbeScriptService probeScriptService;
 
 
     @GetMapping("/page")
@@ -77,7 +85,10 @@ public class ProbeManagerController {
     @ApiOperation(value = "新增自定义探针")
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-            String httpUrl = probeService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+            InputStream is = new ByteArrayInputStream(Base64.decodeBase64(probeRequest.getScriptContent()));
+            String httpUrl = probeScriptService.uploadScriptContentToFDFS(is);
+            long checksum = IoUtil.checksumCRC32(is);
+            probeRequest.setScriptChecksum(checksum);
             probeRequest.setScriptUrl(httpUrl);
         }
         probeService.addProbe(probeRequest);
@@ -88,16 +99,26 @@ public class ProbeManagerController {
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        ProbeDto probeDto = probeService.getById(probeRequest.getId());
-        // 判断脚本内容是否有变动
-        if (!Objects.equals(probeDto.getScriptContent(), probeRequest.getScriptContent())) {
-            if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-                String httpUrl = probeService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+        Long oldChecksum = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
+        // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
+
+        boolean contentChanged = false;
+        if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
+            InputStream is = new ByteArrayInputStream(Base64.decodeBase64(probeRequest.getScriptContent()));
+            long newChecksum = IoUtil.checksumCRC32(is);
+
+            if (!Objects.equals(newChecksum, oldChecksum)) {
+                String httpUrl = probeScriptService.uploadScriptContentToFDFS(is);
+                probeRequest.setScriptChecksum(newChecksum);
                 probeRequest.setScriptUrl(httpUrl);
+                contentChanged = true;
             }
-        } else {
+        }
+
+        if (!contentChanged) {
             probeRequest.setScriptContent(null);
-            probeDto.setScriptUrl(null);
+            probeRequest.setScriptUrl(null);
+            probeRequest.setScriptChecksum(null);
         }
 
         probeService.modifyProbe(probeRequest);
@@ -117,7 +138,7 @@ public class ProbeManagerController {
     @PostMapping("/script/import")
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {
-        String content = probeService.readScriptFileContent(file);
+        String content = probeScriptService.readScriptFileContent(file);
         return ServiceResult.success(content);
     }
 }

@@ -1,0 +1,81 @@
+package cn.cyberpeace.mp.situationaware.service;
+
+import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import cn.cyberpeace.mp.situationaware.utils.FileUtils;
+import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2022/4/27 18:19
+ */
+@Slf4j
+@Service
+public class ProbeScriptService {
+
+
+    @Autowired
+    private FastDfsConfig fastDfsConfig;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
+
+    @Autowired
+    private ProbeScriptMapper probeScriptMapper;
+
+
+    public Long getScriptChecksumByProbeId(String probeId) {
+        return probeScriptMapper.getChecksumByProbeId(probeId);
+    }
+
+    /**
+     * 将脚本内容上传FDFS，返回上传文件url
+     * @param scriptContent
+     * @return
+     */
+    public String uploadScriptContentToFDFS(InputStream is) {
+        // 处理探针脚本
+        // todo 语法校验
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+        String filepath = fastDFSClient.upload(is, "script", null, FdfsGroupEnum.DEFAULT.toString());
+        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
+        return httpUrl;
+    }
+
+
+    /**
+     * 导入脚本文件，返回脚本内容
+     * @return 脚本内容
+     */
+    public String readScriptFileContent(MultipartFile scriptFile) {
+        if (Objects.isNull(scriptFile)) {
+            return "";
+        }
+        File file = null;
+        String content = "";
+        try {
+            file = FileUtils.multipartToFile(scriptFile, scriptFile.getOriginalFilename());
+            content = FileUtil.readUtf8String(file);
+        } catch (IOException e) {
+            log.error("error:{}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("parse script file error!");
+        }
+        file.deleteOnExit();
+        return content;
+    }
+
+}

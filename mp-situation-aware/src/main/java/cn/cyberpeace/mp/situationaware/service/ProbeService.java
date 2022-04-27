@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
@@ -18,10 +16,7 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
-import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
-import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +25,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -58,13 +50,6 @@ public class ProbeService {
     private ProbeScriptMapper probeScriptMapper;
 
     @Autowired
-    private FastDfsConfig fastDfsConfig;
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
-
-    @Autowired
     private DataCollectionService dataCollectionService;
 
     /**
@@ -81,19 +66,24 @@ public class ProbeService {
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
         probeModel.setOsType(osTypes);
-
+        probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         String probeId = TextUtils.uuid();
         probeModel.setId(probeId);
-        probeMapper.create(probeModel);
+        if (StringUtils.isBlank(probeModel.getOutputFormat())) {
+            probeModel.setOutputFormat(null);
+        }
+        boolean createProbeSuccess = probeMapper.create(probeModel);
 
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             ProbeScriptModel scriptModel = ProbeScriptModel.builder()
                     .probeId(probeId)
                     .scriptType(probeRequest.getScriptType())
                     .scriptContent(probeRequest.getScriptContent())
-                    .scriptUrl(probeRequest.getScriptUrl()).build();
-            probeScriptMapper.create(scriptModel);
+                    .scriptUrl(probeRequest.getScriptUrl())
+                    .checksum(probeRequest.getScriptChecksum())
+                    .build();
+            boolean success = probeScriptMapper.create(scriptModel);
         }
 
 
@@ -128,6 +118,7 @@ public class ProbeService {
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
         probeModel.setOsType(osTypes);
+        probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         probeModel.setId(probeId);
         probeMapper.update(probeModel);
@@ -170,6 +161,7 @@ public class ProbeService {
         log.info("id:{}", id);
         return probeMapper.getById(id);
     }
+
 
     public ProbeDto delete(String id) {
         log.info("id:{}", id);
@@ -263,41 +255,6 @@ public class ProbeService {
 
 
 
-    /**
-     * 将脚本内容上传FDFS，返回上传文件url
-     * @param scriptContent
-     * @return
-     */
-    public String uploadScriptContentToFDFS(String scriptContent) {
-        // 处理探针脚本
-        // todo 语法校验
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String filepath = fastDFSClient.upload(scriptContent, "script", null, FdfsGroupEnum.DEFAULT.toString());
-        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
-        return httpUrl;
-    }
-
-
-    /**
-     * 导入脚本文件，返回脚本内容
-     * @return 脚本内容
-     */
-    public String readScriptFileContent(MultipartFile scriptFile) {
-        if (Objects.isNull(scriptFile)) {
-            return "";
-        }
-        File file = null;
-        String content = "";
-        try {
-            file = FileUtils.multipartToFile(scriptFile, scriptFile.getOriginalFilename());
-            content = FileUtil.readUtf8String(file);
-        } catch (IOException e) {
-            log.error("error:{}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException("parse script file error!");
-        }
-        file.deleteOnExit();
-        return content;
-    }
 
 
     /*@Transactional(rollbackFor = Exception.class, readOnly = true)

@@ -57,9 +57,11 @@ public class ProbeRequest {
     @NotBlank(groups = {AddGroup.class})
     private String scriptContent;
 
-
     @ApiModelProperty(value = "探针脚本Url")
     private String scriptUrl;
+
+    @ApiModelProperty(hidden = true)
+    private Long scriptChecksum;
 
     @ApiModelProperty(value = "脚本参数列表")
     private List<ProbeParamsRequest> params;

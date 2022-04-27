@@ -62,4 +62,7 @@ public class ProbeScriptModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "探针脚本内容fdfs地址")
     private String scriptUrl;
 
+    @ApiModelProperty(hidden = true)
+    private Long checksum;
+
 }
