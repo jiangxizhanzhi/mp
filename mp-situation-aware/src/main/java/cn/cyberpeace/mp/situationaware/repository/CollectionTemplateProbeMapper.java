@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.situationaware.repository;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 
 @Mapper
@@ -24,4 +27,8 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 //
 //    int updateByPrimaryKey(CollectionTemplateProbeModel record);
     int deleteByTemplateId(@Param("templateId") String templateId);
+
+//    List<CollectionTemplateProbeDto> listByCondition();
+
+    List<ProbeModel> listCustomProbesForTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
 }

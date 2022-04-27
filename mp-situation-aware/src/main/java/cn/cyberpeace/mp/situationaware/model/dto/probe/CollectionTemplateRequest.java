@@ -50,15 +50,15 @@ public class CollectionTemplateRequest {
 
 
     @ApiModelProperty(value = "基础信息探针列表")
-    private List<CollectionTemplateProbeDto> basicInfoProbes;
+    private List<CollectionTemplateProbeRequest> basicInfoProbes;
 
     @ApiModelProperty(value = "事件采集探针列表")
-    private List<CollectionTemplateProbeDto> eventProbes;
+    private List<CollectionTemplateProbeRequest> eventProbes;
 
     @ApiModelProperty(value = "日志采集探针列表")
-    private List<CollectionTemplateProbeDto> logProbes;
+    private List<CollectionTemplateProbeRequest> logProbes;
 
     @ApiModelProperty(value = "自定义探针列表")
-    private List<CollectionTemplateProbeDto> customProbes;
+    private List<CollectionTemplateProbeRequest> customProbes;
 
 }

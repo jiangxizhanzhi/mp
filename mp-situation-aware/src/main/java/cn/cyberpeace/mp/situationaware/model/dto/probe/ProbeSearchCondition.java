@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Description:
@@ -9,6 +12,9 @@ import lombok.Data;
  * @Date：2022/4/26 10:33
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ProbeSearchCondition {
 
     @ApiModelProperty(value = "探针id")

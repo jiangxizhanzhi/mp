@@ -210,6 +210,11 @@ public class ProbeService {
         return probeDtos;
     }
 
+    public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
+        List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        return probeDtos;
+    }
+
     /**
      * 根据ids逻辑删除
      * @param ids

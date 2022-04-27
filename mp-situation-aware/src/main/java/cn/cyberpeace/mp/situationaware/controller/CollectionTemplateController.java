@@ -2,10 +2,11 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageItemDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
@@ -46,14 +47,30 @@ public class CollectionTemplateController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-    @GetMapping
-    @ApiOperation(value = "查询采集模板")
-    public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 
-//        List<ProbeDto> probeDtos = templateService.listByIds(Arrays.asList(ids));
-        return ServiceResult.success(probeDtos);
+    @GetMapping()
+    @ApiOperation(value = "查询采集模板")
+    public ServiceResult<List<CollectionTemplateDto>> getByIds(@RequestParam String[] ids) {
+//        List<CollectionTemplateDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
+        List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ids);
+        return ServiceResult.success(colTempDtos);
     }
 
+
+
+    /**
+     *
+     * @param templateId
+     * @param category
+     * @param name
+     * @return
+     */
+    @GetMapping("/probes")
+    @ApiOperation(value = "查询采集模板可以导入的自定义探针")
+    public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam String templateId, @RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
+        List<ProbeModel> probes = templateService.listCustomProbesForTemplate(templateId, category, name);
+        return ServiceResult.success(probes);
+    }
 
     /**
      * 新增采集模板

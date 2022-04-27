@@ -143,4 +143,22 @@
     delete from mp_situation_collection_template_probe
     where template_id = #{templateId}
   </delete>
+
+  <select id="listCustomProbesForTemplate" resultType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    select * from mp_situation_probe
+    where id not in
+    (select p.id from mp_situation_collection_template_probe tempp
+    left join mp_situation_probe p on tempp.probe_id = p.id
+    where tempp.template_id = #{templateId}
+        )
+    <where>
+      AND type = 1
+      <if test="category != null">
+        AND probe_category = #{category}
+      </if>
+      <if test="probeName != null and probeName != ''">
+        AND name like CONCAT('%', #{probeName}, '%')
+      </if>
+    </where>
+  </select>
 </mapper>

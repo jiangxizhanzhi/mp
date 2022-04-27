@@ -46,7 +46,7 @@ public class ProbeManagerController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-    @GetMapping()
+    @GetMapping
     @ApiOperation(value = "查询探针详情，包含探针脚本内容")
     public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 
