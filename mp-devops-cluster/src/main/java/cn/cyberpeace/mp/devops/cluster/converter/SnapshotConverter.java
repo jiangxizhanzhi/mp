@@ -64,6 +64,7 @@ public class SnapshotConverter {
         List<SnapshotConvertModel> resultList = new ArrayList<>();
         SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getImageName(), model.getDeviceName(), model.getDeviceUuid(),
                 "", null);
+        snapshotConvertModel.setQuickCreateParams(model.getQuickCreateParams());
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
         convertModel.setDeviceUuid(model.getDeviceUuid());
