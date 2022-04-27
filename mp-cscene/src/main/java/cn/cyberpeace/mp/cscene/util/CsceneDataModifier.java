@@ -261,7 +261,7 @@ public class CsceneDataModifier {
                                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                                     List<AccessMode> accessModes = port.getAccessModes();
                                     accessModes.forEach(accessMode -> {
-                                        accessMode.setSecretPath(removePrefix(accessMode.getSecretPath(), baseAppConfig.getFdfsOuterHttpServer()));
+                                        accessMode.setPrivateKeyPath(removePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer()));
                                     });
                                 }
                             }
@@ -470,8 +470,8 @@ public class CsceneDataModifier {
                                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                                     List<AccessMode> accessModes = port.getAccessModes();
                                     accessModes.forEach(accessMode -> {
-                                        String secretPath = addFilePrefix(accessMode.getSecretPath(), baseAppConfig.getFdfsOuterHttpServer());
-                                        accessMode.setSecretPath(secretPath);
+                                        String secretPath = addFilePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer());
+                                        accessMode.setPrivateKeyPath(secretPath);
                                     });
                                 }
                             }
