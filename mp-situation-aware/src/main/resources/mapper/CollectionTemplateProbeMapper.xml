@@ -144,7 +144,69 @@
     where template_id = #{templateId}
   </delete>
 
-  <select id="listCustomProbesForTemplate" resultType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+  <delete id="deleteByTemplateIds">
+    delete from mp_situation_collection_template_probe
+    <where>
+      template_id in
+      <if test="templateIds != null and templateIds.length > 0">
+        <foreach item="templateId" index="index" collection="templateIds" open="(" separator="," close=")">
+          #{templateId}
+        </foreach>
+      </if>
+    </where>
+  </delete>
+
+  <select id="countByTemplateId">
+    select count(*) from mp_situation_collection_template_probe tempp
+    left join mp_situation_probe p on tempp.probe_id = p.id
+    <where>
+      template_id = #{templateId}
+      <if test="type != null">
+        AND p.type = #{type}
+      </if>
+    </where>
+
+
+  </select>
+
+  <select id="listCollectionTemplateProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeDto">
+    select tempp.probe_id,
+           tempp.template_id,
+           tempp.disabled,
+           tempp.interval_sec as template_probe_interval_sec,
+           tempp.config,
+           p.`name`,
+           p.description,
+           p.probe_category,
+           p.`type`,
+           p.creator,
+           p.interval_sec,
+           p.output_format,
+           p.is_deleted,
+           p.OS_type,
+           p.create_time,
+           p.update_time
+    from mp_situation_collection_template_probe tempp
+           left join mp_situation_probe p
+                     on p.id = tempp.probe_id
+    <where>
+        tempp.template_id = #{templateId}
+        <if test="probeCondition.probeCategories != null and probeCondition.probeCategories.length > 0">
+          AND p.probe_category in
+          <foreach item="category" index="index" collection="probeCondition.probeCategories" open="(" separator="," close=")">
+            #{category}
+          </foreach>
+        </if>
+        <if test="probeCondition.types != null and probeCondition.types.length > 0">
+          AND p.type in
+          <foreach item="type" index="index" collection="probeCondition.types" open="(" separator="," close=")">
+            #{type}
+          </foreach>
+        </if>
+    </where>
+  </select>
+
+  <select id="listCustomProbesNotInTemplate" resultType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
     select * from mp_situation_probe
     where id not in
     (select p.id from mp_situation_collection_template_probe tempp

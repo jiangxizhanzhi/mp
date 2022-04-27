@@ -11,13 +11,17 @@ import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,12 +52,14 @@ public class CollectionTemplateController {
     }
 
 
-    @GetMapping()
+    @GetMapping("/{id}")
     @ApiOperation(value = "查询采集模板")
-    public ServiceResult<List<CollectionTemplateDto>> getByIds(@RequestParam String[] ids) {
-//        List<CollectionTemplateDto> templateDtos = templateMapper.listTemplateItemDtos(condition);
-        List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ids);
-        return ServiceResult.success(colTempDtos);
+    public ServiceResult<CollectionTemplateDto> getById(@PathVariable String id) {
+        List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ArrayUtils.toArray(id));
+        if (CollectionUtil.isNotEmpty(colTempDtos)) {
+            return ServiceResult.success(colTempDtos.get(0));
+        }
+        return ServiceResult.successful();
     }
 
 
@@ -68,7 +74,7 @@ public class CollectionTemplateController {
     @GetMapping("/probes")
     @ApiOperation(value = "查询采集模板可以导入的自定义探针")
     public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam String templateId, @RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
-        List<ProbeModel> probes = templateService.listCustomProbesForTemplate(templateId, category, name);
+        List<ProbeModel> probes = templateService.listCustomProbesNotInTemplate(templateId, category, name);
         return ServiceResult.success(probes);
     }
 
@@ -97,6 +103,15 @@ public class CollectionTemplateController {
     public ServiceResult<Void> modifyTemplate(@RequestBody @Validated(UpdateGroup.class) CollectionTemplateRequest updateRequest) {
         templateService.modifyTemplate(updateRequest);
         return ServiceResult.successful();
+    }
+
+
+    @DeleteMapping()
+    @ApiOperation(value = "删除采集模板")
+    public ServiceResult deleteByIds(@RequestParam String[] ids) {
+
+        int cnt = templateService.deleteByIds(ids);
+        return ServiceResult.success(cnt);
     }
 
 }

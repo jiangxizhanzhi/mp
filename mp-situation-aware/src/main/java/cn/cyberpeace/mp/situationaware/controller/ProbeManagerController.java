@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,8 +48,19 @@ public class ProbeManagerController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
+
+    @GetMapping("/{id}")
+    @ApiOperation(value = "根据id查询单个探针详情，包含探针脚本内容")
+    public ServiceResult<ProbeDto> getById(@PathVariable String id) {
+        List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(id));
+        if (CollectionUtil.isNotEmpty(probeDtos)) {
+            return ServiceResult.success(probeDtos.get(0));
+        }
+        return ServiceResult.successful();
+    }
+
     @GetMapping
-    @ApiOperation(value = "查询探针详情，包含探针脚本内容")
+    @ApiOperation(value = "根据id数组批量查询探针详情，包含探针脚本内容")
     public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(ids));

@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -28,7 +30,19 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 //    int updateByPrimaryKey(CollectionTemplateProbeModel record);
     int deleteByTemplateId(@Param("templateId") String templateId);
 
+    int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
+
+    List<CollectionTemplateProbeDto> listCollectionTemplateProbeDtos(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
+
+    /**
+     *
+     * @param templateId
+     * @param type 探针类型
+     * @return
+     */
+    int countByTemplateId(@Param("templateId") String templateId, @Param("type") Integer type);
+
 //    List<CollectionTemplateProbeDto> listByCondition();
 
-    List<ProbeModel> listCustomProbesForTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
+    List<ProbeModel> listCustomProbesNotInTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
 }

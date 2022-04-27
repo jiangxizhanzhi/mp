@@ -27,4 +27,6 @@ public interface ProbeParamMapper extends BaseModelMapper<ProbeParamModel> {
     int deleteByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
 
     int deleteByTemplateId(@Param("templateId") String templateId);
+
+    int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
 }

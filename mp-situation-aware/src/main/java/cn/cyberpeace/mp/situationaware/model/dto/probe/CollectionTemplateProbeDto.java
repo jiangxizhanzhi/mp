@@ -15,7 +15,7 @@ import java.util.Map;
  * @Date：2022/4/25 09:41
  */
 @Data
-public class CollectionTemplateProbeVO {
+public class CollectionTemplateProbeDto {
 
     /**
      * 探针ID
@@ -94,6 +94,12 @@ public class CollectionTemplateProbeVO {
      */
     @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec")
     private Integer templateProbeIntervalSec;
+
+    /**
+     * 探针配置，json串，数组
+     */
+    @ApiModelProperty(value = "探针配置，json串，数组 {\"paths\": [\n\"/var/log/mp.log,/var/log/cr.log\",\n\"/etc/ossec\"]}")
+    private String config;
 
     /**
      * 探针配置，json串，数组

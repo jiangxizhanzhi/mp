@@ -166,4 +166,15 @@
     delete from mp_situation_probe_param
     where template_id = #{templateId}
   </delete>
+  <delete id="deleteByTemplateIds">
+    delete from mp_situation_probe_param
+    <where>
+      template_id in
+      <if test="templateIds != null and templateIds.length > 0">
+        <foreach item="templateId" index="index" collection="templateIds" open="(" separator="," close=")">
+          #{templateId}
+        </foreach>
+      </if>
+    </where>
+  </delete>
 </mapper>
