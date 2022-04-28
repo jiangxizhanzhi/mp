@@ -7,7 +7,7 @@
     <result column="probe_id" jdbcType="VARCHAR" property="probeId" />
     <result column="script_url" jdbcType="VARCHAR" property="scriptUrl" />
     <result column="script_type" jdbcType="INTEGER" property="scriptType" />
-    <result column="checksum" jdbcType="BIGINT" property="checksum" />
+    <result column="checksum" jdbcType="VARCHAR" property="checksum" />
     <result column="version" jdbcType="INTEGER" property="version" />
     <result column="status" jdbcType="INTEGER" property="status" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
@@ -40,7 +40,7 @@
       `status`, create_time, update_time, 
       script_content)
     values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeId,jdbcType=VARCHAR}, 
-      #{scriptUrl,jdbcType=VARCHAR}, #{scriptType,jdbcType=INTEGER}, #{checksum,jdbcType=BIGINT}, #{version,jdbcType=INTEGER},
+      #{scriptUrl,jdbcType=VARCHAR}, #{scriptType,jdbcType=INTEGER}, #{checksum,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER},
       #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
       #{scriptContent,jdbcType=LONGVARBINARY})
   </insert>
@@ -98,7 +98,7 @@
         #{scriptType,jdbcType=INTEGER},
       </if>
       <if test="checksum != null">
-        #{checksum,jdbcType=BIGINT},
+        #{checksum,jdbcType=VARCHAR},
       </if>
       <if test="version != null">
         #{version,jdbcType=INTEGER},
@@ -133,7 +133,7 @@
         script_type = #{scriptType,jdbcType=INTEGER},
       </if>
       <if test="checksum != null">
-        `checksum` = #{checksum,jdbcType=BIGINT},
+        `checksum` = #{checksum,jdbcType=VARCHAR},
       </if>
       <if test="version != null">
         version = #{version,jdbcType=INTEGER},
@@ -159,7 +159,7 @@
       probe_id = #{probeId,jdbcType=VARCHAR},
       script_url = #{scriptUrl,jdbcType=VARCHAR},
       script_type = #{scriptType,jdbcType=INTEGER},
-      `checksum` = #{checksum,jdbcType=BIGINT},
+      `checksum` = #{checksum,jdbcType=VARCHAR},
       version = #{version,jdbcType=INTEGER},
       `status` = #{status,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -173,7 +173,7 @@
       probe_id = #{probeId,jdbcType=VARCHAR},
       script_url = #{scriptUrl,jdbcType=VARCHAR},
       script_type = #{scriptType,jdbcType=INTEGER},
-      `checksum` = #{checksum,jdbcType=BIGINT},
+      `checksum` = #{checksum,jdbcType=VARCHAR},
       version = #{version,jdbcType=INTEGER},
       `status` = #{status,jdbcType=INTEGER},
       create_time = #{createTime,jdbcType=TIMESTAMP},
@@ -183,7 +183,7 @@
   <delete id="deleteByProbeId">
     delete from mp_situation_probe_script where probe_id = #{probeId}
   </delete>
-  <select id="getChecksumByProbeId">
+  <select id="getChecksumByProbeId" resultType="string">
     select checksum from mp_situation_probe_script where probe_id = #{probeId}
   </select>
 </mapper>

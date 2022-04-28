@@ -11,11 +11,10 @@ import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.IoUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -31,8 +30,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -84,11 +81,10 @@ public class ProbeManagerController {
     @PostMapping
     @ApiOperation(value = "新增自定义探针")
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
-        if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-            InputStream is = new ByteArrayInputStream(Base64.decodeBase64(probeRequest.getScriptContent()));
-            String httpUrl = probeScriptService.uploadScriptContentToFDFS(is);
-            long checksum = IoUtil.checksumCRC32(is);
-            probeRequest.setScriptChecksum(checksum);
+        if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
+            String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+            String md5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
+            probeRequest.setScriptChecksum(md5);
             probeRequest.setScriptUrl(httpUrl);
         }
         probeService.addProbe(probeRequest);
@@ -99,17 +95,15 @@ public class ProbeManagerController {
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        Long oldChecksum = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
+        String oldMd5 = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
-
         boolean contentChanged = false;
-        if (StringUtils.isBlank(probeRequest.getScriptUrl())) {
-            InputStream is = new ByteArrayInputStream(Base64.decodeBase64(probeRequest.getScriptContent()));
-            long newChecksum = IoUtil.checksumCRC32(is);
+        if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
+            String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
 
-            if (!Objects.equals(newChecksum, oldChecksum)) {
-                String httpUrl = probeScriptService.uploadScriptContentToFDFS(is);
-                probeRequest.setScriptChecksum(newChecksum);
+            if (!Objects.equals(newMd5, oldMd5)) {
+                String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+                probeRequest.setScriptChecksum(newMd5);
                 probeRequest.setScriptUrl(httpUrl);
                 contentChanged = true;
             }

@@ -61,7 +61,7 @@ public class ProbeRequest {
     private String scriptUrl;
 
     @ApiModelProperty(hidden = true)
-    private Long scriptChecksum;
+    private String scriptChecksum;
 
     @ApiModelProperty(value = "脚本参数列表")
     private List<ProbeParamsRequest> params;

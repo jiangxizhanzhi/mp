@@ -63,6 +63,6 @@ public class ProbeScriptModel extends BaseModel implements Serializable {
     private String scriptUrl;
 
     @ApiModelProperty(hidden = true)
-    private Long checksum;
+    private String checksum;
 
 }

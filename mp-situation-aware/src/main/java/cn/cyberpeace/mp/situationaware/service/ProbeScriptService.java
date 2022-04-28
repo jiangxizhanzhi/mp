@@ -9,10 +9,12 @@ import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +40,7 @@ public class ProbeScriptService {
     private ProbeScriptMapper probeScriptMapper;
 
 
-    public Long getScriptChecksumByProbeId(String probeId) {
+    public String getScriptChecksumByProbeId(String probeId) {
         return probeScriptMapper.getChecksumByProbeId(probeId);
     }
 
@@ -47,9 +49,10 @@ public class ProbeScriptService {
      * @param scriptContent
      * @return
      */
-    public String uploadScriptContentToFDFS(InputStream is) {
+    public String uploadScriptContentToFDFS(String scriptContent) {
         // 处理探针脚本
         // todo 语法校验
+        InputStream is = new ByteArrayInputStream(Base64.decodeBase64(scriptContent));
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
         String filepath = fastDFSClient.upload(is, "script", null, FdfsGroupEnum.DEFAULT.toString());
         String httpUrl = group.getFileServerAddr() + File.separator + filepath;

@@ -75,6 +75,16 @@ public class ProbeService {
         }
         boolean createProbeSuccess = probeMapper.create(probeModel);
 
+        boolean rollback = false;
+        if (!createProbeSuccess) {
+            log.error("create probe:{} failed!", probeId);
+            rollback = true;
+        }
+
+        if (rollback) {
+            throw new MpRuntimeException("modify probe failed!");
+        }
+
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             ProbeScriptModel scriptModel = ProbeScriptModel.builder()
                     .probeId(probeId)
@@ -83,7 +93,12 @@ public class ProbeService {
                     .scriptUrl(probeRequest.getScriptUrl())
                     .checksum(probeRequest.getScriptChecksum())
                     .build();
-            boolean success = probeScriptMapper.create(scriptModel);
+            boolean scriptCreateSuccess = probeScriptMapper.create(scriptModel);
+
+            if (!scriptCreateSuccess) {
+                log.error("create script:{} failed!", scriptModel);
+                rollback = true;
+            }
         }
 
 
@@ -102,7 +117,16 @@ public class ProbeService {
                         return paramModel;
                     }).collect(Collectors.toList());
 
-            probeParamMapper.bulkCreate(paramList);
+            int createCnt = probeParamMapper.bulkCreate(paramList);
+            if (createCnt <= 0) {
+                log.error("create probeparam cnt less than 1:{}", createCnt);
+                rollback = true;
+            }
+        }
+
+        if (rollback) {
+            log.error("finally, add probe failed! rollback:{}", rollback);
+            throw new MpRuntimeException("add probe failed!");
         }
     }
 
@@ -121,16 +145,32 @@ public class ProbeService {
         probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         probeModel.setId(probeId);
-        probeMapper.update(probeModel);
+        boolean probeUpdateSuccess = probeMapper.update(probeModel);
+
+        boolean rollback = false;
+        if (!probeUpdateSuccess) {
+            log.error("update probe:{} failed!", probeId);
+            rollback = true;
+        }
+
+        if (rollback) {
+            throw new MpRuntimeException("modify probe failed!");
+        }
 
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             ProbeScriptModel scriptModel = ProbeScriptModel.builder()
                     .probeId(probeId)
                     .scriptType(probeRequest.getScriptType())
                     .scriptContent(probeRequest.getScriptContent())
-                    .scriptUrl(probeRequest.getScriptUrl()).build();
+                    .scriptUrl(probeRequest.getScriptUrl())
+                    .checksum(probeRequest.getScriptChecksum())
+                    .build();
             probeScriptMapper.deleteByProbeId(probeId);
-            probeScriptMapper.create(scriptModel);
+            boolean scriptCreateSuccess = probeScriptMapper.create(scriptModel);
+            if (!scriptCreateSuccess) {
+                log.error("create script:{} failed!", scriptModel);
+                rollback = true;
+            }
         }
 
         List<ProbeParamsRequest> params = probeRequest.getParams();
@@ -149,11 +189,19 @@ public class ProbeService {
                     }).collect(Collectors.toList());
 
             probeParamMapper.deleteByProbeIdAndTemplateId(probeId, null);
-            probeParamMapper.bulkCreate(paramList);
+            int createCnt = probeParamMapper.bulkCreate(paramList);
+            if (createCnt <= 0) {
+                log.error("create probeparam cnt less than 1:{}", createCnt);
+                rollback = true;
+            }
         } else {
             probeParamMapper.deleteByProbeIdAndTemplateId(probeId, null);
         }
 
+        if (rollback) {
+            log.error("finally, modify probe failed! rollback:{}", rollback);
+            throw new MpRuntimeException("modify probe failed!");
+        }
     }
 
 

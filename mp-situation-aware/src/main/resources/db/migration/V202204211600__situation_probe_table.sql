@@ -37,7 +37,7 @@ create table mp_situation_probe_script
     script_type int not null comment '0:shell 1:python 2:bat',
     version int default 1 not null comment '脚本版本',
     status int default 1 not null comment '脚本状态',
-    checksum bigint default 1 not null comment '脚本状态',
+    checksum varchar(100)  null comment '脚本内容md5',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     constraint mp_sita_probe_script_id unique (id)
