@@ -169,7 +169,7 @@
 
   </select>
 
-  <select id="listCollectionTemplateProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeDto">
+  <select id="listCollectionTemplateProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto">
     select tempp.probe_id,
            tempp.template_id,
            tempp.disabled,

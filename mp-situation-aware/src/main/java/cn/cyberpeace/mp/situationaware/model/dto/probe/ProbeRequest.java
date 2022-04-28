@@ -42,9 +42,12 @@ public class ProbeRequest {
     private String outputFormat;
 
 
+    @ApiModelProperty(value = "分析引擎")
+    private String engine;
+
+
     @ApiModelProperty(value = "(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private List<Integer> osTypes;
-
 
     /**
      * 0:shell 1:python 2:bat

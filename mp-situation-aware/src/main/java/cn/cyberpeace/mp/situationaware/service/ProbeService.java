@@ -56,9 +56,11 @@ public class ProbeService {
      * 新增探针
      *
      * @param probeRequest
+     * @return probeId
      */
     @Transactional(rollbackFor = Exception.class)
-    public void addProbe(ProbeRequest probeRequest) {
+    public String addProbe(ProbeRequest probeRequest) {
+        log.info("probeRequest:{}", probeRequest);
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         //新增探针，默认为自定义探针
@@ -69,6 +71,7 @@ public class ProbeService {
         probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         String probeId = TextUtils.uuid();
+        log.info("generated probeId is {}", probeId);
         probeModel.setId(probeId);
         if (StringUtils.isBlank(probeModel.getOutputFormat())) {
             probeModel.setOutputFormat(null);
@@ -82,7 +85,7 @@ public class ProbeService {
         }
 
         if (rollback) {
-            throw new MpRuntimeException("modify probe failed!");
+            throw new MpRuntimeException("create probe failed!");
         }
 
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
@@ -126,13 +129,16 @@ public class ProbeService {
 
         if (rollback) {
             log.error("finally, add probe failed! rollback:{}", rollback);
-            throw new MpRuntimeException("add probe failed!");
+            throw new MpRuntimeException("finally, add probe failed!");
         }
+
+        return probeId;
     }
 
 
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbe(ProbeRequest probeRequest) {
+        log.info("probeRequest:{}", probeRequest);
         String probeId = probeRequest.getId();
 
         ProbeModel probeModel = new ProbeModel();
@@ -200,7 +206,7 @@ public class ProbeService {
 
         if (rollback) {
             log.error("finally, modify probe failed! rollback:{}", rollback);
-            throw new MpRuntimeException("modify probe failed!");
+            throw new MpRuntimeException("finally, modify probe failed!");
         }
     }
 
@@ -235,14 +241,13 @@ public class ProbeService {
         return pageInfo;
     }
 
-
-
     /**
      * 根据ids查询列表
      * @param ids
      * @return
      */
     public List<ProbeDto> listByIds(List<String> ids) {
+        log.info("ids:{}", ids);
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setIds(ids.toArray(new String[0]));
         condition.setNeedScriptContent(true);
@@ -251,6 +256,7 @@ public class ProbeService {
     }
 
     public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
+        log.info("condition:{}", condition);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         return probeDtos;
     }
@@ -261,6 +267,7 @@ public class ProbeService {
      * @return
      */
     public int deleteByIds(List<String> ids) {
+        log.info("ids:{}", ids);
         List<ProbeModel> probesToUpdate =
             ids.stream().map(id -> {
                 ProbeModel probeModel = new ProbeModel();

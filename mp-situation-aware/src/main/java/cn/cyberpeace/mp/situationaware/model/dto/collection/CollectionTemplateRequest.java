@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.model.dto.probe;
+package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -45,7 +46,7 @@ public class CollectionTemplateRequest {
      * (单选) 操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
      */
     @ApiModelProperty(value = "(单选) 操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
-    @NotBlank(groups = AddGroup.class)
+    @NotNull(groups = AddGroup.class)
     private Integer osType;
 
 

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.model.dto.probe;
+package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

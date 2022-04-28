@@ -1,15 +1,19 @@
-package cn.cyberpeace.mp.situationaware.model.dto.probe;
+package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2022/4/26 10:33
- */
 @Data
-public class CollectionTemplateSearchCondition {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@ApiModel("采集模板查询请求体")
+public class CollectionTemplatePageQueryRequest extends BasePageRequest {
 
     @ApiModelProperty(value = "采集模板ids")
     private String[] ids;

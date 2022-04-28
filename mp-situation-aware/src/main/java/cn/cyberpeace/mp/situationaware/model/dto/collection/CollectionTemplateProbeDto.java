@@ -1,7 +1,6 @@
-package cn.cyberpeace.mp.situationaware.model.dto.probe;
+package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -67,14 +66,18 @@ public class CollectionTemplateProbeDto {
      * 自定义探针输出格式: none, json, plain
      */
     @ApiModelProperty(value = "自定义探针输出格式: none, json, plain")
-    @DefaultStr("none")
     private String outputFormat;
+
+    /**
+     * 分析引擎
+     */
+    @ApiModelProperty(value = "分析引擎")
+    private String engine;
 
     /**
      * 1:删除 0:未删除
      */
     @ApiModelProperty(value = "1:删除 0:未删除")
-    @DefaultInt(0)
     private Integer isDeleted;
 
     /**

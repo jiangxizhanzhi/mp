@@ -17,6 +17,7 @@ create table mp_situation_probe
     creator varchar(100) null comment '创建者用户名',
     interval_sec int default 180 not null comment '探针执行间隔，为大于1的数值，单位秒',
     output_format varchar(10) default 'none' not null comment '自定义探针输出格式: none, json, plain',
+    engine varchar(40) null comment '分析引擎',
     is_deleted int default 0 null comment '1:删除 0:未删除',
     OS_type varchar(20) null comment '(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

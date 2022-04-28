@@ -11,13 +11,14 @@
     <result column="creator" jdbcType="VARCHAR" property="creator" />
     <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
     <result column="output_format" jdbcType="VARCHAR" property="outputFormat" />
+    <result column="engine" jdbcType="VARCHAR" property="engine" />
     <result column="is_deleted" jdbcType="INTEGER" property="isDeleted" />
     <result column="OS_type" jdbcType="VARCHAR" property="osType" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    pk, id, `name`, description, probe_category, `type`, creator, interval_sec, output_format,
+    pk, id, `name`, description, probe_category, `type`, creator, interval_sec, output_format, `engine`,
     is_deleted, OS_type, create_time, update_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
@@ -33,12 +34,12 @@
   <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
     insert into mp_situation_probe (pk, id, `name`,
       description, probe_category,
-      `type`, creator, interval_sec, output_format, is_deleted,
+      `type`, creator, interval_sec, output_format, `engine`, is_deleted,
       OS_type, create_time, update_time
       )
     values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
       #{description,jdbcType=VARCHAR}, #{probeCategory,jdbcType=INTEGER},
-      #{type,jdbcType=INTEGER},  #{creator,jdbcType=VARCHAR}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
+      #{type,jdbcType=INTEGER},  #{creator,jdbcType=VARCHAR}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{engine,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
       #{osType,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
       )
   </insert>
@@ -71,6 +72,9 @@
       </if>
       <if test="outputFormat != null">
         output_format,
+      </if>
+      <if test="engine != null">
+        `engine`,
       </if>
       <if test="isDeleted != null">
         is_deleted,
@@ -113,6 +117,9 @@
       <if test="outputFormat != null">
         #{outputFormat,jdbcType=VARCHAR},
       </if>
+      <if test="engine != null">
+        #{engine,jdbcType=VARCHAR},
+      </if>
       <if test="isDeleted != null">
         #{isDeleted,jdbcType=INTEGER},
       </if>
@@ -154,6 +161,9 @@
       <if test="outputFormat != null">
         output_format = #{outputFormat,jdbcType=VARCHAR},
       </if>
+      <if test="engine != null">
+        `engine` = #{engine,jdbcType=VARCHAR},
+      </if>
       <if test="isDeleted != null">
         is_deleted = #{isDeleted,jdbcType=INTEGER},
       </if>
@@ -179,7 +189,7 @@
       creator = #{creator,jdbcType=VARCHAR},
       interval_sec = #{intervalSec,jdbcType=INTEGER},
       output_format = #{outputFormat,jdbcType=VARCHAR},
-      output_format = #{outputFormat,jdbcType=VARCHAR},
+      `engine` = #{engine,jdbcType=VARCHAR},
       is_deleted = #{isDeleted,jdbcType=INTEGER},
       OS_type = #{osType,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},

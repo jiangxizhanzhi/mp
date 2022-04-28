@@ -1,18 +1,19 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageItemDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSearchCondition;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
@@ -48,8 +49,6 @@ public class CollectionTemplateService {
     @Autowired
     private CollectionTemplateProbeMapper templateProbeMapper;
 
-//    @Autowired
-//    private CollectionTemplateProbeService templateProbeService;
 
     @Autowired
     private ProbeParamMapper probeParamMapper;
@@ -82,6 +81,7 @@ public class CollectionTemplateService {
      * @return
      */
     public List<CollectionTemplateDto> listByIds(String[] ids) {
+        log.info("ids:{}", ids);
         CollectionTemplateSearchCondition condition = new CollectionTemplateSearchCondition();
         condition.setIds(ids);
         List<CollectionTemplatePageItemDto> templatePageItemDtos = templateMapper.listTemplateItemDtos(condition);
@@ -95,10 +95,6 @@ public class CollectionTemplateService {
                 List<CollectionTemplateProbeDto> eventProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateEventProbesCondition());
                 List<CollectionTemplateProbeDto> logProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateLogProbesCondition());
                 List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateCustomProbesCondition());
-
-    //            List<ProbeDto> basicProbeDtos = probeService.listByCondition(generateBasicInfoProbesCondition());
-    //            List<ProbeDto> eventProbeDtos = probeService.listByCondition(generateEventProbesCondition());
-    //            List<ProbeDto> logProbeDtos = probeService.listByCondition(generateLogProbesCondition());
 
                 templateDto.setBasicInfoProbes(basicProbeDtos);
                 templateDto.setEventProbes(eventProbeDtos);
@@ -114,12 +110,14 @@ public class CollectionTemplateService {
 
     /**
      * 为采集模板查询可以导入的自定义探针
+     *
      * @param templateId
      * @param catetory
      * @param name
      * @return
      */
     public List<ProbeModel> listCustomProbesNotInTemplate(String templateId, Integer catetory, String name) {
+        log.info("templateId:{}, category:{}, name:{}", templateId, catetory, name);
         List<ProbeModel> probes = templateProbeMapper.listCustomProbesNotInTemplate(templateId, catetory, name);
         return probes;
     }
@@ -160,13 +158,37 @@ public class CollectionTemplateService {
         List<CollectionTemplateProbeRequest> customProbes = addRequest.getCustomProbes();
         processColTempProbeDto(templateId, customProbes, allColTempProbeList, allProbeParamList);
 
-        templateMapper.create(colTempModelToCreate);
+        boolean createSuccess = templateMapper.create(colTempModelToCreate);
+
+        boolean rollback = false;
+        if (!createSuccess) {
+            log.error("create template:{} failed!", templateId);
+            rollback = true;
+        }
+
+        if (rollback) {
+            throw new MpRuntimeException("create template failed!");
+        }
+
         if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
-            templateProbeMapper.bulkCreate(allColTempProbeList);
+            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList);
+            if (cnt <= 0) {
+                log.error("create template-probe count less than 1:{}", cnt);
+                rollback = true;
+            }
         }
 
         if (CollectionUtil.isNotEmpty(allProbeParamList)) {
-            probeParamMapper.bulkCreate(allProbeParamList);
+            int cnt = probeParamMapper.bulkCreate(allProbeParamList);
+            if (cnt <= 0) {
+                log.error("create probe-param count less than 1:{}", cnt);
+                rollback = true;
+            }
+        }
+
+        if (rollback) {
+            log.error("finally, add template failed! rollback:{}", rollback);
+            throw new MpRuntimeException("finally, add template failed!");
         }
 
         return true;
@@ -204,17 +226,41 @@ public class CollectionTemplateService {
         List<CollectionTemplateProbeRequest> customProbes = modifyRequest.getCustomProbes();
         processColTempProbeDto(templateId, customProbes, allColTempProbeList, allProbeParamList);
 
-        templateMapper.update(colTempModelToUpdate);
+        boolean updateSuccess = templateMapper.update(colTempModelToUpdate);
+
+        boolean rollback = false;
+        if (!updateSuccess) {
+            log.error("update template:{} failed!", templateId);
+            rollback = true;
+        }
+
+        if (rollback) {
+            throw new MpRuntimeException("update template failed!");
+        }
+
         if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
             // templateId相关关联实体全部删除
             templateProbeMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
-            templateProbeMapper.bulkCreate(allColTempProbeList);
+            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList);
+            if (cnt <= 0) {
+                log.error("create template-probe count less than 1:{}", cnt);
+                rollback = true;
+            }
         }
 
         if (CollectionUtil.isNotEmpty(allProbeParamList)) {
             // templateId相关参数全部删除
             probeParamMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
-            probeParamMapper.bulkCreate(allProbeParamList);
+            int cnt = probeParamMapper.bulkCreate(allProbeParamList);
+            if (cnt <= 0) {
+                log.error("create probe-param count less than 1:{}", cnt);
+                rollback = true;
+            }
+        }
+
+        if (rollback) {
+            log.error("finally, update template failed! rollback:{}", rollback);
+            throw new MpRuntimeException("finally, update template failed!");
         }
 
         return true;

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateProbeDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

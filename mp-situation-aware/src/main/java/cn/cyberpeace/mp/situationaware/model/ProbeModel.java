@@ -81,6 +81,13 @@ public class ProbeModel extends BaseModel {
     private String outputFormat;
 
     /**
+     * 分析引擎
+     */
+    @ApiModelProperty(value = "分析引擎")
+    @DefaultStr("")
+    private String engine;
+
+    /**
      * 1:删除 0:未删除
      */
     @ApiModelProperty(value = "1:删除 0:未删除")

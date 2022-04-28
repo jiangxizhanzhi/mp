@@ -3,10 +3,10 @@ package cn.cyberpeace.mp.situationaware.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageItemDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplatePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.CollectionTemplateRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
@@ -37,7 +37,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/collection/template")
-@Api(value = "采集模板管理", tags = "探针模板管理")
+@Api(value = "采集模板管理", tags = "采集模板管理")
 public class CollectionTemplateController {
 
     @Autowired
@@ -61,8 +61,6 @@ public class CollectionTemplateController {
         }
         return ServiceResult.successful();
     }
-
-
 
     /**
      *
@@ -91,8 +89,6 @@ public class CollectionTemplateController {
         return ServiceResult.successful();
     }
 
-
-
     /**
      * 修改采集模板
      *
@@ -109,7 +105,6 @@ public class CollectionTemplateController {
     @DeleteMapping()
     @ApiOperation(value = "删除采集模板")
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
-
         int cnt = templateService.deleteByIds(ids);
         return ServiceResult.success(cnt);
     }
