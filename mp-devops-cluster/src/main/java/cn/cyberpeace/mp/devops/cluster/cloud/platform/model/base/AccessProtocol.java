@@ -61,6 +61,9 @@ public class AccessProtocol implements Serializable {
     @ApiModelProperty("秘钥文件")
     private String privateKeyPath;
 
+    @ApiModelProperty("秘钥文件名称")
+    private String privateKeyFileName;
+
     /**d
      * 描述
      */
