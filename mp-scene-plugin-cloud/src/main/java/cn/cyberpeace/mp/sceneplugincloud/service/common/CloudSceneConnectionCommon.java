@@ -44,6 +44,7 @@ public class CloudSceneConnectionCommon {
         private CloudAccessMode cloudAccessMode;
         private String userId;
         private String systemType;
+        private Boolean entity;
 
         //        private String username;
         private String sceneName;
@@ -145,8 +146,14 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
             guacamoleCreateConnectionData.setFlag(false);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
-            var protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ?
-                    AccessMode.Protocol.VNC : sceneConnection.getProtocol();
+            // 协议的特殊处理
+            String protocol = null;
+            if (Boolean.TRUE.equals(param.getEntity()) && sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
+                // 实体节点的console协议使用telnet代替
+                protocol = AccessMode.Protocol.TELNET;
+            } else {
+                protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ? AccessMode.Protocol.VNC : sceneConnection.getProtocol();
+            }
             connectionParams.setProtocol(protocol);
             // windows系统的rdp连接,需要禁用字形缓存
             if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
