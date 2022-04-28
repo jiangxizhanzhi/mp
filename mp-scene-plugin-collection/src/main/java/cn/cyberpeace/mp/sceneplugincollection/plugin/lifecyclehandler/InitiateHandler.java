@@ -18,7 +18,7 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhControl;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.situationaware.model.ProbeResult;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.hutool.core.collection.CollectionUtil;
