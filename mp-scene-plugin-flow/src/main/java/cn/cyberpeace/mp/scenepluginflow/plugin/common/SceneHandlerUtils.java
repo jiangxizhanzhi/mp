@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
@@ -78,8 +79,8 @@ public class SceneHandlerUtils {
         flowExecutor = BeanCommon.getBean(FlowExecutor.class);
     }
 
-    public String createExecutor(String sceneEid, List<String> networkIds) {
-        return flowExecutor.createExecutor(sceneEid);
+    public String createExecutor(String sceneEid, List<FlowNetworkInfo> networkInfos) {
+        return flowExecutor.createExecutor(sceneEid, networkInfos);
     }
 
     public void deleteExecutor(String executorId) {

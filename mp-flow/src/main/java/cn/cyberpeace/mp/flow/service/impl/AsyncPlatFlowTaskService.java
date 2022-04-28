@@ -14,10 +14,7 @@ import cn.cyberpeace.mp.flow.enums.CustomFlagEnum;
 import cn.cyberpeace.mp.flow.enums.FlowPlatformEnum;
 import cn.cyberpeace.mp.flow.enums.ResourceTypeEnum;
 import cn.cyberpeace.mp.flow.enums.TaskStatusEnum;
-import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
-import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.model.FlowPortModel;
-import cn.cyberpeace.mp.flow.model.FlowTaskModel;
+import cn.cyberpeace.mp.flow.model.*;
 import cn.cyberpeace.mp.flow.repository.FlowActuatorMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.repository.FlowPortMapper;
@@ -26,6 +23,7 @@ import cn.cyberpeace.mp.flow.request.AddAppTaskRequest;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.AddStandardsTaskRequest;
 import cn.cyberpeace.mp.flow.request.AddVmRequest;
+import cn.cyberpeace.mp.flow.service.FlowPortService;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
 import cn.cyberpeace.mp.flow.util.HttpDeleteUtil;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
@@ -83,6 +81,9 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FastDFSClient fastDFSClient;
+
+    @Autowired
+    private FlowPortService flowPortService;
 
     /**
      * 保存流量发生平台任务
@@ -301,11 +302,13 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 同步新增流量执行器
+     * @param trexName
+     * @param networkInfos
      * @return
      */
-    public String addExecutorSync(String trexName) {
+    public String addExecutorSync(String trexName, List<FlowNetworkInfo> networkInfos) {
         String uuid = TextUtils.uuid();
-        this.addFlowExecutor(uuid, trexName);
+        this.addFlowExecutor(uuid, trexName, networkInfos);
         return uuid;
     }
 
@@ -314,15 +317,15 @@ public class AsyncPlatFlowTaskService {
      *
      */
     @Async
-    public void addExecutor(String uuid) {
-        this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()));
+    public void addExecutor(String uuid, List<FlowNetworkInfo> networkInfos) {
+        this.addFlowExecutor(uuid, String.valueOf(System.currentTimeMillis()), networkInfos);
     }
 
     /**
      * 新增流量执行器
      * @param uuid
      */
-    private void addFlowExecutor(String uuid,String trexName) {
+    private void addFlowExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
         log.info("================ Add vm instance start ==================");
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
@@ -375,7 +378,7 @@ public class AsyncPlatFlowTaskService {
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, null, () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));

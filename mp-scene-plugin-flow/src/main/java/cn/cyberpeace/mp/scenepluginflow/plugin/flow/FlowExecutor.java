@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
+import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowScriptParamModel;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Component
@@ -37,8 +39,8 @@ public class FlowExecutor {
         setFlowService3(flowService3);
     }
 
-    public String createExecutor(String name) {
-        return flowService1.addExecutorSync(name);
+    public String createExecutor(String name, List<FlowNetworkInfo> networkInfos) {
+        return flowService1.addExecutorSync(name, networkInfos);
     }
 
     public void deleteExecutor(String executorId) {
