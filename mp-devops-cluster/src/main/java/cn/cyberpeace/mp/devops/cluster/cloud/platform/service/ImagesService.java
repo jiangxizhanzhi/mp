@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ImageConnectionCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
@@ -33,13 +32,6 @@ public class ImagesService extends BaseOpenStackService {
 
     public ImagesService(DevopsConfig devopsConfig) {
         super(devopsConfig);
-    }
-
-    /**
-     * 分页查询
-     */
-    public DeviceCloudPlatformModel page(String getParams){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists" + getParams, DeviceCloudPlatformModel.class);
     }
 
     /**

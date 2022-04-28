@@ -52,6 +52,15 @@ public class AccessProtocol implements Serializable {
     @ApiModelProperty("密码")
     private String password;
 
+    /**
+     * 是否密码
+     */
+    @ApiModelProperty("是否密码访问")
+    private Boolean isPassword;
+
+    @ApiModelProperty("秘钥文件")
+    private String encryptionFile;
+
     /**d
      * 描述
      */
