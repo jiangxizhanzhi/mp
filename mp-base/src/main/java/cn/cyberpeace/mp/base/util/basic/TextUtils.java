@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.util.basic;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class TextUtils {
@@ -88,6 +90,25 @@ public class TextUtils {
         return chinesePattern.matcher(str).find();
     }
 
+    public static byte[] rawEncodeBase64(byte[] bytes) {
+        return base64Encoder.encode(bytes);
+    }
+
+    public static byte[] rawEncodeBase64(String str) {
+        return base64Encoder.encode(str.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static byte[] rawDecodeBase64(byte[] bytes) {
+        return base64Decoder.decode(bytes);
+    }
+    public static byte[] rawDecodeBase64(String str) {
+        return base64Decoder.decode(str);
+    }
+
+    public static String encodeBase64(byte[] bytes) {
+        return base64Encoder.encodeToString(bytes);
+    }
+
     public static String encodeBase64(String str) {
         return base64Encoder.encodeToString(str.getBytes(StandardCharsets.UTF_8));
     }
@@ -96,8 +117,21 @@ public class TextUtils {
         return new String(rawDecodeBase64(str), StandardCharsets.UTF_8);
     }
 
-    public static byte[] rawDecodeBase64(String str) {
-        return base64Decoder.decode(str);
+    public static String decodeBase64(byte[] bytes) {
+        return new String(rawDecodeBase64(bytes), StandardCharsets.UTF_8);
+    }
+
+    public static byte[] rawCompress(byte[] bytesToCompress) {
+        var deflater = new Deflater();
+        deflater.setInput(bytesToCompress);
+        deflater.finish();
+
+        var bytesCompressed = new byte[Short.MAX_VALUE];
+        int numberOfBytesAfterCompression = deflater.deflate(bytesCompressed);
+        var returnValues = new byte[numberOfBytesAfterCompression];
+        System.arraycopy(bytesCompressed, 0, returnValues, 0, numberOfBytesAfterCompression);
+
+        return returnValues;
     }
 
     public static byte[] rawDecompress(byte[] bytesToDecompress) {
@@ -129,6 +163,10 @@ public class TextUtils {
         inflater.end();
 
         return returnValues;
+    }
+
+    public static byte[] compress(String str) {
+        return rawCompress(str.getBytes(StandardCharsets.UTF_8));
     }
 
     public static String decompress(byte[] bytesToDecompress) {
