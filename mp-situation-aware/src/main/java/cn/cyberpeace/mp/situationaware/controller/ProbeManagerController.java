@@ -2,11 +2,13 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
 import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
@@ -43,6 +45,9 @@ public class ProbeManagerController {
     private ProbeService probeService;
 
     @Autowired
+    private ProbeAbilityService probeAbilityService;
+
+    @Autowired
     private ProbeScriptService probeScriptService;
 
 
@@ -50,6 +55,14 @@ public class ProbeManagerController {
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
     public ListObjServiceResult<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
         PageInfo<ProbeDto> pageInfo = probeService.page(pageQueryRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+
+    @GetMapping("/abilities/page")
+    @ApiOperation(value = "分页查询探针能力")
+    public ListObjServiceResult<ProbeAbilityDto> pageAbilities(ProbePageQueryRequest pageQueryRequest) {
+        PageInfo<ProbeAbilityDto> pageInfo = probeAbilityService.page(pageQueryRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 

@@ -18,8 +18,14 @@ public class ProbePageQueryRequest extends BasePageRequest {
     @ApiModelProperty(value = "探针id")
     private String[] ids;
 
+    @ApiModelProperty(value = "探针能力ids")
+    private String[] abilityIds;
+
     @ApiModelProperty(value = "探针名称，模糊匹配")
     private String name;
+
+    @ApiModelProperty(value = "探针能力名称，模糊匹配")
+    private String abilityName;
 
     @ApiModelProperty(value = "null:全部, 0:信息类 1:事件类 2:日志类")
     private Integer[] probeCategories;

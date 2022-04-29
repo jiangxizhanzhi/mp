@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace=" cn.cyberpeace.mp.situationaware.repository.ProbeAbilityMapper">
+  <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
+    <id column="pk" jdbcType="INTEGER" property="pk" />
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="probe_id" jdbcType="VARCHAR" property="probeId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk, id, probe_id, `name`, description, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from mp_situation_probe_ability
+    where pk = #{pk,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mp_situation_probe_ability
+    where pk = #{pk,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
+    insert into mp_situation_probe_ability (pk, id, probe_id, 
+      `name`, description, create_time, 
+      update_time)
+    values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeId,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
+    insert into mp_situation_probe_ability
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        pk,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="probeId != null">
+        probe_id,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        #{pk,jdbcType=INTEGER},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
+    update mp_situation_probe_ability
+    <set>
+      <if test="id != null">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        probe_id = #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
+    update mp_situation_probe_ability
+    set id = #{id,jdbcType=VARCHAR},
+      probe_id = #{probeId,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+
+  <select id="listProbeAbilityDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto">
+        select * from mp_situation_probe_ability pa
+        left join mp_situation_probe p on pa.probe_id = p.id
+        <where>
+
+        </where>
+  </select>
+
+  <select id="listProbeAbilityDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto">
+    select
+    pa.*, p.id as probe_id, p.name as probe_name
+    from mp_situation_probe_ability pa
+    left join mp_situation_probe p
+    on p.id = pa.probe_id
+    <where>
+      p.is_deleted = 0
+      AND p.type = 0
+      <if test="condition.ids != null and condition.ids.length > 0">
+        AND p.id in
+        <foreach item="pid" index="index" collection="condition.ids" open="(" separator="," close=")">
+          #{pid}
+        </foreach>
+      </if>
+      <if test="condition.abilityIds != null and condition.abilityIds.length > 0">
+        AND pa.id in
+        <foreach item="aid" index="index" collection="condition.abilityIds" open="(" separator="," close=")">
+          #{aid}
+        </foreach>
+      </if>
+      <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
+        AND p.probe_category in
+        <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
+          #{category}
+        </foreach>
+      </if>
+      <if test="condition.types != null and condition.types.length > 0">
+        AND p.type in
+        <foreach item="type" index="index" collection="condition.types" open="(" separator="," close=")">
+          #{type}
+        </foreach>
+      </if>
+      <if test="condition.name != null and condition.name != ''">
+        AND p.name like CONCAT('%', #{condition.name}, '%')
+      </if>
+      <if test="condition.abilityName != null and condition.abilityName != ''">
+        AND pa.name like CONCAT('%', #{condition.abilityName}, '%')
+      </if>
+      <if test="condition.osTypes != null and condition.osTypes.length > 0">
+        AND
+        <foreach item="osType" index="index" collection="condition.osTypes" open="(" separator="OR" close=")">
+          p.OS_type like CONCAT('%', #{osType}, '%')
+        </foreach>
+      </if>
+    </where>
+    order by p.create_time desc
+  </select>
+</mapper>

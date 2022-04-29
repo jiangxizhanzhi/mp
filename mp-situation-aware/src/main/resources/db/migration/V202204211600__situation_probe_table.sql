@@ -1,4 +1,5 @@
 drop table if exists mp_situation_probe;
+drop table if exists mp_situation_probe_ability;
 drop table if exists mp_situation_script;
 drop table if exists mp_situation_probe_script;
 drop table if exists mp_situation_probe_param;
@@ -25,6 +26,21 @@ create table mp_situation_probe
     constraint mp_sita_probe_id unique (id)
 ) comment '探针基本信息';
 
+
+
+
+-- 探针功能项表
+create table mp_situation_probe_ability
+(
+    pk int auto_increment primary key,
+    id varchar(64) not null,
+    probe_id varchar(64) not null comment '探针id',
+    name varchar(32) not null comment '功能名称',
+    description varchar(400) null comment '描述',
+    create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    constraint mp_sita_probe_abi_id unique (id)
+) comment '探针功能项信息';
 
 
 -- 探针脚本表
