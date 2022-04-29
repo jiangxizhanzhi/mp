@@ -140,6 +140,7 @@ public class CollectionTemplateService {
         colTempModelToCreate.setId(templateId);
         colTempModelToCreate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
+
         List<CollectionTemplateProbeModel> allColTempProbeList = new ArrayList<>();
         List<ProbeParamModel> allProbeParamList = new ArrayList<>();
         // 基础信息采集

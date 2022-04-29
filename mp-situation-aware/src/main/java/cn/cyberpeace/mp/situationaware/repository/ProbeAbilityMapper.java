@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -18,6 +19,6 @@ import java.util.List;
 @ModelClass(ProbeAbilityModel.class)
 public interface ProbeAbilityMapper extends BaseModelMapper<ProbeAbilityModel> {
 
-    List<ProbeAbilityDto> listProbeAbilityDtos(ProbeSearchCondition condition);
+    List<ProbeAbilityDto> listProbeAbilityDtos(@Param("condition") ProbeSearchCondition condition);
 
 }

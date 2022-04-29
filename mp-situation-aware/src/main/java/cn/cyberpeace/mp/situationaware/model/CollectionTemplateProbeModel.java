@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -52,6 +53,7 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * 探针配置，json字符串
      */
     @ApiModelProperty(value = "探针配置，json串，数组")
+    @DefaultStr("")
     private String config;
 
 }
