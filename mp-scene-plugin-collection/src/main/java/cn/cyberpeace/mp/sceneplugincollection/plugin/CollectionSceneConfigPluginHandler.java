@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElem
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
 
@@ -25,11 +26,6 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
 
     private CollectionSceneConfigPluginModelHandler pluginModelHandler;
 
-    private static final String EVENT = "1";
-    private static final String LOG = "2";
-    private static final String REGISTRY_PROBE_ID = "registry";
-    private static final String FILE_PROBE_ID = "file";
-
     @Override
     public void correctData() {
         if (getElementMap() != null && !getElementMap().isEmpty()) {
@@ -40,11 +36,11 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
                 e.getProbes().forEach(probe -> {
                     if (probe.getScriptUrl() != null) {
                         probe.setExecType(Probe.ExecType.SCRIPT_PROBE);
-                    } else if (REGISTRY_PROBE_ID.equals(probe.getId())) {
+                    } else if (ProbeConstant.REGISTRY_ID.equals(probe.getId())) {
                         probe.setExecType(Probe.ExecType.REGISTRY_PROBE);
-                    } else if (FILE_PROBE_ID.equals(probe.getId())) {
+                    } else if (ProbeConstant.FILE_ID.equals(probe.getId())) {
                         probe.setExecType(Probe.ExecType.FILE_PROBE);
-                    } else if (probe.getCommon() && LOG.equals(probe.getType())) {
+                    } else if (probe.getCommon() && ProbeConstant.LOG_TYPE.equals(probe.getType())) {
                         probe.setExecType(Probe.ExecType.LOG_PROBE);
                     } else {
                         probe.setExecType(Probe.ExecType.BASE_PROBE);

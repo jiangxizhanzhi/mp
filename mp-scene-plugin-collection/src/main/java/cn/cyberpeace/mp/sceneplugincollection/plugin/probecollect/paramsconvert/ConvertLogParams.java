@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert
 
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneLogProbeLocationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 
@@ -19,11 +20,6 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
 
     private static final String LOG_FORMAT_SYSLOG = "syslog";
 
-    private static final String LOG_ID = "log";
-    private static final String SECURITY_ID = "security";
-    private static final String OS_ID = "os";
-    private static final String APPLICATION_ID = "application";
-
     public ConvertLogParams(Probe probe, String systemType, Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
         this.probe = probe;
         this.systemType = SystemTypeCommandUtils.getOsType(systemType);
@@ -36,11 +32,11 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
         if (probe.getDisabled()) {
             return new ArrayList<>();
         }
-        if (LOG_ID.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
+        if (ProbeConstant.LOG_ID.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
             return new ArrayList<>();
         }
         int i = 1;
-        if (LOG_ID.equals(probe.getId())) {
+        if (ProbeConstant.LOG_ID.equals(probe.getId())) {
             for (String path : probe.getCollectPath()) {
                 WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
                 logParam.setId(probe.getId() + "_" + i++);
