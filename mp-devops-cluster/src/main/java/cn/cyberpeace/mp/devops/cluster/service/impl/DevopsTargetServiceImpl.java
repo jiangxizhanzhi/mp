@@ -138,6 +138,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
 
         ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
         if (Objects.nonNull(extSystemInfo)){
+            targetModel.setParentSystemType(extSystemInfo.getParentSystemType());
             targetModel.setSystemType(extSystemInfo.getSystemType());
             targetModel.setLanguage(extSystemInfo.getLanguage());
             targetModel.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
