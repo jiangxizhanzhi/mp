@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,30 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         CollectionPluginSceneConfigElementBO, CollectionPluginSceneConfigElementPortBO, Object> {
 
     private CollectionSceneConfigPluginModelHandler pluginModelHandler;
+
+    @Override
+    public void correctData() {
+        if (getElementMap() != null && !getElementMap().isEmpty()) {
+            getElementMap().values().forEach(e -> {
+                if (e.getProbes() == null || e.getProbes().isEmpty()) {
+                    return;
+                }
+                e.getProbes().forEach(probe -> {
+                    if (probe.getScriptUrl() != null) {
+                        probe.setExecType(Probe.ExecType.SCRIPT_PROBE);
+                    } else if (ProbeConstant.REGISTRY_ID.equals(probe.getId())) {
+                        probe.setExecType(Probe.ExecType.REGISTRY_PROBE);
+                    } else if (ProbeConstant.FILE_ID.equals(probe.getId())) {
+                        probe.setExecType(Probe.ExecType.FILE_PROBE);
+                    } else if (probe.getCommon() && ProbeConstant.LOG_TYPE.equals(probe.getType())) {
+                        probe.setExecType(Probe.ExecType.LOG_PROBE);
+                    } else {
+                        probe.setExecType(Probe.ExecType.BASE_PROBE);
+                    }
+                });
+            });
+        }
+    }
 
     @Override
     public void initBase() {

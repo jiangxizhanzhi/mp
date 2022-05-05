@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
@@ -13,15 +13,19 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneLogProbeLocationModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertFileParams;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertLogParams;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertRegistryParams;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertScriptParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
-import cn.cyberpeace.mp.situationaware.service.ProbeService;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneLogProbeLocationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,9 +38,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
-
-    private ProbeService probeService;
-
 
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
@@ -51,7 +52,6 @@ public class InitiateHandler extends HandlerCommon {
 
     public InitiateHandler(CollectionScenePluginHandler pluginHandler) {
         super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.INITIATE);
-        this.probeService = BeanCommon.getBean(ProbeService.class);
     }
 
     public void initiate() {
@@ -170,61 +170,17 @@ public class InitiateHandler extends HandlerCommon {
             // 初始化安装探针脚本
             var collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
+                Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = this.getLocationMap();
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
-                    List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
-                    if (collectionElement.getProbes() != null) {
-                        List<String> probeIds = collectionElement.getProbes().stream().map(p -> p.getId()).collect(Collectors.toList());
-                        List<ProbeDto> probeResults = probeService.listByIds(probeIds);
-                        Map<String, ProbeDto> probeId2Probe = new HashMap<>();
-                        probeResults.forEach(probe -> {
-                            probeId2Probe.put(probe.getId(), probe);
-                        });
-                        collectionElement.getProbes().forEach(probe -> {
-                            WazuhControl.ControlProbeParam controlProbeParam = new WazuhControl.ControlProbeParam();
-                            controlProbeParam.setId(TextUtils.uuid());
-                            controlProbeParam.setGroup(srcElement.getEid());
-                            List<String> params = new ArrayList<>();
-                            if (probe.getParams() != null) {
-                                probe.getParams().forEach(param -> {
-                                    if (param.getValue() != null) {
-                                        params.add(param.getValue());
-                                    } else {
-                                        params.add(param.getDefaultValue());
-                                    }
-                                });
-                            }
-                            if (!CollectionUtil.isEmpty(params)) {
-                                controlProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
-                            }
-                            if (!probeId2Probe.containsKey(probe.getId())) {
-                                return;
-                            }
-                            ProbeDto probeResult = probeId2Probe.get(probe.getId());
-                            if (probeResult.getScriptType() == 0) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-                            } else if (probeResult.getScriptType() == 1) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-                            } else if (probeResult.getScriptType() == 2) {
-                                controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_BAT);
-                            }
-                            if (probe.getInterval() != null) {
-                                controlProbeParam.setInterval(probe.getInterval().toString() + "s");
-                            }
-                            controlProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-                            controlProbeParam.setScriptContent(probeResult.getScriptContent());
-                            if (probe.getDisabled() != null && probe.getDisabled()) {
-                                controlProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);
-                            }
-                            if (probeResult.getOutputFormat() != null) {
-                                controlProbeParam.setOutputFormat(probeResult.getOutputFormat());
-                            }
-//                            controlProbeParams.add(controlProbeParam);
-                        });
-                    }
+                    WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
+                    if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
+                        controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
+                                systemType, locationMap);
+                    }
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId, controlProbeParams);
+                            srcElement.getEid(), collectionId, controlParam);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
@@ -239,4 +195,52 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
+    private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
+            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
+        List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
+        List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
+        List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();
+        List<WazuhControl.ControlLogCollectParam> logParams = new ArrayList<>();
+        WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
+        for (Probe probe : probes) {
+            if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
+                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
+                customProbeParams.addAll(convertScript.convertParams());
+            }
+            if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
+                ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
+                registryParams.addAll(convertRegistry.convertParams());
+            }
+            if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
+                ConvertFileParams convertFile = new ConvertFileParams(probe);
+                fileParams.addAll(convertFile.convertParams());
+            }
+            if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
+                ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
+                logParams.addAll(convertLog.convertParams());
+            }
+        }
+        controlParam.setProbeParams(customProbeParams);
+        controlParam.setRegistryModifyParams(registryParams);
+        controlParam.setFileModifyParams(fileParams);
+        controlParam.setLogCollectParams(logParams);
+        return controlParam;
+    }
+
+    private Map<String, List<CollectionPluginSceneLogProbeLocationModel>> getLocationMap() {
+        var locationMapper = BeanCommon.getBean(CollectionPluginSceneLogProbeLocationMapper.class);
+        List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMapper.list(new HumanCondition());
+        if (locationModels == null || locationModels.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = new HashMap<>();
+        locationModels.forEach(locationModel -> {
+            String key = locationModel.getProbeId() + "_" + locationModel.getOsType();
+            if (!locationMap.containsKey(key)) {
+                locationMap.put(key, new ArrayList<>());
+            }
+            locationMap.get(key).add(locationModel);
+        });
+        return locationMap;
+    }
 }
