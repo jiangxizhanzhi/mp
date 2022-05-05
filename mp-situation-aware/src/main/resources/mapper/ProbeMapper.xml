@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.situationaware.repository.ProbeMapper">
+  <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    <id column="pk" jdbcType="INTEGER" property="pk" />
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="probe_category" jdbcType="INTEGER" property="probeCategory" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
+    <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
+    <result column="output_format" jdbcType="VARCHAR" property="outputFormat" />
+    <result column="engine" jdbcType="VARCHAR" property="engine" />
+    <result column="is_deleted" jdbcType="INTEGER" property="isDeleted" />
+    <result column="OS_type" jdbcType="VARCHAR" property="osType" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk, id, `name`, description, probe_category, `type`, creator, interval_sec, output_format, `engine`,
+    is_deleted, OS_type, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from mp_situation_probe
+    where pk = #{pk,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mp_situation_probe
+    where pk = #{pk,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    insert into mp_situation_probe (pk, id, `name`,
+      description, probe_category,
+      `type`, creator, interval_sec, output_format, `engine`, is_deleted,
+      OS_type, create_time, update_time
+      )
+    values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{description,jdbcType=VARCHAR}, #{probeCategory,jdbcType=INTEGER},
+      #{type,jdbcType=INTEGER},  #{creator,jdbcType=VARCHAR}, #{intervalSec,jdbcType=INTEGER}, #{outputFormat,jdbcType=VARCHAR}, #{engine,jdbcType=VARCHAR}, #{isDeleted,jdbcType=INTEGER},
+      #{osType,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    insert into mp_situation_probe
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        pk,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="probeCategory != null">
+        probe_category,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="creator != null">
+        creator,
+      </if>
+      <if test="intervalSec != null">
+        interval_sec,
+      </if>
+      <if test="outputFormat != null">
+        output_format,
+      </if>
+      <if test="engine != null">
+        `engine`,
+      </if>
+      <if test="isDeleted != null">
+        is_deleted,
+      </if>
+      <if test="osType != null">
+        OS_type,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        #{pk,jdbcType=INTEGER},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="probeCategory != null">
+        #{probeCategory,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="intervalSec != null">
+        #{intervalSec,jdbcType=INTEGER},
+      </if>
+      <if test="outputFormat != null">
+        #{outputFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="engine != null">
+        #{engine,jdbcType=VARCHAR},
+      </if>
+      <if test="isDeleted != null">
+        #{isDeleted,jdbcType=INTEGER},
+      </if>
+      <if test="osType != null">
+        #{osType,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    update mp_situation_probe
+    <set>
+      <if test="id != null">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="probeCategory != null">
+        probe_category = #{probeCategory,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="creator != null">
+        creator = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="intervalSec != null">
+        interval_sec = #{intervalSec,jdbcType=INTEGER},
+      </if>
+      <if test="outputFormat != null">
+        output_format = #{outputFormat,jdbcType=VARCHAR},
+      </if>
+      <if test="engine != null">
+        `engine` = #{engine,jdbcType=VARCHAR},
+      </if>
+      <if test="isDeleted != null">
+        is_deleted = #{isDeleted,jdbcType=INTEGER},
+      </if>
+      <if test="osType != null">
+        OS_type = #{osType,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeModel">
+    update mp_situation_probe
+    set id = #{id,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      probe_category = #{probeCategory,jdbcType=INTEGER},
+      `type` = #{type,jdbcType=INTEGER},
+      creator = #{creator,jdbcType=VARCHAR},
+      interval_sec = #{intervalSec,jdbcType=INTEGER},
+      output_format = #{outputFormat,jdbcType=VARCHAR},
+      `engine` = #{engine,jdbcType=VARCHAR},
+      is_deleted = #{isDeleted,jdbcType=INTEGER},
+      OS_type = #{osType,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+
+
+  <select id="getById" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
+    select
+      p.*, ps.script_type, ps.script_content, ps.script_url
+    from mp_situation_probe p
+    left join mp_situation_probe_script ps
+    on p.id = ps.probe_id
+    where p.id = #{id} and p.is_deleted = 0
+  </select>
+
+
+  <select id="listProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
+    select
+      p.*, ps.script_type, ps.script_url
+    <if test="condition.needScriptContent != null and condition.needScriptContent == true">
+      , ps.script_content
+    </if>
+    from mp_situation_probe p
+    left join mp_situation_probe_script ps
+    on p.id = ps.probe_id
+    <where>
+      p.is_deleted = 0
+      <if test="condition.ids != null and condition.ids.length > 0">
+        AND p.id in
+        <foreach item="pid" index="index" collection="condition.ids" open="(" separator="," close=")">
+          #{pid}
+        </foreach>
+      </if>
+      <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
+        AND p.probe_category in
+        <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
+          #{category}
+        </foreach>
+      </if>
+      <if test="condition.types != null and condition.types.length > 0">
+        AND p.type in
+        <foreach item="type" index="index" collection="condition.types" open="(" separator="," close=")">
+          #{type}
+        </foreach>
+      </if>
+      <if test="condition.scriptTypes != null and condition.scriptTypes.length > 0">
+        AND ps.script_type in
+        <foreach item="scriptType" index="index" collection="condition.scriptTypes" open="(" separator="," close=")">
+          #{scriptType}
+        </foreach>
+      </if>
+      <if test="condition.name != null and condition.name != ''">
+        AND p.name like CONCAT('%', #{condition.name}, '%')
+      </if>
+      <if test="condition.osTypes != null and condition.osTypes.length > 0">
+        AND
+          <foreach item="osType" index="index" collection="condition.osTypes" open="(" separator="OR" close=")">
+            p.OS_type like CONCAT('%', #{osType}, '%')
+          </foreach>
+      </if>
+    </where>
+    order by p.create_time desc
+  </select>
+</mapper>

@@ -146,11 +146,23 @@ public class RealEquipmentController {
     @GetMapping("/{id}")
     public Result<RealEquipmentByIdResponse> getById(@PathVariable String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
+        List<ExtEntityAccess> extEntityAccess = realEquipment.getExtEntityAccess();
+        if (CollectionUtils.isNotEmpty(extEntityAccess)) {
+            extEntityAccess = extEntityAccess.stream().map(v -> {
+                List<AccessProtocol> accessProtocols = v.getAccessProtocols();
+                if (CollectionUtils.isNotEmpty(accessProtocols)) {
+                    accessProtocols = accessProtocols.stream().filter(accessProtocol -> !"console".equals(accessProtocol.getProtocol())).collect(Collectors.toList());
+                }
+                v.setAccessProtocols(accessProtocols);
+                return v;
+            }).collect(Collectors.toList());
+        }
+
         RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory()).thirdCategory(realEquipment.getThirdCategory())
                 .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
-                .description(realEquipment.getDescription()).extEntityAccess(realEquipment.getExtEntityAccess()).build();
+                .description(realEquipment.getDescription()).extEntityAccess(extEntityAccess).build();
         return new Result(response);
     }
 
@@ -189,8 +201,8 @@ public class RealEquipmentController {
     @ApiOperation("删除")
     @DeleteMapping("/delete")
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
-        Boolean result = realEquipmentConverter.delete(request);
-        return new Result<>(result);
+        BaseCloudPlatformModel result = realEquipmentConverter.delete(request);
+        return new Result<>(result.isSuccess());
     }
 
     @ApiOperation("查询详情")

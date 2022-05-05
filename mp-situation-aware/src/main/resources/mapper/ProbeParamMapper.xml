@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper">
+  <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeParamModel">
+    <id column="pk" jdbcType="INTEGER" property="pk" />
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="probe_id" jdbcType="VARCHAR" property="probeId" />
+    <result column="template_id" jdbcType="VARCHAR" property="templateId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="default_value" jdbcType="VARCHAR" property="defaultValue" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk, id, probe_id, template_id, `name`, `type`, default_value, description, create_time, 
+    update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from mp_situation_probe_param
+    where pk = #{pk,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mp_situation_probe_param
+    where pk = #{pk,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeParamModel">
+    insert into mp_situation_probe_param (pk, id, probe_id, 
+      template_id, `name`, `type`, 
+      default_value, description, create_time, 
+      update_time)
+    values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeId,jdbcType=VARCHAR}, 
+      #{templateId,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, 
+      #{defaultValue,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{updateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeParamModel">
+    insert into mp_situation_probe_param
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        pk,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="probeId != null">
+        probe_id,
+      </if>
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="name != null">
+        `name`,
+      </if>
+      <if test="type != null">
+        `type`,
+      </if>
+      <if test="defaultValue != null">
+        default_value,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        #{pk,jdbcType=INTEGER},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null">
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="defaultValue != null">
+        #{defaultValue,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeParamModel">
+    update mp_situation_probe_param
+    <set>
+      <if test="id != null">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        probe_id = #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null">
+        template_id = #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="defaultValue != null">
+        default_value = #{defaultValue,jdbcType=VARCHAR},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeParamModel">
+    update mp_situation_probe_param
+    set id = #{id,jdbcType=VARCHAR},
+      probe_id = #{probeId,jdbcType=VARCHAR},
+      template_id = #{templateId,jdbcType=VARCHAR},
+      `name` = #{name,jdbcType=VARCHAR},
+      `type` = #{type,jdbcType=INTEGER},
+      default_value = #{defaultValue,jdbcType=VARCHAR},
+      description = #{description,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByProbeIdAndTemplateId">
+    delete from mp_situation_probe_param
+      <where>
+        probe_id = #{probeId}
+        <if test="templateId != null and templateId != ''">
+          AND template_id = #{templateId}
+        </if>
+        <if test="templateId == null or templateId = ''">
+          AND template_id = ''
+        </if>
+      </where>
+  </delete>
+  <delete id="deleteByTemplateId">
+    delete from mp_situation_probe_param
+    where template_id = #{templateId}
+  </delete>
+  <delete id="deleteByTemplateIds">
+    delete from mp_situation_probe_param
+    <where>
+      template_id in
+      <if test="templateIds != null and templateIds.length > 0">
+        <foreach item="templateId" index="index" collection="templateIds" open="(" separator="," close=")">
+          #{templateId}
+        </foreach>
+      </if>
+    </where>
+  </delete>
+</mapper>
