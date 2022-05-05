@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.Getter;
@@ -53,9 +52,6 @@ public class WazuhControl {
     public static final String FILE_CONTROL_ACTION_REMOVE = "remove";
 
     public static final String FILE_CONTROL_REMOTE_TYPE_GOFDFS = "godfs";
-
-    @Getter
-    private HttpClient godfsHttpClient;
 
     public static String genControlConfigCommand(String osType, ControlConfigParam controlConfigParam) {
         return genControlConfigCommand(osType, controlConfigParam, false);
@@ -136,6 +132,9 @@ public class WazuhControl {
     @Getter
     private WazuhLauncher wazuhLauncher;
 
+    @Getter
+    private GodfsClient godfsClient;
+
     public static class WazuhControlBuilder {
         private WazuhLauncher.WazuhLauncherBuilder wazuhLauncherBuilder;
         private String godfsServer;
@@ -176,9 +175,7 @@ public class WazuhControl {
 
     private WazuhControl(WazuhLauncher wazuhLauncher, String godfsServer) {
         this.wazuhLauncher = wazuhLauncher;
-
-        this.godfsHttpClient = new HttpClient(godfsServer, 600000, 200, 200);
-        this.godfsHttpClient.setLogRequest(true);
+        this.godfsClient = new GodfsClient(godfsServer);
     }
 
     public static WazuhControlBuilder builder() {

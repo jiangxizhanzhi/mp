@@ -29,7 +29,7 @@ public interface HttpData {
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
             if (!StringUtils.equals("class", fieldName)) {
-                multipart.put(fieldName, propertyDescriptor.getValue(fieldName));
+                multipart.put(fieldName, wrapper.getPropertyValue(fieldName));
             }
         }
         return multipart;
