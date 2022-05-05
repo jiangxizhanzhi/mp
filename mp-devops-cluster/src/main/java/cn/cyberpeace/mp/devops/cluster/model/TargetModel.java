@@ -82,6 +82,11 @@ public class TargetModel extends BaseModel {
     /**
      * 系统类型
      */
+    private Integer parentSystemType;
+
+    /**
+     * 系统类型
+     */
     private Integer systemType;
 
     /**
