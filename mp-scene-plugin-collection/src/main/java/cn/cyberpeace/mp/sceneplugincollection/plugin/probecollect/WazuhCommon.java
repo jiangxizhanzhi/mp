@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class WazuhCommon {
     private WazuhCommon() {}
 
     public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
-                                                         List<WazuhControl.ControlProbeParam> customProbeParams) {
+                                                         WazuhControl.ControlConfigParam controlParam) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -50,11 +51,12 @@ public class WazuhCommon {
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
-        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(customProbeParams);
+        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(controlParam.getProbeParams());
         List<WazuhControl.ControlProbeParam> defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer,
                 agentName, wazuhProbeConfig);
         controlProbeParams.addAll(defaultProbeParams);
-        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlProbeParams, new ArrayList<>());
+        controlParam.setProbeParams(controlProbeParams);
+        String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
 
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {

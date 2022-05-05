@@ -63,9 +63,11 @@ public class Probe {
     }
 
     public static class ExecType {
-        public static final int baseProbe = 0;
-        public static final int fileProbe = 1;
-        public static final int scriptProbe = 2;
+        public static final int BASE_PROBE = 0;
+        public static final int LOG_PROBE = 1;
+        public static final int FILE_PROBE = 2;
+        public static final int REGISTRY_PROBE = 3;
+        public static final int SCRIPT_PROBE = 4;
 
         private ExecType() {
         }
