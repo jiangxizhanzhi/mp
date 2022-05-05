@@ -18,8 +18,8 @@ import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
-import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhControl;
-import cn.cyberpeace.mp.situationaware.model.ProbeResult;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -175,8 +175,8 @@ public class InitiateHandler extends HandlerCommon {
                     List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
                     if (collectionElement.getProbes() != null) {
                         List<String> probeIds = collectionElement.getProbes().stream().map(p -> p.getId()).collect(Collectors.toList());
-                        List<ProbeResult> probeResults = probeService.queryProbeByIds(probeIds);
-                        Map<String, ProbeResult> probeId2Probe = new HashMap<>();
+                        List<ProbeDto> probeResults = probeService.listByIds(probeIds);
+                        Map<String, ProbeDto> probeId2Probe = new HashMap<>();
                         probeResults.forEach(probe -> {
                             probeId2Probe.put(probe.getId(), probe);
                         });
@@ -200,7 +200,7 @@ public class InitiateHandler extends HandlerCommon {
                             if (!probeId2Probe.containsKey(probe.getId())) {
                                 return;
                             }
-                            ProbeResult probeResult = probeId2Probe.get(probe.getId());
+                            ProbeDto probeResult = probeId2Probe.get(probe.getId());
                             if (probeResult.getScriptType() == 0) {
                                 controlProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
                             } else if (probeResult.getScriptType() == 1) {

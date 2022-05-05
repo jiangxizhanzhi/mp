@@ -1,160 +1,103 @@
 package cn.cyberpeace.mp.situationaware.model;
 
-import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
-import cn.cyberpeace.mp.situationaware.model.enums.SourceCategory;
-import java.io.Serializable;
-import java.util.Date;
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
+import cn.cyberpeace.mp.base.model.stereotype.Table;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public class ProbeModel implements Serializable {
-    private Integer pk;
+/**
+ * 探针 实体
+ * mp_situation_probe
+ * @author 
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table("mp_situation_probe")
+public class ProbeModel extends BaseModel {
 
-    private String id;
+    public static final int TYPE_COMMON = 0;
 
-    private String probeName;
+    public static final int TYPE_CUSTOM = 1;
 
-    private String des;
+    public static final int CATATORY_BASIC_INFO = 0;
 
-    private Integer osType;
+    public static final int CATATORY_EVENT = 1;
 
-    private Integer probeCategory;
-
-    private SourceCategory sourceCategory;
-
-    private Integer scriptType;
-
-    private Date createTime;
-
-    private Date updateTime;
-
-    private Integer delFlag;
-
-    private byte[] scriptContent;
-
-    private String commandInterval;
-
-    private ProbeStatus probeStatus;
+    public static final int CATATORY_LOG = 2;
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * 探针名称
+     */
+    @ApiModelProperty(value = "探针名称")
+    private String name;
+
+    /**
+     * 描述
+     */
+    @ApiModelProperty(value = "描述")
+    private String description;
+
+    /**
+     * 0:信息类 1:事件类 2:日志类 
+     */
+    @ApiModelProperty(value = "0:信息类 1:事件类 2:日志类")
+    private Integer probeCategory;
+
+    /**
+     * 0:通用探针 1:自定义探针
+     */
+    @ApiModelProperty(value = "0:通用探针 1:自定义探针")
+    @DefaultInt(1)
+    private Integer type;
+
+    /**
+     * 创建者用户名
+     */
+    @ApiModelProperty(value = "创建者用户名")
+    @DefaultStr
+    private String creator;
+    
+    /**
+     * 探针执行间隔，为大于1的数值，单位秒，默认60秒
+     */
+    @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒")
+    @DefaultInt(60)
+    private Integer intervalSec;
+
+    /**
+     * 自定义探针输出格式: none, json, plain
+     */
+    @ApiModelProperty(value = "自定义探针输出格式: none, json, plain")
+    @DefaultStr("none")
     private String outputFormat;
 
-    public String getOutputFormat() {
-        return outputFormat;
-    }
+    /**
+     * 分析引擎
+     */
+    @ApiModelProperty(value = "分析引擎")
+    @DefaultStr("")
+    private String engine;
 
-    public void setOutputFormat(String outputFormat) {
-        this.outputFormat = outputFormat;
-    }
+    /**
+     * 1:删除 0:未删除
+     */
+    @ApiModelProperty(value = "1:删除 0:未删除")
+    @DefaultInt(0)
+    private Integer isDeleted;
 
-    public Integer getPk() {
-        return pk;
-    }
+    /**
+     * (可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
+     */
+    @ApiModelProperty(value = "(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    private String osType;
 
-    public void setPk(Integer pk) {
-        this.pk = pk;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id == null ? null : id.trim();
-    }
-
-    public String getProbeName() {
-        return probeName;
-    }
-
-    public void setProbeName(String probeName) {
-        this.probeName = probeName == null ? null : probeName.trim();
-    }
-
-    public String getDes() {
-        return des;
-    }
-
-    public void setDes(String des) {
-        this.des = des == null ? null : des.trim();
-    }
-
-    public Integer getOsType() {
-        return osType;
-    }
-
-    public void setOsType(Integer osType) {
-        this.osType = osType;
-    }
-
-    public Integer getProbeCategory() {
-        return probeCategory;
-    }
-
-    public void setProbeCategory(Integer probeCategory) {
-        this.probeCategory = probeCategory;
-    }
-
-    public Integer getScriptType() {
-        return scriptType;
-    }
-
-    public void setScriptType(Integer scriptType) {
-        this.scriptType = scriptType;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public Integer getDelFlag() {
-        return delFlag;
-    }
-
-    public void setDelFlag(Integer delFlag) {
-        this.delFlag = delFlag;
-    }
-
-    public byte[] getScriptContent() {
-        return scriptContent;
-    }
-
-    public void setScriptContent(byte[] scriptContent) {
-        this.scriptContent = scriptContent;
-    }
-
-    public String getCommandInterval() {
-        return commandInterval;
-    }
-
-    public void setCommandInterval(String commandInterval) {
-        this.commandInterval = commandInterval;
-    }
-
-    public ProbeStatus getProbeStatus() {
-        return probeStatus;
-    }
-
-    public void setProbeStatus(ProbeStatus probeStatus) {
-        this.probeStatus = probeStatus;
-    }
-
-    public SourceCategory getSourceCategory() {
-        return sourceCategory;
-    }
-
-    public void setSourceCategory(SourceCategory sourceCategory) {
-        this.sourceCategory = sourceCategory;
-    }
 }
