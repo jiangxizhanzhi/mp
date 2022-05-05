@@ -230,11 +230,11 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Boolean delete(ImagesDeleteRequest request) {
+    public BaseCloudPlatformModel delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
-        Boolean result = deviceService.deleteByIds(request.getImageIds());
+        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getImageIds());
 
-        if (CollectionUtils.isNotEmpty(request.getImageIds())){
+        if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
             imageMapper.delete(dto);

@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.extern.slf4j.Slf4j;
@@ -254,9 +255,49 @@ public class CsceneDataModifier {
                             e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
                         }
                     }
+                    if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                        e.getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        accessMode.setPrivateKeyPath(removePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             }
+            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("secret_path") != null) {
+                                    accessMode.put("secret_path", removePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
+    }
+
+    private static String removePrefix(String path, String prefix) {
+        if (StringUtils.isEmpty(path)) {
+            return path;
+        }
+        if (path.startsWith(prefix)) {
+            path = StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
+            if (path.startsWith("/")) {
+                path = StringUtils.replaceOnce(path, "/", StringUtils.EMPTY);
+            }
+        }
+        return path;
     }
 
     public static void assembleInitCommands(CsceneBO csceneBO) {
@@ -422,9 +463,51 @@ public class CsceneDataModifier {
                         }
                         sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
                     }
+                    if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+                        sceneElement.getPorts().forEach(p -> {
+                            if (p != null) {
+                                BaseSceneElementPortBO port = (BaseSceneElementPortBO) p;
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        String secretPath = addFilePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer());
+                                        accessMode.setPrivateKeyPath(secretPath);
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             }
+            if (baseSceneDataBO.getPlugins() != null && baseSceneDataBO.getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = (ScenePluginDataBO) baseSceneDataBO.getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("secret_path") != null) {
+                                    accessMode.put("secret_path", addFilePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
+    }
+
+    private static String addFilePrefix(String path, String prefix) {
+        if (StringUtils.isEmpty(path)) {
+            return path;
+        }
+        if (!StringUtils.startsWith(path, prefix)) {
+            if (!StringUtils.startsWith(path, "/")) {
+                path = "/" + path;
+            }
+            path = prefix + path;
+        }
+        return path;
     }
 
     public static void checkFlowNum(CsceneBO csceneBO) {

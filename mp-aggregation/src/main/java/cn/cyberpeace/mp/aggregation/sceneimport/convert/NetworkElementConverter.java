@@ -86,7 +86,12 @@ class NetworkElementConverter implements IConverter {
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setCidr(network.getCidr());
         pluginElement.setGateway(network.getGateway());
-        pluginElement.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
+        if (network.getDhcp() == null) {
+            // dhcp 默认开启
+            pluginElement.setDhcp(true);
+        } else {
+            pluginElement.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
+        }
         // TODO: 设置地址池
 //        pluginElement.setAllocationPools();
         if (!StringUtils.isEmpty(network.getDns())) {
