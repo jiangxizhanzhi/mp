@@ -587,7 +587,6 @@ public class FlowAnalysisService extends AbstractBaseService {
     }
 
 
-
     /**
      * 计算流量大小
      * @param request
@@ -600,8 +599,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         searchSourceBuilder.aggregation(aggregationBuilder);
         searchSourceBuilder.size(0);
 
-        var searchRequest = new SearchRequest(this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        var searchRequest = this.buildSearchRequest(request,searchSourceBuilder);
 
         var boolQueryBuilder = this.buildBoolQueryBuilder(request);
 
@@ -702,6 +700,8 @@ public class FlowAnalysisService extends AbstractBaseService {
         return teamAttackResultVO;
     }
 
+
+
     /**
      * 删除对应场景流量数据
      * @param groupList
@@ -751,7 +751,8 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     protected SearchRequest buildSearchRequest(FlowAnalysisRequest request,SearchSourceBuilder searchSourceBuilder){
         var searchRequest = new SearchRequest();
-        searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? request.getIndices() : this.indices(request.getGroupList(),request.getStartDateTime(),request.getEndDateTime()));
+        String[] indices = this.indices(request.getGroupList(), request.getStartDateTime(), request.getEndDateTime());
+        searchRequest.indices(ArrayUtils.isNotEmpty(request.getIndices()) ? ArrayUtils.addAll(request.getIndices(),indices) : indices);
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         searchRequest.source(searchSourceBuilder);
         return searchRequest;
@@ -850,6 +851,7 @@ public class FlowAnalysisService extends AbstractBaseService {
      */
     public String[] getAllIndices(String... indices){
         GetIndexRequest getIndexRequest = new GetIndexRequest(indices);
+        getIndexRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         GetIndexResponse getIndexResponse = null;
         try {
             getIndexResponse = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);

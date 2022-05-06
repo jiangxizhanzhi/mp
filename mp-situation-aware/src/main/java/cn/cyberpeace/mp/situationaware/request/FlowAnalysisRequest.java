@@ -119,11 +119,14 @@ public class FlowAnalysisRequest {
     @ApiModelProperty("聚合类型")
     private AggregationTypeEnum aggregationTypeEnum;
 
-    @ApiModelProperty(value = "索引",hidden = true)
+    @ApiModelProperty(value = "索引")
     private String[] indices;
 
     @ApiModelProperty("队伍数据")
     private List<TeamBO> teamBOS;
+
+    @ApiModelProperty("索引名称，支持正则")
+    private String indicesMatch;
 
     public Integer getTopSize() {
         return Objects.isNull(topSize) ? 10 : topSize;
