@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
@@ -38,9 +39,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCrea
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -495,9 +498,33 @@ public class CreateHandler extends HandlerCommon {
         // TODO: 应用安装
 
         // TODO: 快速创建安装
-//        if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
-//
-//        }
+        if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getQuickCreateParams())) {
+                cloudElement.getQuickCreateParams().forEach(p -> {
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(p.getResourceList())) {
+                        var installers = p.getResourceList().stream().map(r -> {
+                            InstallerUtils.Installer installer = new InstallerUtils.Installer();
+                            installer.setFile(r.getFile());
+                            installer.setName(r.getUserFilename());
+                            installer.setInstallCommand(r.getCommand());
+                            return installer;
+                        }).collect(Collectors.toList());
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, installers));
+                    }
+                    if (p.getDockerInstallerData() != null && StringUtils.isNotEmpty(p.getDockerInstallerData().getDockerUrl())) {
+                        var installer = new InstallerUtils.Installer();
+                        installer.setDocker(true);
+                        installer.setFile(p.getDockerInstallerData().getDockerUrl());
+                        installer.setName(p.getDockerInstallerData().getUserFilename());
+                        if (StringUtils.isEmpty(installer.getName())) {
+                            installer.setName(FileNameUtil.getName(installer.getFile()));
+                        }
+                        installer.setInstallCommand(DockerInstallCommandUtils.genDockerRunDefaultCmd(p.getDockerInstallerData().getStartUpParameterList()));
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, List.of(installer)));
+                    }
+                });
+            }
+        }
 
         CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(standardSystemType);
         if (cloudElement.getSrcElement() != null && cloudElement.getSrcElement().getPorts() != null) {
