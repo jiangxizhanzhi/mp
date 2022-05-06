@@ -8,8 +8,6 @@ import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
-import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import io.swagger.annotations.Api;
@@ -30,9 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor/scene/element")
 public class ElementMonitorController {
-
-    @Autowired
-    private CsceneInstanceService csceneInstanceService;
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
@@ -98,12 +93,6 @@ public class ElementMonitorController {
         pageRequest.ensure();
 
         return sceneElementMonitorService.pageNetworkConnections(pageRequest);
-    }
-
-    private boolean checkCsceneIsRunning(String csceneId) {
-        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
-        SceneStateInfo sceneStateInfo = result.getSource();
-        return sceneStateInfo.isRunning();
     }
 
 

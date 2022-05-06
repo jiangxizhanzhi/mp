@@ -17,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CsceneCacheConfig {
 
-    @Bean(name = "csceneCacheManager")
+    public static final String CACHE_MANAGER = "csceneCacheManager";
+
+    @Bean(name = CACHE_MANAGER)
     @Primary
     public CacheManager csceneCacheManager() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();

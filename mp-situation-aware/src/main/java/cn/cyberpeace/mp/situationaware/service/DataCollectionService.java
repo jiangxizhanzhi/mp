@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.es.EsConstants;
+import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
@@ -128,7 +129,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_FILE_EVENTS)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
@@ -168,7 +169,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_MONITOR_EVENTS)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -279,7 +280,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_HOST_STATE)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -306,7 +307,7 @@ public class DataCollectionService {
         return wazuhModelList;
     }
 
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_NET_CONN)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -346,7 +347,7 @@ public class DataCollectionService {
         return list;
     }
 
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -607,7 +608,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_AGGS_BY_AGENTNAME)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
@@ -663,7 +664,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_COUNT_BY_AGENTNAME)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {

@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -64,7 +63,7 @@ public class SceneElementMonitorService {
     private CsceneSpecialService csceneSpecialService;
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -98,14 +97,14 @@ public class SceneElementMonitorService {
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
-        if (!checkCsceneIsRunning(pageRequest.getSceneId())) {
+        if (!csceneCommonService.checkCsceneIsRunning(pageRequest.getSceneId())) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
         listPageInfoQueryParams.setPage(pageRequest.getPage());
         listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
-        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
         listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
         ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
 
@@ -126,7 +125,7 @@ public class SceneElementMonitorService {
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
 //        listPageInfoQueryParams.setPage(pageRequest.getPage());
 //        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
-        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
         listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
         int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams);
         return sum;
@@ -251,12 +250,6 @@ public class SceneElementMonitorService {
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
-
-    private boolean checkCsceneIsRunning(String csceneId) {
-        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
-        SceneStateInfo sceneStateInfo = result.getSource();
-        return sceneStateInfo.isRunning();
-    }
 
     private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
         ConnectionState connectionState = new ConnectionState();

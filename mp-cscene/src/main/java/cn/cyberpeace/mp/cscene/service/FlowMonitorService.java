@@ -78,7 +78,7 @@ public class FlowMonitorService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     @Autowired
     private FlowAnalysisService flowAnalysisService;
@@ -135,7 +135,7 @@ public class FlowMonitorService {
 
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowSimulationParams params = new FlowSimulationParams();
         params.setSceneIds(sceneIdList);
@@ -169,7 +169,7 @@ public class FlowMonitorService {
         LocalDateTime startTime = request.getStartTime();
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
         params.setStartTime(startTime);
@@ -213,7 +213,7 @@ public class FlowMonitorService {
         LocalDateTime startTime = request.getStartTime();
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
         params.setStartTime(startTime);
@@ -310,7 +310,7 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
         }
 
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, null, null);
         Map<String, Integer> map = mapResult.getSource();
@@ -339,7 +339,7 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
         }
 
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(),baseRequest.getTopSize());
         Map<String, Integer> map = mapResult.getSource();
@@ -356,7 +356,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTime> result = new ArrayList<>();
@@ -375,7 +375,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         String groupField = baseRequest.getIpType() == 0 ?
                 ScenePluginCollectionSceneService.GroupCountFlowField.SOURCE_IP :
                 ScenePluginCollectionSceneService.GroupCountFlowField.DEST_IP;
@@ -400,7 +400,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
         TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
         totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
@@ -484,7 +484,7 @@ public class FlowMonitorService {
         }
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type);
@@ -529,7 +529,7 @@ public class FlowMonitorService {
     public FlowAnalysisSummary getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         BaseRequestUtil.processDefaultTimeRange(timeRangeRequest);
 
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
+        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, timeRangeRequest.getElementIds());
 
         FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()

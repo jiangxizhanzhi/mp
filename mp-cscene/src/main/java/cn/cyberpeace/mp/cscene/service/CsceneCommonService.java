@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +22,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class SceneTranslationService {
+public class CsceneCommonService {
 
     @Autowired
     private CsceneInstanceService csceneInstanceService;
@@ -27,7 +30,10 @@ public class SceneTranslationService {
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
-    @Cacheable(cacheManager = "csceneCacheManager", value = "translate_sceneids")
+    @Autowired
+    private CsceneSpecialService csceneSpecialService;
+
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "translate_sceneids")
     public List<String> translateSceneIds(List<String> sceneIds) {
         log.info("before translate: {}", sceneIds);
         List<String> translatedScendIds = new ArrayList<>();
@@ -46,7 +52,7 @@ public class SceneTranslationService {
      * @param elementIds
      * @return
      */
-    @Cacheable(cacheManager = "csceneCacheManager", value = "query_agentnames_by_elementids")
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "query_agentnames_by_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
         log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
@@ -61,6 +67,18 @@ public class SceneTranslationService {
         }
 
         return agentNames;
+    }
+
+
+    /**
+     * 根据sceneId查询场景是否是开启状态
+     * @return
+     */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "check_cscene_is_running")
+    public boolean checkCsceneIsRunning(String csceneId) {
+        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
+        SceneStateInfo sceneStateInfo = result.getSource();
+        return sceneStateInfo.isRunning();
     }
 
 }
