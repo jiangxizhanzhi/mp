@@ -195,6 +195,15 @@ public class InitiateHandler extends HandlerCommon {
 
     }
 
+    /**
+     * 获取探针采集参数
+     *
+     * @param probes      探针集合
+     * @param agentName
+     * @param systemType  系统类型
+     * @param locationMap 日志采集探针参数Map
+     * @return 探针采集参数
+     */
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
             , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
@@ -203,18 +212,22 @@ public class InitiateHandler extends HandlerCommon {
         List<WazuhControl.ControlLogCollectParam> logParams = new ArrayList<>();
         WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
         for (Probe probe : probes) {
+            //有脚本，新增脚本参数
             if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
                 ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
                 customProbeParams.addAll(convertScript.convertParams());
             }
+            //注册表类型，新增注册表参数
             if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
             }
+            //文件类型，新增文件参数
             if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
             }
+            //日志类型，新增日志参数
             if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
                 logParams.addAll(convertLog.convertParams());
@@ -227,6 +240,11 @@ public class InitiateHandler extends HandlerCommon {
         return controlParam;
     }
 
+    /**
+     * 获取日志采集探针Map
+     *
+     * @return 日志采集探针参数Map
+     */
     private Map<String, List<CollectionPluginSceneLogProbeLocationModel>> getLocationMap() {
         var locationMapper = BeanCommon.getBean(CollectionPluginSceneLogProbeLocationMapper.class);
         List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMapper.list(new HumanCondition());
@@ -234,6 +252,7 @@ public class InitiateHandler extends HandlerCommon {
             return new HashMap<>();
         }
         Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = new HashMap<>();
+        //探针id和系统类型为key，探针参数为value
         locationModels.forEach(locationModel -> {
             String key = locationModel.getProbeId() + "_" + locationModel.getOsType();
             if (!locationMap.containsKey(key)) {

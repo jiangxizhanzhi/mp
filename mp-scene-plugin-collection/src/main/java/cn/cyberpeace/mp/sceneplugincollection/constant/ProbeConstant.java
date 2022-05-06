@@ -1,14 +1,27 @@
 package cn.cyberpeace.mp.sceneplugincollection.constant;
 
+/**
+ * @Description: 探针常量
+ * @Author hewei
+ * @Date：2022/5/6 9:23
+ */
 public class ProbeConstant {
-    public static final String LOG_TYPE = "2";
+    //探针类型
+    public interface ProbeType {
+        String MESSAGE_TYPE = "0";
+        String EVENT_TYPE = "1";
+        String LOG_TYPE = "2";
+    }
 
-    public static final String FILE_ID = "006";
-    public static final String REGISTRY_ID = "007";
-    public static final String OS_ID = "008";
-    public static final String APPLICATION_ID = "009";
-    public static final String SECURITY_ID = "010";
-    public static final String LOG_ID = "011";
+    //探针ID
+    public interface ProbeId {
+        String FILE_ID = "006";
+        String REGISTRY_ID = "007";
+        String OS_ID = "008";
+        String APPLICATION_ID = "009";
+        String SECURITY_ID = "010";
+        String LOG_ID = "011";
+    }
 
     public ProbeConstant() {
     }

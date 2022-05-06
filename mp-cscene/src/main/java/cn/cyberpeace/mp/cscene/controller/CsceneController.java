@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
@@ -199,15 +198,5 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCscenes(images).asResult();
-    }
-
-    @ApiOperation("根据fdfs地址获取文件内容")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "url", value = "fdfs地址", dataTypeClass = String.class, allowMultiple = true),
-    })
-    @GetMapping("/content")
-    public ServiceResult<String> getContent(@RequestParam String url) {
-        String content = FdfsCommon.downloadContent(url);
-        return new ServiceResult<>(content).asResult();
     }
 }
