@@ -23,8 +23,11 @@ public class AccessMode {
     @ApiModelProperty(value = "是否开启ssh秘钥登录")
     private Boolean privateKeyEnable;
 
-    @ApiModelProperty(value = "ssh秘钥")
+    @ApiModelProperty(value = "ssh秘钥文件地址")
     private String privateKeyPath;
+
+    @ApiModelProperty(value = "ssh秘钥文件名")
+    private String privateKeyFileName;
 
     @ApiModelProperty(value = "路径")
     private String path;
