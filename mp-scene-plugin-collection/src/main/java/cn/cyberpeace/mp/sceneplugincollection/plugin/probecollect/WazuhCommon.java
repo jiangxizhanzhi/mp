@@ -69,6 +69,9 @@ public class WazuhCommon {
                             String.format("cd %s\\agent-installer\\agent-windows",
                                     SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
                             "call install.bat",
+                            String.format("cd %s", SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            "rd/s/q agent-installer",
+                            "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
                             String.format("set SIC_WAZUH_AGENT_NAME=%s", agentName),
                             String.format("set SIC_WAZUH_MANAGER_REMOTE_PORT=%d", getWazuhRemotePort()),
@@ -88,6 +91,9 @@ public class WazuhCommon {
                             String.format("cd %s/agent-installer/agent-linux",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
                             "bash install.sh",
+                            String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                            "rm -rf agent-installer",
+                            "rm -rf " + InstallerUtils.INSTALLER_REPLACEMENT,
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
@@ -101,6 +107,15 @@ public class WazuhCommon {
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
     }
 
+    /**
+     * 获取默认脚本探针参数集合
+     *
+     * @param nameFileMap        文件名Map
+     * @param metadataFileServer 文件下载前缀
+     * @param agentName
+     * @param wazuhProbeConfig   默认脚本探针配置
+     * @return 默认脚本探针参数集合
+     */
     private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {

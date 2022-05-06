@@ -252,7 +252,7 @@ public class ScenePluginCollectionSceneService {
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0)).asResult();
         }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {

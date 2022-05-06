@@ -10,6 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @Description: 日志采集探针参数转换
+ * @Author hewei
+ * @Date：2022/5/6 9:23
+ */
 public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.ControlLogCollectParam> {
 
     private Probe probe;
@@ -32,11 +37,13 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
         if (probe.getDisabled()) {
             return new ArrayList<>();
         }
-        if (ProbeConstant.LOG_ID.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
+        if (ProbeConstant.ProbeId.LOG_ID.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
             return new ArrayList<>();
         }
         int i = 1;
-        if (ProbeConstant.LOG_ID.equals(probe.getId())) {
+        //日志文件或日志路径探针单独处理
+        if (ProbeConstant.ProbeId.LOG_ID.equals(probe.getId())) {
+            //每有一个路径添加一个参数
             for (String path : probe.getCollectPath()) {
                 WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
                 logParam.setId(probe.getId() + "_" + i++);
@@ -46,6 +53,7 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
                 logParams.add(logParam);
             }
         } else {
+            //探针id和系统类型组成key取日志探针参数
             String key = probe.getId() + "_" + systemType;
             List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMap.get(key);
             if (locationModels == null || locationModels.isEmpty()) {

@@ -62,6 +62,7 @@ public class Probe {
         private Status() {}
     }
 
+    //探针执行类型
     public static class ExecType {
         public static final int BASE_PROBE = 0;
         public static final int LOG_PROBE = 1;
