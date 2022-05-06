@@ -79,6 +79,10 @@ public abstract class BaseCloudPluginSceneElementBO<M extends BaseCloudPluginSce
     @Valid
     private List<StaticRoute> staticRoutes;
 
+    // ospf网络属性
+    @ApiModelProperty(value = "ospf网络下的routerID")
+    private String ospfRouterId;
+
     // 虚拟防火墙属性
     @ApiModelProperty(value = "虚拟防火墙规则")
     @Valid

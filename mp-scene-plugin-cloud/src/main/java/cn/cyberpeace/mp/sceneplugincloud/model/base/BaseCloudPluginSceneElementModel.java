@@ -77,6 +77,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String staticRoutes;
 
+    // ospf网络属性
+    @DefaultStr
+    private String ospfRouterId;
+
     // 虚拟防火墙属性
     @DefaultStr
     private String firewallRules;

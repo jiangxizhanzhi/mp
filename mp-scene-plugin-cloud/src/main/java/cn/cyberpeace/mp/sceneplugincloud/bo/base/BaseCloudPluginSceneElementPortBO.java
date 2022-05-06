@@ -55,6 +55,22 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
 
+    // ospf 组网
+    @ApiModelProperty(value = "ospf组网下的ip地址")
+    private String ospfIp;
+    @ApiModelProperty(value = "ospf组网下的area")
+    private String ospfArea;
+
+    // bgp 组网
+    @ApiModelProperty(value = "bgp组网下的as")
+    private String bgpAs;
+    @ApiModelProperty(value = "bgp组网下的ip地址")
+    private String bgpIp;
+    @ApiModelProperty(value = "bgp组网下的对端端口ip")
+    private String bgpPeer;
+    @ApiModelProperty(value = "bgp组网下的对端端口所属AS")
+    private String bgpPeerAs;
+
     @Override
     public void fromModel(M obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
