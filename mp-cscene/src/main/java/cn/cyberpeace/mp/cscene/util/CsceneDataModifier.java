@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -553,6 +554,23 @@ public class CsceneDataModifier {
                                 p.setEgress(-1);
                             }
                         });
+                    }
+                });
+            }
+        }
+    }
+
+    public static void correctQuickCreateSupport(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            if (elements.getElements() != null) {
+                elements.getElements().values().forEach(e -> {
+                    // 有软件需要安装的 quick_create_support 设置为true
+                    if (e.get("quick_create_params") != null) {
+                        Collection list = (Collection) e.get("quick_create_params");
+                        if (list.size() > 0) {
+                            e.put("quick_create_support", true);
+                        }
                     }
                 });
             }

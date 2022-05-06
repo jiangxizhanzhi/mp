@@ -104,6 +104,21 @@ public class InstallerUtils {
             "sync",
     };
 
+    public static final String[] LINUX_DOCKER_TAR_INSTALL = {
+            "mkdir -p %s/docker_install/%s",
+            "cd %s/docker_install/%s",
+            "repo_tag=$(docker load -i %s | grep 'Loaded image' | awk '{print $3}')",
+            "%s"
+    };
+
+    public static final String[] LINUX_DOCKER_ZIP_INSTALL = {
+            "mkdir -p %s/docker_install/%s",
+            "unzip -o %s -d %s/docker_install/%s",
+            "cd %s/docker_install/%s",
+            "repo_tag=$(docker load -i %s | grep 'Loaded image' | awk '{print $3}')",
+            "%s"
+    };
+
     /**
      * linux文件下载
      */
@@ -267,6 +282,41 @@ public class InstallerUtils {
     }
 
     /**
+     * 生成docker服务安装命令
+     * @param systemType 系统类型
+     * @param filePath 文件路径
+     * @param installCommand 安装命令
+     * @return 默认自定义安装命令
+     */
+    public static String generateDockerCommand(String systemType, String filePath, String imageName, String installCommand) {
+        String filePathLower = filePath.toLowerCase();
+        var installerDir = getDefaultInstallDir(systemType);
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
+            // todo 暂不支持 windows 的docker 服务
+        } else {
+            if (filePathLower.endsWith(".zip")) {
+                var installFolder = TextUtils.uuid();
+                return String.format(
+                        SystemTypeCommandUtils.joinCommands(systemType, LINUX_DOCKER_ZIP_INSTALL),
+                        installerDir, installFolder,
+                        filePath, installerDir, installFolder,
+                        installerDir, installFolder,
+                        imageName,
+                        installCommand);
+            } else {
+                var installFolder = TextUtils.uuid();
+                return String.format(
+                        SystemTypeCommandUtils.joinCommands(systemType, LINUX_DOCKER_TAR_INSTALL),
+                        installerDir, installFolder,
+                        installerDir, installFolder,
+                        filePath,
+                        installCommand);
+            }
+        }
+        return StringUtils.EMPTY;
+    }
+
+    /**
      * 获取windows安装工具
      * @return windows安装工具
      */
@@ -345,7 +395,9 @@ public class InstallerUtils {
                     filePath = filePath.replace(downloadFileName, fileName);
                 }
 
-                if (StringUtils.isEmpty(installCommand)) {
+                if (installer.isDocker()) {
+                    innerCommands.add(generateDockerCommand(systemType, filePath, installer.getName(), installCommand));
+                } else if (StringUtils.isEmpty(installCommand)) {
                     innerCommands.add(generateDefaultInstallCommand(systemType, filePath));
                 } else {
                     installCommand = generateDefaultCustomInstallCommand(systemType, filePath, installCommand);
@@ -409,5 +461,6 @@ public class InstallerUtils {
         private String name;
         private String file;
         private String installCommand;
+        private boolean docker;
     }
 }
