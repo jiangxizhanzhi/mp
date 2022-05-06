@@ -21,6 +21,9 @@ public class WazuhControl {
     public static final String WINDOWS_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\probe-query.bat";
     public static final String LINUX_QUERY_SCRIPT_PATH = "/var/ossec/bin/probe-query.py";
 
+    public static final String WINDOWS_SPEC_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\spec-query.bat";
+    public static final String LINUX_SPEC_QUERY_SCRIPT_PATH = "/var/ossec/bin/spec-query.py";
+
     public static final String CONTROL_ACTION_ADD = "add";
     public static final String CONTROL_ACTION_REMOVE = "remove";
     public static final String CONTROL_ACTION_ENABLE = "enable";
@@ -40,6 +43,8 @@ public class WazuhControl {
     public static final String SCRIPT_SUFFIX_BAT = "bat";
     public static final String SCRIPT_SUFFIX_SH = "sh";
 
+
+    public static final String SPEC_QUERY_ACTION_GET_LOG_COLLECT_FILES = "get_log_collect_files";
 
     public static final String WINDOWS_FILE_CONTROL_SCRIPT_PATH = "C:\\ossec-agent\\file-control.bat";
     public static final String LINUX_FILE_CONTROL_SCRIPT_PATH = "/var/ossec/bin/file-control.py";
@@ -107,6 +112,20 @@ public class WazuhControl {
             queryScriptPath = LINUX_QUERY_SCRIPT_PATH;
         }
         return String.format("%s", queryScriptPath);
+    }
+
+    public static String genSpecQueryCommand(String osType, SpecQueryParam specQueryParam) {
+        String controlScriptPath;
+        if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
+            controlScriptPath = WINDOWS_SPEC_QUERY_SCRIPT_PATH;
+        } else {
+            controlScriptPath = LINUX_SPEC_QUERY_SCRIPT_PATH;
+        }
+        if (specQueryParam == null) {
+            return StringUtils.EMPTY;
+        }
+        String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.snakeStringify(specQueryParam));
+        return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
     }
 
     public static String genControlFileCommand(String osType, List<ControlFileParam> controlFileParams) {
@@ -225,6 +244,45 @@ public class WazuhControl {
         }
 
         return configData;
+    }
+
+    public List<QueryLogCollectFileData> queryLogCollectFiles(String agentName, String osType) {
+        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        runCommandItem.setAgentName(agentName);
+        runCommandItem.setOsType(osType);
+
+        var specQueryParam = new SpecQueryParam();
+        specQueryParam.setAction(SPEC_QUERY_ACTION_GET_LOG_COLLECT_FILES);
+        runCommandItem.setCommand(genSpecQueryCommand(osType, specQueryParam));
+        runCommandItem.setCheckOutput(true);
+        runCommandItem.setCheckOutputTime(5);
+        runCommandItem.setCheckOutputInterval(5000);
+        wazuhLauncher.runCommand(List.of(runCommandItem));
+
+        var error = runCommandItem.getError();
+        if (!StringUtils.isEmpty(error)) {
+            log.error("Query agent({}) osType({}) log collect files error: {}", agentName, osType, error);
+        }
+
+        List<QueryLogCollectFileData> result = new ArrayList<>();
+        var output = runCommandItem.getOutput();
+        if (output == null) {
+            return result;
+        }
+        var rawOutput = output.getOrDefault(WazuhLauncher.COMMAND_RAW_OUTPUT_KEY, null);
+        if (rawOutput == null) {
+            return result;
+        }
+
+        try {
+            result = JsonCommon.snakeParse(TextUtils.decompress(TextUtils.rawDecodeBase64(((String) rawOutput).trim())),
+                    new TypeReference<List<QueryLogCollectFileData>>() {});
+        } catch (Exception e) {
+            log.error("Query agent({}) osType({}) log collect files parse raw output({}) error: {}", agentName, osType,
+                    rawOutput, e);
+        }
+
+        return result;
     }
 
     public Map<String, ControlFileResult> controlFile(String agentName, String osType,
@@ -388,6 +446,26 @@ public class WazuhControl {
         private List<String> targets;
         private List<String> ignores;
         private List<String> sregexIgnores;
+    }
+
+    @Data
+    public static class SpecQueryParam {
+        private String action;
+    }
+
+    @Data
+    public static class QueryLogCollectFileData {
+        private String key;
+        private String logFormat;
+        private String location;
+        private List<QueryLogCollectRelatedFileInfo> relatedFiles;
+    }
+
+    @Data
+    public static class QueryLogCollectRelatedFileInfo {
+        private String path;
+        private Long size;
+        private String modifyTime;
     }
 
     @Data
