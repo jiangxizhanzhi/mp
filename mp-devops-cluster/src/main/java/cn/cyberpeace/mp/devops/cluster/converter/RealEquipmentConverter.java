@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
@@ -66,11 +67,13 @@ public class RealEquipmentConverter implements BaseConverter{
         this.targetConverter = targetConverter;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getDefaultPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public String[] getTotalPageIgnoreField() {
         return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
@@ -194,10 +197,10 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Boolean delete(RealEquipmentDeleteRequest request) {
+    public BaseCloudPlatformModel delete(RealEquipmentDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getUuids());
-        Boolean result = deviceService.deleteByIds(request.getUuids());
-        if (result) {
+        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getUuids());
+        if (result.isSuccess()) {
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getUuids());
             imageMapper.delete(dto);

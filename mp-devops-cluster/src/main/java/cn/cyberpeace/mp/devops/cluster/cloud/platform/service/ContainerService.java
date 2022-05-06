@@ -14,7 +14,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
@@ -42,9 +41,7 @@ public class ContainerService extends BaseOpenStackService {
      */
     public ContainerCloudPlatformModel page(String getParams) {
         ContainerPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, ContainerPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<ContainerModel> data = pageResult.getData();
         List<ContainerModel> containerModels = data.getList();
         ContainerCloudPlatformModel model = new ContainerCloudPlatformModel();

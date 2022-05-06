@@ -8,12 +8,7 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -115,7 +110,7 @@ public class HttpClient {
 
     private <T extends HttpRequestBase> HttpResult request(Class<T> requestClass, String url, HttpData data,
                                                            HttpParam param, Map<String, String> headers,
-                                                           Integer timeout) {
+                                                           Integer timeout, boolean loadResult) {
         var request = genRequest(requestClass, url, param, data, headers, timeout);
         var result = new HttpResult();
         result.setRequest(request);
@@ -141,12 +136,14 @@ public class HttpClient {
                     data == null ? StringUtils.EMPTY : data.toContent(), response.getStatusLine().getStatusCode(), response.getStatusLine().getReasonPhrase());
         }
 
-        try {
-            result.loadResult(charset);
-        } catch (IOException e) {
-            log.error("Http {} receive exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
-                    request.getURI(), request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent(), e);
-            result.setException(e);
+        if (loadResult) {
+            try {
+                result.loadResult(charset);
+            } catch (IOException e) {
+                log.error("Http {} receive exception - url: {}, header: {}, body: {}, error: {}", request.getMethod(),
+                        request.getURI(), request.getAllHeaders(), data == null ? StringUtils.EMPTY : data.toContent(), e);
+                result.setException(e);
+            }
         }
 
         return result;
@@ -174,22 +171,27 @@ public class HttpClient {
     }
 
     public HttpResult get(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return request(HttpGet.class, url, null, param, headers, timeout);
+        return request(HttpGet.class, url, null, param, headers, timeout, true);
+    }
+
+    public HttpResult resGet(String url, HttpParam param, Map<String, String> headers, Integer timeout) {
+        return request(HttpGet.class, url, null, param, headers, timeout, false);
     }
 
     public HttpResult post(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return request(HttpPost.class, url, data, param, headers, timeout);
+        return request(HttpPost.class, url, data, param, headers, timeout, true);
     }
 
     public HttpResult put(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return request(HttpPut.class, url, data, param, headers, timeout);
+        return request(HttpPut.class, url, data, param, headers, timeout, true);
     }
 
     public HttpResult patch(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return request(HttpPatch.class, url, data, param, headers, timeout);
+        return request(HttpPatch.class, url, data, param, headers, timeout, true);
     }
 
     public HttpResult delete(String url, HttpData data, HttpParam param, Map<String, String> headers, Integer timeout) {
-        return request(HttpDeleteWithBody.class, url, data, param, headers, timeout);
+        return request(HttpDeleteWithBody.class, url, data, param, headers, timeout, true);
     }
+
 }

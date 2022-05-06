@@ -17,7 +17,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
 
@@ -42,9 +41,7 @@ public class VmService extends BaseOpenStackService {
      */
     public InstanceCloudPlatformModel page(String getParams){
         InstancePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + getParams, InstancePageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<InstanceModel> data = pageResult.getData();
         List<InstanceModel> instanceModels = data.getList();
         InstanceCloudPlatformModel model = new InstanceCloudPlatformModel();
@@ -70,9 +67,7 @@ public class VmService extends BaseOpenStackService {
      */
     public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
         InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + "/os-services", InstanceOsServicePageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
+        super.checkResult(pageResult);
         CloudPlatformPageResult<InstanceOsServiceModel> data = pageResult.getData();
         List<InstanceOsServiceModel> list = data.getList();
         InstanceOsServiceCloudPlatformModel model = new InstanceOsServiceCloudPlatformModel();

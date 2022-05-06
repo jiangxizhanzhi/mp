@@ -20,6 +20,8 @@ public enum CloudPlatformEnum{
 
     STOPPED("Stopped","已停止"),
 
+    PAUSED("PAUSED","暂停"),
+
     UPPER_DOWN("DOWN","异常"),
 
     ACTIVE("ACTIVE","运行"),

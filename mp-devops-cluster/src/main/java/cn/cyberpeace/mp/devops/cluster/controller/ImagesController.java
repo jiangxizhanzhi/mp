@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
@@ -208,8 +209,8 @@ public class ImagesController {
     @ApiOperation("删除")
     @DeleteMapping("/page")
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
-        Boolean result = imagesConverter.delete(request);
-        return result ? ServiceResult.successful() : ServiceResult.fail("");
+        BaseCloudPlatformModel model = imagesConverter.delete(request);
+        return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -252,7 +253,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -265,7 +266,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -278,7 +279,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -293,6 +294,7 @@ public class ImagesController {
         }
         return new Result(convertModel.getModelList());
     }
+
 
     /**
      * 查询快照历史
@@ -314,7 +316,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -327,7 +329,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -341,7 +343,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
     /**
@@ -367,7 +369,7 @@ public class ImagesController {
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
-        return ControllerConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 

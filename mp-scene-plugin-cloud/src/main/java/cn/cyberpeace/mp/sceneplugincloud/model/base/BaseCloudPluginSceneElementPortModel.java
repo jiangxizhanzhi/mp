@@ -43,10 +43,24 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     @DefaultStr
     private String floatingIpId;
 
-    /**
-     * 三层防火墙对应防火墙资源id
-     */
+    // 三层防火墙对应防火墙资源id
     @DefaultStr
     private String firewallResourceId;
+
+    // ospf 组网
+    @DefaultStr
+    private String ospfIp;
+    @DefaultStr
+    private String ospfArea;
+
+    // bgp 组网
+    @DefaultStr
+    private String bgpAs;
+    @DefaultStr
+    private String bgpIp;
+    @DefaultStr
+    private String bgpPeer;
+    @DefaultStr
+    private String bgpPeerAs;
 
 }

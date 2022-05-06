@@ -14,7 +14,7 @@ public class InstanceOsServiceModel implements Serializable {
     /**
      * id
      */
-    private Integer id;
+    private String id;
 
     /**
      * binary

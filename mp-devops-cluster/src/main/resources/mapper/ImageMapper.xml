@@ -53,8 +53,8 @@
             <if test=" useStatus != null ">
                 and i.use_status = #{useStatus}
             </if>
-            <if test=" quickCreateSupport != null">
-                and i.quick_create_support = #{quickCreateSupport}
+            <if test=" quickCreateSupport != null and quickCreateSupport == true">
+                and i.quick_create_support = #{quickCreateSupport} and i.system_type > 0
             </if>
             <if test=" owner != null and searchPublicEnum == 1">
                 and  i.is_public in (2)
@@ -292,6 +292,9 @@
             <if test="referenceStatus != null">
                 reference_status = #{referenceStatus},
             </if>
+            <if test="parentSystemType != null">
+                parent_system_type = #{parentSystemType},
+            </if>
             <if test="systemType != null">
                 system_type = #{systemType},
             </if>
@@ -348,7 +351,7 @@
     <insert id="batchInsert" parameterType="java.util.List">
         insert into mp_devops_target( id, uuid, name, main_category,sub_category,third_category,
                                      role, image_type,is_public, quick_create_support,
-                                     create_time, update_time, in_position,use_status,reference_status,
+                                     create_time, update_time, in_position,use_status,reference_status,parent_system_type,
                                      system_type,system_architecure, language,image_status,base_image_support,
                                      init_support,image_source,is_import,is_hide)
         VALUES
@@ -360,7 +363,7 @@
             #{item.quickCreateSupport}, #{item.createTime},
             #{item.updateTime},#{item.inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
-            #{item.referenceStatus}, #{item.systemType}, #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
+            #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType}, #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
             #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport}, #{item.isHide}
         )
         </foreach>

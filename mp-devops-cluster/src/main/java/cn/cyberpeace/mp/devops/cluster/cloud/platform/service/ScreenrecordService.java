@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.constant.BaseConstants;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenrecordQueryParams;
@@ -52,7 +51,7 @@ public class ScreenrecordService extends BaseOpenStackService {
      */
     public ListObjServiceResult<ScreenrecordResponse> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         queryParams.ensure();
-        StringBuffer getParams = new StringBuffer(BaseConstants.QUESTION_MARK);
+        StringBuffer getParams = new StringBuffer("?");
         getParams.append("limit=").append(Objects.nonNull(queryParams.getPageSize()) ? queryParams.getPageSize() : queryParams.getPerPage())
                 .append("&page=").append(queryParams.getPage());
         if (StringUtils.isNotBlank(queryParams.getSearch())) {

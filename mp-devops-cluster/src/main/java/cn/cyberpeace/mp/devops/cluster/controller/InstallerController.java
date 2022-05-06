@@ -63,6 +63,7 @@ public class InstallerController {
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
                         .categories(installer.getCategories()).deployType(installer.getDeployType())
+                        .startUpParameterList(installer.getStartUpParameterList())
                         .build()
         ).collect(Collectors.toList());
 

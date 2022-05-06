@@ -6,7 +6,9 @@ import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.modelhandler.CollectionSceneConfigPluginModelHandler;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,36 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
         CollectionPluginSceneConfigElementBO, CollectionPluginSceneConfigElementPortBO, Object> {
 
     private CollectionSceneConfigPluginModelHandler pluginModelHandler;
+
+    @Override
+    public void correctData() {
+        //根据探针不同类型设置五种执行类型
+        if (getElementMap() != null && !getElementMap().isEmpty()) {
+            getElementMap().values().forEach(e -> {
+                if (e.getProbes() == null || e.getProbes().isEmpty()) {
+                    return;
+                }
+                e.getProbes().forEach(probe -> {
+                    //有脚本，脚本驱动类型
+                    if (probe.getScriptUrl() != null) {
+                        probe.setExecType(Probe.ExecType.SCRIPT_PROBE);
+                    } else if (ProbeConstant.ProbeId.REGISTRY_ID.equals(probe.getId())) {
+                        //注册表变更类型
+                        probe.setExecType(Probe.ExecType.REGISTRY_PROBE);
+                    } else if (ProbeConstant.ProbeId.FILE_ID.equals(probe.getId())) {
+                        //文件变更类型
+                        probe.setExecType(Probe.ExecType.FILE_PROBE);
+                    } else if (probe.getCommon() && ProbeConstant.ProbeType.LOG_TYPE.equals(probe.getType())) {
+                        //日志采集类型
+                        probe.setExecType(Probe.ExecType.LOG_PROBE);
+                    } else {
+                        //基础类型
+                        probe.setExecType(Probe.ExecType.BASE_PROBE);
+                    }
+                });
+            });
+        }
+    }
 
     @Override
     public void initBase() {
