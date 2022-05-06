@@ -13,4 +13,6 @@ public class StaticRoute {
     @ApiModelProperty(value = "下一跳地址")
     @IpAddress(message = "{sceneplugincloud.validation.ip_address}")
     private String nexthop;
+    @ApiModelProperty(value = "下一跳接口Id")
+    private String nexthopPortId;
 }
