@@ -288,7 +288,7 @@ public class HostStateService {
     public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
-        if (!csceneCommonService.checkCsceneIsRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
@@ -299,7 +299,7 @@ public class HostStateService {
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
-        if (!csceneCommonService.checkCsceneIsRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 

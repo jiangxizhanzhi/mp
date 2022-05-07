@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -71,14 +72,17 @@ public class CsceneCommonService {
 
 
     /**
-     * 根据sceneId查询场景是否是开启状态
+     * 查询场景是否是开启状态
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "check_cscene_is_running")
-    public boolean checkCsceneIsRunning(String csceneId) {
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "is_cscene_running")
+    public boolean isCsceneInstanceRunning(String csceneId) {
         ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
         SceneStateInfo sceneStateInfo = result.getSource();
-        return sceneStateInfo.isRunning();
+        if (Objects.nonNull(sceneStateInfo)) {
+            return sceneStateInfo.isRunning();
+        }
+        return false;
     }
 
 }

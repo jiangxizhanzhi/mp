@@ -44,7 +44,7 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点基本信息")
     @GetMapping("/info")
     public ServiceResult<ElementMonitorBasicInfo> getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
-        ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest);
+        ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest, true);
 
         return ServiceResult.success(elementMonitorBasicInfo);
     }

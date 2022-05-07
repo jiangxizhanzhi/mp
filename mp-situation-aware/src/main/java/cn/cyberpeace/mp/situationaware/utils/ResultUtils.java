@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import com.github.pagehelper.PageInfo;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,14 +21,19 @@ public class ResultUtils {
         return new ListObjServiceResult(new ListObjResult(list, total).asResult()).asResult();
     }
 
-
     public static ListObjServiceResult pageInfo2ObjServiceResult(PageInfo pageInfo) {
         return new ListObjServiceResult(new ListObjResult(pageInfo.getList(), Long.valueOf(pageInfo.getTotal()).intValue()).asResult()).asResult();
+    }
+
+    public static ListObjServiceResult emptyListObjServiceResult() {
+        return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0).asResult()).asResult();
     }
 
     public static ObjServiceResult obj2ObjServiceResult(Object obj) {
         return new ObjServiceResult(new ObjResult(obj)).asResult();
     }
+
+
 
 //    public static void throwExceptionIfError(ObjServiceResult result, ErrorCode errorCode) {
 //        if (Objects.isNull(result.getSource())) {

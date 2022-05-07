@@ -70,7 +70,7 @@ public class SceneElementMonitorService {
      *
      * @return
      */
-    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
+    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest, boolean fetchRealTimeHostState) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
         String sceneId = baseRequest.getSceneId();
@@ -81,7 +81,7 @@ public class SceneElementMonitorService {
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
-        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, true);
+        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
         // todo 节点实时信息
@@ -97,7 +97,7 @@ public class SceneElementMonitorService {
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
-        if (!csceneCommonService.checkCsceneIsRunning(pageRequest.getSceneId())) {
+        if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
