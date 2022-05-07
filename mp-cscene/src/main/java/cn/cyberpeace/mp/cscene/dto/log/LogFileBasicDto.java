@@ -17,6 +17,9 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class LogFileBasicDto {
 
+    @ApiModelProperty(value = "节点id")
+    private String elementId;
+
     @ApiModelProperty(value = "探针名称")
     private String agentName;
 

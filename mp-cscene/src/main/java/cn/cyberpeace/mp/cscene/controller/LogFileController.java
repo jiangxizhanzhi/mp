@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
-import cn.cyberpeace.mp.cscene.dto.log.DownloadUrlRequest;
-import cn.cyberpeace.mp.cscene.dto.log.LogFileDto;
+import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlRequest;
+import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
 import cn.cyberpeace.mp.cscene.service.LogFileService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,9 +37,9 @@ public class LogFileController {
      */
     @ApiOperation(value = "分页查询日志文件")
     @GetMapping("/page")
-    public ListObjServiceResult<LogFileDto> pageLogFiles(BaseSceneElementPageRequest pageRequest) {
+    public ListObjServiceResult<LogFileVO> pageLogFiles(BaseSceneElementPageRequest pageRequest) {
         log.info("{}", pageRequest);
-        ListObjServiceResult<LogFileDto> result = logFileService.pageByElementId(pageRequest);
+        ListObjServiceResult<LogFileVO> result = logFileService.pageByElementId(pageRequest);
         return result;
     }
 
@@ -52,7 +52,7 @@ public class LogFileController {
      */
     @ApiOperation(value = "查询日志原始文件下载地址")
     @GetMapping("/download_url")
-    public ListObjServiceResult<LogFileDto> getDownloadUrl(DownloadUrlRequest request) {
+    public ListObjServiceResult<LogFileVO> getDownloadUrl(LogFileDownloadUrlRequest request) {
         log.info("{}", request);
         logFileService.getDownloadUrls(request);
         return null;

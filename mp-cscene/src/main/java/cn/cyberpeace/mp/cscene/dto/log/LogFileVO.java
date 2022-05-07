@@ -17,10 +17,7 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LogFileDto extends LogFileBasicDto {
-
-    @ApiModelProperty(value = "节点id")
-    private String elementId;
+public class LogFileVO extends LogFileBasicDto {
 
     @ApiModelProperty("大小")
     private Long size;
@@ -28,5 +25,4 @@ public class LogFileDto extends LogFileBasicDto {
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
-    private String downloadUrl;
 }
