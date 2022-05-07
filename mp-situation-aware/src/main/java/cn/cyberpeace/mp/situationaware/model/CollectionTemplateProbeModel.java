@@ -44,10 +44,17 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
     private Integer disabled;
 
     /**
+     * 探针脚本内容fdfs地址（采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板）
+     */
+    @ApiModelProperty(value = "探针脚本内容fdfs地址(采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板)")
+    private String scriptUrl;
+
+    /**
      * 探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec
      */
     @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec")
     private Integer intervalSec;
+
 
     /**
      * 探针配置，json字符串

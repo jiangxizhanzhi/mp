@@ -45,4 +45,6 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 //    List<CollectionTemplateProbeDto> listByCondition();
 
     List<ProbeModel> listCustomProbesNotInTemplate(@Param("templateId") String templateId, @Param("category") Integer category, @Param("probeName") String probeName);
+
+    List<ProbeModel> listCustomProbes(@Param("category") Integer category, @Param("probeName") String probeName);
 }

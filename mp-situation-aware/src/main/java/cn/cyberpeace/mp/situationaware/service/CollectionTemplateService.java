@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePr
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -49,9 +51,11 @@ public class CollectionTemplateService {
     @Autowired
     private CollectionTemplateProbeMapper templateProbeMapper;
 
-
     @Autowired
     private ProbeParamMapper probeParamMapper;
+
+    @Autowired
+    private ProbeService probeService;
 
     /**
      * 分页查询探针列表
@@ -111,17 +115,15 @@ public class CollectionTemplateService {
     /**
      * 为采集模板查询可以导入的自定义探针
      *
-     * @param templateId
      * @param catetory
      * @param name
      * @return
      */
-    public List<ProbeModel> listCustomProbesNotInTemplate(String templateId, Integer catetory, String name) {
-        log.info("templateId:{}, category:{}, name:{}", templateId, catetory, name);
-        List<ProbeModel> probes = templateProbeMapper.listCustomProbesNotInTemplate(templateId, catetory, name);
+    public List<ProbeModel> listCustomProbesNotInTemplate(Integer catetory, String name) {
+        log.info("category:{}, name:{}", catetory, name);
+        List<ProbeModel> probes = templateProbeMapper.listCustomProbes(catetory, name);
         return probes;
     }
-
 
 
 
@@ -294,11 +296,14 @@ public class CollectionTemplateService {
             colTempProbeModel.setTemplateId(templateId);
             colTempProbeModel.setIntervalSec(colTempProbeReq.getTemplateProbeIntervalSec());
             colTempProbeModel.setDisabled(colTempProbeReq.getDisabled());
-            if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("paths", colTempProbeReq.getPaths());
-                colTempProbeModel.setConfig(jsonObject.toJSONString());
+            if(Objects.equals(0, colTempProbeReq.getDisabled())) {
+                if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("paths", colTempProbeReq.getPaths());
+                    colTempProbeModel.setConfig(jsonObject.toJSONString());
+                }
             }
+
             allColTempProbeList.add(colTempProbeModel);
 
             // 不需要处理参数，如通用探针
@@ -326,6 +331,18 @@ public class CollectionTemplateService {
 
             allProbeParamList.addAll(paramList);
         }
+
+        // 从探针里面查询scriptUrl，采集模板需要单独保存一份。 防止保存采集模板之后，修改了探针脚本对采集模板产生影响
+        List<String> probeIds = allColTempProbeList.stream().map(CollectionTemplateProbeModel::getProbeId).collect(Collectors.toList());
+        List<ProbeDto> probeDtos = probeService.listByIds(probeIds);
+
+        allColTempProbeList.forEach(tp -> {
+            probeDtos.forEach(p -> {
+                if (Objects.equals(p.getId(), tp.getProbeId())) {
+                    tp.setScriptUrl(p.getScriptUrl());
+                }
+            });
+        });
     }
 
 

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -26,6 +27,7 @@ public class CollectionTemplateProbeRequest {
      * 0:启用，1:禁用
      */
     @ApiModelProperty(value = "0:启用，1:禁用")
+    @NotNull
     private Integer disabled;
 
     /**

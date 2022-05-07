@@ -64,15 +64,14 @@ public class CollectionTemplateController {
 
     /**
      *
-     * @param templateId
      * @param category
      * @param name
      * @return
      */
     @GetMapping("/probes")
-    @ApiOperation(value = "查询采集模板可以导入的自定义探针")
-    public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam String templateId, @RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
-        List<ProbeModel> probes = templateService.listCustomProbesNotInTemplate(templateId, category, name);
+    @ApiOperation(value = "查询可以导入的自定义探针列表")
+    public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
+        List<ProbeModel> probes = templateService.listCustomProbesNotInTemplate(category, name);
         return ServiceResult.success(probes);
     }
 
