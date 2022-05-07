@@ -465,7 +465,10 @@ public class WazuhControl {
     public static class QueryLogCollectRelatedFileInfo {
         private String path;
         private Long size;
+        // linux下创建时间实际为changeTime，暂无法获取创建时间
+        private String createTime;
         private String modifyTime;
+        private String accessTime;
     }
 
     @Data
