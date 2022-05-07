@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
@@ -26,11 +28,13 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +60,9 @@ public class CollectionTemplateService {
 
     @Autowired
     private ProbeService probeService;
+
+    @Autowired
+    private FastDFSClient fastDFSClient;
 
     /**
      * 分页查询探针列表
@@ -109,6 +116,33 @@ public class CollectionTemplateService {
             }).collect(Collectors.toList());
 
         return templateDtoList;
+    }
+
+
+    /**
+     * 查询模板下探针内容（加载脚本内容）
+     * @param templateId
+     * @param probeId
+     * @return
+     */
+    public CollectionTemplateProbeDto getTemplateProbeDtoWithScriptContent(String templateId, String probeId) {
+        log.info("templateId:{}, probeId:{}", templateId, probeId);
+        ProbeSearchCondition probeSearchCondition = generateCustomProbesCondition();
+        probeSearchCondition.setIds(ArrayUtils.toArray(probeId));
+        List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(templateId, probeSearchCondition);
+        if (CollectionUtil.isNotEmpty(customProbeDtos)) {
+            CollectionTemplateProbeDto colTempProbeDto = customProbeDtos.get(0);
+            if (StringUtils.isNotBlank(colTempProbeDto.getScriptUrl())) {
+                log.info("Render Script Content...");
+                // 加载脚本内容
+                byte[] scriptByte = fastDFSClient.download(colTempProbeDto.getScriptUrl(), FdfsGroupEnum.DEFAULT.toString());
+                String scriptContent = new String(scriptByte, StandardCharsets.UTF_8);
+                colTempProbeDto.setScriptContent(scriptContent);
+            }
+            return colTempProbeDto;
+        }
+
+        return null;
     }
 
 

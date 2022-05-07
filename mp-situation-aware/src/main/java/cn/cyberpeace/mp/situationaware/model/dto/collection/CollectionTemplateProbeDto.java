@@ -99,6 +99,12 @@ public class CollectionTemplateProbeDto {
     private String scriptUrl;
 
     /**
+     * 探针脚本内容
+     */
+    @ApiModelProperty(value = "探针脚本内容，只有查询模板下单个自定义探针的接口才会加载这个字段")
+    private String scriptContent;
+
+    /**
      * 探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec
      */
     @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec")

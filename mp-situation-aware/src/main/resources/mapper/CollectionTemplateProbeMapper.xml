@@ -197,10 +197,15 @@
            p.create_time,
            p.update_time
     from mp_situation_collection_template_probe tempp
-           left join mp_situation_probe p
-                     on p.id = tempp.probe_id
+           left join mp_situation_probe p on p.id = tempp.probe_id
     <where>
         tempp.template_id = #{templateId}
+        <if test="probeCondition.ids != null and probeCondition.ids.length > 0">
+          AND p.id in
+          <foreach item="pid" index="index" collection="probeCondition.ids" open="(" separator="," close=")">
+            #{pid}
+          </foreach>
+        </if>
         <if test="probeCondition.probeCategories != null and probeCondition.probeCategories.length > 0">
           AND p.probe_category in
           <foreach item="category" index="index" collection="probeCondition.probeCategories" open="(" separator="," close=")">

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
@@ -62,13 +63,21 @@ public class CollectionTemplateController {
         return ServiceResult.successful();
     }
 
+
+    @GetMapping("/probe_details")
+    @ApiOperation(value = "查询采集模板中的某个探针详细信息，包括脚本内容")
+    public ServiceResult<CollectionTemplateProbeDto> getProbeDetailsById(@RequestParam String templateId, @RequestParam String probeId) {
+        CollectionTemplateProbeDto tempProbeDto = templateService.getTemplateProbeDtoWithScriptContent(templateId, probeId);
+        return ServiceResult.success(tempProbeDto);
+    }
+
     /**
      *
      * @param category
      * @param name
      * @return
      */
-    @GetMapping("/probes")
+    @GetMapping("/probes_to_import")
     @ApiOperation(value = "查询可以导入的自定义探针列表")
     public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
         List<ProbeModel> probes = templateService.listCustomProbesNotInTemplate(category, name);
