@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
@@ -103,31 +103,61 @@ public class WazuhCommon {
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
             if (isContainer) {
-                resource.setCopyFile(getAgentLinuxLocalFilepath());
+                resource.setFile(StringUtils.EMPTY);
+                resource.setInstallCommand(
+                        StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                                String.format("unzip " + WAZUH_AGENT_LINUX_FILE_NAME + " -d %s/agent-installer",
+                                        SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                String.format("cd %s/agent-installer/agent-linux",
+                                        SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                "bash install.sh",
+                                String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                "rm -rf agent-installer",
+                                "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
+                                String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                                "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                        wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                                "cd /opt/wazuha",
+                                "bash config.sh",
+                                probeCommand,
+                                "bash start.sh"
+                        ));
             } else {
                 resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
+                resource.setInstallCommand(
+                        StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                                String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s/agent-installer",
+                                        SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                String.format("cd %s/agent-installer/agent-linux",
+                                        SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                "bash install.sh",
+                                String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                                "rm -rf agent-installer",
+                                "rm -rf " + InstallerUtils.INSTALLER_REPLACEMENT,
+                                String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
+                                                "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
+                                        wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
+                                "cd /opt/wazuha",
+                                "bash config.sh",
+                                probeCommand,
+                                "bash start.sh"
+                        ));
             }
-            resource.setInstallCommand(
-                    StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s/agent-installer",
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            String.format("cd %s/agent-installer/agent-linux",
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            "bash install.sh",
-                            String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            "rm -rf agent-installer",
-                            "rm -rf " + InstallerUtils.INSTALLER_REPLACEMENT,
-                            String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
-                                            "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
-                                    wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
-                            "cd /opt/wazuha",
-                            "bash config.sh",
-                            probeCommand,
-                            "bash start.sh"
-                    ));
         }
-        return resource == null ? new ArrayList<>() :
+        List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+        if (isContainer) {
+            int mkdirCmdIndex = 0;
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i).contains("mkdir") && result.get(i).contains(SceneSingleton.sceneAppConfig.getLinuxInstallerDir())) {
+                    mkdirCmdIndex = i + 1;
+                    break;
+                }
+            }
+            result.add(mkdirCmdIndex, String.format(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX + " %s %s",
+                    getAgentLinuxLocalFilepath(), SceneSingleton.sceneAppConfig.getLinuxInstallerDir()));
+        }
+        return result;
     }
 
     /**

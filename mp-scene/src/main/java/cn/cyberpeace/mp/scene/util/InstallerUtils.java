@@ -125,11 +125,6 @@ public class InstallerUtils {
     public static final String LINUX_FILE_DOWNLOAD = "curl -o \"%s\" %s";
 
     /**
-     * 容器文件复制
-     */
-    public static final String CONTAINER_FILE_COPY = "copy_file %s %s";
-
-    /**
      * linux rpm默认安装
      */
     public static final String LINUX_RPM_DEFAULT_INSTALL_SOFTWARE = "rpm -ivh %s";
@@ -223,18 +218,6 @@ public class InstallerUtils {
     }
 
     /**
-     * 生成文件复制命令
-     * @param systemType 系统类型
-     * @param fileUrl 文件url
-     * @return 文件复制命令
-     */
-    public static FileDownloadInfo generateFileCopyCommand(String systemType, String fileUrl) {
-        var installerDir = getDefaultInstallDir(systemType);
-        String downloadCommand = String.format(CONTAINER_FILE_COPY, fileUrl, installerDir);
-        return new FileDownloadInfo(fileUrl, downloadCommand);
-    }
-
-    /**
      * 生成默认的安装脚本
      * @param systemType 系统详细类型
      * @param filePath 文件路径
@@ -295,27 +278,6 @@ public class InstallerUtils {
             }
         }
 
-        return StringUtils.EMPTY;
-    }
-
-    /**
-     * 生成容器自定义安装命令
-     * @param systemType 系统类型
-     * @param filePath 复制文件源路径
-     * @param installCommand 安装命令
-     * @return 容器自定义安装命令
-     */
-    public static String generateContainerCustomInstallCommand(String systemType, String filePath, String installCommand) {
-        String filePathLower = filePath.toLowerCase();
-        var installerDir = getDefaultInstallDir(systemType);
-        if (SystemTypeCommandUtils.isLinux(systemType)) {
-            if (installCommand.contains(INSTALLER_REPLACEMENT)) {
-                var fileName = FileUtil.getName(filePath);
-                installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
-                return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_NORMAL_INSTALL), installerDir,
-                        installCommand);
-            }
-        }
         return StringUtils.EMPTY;
     }
 
@@ -401,7 +363,7 @@ public class InstallerUtils {
         for (var installer : installers) {
             String installerFile = installer.getFile();
             String installCommand = installer.getInstallCommand();
-            if (StringUtils.isEmpty(installerFile) && StringUtils.isEmpty(installer.getCopyFile())) {
+            if (StringUtils.isEmpty(installerFile)) {
                 if (StringUtils.isEmpty(installCommand)) {
                     continue;
                 }
@@ -422,12 +384,8 @@ public class InstallerUtils {
                 } else {
                     downloadFileName = fileName;
                 }
-                var fileDownloadInfo = new FileDownloadInfo();
-                if (StringUtils.isNotEmpty(installer.getCopyFile())) {
-                    fileDownloadInfo = generateFileCopyCommand(systemType, installer.getCopyFile());
-                } else {
-                    fileDownloadInfo = generateFileDownloadCommand(systemType, fileUrl, downloadFileName);
-                }
+                var fileDownloadInfo = generateFileDownloadCommand(systemType, fileUrl,
+                        downloadFileName);
                 subInstallCommands.add(fileDownloadInfo.getDownloadCommand());
 
                 var filePath = fileDownloadInfo.getFilePath();
@@ -442,11 +400,7 @@ public class InstallerUtils {
                 } else if (StringUtils.isEmpty(installCommand)) {
                     innerCommands.add(generateDefaultInstallCommand(systemType, filePath));
                 } else {
-                    if (StringUtils.isNotEmpty(installer.getCopyFile())) {
-                        installCommand = generateContainerCustomInstallCommand(systemType, filePath, installCommand);
-                    } else {
-                        installCommand = generateDefaultCustomInstallCommand(systemType, filePath, installCommand);
-                    }
+                    installCommand = generateDefaultCustomInstallCommand(systemType, filePath, installCommand);
                     boolean isWinCommandContainZh = isWindowsOS && TextUtils.containChinese(installCommand);
                     if (!isWinFileContainZh && isWinCommandContainZh) {
                         installCommand = CommandUtils.fixWinZhCommand(installCommand);
@@ -508,6 +462,5 @@ public class InstallerUtils {
         private String file;
         private String installCommand;
         private boolean docker;
-        private String copyFile;
     }
 }

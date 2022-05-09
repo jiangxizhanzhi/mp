@@ -18,7 +18,7 @@ public class ContainerFileUtils {
 
     public static final String UNZIP_EXECUTOR_NAME = "unzip";
 
-    public static final String CONTAINER_COPY_FILE_PREFIX = "copy_file";
+    public static final String CONTAINER_COPY_FILE_PREFIX = "container_copy_file:";
 
     public static String unzipLocalFilepath = null;
 
