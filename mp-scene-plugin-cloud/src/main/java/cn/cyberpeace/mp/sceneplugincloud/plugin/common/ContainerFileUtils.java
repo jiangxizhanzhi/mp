@@ -56,4 +56,11 @@ public class ContainerFileUtils {
         return true;
     }
 
+    public static boolean copyFile(Container containerClient, String containerId, String localPath, String destinationPath) {
+        if (StringUtils.isEmpty(localPath)) {
+            return false;
+        }
+        return containerClient.copyFile(containerId, localPath, destinationPath);
+    }
+
 }

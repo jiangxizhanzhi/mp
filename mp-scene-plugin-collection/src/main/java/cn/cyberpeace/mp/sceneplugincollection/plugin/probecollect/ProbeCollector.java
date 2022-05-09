@@ -44,8 +44,8 @@ public class ProbeCollector {
     }
 
     public List<String> generateProbeInstallScript(String systemType, String agentName, String collectorId,
-                                             WazuhControl.ControlConfigParam controlParam) {
-        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam);
+                                                   WazuhControl.ControlConfigParam controlParam, Integer virtualType) {
+        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, virtualType);
     }
 
 }
