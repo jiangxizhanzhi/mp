@@ -6,12 +6,9 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -48,9 +44,6 @@ public class VmController {
     @GetMapping("/page")
     public PageResult<InstancePageResponse> page(InstancePageRequest request){
         InstanceConvertModel model = vmConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
         List<InstanceConvertModel.Model> instances = model.getModelList();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
             InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())

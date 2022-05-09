@@ -6,19 +6,15 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -46,9 +42,6 @@ public class RouterController {
     @GetMapping("/page")
     public PageResult<RouterPageResponse> page(RouterPageRequest request){
         RouterPageConverterModel model = routerConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
         List<RouterPageResponse> list =  model.getModelList().stream().map(routerModel ->
                 RouterPageResponse.builder().name(routerModel.getName())
                         .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()

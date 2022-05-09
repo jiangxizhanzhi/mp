@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -54,10 +53,7 @@ public class ElasticIpConverter implements BaseConverter {
     public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        final ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
-            return null;
-        }
+        ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
         List<ElasticIpConvertModel.Model> list = model.getFloatingips().stream().map(elasticIpModel ->
                 ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
                         .fixedIpAddress(elasticIpModel.getFixedIpAddress())

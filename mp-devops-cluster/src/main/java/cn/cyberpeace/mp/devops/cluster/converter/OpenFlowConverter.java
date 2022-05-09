@@ -13,14 +13,12 @@ import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.OpenFlowVoConverter;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,9 +57,6 @@ public class OpenFlowConverter implements BaseConverter{
         params.setLimit(request.getLimit());
         params.setOffset(request.getOffset());
         OpenFlowCloudPlatformModel model = openFlowService.page(params);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getOpenFlows())){
-            return null;
-        }
         List<OpenFlow> openFlows = model.getOpenFlows();
         List<OpenFlowVO> openFlowVOS = openFlows.stream().map(v -> {
             OpenFlowVO openFlowVO = openFlowVoConverter.openFlowToOpenFlowVO(v);
