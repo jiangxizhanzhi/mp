@@ -4,8 +4,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
-import cn.cyberpeace.mp.front.admin.dto.activation.VerifyInfoRequest;
-import cn.cyberpeace.mp.front.admin.dto.activation.VerifyInfoResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Objects;
 
@@ -45,7 +42,7 @@ public class SysActivationController {
         return ServiceResult.successful();
     }
 
-
+    /*
     @ApiIgnore
     @ApiOperation("(生成校验码之前)查询授权信息，包括机器码，自定义授权信息，授权月数")
     @PostMapping("/verifyinfo")
@@ -66,7 +63,7 @@ public class SysActivationController {
 
         return ServiceResult.success(verifyInfoResponse);
     }
-
+    */
 
     @ApiOperation("查询激活状态")
     @GetMapping("/status")
