@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * 防火墙
@@ -51,9 +50,6 @@ public class FirewallConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         FirewallCloudPlatformModel model = firewallService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFirewalls())){
-            return null;
-        }
         FirewallPageConverterModel convertModel = new FirewallPageConverterModel();
         convertModel.setModelList(model.getFirewalls());
         convertModel.setTotal(model.getTotal());

@@ -56,9 +56,6 @@ public class VmConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         InstanceCloudPlatformModel model = vmService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
-            return null;
-        }
         List<InstanceConvertModel.Model> list = model.getInstances().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
