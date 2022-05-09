@@ -91,10 +91,11 @@ public class InitiateHandler extends HandlerCommon {
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {
                 cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-                    // TODO: 只支持虚拟机
+                    // TODO: 只支持虚拟机、Linux容器
                     var virtualType = cloudElement.getVirtualType();
                     if (virtualType == null
-                            || virtualType != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE) {
+                            || (virtualType != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&
+                            virtualType != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                         return;
                     }
 
@@ -171,16 +172,20 @@ public class InitiateHandler extends HandlerCommon {
             var collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
                 Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = this.getLocationMap();
+                CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                        .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
+                    var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    boolean isContainer = cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
                     WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
-                                systemType, locationMap);
+                                systemType, locationMap, isContainer);
                     }
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId, controlParam);
+                            srcElement.getEid(), collectionId, controlParam, isContainer);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
@@ -205,7 +210,7 @@ public class InitiateHandler extends HandlerCommon {
      * @return 探针采集参数
      */
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
-            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
+            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap, boolean isContainer) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
         List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();
@@ -214,7 +219,7 @@ public class InitiateHandler extends HandlerCommon {
         for (Probe probe : probes) {
             //脚本驱动类型，新增脚本参数
             if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
-                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
+                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName, isContainer);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 //注册表变更类型，新增注册表参数

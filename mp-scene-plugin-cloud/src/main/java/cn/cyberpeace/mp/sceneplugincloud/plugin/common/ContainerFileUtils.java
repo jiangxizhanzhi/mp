@@ -18,6 +18,8 @@ public class ContainerFileUtils {
 
     public static final String UNZIP_EXECUTOR_NAME = "unzip";
 
+    public static final String CONTAINER_COPY_FILE_PREFIX = "copy_file";
+
     public static String unzipLocalFilepath = null;
 
     public static String getUnzipLocalFilepath() {
@@ -54,6 +56,13 @@ public class ContainerFileUtils {
         containerClient.executeCommand(containerId, CommandUtils.linuxUnzipFile(toPath, unzipDir));
         containerClient.executeCommand(containerId, String.format("chmod +x %s/*", unzipDir));
         return true;
+    }
+
+    public static boolean prepareLocalFile(Container containerClient, String containerId, String localPath, String destinationPath) {
+        if (StringUtils.isEmpty(localPath)) {
+            return false;
+        }
+        return containerClient.copyFile(containerId, localPath, destinationPath);
     }
 
 }

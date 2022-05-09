@@ -600,6 +600,15 @@ public class CreateHandler extends HandlerCommon {
         }
 
         for (var command : commands) {
+            if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
+                String[] path = command.split(StringUtils.SPACE);
+                try {
+                    ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                } catch (Exception e) {
+                    log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                }
+                continue;
+            }
             containerClient.executeCommand(containerId, command);
         }
     }

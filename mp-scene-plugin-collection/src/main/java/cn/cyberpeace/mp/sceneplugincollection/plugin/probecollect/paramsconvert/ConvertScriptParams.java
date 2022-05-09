@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert;
 
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
@@ -23,18 +25,22 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
 
     private String agentName;
 
+    private boolean isContainer;
+
     private static String getCollectInterval() {
         return CollectionSingleton.collectionAppConfig.getCollectInterval();
     }
 
-    public ConvertScriptParams(Probe probe, String agentName) {
+    public ConvertScriptParams(Probe probe, String agentName, Boolean isContainer) {
         this.probe = probe;
         this.agentName = agentName;
+        this.isContainer = isContainer;
     }
 
     @Override
     public List<WazuhControl.ControlProbeParam> convertParams() {
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String fdfsInnerServer = BaseSingleton.baseAppConfig.getFdfsInnerHttpServer();
         WazuhControl.ControlProbeParam scriptProbeParam = new WazuhControl.ControlProbeParam();
         scriptProbeParam.setId(probe.getId());
         scriptProbeParam.setGroup(agentName);
@@ -61,7 +67,12 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         }
         scriptProbeParam.setInterval(getCollectInterval());
         scriptProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-        String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());
+        String url;
+        if (isContainer) {
+            url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, fdfsInnerServer, probe.getScriptUrl());
+        } else {
+            url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());
+        }
         scriptProbeParam.setScriptUrl(url);
         if (probe.getDisabled() != null && probe.getDisabled()) {
             scriptProbeParam.setDisabled(WazuhControl.SCRIPT_DISABLED_YES);

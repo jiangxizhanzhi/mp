@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
@@ -37,10 +39,22 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
+    public static String agentLinuxLocalFilepath = null;
+
+    public static String getAgentLinuxLocalFilepath() {
+        if (!StringUtils.isEmpty(agentLinuxLocalFilepath)) {
+            return agentLinuxLocalFilepath;
+        }
+
+        LocalFileMappingModel mapping = LocalFileMappingCommon.getMapping(WAZUH_AGENT_GROUP, WAZUH_AGENT_LINUX_FILE_NAME);
+        agentLinuxLocalFilepath = mapping != null ? mapping.getLocalFile() : null;
+        return agentLinuxLocalFilepath;
+    }
+
     private WazuhCommon() {}
 
     public static List<String> generateWazuhAgentInstallScript(String systemType, String agentName, String wazuhHost,
-                                                         WazuhControl.ControlConfigParam controlParam) {
+                                                               WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
         if (wazuhProbeConfig == null) {
             wazuhProbeConfig = BeanCommon.getBean(WazuhProbeConfig.class);
         }
@@ -51,9 +65,14 @@ public class WazuhCommon {
 
         String osType = SystemTypeCommandUtils.getOsType(systemType);
         String metadataFileServer = SceneSingleton.sceneAppConfig.getMetadataFileServer();
+        String fdfsInnerServer = BaseSingleton.baseAppConfig.getFdfsInnerHttpServer();
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>(controlParam.getProbeParams());
-        List<WazuhControl.ControlProbeParam> defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer,
-                agentName, wazuhProbeConfig);
+        List<WazuhControl.ControlProbeParam> defaultProbeParams;
+        if (isContainer) {
+            defaultProbeParams = getDefaultProbeParams(nameFileMap, fdfsInnerServer, agentName, wazuhProbeConfig);
+        } else {
+            defaultProbeParams = getDefaultProbeParams(nameFileMap, metadataFileServer, agentName, wazuhProbeConfig);
+        }
         controlProbeParams.addAll(defaultProbeParams);
         controlParam.setProbeParams(controlProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
@@ -83,7 +102,11 @@ public class WazuhCommon {
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
-            resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
+            if (isContainer) {
+                resource.setCopyFile(getAgentLinuxLocalFilepath());
+            } else {
+                resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
+            }
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                             String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s/agent-installer",
