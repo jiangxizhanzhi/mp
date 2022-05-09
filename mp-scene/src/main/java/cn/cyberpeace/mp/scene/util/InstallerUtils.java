@@ -299,6 +299,27 @@ public class InstallerUtils {
     }
 
     /**
+     * 生成容器自定义安装命令
+     * @param systemType 系统类型
+     * @param filePath 复制文件源路径
+     * @param installCommand 安装命令
+     * @return 容器自定义安装命令
+     */
+    public static String generateContainerCustomInstallCommand(String systemType, String filePath, String installCommand) {
+        String filePathLower = filePath.toLowerCase();
+        var installerDir = getDefaultInstallDir(systemType);
+        if (SystemTypeCommandUtils.isLinux(systemType)) {
+            if (installCommand.contains(INSTALLER_REPLACEMENT)) {
+                var fileName = FileUtil.getName(filePath);
+                installCommand = installCommand.replace(INSTALLER_REPLACEMENT, fileName);
+                return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_NORMAL_INSTALL), installerDir,
+                        installCommand);
+            }
+        }
+        return StringUtils.EMPTY;
+    }
+
+    /**
      * 生成docker服务安装命令
      * @param systemType 系统类型
      * @param filePath 文件路径
@@ -421,7 +442,11 @@ public class InstallerUtils {
                 } else if (StringUtils.isEmpty(installCommand)) {
                     innerCommands.add(generateDefaultInstallCommand(systemType, filePath));
                 } else {
-                    installCommand = generateDefaultCustomInstallCommand(systemType, filePath, installCommand);
+                    if (StringUtils.isNotEmpty(installer.getCopyFile())) {
+                        installCommand = generateContainerCustomInstallCommand(systemType, filePath, installCommand);
+                    } else {
+                        installCommand = generateDefaultCustomInstallCommand(systemType, filePath, installCommand);
+                    }
                     boolean isWinCommandContainZh = isWindowsOS && TextUtils.containChinese(installCommand);
                     if (!isWinFileContainZh && isWinCommandContainZh) {
                         installCommand = CommandUtils.fixWinZhCommand(installCommand);
