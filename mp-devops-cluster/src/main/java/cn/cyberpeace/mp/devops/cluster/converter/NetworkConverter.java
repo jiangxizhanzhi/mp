@@ -56,9 +56,6 @@ public class NetworkConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         NetworkCloudPlatformModel model = networkService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNetworks())){
-            return null;
-        }
         List<NetworkPageConverterModel.Model> list = model.getNetworks().stream().map(networkModel -> {
             NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageConverterModel.Model.Subnet> subnets = Lists.newArrayList();

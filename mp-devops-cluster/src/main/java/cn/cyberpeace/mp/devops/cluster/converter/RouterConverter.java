@@ -50,9 +50,6 @@ public class RouterConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         RouterCloudPlatformModel model = routerService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
-            return null;
-        }
         List<RouterModel> routers = model.getRouters();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
