@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.es.EsConstants;
+import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
@@ -130,8 +130,8 @@ public class NetworkTrafficService extends AbstractBaseService{
         //时间查询
         if (Objects.nonNull(sessionRequest.getStartTime()) && Objects.nonNull(sessionRequest.getEndTime())) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(sessionRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
-                    .to(sessionRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+                    .from(sessionRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
+                    .to(sessionRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
 
         //构造动态条件查询

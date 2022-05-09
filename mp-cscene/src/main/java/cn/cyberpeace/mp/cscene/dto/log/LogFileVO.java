@@ -22,7 +22,13 @@ public class LogFileVO extends LogFileBasicDto {
     @ApiModelProperty("大小")
     private Long size;
 
-    @ApiModelProperty("时间")
-    private LocalDateTime time;
+    @ApiModelProperty("创建时间")
+    private LocalDateTime createTime;
+
+    @ApiModelProperty("修改时间")
+    private LocalDateTime modifyTime;
+
+    @ApiModelProperty("接入时间")
+    private LocalDateTime accessTime;
 
 }

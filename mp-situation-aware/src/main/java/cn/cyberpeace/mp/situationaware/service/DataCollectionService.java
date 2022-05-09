@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.es.EsConstants;
+import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
@@ -539,8 +539,8 @@ public class DataCollectionService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //构造事件条件
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
     }
 
@@ -863,8 +863,8 @@ public class DataCollectionService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
             boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
 
     }
