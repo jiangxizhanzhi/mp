@@ -35,6 +35,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * @Deprecated
+ *
  * http工具类
  */
 @Slf4j

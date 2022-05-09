@@ -1,12 +1,11 @@
 package cn.cyberpeace.mp.base.util.basic;
 
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class BeanUtils {
 
@@ -71,6 +70,19 @@ public class BeanUtils {
         Set<String> ignorePropertyNames = new HashSet<>(Arrays.asList(ignoreProperties));
         ignorePropertyNames.addAll(Arrays.asList(getNullPropertyNames(source)));
         org.springframework.beans.BeanUtils.copyProperties(source, target, ignorePropertyNames.toArray(new String[0]));
+    }
+
+    public static Map<String, Object> getMap(Object obj) {
+        Map<String, Object> map = new HashMap<>();
+        final BeanWrapper wrapper = new BeanWrapperImpl(obj);
+        var propertyDescriptors = wrapper.getPropertyDescriptors();
+        for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+            String fieldName = propertyDescriptor.getName();
+            if (!StringUtils.equals("class", fieldName)) {
+                map.put(fieldName, wrapper.getPropertyValue(fieldName));
+            }
+        }
+        return map;
     }
 
 }

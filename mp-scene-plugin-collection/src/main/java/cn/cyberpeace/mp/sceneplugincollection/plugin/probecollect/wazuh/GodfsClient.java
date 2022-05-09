@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import cn.hutool.core.io.FileUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
@@ -10,7 +10,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,12 @@ public class GodfsClient {
     private HttpClient godfsHttpClient;
 
     public GodfsClient(String godfsServer) {
-        this.godfsHttpClient = new HttpClient(godfsServer, 600000, 200, 200);
+        this.godfsHttpClient = HttpClient.builder()
+                .configServer(godfsServer)
+                .configTimeout(600000)
+                .configMaxConnPerRoute(200)
+                .configMaxConnTotal(200)
+                .build();
         this.godfsHttpClient.setLogRequest(true);
     }
 
@@ -82,21 +86,9 @@ public class GodfsClient {
 
     public boolean download(String path, String localFilepath) {
         var downloadUrl = StringUtils.join(DOWNLOAD_URL_PREFIX, path);
-        var httpResult = godfsHttpClient.resGet(downloadUrl, null, null, null);
-        if (!httpResult.isSuccess()) {
-            log.error("download godfs file {} error: {}", path, httpResult.getResult());
-            return false;
-        }
-
-        var entity = httpResult.getResponse().getEntity();
-        try {
-            FileCopyUtils.copy(entity.getContent(), FileUtil.getOutputStream(localFilepath));
-        } catch (IOException e) {
-            log.error("download godfs file {} error: get content error - {}", path, e);
-            return false;
-        }
-
-        return true;
+        var httpResult = godfsHttpClient.download(localFilepath, downloadUrl, null, null,
+                null);
+        return httpResult.getException() == null;
     }
 
     public boolean delete(String path) {
@@ -113,7 +105,7 @@ public class GodfsClient {
     }
 
     @Data
-    public static class GodfsUploadData implements HttpData {
+    public static class GodfsUploadData implements SnakeHttpData {
         private String filename;
         private String output = "json2";
         private File file;
@@ -147,7 +139,7 @@ public class GodfsClient {
     }
 
     @Data
-    public static class GodfsDeleteParam implements HttpParam {
+    public static class GodfsDeleteParam implements SnakeHttpParam {
         private String path;
         private String md5;
     }

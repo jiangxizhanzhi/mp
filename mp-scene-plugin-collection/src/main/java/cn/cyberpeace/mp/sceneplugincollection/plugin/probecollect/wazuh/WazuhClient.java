@@ -3,24 +3,17 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.http.ParamUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpResult;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -138,7 +131,12 @@ public class WazuhClient {
     }
 
     private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer) {
-        this.wazuhHttpClient = new HttpClient(wazuhServer, 60000, 200, 200);
+        this.wazuhHttpClient = HttpClient.builder()
+                .configServer(wazuhServer)
+                .configTimeout(60000)
+                .configMaxConnPerRoute(200)
+                .configMaxConnTotal(200)
+                .build();
         this.wazuhHttpClient.setLogRequest(true);
         this.wazuhUser = wazuhUser;
         this.wazuhPass = wazuhPass;
@@ -221,39 +219,8 @@ public class WazuhClient {
         private Object dapiErrors;
     }
 
-    public interface WazuhHttpParam extends HttpParam {
-        @Override
-        default String toPathString() {
-            List<Field> fieldList = ParamUtils.getFieldsByObject(this);
-            return ParamUtils.wrapperGetParamsByFieldsAndObject(fieldList, this, Boolean.TRUE);
-        }
-    }
-
-    public interface WazuhHttpData extends HttpData {
-
-        @Override
-        default String toContent() {
-            return JsonUtils.snakeStringify(this);
-        }
-
-        @Override
-        default Map<String, Object> toMultipart() {
-            Map<String, Object> multipart = new HashMap<>();
-            final BeanWrapper wrapper = new BeanWrapperImpl(this);
-            var propertyDescriptors = wrapper.getPropertyDescriptors();
-            for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
-                String fieldName = propertyDescriptor.getName();
-                if (!StringUtils.equals("class", fieldName)) {
-                    multipart.put(TextUtils.humpToLine(fieldName), wrapper.getPropertyValue(fieldName));
-                }
-            }
-            return multipart;
-        }
-
-    }
-
     @Data
-    public static class AgentsQueryWazuhHttpParam implements WazuhHttpParam {
+    public static class AgentsQueryWazuhHttpParam implements SnakeHttpParam {
         private String status;
     }
 }
