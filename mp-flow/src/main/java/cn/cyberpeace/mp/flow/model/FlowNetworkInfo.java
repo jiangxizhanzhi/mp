@@ -20,4 +20,9 @@ public class FlowNetworkInfo {
      */
     private String networkId;
 
+    /**
+     * mac
+     */
+    private String mac;
+
 }

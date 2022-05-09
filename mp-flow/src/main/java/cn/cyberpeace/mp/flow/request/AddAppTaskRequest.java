@@ -105,15 +105,13 @@ public class AddAppTaskRequest {
         client.setIp(flowPortModel.getClientIp());
         client.setPort(flowPortModel.getClientMac());
         // 目标ip作为客户端网关
-        String clientGw = targetIps[0];
-        client.setDefaultGw(clientGw);
+        client.setDefaultGw(flowPortModel.getClientGateway());
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
         // 目标ip作为服务端网关
-//        String serverGw = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH)[0];
-        server.setDefaultGw(clientGw);
+        server.setDefaultGw(flowPortModel.getServerGateway());
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
         networkConfig.setClient(Collections.singletonList(client));

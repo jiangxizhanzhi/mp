@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
@@ -148,28 +149,23 @@ public class AsyncPlatFlowTaskService {
             // 更新时，查询之前记录
             flowPortModel = flowPortMapper.get(flowTaskModel.getFlowPortId());
             if (Objects.isNull(flowPortModel)) {
-                log.error("get flow port info error");
+                log.error("update flow port info error");
                 return;
             }
         } else {
-            // 新增时，创建网口信息
-            flowPortModel = this.createPort(flowActuatorModel, flowInfoModel.getResourceType());
-            if (Objects.isNull(flowPortModel)) {
+            // 新增时，根据目标ip查询网口信息
+            List<FlowPortModel> flowPortModels =
+                    flowPortMapper.list(new HumanCondition().filterEqual(FlowPortModel::getClientGateway,
+                    flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
+                    .filterEqual(FlowPortModel::getActuatorId, actuatorId));
+            if (CollectionUtils.isEmpty(flowPortModels)) {
                 log.error("create flow port info error");
                 return;
             }
+            flowPortModel = flowPortModels.get(0);
         }
 
         flowTaskModel.setFlowPortId(flowPortModel.getId());
-
-        try {
-            // 校验任务接口网络是否正常，正常才继续;异常时直到超时才继续走
-            CheckUtils.loopCheck(() -> getTaskJobStatus(flowActuatorModel), 2000, 1000 * 60 * 5,
-                    null, 0, null, () -> log.error("task job status check failed：[{}]",
-                            flowActuatorModel.getIp()), "CheckTaskJobStatus");
-        } catch (Exception e) {
-            log.error("checkTaskJobStatus error", e);
-        }
 
         String thirdTaskId = "";
         if (isCustom || ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
@@ -384,6 +380,7 @@ public class AsyncPlatFlowTaskService {
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
         } catch (MpRuntimeException e) {
+            log.error("add vm instance error", e);
             throw e;
         } catch (Exception e) {
             log.error("add vm instance error", e);
@@ -419,94 +416,79 @@ public class AsyncPlatFlowTaskService {
         return isActive;
     }
 
-    /**
-     * 新增网口
-     *
-     * @param flowActuatorModel
-     * @return
-     */
-    private FlowPortModel createPort(FlowActuatorModel flowActuatorModel, int resourceType) {
-        FlowPortModel flowPortModel = null;
-        try {
-            JSONObject addPortReq = new JSONObject();
-            addPortReq.put("network_id", flowActuatorModel.getNetworkId());
-
-            String serverMac = "";
-            String serverIp = "";
-            String serverPortId = "";
-
-            String clientMac = "";
-            String clientIp = "";
-            String clientPortId = "";
-            if (ResourceTypeEnum.PACP.toValue() == resourceType) {
-                // pcap需要给trex虚拟机添加client网口
-                String addTrexClientPortRsp =
-                        HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
-                                , addPortReq.toJSONString());
-                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
-                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                    clientMac = clientDataObj.getString("mac_address");
-                    clientIp = clientDataObj.getString("fixed_ip");
-                    clientPortId = clientDataObj.getString("port_id");
-
-                    // pcap使用无状态模式，客户端和服务端共用一个网口
-                    serverMac = clientMac;
-                    serverIp = clientIp;
-                    serverPortId = clientPortId;
-                } else {
-                    log.error("add trex client port error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                }
-            } else {
-                // 给trex虚拟机添加server网口
-                String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
-                        flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
-                JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
-                log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
-
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject serverDataObj = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA);
-                    serverMac = serverDataObj.getString("mac_address");
-                    serverIp = serverDataObj.getString("fixed_ip");
-                    serverPortId = serverDataObj.getString("port_id");
-                } else {
-                    log.error("add trex server port error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                }
-            }
-
-            // 查询默认网关
-            String getGateWayRsp = HttpUtils.sendGet(cpUrl + "/v1/networks/" + flowActuatorModel.getNetworkId());
-            JSONObject getGateWayObj = JSONObject.parseObject(getGateWayRsp);
-            log.info("get gateway response:{}", getGateWayObj.toJSONString());
-            String gatewayIp = "";
-            if (BaseConstants.SUCCESS_ZERO.equals(getGateWayObj.getString(BaseConstants.STR_CODE))) {
-                gatewayIp =
-                        getGateWayObj.getJSONObject(BaseConstants.STR_DATA).getJSONObject("subnet").getString(
-                                "gateway_ip");
-            } else {
-                log.error("get gateway info error");
-            }
-
-            flowPortModel = FlowPortModel.builder()
-                    .serverIp(serverIp)
-                    .serverMac(serverMac)
-                    .serverPortId(serverPortId)
-                    .serverGateway(gatewayIp)
-                    .clientIp(clientIp)
-                    .clientMac(clientMac)
-                    .clientPortId(clientPortId)
-                    .clientGateway(gatewayIp)
-                    .build();
-            flowPortMapper.create(flowPortModel);
-        } catch (IOException e) {
-            log.error("add flow port error", e);
-        }
-
-        return flowPortModel;
-    }
+//    /**
+//     * 新增网口
+//     *
+//     * @param flowActuatorModel
+//     * @return
+//     */
+//    private FlowPortModel createPort(FlowActuatorModel flowActuatorModel, int resourceType) {
+//        FlowPortModel flowPortModel = null;
+//        try {
+//            JSONObject addPortReq = new JSONObject();
+//            addPortReq.put("network_id", flowActuatorModel.getNetworkId());
+//
+//            String serverMac = "";
+//            String serverIp = "";
+//            String serverPortId = "";
+//
+//            String clientMac = "";
+//            String clientIp = "";
+//            String clientPortId = "";
+//            if (ResourceTypeEnum.PACP.toValue() == resourceType) {
+//                // pcap需要给trex虚拟机添加client网口
+//                String addTrexClientPortRsp =
+//                        HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
+//                                , addPortReq.toJSONString());
+//                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+//                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
+//                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+//                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+//                    clientMac = clientDataObj.getString("mac_address");
+//                    clientIp = clientDataObj.getString("fixed_ip");
+//                    clientPortId = clientDataObj.getString("port_id");
+//
+//                    // pcap使用无状态模式，客户端和服务端共用一个网口
+//                    serverMac = clientMac;
+//                    serverIp = clientIp;
+//                    serverPortId = clientPortId;
+//                } else {
+//                    log.error("add trex client port error");
+//                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+//                }
+//            } else {
+//                // 给trex虚拟机添加server网口
+//                String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
+//                        flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+//                JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
+//                log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
+//
+//                if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
+//                    JSONObject serverDataObj = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA);
+//                    serverMac = serverDataObj.getString("mac_address");
+//                    serverIp = serverDataObj.getString("fixed_ip");
+//                    serverPortId = serverDataObj.getString("port_id");
+//                } else {
+//                    log.error("add trex server port error");
+//                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+//                }
+//            }
+//
+//            flowPortModel = FlowPortModel.builder()
+//                    .serverIp(serverIp)
+//                    .serverMac(serverMac)
+//                    .serverPortId(serverPortId)
+//                    .clientIp(clientIp)
+//                    .clientMac(clientMac)
+//                    .clientPortId(clientPortId)
+//                    .build();
+//            flowPortMapper.create(flowPortModel);
+//        } catch (IOException e) {
+//            log.error("add flow port error", e);
+//        }
+//
+//        return flowPortModel;
+//    }
 
     /**
      * 删除网口信息

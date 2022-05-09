@@ -53,15 +53,14 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
     @Async
     public void batchCreatePorts(List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel) {
         log.info("=========== batch create ports start =============");
-        List<String> networkIdList = new ArrayList<>();
-        if (CollectionUtils.isEmpty(networkIdList)) {
-            log.error("【{}】batch create ports error for networkIdList is empty", flowActuatorModel.getTitle());
+        if (CollectionUtils.isEmpty(networkInfos)) {
+            log.error("【{}】batch create ports error for networkInfos is empty", flowActuatorModel.getTitle());
             return;
         }
 
         List<FlowPortModel> flowPortModels = new ArrayList<>();
-        List<String> macList = new ArrayList<>();
-        networkIdList.forEach(networkId -> {
+        networkInfos.forEach(networkInfo -> {
+            String networkId = networkInfo.getNetworkId();
             try {
                 JSONObject addPortReq = new JSONObject();
                 addPortReq.put("network_id", networkId);
@@ -89,24 +88,9 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                     serverMac = clientMac;
                     serverIp = clientIp;
                     serverPortId = clientPortId;
-
-                    macList.add(clientMac);
+                    networkInfo.setMac(clientMac);
                 } else {
                     log.error("【{}】add client port error for networkId: {}", flowActuatorModel.getTitle(), networkId);
-                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                }
-
-                // 查询默认网关
-                String getGateWayRsp = HttpUtils.sendGet(cpUrl + "/v1/networks/" + networkId);
-                JSONObject getGateWayObj = JSONObject.parseObject(getGateWayRsp);
-                log.info("get gateway response for:{}", getGateWayObj.toJSONString());
-                String gatewayIp = "";
-                if (BaseConstants.SUCCESS_ZERO.equals(getGateWayObj.getString(BaseConstants.STR_CODE))) {
-                    gatewayIp =
-                            getGateWayObj.getJSONObject(BaseConstants.STR_DATA).getJSONObject("subnet").getString(
-                                    "gateway_ip");
-                } else {
-                    log.error("【{}】get gateway info error for networkId:{}", flowActuatorModel.getTitle(), networkId);
                     throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                 }
 
@@ -114,11 +98,11 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                         .serverIp(serverIp)
                         .serverMac(serverMac)
                         .serverPortId(serverPortId)
-                        .serverGateway(gatewayIp)
+                        .serverGateway(networkInfo.getIp()) // 目标ip作为网关地址
                         .clientIp(clientIp)
                         .clientMac(clientMac)
                         .clientPortId(clientPortId)
-                        .clientGateway(gatewayIp)
+                        .clientGateway(networkInfo.getIp()) // 目标ip作为网关地址
                         .networkId(networkId)
                         .actuatorId(flowActuatorModel.getId())
                         .build();
@@ -128,30 +112,28 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                 log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), networkId, e);
                 throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
             }
-
-            // 批量新增网口信息
-            getModelMapper().bulkCreate(flowPortModels);
         });
 
-        // 流量发生器初始化网口信息
-        if (CollectionUtils.isNotEmpty(macList)) {
-            JSONObject taskInitObj = new JSONObject();
-            taskInitObj.put("macs", macList);
-            String taskInitRsp = null;
-            try {
-                taskInitRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/init",
-                        taskInitObj.toJSONString());
-            } catch (IOException e) {
-                log.error("tasks init error", e);
-                throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-            }
-            JSONObject taskResultObj = JSONObject.parseObject(taskInitRsp);
-            log.info("tasks init response:{}", taskResultObj.toJSONString());
-            if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
+        // 批量新增网口信息
+        getModelMapper().bulkCreate(flowPortModels);
 
-            } else {
-                log.error("tasks init response error");
-            }
+        // 流量发生器初始化网口信息
+        JSONObject taskInitObj = new JSONObject();
+        taskInitObj.put("network_infos", networkInfos);
+        String taskInitRsp;
+        try {
+            taskInitRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/init",
+                    taskInitObj.toJSONString());
+        } catch (IOException e) {
+            log.error("tasks init error", e);
+            throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+        }
+        JSONObject taskResultObj = JSONObject.parseObject(taskInitRsp);
+        log.info("tasks init response:{}", taskResultObj.toJSONString());
+        if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
+            log.info("tasks init response success");
+        } else {
+            log.error("tasks init response error");
         }
 
         log.info("=========== batch create ports end =============");
