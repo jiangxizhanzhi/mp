@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.auth.test;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.OrgService;
@@ -16,34 +14,27 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description:
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
+@ApiIgnore
 @Api(value = "TEST", tags = "AUTH-TEST")
 @Slf4j
 @RestController
@@ -134,7 +125,7 @@ public class AuthTestController {
         return map;
     }
 
-
+    /*
     @GetMapping("test_exception_handler")
     public ServiceResult testErrorCode() {
 
@@ -198,5 +189,6 @@ public class AuthTestController {
         messageFormat.format(args, formattedMessage, null);
         return formattedMessage.toString();
     }
+    */
 
 }
