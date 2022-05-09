@@ -131,17 +131,16 @@ public class WazuhCommon {
         }
         List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
-        //容器需要添加一条复制文件命令
+        //容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
         if (isContainer) {
+            //将文件复制的命令加到创建目录的命令之后
             int copyFileIndex = 0;
-            //找到创建目录位置
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i).contains("mkdir") && result.get(i).contains(SceneSingleton.sceneAppConfig.getLinuxInstallerDir())) {
                     copyFileIndex = i + 1;
                     break;
                 }
             }
-            //先创建目录，然后将文件复制到目录下
             result.add(copyFileIndex, String.format(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX + " %s %s",
                     getAgentLinuxLocalFilepath(), SceneSingleton.sceneAppConfig.getLinuxInstallerDir()));
         }
