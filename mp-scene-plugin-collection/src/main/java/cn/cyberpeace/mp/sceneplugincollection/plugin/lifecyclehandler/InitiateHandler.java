@@ -91,7 +91,7 @@ public class InitiateHandler extends HandlerCommon {
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             runSceneProgress(SceneProcess.INITIATE_PROBE_COLLECTION, () -> {
                 cloudPluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
-                    // TODO: 只支持虚拟机
+                    // TODO: 只支持虚拟机、Linux容器
                     var virtualType = cloudElement.getVirtualType();
                     if (virtualType == null
                             || (virtualType != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&

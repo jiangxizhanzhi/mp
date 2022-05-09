@@ -39,7 +39,7 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
-    public static String agentLinuxLocalFilepath = "C:\\Users\\Public\\agent-linux.zip";
+    public static String agentLinuxLocalFilepath = null;
 
     public static String getAgentLinuxLocalFilepath() {
         if (!StringUtils.isEmpty(agentLinuxLocalFilepath)) {
