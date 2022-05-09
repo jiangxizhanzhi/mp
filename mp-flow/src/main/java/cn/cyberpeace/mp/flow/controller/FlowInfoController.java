@@ -153,13 +153,4 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.modifyAttackFlow(modifyRequest);
     }
 
-    /**
-     * 批量导入预制流量
-     * @return
-     */
-    @GetMapping("/batchImport")
-    public ServiceResult batchImport() {
-        return flowServiceImpl.batchImportFlowInfo();
-    }
-
 }
