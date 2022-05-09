@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpData;
+import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -318,13 +320,13 @@ public class WazuhLauncher {
     }
 
     @Data
-    public static class ActiveResponseHttpData implements WazuhClient.WazuhHttpData {
+    public static class ActiveResponseHttpData implements SnakeHttpData {
         private String command;
         private List<String> arguments;
     }
 
     @Data
-    public static class AgentsActiveResponseHttpParam implements WazuhClient.WazuhHttpParam {
+    public static class AgentsActiveResponseHttpParam implements SnakeHttpParam {
         private String agentsList;
     }
 
