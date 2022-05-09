@@ -24,8 +24,16 @@ public class FdfsCommon {
         return fdfsClient.uploadContent(content);
     }
 
+    public static String uploadContent(String content, String fileSuffix) {
+        return fdfsClient.uploadContent(content, fileSuffix);
+    }
+
     public static String upload(InputStream is) {
         return fdfsClient.upload(is);
+    }
+
+    public static String upload(InputStream is, String fileSuffix) {
+        return fdfsClient.upload(is, fileSuffix);
     }
 
     public static void download(String fdfsFilepath, String localFilepath) {

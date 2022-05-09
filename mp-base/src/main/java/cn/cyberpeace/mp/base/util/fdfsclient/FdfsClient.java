@@ -60,15 +60,23 @@ public class FdfsClient {
     }
 
     public String uploadContent(String content) {
-        return upload(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+        return uploadContent(content, null);
+    }
+
+    public String uploadContent(String content, String fileSuffix) {
+        return upload(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), fileSuffix);
     }
 
     public String upload(InputStream is) {
+        return upload(is, null);
+    }
+
+    public String upload(InputStream is, String fileSuffix) {
         String fdfsFilePath;
         try (is) {
             var fileBuff = new byte[is.available()];
             is.read(fileBuff, 0, fileBuff.length);
-            fdfsFilePath = getStorageClient().upload_file1(fileBuff, null, null);
+            fdfsFilePath = getStorageClient().upload_file1(fileBuff, fileSuffix, null);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs upload with input stream error: %s", e.getMessage());
             log.error(msg);
