@@ -600,12 +600,12 @@ public class CreateHandler extends HandlerCommon {
         }
 
         for (var command : commands) {
-            if (command.startsWith("copy_file")) {
+            if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
                 String[] path = command.split(StringUtils.SPACE);
                 try {
-                    ContainerFileUtils.copyFile(containerClient, containerId, path[1], path[2]);
+                    ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
                 } catch (Exception e) {
-                    log.warn("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                    log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
                 }
                 continue;
             }

@@ -177,14 +177,15 @@ public class InitiateHandler extends HandlerCommon {
                 probeCollectionElements.forEach(collectionElement -> {
                     var srcElement = collectionElement.getSrcElement();
                     var cloudElement = cloudPluginHandler.getElement(srcElement.getId());
+                    boolean isContainer = cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
                     WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
-                                systemType, locationMap, cloudElement.getVirtualType());
+                                systemType, locationMap, isContainer);
                     }
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
-                            srcElement.getEid(), collectionId, controlParam, cloudElement.getVirtualType());
+                            srcElement.getEid(), collectionId, controlParam, isContainer);
                     var initCommands = srcElement.getInitCommands();
                     if (initCommands == null) {
                         initCommands = new ArrayList<>();
@@ -209,7 +210,7 @@ public class InitiateHandler extends HandlerCommon {
      * @return 探针采集参数
      */
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
-            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap, Integer virtualType) {
+            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap, boolean isContainer) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
         List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();
@@ -218,7 +219,7 @@ public class InitiateHandler extends HandlerCommon {
         for (Probe probe : probes) {
             //脚本驱动类型，新增脚本参数
             if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
-                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName, virtualType);
+                ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName, isContainer);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
                 //注册表变更类型，新增注册表参数

@@ -18,6 +18,8 @@ public class ContainerFileUtils {
 
     public static final String UNZIP_EXECUTOR_NAME = "unzip";
 
+    public static final String CONTAINER_COPY_FILE_PREFIX = "copy_file";
+
     public static String unzipLocalFilepath = null;
 
     public static String getUnzipLocalFilepath() {
@@ -56,7 +58,7 @@ public class ContainerFileUtils {
         return true;
     }
 
-    public static boolean copyFile(Container containerClient, String containerId, String localPath, String destinationPath) {
+    public static boolean prepareLocalFile(Container containerClient, String containerId, String localPath, String destinationPath) {
         if (StringUtils.isEmpty(localPath)) {
             return false;
         }

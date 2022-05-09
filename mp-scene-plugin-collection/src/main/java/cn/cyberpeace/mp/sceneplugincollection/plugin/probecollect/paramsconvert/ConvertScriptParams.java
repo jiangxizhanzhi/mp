@@ -25,16 +25,16 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
 
     private String agentName;
 
-    private Integer virtualType;
+    private boolean isContainer;
 
     private static String getCollectInterval() {
         return CollectionSingleton.collectionAppConfig.getCollectInterval();
     }
 
-    public ConvertScriptParams(Probe probe, String agentName, Integer virtualType) {
+    public ConvertScriptParams(Probe probe, String agentName, Boolean isContainer) {
         this.probe = probe;
         this.agentName = agentName;
-        this.virtualType = virtualType;
+        this.isContainer = isContainer;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         scriptProbeParam.setInterval(getCollectInterval());
         scriptProbeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         String url;
-        if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+        if (isContainer) {
             url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, fdfsInnerServer, probe.getScriptUrl());
         } else {
             url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer, probe.getScriptUrl());

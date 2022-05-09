@@ -231,7 +231,7 @@ public class InstallerUtils {
     public static FileDownloadInfo generateFileCopyCommand(String systemType, String fileUrl) {
         var installerDir = getDefaultInstallDir(systemType);
         String downloadCommand = String.format(CONTAINER_FILE_COPY, fileUrl, installerDir);
-        return new FileDownloadInfo(installerDir, downloadCommand);
+        return new FileDownloadInfo(fileUrl, downloadCommand);
     }
 
     /**
@@ -292,9 +292,6 @@ public class InstallerUtils {
                 return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_UNZIP_INSTALL), installerDir,
                         installFolder, filePath, installerDir, installFolder, installerDir, installFolder, installerDir,
                         installFolder, installerDir, installFolder, installCommand);
-            } else {
-                return String.format(SystemTypeCommandUtils.joinCommands(systemType, LINUX_CUSTOM_NORMAL_INSTALL), installerDir,
-                        installCommand);
             }
         }
 
