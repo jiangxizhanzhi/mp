@@ -41,4 +41,10 @@ public class JsonUtils {
         pc.propertyNamingStrategy = PropertyNamingStrategy.SnakeCase;
         return JSON.parseObject(json, clazz, pc);
     }
+
+    public static void main(String[] args) {
+
+    }
+
+    
 }
