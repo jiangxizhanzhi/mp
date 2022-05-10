@@ -69,6 +69,8 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         listResult.getData().getList().forEach(flowCollectionModel -> {
             FlowCollectionResponse collectionResponse = new FlowCollectionResponse();
             BeanUtils.copyProperties(flowCollectionModel, collectionResponse);
+            // 兼容前端，冗余描述信息，和流量信息描述字段保持一致
+            collectionResponse.setIntroduction(flowCollectionModel.getDescription());
             responseList.add(collectionResponse);
         });
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listResult.getSource().getTotal())).asResult();
