@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -28,10 +29,12 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
@@ -42,13 +45,16 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,6 +73,7 @@ public class CreateHandler extends HandlerCommon {
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
+    private final VmRouter vmRouter = new VmRouter();
 
     private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -343,6 +350,13 @@ public class CreateHandler extends HandlerCommon {
             Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
             allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
             List<ConnectedNetworkBO> orderNetwork = new ArrayList<>();
+            // 端口使用前再执行一次排序
+            Collections.sort(cloudElement.getSrcElement().getPorts(), (p1, p2) -> {
+                if (p1.getOrder() == null || p2.getOrder() == null) {
+                    return 0;
+                }
+                return p1.getOrder() - p2.getOrder();
+            });
             for (var port : cloudElement.getSrcElement().getPorts()) {
                 if (portId2Net.containsKey(port.getId())) {
                     orderNetwork.add(portId2Net.remove(port.getId()));
@@ -829,6 +843,9 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
         checkAccessModes(cloudElement);
+        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+            this.configVyosNetwork(cloudElement);
+        }
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
@@ -986,4 +1003,42 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * 配置vyos网络
+     * @param elementBO
+     */
+    private void configVyosNetwork(CloudPluginSceneElementBO elementBO) {
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(elementBO.getSrcElement().getPorts())) {
+            return;
+        }
+        // 查询串口地址
+        var port = vmRouter.queryPort(elementBO.getResourceId());
+        if (port == null || StringUtils.isEmpty(port.getPort()) || StringUtils.isEmpty(port.getHost())) {
+            log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
+            return;
+        }
+        // 开启dhcp
+        var openDhcp = new RouterConfigCmdData();
+        openDhcp.setSerialIp(port.getHost());
+        openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
+        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
+        boolean result = vmRouter.createConfig(openDhcp);
+        if (result == false) {
+            log.error("open dhcp failed , resource id is {} , params is {}", elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            return;
+        }
+
+        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
+            log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
+            return;
+        }
+
+        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
+        var config = new RouterConfigCmdData();
+        config.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        config.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        config.setCmds(cmds);
+        vmRouter.createConfig(config);
+    }
 }

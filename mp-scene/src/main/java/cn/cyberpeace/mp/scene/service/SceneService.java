@@ -47,6 +47,7 @@ public class SceneService {
             if (sceneHandler.getScene() != null) {
                 sceneHandler.getScene().setCreateTime(null);
             }
+            sceneHandler.reformTopo();
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
