@@ -2,8 +2,14 @@ package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.io.FileUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.pool2.BasePooledObjectFactory;
+import org.apache.commons.pool2.PooledObject;
+import org.apache.commons.pool2.impl.DefaultPooledObject;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.csource.common.MyException;
 import org.csource.fastdfs.StorageClient1;
 import org.csource.fastdfs.TrackerClient;
@@ -22,36 +28,62 @@ public class FdfsClient {
 
     public static final String TMP_DIR_NAME = "fdfs";
 
-    private final TrackerClient trackerClient;
+    private final GenericObjectPool<TrackerServer> connectionPool;
 
-    /**
-     * TODO 优化连接池
-     */
-    private StorageClient1 getStorageClient() {
+    private Connection getConnection() {
         TrackerServer trackerServer;
         try {
-            trackerServer = trackerClient.getConnection();
-        } catch (IOException e) {
-            var msg = String.format("Fdfs connect to tracker server error: %s", e.getMessage());
+            trackerServer = connectionPool.borrowObject();
+        } catch (Exception e) {
+            var msg = String.format("Fdfs get connection error: %s", e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
-        return new StorageClient1(trackerServer, null);
+        return new Connection(connectionPool, trackerServer);
     }
 
-    public FdfsClient(List<String> trackerServers) {
-        trackerClient = new TrackerClient(new TrackerGroup(trackerServers.stream()
+    public static class FdfsClientBuilder {
+        private List<String> trackerServers;
+        private Integer maxTotalConnection;
+
+        public FdfsClientBuilder configServers(List<String> trackerServers) {
+            this.trackerServers = trackerServers;
+            return this;
+        }
+
+        public FdfsClientBuilder configMaxTotalConnection(Integer maxTotalConnection) {
+            this.maxTotalConnection = maxTotalConnection;
+            return this;
+        }
+
+        public FdfsClient build() {
+            return new FdfsClient(trackerServers, maxTotalConnection);
+        }
+    }
+
+    public static FdfsClientBuilder builder() {
+        return new FdfsClientBuilder();
+    }
+
+    private FdfsClient(List<String> trackerServers, Integer maxTotalConnection) {
+        var trackerClient = new TrackerClient(new TrackerGroup(trackerServers.stream()
                 .map(trackerServer -> {
             String[] arr2 = trackerServer.trim().split(":");
             String host = arr2[0].trim();
             var port = Integer.parseInt(arr2[1].trim());
             return new InetSocketAddress(host, port);
         }).toArray(InetSocketAddress[]::new)));
+
+        var poolConfig = new GenericObjectPoolConfig();
+        if (maxTotalConnection != null) {
+            poolConfig.setMaxTotal(maxTotalConnection);
+        }
+        connectionPool = new GenericObjectPool<>(new ConnectionFactory(trackerClient), poolConfig);
     }
 
     public String upload(String localFilepath) {
-        try {
-            return getStorageClient().upload_file1(localFilepath, null, null);
+        try (var connection = getConnection()) {
+            return connection.getStorageClient().upload_file1(localFilepath, null, null);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs upload local file %s error: %s", localFilepath, e.getMessage());
             log.error(msg);
@@ -60,15 +92,23 @@ public class FdfsClient {
     }
 
     public String uploadContent(String content) {
-        return upload(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+        return uploadContent(content, null);
+    }
+
+    public String uploadContent(String content, String fileSuffix) {
+        return upload(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), fileSuffix);
     }
 
     public String upload(InputStream is) {
+        return upload(is, null);
+    }
+
+    public String upload(InputStream is, String fileSuffix) {
         String fdfsFilePath;
-        try (is) {
+        try (is; var connection = getConnection()) {
             var fileBuff = new byte[is.available()];
             is.read(fileBuff, 0, fileBuff.length);
-            fdfsFilePath = getStorageClient().upload_file1(fileBuff, null, null);
+            fdfsFilePath = connection.getStorageClient().upload_file1(fileBuff, fileSuffix, null);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs upload with input stream error: %s", e.getMessage());
             log.error(msg);
@@ -79,8 +119,8 @@ public class FdfsClient {
     }
 
     public void download(String fdfsFilepath, String localFilepath) {
-        try {
-            getStorageClient().download_file1(fdfsFilepath, localFilepath);
+        try (var connection = getConnection()) {
+            connection.getStorageClient().download_file1(fdfsFilepath, localFilepath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs download %s to %s error: %s", fdfsFilepath, localFilepath,
                     e.getMessage());
@@ -109,8 +149,8 @@ public class FdfsClient {
 
     public String downloadContent(String fdfsFilepath) {
         byte[] byteContent;
-        try {
-            byteContent = getStorageClient().download_file1(fdfsFilepath);
+        try (var connection = getConnection()) {
+            byteContent = connection.getStorageClient().download_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs download %s content error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
@@ -120,9 +160,9 @@ public class FdfsClient {
     }
 
     public void delete(String fdfsFilepath) {
-        try {
+        try (var connection = getConnection()) {
             log.info("delete fdfs file,file path:{}", fdfsFilepath);
-            getStorageClient().delete_file1(fdfsFilepath);
+            connection.getStorageClient().delete_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs delete %s error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
@@ -130,4 +170,61 @@ public class FdfsClient {
         }
     }
 
+    public static class Connection implements AutoCloseable {
+
+        private final GenericObjectPool<TrackerServer> connectionPool;
+
+        private final TrackerServer trackerServer;
+
+        @Getter
+        private final StorageClient1 storageClient;
+
+        public Connection(GenericObjectPool<TrackerServer> connectionPool, TrackerServer trackerServer) {
+            this.connectionPool = connectionPool;
+            this.trackerServer = trackerServer;
+            this.storageClient = new StorageClient1(trackerServer, null);
+        }
+
+        @Override
+        public void close() {
+            connectionPool.returnObject(trackerServer);
+        }
+
+    }
+
+    public static class ConnectionFactory extends BasePooledObjectFactory<TrackerServer> {
+
+        @Getter
+        private final TrackerClient trackerClient;
+
+        public ConnectionFactory(TrackerClient trackerClient) {
+            this.trackerClient = trackerClient;
+        }
+
+        @Override
+        public TrackerServer create() throws Exception {
+            try {
+                return trackerClient.getConnection();
+            } catch (Exception e) {
+                log.error("Fdfs connect to tracker server error: ", e);
+                throw e;
+            }
+        }
+
+        @Override
+        public PooledObject<TrackerServer> wrap(TrackerServer trackerServer) {
+            return new DefaultPooledObject<>(trackerServer);
+        }
+
+        @Override
+        public void destroyObject(PooledObject<TrackerServer> pooledObject) throws Exception {
+            var trackerServer = pooledObject.getObject();
+            if (trackerServer != null) {
+                trackerServer.getInputStream().close();
+                trackerServer.getOutputStream().close();
+                trackerServer.close();
+            }
+        }
+
+    }
 }
