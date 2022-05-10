@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
@@ -26,18 +25,6 @@ public class NpcConverter implements BaseConverter{
     @Autowired
     public NpcConverter(NpcService npcService) {
         this.npcService = npcService;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getPage,NpcPageRequest::getPerPage);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getOffset,NpcPageRequest::getPage,NpcPageRequest::getPerPage);
     }
 
     /**

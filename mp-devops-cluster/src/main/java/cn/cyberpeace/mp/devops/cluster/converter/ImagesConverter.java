@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
@@ -77,19 +76,6 @@ public class ImagesConverter implements BaseConverter{
         this.userService = userService;
         this.scenariosService = scenariosService;
         this.targetConverter = targetConverter;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.HypervisorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
@@ -9,7 +8,6 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
@@ -45,19 +43,6 @@ public class HypervisorConverter implements BaseConverter {
         this.switchService = switchService;
         this.networkService = networkService;
         this.vmService = vmService;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

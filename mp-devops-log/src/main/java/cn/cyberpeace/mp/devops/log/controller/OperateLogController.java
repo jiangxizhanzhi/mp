@@ -81,10 +81,4 @@ public class OperateLogController {
     }
 
 
-    @GetMapping("test_exception_handler")
-    public ServiceResult testErrorCode() {
-        throw new IllegalArgumentException("illegal from mp.front.admin");
-    }
-
-
 }
