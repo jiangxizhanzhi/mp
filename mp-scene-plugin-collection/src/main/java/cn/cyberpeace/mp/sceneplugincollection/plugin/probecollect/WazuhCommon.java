@@ -39,6 +39,10 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
 
+    public static final String LINUX_DOWNLOAD_AGENT_FILE = "download_agent.sh";
+
+    public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
+
     public static String agentLinuxLocalFilepath = null;
 
     public static String getAgentLinuxLocalFilepath() {
@@ -77,6 +81,8 @@ public class WazuhCommon {
         controlParam.setProbeParams(controlProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
 
+        String windowsInstallDir = SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
+        String linuxInstallDir = SceneSingleton.sceneAppConfig.getLinuxInstallerDir();
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             resource = new InstallerUtils.Installer();
@@ -84,11 +90,10 @@ public class WazuhCommon {
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
                             String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s\\agent-installer",
-                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
-                            String.format("cd %s\\agent-installer\\agent-windows",
-                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                                    windowsInstallDir),
+                            String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
                             "call install.bat",
-                            String.format("cd %s", SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
@@ -102,25 +107,16 @@ public class WazuhCommon {
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
-            String fileName;
-            if (isContainer) {
-                resource.setFile(StringUtils.EMPTY);
-                fileName = WAZUH_AGENT_LINUX_FILE_NAME;
-            } else {
-                resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
-                fileName = InstallerUtils.INSTALLER_REPLACEMENT;
-            }
+            resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip %s" + CommandUtils.LINUX_PATH_DELIMITER + fileName +
-                                            " -d %s/agent-installer", SceneSingleton.sceneAppConfig.getLinuxInstallerDir(),
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            String.format("cd %s/agent-installer/agent-linux",
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                            String.format("unzip %s" + InstallerUtils.FILE_URL_SEPARATOR + WAZUH_AGENT_LINUX_FILE_NAME +
+                                    " -d %s/agent-installer", linuxInstallDir, linuxInstallDir),
+                            String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "bash install.sh",
-                            String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                            String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
-                            "rm -rf " + fileName,
+                            "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
@@ -137,13 +133,46 @@ public class WazuhCommon {
             //将文件复制的命令加到创建目录的命令之后
             int copyFileIndex = 0;
             for (int i = 0; i < result.size(); i++) {
-                if (result.get(i).contains("mkdir") && result.get(i).contains(SceneSingleton.sceneAppConfig.getLinuxInstallerDir())) {
+                if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
                     copyFileIndex = i + 1;
                     break;
                 }
             }
             result.add(copyFileIndex, String.format(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX + " %s %s",
-                    getAgentLinuxLocalFilepath(), SceneSingleton.sceneAppConfig.getLinuxInstallerDir()));
+                    getAgentLinuxLocalFilepath(), linuxInstallDir));
+        } else if (SystemTypeCommandUtils.isLinux(systemType)) {
+            //Linux需要按需下载agent安装包
+            String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                    nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
+            //下载按需安装脚本并执行
+            String downloadCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                    String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, linuxInstallDir + InstallerUtils.FILE_URL_SEPARATOR
+                            + LINUX_DOWNLOAD_AGENT_FILE, downloadUrl),
+                    String.format("bash %s/%s", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+            //给执行的下载脚本添加参数
+            String filePathParam = String.format(StringUtils.SPACE + "filepath=%s/%s", linuxInstallDir,
+                    WAZUH_AGENT_LINUX_FILE_NAME);
+            downloadCommand = downloadCommand.concat(filePathParam);
+            List<String> linuxFiles = new ArrayList<>();
+            nameFileMap.forEach((name, url) -> {
+                if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
+                    linuxFiles.add(name);
+                }
+            });
+            for (String file : linuxFiles) {
+                String param = StringUtils.SPACE + file + "=" + metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR
+                        + nameFileMap.get(file);
+                downloadCommand = downloadCommand.concat(param);
+            }
+            //将文件下载的命令放在创建目录之后
+            int downloadFileIndex = 0;
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
+                    downloadFileIndex = i + 1;
+                    break;
+                }
+            }
+            result.add(downloadFileIndex, downloadCommand);
         }
         return result;
     }
