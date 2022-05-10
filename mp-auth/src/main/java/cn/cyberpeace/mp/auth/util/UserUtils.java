@@ -53,6 +53,9 @@ public class UserUtils {
     public static UserModel getLoginUser() {
         UserModel user = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (Objects.isNull(authentication)) {
+            return null;
+        }
         log.info("authentication name:{}  authentication type:{}", authentication.getName(), authentication.getClass());
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
