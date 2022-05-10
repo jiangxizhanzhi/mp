@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ public class HypervisorConverter implements BaseConverter {
 
     private VmService vmService;
 
-    @Autowired
     public HypervisorConverter(HypervisorService hypervisorService, SwitchService switchService,
                                    NetworkService networkService,VmService vmService) {
         this.hypervisorService = hypervisorService;

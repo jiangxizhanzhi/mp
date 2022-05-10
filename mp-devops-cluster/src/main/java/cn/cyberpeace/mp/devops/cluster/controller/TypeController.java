@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +46,6 @@ public class TypeController {
 
     private SwitchConverter switchConverter;
 
-    @Autowired
     public TypeController(TypeConverter typeConverter,TypeService typeService,SerialPortConverter serialPortConverter,
                           SwitchConverter switchConverter) {
         this.typeConverter = typeConverter;

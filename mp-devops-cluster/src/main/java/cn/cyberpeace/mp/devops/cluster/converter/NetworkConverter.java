@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -26,7 +25,6 @@ public class NetworkConverter implements BaseConverter{
 
     private NetworkService networkService;
 
-    @Autowired
     public NetworkConverter(NetworkService networkService) {
         this.networkService = networkService;
     }

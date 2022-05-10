@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -22,7 +21,6 @@ public class NpcConverter implements BaseConverter{
 
     private NpcService npcService;
 
-    @Autowired
     public NpcConverter(NpcService npcService) {
         this.npcService = npcService;
     }

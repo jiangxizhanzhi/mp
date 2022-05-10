@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -26,7 +25,6 @@ public class ContainerConverter implements BaseConverter {
 
     private ContainerService containerService;
 
-    @Autowired
     public ContainerConverter(ContainerService containerService) {
         this.containerService = containerService;
     }
