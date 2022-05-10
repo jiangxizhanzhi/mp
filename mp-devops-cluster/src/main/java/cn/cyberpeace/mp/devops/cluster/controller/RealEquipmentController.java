@@ -29,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -48,7 +47,6 @@ public class RealEquipmentController {
 
     private TypeConverter typeConverter;
 
-    @Autowired
     public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
                                   TypeConverter typeConverter) {
         this.realEquipmentConverter = realEquipmentConverter;

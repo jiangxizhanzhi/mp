@@ -23,7 +23,6 @@ import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,6 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private TargetConverter targetConverter;
 
-    @Autowired
     public RealEquipmentConverter(RealEquipmentService realEquipmentService, DeviceService deviceService,
                                       DevopsTargetService devopsTargetService, ImageMapper imageMapper,
                                       ImageAuthMapper imageAuthMapper,TargetConverter targetConverter) {

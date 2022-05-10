@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ public class TypeConverter {
 
     private TypeService typeService;
 
-    @Autowired
     public TypeConverter(TypeService typeService) {
         this.typeService = typeService;
     }

@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -26,7 +25,6 @@ public class VmConverter implements BaseConverter{
 
     private VmService vmService;
 
-    @Autowired
     public VmConverter(VmService vmService) {
         this.vmService = vmService;
     }

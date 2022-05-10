@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +32,6 @@ public class ImportConverter implements BaseConverter{
     @Value("${mp.devops.max-target-size:100}")
     private String maxTargetSize;
 
-    @Autowired
     public ImportConverter(ImportService importService, SysActivationService sysActivationService) {
         this.importService = importService;
         this.sysActivationService = sysActivationService;

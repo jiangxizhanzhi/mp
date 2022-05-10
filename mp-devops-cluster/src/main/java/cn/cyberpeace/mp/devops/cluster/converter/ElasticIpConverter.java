@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -23,7 +22,6 @@ public class ElasticIpConverter implements BaseConverter {
 
     private NetworkService networkService;
 
-    @Autowired
     public ElasticIpConverter(NetworkService networkService) {
         this.networkService = networkService;
     }
