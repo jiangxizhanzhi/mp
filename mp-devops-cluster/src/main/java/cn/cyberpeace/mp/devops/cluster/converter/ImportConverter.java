@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImportService;
 import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
@@ -39,19 +37,6 @@ public class ImportConverter implements BaseConverter{
     public ImportConverter(ImportService importService, SysActivationService sysActivationService) {
         this.importService = importService;
         this.sysActivationService = sysActivationService;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

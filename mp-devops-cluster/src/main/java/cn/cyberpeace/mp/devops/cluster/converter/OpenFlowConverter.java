@@ -1,12 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.OpenFlowPageParams;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.OpenFlowService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.OpenFlowPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.OpenFlowCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.OpenFlowPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowMatchConditionVO;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
@@ -31,19 +29,6 @@ public class OpenFlowConverter implements BaseConverter{
     public OpenFlowConverter(OpenFlowService openFlowService,OpenFlowVoConverter openFlowVoConverter) {
         this.openFlowService = openFlowService;
         this.openFlowVoConverter = openFlowVoConverter;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
