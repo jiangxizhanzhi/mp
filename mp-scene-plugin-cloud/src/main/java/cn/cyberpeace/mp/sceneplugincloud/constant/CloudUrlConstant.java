@@ -57,6 +57,10 @@ public class CloudUrlConstant {
     public static final String DELETE_ROUTER_URL = "/v1/routers/{router_id}";
     public static final String QUERY_PORTS = "/v1/ports/{resource_id}";
 
+    public static final String GET_SERIAL_PORT_URL = "/v1/instances/{instance_id}/serial-port";
+    public static final String ROUTER_CMD_SEND_URL = "/cpcloud/router/v1/send_rule";
+    public static final String ROUTER_CONFIG_QUERY_URL = "/cpcloud/router/v1/get_rule";
+
     public static final String VLAN_RANGE = "/cpcloud/info/v1/vlan_range";
 
     private CloudUrlConstant() {}

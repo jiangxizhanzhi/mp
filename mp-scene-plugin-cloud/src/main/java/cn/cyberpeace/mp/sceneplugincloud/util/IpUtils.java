@@ -517,4 +517,21 @@ public class IpUtils {
         boolean isBeyondEnd = (ip <= end);
         return (isOverStart && isBeyondEnd);
     }
+
+    /**
+     * 通过掩码位数格式化ip地址
+     * 192.168.10.254/24 -> 192.168.10.0/24
+     * @param cidrIp
+     * @return
+     */
+    public static String getFormatCidrIp(String cidrIp) {
+        String[] info = cidrIp.split("/");
+        String ip = info[0];
+        String maskBit = info[1];
+        String mask = Ipv4Util.getMaskByMaskBit(Integer.parseInt(maskBit));
+        long maskIpLong = Ipv4Util.ipv4ToLong(mask);
+        long ipLong = Ipv4Util.ipv4ToLong(ip);
+        String formatIp = Ipv4Util.longToIpv4(ipLong & maskIpLong);
+        return formatIp + "/" + maskBit;
+    }
 }

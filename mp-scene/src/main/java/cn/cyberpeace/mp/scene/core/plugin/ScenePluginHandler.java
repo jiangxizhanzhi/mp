@@ -128,6 +128,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void reformTopo() {
+
+    }
+
     public void recreateElement(String nodeId) {
 
     }

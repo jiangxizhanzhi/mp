@@ -43,6 +43,8 @@ public class BaseSceneElementPortModel extends BaseModel {
     private String accessModes;
     @DefaultInt
     private Integer order;
+    @DefaultBool
+    private Boolean isAuxiliary;
 
     public static class Type {
         public static final int IP_PORT = 1;

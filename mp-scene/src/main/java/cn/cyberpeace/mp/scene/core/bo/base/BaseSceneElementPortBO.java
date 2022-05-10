@@ -46,6 +46,8 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private List<AccessMode> accessModes;
     @ApiModelProperty(value = "端口顺序")
     private Integer order;
+    @ApiModelProperty(value = "是否辅助端口")
+    private Boolean isAuxiliary;
 
     @JsonIgnore
     private E element;
