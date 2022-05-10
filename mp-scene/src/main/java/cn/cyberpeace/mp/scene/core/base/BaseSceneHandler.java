@@ -971,7 +971,9 @@ public abstract class BaseSceneHandler<
                 return;
             }
             for (int i = 0; i < elementPorts.size(); i++) {
-                elementPorts.get(i).setOrder(i + 1);
+                if (elementPorts.get(i).getOrder() == null) {
+                    elementPorts.get(i).setOrder(i + 1);
+                }
             }
             String elementId = element.getEid();
             elementPorts.forEach(elementPortBO -> {
@@ -1681,4 +1683,7 @@ public abstract class BaseSceneHandler<
         scenePluginDataBO.getElementPorts().put(portId, pluginPort);
     }
 
+    public void addPort(String portId, E element) {
+        this.portIdElementMap.put(portId, element);
+    }
 }

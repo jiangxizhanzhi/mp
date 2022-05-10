@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -377,7 +378,73 @@ public class CsceneDataModifier {
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
+        handlerHiddenElement(csceneInstanceBO.getScene());
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
+    }
+
+    /**
+     * 处理需要隐藏的节点
+     * @param sceneDataBO
+     */
+    public static void handlerHiddenElement(SceneDataBO sceneDataBO) {
+        if (sceneDataBO.getTopology() != null && sceneDataBO.getTopology().getElements() != null) {
+            List<String> hiddenElements = new ArrayList<>();
+            List<String> hiddenPorts = new ArrayList<>();
+            for (var element : sceneDataBO.getTopology().getElements()) {
+                if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
+                    // 辅助节点,节点和端口都要隐藏
+                    hiddenElements.add(element.getId());
+                    if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                        element.getPorts().forEach(p -> hiddenPorts.add(p.getId()));
+                    }
+                }
+            }
+            var elementIterator = sceneDataBO.getTopology().getElements().iterator();
+            while (elementIterator.hasNext()) {
+                var element = elementIterator.next();
+                if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
+                    // 辅助节点整个隐藏
+                    elementIterator.remove();
+                    if (sceneDataBO.getPlugins() == null) {
+                        continue;
+                    }
+                    // 隐藏插件节点
+                    sceneDataBO.getPlugins().values().forEach(plugin -> {
+                        // 处理节点
+                        if (plugin.getElements() != null) {
+                            plugin.getElements().remove(element.getId());
+                        }
+                        // 处理端口
+                        if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                            element.getPorts().forEach(p -> {
+                                if (plugin.getElementPorts() != null) {
+                                    plugin.getElementPorts().remove(p.getId());
+                                }
+                            });
+                        }
+                    });
+                } else if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                    // 其他节点隐藏辅助端口
+                    var portIterator = element.getPorts().iterator();
+                    while (portIterator.hasNext()) {
+                        var port = portIterator.next();
+                        if (Boolean.TRUE.equals(port.getIsAuxiliary())) {
+                            // 辅助端口隐藏
+                            portIterator.remove();
+                            if (sceneDataBO.getPlugins() == null) {
+                                continue;
+                            }
+                            // 处理插件中的端口
+                            sceneDataBO.getPlugins().values().forEach(plugin -> {
+                                if (plugin.getElementPorts() != null) {
+                                    plugin.getElementPorts().remove(port.getId());
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene) {
