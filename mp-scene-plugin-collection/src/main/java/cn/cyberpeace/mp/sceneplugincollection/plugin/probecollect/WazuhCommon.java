@@ -112,7 +112,8 @@ public class WazuhCommon {
             }
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip " + fileName + " -d %s/agent-installer",
+                            String.format("unzip %s" + CommandUtils.LINUX_PATH_DELIMITER + fileName +
+                                            " -d %s/agent-installer", SceneSingleton.sceneAppConfig.getLinuxInstallerDir(),
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
                             String.format("cd %s/agent-installer/agent-linux",
                                     SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
