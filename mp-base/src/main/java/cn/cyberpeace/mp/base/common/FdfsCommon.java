@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
-import cn.hutool.core.io.FileUtil;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -13,7 +12,9 @@ public class FdfsCommon {
     public static FdfsClient fdfsClient;
 
     private FdfsCommon(BaseAppConfig baseAppConfig) {
-        FdfsCommon.fdfsClient = new FdfsClient(baseAppConfig.getFdfsTrackerServers());
+        FdfsCommon.fdfsClient = FdfsClient.builder()
+                .configServers(baseAppConfig.getFdfsTrackerServers())
+                .build();
     }
 
     public static String upload(String localFilepath) {
