@@ -51,6 +51,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Autowired
     private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
 
+    @Autowired
+    private AuthDesensitizedService desensitizedService;
+
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
 
@@ -64,7 +67,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public List<UserModel> listUsersByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId);
-
+        desensitizedService.desensitiveUserModels(users);
         return users;
     }
 
@@ -82,6 +85,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
+        desensitizedService.desensitiveUserModels(users);
         return users;
     }
 
@@ -178,6 +182,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             return userDto;
         }).collect(Collectors.toList());
 
+        desensitizedService.desensitiveUserDtos(userDtos);
         pageInfo.setList(userDtos);
         return pageInfo;
     }

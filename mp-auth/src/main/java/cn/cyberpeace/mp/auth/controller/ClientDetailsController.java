@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api(value = "Client客户端管理接口", tags = "AUTH-Client客户端管理接口")
 @Slf4j
-@RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/client_details")
+//@RestController
+//@RequestMapping(ControllerConstant.BASE_API_PATH + "/client_details")
 public class ClientDetailsController extends BaseModelController<ClientDetailsModel, QueryParams, ClientDetailsService> {
 
     @Autowired

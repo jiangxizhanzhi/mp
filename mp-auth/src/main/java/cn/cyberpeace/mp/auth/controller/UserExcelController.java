@@ -78,6 +78,7 @@ public class UserExcelController {
 
     @ApiOperation(value = "下载用户导入excel模板", notes = "")
     @GetMapping("/excel/template")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void downloadExcelTemplate() {
         userService.downloadExcelTemplate();
     }

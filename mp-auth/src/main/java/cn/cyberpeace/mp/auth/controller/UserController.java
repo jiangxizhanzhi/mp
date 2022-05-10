@@ -116,7 +116,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     })
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
@@ -146,7 +146,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult add(@RequestBody UserRequest createRequest) {
         UserModel userModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, userModel);
@@ -155,7 +155,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, userModel);
@@ -165,7 +165,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = getModelService().resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
@@ -186,7 +186,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult disable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -201,7 +201,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult enable(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -214,7 +214,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "审核用户", notes = "")
     @PostMapping("/approve")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult approve(@RequestBody List<String> userIds) {
         String errMsg = getModelService().batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
@@ -227,7 +227,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "更改用户头像", notes = "")
     @PostMapping("/updateAvatar")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_USER_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
         boolean success = getModelService().updateAvatar(userId, file);
         return ResultUtils.commonResult(success, null);

@@ -116,6 +116,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private AvatarService avatarService;
 
     @Autowired
+    private AuthDesensitizedService desensitizedService;
+
+    @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -126,7 +129,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
-
+        desensitizedService.desensitiveUserDtos(Arrays.asList(userDto));
         return userDto;
     }
 
@@ -136,7 +139,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModel = UserUtils.getLoginUser();
 
         UserDto userDto = userModel2UserDto(userModel);
-
+        desensitizedService.desensitiveUserDtos(Arrays.asList(userDto));
         return userDto;
     }
 
@@ -157,6 +160,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         if (CollectionUtil.isNotEmpty(userDtos)) {
             // 转换
+            desensitizedService.desensitiveUserDtos(userDtos);
             ListObjServiceResult<UserDto> result = new ListObjServiceResult<>();
             BeanUtils.copyProperties(listObjSrvResult, result);
             result.getSource().setObjs(userDtos);
@@ -345,6 +349,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
         return userModel;
     }
 
@@ -353,12 +358,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByIdent(String ident) {
         log.info("ident:{}", ident);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
+        desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
         return userModel;
     }
 
     @Override
     public UserModel getByMobile(String mobile) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
         return userModel;
     }
 
@@ -722,6 +729,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
+        desensitizedService.desensitiveUserModels(userModels);
         return userModels;
     }
 

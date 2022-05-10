@@ -27,18 +27,16 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_UNAUTH_API_PATH + "/avatar")
-public class AvatarController extends BaseModelController<AvatarModel, QueryParams, AvatarService> {
+public class AvatarController {
 
     @Autowired
-    public AvatarController(AvatarService modelService) {
-        setModelService(modelService);
-    }
+    private AvatarService avatarService;
 
     @ApiOperation(value = "查询所有头像", notes = "")
     @GetMapping("/all")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult getAll() {
-        List<AvatarModel> avatars = getModelService().listAll();
+        List<AvatarModel> avatars = avatarService.listAll();
         return ResultUtils.commonResult(true, avatars);
     }
 
@@ -48,7 +46,7 @@ public class AvatarController extends BaseModelController<AvatarModel, QueryPara
     @ResponseBody
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult upload(MultipartFile file) {
-        FileResponseData responseData = getModelService().upload(file);
+        FileResponseData responseData = avatarService.upload(file);
         return ResultUtils.commonResult(true, responseData.getHttpUrl());
     }
 

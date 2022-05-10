@@ -39,6 +39,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     private RoleService roleService;
 
     @Autowired
+    private AuthDesensitizedService desensitizedService;
+
+    @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -58,6 +61,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public List<UserModel> listUsersByRoleId(String roleId) {
         Assert.notBlank(roleId, "roleId不能为空！");
         List<UserModel> users = getModelMapper().listByRoleId(roleId);
+        desensitizedService.desensitiveUserModels(users);
         return users;
     }
 
@@ -84,6 +88,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         if (CollectionUtil.isNotEmpty(userModels)) {
             userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
         }
+        desensitizedService.desensitiveUserDtos(userDtos);
         pageInfo.setList(userDtos);
         return pageInfo;
     }

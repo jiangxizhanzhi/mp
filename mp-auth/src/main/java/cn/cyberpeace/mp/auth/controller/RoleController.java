@@ -60,7 +60,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<RoleModel> create(@RequestBody RoleModel obj, @RequestParam String[] fields) {
         return super.create(obj, fields);
     }
@@ -74,7 +74,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @PatchMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
                                               @RequestParam(required = false) String[] fields) {
         return super.update(id, obj, fields);
@@ -87,7 +87,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     })
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         return super.delete(id);
     }
@@ -116,7 +116,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = AuthLogConstant.TARGET_ROLE)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, roleModel);
@@ -126,7 +126,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = AuthLogConstant.TARGET_ROLE)
-    @PreAuthorize("hasAnyAuthority('" + AuthConstant.AUTHORITY_ROLE_MANAGE + "', 'ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = getModelService().modify(modifyRequest);
         return ResultUtils.commonResult(true, roleModel);
