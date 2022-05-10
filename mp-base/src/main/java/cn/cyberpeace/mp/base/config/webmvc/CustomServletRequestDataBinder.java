@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.config;
+package cn.cyberpeace.mp.base.config.webmvc;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.PropertyValue;
@@ -36,7 +36,6 @@ public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
      */
     @Override
     protected void addBindValues(MutablePropertyValues mutablePropertyValues, ServletRequest request) {
-
         List<PropertyValue> propertyValueList = mutablePropertyValues.getPropertyValueList();
         List<PropertyValue> adds = new LinkedList<>();
         for (PropertyValue propertyValue : propertyValueList) {
@@ -62,6 +61,5 @@ public class CustomServletRequestDataBinder extends ServletRequestDataBinder {
         }
         matcher.appendTail(result);
         return result.toString();
-
     }
 }
