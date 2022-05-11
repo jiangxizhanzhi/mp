@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -213,13 +214,15 @@ public class ProbeService {
 
     public ProbeDto getById(String id) {
         log.info("id:{}", id);
-        return probeMapper.getById(id);
+        ProbeDto probeDto = probeMapper.getById(id);
+        processProbeDtoOsTypes(probeDto);
+        return probeDto;
     }
 
 
-    public ProbeDto delete(String id) {
+    public boolean delete(String id) {
         log.info("id:{}", id);
-        return probeMapper.getById(id);
+        return probeMapper.delete(id);
     }
 
     /**
@@ -236,8 +239,8 @@ public class ProbeService {
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p -> processProbeDtoOsTypes(p));
         PageInfo pageInfo = new PageInfo(probeDtos);
-
         return pageInfo;
     }
 
@@ -252,12 +255,19 @@ public class ProbeService {
         condition.setIds(ids.toArray(new String[0]));
         condition.setNeedScriptContent(true);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p ->
+            processProbeDtoOsTypes(p)
+        );
+
         return probeDtos;
     }
 
     public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
         log.info("condition:{}", condition);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p -> {
+            processProbeDtoOsTypes(p);
+        });
         return probeDtos;
     }
 
@@ -308,6 +318,16 @@ public class ProbeService {
         // 4. 表数据？
     }
 
+
+    private void processProbeDtoOsTypes(ProbeDto probeDto) {
+        if (StringUtils.isNotBlank(probeDto.getOsType())) {
+            List<Integer> osTypes = new ArrayList<>();
+            for (String osType : probeDto.getOsType().split(",")) {
+                osTypes.add(Integer.valueOf(osType));
+            }
+            probeDto.setOsTypes(osTypes);
+        }
+    }
 
 
 

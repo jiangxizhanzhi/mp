@@ -167,7 +167,7 @@
     </where>
   </delete>
 
-  <select id="countByTemplateId">
+  <select id="countByTemplateId" resultType="integer">
     select count(*) from mp_situation_collection_template_probe tempp
     left join mp_situation_probe p on tempp.probe_id = p.id
     <where>
