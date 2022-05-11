@@ -10,20 +10,16 @@ import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamsRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
-import cn.cyberpeace.mp.situationaware.model.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
 import cn.hutool.core.collection.CollectionUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -57,6 +52,9 @@ public class ProbeService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private ProbeParamService probeParamService;
 
     /**
      * 新增探针
@@ -110,7 +108,7 @@ public class ProbeService {
             }
         }
 
-        List<ProbeParamsRequest> params = processParamRequest(probeRequest.getParameter());
+        List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
 
         if (CollectionUtil.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
@@ -186,7 +184,7 @@ public class ProbeService {
         }
 
 
-        List<ProbeParamsRequest> params = processParamRequest(probeRequest.getParameter());
+        List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
         if (CollectionUtil.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
                     params.stream().map(paramReq -> {
@@ -222,9 +220,7 @@ public class ProbeService {
         log.info("id:{}", id);
         ProbeDto probeDto = probeMapper.getById(id);
         processProbeDtoOsTypes(probeDto);
-        List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(id, null);
-        String paramStr = processParamResponse(probeParamModels);
-        probeDto.setParameter(paramStr);
+        processProbeDtoParams(probeDto);
         return probeDto;
     }
 
@@ -269,9 +265,7 @@ public class ProbeService {
             processProbeDtoOsTypes(p)
         );
         probeDtos.forEach(p -> {
-            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(p.getId(), null);
-            String paramStr = processParamResponse(probeParamModels);
-            p.setParameter(paramStr);
+            processProbeDtoParams(p);
         });
         return probeDtos;
     }
@@ -284,9 +278,7 @@ public class ProbeService {
             processProbeDtoOsTypes(p);
         });
         probeDtos.forEach(p -> {
-            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(p.getId(), null);
-            String paramStr = processParamResponse(probeParamModels);
-            p.setParameter(paramStr);
+            processProbeDtoParams(p);
         });
         return probeDtos;
     }
@@ -350,92 +342,15 @@ public class ProbeService {
     }
 
     private void processProbeDtoParams(ProbeDto probeDto) {
-        String probeId = probeDto.getId();
-        List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeId, null);
-
-    }
-
-
-    /**
-     * 将请求json字符串形式的参数内容，处理成ParamRequest
-     * @param parameterStr
-     * @return
-     */
-    private List<ProbeParamsRequest> processParamRequest(String parameterStr) {
-        if (StringUtils.isNotBlank(parameterStr)) {
-            List<ProbeParamsRequest> probeParamReqs = new ArrayList<>();
-            JSONObject paramObj = JSONObject.parseObject(parameterStr);
-            paramObj.keySet().forEach(paramKey -> {
-                ProbeParamsRequest paramReq = new ProbeParamsRequest();
-                paramReq.setName(paramKey);
-
-                JSONArray paramArray = paramObj.getJSONArray(paramKey);
-                // 参数类型
-                Integer type;
-                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.STRING.toValue();
-                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.IP.toValue();
-                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.NUMBER.toValue();
-                } else {
-                    type = ParamTypeEnum.BOOL.toValue();
-                }
-                paramReq.setType(type);
-
-                // 参数值
-                paramReq.setDefaultValue(paramArray.getString(1));
-                // 参数描述
-                paramReq.setDescription(paramArray.getString(2));
-
-                // 参数校验
-                if (paramKey.length() > 40 || paramReq.getDefaultValue().length() > 50 ||
-                        paramReq.getDescription().length() > 2048) {
-                    log.error("param length is invalid");
-                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-                }
-
-                probeParamReqs.add(paramReq);
-            });
-
-            return probeParamReqs;
+        if (StringUtils.isNotBlank(probeDto.getId())) {
+            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeDto.getId(), null);
+            String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
+            probeDto.setParameter(paramStr);
         }
-        return Collections.emptyList();
     }
 
 
-    /**
-     * 将probeParamModels转化成parameter json字符串
-     * @return
-     */
-    private String processParamResponse(List<ProbeParamModel> probeParamModels) {
-        if (CollectionUtils.isNotEmpty(probeParamModels)) {
-            JSONObject paramObj = new JSONObject();
-            probeParamModels.forEach(param -> {
-                JSONArray paramArray = new JSONArray();
-                String type;
-                if (param.getType() == ParamTypeEnum.STRING.toValue()) {
-                    type = "String";
-                } else if (param.getType() == ParamTypeEnum.IP.toValue()) {
-                    type = "IP";
-                } else if (param.getType() == ParamTypeEnum.NUMBER.toValue()) {
-                    type = "Number";
-                } else {
-                    type = "Bool";
-                }
-                // 类型
-                paramArray.add(type);
-                // 默认值
-                paramArray.add(param.getDefaultValue());
-                // 参数说明
-                paramArray.add(param.getDescription());
-                paramObj.put(param.getName(), paramArray);
-            });
-            String paramStr = paramObj.toJSONString();
-            return paramStr;
-        }
-        return null;
-    }
+
 
 
 

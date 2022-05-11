@@ -59,6 +59,9 @@ public class CollectionTemplateService {
     private ProbeParamMapper probeParamMapper;
 
     @Autowired
+    private ProbeParamService probeParamService;
+
+    @Autowired
     private ProbeService probeService;
 
     @Autowired
@@ -112,6 +115,10 @@ public class CollectionTemplateService {
                 templateDto.setLogProbes(logProbeDtos);
                 templateDto.setCustomProbes(customProbeDtos);
 
+//                customProbeDtos.forEach(p -> {
+//                    processParams(p);
+//                });
+
                 return templateDto;
             }).collect(Collectors.toList());
 
@@ -139,6 +146,8 @@ public class CollectionTemplateService {
                 String scriptContent = new String(scriptByte, StandardCharsets.UTF_8);
                 colTempProbeDto.setScriptContent(scriptContent);
             }
+            // 查询参数
+            processParams(colTempProbeDto);
             return colTempProbeDto;
         }
 
@@ -345,11 +354,11 @@ public class CollectionTemplateService {
                 return;
             }
 
-            if (CollectionUtil.isEmpty(colTempProbeReq.getParamList())) {
+            List<ProbeParamRequest> paramReqs = probeParamService.paramStr2paramsRequest(colTempProbeReq.getParameter());
+            if (CollectionUtil.isEmpty(paramReqs)) {
                 return;
             }
 
-            List<ProbeParamRequest> paramReqs = colTempProbeReq.getParamList();
             List<ProbeParamModel> paramList =
                     paramReqs.stream().map(paramReq -> {
                         ProbeParamModel paramModel = ProbeParamModel.builder()
@@ -410,6 +419,18 @@ public class CollectionTemplateService {
         return ProbeSearchCondition.builder()
                 .types(ArrayUtils.toArray(ProbeModel.TYPE_CUSTOM))
                 .build();
+    }
+
+    /**
+     * 处理自定义探针参数
+     * @param colTempProbeDto
+     */
+    private void processParams(CollectionTemplateProbeDto colTempProbeDto) {
+        if (StringUtils.isNotBlank(colTempProbeDto.getProbeId())) {
+            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(colTempProbeDto.getProbeId(), null);
+            String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
+            colTempProbeDto.setParameter(paramStr);
+        }
     }
 
 }

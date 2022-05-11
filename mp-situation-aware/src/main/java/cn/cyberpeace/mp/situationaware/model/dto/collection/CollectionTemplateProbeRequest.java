@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -42,9 +41,15 @@ public class CollectionTemplateProbeRequest {
     @ApiModelProperty(value = "探针配置，路径数组 如：[\"/var/log/mp.log\", \"/etc/bin\"] 或者注册表选项 [\"HKEY_LOCAL_MACHINE\\SYSTEM\\Setup\"]")
     private List<String> paths;
 
+//    /**
+//     * 参数列表
+//     */
+//    @ApiModelProperty(value = "参数列表")
+//    private List<ProbeParamRequest> paramList;
+
     /**
-     * 参数列表
+     * 脚本参数(JSON)
      */
-    @ApiModelProperty(value = "参数列表")
-    private List<ProbeParamRequest> paramList;
+    @ApiModelProperty(value = "脚本参数")
+    private String parameter;
 }
