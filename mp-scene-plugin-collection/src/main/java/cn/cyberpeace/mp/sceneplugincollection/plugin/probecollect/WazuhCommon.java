@@ -139,10 +139,11 @@ public class WazuhCommon {
                 //Linux虚拟机增加按需下载agent安装包的命令
                 String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
                         nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
+                String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
+                        LINUX_DOWNLOAD_AGENT_FILE);
                 //下载按需安装脚本并执行
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                        String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, linuxInstallDir + InstallerUtils.FILE_URL_SEPARATOR
-                                + LINUX_DOWNLOAD_AGENT_FILE, downloadUrl),
+                        String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("bash %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
                 //给下载安装包的脚本添加参数
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
