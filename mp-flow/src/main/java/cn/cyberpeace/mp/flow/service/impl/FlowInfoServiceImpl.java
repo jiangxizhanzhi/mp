@@ -81,6 +81,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private FlowScriptParamServiceImpl flowScriptParamService;
 
+    @Autowired
+    private FlowCollectionRelServiceImpl flowCollectionRelService;
+
     /**
      * 预制流量文件目录
      */
@@ -244,6 +247,28 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+    }
+
+    /**
+     * 根据集合id批量查询
+     * @param request
+     * @return
+     */
+    public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
+        // 查询流量集合关联流量信息
+        List<FlowCollectionRelModel> flowCollectionRelModels =
+                flowCollectionRelService.selectByCollectionIds(request.getCollectionIds());
+        if (CollectionUtils.isEmpty(flowCollectionRelModels)) {
+            return ServiceResult.success(new ArrayList<>());
+        }
+
+        List<String> flowIds =
+                flowCollectionRelModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+        FlowInfoQueryParams queryParams = new FlowInfoQueryParams();
+        queryParams.setIds(flowIds.toArray(new String[0]));
+        ListObjServiceResult<FlowInfoResponse> listObjServiceResult = pageFlowInfo(queryParams);
+
+        return ServiceResult.success(listObjServiceResult.getSource().getList());
     }
 
     /**

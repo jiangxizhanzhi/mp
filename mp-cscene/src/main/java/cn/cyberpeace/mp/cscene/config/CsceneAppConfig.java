@@ -48,6 +48,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.scene-enable-recording:false}")
     private Boolean sceneEnableRecording;
 
+    @Value("${mp.cscene.scene-message-timeout:3600000}")
+    private Long sceneMessageTimeout;
+
     @Autowired
     private MessageSource messageSource;
 

@@ -46,7 +46,7 @@ public class ProbeRequest {
     private String engine;
 
 
-    @ApiModelProperty(value = "(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    @ApiModelProperty(value = "集合类型，操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private List<Integer> osTypes;
 
     /**

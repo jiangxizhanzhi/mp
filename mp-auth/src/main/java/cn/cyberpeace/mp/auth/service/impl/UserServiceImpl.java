@@ -748,8 +748,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userDto.setRoles(roles);
 
-            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-            boolean isSuperUser = userModel.getId().equals(AuthConstant.ROOT_USER_ID);
+            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ROLE_ADMIN));
+            boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             if (isAdmin) {
                 userDto.setIsAdmin(1);
