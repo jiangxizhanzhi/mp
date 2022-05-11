@@ -89,7 +89,7 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s\\agent-installer",
+                            String.format("unzip %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
                             "call install.bat",
@@ -110,8 +110,8 @@ public class WazuhCommon {
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip %s" + InstallerUtils.FILE_URL_SEPARATOR + WAZUH_AGENT_LINUX_FILE_NAME +
-                                    " -d %s/agent-installer", linuxInstallDir, linuxInstallDir),
+                            String.format("unzip %s/%s -d %s/agent-installer", linuxInstallDir,
+                                    WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "bash install.sh",
                             String.format("cd %s", linuxInstallDir),
@@ -128,51 +128,46 @@ public class WazuhCommon {
         }
         List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
-        //容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
-        if (isContainer) {
-            //将文件复制的命令加到创建目录的命令之后
-            int copyFileIndex = 0;
+        if (SystemTypeCommandUtils.isLinux(systemType)) {
+            String addCommand;
+            if (isContainer) {
+                //容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
+                addCommand = String.format("%s %s %s", ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX,
+                        getAgentLinuxLocalFilepath(), linuxInstallDir);
+            } else {
+                //Linux虚拟机增加按需下载agent安装包的命令
+                String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                        nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
+                //下载按需安装脚本并执行
+                addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                        String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, linuxInstallDir + InstallerUtils.FILE_URL_SEPARATOR
+                                + LINUX_DOWNLOAD_AGENT_FILE, downloadUrl),
+                        String.format("bash %s/%s", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                //给下载安装包的脚本添加参数
+                String filePathParam = String.format(StringUtils.SPACE + "filepath=%s/%s", linuxInstallDir,
+                        WAZUH_AGENT_LINUX_FILE_NAME);
+                addCommand = addCommand.concat(filePathParam);
+                List<String> linuxFiles = new ArrayList<>();
+                nameFileMap.forEach((name, url) -> {
+                    if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
+                        linuxFiles.add(name);
+                    }
+                });
+                for (String file : linuxFiles) {
+                    String param = StringUtils.SPACE + file + "=" + metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR
+                            + nameFileMap.get(file);
+                    addCommand = addCommand.concat(param);
+                }
+            }
+            //将容器或Linux虚拟机新增的命令放在创建目录之后
+            int addCommandIndex = 0;
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
-                    copyFileIndex = i + 1;
+                    addCommandIndex = i + 1;
                     break;
                 }
             }
-            result.add(copyFileIndex, String.format(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX + " %s %s",
-                    getAgentLinuxLocalFilepath(), linuxInstallDir));
-        } else if (SystemTypeCommandUtils.isLinux(systemType)) {
-            //Linux需要按需下载agent安装包
-            String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
-                    nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
-            //下载按需安装脚本并执行
-            String downloadCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                    String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, linuxInstallDir + InstallerUtils.FILE_URL_SEPARATOR
-                            + LINUX_DOWNLOAD_AGENT_FILE, downloadUrl),
-                    String.format("bash %s/%s", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-            //给执行的下载脚本添加参数
-            String filePathParam = String.format(StringUtils.SPACE + "filepath=%s/%s", linuxInstallDir,
-                    WAZUH_AGENT_LINUX_FILE_NAME);
-            downloadCommand = downloadCommand.concat(filePathParam);
-            List<String> linuxFiles = new ArrayList<>();
-            nameFileMap.forEach((name, url) -> {
-                if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
-                    linuxFiles.add(name);
-                }
-            });
-            for (String file : linuxFiles) {
-                String param = StringUtils.SPACE + file + "=" + metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR
-                        + nameFileMap.get(file);
-                downloadCommand = downloadCommand.concat(param);
-            }
-            //将文件下载的命令放在创建目录之后
-            int downloadFileIndex = 0;
-            for (int i = 0; i < result.size(); i++) {
-                if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
-                    downloadFileIndex = i + 1;
-                    break;
-                }
-            }
-            result.add(downloadFileIndex, downloadCommand);
+            result.add(addCommandIndex, addCommand);
         }
         return result;
     }
