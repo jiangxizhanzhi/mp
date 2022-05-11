@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.ElasticIpPageResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.NetworkAgentPageResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.NetworkPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
@@ -11,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.model.NetworkCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,10 +39,10 @@ public class NetworkService extends BaseOpenStackService {
      * @return
      */
     public NetworkCloudPlatformModel page(String getParams){
-        NetworkPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + getParams, NetworkPageResult.class);
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<NetworkModel> data = pageResult.getData();
-        List<NetworkModel> list = data.getList();
+        CloudPlatformPageData<NetworkModel> data = pageResult.getData();
+        List<NetworkModel> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), NetworkModel.class);
         NetworkCloudPlatformModel model = new NetworkCloudPlatformModel();
         model.setNetworks(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(data.getTotal());
@@ -57,10 +56,10 @@ public class NetworkService extends BaseOpenStackService {
      * @return
      */
     public ElasticIpCloudPlatformModel pageElasticIp(String getParams){
-        ElasticIpPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpPageResult.class);
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/floatingips" + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<ElasticIpModel> data = pageResult.getData();
-        List<ElasticIpModel> list = data.getList();
+        CloudPlatformPageData<ElasticIpModel> data = pageResult.getData();
+        List<ElasticIpModel> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), ElasticIpModel.class);
         ElasticIpCloudPlatformModel model = new ElasticIpCloudPlatformModel();
         model.setFloatingips(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(data.getTotal());
@@ -73,10 +72,10 @@ public class NetworkService extends BaseOpenStackService {
      * @return
      */
     public NetworkAgentCloudPlatformModel agentsStateFromNetworks(){
-        NetworkAgentPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/agents", NetworkAgentPageResult.class);
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + NETWORKS + "/agents", CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<NetworkAgentModel> data = pageResult.getData();
-        List<NetworkAgentModel> list = data.getList();
+        CloudPlatformPageData<NetworkAgentModel> data = pageResult.getData();
+        List<NetworkAgentModel> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), NetworkAgentModel.class);
         NetworkAgentCloudPlatformModel model = new NetworkAgentCloudPlatformModel();
         model.setAgents(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(data.getTotal());
