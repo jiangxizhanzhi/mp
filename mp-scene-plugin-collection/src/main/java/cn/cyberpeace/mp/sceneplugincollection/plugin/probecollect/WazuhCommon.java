@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -142,24 +143,21 @@ public class WazuhCommon {
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, linuxInstallDir + InstallerUtils.FILE_URL_SEPARATOR
                                 + LINUX_DOWNLOAD_AGENT_FILE, downloadUrl),
-                        String.format("bash %s/%s", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                        String.format("bash %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
                 //给下载安装包的脚本添加参数
-                String filePathParam = String.format(StringUtils.SPACE + "filepath=%s/%s", linuxInstallDir,
+                String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
-                addCommand = addCommand.concat(filePathParam);
-                List<String> linuxFiles = new ArrayList<>();
+                List<String> params = new ArrayList<>(CollectionUtil.toList(filePathParam));
                 nameFileMap.forEach((name, url) -> {
                     if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
-                        linuxFiles.add(name);
+                        String remoteUrl = String.format("%s/%s", metadataFileServer, url);
+                        String param = String.format("%s=%s", name, remoteUrl);
+                        params.add(param);
                     }
                 });
-                for (String file : linuxFiles) {
-                    String param = StringUtils.SPACE + file + "=" + metadataFileServer + InstallerUtils.FILE_URL_SEPARATOR
-                            + nameFileMap.get(file);
-                    addCommand = addCommand.concat(param);
-                }
+                addCommand = addCommand.concat(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
             }
-            //将容器或Linux虚拟机新增的命令放在创建目录之后
+            //将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
             int addCommandIndex = 0;
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
