@@ -27,7 +27,7 @@ public class BaseInit implements ApplicationRunner {
         log.info("Resource dir: {}", resourcesDir);
 
         BaseServer.initServerSessionMap();
-        BaseGroupServer.initServerGroupSessionsMap();
+        BaseGroupServer.initServerGroupSessionsListMap();
     }
 
 }
