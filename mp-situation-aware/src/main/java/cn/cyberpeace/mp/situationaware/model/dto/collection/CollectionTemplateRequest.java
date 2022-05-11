@@ -50,8 +50,8 @@ public class CollectionTemplateRequest {
     private Integer osType;
 
 
-    @ApiModelProperty(value = "基础信息探针列表")
-    private List<CollectionTemplateProbeRequest> basicInfoProbes;
+//    @ApiModelProperty(value = "基础信息探针列表，由于基础信息默认开启，后端接口会直接忽略这个入参")
+//    private List<CollectionTemplateProbeRequest> basicInfoProbes;
 
     @ApiModelProperty(value = "事件采集探针列表")
     private List<CollectionTemplateProbeRequest> eventProbes;

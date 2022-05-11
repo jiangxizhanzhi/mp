@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
@@ -144,18 +145,24 @@ public class ProbeService {
     public void modifyProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
         String probeId = probeRequest.getId();
+        ProbeModel probeModel = probeMapper.get(probeId);
 
-        ProbeModel probeModel = new ProbeModel();
-        BeanUtils.copyProperties(probeRequest, probeModel);
+        if (Objects.isNull(probeModel)) {
+            log.error("probe not existed! probeId:{}", probeId);
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NOT_EXISTED);
+        }
+
+        ProbeModel probeModelToUpdate = new ProbeModel();
+        BeanUtils.copyProperties(probeRequest, probeModelToUpdate);
         //新增探针，默认为自定义探针
-        probeModel.setType(ProbeModel.TYPE_CUSTOM);
+        probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
-        probeModel.setOsType(osTypes);
-        probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
+        probeModelToUpdate.setOsType(osTypes);
+        probeModelToUpdate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
-        probeModel.setId(probeId);
-        boolean probeUpdateSuccess = probeMapper.update(probeModel);
+        probeModelToUpdate.setId(probeId);
+        boolean probeUpdateSuccess = probeMapper.update(probeModelToUpdate);
 
         boolean rollback = false;
         if (!probeUpdateSuccess) {

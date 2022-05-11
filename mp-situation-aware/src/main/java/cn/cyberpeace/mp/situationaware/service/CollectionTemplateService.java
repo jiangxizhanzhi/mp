@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
@@ -19,6 +21,7 @@ import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSe
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
@@ -33,6 +36,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -48,6 +52,8 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class CollectionTemplateService {
+
+    public static final String[] BASIC_INFO_PROBE_IDS = {"001", "002", "003", "004", "005"};
 
     @Autowired
     private CollectionTemplateMapper templateMapper;
@@ -178,6 +184,9 @@ public class CollectionTemplateService {
     @Transactional(rollbackFor = Exception.class)
     public boolean addTemplate(CollectionTemplateRequest addRequest) {
         log.info("addRequest:{}", addRequest);
+
+        addTemplateCheck(addRequest);
+
         CollectionTemplateModel colTempModelToCreate = new CollectionTemplateModel();
         BeanUtils.copyProperties(addRequest, colTempModelToCreate);
 
@@ -185,24 +194,9 @@ public class CollectionTemplateService {
         colTempModelToCreate.setId(templateId);
         colTempModelToCreate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
-
         List<CollectionTemplateProbeModel> allColTempProbeList = new ArrayList<>();
         List<ProbeParamModel> allProbeParamList = new ArrayList<>();
-        // 基础信息采集
-        List<CollectionTemplateProbeRequest> basicProbes = addRequest.getBasicInfoProbes();
-        processColTempProbeDto(templateId, basicProbes, allColTempProbeList, null);
-
-        // 事件采集
-        List<CollectionTemplateProbeRequest> eventProbes = addRequest.getEventProbes();
-        processColTempProbeDto(templateId, eventProbes, allColTempProbeList, null);
-
-        // 日志采集
-        List<CollectionTemplateProbeRequest> logProbes = addRequest.getLogProbes();
-        processColTempProbeDto(templateId, logProbes, allColTempProbeList, null);
-
-        // 自定义采集
-        List<CollectionTemplateProbeRequest> customProbes = addRequest.getCustomProbes();
-        processColTempProbeDto(templateId, customProbes, allColTempProbeList, allProbeParamList);
+        processColTempRequest(addRequest, templateId, allColTempProbeList, allProbeParamList);
 
         boolean createSuccess = templateMapper.create(colTempModelToCreate);
 
@@ -249,28 +243,16 @@ public class CollectionTemplateService {
     @Transactional(rollbackFor = Exception.class)
     public boolean modifyTemplate(CollectionTemplateRequest modifyRequest) {
         log.info("modifyRequest:{}", modifyRequest);
+
+        modifyTemplateCheck(modifyRequest);
+
         CollectionTemplateModel colTempModelToUpdate = new CollectionTemplateModel();
         BeanUtils.copyProperties(modifyRequest, colTempModelToUpdate);
 
         String templateId = modifyRequest.getId();
-
         List<CollectionTemplateProbeModel> allColTempProbeList = new ArrayList<>();
         List<ProbeParamModel> allProbeParamList = new ArrayList<>();
-        // 基础信息采集
-        List<CollectionTemplateProbeRequest> basicProbes = modifyRequest.getBasicInfoProbes();
-        processColTempProbeDto(templateId, basicProbes, allColTempProbeList, null);
-
-        // 事件采集
-        List<CollectionTemplateProbeRequest> eventProbes = modifyRequest.getEventProbes();
-        processColTempProbeDto(templateId, eventProbes, allColTempProbeList, null);
-
-        // 日志采集
-        List<CollectionTemplateProbeRequest> logProbes = modifyRequest.getLogProbes();
-        processColTempProbeDto(templateId, logProbes, allColTempProbeList, null);
-
-        // 自定义采集
-        List<CollectionTemplateProbeRequest> customProbes = modifyRequest.getCustomProbes();
-        processColTempProbeDto(templateId, customProbes, allColTempProbeList, allProbeParamList);
+        processColTempRequest(modifyRequest, templateId, allColTempProbeList, allProbeParamList);
 
         boolean updateSuccess = templateMapper.update(colTempModelToUpdate);
 
@@ -324,59 +306,156 @@ public class CollectionTemplateService {
         return cnt;
     }
 
+
+    public CollectionTemplateModel getById(String id) {
+        return templateMapper.get(id);
+    }
+
+    public CollectionTemplateModel getByName(String name) {
+        return templateMapper.getByName(name);
+    }
+
+
+    /**
+     * 创建模板检查
+     * @param addRequest
+     */
+    private void addTemplateCheck(CollectionTemplateRequest addRequest) {
+        CollectionTemplateModel oldModel = getByName(addRequest.getName());
+        if (Objects.nonNull(oldModel)) {
+            log.error("template name:{} already existed!", addRequest.getName());
+            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_EXISTED);
+        }
+    }
+
+
+    /**
+     * 修改模板检查
+     * @param modifyRequest
+     */
+    private void modifyTemplateCheck(CollectionTemplateRequest modifyRequest) {
+        String templateId = modifyRequest.getId();
+        CollectionTemplateModel templateModel = templateMapper.get(templateId);
+        if (Objects.isNull(templateModel)) {
+            log.error("collection template not existed! templateId:{}", templateId);
+            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_NOT_EXISTED);
+        }
+
+        CollectionTemplateModel oldModel = getByName(modifyRequest.getName());
+        // 名称已被占用，且不是被修改的这个模板
+        if (Objects.nonNull(oldModel) && !Objects.equals(oldModel.getId(), templateId)) {
+            log.error("template name:{} already existed!", modifyRequest.getName());
+            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_EXISTED);
+        }
+    }
+
+    /**
+     * 处理采集模板请求实体
+     * @param colTempReq
+     * @param templateId
+     * @param allColTempProbeList
+     * @param allProbeParamList
+     */
+    private void processColTempRequest(CollectionTemplateRequest colTempReq, String templateId, List<CollectionTemplateProbeModel> allColTempProbeList, List<ProbeParamModel> allProbeParamList) {
+        // todo 直接关联默认的基础信息
+        processDefaultColTempProbes(templateId, allColTempProbeList);
+
+        // 事件采集
+        List<CollectionTemplateProbeRequest> eventProbes = colTempReq.getEventProbes();
+        processColTempProbeDtos(templateId, ProbeModel.TYPE_COMMON, eventProbes, allColTempProbeList, null);
+
+        // 日志采集
+        List<CollectionTemplateProbeRequest> logProbes = colTempReq.getLogProbes();
+        processColTempProbeDtos(templateId, ProbeModel.TYPE_COMMON, logProbes, allColTempProbeList, null);
+
+        // 自定义采集
+        List<CollectionTemplateProbeRequest> customProbes = colTempReq.getCustomProbes();
+        processColTempProbeDtos(templateId, ProbeModel.TYPE_CUSTOM, customProbes, allColTempProbeList, allProbeParamList);
+    }
+
+
     /**
      * 处理采集模板中的通用探针，自定义探针，探针配置，探针参数等
      *
      * @param templateId
-     * @param colTelProbeDtos
+     * @param colTempProbeDtos
      * @param allColTempProbeList
      * @param allProbeParamList   需要处理的参数列表，null表示无参数，如通用探针
      */
-    private void processColTempProbeDto(String templateId, List<CollectionTemplateProbeRequest> colTelProbeDtos, List<CollectionTemplateProbeModel> allColTempProbeList, List<ProbeParamModel> allProbeParamList) {
-        for (CollectionTemplateProbeRequest colTempProbeReq : colTelProbeDtos) {
-            CollectionTemplateProbeModel colTempProbeModel = new CollectionTemplateProbeModel();
-            colTempProbeModel.setProbeId(colTempProbeReq.getProbeId());
-            colTempProbeModel.setTemplateId(templateId);
-            colTempProbeModel.setIntervalSec(colTempProbeReq.getTemplateProbeIntervalSec());
-            colTempProbeModel.setDisabled(colTempProbeReq.getDisabled());
-            if(Objects.equals(0, colTempProbeReq.getDisabled())) {
-                if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("paths", colTempProbeReq.getPaths());
-                    colTempProbeModel.setConfig(jsonObject.toJSONString());
+    private void processColTempProbeDtos(String templateId, Integer probeType, List<CollectionTemplateProbeRequest> colTempProbeDtos,
+                                         List<CollectionTemplateProbeModel> allColTempProbeList,
+                                         List<ProbeParamModel> allProbeParamList) {
+
+        log.info("templateId:{}, \nprobeType:{}, \ncolTelProbeDtos:{},\n allColTempProbeList:{},\nallProbeParamList:{}",
+                templateId, probeType, colTempProbeDtos, allColTempProbeList, allProbeParamList);
+
+        if (Objects.equals(probeType, ProbeModel.TYPE_COMMON)) {
+            for (CollectionTemplateProbeRequest colTempProbeReq : colTempProbeDtos) {
+
+                CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
+                        .probeId(colTempProbeReq.getProbeId())
+                        .templateId(templateId)
+                        .intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
+                        .disabled(colTempProbeReq.getDisabled())
+                        .build();
+
+                if (Objects.equals(0, colTempProbeReq.getDisabled())) {
+                    if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("paths", colTempProbeReq.getPaths());
+                        colTempProbeModel.setConfig(jsonObject.toJSONString());
+                    }
                 }
+
+                allColTempProbeList.add(colTempProbeModel);
             }
-
-            allColTempProbeList.add(colTempProbeModel);
-
-            // 不需要处理参数，如通用探针
-            if (CollectionUtil.isEmpty(allProbeParamList)) {
-                return;
-            }
-
-            List<ProbeParamRequest> paramReqs = probeParamService.paramStr2paramsRequest(colTempProbeReq.getParameter());
-            if (CollectionUtil.isEmpty(paramReqs)) {
-                return;
-            }
-
-            List<ProbeParamModel> paramList =
-                    paramReqs.stream().map(paramReq -> {
-                        ProbeParamModel paramModel = ProbeParamModel.builder()
-                                .probeId(colTempProbeReq.getProbeId())
-                                .templateId(templateId)
-                                .name(paramReq.getName())
-                                .defaultValue(paramReq.getDefaultValue())
-                                .description(paramReq.getDescription())
-                                .type(paramReq.getType())
-                                .build();
-                        return paramModel;
-                    }).collect(Collectors.toList());
-
-            allProbeParamList.addAll(paramList);
         }
 
+        // 不需要处理参数和脚本，如通用探针
+        if (Objects.equals(probeType, ProbeModel.TYPE_COMMON)) {
+            return;
+        }
+
+        // 以下处理逻辑仅针对自定义探针有效
+        // 1. 处理参数
+        for (CollectionTemplateProbeRequest colTempProbeReq : colTempProbeDtos) {
+            List<ProbeParamRequest> paramReqs = probeParamService.paramStr2paramsRequest(colTempProbeReq.getParameter());
+            if (CollectionUtil.isNotEmpty(paramReqs)) {
+                List<ProbeParamModel> paramList =
+                        paramReqs.stream().map(paramReq -> {
+                            ProbeParamModel paramModel = ProbeParamModel.builder()
+                                    .probeId(colTempProbeReq.getProbeId())
+                                    .templateId(templateId)
+                                    .name(paramReq.getName())
+                                    .defaultValue(paramReq.getDefaultValue())
+                                    .description(paramReq.getDescription())
+                                    .type(paramReq.getType())
+                                    .build();
+                            return paramModel;
+                        }).collect(Collectors.toList());
+
+                allProbeParamList.addAll(paramList);
+            }
+        }
+
+        // 2. 处理脚本
+        processCustomProbeScripts(colTempProbeDtos, allColTempProbeList);
+
+    }
+
+
+
+    /**
+     * 采集模板另存一份脚本内容
+     * @param customProbes 自定义探针
+     * @param allColTempProbeList 采集模板-探针关联实体列表
+     */
+    private void processCustomProbeScripts(List<CollectionTemplateProbeRequest> customProbes,
+                                           List<CollectionTemplateProbeModel> allColTempProbeList) {
+
+        // 处理脚本
         // 从探针里面查询scriptUrl，采集模板需要单独保存一份。 防止保存采集模板之后，修改了探针脚本对采集模板产生影响
-        List<String> probeIds = allColTempProbeList.stream().map(CollectionTemplateProbeModel::getProbeId).collect(Collectors.toList());
+        List<String> probeIds = customProbes.stream().map(CollectionTemplateProbeRequest::getProbeId).collect(Collectors.toList());
         List<ProbeDto> probeDtos = probeService.listByIds(probeIds);
 
         allColTempProbeList.forEach(tp -> {
@@ -386,12 +465,22 @@ public class CollectionTemplateService {
                 }
             });
         });
+
     }
 
-
-    public CollectionTemplateModel getById(String id) {
-        return null;
+    /**
+     * 处理通用探针--基础信息采集探针
+     * @param templateId
+     * @param allColTempProbeList
+     */
+    private void processDefaultColTempProbes(String templateId, List<CollectionTemplateProbeModel> allColTempProbeList) {
+        for (String probeId : BASIC_INFO_PROBE_IDS) {
+            CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
+                    .probeId(probeId).templateId(templateId).build();
+            allColTempProbeList.add(colTempProbeModel);
+        }
     }
+
 
 
     private ProbeSearchCondition generateBasicInfoProbesCondition() {

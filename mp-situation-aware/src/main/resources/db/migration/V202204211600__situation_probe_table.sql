@@ -26,6 +26,10 @@ create table mp_situation_probe
     constraint mp_sita_probe_id unique (id)
 ) comment '探针基本信息';
 
+create index idx_sit_pro_name on mp_situation_probe (name);
+create index idx_sit_pro_ctime on mp_situation_probe (create_time);
+create index idx_sit_pro_type_ctime on mp_situation_probe (type, probe_category, create_time);
+
 
 
 
@@ -61,6 +65,8 @@ create table mp_situation_probe_script
 )
     comment '探针脚本';
 
+create index idx_sit_pro_script_pid_type on mp_situation_probe_script (probe_id, script_type);
+
 
 
 -- 探针/采集模板参数表
@@ -80,6 +86,7 @@ create table mp_situation_probe_param
 )
     comment '探针或者采集模板的参数';
 
+create index idx_sit_pro_param_tid_pid on mp_situation_probe_param (template_id, probe_id);
 
 
 -- 采集模板表
@@ -93,9 +100,14 @@ create table mp_situation_collection_template
     OS_type int null comment '(单选) 操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    constraint mp_sita_tel_id unique (id)
+    constraint mp_sita_tel_id unique (id),
+    UNIQUE(name)
 )
     comment '采集模板表';
+
+create index idx_sit_coltemp_type on mp_situation_collection_template (OS_type);
+create index idx_sit_coltemp_ctime on mp_situation_collection_template (create_time);
+
 
 
 
@@ -115,3 +127,4 @@ create table mp_situation_collection_template_probe
     constraint mp_sita_tel_probe_id unique (id)
 )
     comment '采集模板-探针关系表';
+create index idx_sit_coltempp_tid_pid on mp_situation_collection_template_probe (template_id, probe_id);
