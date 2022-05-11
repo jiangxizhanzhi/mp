@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.ContainerPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -40,10 +41,10 @@ public class ContainerService extends BaseOpenStackService {
      * @return
      */
     public ContainerCloudPlatformModel page(String getParams) {
-        ContainerPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, ContainerPageResult.class);
+        CloudPlatformPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<ContainerModel> data = pageResult.getData();
-        List<ContainerModel> containerModels = data.getList();
+        CloudPlatformPageData<ContainerModel> data = pageResult.getData();
+        List<ContainerModel> containerModels = JSONObject.parseArray(JSONObject.toJSONString(data.getList()),ContainerModel.class);
         ContainerCloudPlatformModel model = new ContainerCloudPlatformModel();
         model.setContainers(CollectionUtils.isEmpty(containerModels) ? Lists.newArrayList() : containerModels);
         model.setTotal(data.getTotal());
