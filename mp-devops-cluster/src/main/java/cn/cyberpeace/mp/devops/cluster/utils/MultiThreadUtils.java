@@ -108,9 +108,9 @@ public class MultiThreadUtils<T> {
                 serviceResult = pool.take().get();
                 result.add(serviceResult);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("error message ： {}",e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                log.error("error message ： {}",e);
             }
 
         }
