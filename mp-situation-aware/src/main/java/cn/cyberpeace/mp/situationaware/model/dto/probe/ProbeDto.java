@@ -34,4 +34,10 @@ public class ProbeDto extends ProbeModel {
     @ApiModelProperty(value = "集合类型，操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private List<Integer> osTypes;
 
+    /**
+     * 脚本参数(JSON)
+     */
+    @ApiModelProperty(value = "脚本参数")
+    private String parameter;
+
 }
