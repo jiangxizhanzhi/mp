@@ -22,8 +22,10 @@ import lombok.NoArgsConstructor;
 @Table("mp_situation_probe")
 public class ProbeModel extends BaseModel {
 
+    // 通用探针
     public static final int TYPE_COMMON = 0;
 
+    // 自定义探针
     public static final int TYPE_CUSTOM = 1;
 
     public static final int CATATORY_BASIC_INFO = 0;

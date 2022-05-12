@@ -134,19 +134,22 @@
           #{tempId}
         </foreach>
       </if>
-      <if test="condition.creator != null and condition.creator != ''">
-        AND temp.creator = #{condition.creator}
-      </if>
       <if test="condition.osTypes != null and condition.osTypes.length > 0">
         AND temp.OS_type in
         <foreach item="osType" index="index" collection="condition.osTypes" open="(" separator="," close=")">
           #{osType}
         </foreach>
       </if>
+      <if test="condition.creator != null and condition.creator != ''">
+        AND temp.creator = #{condition.creator}
+      </if>
       <if test="condition.name != null and condition.name != ''">
         AND temp.name like CONCAT('%', #{condition.name}, '%')
       </if>
     </where>
     order by temp.create_time desc
+  </select>
+  <select id="getByName" resultMap="BaseResultMap">
+    select * from mp_situation_collection_template where name = #{name}
   </select>
 </mapper>

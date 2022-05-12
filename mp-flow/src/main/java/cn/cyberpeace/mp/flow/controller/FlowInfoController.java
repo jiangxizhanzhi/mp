@@ -7,10 +7,7 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
-import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -24,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -154,12 +152,14 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     }
 
     /**
-     * 批量导入预制流量
+     * 根据集合id批量查询
+     * @param request
      * @return
      */
-    @GetMapping("/batchImport")
-    public ServiceResult batchImport() {
-        return flowServiceImpl.batchImportFlowInfo();
+    @ApiOperation("根据集合id批量查询")
+    @GetMapping("/list_by_collection_ids")
+    public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
+        return flowServiceImpl.listByCollectionIds(request);
     }
 
 }

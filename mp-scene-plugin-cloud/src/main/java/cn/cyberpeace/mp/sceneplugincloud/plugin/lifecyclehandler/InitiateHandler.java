@@ -832,6 +832,9 @@ public class InitiateHandler extends HandlerCommon {
                 } else {
                     initiateOtherElementPortsTasks.add(task);
                 }
+            } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getIsAuxiliary())) {
+                // 辅助节点也需要处理下端口
+                initiateOtherElementPortsTasks.add(() -> initiateVirtualPort(cloudElement));
             }
         });
         if (!initiateRouterElementPortsTasks.isEmpty()) {

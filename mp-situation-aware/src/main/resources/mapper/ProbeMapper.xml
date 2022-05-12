@@ -225,16 +225,16 @@
           #{pid}
         </foreach>
       </if>
-      <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
-        AND p.probe_category in
-        <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
-          #{category}
-        </foreach>
-      </if>
       <if test="condition.types != null and condition.types.length > 0">
         AND p.type in
         <foreach item="type" index="index" collection="condition.types" open="(" separator="," close=")">
           #{type}
+        </foreach>
+      </if>
+      <if test="condition.probeCategories != null and condition.probeCategories.length > 0">
+        AND p.probe_category in
+        <foreach item="category" index="index" collection="condition.probeCategories" open="(" separator="," close=")">
+          #{category}
         </foreach>
       </if>
       <if test="condition.scriptTypes != null and condition.scriptTypes.length > 0">

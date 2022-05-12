@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
@@ -13,6 +15,7 @@ import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
+import cn.cyberpeace.mp.flow.response.FlowCollectionResponse;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -23,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -51,14 +56,24 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
      */
     @ApiOperation("分页查询流量集合信息")
     @GetMapping("/page")
-    public ListObjServiceResult<FlowCollectionModel> pageFlowCollection(FlowCollectionQueryParams queryParams) {
+    public ListObjServiceResult<FlowCollectionResponse> pageFlowCollection(FlowCollectionQueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {
             // 默认按时间降序
             queryParams.setOrders(new String[]{"-createTime"});
         }
 
         handleQueryParams(BaseConstants.STR_LIST, queryParams);
-        return getModelService().list(queryParams).asResult();
+        ListObjServiceResult<FlowCollectionModel> listResult = getModelService().list(queryParams).asResult();
+
+        List<FlowCollectionResponse> responseList = new ArrayList<>();
+        listResult.getData().getList().forEach(flowCollectionModel -> {
+            FlowCollectionResponse collectionResponse = new FlowCollectionResponse();
+            BeanUtils.copyProperties(flowCollectionModel, collectionResponse);
+            // 兼容前端，冗余描述信息，和流量信息描述字段保持一致
+            collectionResponse.setIntroduction(flowCollectionModel.getDescription());
+            responseList.add(collectionResponse);
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(responseList, listResult.getSource().getTotal())).asResult();
     }
 
     @ApiOperation("根据集合id查询流量信息")

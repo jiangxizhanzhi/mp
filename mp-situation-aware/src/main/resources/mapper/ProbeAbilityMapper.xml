@@ -116,7 +116,7 @@
   </update>
 
   <select id="listProbeAbilityDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto">
-    select pa.*, p.id as probe_id, p.name as probe_name
+    select pa.*, p.id as probe_id, p.name as probe_name, p.OS_type as os_type
     from mp_situation_probe_ability pa
     left join mp_situation_probe p
     on p.id = pa.probe_id

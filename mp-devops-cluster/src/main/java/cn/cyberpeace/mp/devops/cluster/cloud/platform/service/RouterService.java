@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.RouterPageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,10 +33,10 @@ public class RouterService extends BaseOpenStackService {
      * @return
      */
     public RouterCloudPlatformModel page(String getParams) {
-        RouterPageResult pageResult = super.sendGet(URL_VERSION + "/routers" + getParams, RouterPageResult.class);
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + "/routers" + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<RouterModel> data = pageResult.getData();
-        List<RouterModel> routerModels = data.getList();
+        CloudPlatformPageData<RouterModel> data = pageResult.getData();
+        List<RouterModel> routerModels = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), RouterModel.class);
         RouterCloudPlatformModel model = new RouterCloudPlatformModel();
         model.setRouters(CollectionUtils.isEmpty(routerModels) ? Lists.newArrayList() : routerModels);
         model.setTotal(data.getTotal());

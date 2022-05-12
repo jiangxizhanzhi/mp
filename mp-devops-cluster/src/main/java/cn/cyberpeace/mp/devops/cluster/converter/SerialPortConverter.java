@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SerialPortService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.SerialPortCloudPlatform;
 import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +15,6 @@ public class SerialPortConverter {
 
     private SerialPortService serialPortService;
 
-    @Autowired
     public SerialPortConverter(SerialPortService serialPortService) {
         this.serialPortService = serialPortService;
     }

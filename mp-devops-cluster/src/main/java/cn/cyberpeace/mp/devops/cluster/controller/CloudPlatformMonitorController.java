@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,7 +56,6 @@ public class CloudPlatformMonitorController {
 
     private NpcConverter npcConverter;
 
-    @Autowired
     public CloudPlatformMonitorController(VmConverter vmConverter, ContainerConverter containerConverter,
                                           RouterConverter routerConverter, NpcConverter npcConverter,
                                           RealEquipmentConverter realEquipmentConverter,

@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,7 +24,6 @@ public class BaseOpenStackService extends BaseService {
 
     private DevopsConfig devopsConfig;
 
-    @Autowired
     public BaseOpenStackService(DevopsConfig devopsConfig) {
        this.devopsConfig = devopsConfig;
     }

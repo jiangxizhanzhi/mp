@@ -4,13 +4,14 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamsRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,6 +53,9 @@ public class ProbeService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private ProbeParamService probeParamService;
 
     /**
      * 新增探针
@@ -104,8 +109,8 @@ public class ProbeService {
             }
         }
 
+        List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
 
-        List<ProbeParamsRequest> params = probeRequest.getParams();
         if (CollectionUtil.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
                     params.stream().map(paramReq -> {
@@ -140,18 +145,24 @@ public class ProbeService {
     public void modifyProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
         String probeId = probeRequest.getId();
+        ProbeModel probeModel = probeMapper.get(probeId);
 
-        ProbeModel probeModel = new ProbeModel();
-        BeanUtils.copyProperties(probeRequest, probeModel);
+        if (Objects.isNull(probeModel)) {
+            log.error("probe not existed! probeId:{}", probeId);
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NOT_EXISTED);
+        }
+
+        ProbeModel probeModelToUpdate = new ProbeModel();
+        BeanUtils.copyProperties(probeRequest, probeModelToUpdate);
         //新增探针，默认为自定义探针
-        probeModel.setType(ProbeModel.TYPE_CUSTOM);
+        probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
 
         String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
-        probeModel.setOsType(osTypes);
-        probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
+        probeModelToUpdate.setOsType(osTypes);
+        probeModelToUpdate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
-        probeModel.setId(probeId);
-        boolean probeUpdateSuccess = probeMapper.update(probeModel);
+        probeModelToUpdate.setId(probeId);
+        boolean probeUpdateSuccess = probeMapper.update(probeModelToUpdate);
 
         boolean rollback = false;
         if (!probeUpdateSuccess) {
@@ -179,7 +190,8 @@ public class ProbeService {
             }
         }
 
-        List<ProbeParamsRequest> params = probeRequest.getParams();
+
+        List<ProbeParamRequest> params = probeParamService.paramStr2paramsRequest(probeRequest.getParameter());
         if (CollectionUtil.isNotEmpty(params)) {
             List<ProbeParamModel> paramList =
                     params.stream().map(paramReq -> {
@@ -213,13 +225,16 @@ public class ProbeService {
 
     public ProbeDto getById(String id) {
         log.info("id:{}", id);
-        return probeMapper.getById(id);
+        ProbeDto probeDto = probeMapper.getById(id);
+        processProbeDtoOsTypes(probeDto);
+        processProbeDtoParams(probeDto);
+        return probeDto;
     }
 
 
-    public ProbeDto delete(String id) {
+    public boolean delete(String id) {
         log.info("id:{}", id);
-        return probeMapper.getById(id);
+        return probeMapper.delete(id);
     }
 
     /**
@@ -236,13 +251,14 @@ public class ProbeService {
 
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p -> processProbeDtoOsTypes(p));
+        // 分页查询不附带参数
         PageInfo pageInfo = new PageInfo(probeDtos);
-
         return pageInfo;
     }
 
     /**
-     * 根据ids查询列表
+     * 根据ids查询列表，包含脚本内容，参数
      * @param ids
      * @return
      */
@@ -252,12 +268,25 @@ public class ProbeService {
         condition.setIds(ids.toArray(new String[0]));
         condition.setNeedScriptContent(true);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p ->
+            processProbeDtoOsTypes(p)
+        );
+        probeDtos.forEach(p -> {
+            processProbeDtoParams(p);
+        });
         return probeDtos;
     }
+
 
     public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
         log.info("condition:{}", condition);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
+        probeDtos.forEach(p -> {
+            processProbeDtoOsTypes(p);
+        });
+        probeDtos.forEach(p -> {
+            processProbeDtoParams(p);
+        });
         return probeDtos;
     }
 
@@ -307,6 +336,26 @@ public class ProbeService {
 
         // 4. 表数据？
     }
+
+
+    private void processProbeDtoOsTypes(ProbeDto probeDto) {
+        if (StringUtils.isNotBlank(probeDto.getOsType())) {
+            List<Integer> osTypes = new ArrayList<>();
+            for (String osType : probeDto.getOsType().split(",")) {
+                osTypes.add(Integer.valueOf(osType));
+            }
+            probeDto.setOsTypes(osTypes);
+        }
+    }
+
+    private void processProbeDtoParams(ProbeDto probeDto) {
+        if (StringUtils.isNotBlank(probeDto.getId())) {
+            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeDto.getId(), null);
+            String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
+            probeDto.setParameter(paramStr);
+        }
+    }
+
 
 
 

@@ -10,10 +10,11 @@ import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
 import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
 import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -38,6 +39,10 @@ public class WazuhCommon {
     public static final String WAZUH_AGENT_WINDOWS_FILE_NAME = "agent-windows.zip";
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
+
+    public static final String LINUX_DOWNLOAD_AGENT_FILE = "download_agent.sh";
+
+    public static final String WAZUH_AGENT_LINUX_FILE_PREFIX = "agent-linux";
 
     public static String agentLinuxLocalFilepath = null;
 
@@ -77,18 +82,19 @@ public class WazuhCommon {
         controlParam.setProbeParams(controlProbeParams);
         String probeCommand = WazuhControl.genControlConfigCommand(osType, controlParam);
 
+        String windowsInstallDir = SceneSingleton.sceneAppConfig.getWindowsInstallerDir();
+        String linuxInstallDir = SceneSingleton.sceneAppConfig.getLinuxInstallerDir();
         InstallerUtils.Installer resource = null;
         if (SystemTypeCommandUtils.isWindows(systemType)) {
             resource = new InstallerUtils.Installer();
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s\\agent-installer",
-                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
-                            String.format("cd %s\\agent-installer\\agent-windows",
-                                    SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            String.format("unzip %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
+                                    windowsInstallDir),
+                            String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
                             "call install.bat",
-                            String.format("cd %s", SceneSingleton.sceneAppConfig.getWindowsInstallerDir()),
+                            String.format("cd %s", windowsInstallDir),
                             "rd/s/q agent-installer",
                             "del/f/s/q " + InstallerUtils.INSTALLER_REPLACEMENT,
                             String.format("set SIC_WAZUH_MANAGER_IP=%s", wazuhHost),
@@ -102,32 +108,67 @@ public class WazuhCommon {
                     ));
         } else if (SystemTypeCommandUtils.isLinux(systemType)) {
             resource = new InstallerUtils.Installer();
-            if (isContainer) {
-                resource.setCopyFile(getAgentLinuxLocalFilepath());
-            } else {
-                resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_LINUX_FILE_NAME, StringUtils.EMPTY));
-            }
+            resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip " + InstallerUtils.INSTALLER_REPLACEMENT + " -d %s/agent-installer",
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            String.format("cd %s/agent-installer/agent-linux",
-                                    SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
-                            "bash install.sh",
-                            String.format("cd %s", SceneSingleton.sceneAppConfig.getLinuxInstallerDir()),
+                            String.format("unzip %s/%s -d %s/agent-installer", linuxInstallDir,
+                                    WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
+                            String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
+                            "sh install.sh",
+                            String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
-                            "rm -rf " + InstallerUtils.INSTALLER_REPLACEMENT,
+                            "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
                             String.format("export SIC_WAZUH_MANAGER_IP=%s SIC_WAZUH_AGENT_NAME=%s " +
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             "cd /opt/wazuha",
-                            "bash config.sh",
+                            "sh config.sh",
                             probeCommand,
-                            "bash start.sh"
+                            "sh start.sh"
                     ));
         }
-        return resource == null ? new ArrayList<>() :
+        List<String> result = resource == null ? new ArrayList<>() :
                 InstallerUtils.generateInstallerInstallCommand(systemType, List.of(resource));
+        if (SystemTypeCommandUtils.isLinux(systemType)) {
+            String addCommand;
+            if (isContainer) {
+                //容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
+                addCommand = String.format("%s %s %s", ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX,
+                        getAgentLinuxLocalFilepath(), linuxInstallDir);
+            } else {
+                //Linux虚拟机增加按需下载agent安装包的命令
+                String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
+                        nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
+                String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
+                        LINUX_DOWNLOAD_AGENT_FILE);
+                //下载按需安装脚本并执行
+                addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
+                        String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
+                        String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                //给下载安装包的脚本添加参数
+                String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
+                        WAZUH_AGENT_LINUX_FILE_NAME);
+                List<String> params = new ArrayList<>(CollectionUtil.toList(filePathParam));
+                nameFileMap.forEach((name, url) -> {
+                    if (name.startsWith(WAZUH_AGENT_LINUX_FILE_PREFIX)) {
+                        String remoteUrl = String.format("%s/%s", metadataFileServer, url);
+                        String param = String.format("%s=%s", name, remoteUrl);
+                        params.add(param);
+                    }
+                });
+                addCommand = addCommand.concat(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
+            }
+            //将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
+            int addCommandIndex = 0;
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {
+                    addCommandIndex = i + 1;
+                    break;
+                }
+            }
+            result.add(addCommandIndex, addCommand);
+        }
+        return result;
     }
 
     /**

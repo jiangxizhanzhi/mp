@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp;
 
 import cn.cyberpeace.mp.base.context.SysContextHolder;
+import cn.cyberpeace.mp.base.util.http.HttpClient;
+import cn.cyberpeace.mp.base.util.http.HttpData;
+import cn.cyberpeace.mp.base.util.http.HttpParam;
+import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpClient;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpResult;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -112,7 +112,12 @@ public class CloudHttpClient {
     }
 
     private CloudHttpClient(String server, Integer timeout, Integer poolSize) {
-        httpClient = new HttpClient(server, timeout, poolSize, poolSize);
+        httpClient = HttpClient.builder()
+                .configServer(server)
+                .configTimeout(timeout)
+                .configMaxConnTotal(poolSize)
+                .configMaxConnPerRoute(poolSize)
+                .build();
         httpClient.setLogRequest(true);
     }
 
