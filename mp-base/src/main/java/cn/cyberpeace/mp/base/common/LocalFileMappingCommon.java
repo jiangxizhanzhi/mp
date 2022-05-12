@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.base.common;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.file.PathUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
