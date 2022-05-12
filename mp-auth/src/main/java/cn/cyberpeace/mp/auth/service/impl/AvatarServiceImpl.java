@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.AvatarModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.AvatarMapper;
@@ -56,7 +57,7 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
     @Autowired
     private UserService userService;
 
-    public static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
+    //public static final String DEFAULT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     @Override
     public List<AvatarModel> listAll() {
@@ -173,10 +174,10 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     // 更新默认用户的头像
     private void updateDefaultUserAvatar(String avatarUrl) {
-        ObjServiceResult<UserModel> result = userService.get(DEFAULT_USER_ID);
+        ObjServiceResult<UserModel> result = userService.get(AuthConstant.ROOT_USER_ID);
         if (Objects.nonNull(result.getSource())) {
             UserModel userUpdate = new UserModel();
-            userUpdate.setId(DEFAULT_USER_ID);
+            userUpdate.setId(AuthConstant.ROOT_USER_ID);
             userUpdate.setAvatar(avatarUrl);
             userService.update(userUpdate);
         }

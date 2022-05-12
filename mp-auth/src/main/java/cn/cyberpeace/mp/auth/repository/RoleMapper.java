@@ -36,6 +36,15 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
     @Select("select * from mp_auth_role where name = #{name}")
     RoleModel selectByName(@Param("name") String name);
 
+
+    @Select("<script>" +
+            "select * from mp_auth_role where name in " +
+            "       <foreach item=\"name\" index=\"index\" collection=\"names\" open=\"(\" separator=\",\" close=\")\"> " +
+            "           #{name} " +
+            "       </foreach>" +
+            "</script>")
+    List<RoleModel> listByNames(@Param("names") List<String> names);
+
     @Select("<script>" +
             "select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) cnt from mp_auth_role r " +
             "<where>" +

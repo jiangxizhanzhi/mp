@@ -14,7 +14,9 @@ public enum AuthErrorCode implements ErrorCode {
     ACCOUNT_NOT_AUDITED("AUTH-0011", "account_not_audited"),
     ACCOUNT_EXPIRED("AUTH-0012", "account_expired"),
 
-    SYS_CONFIG_CANNOT_CLOSE_AUDIT("AUTH-1001", "sysconfig_cannot_close_audit");
+    SYS_CONFIG_CANNOT_CLOSE_AUDIT("AUTH-1001", "sysconfig_cannot_close_audit"),
+
+    PERMISSION_DENIED("MP-110140", "permission_denied");
 
     AuthErrorCode(String code, String message) {
         setCode(code, AuthConstant.ERROR_CODE_PREFIX + message);

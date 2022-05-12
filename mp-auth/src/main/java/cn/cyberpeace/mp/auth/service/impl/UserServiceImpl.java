@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -40,7 +41,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.BeanUtils;
-import cn.cyberpeace.mp.base.util.IdGenerator;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
@@ -117,6 +117,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private AuthDesensitizedService desensitizedService;
+
+    @Autowired
+    private OperateUserPermissionCheckService permCheckService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -220,6 +223,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
         Assert.notNull(createRequest, "userDto不能为空");
+
+        permCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -668,36 +673,58 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(userModel)) {
             return null;
         }
+        return doModel2Dto(userModel, true, true);
+    }
+
+
+    @Override
+    public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
+        return doModel2Dto(userModel, false, true);
+    }
+
+
+    @Override
+    public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+        if (Objects.isNull(userModel)) {
+            return null;
+        }
 
         UserDto userDto = new UserDto();
         BeanUtils.copyProperties(userModel, userDto);
         // 过期状态处理
         processExpiredStatus(userDto);
 
-        List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
-        List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
+        if (needOrg) {
+            List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
+            List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-        List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-        userDto.setOrgs(orgs);
-        userDto.setOrgIds(orgIds);
-        userDto.setOrgpaths(allorgpath);
-
-        List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-        userDto.setRoles(roles);
-
-        boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-        boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
-
-        if (isAdmin) {
-            userDto.setIsAdmin(1);
-        } else {
-            userDto.setIsAdmin(0);
+            List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            userDto.setOrgs(orgs);
+            userDto.setOrgIds(orgIds);
+            userDto.setOrgpaths(allorgpath);
         }
 
-        if (isSuperUser) {
-            userDto.setIsSuperUser(1);
-        } else {
-            userDto.setIsSuperUser(0);
+        if(needRole) {
+            List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
+            userDto.setRoles(roles);
+
+            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+            boolean isSuperUser = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_SUPERUSER));
+
+            if (isAdmin) {
+                userDto.setIsAdmin(1);
+            } else {
+                userDto.setIsAdmin(0);
+            }
+
+            if (isSuperUser) {
+                userDto.setIsSuperUser(1);
+            } else {
+                userDto.setIsSuperUser(0);
+            }
         }
 
         return userDto;

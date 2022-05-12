@@ -15,6 +15,8 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
 
     List<RoleModel> listByUserId(String userId);
 
+    List<RoleModel> listByUserIds(List<String> userIds);
+
     List<UserModel> listUsersByRoleId(String roleId);
 
     PageInfo pageByUserId(UserRolePageRequest pageRequest);

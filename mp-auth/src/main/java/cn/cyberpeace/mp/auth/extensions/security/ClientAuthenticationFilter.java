@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthenticationToken;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
@@ -48,7 +49,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
             log.info("client auth... clientId:{}", clientId);
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // client认证, 赋有所有角色，资源权限
-                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AvatarServiceImpl.DEFAULT_USER_ID);
+                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);
 
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

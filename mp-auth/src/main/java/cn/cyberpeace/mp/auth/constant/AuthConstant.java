@@ -1,6 +1,13 @@
 package cn.cyberpeace.mp.auth.constant;
 
 public class AuthConstant {
+
+    public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
+
+    public static final String SUPERUSER_ROLE_ID = "e12bb08a9bc545bbba46a2fb3c92533a";
+
+    public static final String ADMIN_ROLE_ID = "5827ff7847504ffd806e0a85c417228d";
+
     public static final String PASSWORD_SECRET = "99bdfe0886604c49be29c977635572d5";
 
     public static final String PASSWORD_DES_KEY = "B13H089Y";

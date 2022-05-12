@@ -76,6 +76,11 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     // userModel转换为userdto，附加组织，角色信息
     UserDto userModel2UserDto(UserModel userModel);
 
+    // userModel转换为userdto，附加角色信息，不包括组织相关信息
+    UserDto userModel2UserDtoWithoutOrg(UserModel userModel);
+
+    UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole);
+
     void heartbeat(UserHeartbeatRequest heartbeat);
 
 //    PageInfo onlineReport(UserOnlineReportPageRequest pageRequest);

@@ -23,6 +23,8 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     RoleModel getByName(String name);
 
+    List<RoleModel> listByNames(List<String> names);
+
     boolean exists(String id);
 
     PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest);

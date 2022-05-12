@@ -127,6 +127,13 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    public List<RoleModel> listByNames(List<String> names) {
+        Assert.notEmpty(names, "names不能为空！");
+        List<RoleModel> roleModels = getModelMapper().listByNames(names);
+        return roleModels;
+    }
+
+    @Override
     public boolean exists(String id) {
         Assert.notBlank(id, "id不能为空！");
         RoleModel roleModel = getModelMapper().get(id);
