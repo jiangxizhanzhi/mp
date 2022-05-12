@@ -268,6 +268,7 @@ public class CollectionTemplateService {
 
         if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
             // templateId相关关联实体全部删除
+            // todo 保留 通用探针>基础信息 类探针关联数据
             templateProbeMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
             int cnt = templateProbeMapper.bulkCreate(allColTempProbeList);
             if (cnt <= 0) {

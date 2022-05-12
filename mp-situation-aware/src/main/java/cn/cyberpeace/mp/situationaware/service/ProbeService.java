@@ -155,12 +155,12 @@ public class ProbeService {
         ProbeModel probeModelToUpdate = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModelToUpdate);
         //新增探针，默认为自定义探针
-        probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
+        //probeModelToUpdate.setType(ProbeModel.TYPE_CUSTOM);
 
-        String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
-        probeModelToUpdate.setOsType(osTypes);
-        probeModelToUpdate.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
-
+        if (CollectionUtil.isNotEmpty(probeRequest.getOsTypes())) {
+            String osTypes = probeRequest.getOsTypes().stream().filter(Objects::nonNull).map(t -> String.valueOf(t)).collect(Collectors.joining(","));
+            probeModelToUpdate.setOsType(osTypes);
+        }
         probeModelToUpdate.setId(probeId);
         boolean probeUpdateSuccess = probeMapper.update(probeModelToUpdate);
 

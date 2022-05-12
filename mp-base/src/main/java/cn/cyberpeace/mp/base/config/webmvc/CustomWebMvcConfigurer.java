@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.config;
+package cn.cyberpeace.mp.base.config.webmvc;
 
 
 import org.springframework.context.annotation.Configuration;
