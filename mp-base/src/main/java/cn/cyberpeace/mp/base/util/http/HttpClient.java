@@ -210,7 +210,9 @@ public class HttpClient {
             clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
         }
         innerHttpClient = clientBuilder.build();
-        this.timeout = timeout;
+        if (timeout != null) {
+            this.timeout = timeout;
+        }
     }
 
     public static HttpClientBuilder builder() {
