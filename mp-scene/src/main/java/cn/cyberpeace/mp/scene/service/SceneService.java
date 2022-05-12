@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
@@ -53,12 +54,13 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
+        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
-            if (!sceneHandler.initiate(false)) {
+            if (!sceneHandlerProxy.initiate(false)) {
                 return;
             }
-            sceneHandler.create();
+            sceneHandlerProxy.create();
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
@@ -88,8 +90,9 @@ public class SceneService {
     public ServiceResult<Boolean> delete(String id, boolean logic, SceneContextBO context) {
         SceneHandler sceneHandler;
         try {
-            sceneHandler = new SceneHandler(id, null, false, context);
-            sceneHandler.setRealTimeUpdate(true);
+//            sceneHandler = new SceneHandler(id, null, false, context);
+//            sceneHandler.setRealTimeUpdate(true);
+            sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
             if (logic) {
                 SceneTaskPool.getInstance().executeTask(() -> sceneHandler.logicDelete());
             } else {
@@ -119,29 +122,33 @@ public class SceneService {
     }
 
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(true);
+//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+//        sceneHandler.setRealTimeUpdate(true);
+        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.pause());
         return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> unpause(String id, SceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(true);
+//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+//        sceneHandler.setRealTimeUpdate(true);
+        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.unpause());
         return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> suspend(String id, SceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(true);
+//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+//        sceneHandler.setRealTimeUpdate(true);
+        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.suspend());
         return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> resume(String id, SceneContextBO context) {
-        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
-        sceneHandler.setRealTimeUpdate(true);
+//        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+//        sceneHandler.setRealTimeUpdate(true);
+        SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.resume());
         return new ServiceResult<>(true);
     }
