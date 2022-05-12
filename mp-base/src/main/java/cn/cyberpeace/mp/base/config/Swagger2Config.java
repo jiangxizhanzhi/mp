@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2018. 南京云帐房网络科技有限公司 版权所有
- */
-
 package cn.cyberpeace.mp.base.config;
 
 import cn.cyberpeace.mp.base.annotation.SwaggerDisplayEnum;
@@ -13,11 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotationUtils;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.ModelPropertyBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.builders.*;
 import springfox.documentation.schema.Annotations;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ParameterType;
