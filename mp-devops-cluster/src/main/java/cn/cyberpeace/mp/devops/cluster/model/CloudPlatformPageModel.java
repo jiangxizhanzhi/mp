@@ -1,24 +1,25 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import io.swagger.annotations.ApiModel;
 import lombok.*;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**
- * 类型模型，仅支持role
+ * 分页基础模型，对应云平台接口返回信息
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class TypeItemsCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
+@ApiModel
+public class CloudPlatformPageModel<T> extends BaseCloudPlatformModel {
 
     /**
      * 数据列表
      */
-    private List<String> items;
+    private List<T> list;
 
 
 }

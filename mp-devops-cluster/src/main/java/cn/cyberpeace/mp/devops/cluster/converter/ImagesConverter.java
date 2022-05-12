@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
@@ -345,11 +346,8 @@ public class ImagesConverter implements BaseConverter{
      * @param ids
      */
     public List<Device> findByIds(List<Integer> ids){
-        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
-        if (Objects.isNull(model) || !model.isSuccess() || CollectionUtils.isEmpty(model.getItems())){
-            return Lists.newArrayList();
-        }
-        return model.getItems();
+        CloudPlatformPageModel<Device>  model = deviceService.findByIds(ids);
+        return model.getList();
     }
 
     /**
@@ -365,11 +363,8 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
         }
-        DeviceCloudPlatformModel model = deviceService.findByIds(diffList);
-        if (Objects.isNull(model) || !model.isSuccess()){
-            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
-        }
-        List<Device> deviceList = model.getItems();
+        CloudPlatformPageModel<Device>  model = deviceService.findByIds(diffList);
+        List<Device> deviceList = model.getList();
         if (CollectionUtils.isEmpty(deviceList)){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
@@ -496,12 +491,12 @@ public class ImagesConverter implements BaseConverter{
      * 获取物理主机服务状态列表
      * @return
      */
-    public HypervisorServiceStatusModel listServiceStatus() {
-        HypervisorServiceStatusModel serviceStatusModel = scenariosService.listServiceStatus();
-        if (Objects.nonNull(serviceStatusModel) && CollectionUtils.isNotEmpty(serviceStatusModel.getData())) {
+    public CloudPlatformPageModel<ServiceStatus> listServiceStatus() {
+        CloudPlatformPageModel<ServiceStatus> serviceStatusModel = scenariosService.listServiceStatus();
+        if (Objects.nonNull(serviceStatusModel) && CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
             return serviceStatusModel;
         } else {
-            return new HypervisorServiceStatusModel(new ArrayList<>());
+            return new CloudPlatformPageModel<>(new ArrayList<>());
         }
     }
 

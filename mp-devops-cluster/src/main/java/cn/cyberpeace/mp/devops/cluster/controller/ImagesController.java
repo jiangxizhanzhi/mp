@@ -18,9 +18,8 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
-import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageConnectionCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImageCheckPortResponse;
@@ -376,11 +375,8 @@ public class ImagesController {
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-        FlavorCloudPlatformModel page = flavorService.page(getParams);
-        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
-            return new Result();
-        }
-        List<Flavor> flavorList = page.getData().getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
+        CloudPlatformPageModel<Flavor> page = flavorService.page(getParams);
+        List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
         return new Result<>(flavorList);
@@ -389,11 +385,8 @@ public class ImagesController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        ImageConnectionCloudPlatform connection = imagesService.connection(uuid);
-        if (Objects.isNull(connection)){
-            return new Result<>();
-        }
-        return new Result<>(connection.getItems());
+        CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
+        return new Result<>(connection.getList());
     }
 
     @ApiOperation("同步镜像数据")
