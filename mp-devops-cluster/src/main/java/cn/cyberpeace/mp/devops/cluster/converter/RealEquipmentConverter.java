@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
@@ -12,11 +11,11 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
+import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
@@ -24,7 +23,6 @@ import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,7 +52,6 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private TargetConverter targetConverter;
 
-    @Autowired
     public RealEquipmentConverter(RealEquipmentService realEquipmentService, DeviceService deviceService,
                                       DevopsTargetService devopsTargetService, ImageMapper imageMapper,
                                       ImageAuthMapper imageAuthMapper,TargetConverter targetConverter) {
@@ -64,17 +61,6 @@ public class RealEquipmentConverter implements BaseConverter{
         this.imageMapper = imageMapper;
         this.imageAuthMapper = imageAuthMapper;
         this.targetConverter = targetConverter;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
@@ -194,10 +180,10 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Boolean delete(RealEquipmentDeleteRequest request) {
+    public BaseCloudPlatformModel delete(RealEquipmentDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getUuids());
-        Boolean result = deviceService.deleteByIds(request.getUuids());
-        if (result) {
+        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getUuids());
+        if (result.isSuccess()) {
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getUuids());
             imageMapper.delete(dto);

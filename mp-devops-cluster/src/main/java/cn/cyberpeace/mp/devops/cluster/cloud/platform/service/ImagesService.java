@@ -3,12 +3,13 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.ImageConnectionCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +32,6 @@ public class ImagesService extends BaseOpenStackService {
 
     public ImagesService(DevopsConfig devopsConfig) {
         super(devopsConfig);
-    }
-
-    /**
-     * 分页查询
-     */
-    public DeviceCloudPlatformModel page(String getParams){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists" + getParams, DeviceCloudPlatformModel.class);
     }
 
     /**
@@ -82,7 +76,8 @@ public class ImagesService extends BaseOpenStackService {
             return null;
         }
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        fileMap.entrySet().stream().forEach(entry -> builder.addBinaryBody(entry.getKey(), entry.getValue()));
+        fileMap.entrySet().stream().forEach(entry -> builder.addBinaryBody("file",  entry.getValue(),ContentType.DEFAULT_BINARY,entry.getKey()));
+        builder.setMode(HttpMultipartMode.RFC6532);
         try {
             return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformModel.class);
         } catch (IOException e) {

@@ -24,9 +24,8 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -40,10 +39,11 @@ import java.util.concurrent.ExecutionException;
  * @Author zhouxinghuai
  * @Date：2022/2/21 17:37
  */
+@ApiIgnore
 @Api(value = "SITUATION-TEST", tags = "SITUATION-TEST")
 @Slf4j
-@RestController
-@RequestMapping("/situation/test")
+//@RestController
+//@RequestMapping("/situation/test")
 public class SituationAwareTestController {
 
     @Autowired
@@ -143,6 +143,19 @@ public class SituationAwareTestController {
         wazuhRequest.setPageSize(1);
         List<WazuhNetworkConnectionModel> list = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
         return ServiceResult.success(list);
+    }
+
+
+    @GetMapping("/query/envvar")
+    public ServiceResult queryEnvVar(@RequestParam String agentName) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("8c58b4d4adc14e54971f5561ae106a3c", "2d6287991041457cbabbcce58479a87a"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-14 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+        return ServiceResult.successful();
     }
 
 }

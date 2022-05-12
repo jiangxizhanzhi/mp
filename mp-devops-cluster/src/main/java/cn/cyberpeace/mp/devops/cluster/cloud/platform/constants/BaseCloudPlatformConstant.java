@@ -31,11 +31,6 @@ public final class BaseCloudPlatformConstant {
     public static final String CPCLOUD_CCM = CPCLOUD_URL + "/ccm";
 
     /**
-     * cpcloud平台NPC模块URL前缀
-     */
-    public static final String CPCLOUD_NPC_URL = CPCLOUD_URL + "/npc_node";
-
-    /**
      * cpcloud平台Switch模块URL前缀
      */
     public static final String CPCLOUD_SWITCH_URL = CPCLOUD_URL + "/switch";
@@ -51,13 +46,13 @@ public final class BaseCloudPlatformConstant {
     public static final String URL_VERSION = "/v1";
 
     /**
-     * 流表监控操作
-     */
-    public static final String OPENFLOW_ACTION_METHOD = "list";
-
-    /**
      * 截屏模块URL前缀
      */
     public static final String SCREENRECORD_METHOD = CPCLOUD_URL + "/guacamole" + URL_VERSION;
+
+    /**
+     * 成功状态码
+     */
+    public static final String CODE = "0";
 
 }

@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +31,6 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
 
     private ImageMapper imageMapper;
 
-    @Autowired
     public DevopsTargetServiceImpl(ImageMapper imageMapper) {
         this.imageMapper = imageMapper;
     }
@@ -138,6 +136,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
 
         ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
         if (Objects.nonNull(extSystemInfo)){
+            targetModel.setParentSystemType(extSystemInfo.getParentSystemType());
             targetModel.setSystemType(extSystemInfo.getSystemType());
             targetModel.setLanguage(extSystemInfo.getLanguage());
             targetModel.setSystemArchitecure(extSystemInfo.getSystemArchitecture());

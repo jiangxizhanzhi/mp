@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,7 +42,7 @@ import java.util.stream.Collectors;
 @Api(tags = "云平台监控")
 public class CloudPlatformMonitorController {
 
-    private InstanceConverter instanceConverter;
+    private VmConverter vmConverter;
 
     private ContainerConverter containerConverter;
 
@@ -51,20 +50,18 @@ public class CloudPlatformMonitorController {
 
     private RealEquipmentConverter realEquipmentConverter;
 
-
     private HypervisorConverter hypervisorConverter;
 
     private ImagesConverter imagesConverter;
 
     private NpcConverter npcConverter;
 
-    @Autowired
-    public CloudPlatformMonitorController(InstanceConverter instanceConverter, ContainerConverter containerConverter,
-                                          RouterConverter routerConverter,NpcConverter npcConverter,
+    public CloudPlatformMonitorController(VmConverter vmConverter, ContainerConverter containerConverter,
+                                          RouterConverter routerConverter, NpcConverter npcConverter,
                                           RealEquipmentConverter realEquipmentConverter,
                                           HypervisorConverter hypervisorConverter,
                                           ImagesConverter imagesConverter) {
-        this.instanceConverter = instanceConverter;
+        this.vmConverter = vmConverter;
         this.containerConverter = containerConverter;
         this.routerConverter = routerConverter;
         this.realEquipmentConverter = realEquipmentConverter;
@@ -84,7 +81,7 @@ public class CloudPlatformMonitorController {
         //虚拟机个数
         InstancePageRequest instancePageRequest = new InstancePageRequest();
         instancePageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalInstances = instanceConverter.getTotalInstances(instancePageRequest);
+        Integer totalInstances = vmConverter.getTotalInstances(instancePageRequest);
 
         //容器个数
         ContainerPageRequest containerPageRequest = new ContainerPageRequest();

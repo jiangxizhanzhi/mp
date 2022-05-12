@@ -1,0 +1,2 @@
+alter table mp_sceneplugincloud_scene_element_port modify column `access_modes` text NOT NULL COMMENT '接入方式' ;
+alter table mp_sceneplugincloud_scene_config_element_port modify column `access_modes` text NOT NULL COMMENT '接入方式' ;

@@ -50,7 +50,7 @@ public class JsonUtils {
 
     private static ObjectMapper createDefaultSnakeObjectMapper() {
         var objectMapper = createDefaultObjectMapper();
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return objectMapper;
     }
 

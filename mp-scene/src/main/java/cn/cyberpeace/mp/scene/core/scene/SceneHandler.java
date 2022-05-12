@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
@@ -426,6 +425,12 @@ public class SceneHandler extends BaseSceneHandler<
         return flag;
     }
 
+    public void reformTopo() {
+        for (var plugin : getPlugins()) {
+            plugin.reformTopo();
+        }
+    }
+
     public boolean initiate() {
         return initiate(true);
     }
@@ -715,6 +720,8 @@ public class SceneHandler extends BaseSceneHandler<
             this.add(SceneModel.Event.SNAPSHOT);
             this.add(SceneModel.Event.DELETE);
             this.add(SceneModel.Event.MODIFY);
+            this.add(SceneModel.Event.SUSPEND);
+            this.add(SceneModel.Event.RESUME);
         }};
         return terminateStates.contains(state);
     }

@@ -1,7 +1,10 @@
 package cn.cyberpeace.mp.cscene.dto.common;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -12,6 +15,9 @@ import java.util.List;
  * @Date：2021/11/29 19:52
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class BaseSceneElementRequest {
 
     @ApiModelProperty("场景id,多个id用逗号分隔")

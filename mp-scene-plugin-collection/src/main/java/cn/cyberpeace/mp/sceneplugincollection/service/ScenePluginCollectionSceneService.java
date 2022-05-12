@@ -116,7 +116,7 @@ public class ScenePluginCollectionSceneService {
     private ProbeService probeService ;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, null);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
         if (CollectionUtils.isEmpty(batchSceneHandler.getFlowCollectors())) {
             log.info("{} query time interval sum flow size,sceneIds:{},no collection plugin or no flowCollector", LOG_PREFIX, JsonCommon.stringify(sceneIds));
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -131,7 +131,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(queryParams.getSourceIps())){
             request.setSourceIps(queryParams.getSourceIps());
         }else {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getTargetIps())){
@@ -252,7 +252,7 @@ public class ScenePluginCollectionSceneService {
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (pluginHandler == null) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0)).asResult();
         }
         Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
         srcElements.forEach(srcElement -> {
@@ -299,7 +299,16 @@ public class ScenePluginCollectionSceneService {
             request.setKeyword(queryParams.getKeyword());
         }
 
-        // todo 查询事件类型
+        if (CollectionUtils.isNotEmpty(queryParams.getRuleGroups())) {
+            request.setRuleGroups(queryParams.getRuleGroups());
+        }
+
+        // todo 查询事件类型，暂时只支持所有，文件两种类型。用户，进程，端口，网络连接事件暂不支持 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
+        if (Objects.nonNull(queryParams.getType())) {
+            if (queryParams.getType().equals(1) || queryParams.getType().equals(2) || queryParams.getType().equals(3) || queryParams.getType().equals(5)) {
+                return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
+            }
+        }
 
         var result = dataCollectionService.queryFileEvents(request);
 
@@ -425,7 +434,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }else{
             request.setSourceIps(sourceIps);
         }
@@ -543,7 +552,7 @@ public class ScenePluginCollectionSceneService {
         FlowAnalysisRequest request = new FlowAnalysisRequest();
         request.setGroupList(batchSceneHandler.getFlowCollectors());
         if (CollectionUtils.isEmpty(sourceIps)) {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }else{
             request.setSourceIps(sourceIps);
         }
@@ -880,7 +889,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isNotEmpty(sourceIps)) {
             request.setSourceIps(sourceIps);
         } else {
-            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
+//            request.setSourceMacs(batchSceneHandler.getFlowCollectedMacAddrs());
         }
         request.setDestinationIps(batchSceneHandler.getAllIpAddrs());
         request.setTopSize(topSize);
@@ -1069,6 +1078,26 @@ public class ScenePluginCollectionSceneService {
         List<WazuhNetworkConnectionModel> resultList = totalList.stream().skip(skip).limit(pageSize).collect(Collectors.toList());
 
         return new ListObjServiceResult<>(new ListObjResult<>(resultList, totalList.size()).asResult()).asResult();
+    }
+
+
+
+    public int sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+
+//        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
+//        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
+        wazuhRequest.setEndTime(endTime);
+
+        int changedCount = dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+
+        return changedCount;
     }
 
     /**

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
@@ -8,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -23,19 +21,8 @@ public class NpcConverter implements BaseConverter{
 
     private NpcService npcService;
 
-    @Autowired
     public NpcConverter(NpcService npcService) {
         this.npcService = npcService;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getPage,NpcPageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(NpcPageRequest::getOffset,NpcPageRequest::getPage,NpcPageRequest::getPerPage);
     }
 
     /**

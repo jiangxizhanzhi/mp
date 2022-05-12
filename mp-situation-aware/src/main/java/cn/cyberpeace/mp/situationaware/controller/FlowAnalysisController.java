@@ -71,7 +71,6 @@ public class FlowAnalysisController {
     @GetMapping("/log")
     @Deprecated
     public ServiceResult<List<FlowLogVO>> flowLog(FlowAnalysisRequest request){
-//        request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<FlowLogBO> flowLogBOList = flowAnalysisService.flowLog(request);
         if (CollectionUtils.isEmpty(flowLogBOList)){
             return new ServiceResult().asResult();
@@ -92,7 +91,6 @@ public class FlowAnalysisController {
     @GetMapping("/top-By-aggregation-type")
     @Deprecated
     public ServiceResult<List<AttackWayAggregationVO>> topByAggregationTypeEnum(FlowAnalysisRequest request){
-        request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.topByAggregationTypeEnum(request);
         if (CollectionUtils.isEmpty(attackWayAggregationBOS)){
             return new ServiceResult().asResult();
@@ -111,7 +109,6 @@ public class FlowAnalysisController {
     @GetMapping("/sum-network-bytes")
     @Deprecated
     public ServiceResult<List<AttackDateHistogramNetworkBytesVO>> sumNetworkBytesByDateHistogramTimestamp(FlowAnalysisRequest request){
-        request.setIndices(flowAnalysisService.getAllIndices(INDICES));
         List<AttackDateHistogramNetworkBytesBO> bos = flowAnalysisService.sumNetworkBytesByDateHistogramTimestamp(request);
         if (CollectionUtils.isEmpty(bos)){
             return new ServiceResult().asResult();
@@ -184,29 +181,5 @@ public class FlowAnalysisController {
             }
         }
         return attackResultVOList;
-    }
-
-    /**
-     *
-     * @param request
-     * @return
-     */
-    private FlowAnalysisRequest buildFlowAnalysisRequest(FlowAnalysisRequest request){
-        FlowAnalysisRequest flowAnalysisRequest = new FlowAnalysisRequest();
-        flowAnalysisRequest.setPageNum(request.getPageNum());
-        flowAnalysisRequest.setPageSize(request.getPageSize());
-        flowAnalysisRequest.setTopSize(request.getTopSize());
-        flowAnalysisRequest.setStartDateTime(request.getStartDateTime());
-        flowAnalysisRequest.setEndDateTime(request.getEndDateTime());
-        flowAnalysisRequest.setGroupList(request.getGroupList());
-        flowAnalysisRequest.setSourcePort(request.getSourcePort());
-        flowAnalysisRequest.setSourceMacs(request.getSourceMacs());
-        flowAnalysisRequest.setDestinationIps(request.getDestinationIps());
-        flowAnalysisRequest.setProtocols(request.getProtocols());
-        flowAnalysisRequest.setDestinationPort(request.getDestinationPort());
-        flowAnalysisRequest.setSecondsInterval(request.getSecondsInterval());
-        flowAnalysisRequest.setSeverityEnum(request.getSeverityEnum());
-        flowAnalysisRequest.setAggregationTypeEnum(request.getAggregationTypeEnum());
-        return flowAnalysisRequest;
     }
 }

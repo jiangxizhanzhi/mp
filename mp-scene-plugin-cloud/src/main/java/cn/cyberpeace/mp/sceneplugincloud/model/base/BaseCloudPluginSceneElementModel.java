@@ -77,6 +77,10 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String staticRoutes;
 
+    // ospf网络属性
+    @DefaultStr
+    private String ospfRouterId;
+
     // 虚拟防火墙属性
     @DefaultStr
     private String firewallRules;
@@ -84,6 +88,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     // 虚拟机/容器属性
     @DefaultStr
     private String image;
+    @DefaultStr
+    private String imageUuid;
     @DefaultStr
     private String initialTools;
 

@@ -45,13 +45,13 @@ public class TypeService extends BaseOpenStackService {
      * 查询所有类型数据
      * @return
      */
-    public TypeCloudPlatformModel findL1AndL2AndL3Type(){
-        String key = cache_prefix_model + "l3:" + ServletUtils.getAcceptLanguage();
+    public TypeCloudPlatformModel findL1AndL2AndL3Type(Boolean isAll){
+        String key = cache_prefix_model + "l3:" + isAll + ":" + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
         if (Objects.nonNull(cache)){
             return (TypeCloudPlatformModel)cache;
         }
-        TypeCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l3", TypeCloudPlatformModel.class);
+        TypeCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + "l3&isAll=" + isAll, TypeCloudPlatformModel.class);
         if (Objects.nonNull(model) && model.isSuccess())
             lfuCache.put(key,model,TIME_OUT);
         return model;
@@ -94,13 +94,13 @@ public class TypeService extends BaseOpenStackService {
      * 查询所有
      * @return
      */
-    public TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type){
-        String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
+    public TypeIdIntegerCloudPlatformModel findIdIntegerByType(String type,Boolean isAll){
+        String key = cache_prefix_model + type + ":" + isAll + ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
         if (Objects.nonNull(cache)){
             return (TypeIdIntegerCloudPlatformModel)cache;
         }
-        TypeIdIntegerCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdIntegerCloudPlatformModel.class);
+        TypeIdIntegerCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type + "&isAll=" + isAll, TypeIdIntegerCloudPlatformModel.class);
         if (Objects.nonNull(model) && model.isSuccess())
             lfuCache.put(key,model,TIME_OUT);
         return model;
@@ -110,13 +110,13 @@ public class TypeService extends BaseOpenStackService {
      * 查询所有
      * @return
      */
-    public TypeIdStringCloudPlatformModel findIdStringByType(String type){
-        String key = cache_prefix_model + type + ServletUtils.getAcceptLanguage();
+    public TypeIdStringCloudPlatformModel findIdStringByType(String type,Boolean isAll){
+        String key = cache_prefix_model + type + ":" + isAll +  ServletUtils.getAcceptLanguage();
         Object cache = lfuCache.get(key);
         if (Objects.nonNull(cache)){
             return (TypeIdStringCloudPlatformModel)cache;
         }
-        TypeIdStringCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type, TypeIdStringCloudPlatformModel.class);
+        TypeIdStringCloudPlatformModel model = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + TYPE + QUESTION_TYPE + type  + "&isAll=" + isAll, TypeIdStringCloudPlatformModel.class);
         if (Objects.nonNull(model) && model.isSuccess())
             lfuCache.put(key,model,TIME_OUT);
         return model;

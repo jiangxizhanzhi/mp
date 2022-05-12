@@ -15,12 +15,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigPieceBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -254,9 +257,49 @@ public class CsceneDataModifier {
                             e.setFile(StringUtils.replaceOnce(e.getFile(), "/", StringUtils.EMPTY));
                         }
                     }
+                    if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                        e.getPorts().forEach(port -> {
+                            if (port != null) {
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        accessMode.setPrivateKeyPath(removePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer()));
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             }
+            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("secret_path") != null) {
+                                    accessMode.put("secret_path", removePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
+    }
+
+    private static String removePrefix(String path, String prefix) {
+        if (StringUtils.isEmpty(path)) {
+            return path;
+        }
+        if (path.startsWith(prefix)) {
+            path = StringUtils.replaceOnce(path, prefix, StringUtils.EMPTY);
+            if (path.startsWith("/")) {
+                path = StringUtils.replaceOnce(path, "/", StringUtils.EMPTY);
+            }
+        }
+        return path;
     }
 
     public static void assembleInitCommands(CsceneBO csceneBO) {
@@ -335,7 +378,73 @@ public class CsceneDataModifier {
     public static void correctReturnCsceneData(CsceneInstanceBO csceneInstanceBO) {
         addFilePathPrefix(csceneInstanceBO.getScene());
         handlerNodeCommand(csceneInstanceBO.getScene());
+        handlerHiddenElement(csceneInstanceBO.getScene());
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
+    }
+
+    /**
+     * 处理需要隐藏的节点
+     * @param sceneDataBO
+     */
+    public static void handlerHiddenElement(SceneDataBO sceneDataBO) {
+        if (sceneDataBO.getTopology() != null && sceneDataBO.getTopology().getElements() != null) {
+            List<String> hiddenElements = new ArrayList<>();
+            List<String> hiddenPorts = new ArrayList<>();
+            for (var element : sceneDataBO.getTopology().getElements()) {
+                if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
+                    // 辅助节点,节点和端口都要隐藏
+                    hiddenElements.add(element.getId());
+                    if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                        element.getPorts().forEach(p -> hiddenPorts.add(p.getId()));
+                    }
+                }
+            }
+            var elementIterator = sceneDataBO.getTopology().getElements().iterator();
+            while (elementIterator.hasNext()) {
+                var element = elementIterator.next();
+                if (Boolean.TRUE.equals(element.getIsAuxiliary())) {
+                    // 辅助节点整个隐藏
+                    elementIterator.remove();
+                    if (sceneDataBO.getPlugins() == null) {
+                        continue;
+                    }
+                    // 隐藏插件节点
+                    sceneDataBO.getPlugins().values().forEach(plugin -> {
+                        // 处理节点
+                        if (plugin.getElements() != null) {
+                            plugin.getElements().remove(element.getId());
+                        }
+                        // 处理端口
+                        if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                            element.getPorts().forEach(p -> {
+                                if (plugin.getElementPorts() != null) {
+                                    plugin.getElementPorts().remove(p.getId());
+                                }
+                            });
+                        }
+                    });
+                } else if (CollectionUtils.isNotEmpty(element.getPorts())) {
+                    // 其他节点隐藏辅助端口
+                    var portIterator = element.getPorts().iterator();
+                    while (portIterator.hasNext()) {
+                        var port = portIterator.next();
+                        if (Boolean.TRUE.equals(port.getIsAuxiliary())) {
+                            // 辅助端口隐藏
+                            portIterator.remove();
+                            if (sceneDataBO.getPlugins() == null) {
+                                continue;
+                            }
+                            // 处理插件中的端口
+                            sceneDataBO.getPlugins().values().forEach(plugin -> {
+                                if (plugin.getElementPorts() != null) {
+                                    plugin.getElementPorts().remove(port.getId());
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene) {
@@ -422,9 +531,51 @@ public class CsceneDataModifier {
                         }
                         sceneElement.setFile(baseAppConfig.getFdfsOuterHttpServer() + sceneElement.getFile());
                     }
+                    if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+                        sceneElement.getPorts().forEach(p -> {
+                            if (p != null) {
+                                BaseSceneElementPortBO port = (BaseSceneElementPortBO) p;
+                                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                                    List<AccessMode> accessModes = port.getAccessModes();
+                                    accessModes.forEach(accessMode -> {
+                                        String secretPath = addFilePrefix(accessMode.getPrivateKeyPath(), baseAppConfig.getFdfsOuterHttpServer());
+                                        accessMode.setPrivateKeyPath(secretPath);
+                                    });
+                                }
+                            }
+                        });
+                    }
                 });
             }
+            if (baseSceneDataBO.getPlugins() != null && baseSceneDataBO.getPlugins().get("cpcloud") != null) {
+                ScenePluginDataBO scenePluginDataBO = (ScenePluginDataBO) baseSceneDataBO.getPlugins().get("cpcloud");
+                if (scenePluginDataBO.getElementPorts() != null) {
+                    scenePluginDataBO.getElementPorts().values().forEach(p -> {
+                        if (p.get("access_modes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("access_modes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("secret_path") != null) {
+                                    accessMode.put("secret_path", addFilePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
+    }
+
+    private static String addFilePrefix(String path, String prefix) {
+        if (StringUtils.isEmpty(path)) {
+            return path;
+        }
+        if (!StringUtils.startsWith(path, prefix)) {
+            if (!StringUtils.startsWith(path, "/")) {
+                path = "/" + path;
+            }
+            path = prefix + path;
+        }
+        return path;
     }
 
     public static void checkFlowNum(CsceneBO csceneBO) {
@@ -450,6 +601,43 @@ public class CsceneDataModifier {
                 elements.values().forEach(e -> {
                     if (e.get("vlan_id") == null || e.get("vlan_id").equals(StringUtils.EMPTY)) {
                         e.put("vlan_id", 0);
+                    }
+                });
+            }
+        }
+    }
+
+    public static void checkIngressAndEgress(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getElements() != null) {
+            var elements = csceneBO.getSceneConfig().getTopology().getElements();
+            if (elements != null && elements.size() > 0) {
+                elements.forEach(e -> {
+                    if (e.getPorts() != null && e.getPorts().size() > 0) {
+                        e.getPorts().forEach(p -> {
+                            if (p.getIngress() == null) {
+                                p.setIngress(-1);
+                            }
+                            if (p.getEgress() == null) {
+                                p.setEgress(-1);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    public static void correctQuickCreateSupport(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud");
+            if (elements.getElements() != null) {
+                elements.getElements().values().forEach(e -> {
+                    // 有软件需要安装的 quick_create_support 设置为true
+                    if (e.get("quick_create_params") != null) {
+                        Collection list = (Collection) e.get("quick_create_params");
+                        if (list.size() > 0) {
+                            e.put("quick_create_support", true);
+                        }
                     }
                 });
             }

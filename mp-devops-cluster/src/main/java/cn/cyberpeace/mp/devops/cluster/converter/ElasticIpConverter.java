@@ -1,20 +1,16 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -26,20 +22,8 @@ public class ElasticIpConverter implements BaseConverter {
 
     private NetworkService networkService;
 
-    @Autowired
     public ElasticIpConverter(NetworkService networkService) {
         this.networkService = networkService;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
 
@@ -52,10 +36,7 @@ public class ElasticIpConverter implements BaseConverter {
     public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        final ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getFloatingips())){
-            return null;
-        }
+        ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
         List<ElasticIpConvertModel.Model> list = model.getFloatingips().stream().map(elasticIpModel ->
                 ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
                         .fixedIpAddress(elasticIpModel.getFixedIpAddress())

@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ public class SnapshotConverter {
 
     private ScenariosService scenariosService;
 
-    @Autowired
     public SnapshotConverter(SnapshotService snapshotService, ScenariosService scenariosService) {
         this.snapshotService = snapshotService;
         this.scenariosService = scenariosService;
@@ -64,6 +62,7 @@ public class SnapshotConverter {
         List<SnapshotConvertModel> resultList = new ArrayList<>();
         SnapshotConvertModel snapshotConvertModel = new SnapshotConvertModel(model.getDeviceUuid(), model.getImageName(), model.getDeviceName(), model.getDeviceUuid(),
                 "", null);
+        snapshotConvertModel.setQuickCreateParams(model.getQuickCreateParams());
         DeviceAndSnapshotConvertModel convertModel = new DeviceAndSnapshotConvertModel();
         convertModel.setDeviceName(model.getDeviceName());
         convertModel.setDeviceUuid(model.getDeviceUuid());

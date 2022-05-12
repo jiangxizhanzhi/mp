@@ -1,13 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -27,17 +25,6 @@ public class RouterConverter implements BaseConverter{
         this.routerService = routerService;
     }
 
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
     /**
      * 分页查询路由信息
      * @param request
@@ -48,9 +35,6 @@ public class RouterConverter implements BaseConverter{
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         RouterCloudPlatformModel model = routerService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getRouters())){
-            return null;
-        }
         List<RouterModel> routers = model.getRouters();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())

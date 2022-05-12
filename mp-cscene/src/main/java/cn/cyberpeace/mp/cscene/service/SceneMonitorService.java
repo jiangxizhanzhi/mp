@@ -54,7 +54,7 @@ public class SceneMonitorService {
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
@@ -197,7 +197,7 @@ public class SceneMonitorService {
         log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
 
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
+        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
         if (CollectionUtil.isEmpty(translatedSceneIds)) {
             return new ArrayList<>();
         }
@@ -211,7 +211,7 @@ public class SceneMonitorService {
      */
     public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
         log.info("{}", request);
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
+        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
         if (CollectionUtil.isEmpty(translatedSceneIds)) {
             return new ArrayList<>();
         }

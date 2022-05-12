@@ -17,14 +17,10 @@ import cn.cyberpeace.mp.devops.cluster.response.InstallerByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,7 +39,6 @@ public class InstallerController {
 
     private InstallerConverter installerConverter;
 
-    @Autowired
     public InstallerController(InstallerConverter installerConverter) {
         this.installerConverter = installerConverter;
     }
@@ -55,14 +50,12 @@ public class InstallerController {
     @GetMapping("/page")
     public PageResult<InstallerPageResponse> page(InstallerPageRequest request){
         InstallerConvertPageModel model = installerConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
 
         List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
                 InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
                         .categories(installer.getCategories()).deployType(installer.getDeployType())
+                        .startUpParameterList(installer.getStartUpParameterList())
                         .build()
         ).collect(Collectors.toList());
 

@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
@@ -17,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.InstallerDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MainTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,7 +59,6 @@ public class ImagesConverter implements BaseConverter{
 
     private TargetConverter targetConverter;
 
-    @Autowired
     public ImagesConverter(ImagesService imagesService, ImageMapper imageMapper,
                            DeviceService deviceService, ImageAuthMapper imageAuthMapper,
                            VmService vmService,ContainerService containerService,
@@ -76,17 +74,6 @@ public class ImagesConverter implements BaseConverter{
         this.userService = userService;
         this.scenariosService = scenariosService;
         this.targetConverter = targetConverter;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getLimit,BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**
@@ -207,7 +194,16 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public Device build(ImagesBuildRequest request) {
-        Device device =  imagesService.quickCreate(new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName(),request.getServiceIds()));
+        DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
+        List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
+        List<DeviceQuickCreateCloudPlatformModel.QuickCreateParams> quickCreateParams = installerDTOList.stream().map(v -> {
+            DeviceQuickCreateCloudPlatformModel.QuickCreateParams params = new DeviceQuickCreateCloudPlatformModel.QuickCreateParams();
+            params.setInstallerUuid(v.getUuid());
+            params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
+            return params;
+        }).collect(Collectors.toList());
+        model.setQuickCreateParams(quickCreateParams);
+        Device device =  imagesService.quickCreate(model);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
@@ -218,11 +214,11 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Boolean delete(ImagesDeleteRequest request) {
+    public BaseCloudPlatformModel delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
-        Boolean result = deviceService.deleteByIds(request.getImageIds());
+        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getImageIds());
 
-        if (CollectionUtils.isNotEmpty(request.getImageIds())){
+        if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
             imageMapper.delete(dto);

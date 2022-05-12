@@ -1,9 +1,13 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
@@ -28,8 +32,11 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ResumeHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.SuspendHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.UnpauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.modelhandler.CloudScenePluginModelHandler;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.TopoReformUtils;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 
 @ClassFieldClasses({
@@ -350,5 +358,56 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             }
         });
         return super.toData();
+    }
+
+    @Override
+    public void reformTopo() {
+        TopoReformUtils topoReformUtils = new TopoReformUtils(this);
+        var coreRouters = getElementMap().values().stream()
+                .filter(e -> ElementTypeUtils.isCoreRouter(e))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(coreRouters)) {
+            // 存在核心路由器 需要新增一个隐藏的交换机节点
+            var hiddenSwitch = topoReformUtils.addAuxiliarySwitchNode();
+            coreRouters.forEach(c -> {
+                // 交换机新增一个端口
+                var switchPort = topoReformUtils.addAuxiliaryPort(hiddenSwitch.getPluginElement());
+                // 核心路由器新增一个端口 端口默认有telnet接入方式
+                var coreRouterPort = topoReformUtils.addAuxiliaryPort(c);
+                topoReformUtils.addAuxiliaryAccessMode(coreRouterPort.getPluginPort(), AccessMode.Protocol.TELNET);
+                // 交换机和核心路由器新增一根连线
+                topoReformUtils.addConnect(switchPort.getScenePort(), coreRouterPort.getScenePort());
+            });
+        }
+    }
+
+    /**
+     * 向插件和topo中新增一个节点
+     * @param nodeId
+     * @param pluginElement
+     * @param srcElement
+     */
+    public void addElementAndSrcElement(String nodeId, CloudPluginSceneElementBO pluginElement, SceneElementBO srcElement) {
+        pluginElement.setSrcElement(srcElement);
+        getElementIds().add(nodeId);
+        getElementMap().put(nodeId, pluginElement);
+        this.getSceneHandler().getElementMap().put(nodeId, pluginElement.getSrcElement());
+        this.getSceneHandler().addElementPlugin(PluginConstant.PLUGIN_KEY, nodeId, JsonCommon.beanToSnakeMap(pluginElement));
+    }
+
+    /**
+     * 向插件和topo中新增一个端口
+     * @param portId
+     * @param pluginPort
+     * @param srcPort
+     */
+    public void addPortAndSrcPort(String portId, CloudPluginSceneElementPortBO pluginPort, SceneElementPortBO srcPort) {
+        pluginPort.setSrcPort(srcPort);
+        getElementPortIds().add(portId);
+        getElementPortMap().put(portId, pluginPort);
+        this.getSceneHandler().getElementPortMap().put(portId, srcPort);
+        this.getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(pluginPort));
+        // 处理辅助变量
+        this.getSceneHandler().addPort(portId, srcPort.getElement());
     }
 }

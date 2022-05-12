@@ -1,20 +1,20 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorStatisticsResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_INFO_URL;
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -39,9 +39,7 @@ public class HypervisorService extends BaseOpenStackService {
      */
     public HypervisorStatisticsCloudPlatformModel statistics(){
         HypervisorStatisticsResult result = super.sendGet(URL_VERSION + HYPERVISORS + "/statistics", HypervisorStatisticsResult.class);
-        if (Objects.isNull(result)){
-            return null;
-        }
+        super.checkResult(result);
         HypervisorStatisticsCloudPlatformModel model = new HypervisorStatisticsCloudPlatformModel();
         model.setHypervisorStatistics(result.getData());
         model.setCode(result.getCode());
@@ -54,12 +52,10 @@ public class HypervisorService extends BaseOpenStackService {
      * @return
      */
     public HypervisorCloudPlatformModel page(String getParams){
-        HypervisorPageResult pageResult =  super.sendGet(URL_VERSION + HYPERVISORS + getParams, HypervisorPageResult.class);
-        if (Objects.isNull(pageResult) || Objects.isNull(pageResult.getData())){
-            return null;
-        }
-        CloudPlatformPageResult<Hypervisor> data = pageResult.getData();
-        List<Hypervisor> hypervisors = data.getList();
+        CloudPlatformPageResult pageResult =  super.sendGet(URL_VERSION + HYPERVISORS + getParams, CloudPlatformPageResult.class);
+        super.checkResult(pageResult);
+        CloudPlatformPageData<Hypervisor> data = pageResult.getData();
+        List<Hypervisor> hypervisors = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), Hypervisor.class);
         HypervisorCloudPlatformModel model = new HypervisorCloudPlatformModel();
         model.setHypervisors(CollectionUtils.isEmpty(hypervisors) ? Lists.newArrayList() : hypervisors);
         model.setTotal(data.getTotal());

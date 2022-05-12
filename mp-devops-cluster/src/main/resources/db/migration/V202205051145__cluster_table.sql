@@ -1,0 +1,1 @@
+alter table mp_devops_target add parent_system_type int(8) null comment '一级系统类型' after use_status;

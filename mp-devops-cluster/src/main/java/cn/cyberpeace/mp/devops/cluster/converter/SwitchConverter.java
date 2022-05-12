@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.SwitchesCloudPlatform;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ public class SwitchConverter {
 
     private SwitchService switchService;
 
-    @Autowired
     public SwitchConverter(SwitchService switchService) {
         this.switchService = switchService;
     }

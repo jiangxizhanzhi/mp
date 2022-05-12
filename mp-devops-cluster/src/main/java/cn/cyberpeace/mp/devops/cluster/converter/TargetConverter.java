@@ -19,7 +19,6 @@ import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -40,8 +39,6 @@ public class TargetConverter{
 
     private CsceneSpecialService csceneSpecialService;
 
-
-    @Autowired
     public TargetConverter(ImageMapper imageMapper, DeviceService deviceService,
                                CsceneSpecialService csceneSpecialService) {
         this.imageMapper = imageMapper;

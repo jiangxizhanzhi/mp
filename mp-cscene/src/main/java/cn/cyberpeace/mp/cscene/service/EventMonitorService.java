@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 public class EventMonitorService {
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -74,7 +74,7 @@ public class EventMonitorService {
         log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         BaseRequestUtil.processDefaultTimeRange(request);
-        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
 
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
@@ -97,7 +97,7 @@ public class EventMonitorService {
         BaseRequestUtil.processDefaultTimeRange(request);
 
         List<String> sceneIds = CollectionUtil.toList(request.getSceneId());
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 
         List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
@@ -163,7 +163,11 @@ public class EventMonitorService {
     public EventAggr aggrByEventType(BaseTimeRangeRequest request) {
         Long sumFromEs = sumEvent(request);
 
-        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(request.getSceneId(), request.getElementIds());
+        EventAggr eventAggr = new EventAggr();
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return eventAggr;
+        }
 
         Map<String, Long> aggsProcessesMap = aggProcessCount(agentNames);
         Map<String, Long> aggsPortsMap = aggPortCount(agentNames);
@@ -175,13 +179,13 @@ public class EventMonitorService {
 
         Long sum = sumFromEs + processSum + portSum + netConnsSum;
 
-        EventAggr eventAggr = new EventAggr();
         eventAggr.setProcess(toRoundPercent(processSum, sum));
-        // todo 文件和用户类型事件区分
-        eventAggr.setFile(22.62);
         eventAggr.setPort(toRoundPercent(portSum, sum));
         eventAggr.setNetwork(toRoundPercent(netConnsSum, sum));
-        eventAggr.setUser(16.67);
+
+        // todo 文件和用户类型事件区分
+        eventAggr.setFile(toRoundPercent(sumFromEs, sum));
+        eventAggr.setUser(0.0);
 
         return eventAggr;
     }
@@ -215,7 +219,7 @@ public class EventMonitorService {
 //        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
 //
 //        List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
-        List<String> agentNames = sceneTranslationService.getAgentNamesBySceneIdAndElementIds(sceneIds.get(0), elementIds);
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(sceneIds.get(0), elementIds);
 
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 

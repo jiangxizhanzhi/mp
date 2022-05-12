@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionFlowTableService;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +43,9 @@ public class ProbeCollector {
     public void deleteCollector(String collectorId) {
     }
 
-    public String generateProbeInstallScript(String systemType, String agentName, String collectorId,
-                                             List<WazuhControl.ControlProbeParam> controlProbeParams) {
-        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlProbeParams);
+    public List<String> generateProbeInstallScript(String systemType, String agentName, String collectorId,
+                                                   WazuhControl.ControlConfigParam controlParam, boolean isContainer) {
+        return WazuhCommon.generateWazuhAgentInstallScript(systemType, agentName, getWazuhHost(collectorId), controlParam, isContainer);
     }
 
 }

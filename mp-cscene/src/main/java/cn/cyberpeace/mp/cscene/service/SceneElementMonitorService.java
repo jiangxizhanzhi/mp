@@ -12,12 +12,14 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
-import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
+import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -61,14 +63,14 @@ public class SceneElementMonitorService {
     private CsceneSpecialService csceneSpecialService;
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
      *
      * @return
      */
-    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
+    public ElementMonitorBasicInfo getElementMonitorInfo(BaseSceneElementRequest baseRequest, boolean fetchRealTimeHostState) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
         String sceneId = baseRequest.getSceneId();
@@ -79,32 +81,30 @@ public class SceneElementMonitorService {
 
         ElementMonitorBasicInfo elementMonitorBasicInfo = new ElementMonitorBasicInfo();
         elementMonitorBasicInfo.setSceneId(sceneId);
-        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, true);
+        processTopologyElement(elementMonitorBasicInfo, csceneInstanceBO, elementId, fetchRealTimeHostState);
         processPluginElement(elementMonitorBasicInfo, csceneInstanceBO, elementId);
 
         // todo 节点实时信息
-        ElementRTInfo rtInfo = new ElementRTInfo();
-        rtInfo.setUserCount(0);
-        rtInfo.setProcessCount(0);
-        rtInfo.setPortsCount(0);
-        rtInfo.setConnectionCount(0);
+        ElementRTInfo rtInfo = processRTInfo(baseRequest);
 
         elementMonitorBasicInfo.setRtInfo(rtInfo);
 
         return elementMonitorBasicInfo;
     }
 
+
+
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
-        if (!checkCsceneIsRunning(pageRequest.getSceneId())) {
+        if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }
 
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
         listPageInfoQueryParams.setPage(pageRequest.getPage());
         listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
-        listPageInfoQueryParams.setSceneIds(sceneTranslationService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
         listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
         ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
 
@@ -117,6 +117,20 @@ public class SceneElementMonitorService {
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
     }
 
+    public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+//        String sceneId = baseRequest.getSceneId();
+//        String elementId = baseRequest.getElementIds().get(0);
+
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+//        listPageInfoQueryParams.setPage(pageRequest.getPage());
+//        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
+        int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams);
+        return sum;
+    }
+
 
     /**
      * 获取节点实时数据
@@ -125,41 +139,7 @@ public class SceneElementMonitorService {
      */
     public ElementRTInfo getElementRTInfo(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
-
-        ElementRTInfo rtInfo = new ElementRTInfo();
-        rtInfo.setProcessCount(0);
-        rtInfo.setPortsCount(0);
-        rtInfo.setConnectionCount(0);
-        // 以下为假数据
-        rtInfo.setUserCount(1);
-        rtInfo.setFileOpCount(5);
-        rtInfo.setRegistryOpCount(5);
-        rtInfo.setEnvOpCount(5);
-
-        ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-        params.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
-        params.setNodeIds(baseRequest.getElementIds());
-        // todo 1201 实时状态
-        ListObjServiceResult<Port> ports = hostStateService.pagePorts(params);
-        ListObjServiceResult<Process> processes = hostStateService.pageProcesses(params);
-
-        BaseSceneElementPageRequest pageRequest = new BaseSceneElementPageRequest();
-        pageRequest.setSceneId(baseRequest.getSceneId());
-        pageRequest.setElementIds(baseRequest.getElementIds());
-        ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
-
-        if (CollectionUtil.isNotEmpty(conns.getSource().getObjs())) {
-            rtInfo.setConnectionCount(conns.getSource().getObjs().size());
-        }
-
-        if (CollectionUtil.isNotEmpty(ports.getSource().getObjs())) {
-            rtInfo.setPortsCount(ports.getSource().getObjs().size());
-        }
-
-        if (CollectionUtil.isNotEmpty(processes.getSource().getObjs())) {
-            rtInfo.setProcessCount(processes.getSource().getObjs().size());
-        }
+        ElementRTInfo rtInfo = processRTInfo(baseRequest);
 
         return rtInfo;
     }
@@ -210,25 +190,17 @@ public class SceneElementMonitorService {
                 resource = new HostState();
             }
 
-            resource.setCpuCount(Optional.ofNullable(sceneElementBO.getCpu()).orElse(0));
-
-            // 内存大小
-            Integer memSize = Optional.ofNullable(sceneElementBO.getRam()).orElse(0);
-            //        double memSizeInGb = NumberUtil.round(memSizeInMb / 1024.0, 2).doubleValue();
-            resource.setMemoryTotal(Long.valueOf(memSize));
-
-            // 磁盘大小
-            Integer diskSize = Optional.ofNullable(sceneElementBO.getDisk()).orElse(0);
-            resource.setDiskSpace(Long.valueOf(diskSize));
-
             BaseSceneElementRequest request = new BaseSceneElementRequest();
             request.setSceneId(basicInfo.getSceneId());
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
 
             List<HostState> hostStates = hostStateService.getHostStates(request);
-//            List<HostState> hostStates = hostStateService.getHostStatesFromWazuh(basicInfo.getSceneId(), sceneElementBO.getEid(), csceneInstanceBO.getCreateTime(), LocalDateTime.now());
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);
+                resource.setCpuCount(hostState.getCpuCount());
+                resource.setMemoryTotal(hostState.getMemoryTotal());
+                resource.setDiskSpace(hostState.getDiskSpace());
+
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryFree(hostState.getMemoryFree());
@@ -279,12 +251,6 @@ public class SceneElementMonitorService {
     }
 
 
-    private boolean checkCsceneIsRunning(String csceneId) {
-        ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
-        SceneStateInfo sceneStateInfo = result.getSource();
-        return sceneStateInfo.isRunning();
-    }
-
     private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
         ConnectionState connectionState = new ConnectionState();
         connectionState.setState(model.getStatus());
@@ -299,4 +265,88 @@ public class SceneElementMonitorService {
 
         return connectionState;
     }
+
+    /**
+     * 处理节点实时信息，用户，进程，端口，网络连接
+     * @param baseRequest
+     * @return
+     */
+    private ElementRTInfo processRTInfo(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        ElementRTInfo rtInfo = new ElementRTInfo();
+
+        // 用户
+        rtInfo.setUserCount(countNodeSessionUsers(baseRequest));
+
+        ListPageInfoQueryParams portsParams = new ListPageInfoQueryParams();
+        portsParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        portsParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<Port> portsResult = hostStateService.pagePorts(portsParams);
+
+        // pagePorts内部有sceneId转换动作，这里pageProcesses不能共用一个param
+        ListPageInfoQueryParams processParams = new ListPageInfoQueryParams();
+        processParams.setSceneIds(CollectionUtil.toList(baseRequest.getSceneId()));
+        processParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<Process> processesResult = hostStateService.pageProcesses(processParams);
+
+        BaseSceneElementPageRequest pageRequest = new BaseSceneElementPageRequest();
+        pageRequest.setSceneId(baseRequest.getSceneId());
+        pageRequest.setElementIds(baseRequest.getElementIds());
+        ListObjServiceResult<ConnectionState> conns = pageNetworkConnections(pageRequest);
+
+        if (Objects.nonNull(conns.getSource().getTotal())) {
+            // 网络连接
+            rtInfo.setConnectionCount(conns.getSource().getTotal());
+        }
+
+        if (Objects.nonNull(portsResult.getSource().getTotal())) {
+            // 端口
+            rtInfo.setPortsCount(portsResult.getSource().getTotal());
+        }
+
+        if (Objects.nonNull(processesResult.getSource().getTotal())) {
+            // 进程
+            rtInfo.setProcessCount(processesResult.getSource().getTotal());
+        }
+
+        // 文件
+        HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+        hostEventQueryParams.setNodeIds(baseRequest.getElementIds());
+        ListObjServiceResult<CollectionHostEventBO> fileResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
+        if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
+            // 文件数量包含其他所有类型，所以这里不会剔除注册表数量
+           rtInfo.setFileOpCount(fileResult.getSource().getTotal());
+        }
+
+        // 注册表
+        hostEventQueryParams.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
+        ListObjServiceResult<CollectionHostEventBO> registryResult = csceneInstanceService.listHostEvents(baseRequest.getSceneId(), hostEventQueryParams);
+        if (CollectionUtil.isNotEmpty(fileResult.getSource().getObjs())) {
+            // 注册表数量
+            rtInfo.setRegistryOpCount(registryResult.getSource().getTotal());
+        }
+
+        // todo 文件操作，注册表变动，环境变量变动
+        // todo 环境变量
+        int envVarChangedCount = sumEnvVarChangedCount(baseRequest);
+        rtInfo.setEnvOpCount(envVarChangedCount);
+
+        return rtInfo;
+    }
+
+    /**
+     * 统计节点当前登录用户数量
+     * @param baseSceneElementRequest
+     * @return
+     */
+    private int countNodeSessionUsers(BaseSceneElementRequest baseSceneElementRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseSceneElementRequest);
+        ServiceResult<List<UserNodeSessionInfo>> result = csceneInstanceService.getNodeSessions(CollectionUtil.toList(baseSceneElementRequest.getSceneId()), baseSceneElementRequest.getElementIds(), null, null);
+        if (CollectionUtil.isNotEmpty(result.getSource())) {
+            return result.getSource().size();
+        } else {
+            return 0;
+        }
+    }
+
 }

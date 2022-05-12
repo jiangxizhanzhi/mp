@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -79,6 +80,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowScriptParamServiceImpl flowScriptParamService;
+
+    @Autowired
+    private FlowCollectionRelServiceImpl flowCollectionRelService;
 
     /**
      * 预制流量文件目录
@@ -246,6 +250,28 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     }
 
     /**
+     * 根据集合id批量查询
+     * @param request
+     * @return
+     */
+    public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
+        // 查询流量集合关联流量信息
+        List<FlowCollectionRelModel> flowCollectionRelModels =
+                flowCollectionRelService.selectByCollectionIds(request.getCollectionIds());
+        if (CollectionUtils.isEmpty(flowCollectionRelModels)) {
+            return ServiceResult.success(new ArrayList<>());
+        }
+
+        List<String> flowIds =
+                flowCollectionRelModels.stream().map(FlowCollectionRelModel::getFlowId).collect(Collectors.toList());
+        FlowInfoQueryParams queryParams = new FlowInfoQueryParams();
+        queryParams.setIds(flowIds.toArray(new String[0]));
+        ListObjServiceResult<FlowInfoResponse> listObjServiceResult = pageFlowInfo(queryParams);
+
+        return ServiceResult.success(listObjServiceResult.getSource().getList());
+    }
+
+    /**
      * 背景流量详情
      * @param id
      * @return
@@ -379,6 +405,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 paramModel.setParamValue(paramArray.getString(1));
                 // 参数描述
                 paramModel.setParamDesc(paramArray.getString(2));
+
+                // 参数校验
+                if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 ||
+                        paramModel.getParamDesc().length() > 2048) {
+                    log.error("param length is invalid");
+                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                }
+
                 scriptParamModels.add(paramModel);
             });
 

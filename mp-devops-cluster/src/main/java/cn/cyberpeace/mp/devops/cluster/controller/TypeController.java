@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +46,6 @@ public class TypeController {
 
     private SwitchConverter switchConverter;
 
-    @Autowired
     public TypeController(TypeConverter typeConverter,TypeService typeService,SerialPortConverter serialPortConverter,
                           SwitchConverter switchConverter) {
         this.typeConverter = typeConverter;
@@ -94,10 +92,14 @@ public class TypeController {
      */
     @ApiOperation("查询所有镜像管理分类")
     @GetMapping("/image-mg-categories")
-    public Result<TypeAllResponse> imageCategories(){
-        TypeAllConvertModel roles = typeConverter.findRoles();
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        TypeAllConvertModel imageType = typeConverter.findImageType();
+    public Result<TypeAllResponse> imageCategories(Boolean isAll){
+        if (Objects.isNull(isAll)){
+            isAll = Boolean.FALSE;
+        }
+        TypeAllConvertModel roles = typeConverter.findRoles(isAll);
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type(isAll);
+        TypeAllConvertModel imageType = typeConverter.findImageType(isAll);
+        TypeAllConvertModel diskFormat = typeConverter.findDiskFormat();
         TypeAllResponse allResponse = new TypeAllResponse();
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);
@@ -107,6 +109,7 @@ public class TypeController {
         allResponse.setHwDiskBusList(typeConverter.findHwDiskBus());
         allResponse.setHwVifModelList(typeConverter.findHwVifModel());
         allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
+        allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
         return new Result<>(allResponse);
     }
 

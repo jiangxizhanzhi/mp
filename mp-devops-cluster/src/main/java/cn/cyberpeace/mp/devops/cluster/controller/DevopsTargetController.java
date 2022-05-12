@@ -31,7 +31,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,18 +59,17 @@ public class DevopsTargetController {
 
     private DeviceVoConverter deviceVoConverter;
 
-    @Autowired
     private ITask asyncTargetTask;
 
-    @Autowired
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService,IpAddressConfig ipAddressConfig,
-                                  DeviceVoConverter deviceVoConverter) {
+                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
         this.ipAddressConfig = ipAddressConfig;
         this.deviceVoConverter = deviceVoConverter;
+        this.asyncTargetTask = asyncTargetTask;
     }
 
     /**

@@ -37,6 +37,8 @@ public class QuickCreateParam {
         private String userFilename;
         @ApiModelProperty(value = "临时文件id")
         private String tmpdirUuid;
+        @ApiModelProperty(value = "执行命令")
+        private String command;
     }
 
     @Data

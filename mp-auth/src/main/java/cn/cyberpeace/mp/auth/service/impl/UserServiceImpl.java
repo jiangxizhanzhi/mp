@@ -562,12 +562,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             Locale locale = LocaleContextHolder.getLocale();
 
-            String res = "excel/import_template.xls";
-            String fileName = "用户列表.xls";
+            String res = "excel/import_template.xlsx";
+            String fileName = "用户列表.xlsx";
 
             if (Objects.equals(locale, Locale.US)) {
-                res = "excel/import_template_en.xls";
-                fileName = "UserList.xls";
+                res = "excel/import_template_en.xlsx";
+                fileName = "UserList.xlsx";
             }
 
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(res);
@@ -748,8 +748,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userDto.setRoles(roles);
 
-            boolean isAdmin = roles.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-            boolean isSuperUser = userModel.getId().equals(AuthConstant.ROOT_USER_ID);
+            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ROLE_ADMIN));
+            boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             if (isAdmin) {
                 userDto.setIsAdmin(1);

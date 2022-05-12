@@ -25,7 +25,7 @@ public abstract class AbstractClearJob<Q> {
     protected static final int OFFSET = 1;
     protected static final int LIMIT = 10;
 
-    private SceneElementMapper sceneElementMapper;
+    protected SceneElementMapper sceneElementMapper;
 
     public AbstractClearJob(SceneElementMapper sceneElementMapper) {
         this.sceneElementMapper = sceneElementMapper;

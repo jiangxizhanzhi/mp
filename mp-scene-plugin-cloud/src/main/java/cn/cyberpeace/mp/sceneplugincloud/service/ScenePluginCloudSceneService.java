@@ -335,6 +335,8 @@ public class ScenePluginCloudSceneService {
             recording.setOrgName(rawRecording.getDepartment());
             recording.setFileUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                     String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
+            recording.setPlayUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
+                    String.format(CloudUrlConstant.RECORDING_PLAY_URL, rawRecording.getRecordingFile())));
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
@@ -377,7 +379,8 @@ public class ScenePluginCloudSceneService {
             return new ServiceResult<>(null, CloudErrorCode.CONNECTION_NOT_EXIST);
         }
         var connectionLinkInfo = connectionLinkInfoMap.get(connectionId);
-        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+//        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
+        CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
     }
 
@@ -417,6 +420,7 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setSceneName(srcScene.getName());
         sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
+        sceneConnectionParam.setEntity(cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         var sceneConnection = CloudSceneConnectionCommon.getOrCreateSceneConnection(sceneConnectionParam);
         if (sceneConnection == null) {
             return new ServiceResult<>(null);

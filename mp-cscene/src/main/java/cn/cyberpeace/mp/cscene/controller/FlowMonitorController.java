@@ -10,11 +10,19 @@ import cn.cyberpeace.mp.cscene.dto.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
-import cn.cyberpeace.mp.cscene.dto.flow.*;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowCommonRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowSceneSimulationRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
+import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
+import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
-import cn.cyberpeace.mp.cscene.service.SceneTranslationService;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CategoryGroupBO;
@@ -50,6 +58,9 @@ public class FlowMonitorController {
 
     @Autowired
     private FlowMonitorService flowMonitorService;
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
 
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
@@ -177,15 +188,12 @@ public class FlowMonitorController {
     }
 
 
-    @Autowired
-    private SceneTranslationService sceneTranslationService;
-
     @ApiOperation(value = "资产统计", notes = "资产统计")
     @GetMapping("/assets_statistics")
     public ServiceResult<List<AssetsStatisticsResponse>> getAssetsStatistics(AssetsStatisticsRequest request) {
         log.info("assets_statistics params: {}", JsonCommon.stringify(request));
         // 转换场景id
-        List<String> sceneIds = sceneTranslationService.translateSceneIds(request.getSceneIds());
+        List<String> sceneIds = csceneCommonService.translateSceneIds(request.getSceneIds());
         if (CollectionUtils.isEmpty(sceneIds)) {
             log.error("translateSceneIds is null");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -210,10 +218,10 @@ public class FlowMonitorController {
                     .sceneId(id)
                     .assetsTotal(sceneAssetsBO.getNodeCount())
                     .ipTotal(sceneAssetsBO.getIpCount())
-                    .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.size() : 0)
-                    .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.size() : 0)
-                    .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.size() : 0)
-                    .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.size() : 0)
+                    .operationSystemCount(CollectionUtils.isNotEmpty(osList) ? osList.get(0).getElements().size() : 0)
+                    .applicationSystemCount(CollectionUtils.isNotEmpty(asList) ? asList.get(0).getElements().size() : 0)
+                    .networkCount(CollectionUtils.isNotEmpty(networkList) ? networkList.get(0).getElements().size() : 0)
+                    .safetySystemCount(CollectionUtils.isNotEmpty(ssList) ? ssList.get(0).getElements().size() : 0)
                     .build();
             responseList.add(response);
         });

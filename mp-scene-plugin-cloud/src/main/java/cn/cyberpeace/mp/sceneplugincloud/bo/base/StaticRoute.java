@@ -8,9 +8,11 @@ import lombok.Data;
 @Data
 public class StaticRoute {
     @ApiModelProperty(value = "目的地址(cidr)")
-    @Cidr
+    @Cidr(message = "{sceneplugincloud.validation.cidr}")
     private String destination;
     @ApiModelProperty(value = "下一跳地址")
-    @IpAddress
+    @IpAddress(message = "{sceneplugincloud.validation.ip_address}")
     private String nexthop;
+    @ApiModelProperty(value = "下一跳接口Id")
+    private String nexthopPortId;
 }

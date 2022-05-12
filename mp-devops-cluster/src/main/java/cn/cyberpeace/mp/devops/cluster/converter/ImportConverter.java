@@ -1,17 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImportService;
 import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,21 +32,9 @@ public class ImportConverter implements BaseConverter{
     @Value("${mp.devops.max-target-size:100}")
     private String maxTargetSize;
 
-    @Autowired
     public ImportConverter(ImportService importService, SysActivationService sysActivationService) {
         this.importService = importService;
         this.sysActivationService = sysActivationService;
-    }
-
-    @Override
-    public String[] getDefaultPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getPage,BasePageRequest::getPerPage);
-    }
-
-    @Override
-    public String[] getTotalPageIgnoreField() {
-        return BeanUtils.getBeanGetterFieldNames(BasePageRequest::getOffset,
-                BasePageRequest::getPage,BasePageRequest::getPerPage);
     }
 
     /**

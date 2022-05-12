@@ -3,12 +3,15 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.base.util.es.EsConstants;
+import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
@@ -18,9 +21,10 @@ import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
+import cn.cyberpeace.mp.situationaware.model.sic.EnvVarOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
-import cn.cyberpeace.mp.situationaware.model.sic.NetConnOutput;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -33,6 +37,7 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
@@ -44,12 +49,17 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
+import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -92,9 +102,25 @@ public class DataCollectionService {
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
-    public static final String HOST_STATE_LAUNCH_ID = "eda72998ba654c8d8625f61eaa918eb3";
+    public static final String LAUNCH_ID_HOST_STATE = "eda72998ba654c8d8625f61eaa918eb3";
 
-    public static final String NET_CONNS_LAUNCH_ID = "09ffcc4a67ef4accb407a1555629d0f8";
+    public static final String LAUNCH_ID_NET_CONNS = "09ffcc4a67ef4accb407a1555629d0f8";
+
+    public static final String LAUNCH_ID_ENV_VAR = "32e9c4db9729440290e843bb6d80295b";
+
+    public static final String CACHE_KEY_FILE_EVENTS = "file_events";
+
+    public static final String CACHE_KEY_MONITOR_EVENTS = "monitor_events";
+
+    public static final String CACHE_KEY_HOST_STATE = "host_states";
+
+    public static final String CACHE_KEY_NET_CONN = "net_conn";
+
+    public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
+
+    public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
+
+    public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
 
 
     /**
@@ -103,8 +129,12 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -139,7 +169,11 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
@@ -201,6 +235,9 @@ public class DataCollectionService {
      */
     @Deprecated
     public List<DataCollectionEventModel> queryMonitorEventsAgg(WazuhMonitorEventsRequest wazuhMonitorEventsRequest){
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(LocalDateTime.now(), LocalDateTime.now());
         var searchRequest = new SearchRequest(indexArray);
@@ -243,8 +280,12 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, HOST_STATE_LAUNCH_ID);
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_HOST_STATE);
         List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
@@ -266,16 +307,18 @@ public class DataCollectionService {
         return wazuhModelList;
     }
 
-
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
-
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
 
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, NET_CONNS_LAUNCH_ID);
-        List<WazuhMonitorRoot<Launch<NetConnOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_NET_CONNS);
+        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<NetConnOutput, BaseInput>>>() {
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
                 })).collect(Collectors.toList());
 
         if (CollectionUtil.isEmpty(wazuhFileRootList)) {
@@ -283,10 +326,10 @@ public class DataCollectionService {
         }
 
         // 只取最近一条
-        WazuhMonitorRoot<Launch<NetConnOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
+        WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
         List<WazuhNetworkConnectionModel> list = new ArrayList<>();
         if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
-            NetConnOutput rawOutput = launchModel.getData().getOutput();
+            BaseRawOutput rawOutput = launchModel.getData().getOutput();
             if (StringUtils.isNotBlank(rawOutput.getRawOutput())) {
                 byte[] raw = TextUtils.rawDecodeBase64(rawOutput.getRawOutput().trim());
                 String output = TextUtils.decompress(raw);
@@ -302,6 +345,35 @@ public class DataCollectionService {
         }
 
         return list;
+    }
+
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
+    public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
+
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+
+        // todo
+//        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+//        List<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+//                .getHits()).map(hit ->
+//                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>>() {
+//                })).collect(Collectors.toList());
+//
+//        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+//            return 0;
+//        }
+//
+//        int sum = wazuhFileRootList.stream().mapToInt(r -> {
+//            String changedCount = r.getData().getOutput().getChangedCount();
+//            int changeCnt = Integer.parseInt(changedCount);
+//            return changeCnt;
+//        }).sum();
+
+        log.info("{}", sum);
+        return sum;
     }
 
 
@@ -346,6 +418,62 @@ public class DataCollectionService {
         }
     }
 
+
+    public int aggsEnvVarCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
+
+        if (StringUtils.isNotBlank(launchId)) {
+            boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", launchId));
+        }
+
+
+        BoolQueryBuilder nestedBoolQueryBuilder = QueryBuilders.boolQuery().must(QueryBuilders.rangeQuery("data.sic_launch_output.changed_count").gt(0L));
+        boolQueryBuilder.must(QueryBuilders.nestedQuery("data.sic_launch_output", nestedBoolQueryBuilder, ScoreMode.None));
+
+        String aggregationNested = "aggs_nested";
+        String aggregationSum = "aggs_changed_count_sum";
+        // build the aggregation
+        Script sumScript = new Script("Integer.parseInt(doc['data.sic_launch_output.changed_count'].value)");
+        NestedAggregationBuilder sumAggregationBuilder = AggregationBuilders.nested(aggregationNested, "data.sic_launch_output").subAggregation(AggregationBuilders.sum(aggregationSum).script(sumScript));
+
+        sourceBuilder.aggregation(sumAggregationBuilder);
+
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.size(0);
+        // 监控数据每个agent一条，所以这里分页大小设为agent数量的2倍
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
+
+        int changedCount = 0;
+        try {
+            log.info("es search start");
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            if (Objects.nonNull(response.getAggregations())) {
+                ParsedNested nested = response.getAggregations().get(aggregationNested);
+                ParsedSum sum = nested.getAggregations().get(aggregationSum);
+                changedCount = Double.valueOf(sum.getValue()).intValue();
+            }
+
+            return changedCount;
+        } catch (IOException e) {
+            log.error("es queryMonitorEventsWithTimeRange error: {}", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
     /**
      * 根据agent查询
      *
@@ -371,7 +499,7 @@ public class DataCollectionService {
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
 //        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-        boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", HOST_STATE_LAUNCH_ID));
+        boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", LAUNCH_ID_HOST_STATE));
         int agentSize = 0;
 
 //        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
@@ -411,8 +539,8 @@ public class DataCollectionService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //构造事件条件
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
     }
 
@@ -480,10 +608,14 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
-        String aggregationName = "aggs_count_by_agent_name";
         Map<String, Long> map = new LinkedHashMap<>();
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return map;
+        }
+        String aggregationName = "aggs_count_by_agent_name";
         wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
 
         //根据日期构造索引
@@ -532,8 +664,12 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return 0;
+        }
 
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
@@ -566,6 +702,9 @@ public class DataCollectionService {
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return 0L;
+        }
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var deleteByQueryRequest = new DeleteByQueryRequest(indexArray);
@@ -655,6 +794,14 @@ public class DataCollectionService {
      */
     private int processPageable(WazuhEventRequest wazuhEventRequest, String[] indexArray,
         BoolQueryBuilder boolQueryBuilder, SearchSourceBuilder sourceBuilder) {
+
+        if(Objects.isNull(wazuhEventRequest.getPageNum())) {
+            wazuhEventRequest.setPageNum(1);
+        }
+        if(Objects.isNull(wazuhEventRequest.getPageSize())) {
+            wazuhEventRequest.setPageSize(100);
+        }
+
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhEventRequest.getPageSize());
@@ -716,8 +863,8 @@ public class DataCollectionService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
             boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsConstants.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
 
     }
@@ -856,10 +1003,35 @@ public class DataCollectionService {
         return wazuhHostStateModel;
     }
 
+    private WazuhEnvVarEventModel convertEnvVarOutput2EnvVarModel(EnvVarOutput output) {
+        WazuhEnvVarEventModel model = new WazuhEnvVarEventModel();
+        BeanUtils.copyProperties(output, model);
+        return model;
+    }
+
     private Long string2Long(String val) {
         Double doubleVal = Double.valueOf(val);
         Long longVal = BigDecimal.valueOf(doubleVal).longValue();
         return longVal;
+    }
+
+    /**
+     * 剔除null
+     * @param agentNames
+     * @return
+     */
+    private List<String> agentNamesExcludeNullValue(List<String> agentNames) {
+        List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        return nullExcludedAgentNames;
+    }
+
+    private boolean isAgentNamesEmpty(List<String> agentNames) {
+        List processedAgentNames = agentNamesExcludeNullValue(agentNames);
+        boolean isEmpty = CollectionUtil.isEmpty(processedAgentNames);
+        if(isEmpty) {
+            log.warn("agentNames is empty:{}", agentNames);
+        }
+        return isEmpty;
     }
 
 }

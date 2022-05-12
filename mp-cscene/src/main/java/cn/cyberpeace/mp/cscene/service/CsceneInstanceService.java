@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -301,6 +302,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 return;
             }
             nodeRecording.setSceneId(csceneInstance.getId());
+
+            if (StringUtils.isNotEmpty(nodeRecording.getUser())) {
+                nodeRecording.setUsername(UserUtils.getUser(nodeRecording.getUser()).getUsername());
+            }
         });
         return nodeRecordingResult;
     }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -7,6 +8,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.scene.util.SceneCommandUtils;
 import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
@@ -27,24 +29,32 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualFirewall;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CloudInitConfigCommon;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.DockerInstallCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.VyosNetworkCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +73,7 @@ public class CreateHandler extends HandlerCommon {
     private final Container containerClient = new Container();
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = new Npc();
+    private final VmRouter vmRouter = new VmRouter();
 
     private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
@@ -339,6 +350,13 @@ public class CreateHandler extends HandlerCommon {
             Map<String, ConnectedNetworkBO> portId2Net = new HashMap<>();
             allNetworks.forEach(net -> portId2Net.put(net.getFromPorts().get(0).getId(), net));
             List<ConnectedNetworkBO> orderNetwork = new ArrayList<>();
+            // 端口使用前再执行一次排序
+            Collections.sort(cloudElement.getSrcElement().getPorts(), (p1, p2) -> {
+                if (p1.getOrder() == null || p2.getOrder() == null) {
+                    return 0;
+                }
+                return p1.getOrder() - p2.getOrder();
+            });
             for (var port : cloudElement.getSrcElement().getPorts()) {
                 if (portId2Net.containsKey(port.getId())) {
                     orderNetwork.add(portId2Net.remove(port.getId()));
@@ -398,7 +416,11 @@ public class CreateHandler extends HandlerCommon {
             virtualNic.setAccessModes(legalAccessModes.stream().map(accessMode -> {
                 var accessModeParam = new VirtualNic.AccessMode();
                 accessModeParam.setProtocol(accessMode.getProtocol());
-                accessModeParam.setPort(accessMode.getPort());
+                if (accessMode.getPort() == null) {
+                    accessModeParam.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.getOrDefault(accessMode.getProtocol(), null));
+                } else {
+                    accessModeParam.setPort(accessMode.getPort());
+                }
                 accessModeParam.setUsername(accessMode.getUsername());
                 accessModeParam.setPassword(accessMode.getPassword());
                 accessModeParam.setEnablePortMapping(accessMode.getProxy());
@@ -439,7 +461,11 @@ public class CreateHandler extends HandlerCommon {
                 entityInterface.setAccessModes(accessModes.stream().map(accessMode -> {
                     var accessModeParam = new EntityNodeCreateData.Interface.AccessMode();
                     accessModeParam.setProtocol(accessMode.getProtocol());
-                    accessModeParam.setPort(accessMode.getPort());
+                    if (accessMode.getPort() == null) {
+                        accessModeParam.setPort(AccessMode.Protocol.DEFAULT_PORT_MAP.getOrDefault(accessMode.getProtocol(), null));
+                    } else {
+                        accessModeParam.setPort(accessMode.getPort());
+                    }
                     accessModeParam.setUsername(accessMode.getUsername());
                     accessModeParam.setPassword(accessMode.getPassword());
                     if (StringUtils.isNotBlank(accessMode.getAccessIp())) {
@@ -486,16 +512,59 @@ public class CreateHandler extends HandlerCommon {
         // TODO: 应用安装
 
         // TODO: 快速创建安装
-//        if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
-//
-//        }
+        if (Boolean.TRUE.equals(cloudElement.getQuickCreateSupport())) {
+            if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(cloudElement.getQuickCreateParams())) {
+                cloudElement.getQuickCreateParams().forEach(p -> {
+                    if (org.apache.commons.collections4.CollectionUtils.isNotEmpty(p.getResourceList())) {
+                        var installers = p.getResourceList().stream().map(r -> {
+                            InstallerUtils.Installer installer = new InstallerUtils.Installer();
+                            installer.setFile(r.getFile());
+                            installer.setName(r.getUserFilename());
+                            installer.setInstallCommand(r.getCommand());
+                            return installer;
+                        }).collect(Collectors.toList());
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, installers));
+                    }
+                    if (p.getDockerInstallerData() != null && StringUtils.isNotEmpty(p.getDockerInstallerData().getDockerUrl())) {
+                        var installer = new InstallerUtils.Installer();
+                        installer.setDocker(true);
+                        installer.setFile(p.getDockerInstallerData().getDockerUrl());
+                        installer.setName(p.getDockerInstallerData().getUserFilename());
+                        if (StringUtils.isEmpty(installer.getName())) {
+                            installer.setName(FileNameUtil.getName(installer.getFile()));
+                        }
+                        installer.setInstallCommand(DockerInstallCommandUtils.genDockerRunDefaultCmd(p.getDockerInstallerData().getStartUpParameterList()));
+                        commands.addAll(InstallerUtils.generateInstallerInstallCommand(standardSystemType, List.of(installer)));
+                    }
+                });
+            }
+        }
 
-        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, commands.toArray(new String[0]));
+        CloudInitConfigCommon.Builder builder = CloudInitConfigCommon.builder(standardSystemType);
+        if (cloudElement.getSrcElement() != null && cloudElement.getSrcElement().getPorts() != null) {
+            Map<String, String> userAndPassword = new HashMap<>();
+            cloudElement.getSrcElement().getPorts().forEach(p -> {
+                if (p.getAccessModes() != null) {
+                    p.getAccessModes().forEach(ac -> {
+                        if (StringUtils.isNotEmpty(ac.getUsername()) && StringUtils.isNotEmpty(ac.getPassword()) && CloudInitConfigCommon.canChangeUser(ac.getProtocol())) {
+                            userAndPassword.put(ac.getUsername(), ac.getPassword());
+                            if (ac.getUsername().equals("root")) {
+                                builder.setRootPassword(ac.getPassword());
+                            }
+                        }
+                    });
+                }
+            });
+            userAndPassword.entrySet().forEach(e -> builder.addUser(e.getKey(), e.getValue()));
+        }
+        builder.addAllInitCommands(commands);
+        List<String> cloudInitCommands = builder.build();
+        var command = SystemTypeCommandUtils.joinCommands(standardSystemType, cloudInitCommands.toArray(new String[0]));
         if (!StringUtils.isEmpty(command)) {
             if (SystemTypeCommandUtils.isWindows(standardSystemType)) {
                 command = SystemTypeCommandUtils.appendBeforeCommand(command, "rem cmd", standardSystemType);
             } else {
-                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#!/bin/sh", standardSystemType);
+                command = SystemTypeCommandUtils.appendBeforeCommand(command, "#cloud-config", standardSystemType);
             }
         }
 
@@ -545,6 +614,15 @@ public class CreateHandler extends HandlerCommon {
         }
 
         for (var command : commands) {
+            if (command.startsWith(ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX)) {
+                String[] path = command.split(StringUtils.SPACE);
+                try {
+                    ContainerFileUtils.prepareLocalFile(containerClient, containerId, path[1], path[2]);
+                } catch (Exception e) {
+                    log.error("Scene({}) cloud container({}) element copy file failed", sceneId, containerId, e);
+                }
+                continue;
+            }
             containerClient.executeCommand(containerId, command);
         }
     }
@@ -765,6 +843,9 @@ public class CreateHandler extends HandlerCommon {
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
         checkAccessModes(cloudElement);
+        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+            this.configVyosNetwork(cloudElement);
+        }
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
@@ -922,4 +1003,42 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    /**
+     * 配置vyos网络
+     * @param elementBO
+     */
+    private void configVyosNetwork(CloudPluginSceneElementBO elementBO) {
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(elementBO.getSrcElement().getPorts())) {
+            return;
+        }
+        // 查询串口地址
+        var port = vmRouter.queryPort(elementBO.getResourceId());
+        if (port == null || StringUtils.isEmpty(port.getPort()) || StringUtils.isEmpty(port.getHost())) {
+            log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
+            return;
+        }
+        // 开启dhcp
+        var openDhcp = new RouterConfigCmdData();
+        openDhcp.setSerialIp(port.getHost());
+        openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
+        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
+        boolean result = vmRouter.createConfig(openDhcp);
+        if (result == false) {
+            log.error("open dhcp failed , resource id is {} , params is {}", elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            return;
+        }
+
+        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
+            log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
+            return;
+        }
+
+        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
+        var config = new RouterConfigCmdData();
+        config.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        config.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        config.setCmds(cmds);
+        vmRouter.createConfig(config);
+    }
 }

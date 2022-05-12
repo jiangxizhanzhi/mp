@@ -11,14 +11,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -32,7 +29,6 @@ public class NetworkController {
 
     private NetworkConverter networkConverter;
 
-    @Autowired
     public NetworkController(NetworkConverter networkConverter) {
         this.networkConverter = networkConverter;
     }
@@ -46,9 +42,6 @@ public class NetworkController {
     @GetMapping("/page")
     public PageResult<NetworkPageResponse> page(NetworkPageRequest request){
         NetworkPageConverterModel model = networkConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
-        }
         List<NetworkPageConverterModel.Model> networks = model.getModelList();
         List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
             List<NetworkPageConverterModel.Model.Subnet> subnetList = networkModel.getSubnets();

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper">
+  <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    <id column="pk" jdbcType="INTEGER" property="pk" />
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="probe_id" jdbcType="VARCHAR" property="probeId" />
+    <result column="script_url" jdbcType="VARCHAR" property="scriptUrl" />
+    <result column="script_type" jdbcType="INTEGER" property="scriptType" />
+    <result column="checksum" jdbcType="VARCHAR" property="checksum" />
+    <result column="version" jdbcType="INTEGER" property="version" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    <result column="script_content" jdbcType="LONGVARBINARY" property="scriptContent" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk, id, probe_id, script_url, script_type, `checksum`, version, `status`, create_time, update_time
+  </sql>
+  <sql id="Blob_Column_List">
+    script_content
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from mp_situation_probe_script
+    where pk = #{pk,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from mp_situation_probe_script
+    where pk = #{pk,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    insert into mp_situation_probe_script (pk, id, probe_id, 
+      script_url, script_type, `checksum`, version,
+      `status`, create_time, update_time, 
+      script_content)
+    values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeId,jdbcType=VARCHAR}, 
+      #{scriptUrl,jdbcType=VARCHAR}, #{scriptType,jdbcType=INTEGER}, #{checksum,jdbcType=VARCHAR}, #{version,jdbcType=INTEGER},
+      #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{scriptContent,jdbcType=LONGVARBINARY})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    insert into mp_situation_probe_script
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        pk,
+      </if>
+      <if test="id != null">
+        id,
+      </if>
+      <if test="probeId != null">
+        probe_id,
+      </if>
+      <if test="scriptUrl != null">
+        script_url,
+      </if>
+      <if test="scriptType != null">
+        script_type,
+      </if>
+      <if test="checksum != null">
+        `checksum`,
+      </if>
+      <if test="version != null">
+        version,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+      <if test="scriptContent != null">
+        script_content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="pk != null">
+        #{pk,jdbcType=INTEGER},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptUrl != null">
+        #{scriptUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptType != null">
+        #{scriptType,jdbcType=INTEGER},
+      </if>
+      <if test="checksum != null">
+        #{checksum,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="scriptContent != null">
+        #{scriptContent,jdbcType=LONGVARBINARY},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    update mp_situation_probe_script
+    <set>
+      <if test="id != null">
+        id = #{id,jdbcType=VARCHAR},
+      </if>
+      <if test="probeId != null">
+        probe_id = #{probeId,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptUrl != null">
+        script_url = #{scriptUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="scriptType != null">
+        script_type = #{scriptType,jdbcType=INTEGER},
+      </if>
+      <if test="checksum != null">
+        `checksum` = #{checksum,jdbcType=VARCHAR},
+      </if>
+      <if test="version != null">
+        version = #{version,jdbcType=INTEGER},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="scriptContent != null">
+        script_content = #{scriptContent,jdbcType=LONGVARBINARY},
+      </if>
+    </set>
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    update mp_situation_probe_script
+    set id = #{id,jdbcType=VARCHAR},
+      probe_id = #{probeId,jdbcType=VARCHAR},
+      script_url = #{scriptUrl,jdbcType=VARCHAR},
+      script_type = #{scriptType,jdbcType=INTEGER},
+      `checksum` = #{checksum,jdbcType=VARCHAR},
+      version = #{version,jdbcType=INTEGER},
+      `status` = #{status,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      script_content = #{scriptContent,jdbcType=LONGVARBINARY}
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    update mp_situation_probe_script
+    set id = #{id,jdbcType=VARCHAR},
+      probe_id = #{probeId,jdbcType=VARCHAR},
+      script_url = #{scriptUrl,jdbcType=VARCHAR},
+      script_type = #{scriptType,jdbcType=INTEGER},
+      `checksum` = #{checksum,jdbcType=VARCHAR},
+      version = #{version,jdbcType=INTEGER},
+      `status` = #{status,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where pk = #{pk,jdbcType=INTEGER}
+  </update>
+  <delete id="deleteByProbeId">
+    delete from mp_situation_probe_script where probe_id = #{probeId}
+  </delete>
+  <select id="getChecksumByProbeId" resultType="string">
+    select checksum from mp_situation_probe_script where probe_id = #{probeId}
+  </select>
+</mapper>

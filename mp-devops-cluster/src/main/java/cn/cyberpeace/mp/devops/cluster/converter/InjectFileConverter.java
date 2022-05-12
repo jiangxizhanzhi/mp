@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileDelete;
 import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.ImageInjectFileDeleteRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,7 +21,6 @@ public class InjectFileConverter {
 
     private ScenariosService scenariosService;
 
-    @Autowired
     public InjectFileConverter(InjectFileService injectFileService, ScenariosService scenariosService) {
         this.injectFileService = injectFileService;
         this.scenariosService = scenariosService;

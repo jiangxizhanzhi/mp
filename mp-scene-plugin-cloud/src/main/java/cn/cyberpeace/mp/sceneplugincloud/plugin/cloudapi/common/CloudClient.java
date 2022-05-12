@@ -2,12 +2,12 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.http.HttpData;
+import cn.cyberpeace.mp.base.util.http.HttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpData;
-import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;

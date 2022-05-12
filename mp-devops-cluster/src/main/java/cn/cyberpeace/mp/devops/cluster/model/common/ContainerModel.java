@@ -150,5 +150,7 @@ public class ContainerModel implements Serializable {
 
         private Boolean preserveOnDelete;
 
+        private Integer vlanId;
+
     }
 }

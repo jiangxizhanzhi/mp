@@ -41,7 +41,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.io.unit.DataSize;
+import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,8 +50,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class FlowMonitorService {
     private CsceneInstanceService csceneInstanceService;
 
     @Autowired
-    private SceneTranslationService sceneTranslationService;
+    private CsceneCommonService csceneCommonService;
 
     @Autowired
     private FlowAnalysisService flowAnalysisService;
@@ -137,7 +135,7 @@ public class FlowMonitorService {
 
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowSimulationParams params = new FlowSimulationParams();
         params.setSceneIds(sceneIdList);
@@ -171,7 +169,7 @@ public class FlowMonitorService {
         LocalDateTime startTime = request.getStartTime();
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
         params.setStartTime(startTime);
@@ -215,7 +213,7 @@ public class FlowMonitorService {
         LocalDateTime startTime = request.getStartTime();
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();
         params.setStartTime(startTime);
@@ -312,7 +310,7 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().get(0));
         }
 
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, null, null);
         Map<String, Integer> map = mapResult.getSource();
@@ -341,7 +339,7 @@ public class FlowMonitorService {
             nodeIds = CollectionUtil.toList(baseRequest.getElementIds().toArray(new String[]{}));
         }
 
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByType(sceneIdList, nodeIds, null, null, baseRequest.getSourceIps(),baseRequest.getTopSize());
         Map<String, Integer> map = mapResult.getSource();
@@ -358,7 +356,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         var mapResult = scenePluginCollectionSceneService.groupCountFlowWithTopSize(sceneIdList, baseRequest.getIps(), null, null);
         Map<String, Integer> map = mapResult.getSource();
         List<FlowAttackTime> result = new ArrayList<>();
@@ -377,7 +375,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         String groupField = baseRequest.getIpType() == 0 ?
                 ScenePluginCollectionSceneService.GroupCountFlowField.SOURCE_IP :
                 ScenePluginCollectionSceneService.GroupCountFlowField.DEST_IP;
@@ -402,7 +400,7 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = Arrays.asList(StringUtils.split(baseRequest.getSceneId(), ","));
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         var countResult = scenePluginCollectionSceneService.groupCountFlow(sceneIdList, baseRequest.getIps(), baseRequest.getTopSize(), baseRequest.getStartTime(), baseRequest.getEndTime()).getSource();
         TotalFlowAttackRatio totalFlowAttackRatio = new TotalFlowAttackRatio();
         totalFlowAttackRatio.setTotalAttackNumber(countResult.getAttackNumber());
@@ -430,7 +428,6 @@ public class FlowMonitorService {
      * @return
      */
     public ListObjServiceResult<FlowAttackDto> pageFlow(String id, FlowQueryParams queryParams) {
-        // todo 分页处理方式
         if (Objects.isNull(queryParams.getPage())) {
             queryParams.setPage(1);
         }
@@ -486,7 +483,7 @@ public class FlowMonitorService {
         }
 
         // todo 转好
-        List<String> sceneIdList = sceneTranslationService.translateSceneIds(sceneIds);
+        List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Long>>> flowResult = scenePluginCollectionSceneService.timeIntervalSumFlowSize(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue(), sourceIps, type);
@@ -531,7 +528,7 @@ public class FlowMonitorService {
     public FlowAnalysisSummary getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         BaseRequestUtil.processDefaultTimeRange(timeRangeRequest);
 
-        List<String> translatedSceneIds = sceneTranslationService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
+        List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(timeRangeRequest.getSceneId()));
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, timeRangeRequest.getElementIds());
 
         FlowAnalysisRequest flowAnalysisRequest = FlowAnalysisRequest.builder()
@@ -545,11 +542,6 @@ public class FlowMonitorService {
         // 攻击流量
         flowAnalysisRequest.setSeverityEnum(SeverityEnum.ALL);
         Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
-
-        // 攻击事件
-//        flowAnalysisRequest.setAggregationTypeEnum(AggregationTypeEnum.SURICATA_CATEGORY);
-//        List<AttackWayAggregationBO> attackWayAggregationBOS = flowAnalysisService.queryTopByAggregationTypeEnum(flowAnalysisRequest);
-//        Long attackCount = attackWayAggregationBOS.stream().map(a -> Objects.isNull(a.getAttackNumber()) ? 0 : a.getAttackNumber()).mapToLong(Long::longValue).sum();
 
         // 攻击事件
         FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
@@ -571,10 +563,25 @@ public class FlowMonitorService {
         // 带宽占用
         Double bandwith = 30.0;
 
-        Long totalFlowMB = DataSize.ofBytes(totalFlowBytes.longValue()).toMegabytes();
-        Long totalAttackFlowMB = DataSize.ofBytes(totalAttackFlowBytes.longValue()).toMegabytes();
-        Double totalFlowGB = BigDecimal.valueOf(totalFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
-        Double totalAttackFlowGB = BigDecimal.valueOf(totalAttackFlowMB.doubleValue() / 1024).round(new MathContext(2)).doubleValue();
+        // Byte -> GB
+        long deno = 1024 * 1024 * 1024;
+        double totalFlowGB = 0.0;
+        if (totalFlowBytes != 0) {
+            totalFlowGB = NumberUtil.round(totalFlowBytes / deno, 3).doubleValue();
+        }
+        double totalAttackFlowGB = 0.0;
+        if (totalAttackFlowBytes != 0) {
+            totalAttackFlowGB = NumberUtil.round(totalAttackFlowBytes / deno, 3).doubleValue();
+        }
+
+        // 有数值的话，不足0.001GB的显示0.001GB
+        if (totalFlowBytes > 0 && totalFlowGB == 0) {
+            totalFlowGB = 0.001;
+        }
+
+        if (totalAttackFlowBytes > 0 && totalAttackFlowGB == 0) {
+            totalAttackFlowGB = 0.001;
+        }
 
 
         FlowAnalysisSummary summary =

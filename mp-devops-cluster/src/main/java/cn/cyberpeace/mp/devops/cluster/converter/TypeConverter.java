@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ public class TypeConverter {
 
     private TypeService typeService;
 
-    @Autowired
     public TypeConverter(TypeService typeService) {
         this.typeService = typeService;
     }
@@ -31,7 +29,19 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type() {
-        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type();
+        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
+        if (Objects.isNull(l1AndL2AndL3Type) || CollectionUtils.isEmpty(l1AndL2AndL3Type.getItems())){
+            return null;
+        }
+        return convertModel(l1AndL2AndL3Type);
+    }
+
+    /**
+     * 查询所有类型数据
+     * @return
+     */
+    public TypeAllConvertModel findL1AndL2AndL3Type(Boolean isAll) {
+        TypeCloudPlatformModel l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(isAll);
         if (Objects.isNull(l1AndL2AndL3Type) || CollectionUtils.isEmpty(l1AndL2AndL3Type.getItems())){
             return null;
         }
@@ -57,7 +67,20 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdIntegerByType(String type) {
-        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type);
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type,Boolean.FALSE);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
+
+    /**
+     * 查询ID为数字类型的枚举数据
+     * @param type
+     * @return
+     */
+    public TypeAllConvertModel findIdIntegerByType(String type,Boolean isAll) {
+        TypeIdIntegerCloudPlatformModel list = typeService.findIdIntegerByType(type,isAll);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
@@ -70,7 +93,20 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdStringByType(String type) {
-        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type);
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type,Boolean.FALSE);
+        if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
+            return null;
+        }
+        return convertModel(list);
+    }
+
+    /**
+     * 查询ID为字符串类型的枚举数据
+     * @param type
+     * @return
+     */
+    public TypeAllConvertModel findIdStringByType(String type,Boolean isAll) {
+        TypeIdStringCloudPlatformModel list = typeService.findIdStringByType(type,isAll);
         if (Objects.isNull(list) || CollectionUtils.isEmpty(list.getItems())){
             return null;
         }
@@ -83,6 +119,14 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findRoles() {
         return this.findIdIntegerByType("role");
+    }
+
+    /**
+     * 查询角色枚举值
+     * @return
+     */
+    public TypeAllConvertModel findRoles(Boolean isAll) {
+        return this.findIdIntegerByType("role",isAll);
     }
 
     /**
@@ -107,6 +151,14 @@ public class TypeConverter {
      */
     public TypeAllConvertModel findImageType() {
         return this.findIdStringByType("image_type");
+    }
+
+    /**
+     * 查询镜像类型枚举值
+     * @return
+     */
+    public TypeAllConvertModel findImageType(Boolean isAll) {
+        return this.findIdStringByType("image_type",isAll);
     }
 
     /**
@@ -230,7 +282,7 @@ public class TypeConverter {
      */
     private TypeAllConvertModel convertModel(TypeIdIntegerCloudPlatformModel list){
         List<TypeIdIntegerConvertModel> modelList = list.getItems().stream()
-                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
+                .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName(), item.getParentId(), item.getChild())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
         model.setIdIntegerModelList(modelList);
         return model;

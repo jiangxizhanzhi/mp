@@ -124,6 +124,16 @@ public class Remote extends CloudClient {
         return result.getRecordingName();
     }
 
+    public String convertRecording(String connectionId) {
+        var result = getHttpClient().put(CloudUrlConstant.CONVERT_RECORDING_URL,
+                new DisableGuacamoleRecordingData(connectionId), null,
+                DisableGuacamoleRecordingResult.class);
+        if (!Boolean.TRUE.equals(result.getSuccess())) {
+            throw new MpRuntimeException(result.getMessages());
+        }
+        return result.getRecordingName();
+    }
+
     public void deleteRecords(List<String> recordingNames) {
         var deleteGuacamoleRecordingData = new DeleteGuacamoleRecordingData();
         deleteGuacamoleRecordingData.setRecordingFile(recordingNames);

@@ -13,10 +13,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * @Deprecated 使用`HttpParam`/`SnakeHttpParam`构造请求参数
+ */
 public class ParamUtils {
 
 
     /**
+     * @Deprecated
      * 包装成get方式的请求参数格式，例如：?a=1&b=2
      * @param fieldList
      * @param object
@@ -39,6 +43,7 @@ public class ParamUtils {
     }
 
     /**
+     * @Deprecated
      * 包装成get方式的请求参数格式，例如：?a=1&b=2
      * @param fieldList
      * @param object
@@ -64,6 +69,7 @@ public class ParamUtils {
     }
 
     /**
+     * @Deprecated
      * 获取对象所有的字段对象Field
      * @param object
      * @return
@@ -80,6 +86,7 @@ public class ParamUtils {
     }
 
     /**
+     * @Deprecated
      * 将对象的所有字段转化为Get请求方式的参数格式
      * @param object
      * @return
@@ -90,6 +97,7 @@ public class ParamUtils {
     }
 
     /**
+     * @Deprecated
      * 将对象的所有字段转化为Get请求方式的参数格式
      * @param object
      * @return
@@ -101,6 +109,7 @@ public class ParamUtils {
     }
 
     /**
+     * @Deprecated
      * 将对象的所有字段转化为Get请求方式的参数格式
      * @param object
      * @return

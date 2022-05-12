@@ -1,34 +1,7 @@
 package cn.cyberpeace.mp.situationaware.task;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.es.EsConstants;
-import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
-import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.ProbeModel;
-import cn.cyberpeace.mp.situationaware.model.enums.ProbeStatus;
-import cn.cyberpeace.mp.situationaware.repository.ProbeModelMapper;
-import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
-import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.support.IndicesOptions;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Objects;
 
 /**
  *
@@ -37,16 +10,16 @@ import java.util.Objects;
 @Slf4j
 public class ProbeManagerTask {
 
-    @Autowired
-    private ProbeModelMapper probeModelMapper;
+//    @Autowired
+//    private ProbeModelMapper probeModelMapper;
+//
+//    @Resource(name = "wazuhRestHighLevelClient")
+//    private RestHighLevelClient restHighLevelClient;
+//
+//    @Autowired
+//    private SituationAwareConfig situationAwareConfig;
 
-    @Resource(name = "wazuhRestHighLevelClient")
-    private RestHighLevelClient restHighLevelClient;
-
-    @Autowired
-    private SituationAwareConfig situationAwareConfig;
-
-    @Scheduled(fixedRate = 1000 * 60)
+    /*@Scheduled(fixedRate = 1000 * 60)
     private void processProbeStatus() {
         if(!situationAwareConfig.getTaskEnable()){
             log.info("ProbeManagerTask disabled");
@@ -60,9 +33,9 @@ public class ProbeManagerTask {
                 probeModelMapper.updateProbeStatus(model.getId(), probeStatus);
             }
         });
-    }
+    }*/
 
-    @VisibleForTesting
+    /*@VisibleForTesting
     protected Boolean queryProbeExist(ProbeModel probeModel) {
         LocalDateTime startTime = LocalDateTime.now().minusMinutes(Long.parseLong(probeModel.getCommandInterval().replace("m", "") + 2L));
         var endTime = LocalDateTime.now();
@@ -91,6 +64,6 @@ public class ProbeManagerTask {
             throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_MANAGER_ES_QUERY_ERROR, ExceptionUtils.getStackTrace(e));
         }
         return Objects.requireNonNull(response).getHits().getHits().length > 0;
-    }
+    }*/
 
 }
