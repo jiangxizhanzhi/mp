@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.bo.GroupCalcItemBO;
 import cn.cyberpeace.mp.base.bo.GroupSizeBO;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
