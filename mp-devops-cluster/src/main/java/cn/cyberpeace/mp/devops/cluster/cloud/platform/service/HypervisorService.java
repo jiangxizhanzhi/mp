@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorStatistics
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
@@ -51,13 +51,13 @@ public class HypervisorService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public HypervisorCloudPlatformModel page(String getParams){
+    public CloudPlatformPageModel<Hypervisor> page(String getParams){
         CloudPlatformPageResult pageResult =  super.sendGet(URL_VERSION + HYPERVISORS + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageData<Hypervisor> data = pageResult.getData();
+        CloudPlatformPageData data = pageResult.getData();
         List<Hypervisor> hypervisors = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), Hypervisor.class);
-        HypervisorCloudPlatformModel model = new HypervisorCloudPlatformModel();
-        model.setHypervisors(CollectionUtils.isEmpty(hypervisors) ? Lists.newArrayList() : hypervisors);
+        CloudPlatformPageModel<Hypervisor> model = new CloudPlatformPageModel<>();
+        model.setList(CollectionUtils.isEmpty(hypervisors) ? Lists.newArrayList() : hypervisors);
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
         return model;

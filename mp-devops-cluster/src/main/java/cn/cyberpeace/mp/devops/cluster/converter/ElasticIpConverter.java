@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.ElasticIpCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,8 @@ public class ElasticIpConverter implements BaseConverter {
     public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        ElasticIpCloudPlatformModel model = networkService.pageElasticIp(getParams);
-        List<ElasticIpConvertModel.Model> list = model.getFloatingips().stream().map(elasticIpModel ->
+        CloudPlatformPageModel<ElasticIpModel> model = networkService.pageElasticIp(getParams);
+        List<ElasticIpConvertModel.Model> list = model.getList().stream().map(elasticIpModel ->
                 ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
                         .fixedIpAddress(elasticIpModel.getFixedIpAddress())
                         .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))

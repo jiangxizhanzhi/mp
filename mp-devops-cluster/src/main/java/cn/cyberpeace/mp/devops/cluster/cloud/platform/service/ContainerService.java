@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatform
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -40,13 +40,13 @@ public class ContainerService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public ContainerCloudPlatformModel page(String getParams) {
+    public CloudPlatformPageModel<ContainerModel> page(String getParams) {
         CloudPlatformPageResult pageResult =  super.sendGet(URL_VERSION + CONTAINERS + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageData<ContainerModel> data = pageResult.getData();
+        CloudPlatformPageData data = pageResult.getData();
         List<ContainerModel> containerModels = JSONObject.parseArray(JSONObject.toJSONString(data.getList()),ContainerModel.class);
-        ContainerCloudPlatformModel model = new ContainerCloudPlatformModel();
-        model.setContainers(CollectionUtils.isEmpty(containerModels) ? Lists.newArrayList() : containerModels);
+        CloudPlatformPageModel<ContainerModel> model = new CloudPlatformPageModel<>();
+        model.setList(CollectionUtils.isEmpty(containerModels) ? Lists.newArrayList() : containerModels);
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
         return model;

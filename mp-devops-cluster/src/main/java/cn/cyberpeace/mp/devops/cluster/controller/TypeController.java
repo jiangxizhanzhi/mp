@@ -72,7 +72,7 @@ public class TypeController {
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse(CCM_1,CCM_1,serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
-        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
+        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getList());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
         allResponse.setRole(Objects.nonNull(roles) ? roles.getIdIntegerModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
@@ -291,7 +291,7 @@ public class TypeController {
         List<SerialPortConvertModel> serialPortConvertModels = serialPortConverter.list();
         allResponse.setSerialPortResponses(Lists.newArrayList(new SerialPortResponse(CCM_1,CCM_1,serialPortConvertModels)));
         allResponse.setSwitchConvertModels(switchConverter.treeList());
-        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getItems());
+        allResponse.setAccessProtocolsPorts(typeService.findAccessProtocolsPort().getList());
         allResponse.setSnmpVersions(Objects.nonNull(snmpVersion) ? snmpVersion.getIdStringModelList() : null);
         allResponse.setEntityRole(Objects.nonNull(entityRoles) ? entityRoles.getIdIntegerModelList() : null);
         allResponse.setFirstTypeList(Objects.nonNull(l1AndL2AndL3Type) ? l1AndL2AndL3Type.getFirstTypeList() : null);

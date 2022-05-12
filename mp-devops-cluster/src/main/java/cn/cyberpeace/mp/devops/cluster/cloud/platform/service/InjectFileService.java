@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.InjectFileCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
+import cn.cyberpeace.mp.devops.cluster.model.common.InjectFile;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +35,13 @@ public class InjectFileService extends BaseOpenStackService {
      * 查询列表
      * @param deviceUuid
      */
-    public InjectFileCloudPlatformModel list(String deviceUuid){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, InjectFileCloudPlatformModel.class);
+    public CloudPlatformPageModel<InjectFile> list(String deviceUuid){
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INJECT_FILE + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<InjectFile> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),InjectFile.class);
+        CloudPlatformPageModel<InjectFile> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 
     /**
