@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.base.init;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.websocket.BaseGroupServer;
+import cn.cyberpeace.mp.base.websocket.BaseServer;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,9 @@ public class BaseInit implements ApplicationRunner {
         FileUtil.mkdir(resourcesDir);
         log.info("Home dir: {}", homeDir);
         log.info("Resource dir: {}", resourcesDir);
+
+        BaseServer.initServerSessionMap();
+        BaseGroupServer.initServerGroupSessionsListMap();
     }
 
 }

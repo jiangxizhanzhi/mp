@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.config;
+package cn.cyberpeace.mp.base.config.webmvc;
 
 import cn.hutool.core.lang.Assert;
 import org.springframework.web.bind.ServletRequestDataBinder;
@@ -22,11 +22,9 @@ public class CustomServletModelAttributeMethodProcessor extends ServletModelAttr
         ServletRequest servletRequest = request.getNativeRequest(ServletRequest.class);
         Assert.state(servletRequest != null,"No servletRequest");
         ServletRequestDataBinder servletRequestDataBinder = (ServletRequestDataBinder) binder;
-        //更换请求参数绑定器
+        // 更换请求参数绑定器
         CustomServletRequestDataBinder customServletRequestDataBinder = new CustomServletRequestDataBinder(servletRequestDataBinder.getTarget());
         customServletRequestDataBinder.setConversionService(servletRequestDataBinder.getConversionService());
         customServletRequestDataBinder.bind(servletRequest);
-
-
     }
 }
