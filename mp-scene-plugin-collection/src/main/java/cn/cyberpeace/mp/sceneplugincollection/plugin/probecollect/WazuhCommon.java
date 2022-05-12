@@ -114,7 +114,7 @@ public class WazuhCommon {
                             String.format("unzip %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
-                            "bash install.sh",
+                            "sh install.sh",
                             String.format("cd %s", linuxInstallDir),
                             "rm -rf agent-installer",
                             "rm -rf " + WAZUH_AGENT_LINUX_FILE_NAME,
@@ -122,9 +122,9 @@ public class WazuhCommon {
                                             "SIC_WAZUH_MANAGER_REMOTE_PORT=%d SIC_WAZUH_MANAGER_AUTH_PORT=%d",
                                     wazuhHost, agentName, getWazuhRemotePort(), getWazuhAuthPort()),
                             "cd /opt/wazuha",
-                            "bash config.sh",
+                            "sh config.sh",
                             probeCommand,
-                            "bash start.sh"
+                            "sh start.sh"
                     ));
         }
         List<String> result = resource == null ? new ArrayList<>() :
@@ -144,7 +144,7 @@ public class WazuhCommon {
                 //下载按需安装脚本并执行
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
-                        String.format("bash %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
+                        String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
                 //给下载安装包的脚本添加参数
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
