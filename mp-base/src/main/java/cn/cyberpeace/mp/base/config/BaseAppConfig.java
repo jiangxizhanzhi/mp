@@ -58,14 +58,26 @@ public class BaseAppConfig {
     @Value("${mp.base.fdfs-outer-http-server:127.0.0.1:8888}")
     private String fdfsOuterHttpServer;
 
-    @Value("${mp.base.resources_dir:}")
+    @Value("${mp.base.home-dir:}")
     private String homeDir;
 
-    @Value("${mp.base.resources_dir:}")
+    @Value("${mp.base.resources-dir:}")
     private String resourcesDir;
 
-    @Value("${mp.base.run_init:false}")
+    @Value("${mp.base.run-init:false}")
     private boolean runInit;
+
+    @Value("${mp.base.swagger-doc-title:mp swagger doc}")
+    private String swaggerDocTitle;
+
+    @Value("${mp.base.swagger-doc-description:mp swagger doc}")
+    private String swaggerDocDescription;
+
+    @Value("${mp.base.swagger-doc-version:1.0}")
+    private String swaggerDocVersion;
+
+    @Value("${mp.base.swagger-doc-url:}")
+    private String swaggerDocUrl;
 
     public String getHomeDir() {
         if (!StringUtils.isEmpty(homeDir)) {
