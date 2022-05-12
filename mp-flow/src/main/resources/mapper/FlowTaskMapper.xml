@@ -21,6 +21,22 @@
         where id = #{taskId,jdbcType=VARCHAR}
     </update>
 
+    <update id="batchUpdateTaskStatus">
+        update mp_flow_task
+        <set>
+            <if test="taskStatus != null">
+                task_status = #{taskStatus},
+            </if>
+            <if test="runCount != null">
+                running_count = running_count + 1,
+            </if>
+        </set>
+        where id in
+        <foreach item="id" index="index" collection="taskIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
     <update id="updateTaskInfo" parameterType="cn.cyberpeace.mp.flow.model.FlowTaskModel">
         update mp_flow_task
         <set>

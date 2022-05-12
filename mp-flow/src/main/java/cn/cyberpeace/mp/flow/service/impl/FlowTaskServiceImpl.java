@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.common.TimeCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -21,9 +20,7 @@ import cn.cyberpeace.mp.flow.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
-import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.FlowPortService;
-import cn.cyberpeace.mp.flow.service.FlowScriptParamService;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.field.FlowTaskFields;
 import cn.cyberpeace.mp.flow.util.CommonUtil;
@@ -39,7 +36,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,10 +55,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         QueryParams> implements FlowTaskService {
 
     @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FlowInfoService flowInfoService;
+    private FlowInfoServiceImpl flowInfoService;
 
     @Autowired
     private FlowExecuteScheduleMethodImpl flowExecuteScheduleMethod;
@@ -72,8 +66,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     @Autowired
     private FlowPortService flowPortService;
 
-    @Autowired
-    private FlowScriptParamService flowScriptParamService;
 
     public FlowTaskServiceImpl(FlowTaskMapper stuMapper, FlowTaskFields stuFields) {
         setModelFields(stuFields);
@@ -202,7 +194,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 FlowInfoModel flowInfoModel = flowInfoObjResult.asResult();
 
                 if (FlowPlatformEnum.TREX.toValue() == flowTaskModel.getFlowPlatform()) {
-                    if (this.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
+                    if (asyncPlatFlowTaskService.uploadFlowInfo(flowInfoModel, flowTaskModel, request)) {
                         create(flowTaskModel);
 
                         // 异步新增流量发生平台流量任务
@@ -223,147 +215,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
     }
 
-    /**
-     * 上传流量文件
-     *
-     * @param flowInfoModel
-     * @param flowTaskModel
-     * @param addFlowTaskRequest
-     * @return
-     */
-    private boolean uploadFlowInfo(FlowInfoModel flowInfoModel, FlowTaskModel flowTaskModel, AddFlowTaskRequest addFlowTaskRequest) {
-        if (Objects.isNull(flowInfoModel) || Objects.isNull(flowTaskModel)) {
-            return false;
-        }
-
-        boolean isSuccess = true;
-        try {
-            String actuatorId = flowTaskModel.getActuatorId();
-            FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
-            String resourceUrl = CommonUtil.getResourcetUrl(flowActuatorModel.getIp());
-
-            // 判断是pcap包还是脚本
-            if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-                // 获取pcap流量包
-                byte[] fileByte = fastDFSClient.download(flowInfoModel.getPcapFile(), FdfsGroupEnum.DEFAULT.name());
-                // 先向流量发生平台导入pcap包
-                JSONObject object = new JSONObject();
-                object.put("fileName",
-                        flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getPcapFile().split(BaseConstants.SPOT)[1]);
-                String pcapRsp = HttpUtils.postFile(resourceUrl + "/pcap/import", fileByte, "file", object);
-                JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
-                log.info("upload pcap file response:{}", jsonObject.toJSONString());
-
-                if (ResponseUtils.checkResponse(jsonObject)) {
-                    // 解析返回的名称
-                    String fileName = jsonObject.getJSONObject(BaseConstants.STR_DATA).getString("file_name");
-                    flowTaskModel.setThirdFlowName(fileName);
-
-                    // 再向流量发生平台创建pcap管理
-                    AddPcapRequest addPcapRequest = new AddPcapRequest();
-                    addPcapRequest.setFileName(fileName);
-                    String addPcapRsp = HttpUtils.sendPost(resourceUrl + "/pcap",
-                            JsonUtils.snakeStringify(addPcapRequest));
-
-                    JSONObject addPcapObj = JSONObject.parseObject(addPcapRsp);
-                    log.info("add pcap file response:{}", addPcapObj.toJSONString());
-                    if (ResponseUtils.checkResponse(addPcapObj)) {
-                        // 获取返回的uuid
-                        String uuid = addPcapObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
-                        flowTaskModel.setThirdFlowId(uuid);
-                    } else {
-                        log.error("add pcap file error");
-                        isSuccess = false;
-                    }
-                } else {
-                    log.error("upload pcap file error");
-                    isSuccess = false;
-                }
-            } else {
-                // 获取script流量脚本
-                byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.name());
-                // 获取替换脚本参数后的脚本内容
-                String code = replaceCode(fileByte, flowInfoModel.getId(), addFlowTaskRequest);
-
-                AddScriptsRequest scriptsRequest = new AddScriptsRequest();
-                // 流量执行平台名称不能重复，名称后加上时间戳
-                String flowName =
-                        flowInfoModel.getTitle() + System.currentTimeMillis() + "." + flowInfoModel.getScriptFile().split(BaseConstants.SPOT)[1];
-                scriptsRequest.setName(flowName);
-                // 默认执行脚本命令
-                String runCmd = "";
-
-                if (flowName.endsWith(".py")) {
-                    runCmd = "python3 " + flowName;
-                } else if (flowName.endsWith(".sh")) {
-                    runCmd = "bash " + flowName;
-                }
-
-                if (StringUtils.isNotBlank(flowInfoModel.getRunCmd())) {
-                    runCmd = runCmd + " " + flowInfoModel.getRunCmd();
-                }
-                scriptsRequest.setRunCmd(runCmd);
-                JSONObject object = JSONObject.parseObject(JsonUtils.snakeStringify(scriptsRequest));
-                object.put("fileName", flowName);
-
-                // 先向流量发生平台新增资源文件
-                String scriptRsp = HttpUtils.postFile(resourceUrl + "/scripts", code.getBytes(StandardCharsets.UTF_8), "run_image_script",
-                        object);
-                JSONObject scriptObj = JSONObject.parseObject(scriptRsp);
-                log.info("add script file response:{}", scriptObj.toJSONString());
-
-                if (ResponseUtils.checkResponse(scriptObj)) {
-                    // 解析返回的uuid
-                    String uuid = scriptObj.getJSONObject(BaseConstants.STR_DATA).getString("uuid");
-                    flowTaskModel.setThirdFlowId(uuid);
-                } else {
-                    log.error("add script file error");
-                    isSuccess = false;
-                }
-            }
-        } catch (Exception e) {
-            log.error("upload file to flow actuator platform error!", e);
-            isSuccess = false;
-        }
-
-        return isSuccess;
-    }
-
-    /**
-     * 脚本内容替换
-     * @param fileByte
-     * @param flowId
-     * @param addFlowTaskRequest
-     * @return
-     */
-    private String replaceCode(byte[] fileByte, String flowId, AddFlowTaskRequest addFlowTaskRequest) {
-        String code = new String(fileByte, StandardCharsets.UTF_8);
-        List<FlowScriptParamModel> replaceScriptParamModels;
-        if (Objects.nonNull(addFlowTaskRequest) && CollectionUtils.isNotEmpty(addFlowTaskRequest.getScriptParamModels())) {
-            // 有传脚本参数过来，直接用传过来的去替换脚本内容
-            replaceScriptParamModels = addFlowTaskRequest.getScriptParamModels();
-            log.info("replace script params:{}", replaceScriptParamModels.toString());
-        } else {
-            // 没有传脚本参数，直接查询默认脚本参数
-            replaceScriptParamModels = flowScriptParamService.selectByFlowId(flowId);
-            log.info("default script params:{}", replaceScriptParamModels.toString());
-        }
-
-        if (CollectionUtils.isNotEmpty(replaceScriptParamModels)) {
-            // 根据脚本key替换脚本参数值
-            for (FlowScriptParamModel replaceScriptParamModel : replaceScriptParamModels) {
-                if (ParamTypeEnum.IP.toString().equalsIgnoreCase(replaceScriptParamModel.getParamKey())) {
-                    // ip替换兼容大小写
-                    code = code.replace("$" + ParamTypeEnum.IP.name().toUpperCase(), replaceScriptParamModel.getParamValue());
-                    code = code.replace("$" + ParamTypeEnum.IP.name().toLowerCase(), replaceScriptParamModel.getParamValue());
-                } else {
-                    code = code.replace("$" + replaceScriptParamModel.getParamKey(), replaceScriptParamModel.getParamValue());
-                }
-            }
-        }
-
-        return code;
-    }
 
     /**
      * 更新流量任务
@@ -406,7 +257,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                             flowInfoService.get(flowTaskModel.getFlowId()).getSource();
                     if (Objects.nonNull(newFlowInfoResult)) {
                         FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
-                        if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
+                        if (!asyncPlatFlowTaskService.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
                             return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                         }
                     } else {
@@ -422,7 +273,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 ObjResult<FlowInfoModel> newFlowInfoResult = flowInfoService.get(flowTaskModel.getFlowId()).getSource();
                 if (Objects.nonNull(newFlowInfoResult)) {
                     FlowInfoModel newFlowInfoModel = newFlowInfoResult.asResult();
-                    if (!this.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
+                    if (!asyncPlatFlowTaskService.uploadFlowInfo(newFlowInfoModel, flowTaskModel, request)) {
                         return ServiceResult.fail(FlowErrorCode.UPDATE_TASK_ERROR);
                     }
                 } else {
@@ -874,12 +725,109 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
     }
 
     /**
+     * 批量更新流量任务信息
+     * @param taskStatus
+     * @param runCount
+     * @param taskIds
+     * @return
+     */
+    public int batchIncreaseRunningCount(Integer taskStatus, Boolean runCount, List<String> taskIds) {
+        return getModelMapper().batchUpdateTaskStatus(taskStatus, runCount, taskIds);
+    }
+
+    /**
      * 更新流量任务
      * @param flowTaskModel
      * @return
      */
     public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
         return getModelMapper().updateTaskInfo(flowTaskModel);
+    }
+
+
+    /**
+     * 批量新增流量任务
+     * @param addTaskRequestList
+     * @return
+     */
+    public List<FlowTaskModel> batchSavePlatFlowTask(List<AddFlowTaskRequest> addTaskRequestList) {
+        return asyncPlatFlowTaskService.batchSavePlatFlowTask(addTaskRequestList);
+    }
+
+    /**
+     * 批量执行流量任务
+     * @param request
+     * @return
+     */
+    public ServiceResult<Boolean> batchActuator(BatchActuatorTaskRequest request) {
+        log.info("=========== Batch actuator flow tasks start ===============");
+        // 流量任务存在校验
+        QueryParams queryParams = new QueryParams();
+        queryParams.setIds(request.getTaskIds().toArray(new String[0]));
+        ListObjServiceResult<FlowTaskModel> objServiceResult = list(queryParams);
+        if (Objects.isNull(objServiceResult) || !Objects.equals(request.getTaskIds().size(), objServiceResult.getData().getList().size())) {
+            log.error("not all flow task exist");
+            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+        }
+
+        List<FlowTaskModel> flowTaskModels = objServiceResult.getData().getList();
+        // 流量执行器信息查询
+        String actuatorId = flowTaskModels.get(0).getActuatorId();
+        FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
+        if (Objects.isNull(flowActuatorModel)) {
+            return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
+        }
+
+        // 第三方任务id集合
+        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).distinct().collect(Collectors.toList());
+        // 任务id集合
+        List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
+        // 查询关联的流量任务
+        List<String> flowIds = flowTaskModels.stream().map(FlowTaskModel::getFlowId).distinct().collect(Collectors.toList());
+        List<FlowInfoModel> flowInfoModels = flowInfoService.selectByFlowIds(flowIds);
+
+        // 执行任务参数
+        JSONObject object = new JSONObject();
+        object.put("uuids", thirdTaskIds);
+        object.put("action", request.getTaskAction());
+        object.put("run_type", request.getRunType());
+        object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
+
+        try {
+            // 执行任务地址
+            String urlPath = CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/action/batch";
+            String batchActuatorRsp = HttpUtils.sendPost(urlPath, JSONObject.toJSONString(object));
+            JSONObject batchActuatorObj = JSONObject.parseObject(batchActuatorRsp);
+            log.info("batch actuator tasks response:{}", batchActuatorObj.toJSONString());
+            if (ResponseUtils.checkResponse(batchActuatorObj)) {
+                log.info("batch actuator tasks success");
+                // 流量任务状态和执行次数更新
+                this.batchIncreaseRunningCount(TaskStatusEnum.RUNNING.toValue(), true, taskIds);
+            } else {
+                log.error("batch actuator tasks failed");
+                return ServiceResult.success(false);
+            }
+        } catch (IOException e) {
+            log.error("batch actuator tasks error", e);
+            return ServiceResult.success(false);
+        }
+
+
+        flowTaskModels.forEach(flowTaskModel -> TaskCommon.executeTask(() -> {
+            try {
+                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, request.getCallback(), request.getErrorCallback());
+            } catch (Exception e) {
+                log.info("refresh task status error: ", e);
+            }
+        }));
+
+
+
+
+
+
+        log.info("=========== Batch actuator flow tasks end ===============");
+        return ServiceResult.success(true);
     }
 
 }
