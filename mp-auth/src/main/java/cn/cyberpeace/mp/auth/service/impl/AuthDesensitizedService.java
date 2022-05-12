@@ -61,11 +61,11 @@ public class AuthDesensitizedService {
 
     private void doDesensitization(UserModel userModel) {
         // 地址
-        userModel.setAddress(DesensitizedUtil.desensitized(userModel.getAddress(), DesensitizedUtil.DesensitizedType.ADDRESS));
+        //userModel.setAddress(DesensitizedUtil.desensitized(userModel.getAddress(), DesensitizedUtil.DesensitizedType.ADDRESS));
         // 手机
-        userModel.setMobile(DesensitizedUtil.desensitized(userModel.getMobile(), DesensitizedUtil.DesensitizedType.MOBILE_PHONE));
+        //userModel.setMobile(DesensitizedUtil.desensitized(userModel.getMobile(), DesensitizedUtil.DesensitizedType.MOBILE_PHONE));
         // 身份证
-        userModel.setIdCard(DesensitizedUtil.desensitized(userModel.getIdCard(), DesensitizedUtil.DesensitizedType.ID_CARD));
+        //userModel.setIdCard(DesensitizedUtil.desensitized(userModel.getIdCard(), DesensitizedUtil.DesensitizedType.ID_CARD));
         // 邮箱
         userModel.setEmail(DesensitizedUtil.desensitized(userModel.getEmail(), DesensitizedUtil.DesensitizedType.EMAIL));
         // 密码

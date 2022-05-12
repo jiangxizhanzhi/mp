@@ -180,9 +180,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
-        if (StringUtils.isBlank(obj.getIdentifier())) {
-            obj.setIdentifier(null);
-        }
         return super.update(obj, fields);
     }
 
@@ -230,11 +227,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
-
-        if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 如果ident为空，则随机生成一个
-            userModel.setIdentifier(String.valueOf(IdGenerator.generateGlobalId()));
-        }
 
         createCheckService.check(userModel);
 
@@ -748,8 +740,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                         // 此处不需要加密，后面的create()方法会加密
                         .password(importUser.getPassword())
                         .build();
-
-        userModel.setIdentifier(IdGenerator.generateGlobalId() + "");
 
         return userModel;
     }

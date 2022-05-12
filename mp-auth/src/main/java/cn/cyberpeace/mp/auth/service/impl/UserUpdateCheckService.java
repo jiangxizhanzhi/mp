@@ -41,17 +41,6 @@ public class UserUpdateCheckService implements UserCheckService {
             Assert.isTrue(Validator.isEmail(user.getEmail()), AuthConstant.ERROR_CODE_PREFIX + "email_invalid");
         }
 
-        // 手机号是否合法
-        if (StringUtils.isNotBlank(user.getMobile())) {
-            Assert.isTrue(PhoneUtil.isMobile(user.getMobile()), AuthConstant.ERROR_CODE_PREFIX + "mobile_invalid");
-            // 如果手机号已存在，查看手机号是否是oldUser
-            UserModel userByMobile = userService.getByMobile(user.getMobile());
-
-            if (userByMobile != null && !Objects.equals(userByMobile.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("该手机号码已存在！" + user.getMobile() + "，请确认用户手机号码是否正确");
-            }
-        }
-
         if (StringUtils.isNotBlank(user.getUsername())) {
             // 如果username已存在，查看username是否是oldUser的
             UserModel userByUserName = userService.getByUserName(user.getUsername());
@@ -61,14 +50,6 @@ public class UserUpdateCheckService implements UserCheckService {
             }
         }
 
-        if (StringUtils.isNotBlank(user.getIdentifier())) {
-            // 如果identifier已存在，查看identifier是否是oldUser的
-            UserModel userByIdent = userService.getByIdent(user.getIdentifier());
-
-            if (userByIdent != null && !Objects.equals(userByIdent.getId(), oldUser.getId())) {
-                throw new MpRuntimeException("用户编号已存在！" + user.getIdentifier() + "，请确认用户编号是否正确");
-            }
-        }
 
     }
 
