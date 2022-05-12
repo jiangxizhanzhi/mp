@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.flow.request;
 
+import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @Description: 批量新增流量任务请求
@@ -34,13 +36,7 @@ public class BatchActuatorTaskRequest {
      * 流量停止回调方法
      */
     @ApiModelProperty(value = "流量停止回调方法")
-    private Runnable callback;
-
-    /**
-     * 流量执行异常回调方法
-     */
-    @ApiModelProperty(value = "流量执行异常回调方法")
-    private Runnable errorCallback;
+    private Consumer<BatchActuatorCallbackResponse> callbackConsumer;
 
     /**
      * 执行方式：0 串行，1 并行

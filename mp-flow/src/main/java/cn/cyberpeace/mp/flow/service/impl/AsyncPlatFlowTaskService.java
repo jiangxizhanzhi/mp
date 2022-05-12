@@ -713,6 +713,12 @@ public class AsyncPlatFlowTaskService {
     }
 
 
+    /**
+     * 2秒一次批量轮询任务状态，当所有任务结束时执行回调方法
+     * @param flowTaskModels
+     * @param flowActuatorModel
+     * @param consumer
+     */
     public void batchRefreshTaskStatus(List<FlowTaskModel> flowTaskModels, FlowActuatorModel flowActuatorModel, Consumer<BatchActuatorCallbackResponse> consumer) {
         String host = flowActuatorModel.getIp();
         // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询20分钟

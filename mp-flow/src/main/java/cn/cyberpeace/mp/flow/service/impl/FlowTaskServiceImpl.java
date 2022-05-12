@@ -812,19 +812,13 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return ServiceResult.success(false);
         }
 
-
-        flowTaskModels.forEach(flowTaskModel -> TaskCommon.executeTask(() -> {
+        TaskCommon.executeTask(() -> {
             try {
-                asyncPlatFlowTaskService.refreshTaskStatus(flowTaskModel.getId(), flowActuatorModel, request.getCallback(), request.getErrorCallback());
+                asyncPlatFlowTaskService.batchRefreshTaskStatus(flowTaskModels, flowActuatorModel, request.getCallbackConsumer());
             } catch (Exception e) {
                 log.info("refresh task status error: ", e);
             }
-        }));
-
-
-
-
-
+        });
 
         log.info("=========== Batch actuator flow tasks end ===============");
         return ServiceResult.success(true);
