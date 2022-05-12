@@ -45,6 +45,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import com.google.common.collect.Lists;
@@ -384,6 +385,39 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId,
                 context == null ? null : context.toSceneContext());
+    }
+
+    public ServiceResult<Boolean> startFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
+                                             CsceneContextBO context, int runType) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context != null) {
+            context.loadTransparentContext();
+        }
+
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.startFlows(sceneId, toNodeId, flowIdWithSourceIps,
+                context == null ? null : context.toSceneContext(), runType);
+    }
+
+    public ServiceResult<Boolean> stopFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps, CsceneContextBO context) {
+        CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context != null) {
+            context.loadTransparentContext();
+        }
+
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        List<String> flowIds = flowIdWithSourceIps.stream().map(f -> f.getFlowId()).collect(Collectors.toList());
+        return scenePluginFlowSceneService.stopFlows(sceneId, toNodeId, flowIds, context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {

@@ -4,19 +4,20 @@ import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
-import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
-import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementPortBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.*;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.modelhandler.FlowScenePluginModelHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
+import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -164,6 +165,67 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         }
 
         var flag = handlerUtils.stopFlow(flow);
+        asyncAckElementChanged(nodeId, true);
+        return flag;
+    }
+
+    public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        List<FlowWithSourceIp> flowWithSourceIps = new ArrayList<>();
+        flowId2Ips.forEach(flowId2Ip -> {
+            FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
+            flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
+            flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp());
+            flowWithSourceIps.add(flowWithSourceIp);
+        });
+        if (flowWithSourceIps.isEmpty()) {
+            return false;
+        }
+
+        var flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
+                    asyncAckElementChanged(nodeId, true);
+                }, async, () -> {
+                    asyncAckElementChanged(nodeId, true);
+                },
+                runType);
+        asyncAckElementChanged(nodeId, true);
+        return flag;
+    }
+
+    public boolean stopFlows(String nodeId, List<String> flowIds) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return false;
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+        if (flows == null) {
+            return false;
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        List<Flow> newFlows = new ArrayList<>();
+        flowIds.forEach(flowId -> {
+            newFlows.add(flowMap.getOrDefault(flowId, null));
+        });
+        if (newFlows.isEmpty()) {
+            return false;
+        }
+
+        var flag = handlerUtils.stopFlows(newFlows);
         asyncAckElementChanged(nodeId, true);
         return flag;
     }
