@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -1017,13 +1018,44 @@ public class CreateHandler extends HandlerCommon {
             log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
             return;
         }
+
+        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
+
         // 开启dhcp
         var openDhcp = new RouterConfigCmdData();
         openDhcp.setSerialIp(port.getHost());
         openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
         openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
-        boolean result = vmRouter.createConfig(openDhcp);
-        if (result == false) {
+        boolean result = false;
+        boolean dhcpSetOk = false;
+        int tryTimes = 3;
+        for (int i = 0; i < tryTimes; i++) {
+            // 先等2s,等待串口可用
+            waitSeconds(2000);
+            result = vmRouter.createConfig(openDhcp);
+            // 失败可能是串口仍不可用,需要重试
+            if (!result) {
+                continue;
+            }
+            // 探测下dhcp设置的ip是否可用
+            for (int s = 0; s < 3; s++) {
+                dhcpSetOk = NetworkUtils.checkHostReachable(defaultPort.getAccessModes().get(0).getAccessIp(), 200);
+                if (dhcpSetOk) {
+                    break;
+                } else {
+                    // 等待 200ms 继续探测
+                    waitSeconds(200);
+                }
+            }
+            if (!dhcpSetOk) {
+                // 多次探测后ip仍然不可用,再次设置dhcp
+                continue;
+            } else {
+                // dhcp设置的ip可用之后 即可执行后续的命令
+                break;
+            }
+        }
+        if (result == false || dhcpSetOk == false) {
             log.error("open dhcp failed , resource id is {} , params is {}", elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
             return;
         }
@@ -1033,12 +1065,17 @@ public class CreateHandler extends HandlerCommon {
             log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
             return;
         }
-
-        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
         var config = new RouterConfigCmdData();
         config.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
         config.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
         config.setCmds(cmds);
         vmRouter.createConfig(config);
+    }
+
+    private void waitSeconds(long millSeconds) {
+        try {
+            Thread.sleep(millSeconds);
+        } catch (InterruptedException e) {
+        }
     }
 }
