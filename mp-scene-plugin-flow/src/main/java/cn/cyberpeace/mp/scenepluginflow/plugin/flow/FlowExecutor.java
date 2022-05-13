@@ -102,9 +102,9 @@ public class FlowExecutor {
         return flowService3.batchSavePlatFlowTask(addFlowTaskRequests);
     }
 
-    public AddFlowTaskRequest buildFlow(String executorId, String targetNetId, String flowId, String fromIps, String toIps,
-                                        Integer delay, Integer count, Integer interval, Flow flow, String instanceIp,
-                                        String sourceIp, String nodeId) {
+    public AddFlowTaskRequest buildFlowTaskRequest(String executorId, String targetNetId, String flowId, String fromIps,
+                                                   String toIps, Integer delay, Integer count, Integer interval,
+                                                   Flow flow, String instanceIp, String sourceIp, String nodeId) {
         var addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);

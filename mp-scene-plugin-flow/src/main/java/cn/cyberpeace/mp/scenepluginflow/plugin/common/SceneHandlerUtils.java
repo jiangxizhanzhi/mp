@@ -322,6 +322,9 @@ public class SceneHandlerUtils {
         var newFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() != null)
                 .collect(Collectors.toList());
+        if (newFlows.isEmpty()) {
+            return false;
+        }
         newFlows.forEach(flow -> {
             preparingFLow(flow.getFlow());
         });
@@ -333,14 +336,14 @@ public class SceneHandlerUtils {
             List<FlowTaskModel> flowTaskModels;
             List<AddFlowTaskRequest> requests = new ArrayList<>();
             newFlows.forEach(flow -> {
-                AddFlowTaskRequest request = flowExecutor.buildFlow(executorId, flowNetworkId, flow.getFlow().getId(),
+                AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
                         StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
                         flow.getSourceIp(), nodeId);
                 requests.add(request);
             });
             try {
                 flowTaskModels = flowExecutor.createFlows(requests);
-                log.info("flowExecutor createFlow success:[{}]", flowTaskModels);
+                log.info("flowExecutor createFlows success:[{}]", flowTaskModels);
             } catch (Exception e) {
                 newFlows.forEach(flow -> {
                     errorFLow(flow.getFlow(), e.getMessage());
@@ -363,7 +366,7 @@ public class SceneHandlerUtils {
                 try {
                     start.call();
                 } catch (Exception e) {
-                    log.info("Start flow error: ", e);
+                    log.info("Start flows error: ", e);
                 }
                 if (asyncCallback != null) {
                     asyncCallback.run();
@@ -374,7 +377,7 @@ public class SceneHandlerUtils {
             try {
                 return start.call();
             } catch (Exception e) {
-                log.info("Start flow error: ", e);
+                log.info("Start flows error: ", e);
                 return false;
             }
         }
