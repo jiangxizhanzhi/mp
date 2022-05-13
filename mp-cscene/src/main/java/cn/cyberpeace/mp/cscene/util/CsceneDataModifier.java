@@ -577,6 +577,21 @@ public class CsceneDataModifier {
                     });
                 }
             }
+            if (baseSceneDataBO.getPlugins() != null && baseSceneDataBO.getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = (ScenePluginDataBO) baseSceneDataBO.getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(p -> {
+                        if (p.get("probes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("probes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("script_url") != null) {
+                                    accessMode.put("script_url", addFilePrefix(accessMode.get("script_url").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
     }
 
