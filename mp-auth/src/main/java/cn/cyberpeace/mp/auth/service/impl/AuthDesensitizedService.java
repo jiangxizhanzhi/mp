@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.DesensitizedUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class AuthDesensitizedService {
 
 
     public void desensitiveUserDtos(List<UserDto> userDtos) {
-        if (!isLoginUserAdmin()) {
+        if (CollectionUtil.isNotEmpty(userDtos) && !isLoginUserAdmin()) {
             // 普通用户查询信息需要部分字段脱敏，管理员不用
             userDtos.forEach(u -> {
                 doDesensitization(u);

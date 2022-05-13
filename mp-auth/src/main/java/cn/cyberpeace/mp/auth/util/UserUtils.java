@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -69,6 +70,12 @@ public class UserUtils {
         }
 
         return user;
+    }
+
+
+    public static UserDto getLoginUserDtoWithoutOrg() {
+        UserModel currentUserModel = getLoginUser();
+        return userService.userModel2UserDtoWithoutOrg(currentUserModel);
     }
 
 

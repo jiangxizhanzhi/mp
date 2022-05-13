@@ -146,7 +146,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = AuthLogConstant.TARGET_USER)
-    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
+    //@PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult add(@RequestBody UserRequest createRequest) {
         UserModel userModel = getModelService().add(createRequest);
         return ResultUtils.commonResult(true, userModel);
