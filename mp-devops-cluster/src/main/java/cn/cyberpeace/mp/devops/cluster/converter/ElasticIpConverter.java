@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
@@ -41,7 +40,7 @@ public class ElasticIpConverter implements BaseConverter {
         List<ElasticIpConvertModel.Model> list = model.getList().stream().map(elasticIpModel ->
                 ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
                         .fixedIpAddress(elasticIpModel.getFixedIpAddress())
-                        .status(CloudPlatformEnum.fromValue(elasticIpModel.getStatus()))
+                        .status(elasticIpModel.getStatus())
                         .createdAt(elasticIpModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
 
