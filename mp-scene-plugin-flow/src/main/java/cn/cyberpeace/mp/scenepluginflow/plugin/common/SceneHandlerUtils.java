@@ -256,7 +256,7 @@ public class SceneHandlerUtils {
         if (needCreateTaskFlows.isEmpty()) {
             return startFlows(flows, stopCallback, runType);
         } else {
-            log.info("taskIds is empty");
+            log.info("taskIds has null value");
         }
 
         var executorId = pluginHandler.getScene().getExecutor();
@@ -328,12 +328,14 @@ public class SceneHandlerUtils {
         final String flowNetworkId = networkId;
         final String flowIp = ip;
         String finalIp = ip;
+        String nodeId = flowElement.getSrcElement().getId();
         Callable<Boolean> start = () -> {
             List<FlowTaskModel> flowTaskModels;
             List<AddFlowTaskRequest> requests = new ArrayList<>();
             newFlows.forEach(flow -> {
                 AddFlowTaskRequest request = flowExecutor.buildFlow(executorId, flowNetworkId, flow.getFlow().getId(),
-                        StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp, flow.getSourceIp());
+                        StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
+                        flow.getSourceIp(), nodeId);
                 requests.add(request);
             });
             try {

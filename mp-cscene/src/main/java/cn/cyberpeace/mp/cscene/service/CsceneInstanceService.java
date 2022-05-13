@@ -421,7 +421,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginFlowSceneService.stopFlows(sceneId, toNodeId, flowIds, context == null ? null : context.toSceneContext());
     }
 
-    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String id, String nodeId, String flowId, CsceneContextBO context) {
+    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String id, String nodeId, String flowId,
+                                                                    CsceneContextBO context, Boolean isBatch) {
         if (context != null) {
             context.loadTransparentContext();
         }
@@ -429,7 +430,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (StringUtils.isEmpty(sceneId)) {
             return new ServiceResult<>();
         }
-        return scenePluginFlowSceneService.queryFlowRecords(sceneId, nodeId, flowId, context == null ? null : context.toSceneContext());
+        return scenePluginFlowSceneService.queryFlowRecords(sceneId, nodeId, flowId,
+                context == null ? null : context.toSceneContext(), isBatch);
     }
 
     public ServiceResult<Probe> startProbe(String id, String toNodeId, String probeId, CsceneContextBO context) {

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -51,7 +52,8 @@ public class ScenePluginFlowSceneService {
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String sceneId, String nodeId, String flowId, SceneContextBO context) {
+    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String sceneId, String nodeId, String flowId,
+                                                                    SceneContextBO context, Boolean isBatch) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var flowElement = pluginHandler.getElement(nodeId);
@@ -70,7 +72,12 @@ public class ScenePluginFlowSceneService {
         if (flow == null) {
             return new ServiceResult<>();
         }
-        var result = flowService3.queryFlowRecords(flow.getTaskId());
+        ServiceResult<FlowRecordsResponse> result = new ServiceResult<>();
+        if (isBatch) {
+            result = flowService3.queryFlowRecords(nodeId);
+        } else {
+            result = flowService3.queryFlowRecords(flow.getTaskId());
+        }
         SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
         response.setFlowRecordsList(result.getData().getFlowRecordsList());
         return new ServiceResult<>(response);

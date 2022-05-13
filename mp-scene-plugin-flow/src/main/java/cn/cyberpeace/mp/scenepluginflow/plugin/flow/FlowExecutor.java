@@ -103,7 +103,8 @@ public class FlowExecutor {
     }
 
     public AddFlowTaskRequest buildFlow(String executorId, String targetNetId, String flowId, String fromIps, String toIps,
-                                        Integer delay, Integer count, Integer interval, Flow flow, String instanceIp, String sourceIp) {
+                                        Integer delay, Integer count, Integer interval, Flow flow, String instanceIp,
+                                        String sourceIp, String nodeId) {
         var addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
         addFlowTaskRequest.setNetworkId(targetNetId);
@@ -113,6 +114,7 @@ public class FlowExecutor {
         addFlowTaskRequest.setTitle(TextUtils.uuid());
         addFlowTaskRequest.setScriptParamModels(new ArrayList<>());
         addFlowTaskRequest.setOriginIps(sourceIp);
+        addFlowTaskRequest.setNodeId(nodeId);
         boolean ipParamLoaded = false;
         if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
             for (Flow.FlowScriptParam param : flow.getScriptParamModels()) {

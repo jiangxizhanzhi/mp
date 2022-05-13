@@ -262,9 +262,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("场景实例查询节点流量执行记录")
     @PostMapping(value = "/query_flow_records")
-    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(@RequestBody CsceneInstanceNodeFlowActionRequest request) {
+    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(@RequestBody CsceneInstanceNodeFlowRecordsRequest request) {
         return modelService.queryFlowRecords(request.getId(), request.getNodeId(), request.getFlowId(),
-                request.getContext()).asResult();
+                request.getContext(), request.getIsBatch()).asResult();
     }
 
     @ApiOperation("场景实例启动节点探针")
