@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.extensions.security.client.ClientAuthenticationToke
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
-import cn.cyberpeace.mp.auth.service.impl.AvatarServiceImpl;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +48,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
             log.info("client auth... clientId:{}", clientId);
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // client认证, 赋有所有角色，资源权限
-                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);
+                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.USER_ROOT_ID);
 
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

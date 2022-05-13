@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionCheckService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermCheckService;
 
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
@@ -89,7 +90,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, getExcludeRoleIdsByLoginUserForSearching());
         desensitizedService.desensitiveUserModels(users);
         return users;
     }
@@ -180,8 +181,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         log.info("orgIds: {}", orgIds);
+
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList, getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {
@@ -222,5 +224,23 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         return true;
     }
 
+
+    private List<String> getExcludeRoleIdsByLoginUserForSearching() {
+
+        boolean isSupserUser = opUserPermCheckService.isLoginUserSuperUser();
+        if (isSupserUser) {
+            // 超级用户不受限制
+            return Collections.emptyList();
+        }
+
+        boolean isAdmin = opUserPermCheckService.isLoginUserAdmin();
+        if (isAdmin) {
+            // 管理员不可查询同级管理员和超级用户
+            return Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID, AuthConstant.ROLE_ADMIN_ID);
+        }
+
+        // 普通用户不可查询管理员和超级用户
+        return Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID, AuthConstant.ROLE_ADMIN_ID);
+    }
 
 }

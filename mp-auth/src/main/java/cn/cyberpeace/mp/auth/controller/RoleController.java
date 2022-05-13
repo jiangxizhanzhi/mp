@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.service.OperateRolePermissionCheckService;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -58,7 +58,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
     @Autowired
-    private OperateRolePermissionCheckService opRolePermCheckService;
+    private OperateRolePermissionService opRolePermCheckService;
 
 
     @Override

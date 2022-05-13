@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
@@ -67,7 +67,7 @@ public class UserPermissionServiceImpl
     private OrgPermissionService orgPermissionService;
 
     @Autowired
-    private OperateUserPermissionCheckService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermCheckService;
 
     @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {

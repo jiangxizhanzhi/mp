@@ -41,11 +41,12 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "select distinct * from mp_auth_user " +
             "<where>" +
             "  <if test=\"orgIds != null and orgIds.size() > 0\">" +
-            "    AND id in (select user from mp_auth_org_user where org in " +
-            "    <foreach item=\"orgId\" index=\"index\" collection=\"orgIds\" open=\"(\" separator=\",\" close=\")\"> " +
-            "      #{orgId} " +
-            "    </foreach>" +
-            " )" +
+            "    AND id in " +
+            "     (select user from mp_auth_org_user where org in " +
+            "       <foreach item=\"orgId\" index=\"index\" collection=\"orgIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{orgId} " +
+            "       </foreach>" +
+            "     )" +
             "  </if>" +
             "  <if test=\"userIds != null and userIds.size() > 0\"> " +
             "    AND id in " +
@@ -53,13 +54,22 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
             "      #{userId} " +
             "    </foreach>" +
             "  </if>" +
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND id not in " +
+            "     (select distinct user from mp_auth_user_role where role in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "     )" +
+            "  </if>" +
             "  <if test=\"username != null and username != ''\">" +
             "    AND ( username like CONCAT('%', #{username}, '%') or name like CONCAT('%', #{username}, '%')) " +
             "  </if>" +
             "</where> " +
             "order by username " +
             "</script>")
-    List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username, @Param("userIds") List<String> userIds);
+    List<UserModel> listUsers(@Param("orgIds") List<String> orgIds, @Param("username") String username,
+                              @Param("userIds") List<String> userIds, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 
     @Delete("delete from mp_auth_org_user where user = #{userId}")

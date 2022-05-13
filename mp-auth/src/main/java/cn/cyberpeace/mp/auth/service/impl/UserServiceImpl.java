@@ -16,7 +16,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -61,7 +61,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -123,7 +122,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionCheckService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermCheckService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -153,6 +152,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
 
         List<UserDto> userDtos;
         if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
@@ -703,6 +703,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = "users_cache", key = "'usermodel_to_userdto_'+#userModel.getId()")
     public UserDto userModel2UserDto(UserModel userModel) {
+        log.info("not use cache for userId:{}", userModel.getId());
         if (Objects.isNull(userModel)) {
             return null;
         }
@@ -713,6 +714,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = "users_cache", key = "'usermodel_to_userdto_withoutorg_'+#userModel.getId()")
     public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
+        log.info("not use cache for userId:{}", userModel.getId());
         if (Objects.isNull(userModel)) {
             return null;
         }
