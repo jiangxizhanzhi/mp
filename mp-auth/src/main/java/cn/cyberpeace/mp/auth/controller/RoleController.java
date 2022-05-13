@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionCheckService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -18,6 +19,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -39,7 +41,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Api(value = "角色管理接口", tags = "AUTH-角色管理接口")
 @Slf4j
@@ -51,6 +56,9 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     public RoleController(RoleService modelService) {
         setModelService(modelService);
     }
+
+    @Autowired
+    private OperateRolePermissionCheckService opRolePermCheckService;
 
 
     @Override
@@ -77,6 +85,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
                                               @RequestParam(required = false) String[] fields) {
+        opRolePermCheckService.checkByTargetRoleIds(Arrays.asList(id));
         return super.update(id, obj, fields);
     }
 
@@ -89,6 +98,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
+        opRolePermCheckService.checkByTargetRoleIds(Arrays.asList(id));
         return super.delete(id);
     }
 
@@ -205,6 +215,8 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @PatchMapping("/bulk_update")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkUpdate(@RequestBody List<RoleModel> objs) {
+        List<String> roleIds = objs.stream().map(RoleModel::getId).filter(Objects::nonNull).collect(Collectors.toList());
+        opRolePermCheckService.checkByTargetRoleIds(roleIds);
         return getModelService().bulkUpdate(objs).asResult();
     }
 
@@ -218,6 +230,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        opRolePermCheckService.checkByTargetRoleIds(CollectionUtil.toList(ids));
         return getModelService().bulkDelete(ids).asResult();
     }
 

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -40,6 +42,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Autowired
     private AuthDesensitizedService desensitizedService;
+
+    @Autowired
+    private OperateUserPermissionCheckService opUserPermCheckService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -106,6 +111,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
         Assert.notNull(userId, "userId不能为空");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -143,6 +149,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -171,7 +178,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByUserId(String userId) {
         Assert.notNull(userId, "userId不能为空");
-
 //        var objResult = userService.get(userId).getSource();
 //        if (objResult == null || objResult.getObj() == null) {
 //            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
@@ -208,6 +214,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {

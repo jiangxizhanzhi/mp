@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RolePermissionService;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,6 +65,9 @@ public class UserPermissionServiceImpl
 
     @Autowired
     private OrgPermissionService orgPermissionService;
+
+    @Autowired
+    private OperateUserPermissionCheckService opUserPermCheckService;
 
     @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
@@ -138,7 +143,7 @@ public class UserPermissionServiceImpl
     @CacheEvict(value = "targets_cache", allEntries = true)
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(userId, "userId不能为空");
-
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         var result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 

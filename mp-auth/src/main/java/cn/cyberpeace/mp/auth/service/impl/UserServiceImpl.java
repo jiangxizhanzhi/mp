@@ -49,6 +49,7 @@ import cn.hutool.core.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,12 +61,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -119,7 +123,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionCheckService permCheckService;
+    private OperateUserPermissionCheckService opUserPermCheckService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -224,7 +228,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel add(UserRequest createRequest) {
         Assert.notNull(createRequest, "userDto不能为空");
 
-        permCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
+        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -279,6 +283,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
+
+        opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+
         // 保存用户
         UserModel userModel = new UserModel();
         org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
@@ -391,6 +398,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
 
         var source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
@@ -404,6 +412,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean disable(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -425,6 +435,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -440,6 +451,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean enable(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -461,6 +473,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -477,6 +490,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean approve(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -498,6 +512,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -566,6 +581,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void importExcel(List<ImportUser> list) {
+
+        // 对导入的用户进行权限检查，低权限用户不能导入高权限用户
+        Set<String> roleNameSet = new HashSet<>();
+        List<String> roleNamesList = list.stream().map(ImportUser::getRoles).collect(Collectors.toList());
+        roleNamesList.forEach(roleNames -> {
+            if (StringUtils.isNotBlank(roleNames)) {
+                Set<String> subRoleNameSet = Arrays.stream(roleNames.split(",")).map(String::trim).collect(Collectors.toSet());
+                roleNameSet.addAll(subRoleNameSet);
+            }
+        });
+
+        if (CollectionUtil.isNotEmpty(roleNameSet)) {
+            opUserPermCheckService.checkByTargetRoleNames(roleNameSet.stream().collect(Collectors.toList()));
+        }
+
         for (ImportUser importUser : list) {
             // 1.保存用户信息
             UserModel userModel = importUser2UserModel(importUser);
@@ -616,6 +646,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
         Assert.notBlank(userId, "userId不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             // 上传服务器
@@ -669,6 +701,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @Cacheable(value = "users_cache", key = "'usermodel_to_userdto_'+#userModel.getId()")
     public UserDto userModel2UserDto(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
@@ -678,6 +711,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @Cacheable(value = "users_cache", key = "'usermodel_to_userdto_withoutorg_'+#userModel.getId()")
     public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;

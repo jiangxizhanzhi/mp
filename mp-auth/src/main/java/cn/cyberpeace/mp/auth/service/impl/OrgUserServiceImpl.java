@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionCheckService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -53,6 +55,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Autowired
     private AuthDesensitizedService desensitizedService;
+
+    @Autowired
+    private OperateUserPermissionCheckService opUserPermCheckService;
 
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
@@ -90,6 +95,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    @Cacheable(value = "orgs_cache", key = "'list_orgs_byuserid'+#userId")
     public List<OrgModel> listOrgsByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
 
@@ -118,6 +124,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
         Assert.notBlank(orgId, "orgId不能为空！");
+        opUserPermCheckService.checkByTargetUserIds(userIds);
         var objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");

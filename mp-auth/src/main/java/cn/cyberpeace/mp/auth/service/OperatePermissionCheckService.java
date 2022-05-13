@@ -45,7 +45,7 @@ public class OperatePermissionCheckService {
             if (isAdmin) {
                 // 管理员不可操作拥有管理员，超级用户角色的账号，但是可以操作普通用户
                 // 管理员甚至无权修改自己的信息
-                if (targetRoleIds.contains(AuthConstant.ADMIN_ROLE_ID) || targetRoleIds.contains(AuthConstant.SUPERUSER_ROLE_ID)) {
+                if (hasAdminOrSuperUserRole(targetRoleIds)) {
                     log.error("permission denied! Cause target role is admin or superuser! current username:{}, isAdmin:{}, isSuperUser:{}", currentUserDto.getUsername(), isAdmin, isSupserUser);
                     throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
                 }
@@ -57,6 +57,14 @@ public class OperatePermissionCheckService {
             throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
         }
 
+    }
+
+
+    private boolean hasAdminOrSuperUserRole(List<String> roleIds) {
+        return roleIds.stream()
+                .filter(r -> Objects.equals(r.trim(), AuthConstant.ADMIN_ROLE_ID) ||
+                        Objects.equals(r.trim(), AuthConstant.SUPERUSER_ROLE_ID))
+                .findAny().isPresent();
     }
 
 }
