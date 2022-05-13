@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
@@ -43,7 +42,7 @@ public class VmConverter implements BaseConverter{
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
-                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
+                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         InstanceConvertModel convertModel = new InstanceConvertModel();
         convertModel.setModelList(list);
