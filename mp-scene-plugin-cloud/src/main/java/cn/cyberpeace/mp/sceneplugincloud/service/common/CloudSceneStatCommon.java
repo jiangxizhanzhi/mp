@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.service.common;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
@@ -17,9 +19,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -80,23 +80,133 @@ public class CloudSceneStatCommon extends CloudSceneStatCommonBase<CloudPluginSc
     }
 
     /**
-     * TODO 分组查询host的聚合统计数量
+     * 简单从聚合统计数据源计算计数统计结果
+     * @param collectedStatData 聚合统计数据源
+     * @param distinct 是否去重
+     * @return 字段的聚合统计数量 Map<key, 计数统计结果>
+     */
+    public Map<String, Long> countCollectedStatData(Map<String, List<Object>> collectedStatData, boolean distinct) {
+        Map<String, Long> result = new HashMap<>();
+        collectedStatData.forEach((key, values) -> {
+            long count;
+            if (distinct) {
+                count = new HashSet<>(values).size();
+            } else {
+                count = values.size();
+            }
+            result.put(key, count);
+        });
+        return result;
+    }
+
+    /**
+     * 分组搜集网元指定字段的聚合统计数据源
      * @param sceneDataBOs 场景列表
      * @param nodeIds 节点id列表，不传默认为全部
      * @param groupFieldName 分组聚合字段
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     * @return 字段的聚合统计数据源 Map<统计字段名称, Map<分组字段值, 该统计字段值列表>>
      */
-    public Map<String, Long> groupCountElementFromData(List<SceneDataBO> sceneDataBOs, List<String> nodeIds,
-                                                       String groupFieldName) {
+    public Map<String, Map<String, List<Object>>> collectGroupStatElementFromData(
+            List<SceneDataBO> sceneDataBOs, List<String> nodeIds, String groupFieldName, List<String> statFieldNames) {
+        if (nodeIds != null && nodeIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<String, Map<String, List<Object>>> fieldGroupValuesMap = new HashMap<>();
         for (var sceneDataBO : sceneDataBOs) {
             var sceneHandler = new SceneHandler(sceneDataBO, null);
-            var scene = sceneHandler.getScene();
             CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
             pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+                if (nodeIds != null && !nodeIds.contains(nodeId)) {
+                    return;
+                }
 
+                var groupFieldValue = ClassUtils.getObjFieldValue(cloudElement, groupFieldName);
+                if (groupFieldValue == null) {
+                    return;
+                }
+                var groupFieldValueStr = groupFieldValue.toString();
+
+                statFieldNames.forEach(statFieldName -> {
+                    var statFieldValue = ClassUtils.getObjFieldValue(cloudElement, statFieldName);
+                    if (statFieldValue == null) {
+                        return;
+                    }
+                    var groupValuesMap = MapUtils.setDefault(fieldGroupValuesMap, statFieldName, new HashMap<>());
+                    MapUtils.setDefault(groupValuesMap, groupFieldValueStr, new ArrayList<>()).add(statFieldValue);
+                });
             });
         }
-        return new HashMap<>();
+        return fieldGroupValuesMap;
+    }
+
+    /**
+     * 搜集网元指定字段的聚合统计数据源
+     * @param sceneDataBOs 场景列表
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param fieldNames 聚合统计字段
+     * @return 字段的聚合统计数据源 Map<统计字段名称, 该字段值列表>
+     */
+    public Map<String, List<Object>> collectStatElementFromData(List<SceneDataBO> sceneDataBOs, List<String> nodeIds,
+                                                                List<String> fieldNames) {
+        if (nodeIds != null && nodeIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<String, List<Object>> fieldNameValuesMap = new HashMap<>();
+        for (var sceneDataBO : sceneDataBOs) {
+            var sceneHandler = new SceneHandler(sceneDataBO, null);
+            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            pluginHandler.getElementMap().forEach((nodeId, cloudElement) -> {
+                if (nodeIds != null && !nodeIds.contains(nodeId)) {
+                    return;
+                }
+
+                fieldNames.forEach(fieldName -> {
+                    var fieldValue = ClassUtils.getObjFieldValue(cloudElement, fieldName);
+                    if (fieldValue == null) {
+                        return;
+                    }
+                    MapUtils.setDefault(fieldNameValuesMap, fieldName, new ArrayList<>()).add(fieldValue);
+                });
+            });
+        }
+        return fieldNameValuesMap;
+    }
+
+    /**
+     * 搜集端口指定字段的聚合统计数据源
+     * @param sceneDataBOs 场景列表
+     * @param nodeIds 节点id列表，不传默认为全部
+     * @param fieldNames 聚合统计字段
+     * @return 字段的聚合统计数据源 Map<统计字段名称, 该字段值列表>
+     */
+    public Map<String, List<Object>> collectStatPortFromData(List<SceneDataBO> sceneDataBOs, List<String> nodeIds,
+                                                             List<String> fieldNames) {
+        if (nodeIds != null && nodeIds.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<String, List<Object>> fieldNameValuesMap = new HashMap<>();
+        for (var sceneDataBO : sceneDataBOs) {
+            var sceneHandler = new SceneHandler(sceneDataBO, null);
+            CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            pluginHandler.getElementPortMap().forEach((portId, cloudPort) -> {
+                var nodeId = cloudPort.getSrcPort().getElement().getId();
+                if (nodeIds != null && !nodeIds.contains(nodeId)) {
+                    return;
+                }
+
+                fieldNames.forEach(fieldName -> {
+                    var fieldValue = ClassUtils.getObjFieldValue(cloudPort, fieldName);
+                    if (fieldValue == null) {
+                        return;
+                    }
+                    MapUtils.setDefault(fieldNameValuesMap, fieldName, new ArrayList<>()).add(fieldValue);
+                });
+            });
+        }
+        return fieldNameValuesMap;
     }
 
 }
