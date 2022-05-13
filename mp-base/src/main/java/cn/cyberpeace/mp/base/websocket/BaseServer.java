@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.base.websocket;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.websocket.WebSocketConfig;
+import cn.cyberpeace.mp.base.message.FormatMessage;
+import cn.cyberpeace.mp.base.message.MessageConverter;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,19 +33,20 @@ public abstract class BaseServer {
         });
     }
 
-    public static void sendToSession(Class<?> serverClass, String sessionKey, String message) {
+    public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
+                                         T data, String type, Map<String, Object> context) {
         var sessionMap = serverSessionMap.get(serverClass);
         var server = sessionMap.getOrDefault(sessionKey, null);
         if (server == null) {
             return;
         }
 
-        server.send(message);
+        server.send(data, type, context);
     }
 
-    public static void sendToAllSessions(Class<?> serverClass, String message) {
+    public static <T> void sendToAllSessions(Class<?> serverClass, T data, String type, Map<String, Object> context) {
         var sessionMap = serverSessionMap.get(serverClass);
-        sessionMap.forEach((sessionKey, server) -> server.send(message));
+        sessionMap.forEach((sessionKey, server) -> server.send(data, type, context));
     }
 
     public static Map<String, Object> getHeaders(Session session) {
@@ -113,11 +118,17 @@ public abstract class BaseServer {
         log.error("Websocket error: ", e);
     }
 
-    public void send(String message) {
+    public abstract MessageConverter getMessageConverter();
+
+    public <T> void send(T data, String type, Map<String, Object> context) {
+        FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
+        log.debug("ws content:{}", JsonCommon.stringify(formatMessage));
+
+        var messageStr = getMessageConverter().toMessageString(formatMessage);
         try {
-            session.getBasicRemote().sendText(message);
+            session.getBasicRemote().sendText(messageStr);
         } catch (IOException e) {
-            log.error("Websocket send message({}) error: {}", message, e);
+            log.error("Websocket send message({}) error: {}", messageStr, e);
         }
     }
 
