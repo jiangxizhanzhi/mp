@@ -346,7 +346,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
-        desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
+        // 登录接口用了这个方法，不能对密码字段做脱敏处理
         return userModel;
     }
 

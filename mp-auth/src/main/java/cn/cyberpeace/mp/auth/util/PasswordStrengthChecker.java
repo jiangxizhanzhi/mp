@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2019. 南京云帐房网络科技有限公司 版权所有
- */
-
 package cn.cyberpeace.mp.auth.util;
 
 

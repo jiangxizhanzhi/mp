@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2018. 南京云帐房网络科技有限公司 版权所有
- */
-
 package cn.cyberpeace.mp.base.config;
 
 import cn.cyberpeace.mp.base.annotation.SwaggerDisplayEnum;
