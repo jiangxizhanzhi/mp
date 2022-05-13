@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
@@ -34,8 +36,12 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
@@ -62,6 +68,10 @@ public class ImagesController {
     private InjectFileConverter injectFileConverter;
 
     private ImagesService imagesService;
+
+    @Qualifier("fastDfsFileServiceImpl")
+    @Autowired
+    private FileService fileService;
 
     public ImagesController(ImagesConverter imagesConverter, SnapshotConverter snapshotConverter,
                             FlavorService flavorService, ImagesService imagesService,
@@ -415,6 +425,34 @@ public class ImagesController {
             imageCheckPorts.add(checkPort);
         }
         return new Result(new ImageCheckPortResponse(imageCheckPorts));
+    }
+
+    /**
+     * SSH文件上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("SSH文件上传方法")
+    @PostMapping(value = "/file/upload/ssh")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadSshFile(MultipartFile file, HttpServletRequest request) {
+        return fileService.uploadFile(file, request);
+    }
+
+    /**
+     * 文件注入上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("文件注入上传方法")
+    @PostMapping(value = "/file/upload/inject")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadInjectFile(MultipartFile file, HttpServletRequest request) {
+        return fileService.uploadFile(file, request);
     }
 
     /**
