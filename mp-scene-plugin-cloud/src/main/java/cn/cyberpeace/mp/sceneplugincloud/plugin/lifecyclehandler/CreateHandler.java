@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -1019,57 +1018,58 @@ public class CreateHandler extends HandlerCommon {
             return;
         }
 
+        // 拼接组网命令
         var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
+        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
+        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
+            log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
+            return;
+        }
+        var buildNetwork = new RouterConfigCmdData();
+        buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        buildNetwork.setCmds(cmds);
 
         // 开启dhcp
         var openDhcp = new RouterConfigCmdData();
         openDhcp.setSerialIp(port.getHost());
         openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
         openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
-        boolean result = false;
-        boolean dhcpSetOk = false;
-        int tryTimes = 3;
+        boolean openDhcpResult = false;
+        boolean buildNetworkResult = false;
+        int tryTimes = 5;
+        Exception exception = null;
         for (int i = 0; i < tryTimes; i++) {
             // 先等2s,等待串口可用
             waitSeconds(2000);
-            result = vmRouter.createConfig(openDhcp);
+            openDhcpResult = vmRouter.createConfig(openDhcp);
             // 失败可能是串口仍不可用,需要重试
-            if (!result) {
+            if (!openDhcpResult) {
                 continue;
             }
-            // 探测下dhcp设置的ip是否可用
-            for (int s = 0; s < 3; s++) {
-                dhcpSetOk = NetworkUtils.checkHostReachable(defaultPort.getAccessModes().get(0).getAccessIp(), 200);
-                if (dhcpSetOk) {
-                    break;
-                } else {
-                    // 等待 200ms 继续探测
-                    waitSeconds(200);
-                }
+            // 发送拼接网络的命令
+            try {
+                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+            } catch (Exception e) {
+                log.error("failed to build network , try time {}", i);
+                exception = e;
+                buildNetworkResult = false;
             }
-            if (!dhcpSetOk) {
-                // 多次探测后ip仍然不可用,再次设置dhcp
+            if (!buildNetworkResult) {
+                // 设置失败需要重试
                 continue;
             } else {
                 // dhcp设置的ip可用之后 即可执行后续的命令
                 break;
             }
         }
-        if (result == false || dhcpSetOk == false) {
-            log.error("open dhcp failed , resource id is {} , params is {}", elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+        if (openDhcpResult == false || buildNetworkResult == false) {
+            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            if (exception != null) {
+                log.error("failed to build network ", exception);
+            }
             return;
         }
-
-        List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
-        if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
-            log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
-            return;
-        }
-        var config = new RouterConfigCmdData();
-        config.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
-        config.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
-        config.setCmds(cmds);
-        vmRouter.createConfig(config);
     }
 
     private void waitSeconds(long millSeconds) {
