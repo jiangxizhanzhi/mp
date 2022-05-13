@@ -37,6 +37,13 @@ public class OrgController {
         return ServiceResult.builder().source(orgs).build().asResult();
     }
 
+    @ApiOperation(value = "根据组织路径查询", notes = "")
+    @GetMapping("/bypath")
+    public ServiceResult<OrgModel> getByPath(@RequestParam String path) {
+        OrgModel org = orgService.getByPath(path.trim());
+        return ServiceResult.success(org);
+    }
+
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
