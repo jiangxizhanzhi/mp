@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Api(tags = "流量任务管理接口")
-//@RestController
+@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/task")
 public class FlowTaskController extends BaseModelController<FlowTaskModel, QueryParams, FlowTaskService> {
 
@@ -161,10 +161,10 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @param request
      * @return
      */
-    @ApiOperation("执行流量任务")
+    @ApiOperation("批量执行流量任务")
     @PostMapping("/batch/actuator")
     public ServiceResult<Boolean> batchActuator(@RequestBody @Validated BatchActuatorTaskRequest request) {
-        return null;
+        return flowTaskService.batchActuator(request);
     }
 
 }

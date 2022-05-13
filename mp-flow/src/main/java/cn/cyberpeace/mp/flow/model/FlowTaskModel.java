@@ -164,5 +164,12 @@ public class FlowTaskModel extends BaseModel {
     @DefaultInt(1)
     private Integer mult;
 
+    /**
+     * 节点id
+     */
+    @ApiModelProperty(value = "节点id")
+    @DefaultStr
+    private String nodeId;
+
 
 }

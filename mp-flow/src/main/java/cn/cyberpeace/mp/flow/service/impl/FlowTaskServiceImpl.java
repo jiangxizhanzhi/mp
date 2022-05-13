@@ -731,7 +731,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param taskIds
      * @return
      */
-    public int batchIncreaseRunningCount(Integer taskStatus, Boolean runCount, List<String> taskIds) {
+    public int batchUpdateTaskStatus(Integer taskStatus, Boolean runCount, List<String> taskIds) {
         return getModelMapper().batchUpdateTaskStatus(taskStatus, runCount, taskIds);
     }
 
@@ -771,6 +771,14 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
 
         List<FlowTaskModel> flowTaskModels = objServiceResult.getData().getList();
+        // 流量任务状态校验
+        List<String> runningTaskIds = flowTaskModels.stream().filter(flowTaskModel ->
+                flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()).map(FlowTaskModel::getId).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(runningTaskIds)) {
+            log.error("tasks [{}] are running, can not batch actuator tasks", runningTaskIds);
+            return ServiceResult.fail(FlowErrorCode.TASK_IS_RUNNING);
+        }
+
         // 流量执行器信息查询
         String actuatorId = flowTaskModels.get(0).getActuatorId();
         FlowActuatorModel flowActuatorModel = asyncPlatFlowTaskService.getFlowActuatorModel(actuatorId);
@@ -782,9 +790,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).distinct().collect(Collectors.toList());
         // 任务id集合
         List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
-        // 查询关联的流量任务
-        List<String> flowIds = flowTaskModels.stream().map(FlowTaskModel::getFlowId).distinct().collect(Collectors.toList());
-        List<FlowInfoModel> flowInfoModels = flowInfoService.selectByFlowIds(flowIds);
 
         // 执行任务参数
         JSONObject object = new JSONObject();
@@ -802,7 +807,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             if (ResponseUtils.checkResponse(batchActuatorObj)) {
                 log.info("batch actuator tasks success");
                 // 流量任务状态和执行次数更新
-                this.batchIncreaseRunningCount(TaskStatusEnum.RUNNING.toValue(), true, taskIds);
+                this.batchUpdateTaskStatus(TaskStatusEnum.RUNNING.toValue(), true, taskIds);
             } else {
                 log.error("batch actuator tasks failed");
                 return ServiceResult.success(false);
@@ -814,6 +819,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         TaskCommon.executeTask(() -> {
             try {
+                // 批量轮询任务状态
                 asyncPlatFlowTaskService.batchRefreshTaskStatus(flowTaskModels, flowActuatorModel, request.getCallbackConsumer());
             } catch (Exception e) {
                 log.info("refresh task status error: ", e);

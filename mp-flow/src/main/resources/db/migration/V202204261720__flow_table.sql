@@ -2,7 +2,8 @@ ALTER TABLE `mp_flow_task`
     ADD COLUMN `custom_flag` tinyint NOT NULL DEFAULT 0 COMMENT '自定义流量任务标志 0：否， 1：是' AFTER `target_ips`,
     ADD COLUMN `flow_protocol` varchar(512) NOT NULL COMMENT '流量协议' AFTER `custom_flag`,
     ADD COLUMN `content` varchar(1024) NOT NULL COMMENT '流量内容' AFTER `flow_protocol`,
-    ADD COLUMN `mult` int NOT NULL DEFAULT 1 COMMENT '倍数:大于等于1的整数' AFTER `content`;
+    ADD COLUMN `mult` int NOT NULL DEFAULT 1 COMMENT '倍数:大于等于1的整数' AFTER `content`,
+    ADD COLUMN `node_id` varchar(64) NOT NULL COMMENT '节点id' AFTER `target_ips`;
 
 ALTER TABLE `mp_flow_port`
     ADD COLUMN `network_id` varchar(64) NOT NULL DEFAULT '' COMMENT '网络id' AFTER `client_gateway`,

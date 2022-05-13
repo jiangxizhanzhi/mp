@@ -721,8 +721,8 @@ public class AsyncPlatFlowTaskService {
      */
     public void batchRefreshTaskStatus(List<FlowTaskModel> flowTaskModels, FlowActuatorModel flowActuatorModel, Consumer<BatchActuatorCallbackResponse> consumer) {
         String host = flowActuatorModel.getIp();
-        // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询20分钟
-        CheckUtils.loopCheck(() -> batchCheckTaskJobStopped(flowTaskModels, host, consumer), 2000, 1000 * 60 * 20,
+        // 轮询校验批量任务是否跑完，完成时调用回调方法，最多轮询60分钟
+        CheckUtils.loopCheck(() -> batchCheckTaskJobStopped(flowTaskModels, host, consumer), 2000, 1000 * 60 * 60,
                 null, 1, null, () -> log.error("batch get task job running status failed"), "BatchCheckTaskJobStopped");
 
     }
@@ -858,6 +858,7 @@ public class AsyncPlatFlowTaskService {
             return false;
         }
 
+        List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).collect(Collectors.toList());
         List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).collect(Collectors.toList());
         try {
             JSONObject statusObj = new JSONObject();
@@ -899,6 +900,10 @@ public class AsyncPlatFlowTaskService {
                             errorTaskModels.add(taskModel);
                         }
                     });
+
+
+                    // 批量更新流量任务状态为停止
+                    flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);
 
                     BatchActuatorCallbackResponse callbackResponse = new BatchActuatorCallbackResponse();
                     callbackResponse.setSuccessTaskModels(successTaskModels);

@@ -87,7 +87,14 @@ public class AddAppTaskRequest {
         AddAppTaskRequest.Specifics specifics = new AddAppTaskRequest.Specifics();
         int duration = flowTaskModel.getCount() * flowTaskModel.getIntervalTime();
         specifics.setDuration(duration);
-        specifics.setSrcIpRange(flowTaskModel.getOriginIps());
+        String[] srcIps = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH);
+        String srcIpRange;
+        if (srcIps.length < 2) {
+            srcIpRange = srcIps[0] + BaseConstants.SHORT_DASH + srcIps[0];
+        } else {
+            srcIpRange = flowTaskModel.getOriginIps();
+        }
+        specifics.setSrcIpRange(srcIpRange);
         String[] targetIps = flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH);
         String dstIpRange;
         if (targetIps.length < 2) {
