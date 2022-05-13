@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
+import cn.cyberpeace.mp.auth.service.impl.AuthDesensitizedService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
@@ -34,6 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Objects;
 
 @Slf4j
@@ -55,6 +57,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthDesensitizedService desensitizedService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -87,6 +92,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
                 UserDto userDto = userService.userModel2UserDto(userResult.getObj());
+
+                desensitizedService.desensitiveUserDtos(Arrays.asList(userDto));
+
                 LoginResp loginResp = new LoginResp();
                 loginResp.setUser(userDto);
                 loginResp.setToken(jwt);
