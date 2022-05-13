@@ -278,8 +278,8 @@ public class CsceneDataModifier {
                         if (p.get("access_modes") != null) {
                             List<Map> accessModes = (List<Map>) p.get("access_modes");
                             accessModes.forEach(accessMode -> {
-                                if (accessMode.get("secret_path") != null) {
-                                    accessMode.put("secret_path", removePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                if (accessMode.get("private_key_path") != null) {
+                                    accessMode.put("private_key_path", removePrefix(accessMode.get("private_key_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
                                 }
                             });
                         }
@@ -554,8 +554,8 @@ public class CsceneDataModifier {
                         if (p.get("access_modes") != null) {
                             List<Map> accessModes = (List<Map>) p.get("access_modes");
                             accessModes.forEach(accessMode -> {
-                                if (accessMode.get("secret_path") != null) {
-                                    accessMode.put("secret_path", addFilePrefix(accessMode.get("secret_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                if (accessMode.get("private_key_path") != null) {
+                                    accessMode.put("private_key_path", addFilePrefix(accessMode.get("private_key_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
                                 }
                             });
                         }
