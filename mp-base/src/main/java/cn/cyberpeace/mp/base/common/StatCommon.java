@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.bo.GroupSizeBO;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,41 +26,84 @@ public class StatCommon {
      * 分组查询指定字段的聚合count数量
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组聚合字段
-     * @param countFieldName 统计字段
+     * @param groupFieldName 分组字段
+     * @param countFieldNames 统计字段
+     * @param distinct 是否去重
      * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
+     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
      */
-    public static <T> Map<T, Long> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
-                                              String groupFieldName, String countFieldName, boolean distinct) {
-        condition.selectAs(groupFieldName, GroupSizeBO<T, Long>::getTarget).groupBy(groupFieldName);
-        if (distinct) {
-            condition.selectAs(Count.f(countFieldName).distinct(), GroupSizeBO<T, Long>::getSize);
-        } else {
-            condition.selectAs(Count.f(countFieldName), GroupSizeBO<T, Long>::getSize);
-        }
-        var groupCountBOs = mapper.list(condition, new GroupSizeBO<T, Long>().getClass());
-        return groupCountBOs.stream()
-                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupSizeBO<T, Long>::getSize));
+    public static <T> Map<String, Map<T, Long>> groupCount(BaseModelMapper<?> mapper, HumanCondition condition,
+                                                           String groupFieldName, List<String> countFieldNames,
+                                                           boolean distinct) {
+        List<AggStatField> countFields = countFieldNames.stream()
+                .map(fieldName -> CountField.f(fieldName, distinct)).collect(Collectors.toList());
+        GroupStatResult<T, ?> statResult = groupAggStat(mapper, condition, groupFieldName, countFields);
+        return statResult.getCountResult();
     }
 
     /**
      * 分组查询指定字段的聚合count数量
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
-     * @param groupFieldName 分组聚合字段
-     * @param sumFieldName 统计字段
+     * @param groupFieldName 分组字段
+     * @param sumFieldNames 统计字段
      * @param <T> 分组聚合字段的值类型
      * @param <S> 统计值类型
-     * @return 字段的聚合count数量 Map<字段值, 该字段值统计数量>
+     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
      */
-    public static <T, S extends Number> Map<T, S> groupSum(
-            BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName, String sumFieldName) {
-        condition.selectAs(groupFieldName, GroupSizeBO<T, S>::getTarget).groupBy(groupFieldName);
-        condition.selectAs(Sum.f(sumFieldName), GroupSizeBO<T, S>::getSize);
-        var groupCountBOs = mapper.list(condition, new GroupSizeBO<T, S>().getClass());
-        return groupCountBOs.stream()
-                .collect(Collectors.toMap(groupCountBO -> (T) groupCountBO.getTarget(), GroupSizeBO<T, S>::getSize));
+    public static <T, S extends Number> Map<String, Map<T, S>> groupSum(
+            BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName, List<String> sumFieldNames) {
+        List<AggStatField> sumFields = sumFieldNames.stream().map(SumField::f).collect(Collectors.toList());
+        GroupStatResult<T, S> statResult = groupAggStat(mapper, condition, groupFieldName, sumFields);
+        return statResult.getSumResult();
+    }
+
+    /**
+     * 分组聚合统计指定字段结果
+     * @param mapper 数据mapper对象
+     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
+     * @param groupFieldName 分组字段
+     * @param statFields 统计字段
+     * @param <T> 分组字段的值类型
+     * @param <S> sum统计结果类型
+     * @return 字段的聚合结果
+     */
+    public static <T, S extends Number> GroupStatResult<T, S> groupAggStat(
+            BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName, List<AggStatField> statFields) {
+        condition.selectAs(groupFieldName, groupFieldName).groupBy(groupFieldName);
+
+        Map<String, Map<T, Long>> countResult = new HashMap<>();
+        Map<String, Map<T, S>> sumResult = new HashMap<>();
+        List<CountField> countFields = new ArrayList<>();
+        List<SumField> sumFields = new ArrayList<>();
+        for (var statField: statFields) {
+            statField.loadToCondition(condition);
+
+            if (statField instanceof CountField) {
+                countFields.add((CountField) statField);
+                countResult.put(statField.getName(), new HashMap<>());
+            } else if (statField instanceof SumField) {
+                sumFields.add((SumField) statField);
+                sumResult.put(statField.getName(), new HashMap<>());
+            }
+        }
+
+        var statLines = mapper.originList(condition);
+        for (var statLine: statLines) {
+            T groupValue = (T) statLine.get(groupFieldName);
+            for (var coundField: countFields) {
+                countResult.get(coundField.getName())
+                        .put(groupValue, Long.valueOf(statLine.get(coundField.getQueryKey()).toString()));
+            }
+            for (var sumField: sumFields) {
+                sumResult.get(sumField.getName())
+                        .put(groupValue, (S) statLine.get(sumField.getQueryKey()));
+            }
+        }
+        GroupStatResult<T, S> statResult = new GroupStatResult<>();
+        statResult.setCountResult(countResult);
+        statResult.setSumResult(sumResult);
+        return statResult;
     }
 
     /**
@@ -69,7 +113,7 @@ public class StatCommon {
      * @param groupFieldName 分组聚合字段
      * @param fieldCalcMap 统计字段对应的计算方法
      * @param <T> 分组聚合分组字段的值类型
-     * @return 字段的聚合count数量 Map<字段, Map<分组字段值, 该字段值聚合结果>>
+     * @return 字段的聚合count数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
      */
     public static <T> Map<String, Map<T, Object>> groupCalc(
             BaseModelMapper<?> mapper, HumanCondition condition, String groupFieldName,
@@ -93,9 +137,11 @@ public class StatCommon {
         });
 
         Map<String, Map<T, Object>> fieldGroupCalcValueMap = new HashMap<>();
+        fieldNames.forEach(fieldName -> {
+            fieldGroupCalcValueMap.put(fieldName, new HashMap<>());
+        });
         fieldGroupValuesMap.forEach((fieldName, fieldGroupValues) -> {
-            Map<T, Object> fieldGroupCalcValue = new HashMap<>();
-            fieldGroupCalcValueMap.put(fieldName, fieldGroupCalcValue);
+            var fieldGroupCalcValue = fieldGroupCalcValueMap.get(fieldName);
             var calc = fieldCalcMap.get(fieldName);
             fieldGroupValues.forEach((groupValue, groupValues) -> {
                 fieldGroupCalcValue.put(groupValue, calc.apply(groupValues));
@@ -109,23 +155,15 @@ public class StatCommon {
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
      * @param fieldNames 统计字段名称列表
+     * @param distinct 是否去重
      * @return 字段的聚合count数量 Map<字段名, 该字段值统计数量>
      */
     public static Map<String, Long> count(BaseModelMapper<?> mapper, HumanCondition condition,
-                                          List<String> fieldNames) {
-        for (var fieldName : fieldNames) {
-            condition.selectAs(Count.f(fieldName).calcEmptyNull().distinct(), fieldName);
-        }
-        var countResultList = mapper.originList(condition);
-        if (countResultList.isEmpty()) {
-            return new HashMap<>();
-        }
-
-        Map<String, Long> countResult = new HashMap<>();
-        countResultList.get(0).forEach((fieldName, countValue) -> {
-            countResult.put(fieldName, Long.valueOf(countValue.toString()));
-        });
-        return countResult;
+                                          List<String> fieldNames, boolean distinct) {
+        List<AggStatField> countFields = fieldNames.stream()
+                .map(fieldName -> CountField.f(fieldName, distinct)).collect(Collectors.toList());
+        StatResult<?> statResult = aggStat(mapper, condition, countFields);
+        return statResult.getCountResult();
     }
 
     /**
@@ -138,19 +176,51 @@ public class StatCommon {
      */
     public static <S extends Number> Map<String, S> sum(
             BaseModelMapper<?> mapper, HumanCondition condition, List<String> fieldNames) {
-        for (var fieldName : fieldNames) {
-            condition.selectAs(Sum.f(fieldName), fieldName);
-        }
-        var sumResultList = mapper.originList(condition);
-        if (sumResultList.isEmpty()) {
-            return new HashMap<>();
+        List<AggStatField> sumFields = fieldNames.stream().map(SumField::f).collect(Collectors.toList());
+        StatResult<S> statResult = aggStat(mapper, condition, sumFields);
+        return statResult.getSumResult();
+    }
+
+    /**
+     * 聚合统计指定字段结果
+     * @param mapper 数据mapper对象
+     * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
+     * @param statFields 统计字段
+     * @param <S> sum统计结果类型
+     * @return 字段的聚合结果
+     */
+    public static <S extends Number> StatResult<S> aggStat(
+            BaseModelMapper<?> mapper, HumanCondition condition, List<AggStatField> statFields) {
+        Map<String, Long> countResult = new HashMap<>();
+        Map<String, S> sumResult = new HashMap<>();
+        List<CountField> countFields = new ArrayList<>();
+        List<SumField> sumFields = new ArrayList<>();
+        for (var statField: statFields) {
+            statField.loadToCondition(condition);
+
+            if (statField instanceof CountField) {
+                countFields.add((CountField) statField);
+                countResult.put(statField.getName(), 0L);
+            } else if (statField instanceof SumField) {
+                sumFields.add((SumField) statField);
+                sumResult.put(statField.getName(), null);
+            }
         }
 
-        Map<String, S> sumResult = new HashMap<>();
-        sumResultList.get(0).forEach((fieldName, sumValue) -> {
-            sumResult.put(fieldName, (S) sumValue);
-        });
-        return sumResult;
+        var statLines = mapper.originList(condition);
+
+        for (var statLine: statLines) {
+            for (var coundField: countFields) {
+                countResult.put(coundField.getName(), Long.valueOf(statLine.get(coundField.getQueryKey()).toString()));
+            }
+            for (var sumField: sumFields) {
+                sumResult.put(sumField.getName(), (S) statLine.get(sumField.getQueryKey()));
+            }
+        }
+        StatResult<S> statResult = new StatResult<>();
+        statResult.setCountResult(countResult);
+        statResult.setSumResult(sumResult);
+        return statResult;
     }
 
     /**
@@ -158,7 +228,7 @@ public class StatCommon {
      * @param mapper 数据mapper对象
      * @param condition 已完成设置的HumanCondition查询条件（如关联查询需要已指向字段对应的表）
      * @param fieldCalcMap 统计字段对应的计算方法
-     * @return 字段的聚合count数量 Map<字段值, 该字段值聚合结果>
+     * @return 字段的聚合count数量 Map<字段名, 该字段值聚合结果>
      */
     public static Map<String, Object> calc(BaseModelMapper<?> mapper, HumanCondition condition,
                                            Map<String, Function<List<Object>, Object>> fieldCalcMap) {
@@ -175,10 +245,72 @@ public class StatCommon {
             });
         });
         Map<String, Object> fieldCalcValueMap = new HashMap<>();
+        fieldNames.forEach(fieldName -> {
+            fieldCalcValueMap.put(fieldName, null);
+        });
         fieldValuesMap.forEach((fieldName, fieldValues) -> {
             fieldCalcValueMap.put(fieldName, fieldCalcMap.get(fieldName).apply(fieldValues));
         });
         return fieldCalcValueMap;
+    }
+
+    @Data
+    public static class GroupStatResult<T, S extends Number> {
+        private Map<String, Map<T, Long>> countResult;
+        private Map<String, Map<T, S>> sumResult;
+    }
+
+    @Data
+    public static class StatResult<S extends Number> {
+        private Map<String, Long> countResult;
+        private Map<String, S> sumResult;
+    }
+
+    @Data
+    public abstract static class AggStatField {
+        private String name;
+        private String queryKey = TextUtils.uuid();
+
+        public abstract void loadToCondition(HumanCondition condition);
+    }
+
+    @Data
+    public static class CountField extends AggStatField {
+        private Boolean distinct;
+
+        public static CountField f(String name) {
+            return f(name, false);
+        }
+
+        public static CountField f(String name, boolean distinct) {
+            var field = new CountField();
+            field.setName(name);
+            field.setDistinct(distinct);
+            return field;
+        }
+
+        @Override
+        public void loadToCondition(HumanCondition condition) {
+            if (Boolean.TRUE.equals(getDistinct())) {
+                condition.selectAs(Count.f(getName()).calcEmptyNull().distinct(), getQueryKey());
+            } else {
+                condition.selectAs(Count.f(getName()).calcEmptyNull(), getQueryKey());
+            }
+        }
+    }
+
+    @Data
+    public static class SumField extends AggStatField {
+        public static SumField f(String name) {
+            var field = new SumField();
+            field.setName(name);
+            return field;
+        }
+
+        @Override
+        public void loadToCondition(HumanCondition condition) {
+            condition.selectAs(Sum.f(getName()), getQueryKey());
+        }
     }
 
 }
