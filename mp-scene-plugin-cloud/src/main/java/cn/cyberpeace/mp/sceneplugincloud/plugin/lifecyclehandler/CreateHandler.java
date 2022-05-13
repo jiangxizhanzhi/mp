@@ -1017,28 +1017,65 @@ public class CreateHandler extends HandlerCommon {
             log.error("get Serial Port failed , resource id is {} , port result is {}", elementBO.getResourceId(), JsonCommon.stringify(port));
             return;
         }
-        // 开启dhcp
-        var openDhcp = new RouterConfigCmdData();
-        openDhcp.setSerialIp(port.getHost());
-        openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
-        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
-        boolean result = vmRouter.createConfig(openDhcp);
-        if (result == false) {
-            log.error("open dhcp failed , resource id is {} , params is {}", elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
-            return;
-        }
 
+        // 拼接组网命令
+        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
         List<String> cmds = VyosNetworkCommandUtils.genNetworkCmdList(elementBO, getPluginHandler());
         if (org.apache.commons.collections4.CollectionUtils.isEmpty(cmds)) {
             log.error("no network config , element id is {} ", elementBO.getSrcElement().getId());
             return;
         }
+        var buildNetwork = new RouterConfigCmdData();
+        buildNetwork.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
+        buildNetwork.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
+        buildNetwork.setCmds(cmds);
 
-        var defaultPort = getPluginHandler().getPort(elementBO.getSrcElement().getPorts().get(0).getId());
-        var config = new RouterConfigCmdData();
-        config.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
-        config.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
-        config.setCmds(cmds);
-        vmRouter.createConfig(config);
+        // 开启dhcp
+        var openDhcp = new RouterConfigCmdData();
+        openDhcp.setSerialIp(port.getHost());
+        openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
+        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
+        boolean openDhcpResult = false;
+        boolean buildNetworkResult = false;
+        int tryTimes = 5;
+        Exception exception = null;
+        for (int i = 0; i < tryTimes; i++) {
+            // 先等2s,等待串口可用
+            waitSeconds(2000);
+            openDhcpResult = vmRouter.createConfig(openDhcp);
+            // 失败可能是串口仍不可用,需要重试
+            if (!openDhcpResult) {
+                continue;
+            }
+            // 发送拼接网络的命令
+            try {
+                buildNetworkResult = vmRouter.createConfig(buildNetwork);
+            } catch (Exception e) {
+                log.error("failed to build network , try time {}", i);
+                exception = e;
+                buildNetworkResult = false;
+            }
+            if (!buildNetworkResult) {
+                // 设置失败需要重试
+                continue;
+            } else {
+                // dhcp设置的ip可用之后 即可执行后续的命令
+                break;
+            }
+        }
+        if (openDhcpResult == false || buildNetworkResult == false) {
+            log.error("build vyos network failed ,openDhcp {} , buildNetwork {} , resource id is {} , params is {} , ", openDhcp, buildNetwork, elementBO.getResourceId(), JsonCommon.stringify(openDhcp));
+            if (exception != null) {
+                log.error("failed to build network ", exception);
+            }
+            return;
+        }
+    }
+
+    private void waitSeconds(long millSeconds) {
+        try {
+            Thread.sleep(millSeconds);
+        } catch (InterruptedException e) {
+        }
     }
 }
