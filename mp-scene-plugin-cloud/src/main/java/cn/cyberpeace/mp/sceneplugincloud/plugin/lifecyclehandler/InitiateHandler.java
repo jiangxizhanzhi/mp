@@ -329,8 +329,7 @@ public class InitiateHandler extends HandlerCommon {
             if (StringUtils.isEmpty(network.getGateway())) {
                 String gatewayIp = null;
                 if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
-                        || ElementTypeUtils.isCoreRouter(element)) {
+                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
                             gatewayIp = p.getIp();
@@ -949,6 +948,26 @@ public class InitiateHandler extends HandlerCommon {
                                 port.setIp(newIp);
                             }
                         }
+                    }
+                    if (ElementTypeUtils.isCoreRouter(element)) {
+                        // 核心路由的网络其网关为核心路由的ip
+                        if (CollectionUtils.isEmpty(element.getDeriveNetworks())) {
+                            continue;
+                        }
+                        element.getDeriveNetworks().forEach(net -> {
+                            if (CollectionUtils.isNotEmpty(net.getFromPorts())) {
+                                String gatewayIp = null;
+                                for (var p : net.getFromPorts()) {
+                                    if (StringUtils.isNotEmpty(p.getIp())) {
+                                        gatewayIp = p.getIp();
+                                        break;
+                                    }
+                                }
+                                if (gatewayIp != null) {
+                                    net.network.setGateway(gatewayIp);
+                                }
+                            }
+                        });
                     }
                 } catch (Exception e) {
                     log.error("reallocate ip error , network is {} ", JsonCommon.stringify(network), e);
