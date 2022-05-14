@@ -12,8 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Objects;
 
 @Component
@@ -45,6 +49,25 @@ public class UserUtils {
         request.setAttribute(LogConstant.USER_ID_KEY, id);
         request.setAttribute(LogConstant.USER_NAME_KEY, name);
         request.setAttribute(LogConstant.USER_TYPE_KEY, userType);
+    }
+
+    /**
+     * 获取当前登录用户类型
+     * @return
+     */
+    public static String getLoginUserType() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+
+        if (Objects.nonNull(request)) {
+            Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
+            if (Objects.nonNull(userType)) {
+                return String.valueOf(userType);
+            }
+        }
+
+        return null;
     }
 
     /**

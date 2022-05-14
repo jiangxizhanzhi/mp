@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,12 +32,19 @@ public class OperatePermissionService {
     public boolean isLoginUserAdmin() {
         UserDto currentUserDto = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserDto)) {
-            if (!Objects.equals(1, currentUserDto.getIsAdmin())) {
-                return false;
+            // 超级用户拥有管理员权限
+            if (Objects.equals(1, currentUserDto.getIsAdmin()) || Objects.equals(1, currentUserDto.getIsSuperUser())) {
+                return true;
             }
         }
-        // client认证的用户都有管理员权限
-        return true;
+
+        String userType = UserUtils.getLoginUserType();
+        if (Objects.equals(LogConstant.USER_TYPE_CLIENT, userType)) {
+            // client类型的认证，默认拥有管理员，超级用户权限
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -47,12 +55,19 @@ public class OperatePermissionService {
     public boolean isLoginUserSuperUser() {
         UserDto currentUserDto = UserUtils.getLoginUserDtoWithoutOrg();
         if (Objects.nonNull(currentUserDto)) {
-            if (!Objects.equals(1, currentUserDto.getIsSuperUser())) {
-                return false;
+            if (Objects.equals(1, currentUserDto.getIsSuperUser())) {
+                return true;
             }
         }
+
+        String userType = UserUtils.getLoginUserType();
+        if (Objects.equals(LogConstant.USER_TYPE_CLIENT, userType)) {
+            // client类型的认证，默认拥有管理员，超级用户权限
+            return true;
+        }
+
         // client认证的用户都有超级用户权限
-        return true;
+        return false;
     }
 
     /**
