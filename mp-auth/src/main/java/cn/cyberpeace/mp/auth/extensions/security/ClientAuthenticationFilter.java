@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -46,6 +48,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
             log.info("client auth... clientId:{}", clientId);
+            log.info("【前置增强】>>  来源IP: {}, 请求地址URL: {}, 头部header: {}, 方法名称method: {}", SnUtils.getRealRemoteIp(request), request.getRequestURI(), SnUtils.getRequestHeaders(request), request.getMethod());
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // client认证, 赋有所有角色，资源权限
                 Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);

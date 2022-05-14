@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.excel.exception.ExcelCommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -72,7 +73,8 @@ public class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public ServiceResult<String> exceptionHandle(Exception ex) {
-        String errorMsg = ex.getMessage();
+        //String errorMsg = ex.getMessage();
+        String errorMsg = ExceptionUtil.stacktraceToString(ex);
         log.error(errorMsg);
         CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
         customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
