@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.common.TimeCommon;
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -644,12 +645,23 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
+        // 批量任务传的是nodeId，直接用该值查询
+        String thirdTaskId = taskId;
         FlowRecordsResponse response = new FlowRecordsResponse();
         FlowTaskModel flowTaskModel = getModelMapper().get(taskId);
         if (Objects.isNull(flowTaskModel)) {
-            log.error("task info is empty for taskId:{}", taskId);
-            // 流量任务不存在
-            return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+            HumanCondition condition = new HumanCondition().filterEqual(FlowTaskModel::getNodeId, taskId);
+            List<FlowTaskModel> flowTaskModelList = getModelMapper().list(condition);
+            if (CollectionUtils.isEmpty(flowTaskModelList)) {
+                log.error("task info is empty for taskId:{}", taskId);
+                // 流量任务不存在
+                return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+            } else {
+                flowTaskModel = flowTaskModelList.get(0);
+            }
+        } else {
+            // 单个任务用thirdTaskId
+            thirdTaskId = flowTaskModel.getThirdTaskId();
         }
 
         // 流量执行器信息查询
@@ -661,7 +673,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             throw new MpRuntimeException(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
 
-        JSONArray rows = this.queryTaskStatus(Collections.singletonList(flowTaskModel.getThirdTaskId()), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
+        JSONArray rows = this.queryTaskStatus(Collections.singletonList(thirdTaskId), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
         if (Objects.nonNull(rows)) {
             List<FlowRecords> flowRecordsList = new ArrayList<>();
             JSONArray flowRecordsArray = rows.getJSONObject(0).getJSONArray("flow_records");
@@ -765,18 +777,20 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         QueryParams queryParams = new QueryParams();
         queryParams.setIds(request.getTaskIds().toArray(new String[0]));
         ListObjServiceResult<FlowTaskModel> objServiceResult = list(queryParams);
-        if (Objects.isNull(objServiceResult) || !Objects.equals(request.getTaskIds().size(), objServiceResult.getData().getList().size())) {
+        if (Objects.isNull(objServiceResult) || !Objects.equals(request.getTaskIds().size(), objServiceResult.getSource().getTotal())) {
             log.error("not all flow task exist");
             return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
         }
 
-        List<FlowTaskModel> flowTaskModels = objServiceResult.getData().getList();
-        // 流量任务状态校验
-        List<String> runningTaskIds = flowTaskModels.stream().filter(flowTaskModel ->
-                flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()).map(FlowTaskModel::getId).collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(runningTaskIds)) {
-            log.error("tasks [{}] are running, can not batch actuator tasks", runningTaskIds);
-            return ServiceResult.fail(FlowErrorCode.TASK_IS_RUNNING);
+        List<FlowTaskModel> flowTaskModels = objServiceResult.getSource().getObjs();
+        if (TaskActionEnum.STOP.toValue() != request.getTaskAction()) {
+            // 流量任务状态校验
+            List<String> runningTaskIds = flowTaskModels.stream().filter(flowTaskModel ->
+                    flowTaskModel.getTaskStatus() == TaskStatusEnum.RUNNING.toValue()).map(FlowTaskModel::getId).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(runningTaskIds)) {
+                log.error("tasks [{}] are running, can not batch actuator tasks", runningTaskIds);
+                return ServiceResult.fail(FlowErrorCode.TASK_IS_RUNNING);
+            }
         }
 
         // 流量执行器信息查询
@@ -796,11 +810,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         object.put("uuids", thirdTaskIds);
         object.put("action", request.getTaskAction());
         object.put("run_type", request.getRunType());
+        object.put("node_id", flowTaskModels.get(0).getNodeId());
         object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
 
         try {
             // 执行任务地址
-            String urlPath = CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/action/batch";
+            String urlPath = CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/batch/action";
             String batchActuatorRsp = HttpUtils.sendPost(urlPath, JSONObject.toJSONString(object));
             JSONObject batchActuatorObj = JSONObject.parseObject(batchActuatorRsp);
             log.info("batch actuator tasks response:{}", batchActuatorObj.toJSONString());

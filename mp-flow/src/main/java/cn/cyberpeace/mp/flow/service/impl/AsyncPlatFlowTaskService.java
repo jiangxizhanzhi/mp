@@ -515,31 +515,31 @@ public class AsyncPlatFlowTaskService {
         log.info("================ Add vm instance end ==================");
     }
 
-    /**
-     * 获取任务接口状态
-     * @param flowActuatorModel
-     * @return
-     */
-    private boolean getTaskJobStatus(FlowActuatorModel flowActuatorModel) {
-        boolean isActive = false;
-        try {
-            JSONObject getTaskObj = new JSONObject();
-            JSONArray getTaskArray = new JSONArray();
-            getTaskArray.add("test_standardTask");
-            getTaskObj.put("uuids", getTaskArray);
-            String getTaskRsp = HttpUtils.sendPostWithTimeOut(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/many",
-                    getTaskObj.toJSONString(), 10000);
-            JSONObject taskResultObj = JSONObject.parseObject(getTaskRsp);
-            log.info("get tasks info response:{}", taskResultObj.toJSONString());
-            if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
-                isActive = true;
-            }
-        } catch (Exception e) {
-            log.error("get tasks info error", e);
-        }
-
-        return isActive;
-    }
+//    /**
+//     * 获取任务接口状态
+//     * @param flowActuatorModel
+//     * @return
+//     */
+//    private boolean getTaskJobStatus(FlowActuatorModel flowActuatorModel) {
+//        boolean isActive = false;
+//        try {
+//            JSONObject getTaskObj = new JSONObject();
+//            JSONArray getTaskArray = new JSONArray();
+//            getTaskArray.add("test_standardTask");
+//            getTaskObj.put("uuids", getTaskArray);
+//            String getTaskRsp = HttpUtils.sendPostWithTimeOut(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/many",
+//                    getTaskObj.toJSONString(), 10000);
+//            JSONObject taskResultObj = JSONObject.parseObject(getTaskRsp);
+//            log.info("get tasks info response:{}", taskResultObj.toJSONString());
+//            if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
+//                isActive = true;
+//            }
+//        } catch (Exception e) {
+//            log.error("get tasks info error", e);
+//        }
+//
+//        return isActive;
+//    }
 
 //    /**
 //     * 新增网口
@@ -875,8 +875,8 @@ public class AsyncPlatFlowTaskService {
                 if (Objects.nonNull(rows)) {
                     // 校验是否有运行中的任务
                     long count = rows.stream().filter(row ->
-                            TaskStatusEnum.INIT.toValue() == ((JSONObject) row).getInteger("result")
-                                    || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) row).getInteger("result")).count();
+                            TaskStatusEnum.INIT.toValue() == ((JSONObject) row).getInteger("status")
+                                    || TaskStatusEnum.RUNNING.toValue() == ((JSONObject) row).getInteger("status")).count();
                     if (count > 0) {
                         log.info("batch actuator task is still running for hostUrl: {}", hostUrl);
                         return false;
@@ -901,14 +901,16 @@ public class AsyncPlatFlowTaskService {
                         }
                     });
 
-
                     // 批量更新流量任务状态为停止
                     flowTaskMapper.batchUpdateTaskStatus(TaskStatusEnum.STOPED.toValue(), null, taskIds);
 
-                    BatchActuatorCallbackResponse callbackResponse = new BatchActuatorCallbackResponse();
-                    callbackResponse.setSuccessTaskModels(successTaskModels);
-                    callbackResponse.setErrorTaskModels(errorTaskModels);
-                    consumer.accept(callbackResponse);
+                    if (Objects.nonNull(consumer)) {
+                        BatchActuatorCallbackResponse callbackResponse = new BatchActuatorCallbackResponse();
+                        callbackResponse.setSuccessTaskModels(successTaskModels);
+                        callbackResponse.setErrorTaskModels(errorTaskModels);
+                        consumer.accept(callbackResponse);
+                    }
+
                     return true;
                 }
             } else {
