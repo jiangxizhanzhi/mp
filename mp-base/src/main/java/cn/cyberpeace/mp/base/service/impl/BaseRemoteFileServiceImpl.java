@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.base.service.impl;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.BaseRemoteFileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileClient;
+import cn.cyberpeace.mp.base.util.remotefile.FileClient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

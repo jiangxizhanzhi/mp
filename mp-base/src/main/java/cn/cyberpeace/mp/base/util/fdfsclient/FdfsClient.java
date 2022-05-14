@@ -1,10 +1,9 @@
 package cn.cyberpeace.mp.base.util.fdfsclient;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.io.FileUtil;
+import cn.cyberpeace.mp.base.util.remotefile.FileClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -13,7 +12,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.csource.common.MyException;
 import org.csource.fastdfs.*;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,22 +87,9 @@ public class FdfsClient implements FileClient {
         }
     }
 
-    public String uploadContent(String content) {
-        return uploadContent(content, null);
-    }
-
-    public String uploadContent(String content, String fileSuffix) {
-        return upload(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), fileSuffix);
-    }
-
-    public String upload(InputStream is) {
-        return upload(is, null);
-    }
-
-    public String upload(InputStream is, String fileSuffix) {
+    public String upload(InputStream is, long filesize, String fileSuffix) {
         String fdfsFilePath;
         try (is; var connection = getConnection()) {
-            var filesize = is.available();
             fdfsFilePath = connection.getStorageClient().upload_file1(null, filesize,
                     new UploadStream(is, filesize), fileSuffix, null);
         } catch (IOException | MyException e) {
@@ -135,24 +120,6 @@ public class FdfsClient implements FileClient {
             throw new MpRuntimeException(msg);
         }
         return true;
-    }
-
-    public String downloadTmp(String fdfsFilepath) {
-        return downloadTmp(fdfsFilepath, null);
-    }
-
-    public String downloadTmp(String fdfsFilepath, String filename) {
-        var tmpDir = FileUtil.getTmpDirPath();
-        var tmpFdfsDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpDir, TMP_DIR_NAME);
-        if (!FileUtil.exist(tmpFdfsDir)) {
-            FileUtil.mkdir(tmpFdfsDir);
-        }
-        if (StringUtils.isEmpty(filename)) {
-            filename = FileUtil.getName(fdfsFilepath);
-        }
-        var tmpFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, tmpFdfsDir, filename);
-        download(fdfsFilepath, tmpFilepath);
-        return tmpFilepath;
     }
 
     public String downloadContent(String fdfsFilepath) {
