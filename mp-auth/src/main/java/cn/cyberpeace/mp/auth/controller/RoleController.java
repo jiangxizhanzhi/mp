@@ -170,8 +170,8 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @ApiOperation(value = "查询所有角色", notes = "")
     @GetMapping("/all")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
-    public ServiceResult getRoleByTenant() {
-        List<RoleModel> roles = getModelService().listAll();
+    public ServiceResult getAllRoles() {
+        List<RoleModel> roles = getModelService().listAllExcludeSuperUserRole();
         return ServiceResult.builder().source(roles).build().asResult();
     }
 

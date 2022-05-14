@@ -17,6 +17,8 @@ public interface RoleService extends BaseModelService<RoleModel, QueryParams> {
 
     List<RoleModel> listAll();
 
+    List<RoleModel> listAllExcludeSuperUserRole();
+
     List<RoleModel> listByOrgId(String orgId);
 
     RoleModel getByIdent(String identifier);

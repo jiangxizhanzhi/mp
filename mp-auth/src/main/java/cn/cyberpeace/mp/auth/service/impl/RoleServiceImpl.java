@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -107,6 +109,19 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public List<RoleModel> listAll() {
         List<RoleModel> roles = getModelMapper().listAll(opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        return roles;
+    }
+
+    @Override
+    public List<RoleModel> listAllExcludeSuperUserRole() {
+        boolean isSuperUser = opRolePermCheckService.isLoginUserSuperUser();
+        List<String > excludeRoleIds = null;
+        if (isSuperUser) {
+            excludeRoleIds = Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID);
+        } else {
+            excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        }
+        List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
         return roles;
     }
 
