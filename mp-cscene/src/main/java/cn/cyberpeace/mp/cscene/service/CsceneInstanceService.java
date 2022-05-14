@@ -423,6 +423,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String id, String nodeId, String flowId,
                                                                     CsceneContextBO context, Boolean isBatch) {
+        CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
             context.loadTransparentContext();
         }

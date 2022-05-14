@@ -83,10 +83,7 @@ public class SceneHandlerUtils {
         var taskIds = flows.stream()
                 .map(f -> f.getTaskId())
                 .collect(Collectors.toList());
-        Map<String, Flow> flowMap = new HashMap<>();
-        flows.forEach(flow -> {
-            flowMap.put(flow.getId(), flow);
-        });
+        Map<String, Flow> flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
         try {
             log.info("start flows for taskIds:[{}]", taskIds);
 
@@ -310,6 +307,7 @@ public class SceneHandlerUtils {
             return false;
         }
 
+        //将流量id为空的流量状态置为错误
         var emptyIdFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() == null)
                 .collect(Collectors.toList());
@@ -319,6 +317,7 @@ public class SceneHandlerUtils {
             });
         }
 
+        //流量id不为空的流量创建流量任务
         var newFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() != null)
                 .collect(Collectors.toList());
@@ -334,6 +333,7 @@ public class SceneHandlerUtils {
         String nodeId = flowElement.getSrcElement().getId();
         Callable<Boolean> start = () -> {
             List<FlowTaskModel> flowTaskModels;
+            //构建批量创建流量任务参数
             List<AddFlowTaskRequest> requests = new ArrayList<>();
             newFlows.forEach(flow -> {
                 AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
@@ -351,10 +351,9 @@ public class SceneHandlerUtils {
                 return false;
             }
 
-            Map<String, FlowTaskModel> flowId2TaskMap = new HashMap<>();
-            flowTaskModels.forEach(flowTaskModel -> {
-                flowId2TaskMap.put(flowTaskModel.getFlowId(), flowTaskModel);
-            });
+            //流量任务id与流量绑定
+            Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
+                    .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
             var executorFlows = newFlows.stream().map(f -> f.getFlow()).collect(Collectors.toList());
             executorFlows.forEach(flow -> {
                 flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());

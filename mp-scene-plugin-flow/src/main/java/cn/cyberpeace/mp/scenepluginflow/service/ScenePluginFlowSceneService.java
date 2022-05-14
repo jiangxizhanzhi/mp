@@ -72,7 +72,7 @@ public class ScenePluginFlowSceneService {
         if (flow == null) {
             return new ServiceResult<>();
         }
-        ServiceResult<FlowRecordsResponse> result = new ServiceResult<>();
+        ServiceResult<FlowRecordsResponse> result;
         if (isBatch) {
             result = flowService3.queryFlowRecords(nodeId);
         } else {
