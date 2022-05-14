@@ -43,6 +43,11 @@ public class VyosNetworkCommandUtils {
         return result;
     }
 
+    public static List<String> genSetHostNameCmds(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
+        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
+        return new RouterNameCmdBuilder().build(paramsWrapper);
+    }
+
     private static class ConfigParamsWrapper {
         CloudPluginSceneElementBO element;
         CloudScenePluginHandler pluginHandler;
