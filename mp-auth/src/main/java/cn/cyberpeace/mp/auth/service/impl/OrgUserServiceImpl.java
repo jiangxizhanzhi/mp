@@ -72,7 +72,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId);
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, getExcludeRoleIdsByLoginUserForSearching());
         desensitizedService.desensitiveUserModels(users);
         return users;
     }

@@ -16,6 +16,12 @@ public enum AuthErrorCode implements ErrorCode {
 
     SYS_CONFIG_CANNOT_CLOSE_AUDIT("AUTH-1001", "sysconfig_cannot_close_audit"),
 
+
+    USER_CANNOT_DELETE_ADMIN("MP-110024", "user_cannot_delete_admin"),
+
+    ROLE_CANNOT_DELETE_ADMIN("MP-110083", "role_cannot_delete_admin"),
+    ROLE_CANNOT_DELETE_SUPERUSER("MP-110084", "role_cannot_delete_superuser"),
+
     PERMISSION_DENIED("MP-110140", "permission_denied");
 
     AuthErrorCode(String code, String message) {

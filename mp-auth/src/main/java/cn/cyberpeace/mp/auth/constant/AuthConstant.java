@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.constant;
 
 public class AuthConstant {
 
-    public static final String USER_ROOT_ID = "3f655d87112f4ae094bbaf70830e20aa";
+    public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
     public static final String ROLE_SUPERUSER_ID = "e12bb08a9bc545bbba46a2fb3c92533a";
 

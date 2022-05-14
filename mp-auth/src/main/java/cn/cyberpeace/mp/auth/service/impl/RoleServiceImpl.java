@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
@@ -331,9 +332,14 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         // 管理员角色不能删除
         RoleModel roleModel = getModelMapper().get(roleId);
-        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
+        if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleModel.getId())) {
             log.info("管理员角色不能删除！");
-            throw new MpRuntimeException("管理员角色不能删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
+        }
+
+        if (Objects.equals(AuthConstant.ROLE_SUPERUSER_ID, roleModel.getId())) {
+            log.info("超级用户角色不能删除！");
+            throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_SUPERUSER);
         }
 
         List<UserModel> users = userRoleService.listUsersByRoleId(roleId);

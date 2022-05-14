@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
@@ -850,6 +851,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private void deleteReleated(String userId) {
         if (StringUtils.isBlank(userId)) {
             return;
+        }
+
+        if (Objects.equals(AuthConstant.ROOT_USER_ID, userId)) {
+            log.warn("can not delete admin user!");
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_ADMIN);
         }
 
         boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);

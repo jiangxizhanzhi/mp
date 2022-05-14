@@ -174,10 +174,10 @@ public class AvatarServiceImpl extends BaseModelServiceImpl<AvatarModel, AvatarM
 
     // 更新默认用户的头像
     private void updateDefaultUserAvatar(String avatarUrl) {
-        ObjServiceResult<UserModel> result = userService.get(AuthConstant.USER_ROOT_ID);
+        ObjServiceResult<UserModel> result = userService.get(AuthConstant.ROOT_USER_ID);
         if (Objects.nonNull(result.getSource())) {
             UserModel userUpdate = new UserModel();
-            userUpdate.setId(AuthConstant.USER_ROOT_ID);
+            userUpdate.setId(AuthConstant.ROOT_USER_ID);
             userUpdate.setAvatar(avatarUrl);
             userService.update(userUpdate);
         }

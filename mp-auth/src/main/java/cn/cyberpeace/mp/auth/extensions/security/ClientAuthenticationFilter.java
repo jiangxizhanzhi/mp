@@ -48,7 +48,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
             log.info("client auth... clientId:{}", clientId);
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // client认证, 赋有所有角色，资源权限
-                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.USER_ROOT_ID);
+                Set<GrantedAuthority> authoritySet = userDetailsService.loadAuthorities(AuthConstant.ROOT_USER_ID);
 
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

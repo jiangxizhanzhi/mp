@@ -19,10 +19,21 @@ import java.util.List;
 public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
 
-    @Select("select distinct * from mp_auth_user where id in " +
+    @Select("<script>" +
+            "select distinct * from mp_auth_user where id in " +
             "(select user from mp_auth_org_user where org = #{orgId}) " +
-            "order by mp_auth_user.username")
-    List<UserModel> listUsersByOrgId(@Param("orgId") String orgId);
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND id not in " +
+            "     (select distinct user from mp_auth_user_role where role in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "     )" +
+            "  </if>" +
+            "order by mp_auth_user.username " +
+            "</script>"
+        )
+    List<UserModel> listUsersByOrgId(@Param("orgId") String orgId, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
     @Select("select distinct * from mp_auth_org where id in " +
             "(select org from mp_auth_org_user where user = #{userId}) " +
