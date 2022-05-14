@@ -23,7 +23,7 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
 
     @Select("<script>" +
-            "select * from mp_auth_role" +
+            "select * from mp_auth_role where 1=1 " +
             "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
             "    AND id not in " +
             "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
