@@ -133,6 +133,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public UserDto getUserDto(String id) {
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
@@ -372,10 +373,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Deprecated
     public UserModel getByMobile(String mobile) {
-        UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
-        desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
-        return userModel;
+        //UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        //desensitizedService.desensitiveUserModels(Arrays.asList(userModel));
+        //return userModel;
+        return null;
     }
 
     @Override

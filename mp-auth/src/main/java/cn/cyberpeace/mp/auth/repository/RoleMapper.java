@@ -22,8 +22,17 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
     List<RoleModel> listByTenantId(@Param("tenantId") String tenantId);
 
 
-    @Select("select * from mp_auth_role")
-    List<RoleModel> listAll();
+    @Select("<script>" +
+            "select * from mp_auth_role" +
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND r.id not in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "  </if>" +
+            "</script>"
+    )
+    List<RoleModel> listAll(@Param("excludeRoleIds") List<String> excludeRoleIds);
 
 
     @Select("select * from mp_auth_role where org = #{orgId}")
@@ -39,11 +48,17 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
     @Select("<script>" +
             "select * from mp_auth_role where name in " +
-            "       <foreach item=\"name\" index=\"index\" collection=\"names\" open=\"(\" separator=\",\" close=\")\"> " +
-            "           #{name} " +
+            "  <foreach item=\"name\" index=\"index\" collection=\"names\" open=\"(\" separator=\",\" close=\")\"> " +
+            "    #{name} " +
+            "  </foreach>" +
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND id not in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
             "       </foreach>" +
+            "  </if>" +
             "</script>")
-    List<RoleModel> listByNames(@Param("names") List<String> names);
+    List<RoleModel> listByNames(@Param("names") List<String> names, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
     @Select("<script>" +
             "select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) cnt from mp_auth_role r " +
@@ -53,11 +68,9 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
             "  </if>" +
             "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
             "    AND r.id not in " +
-            "     (select distinct user from mp_auth_user_role where role in " +
             "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
             "         #{roleId} " +
             "       </foreach>" +
-            "     )" +
             "  </if>" +
             "</where>" +
             "</script>")

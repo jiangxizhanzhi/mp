@@ -19,9 +19,17 @@ import java.util.List;
 @ModelClass(UserRoleModel.class)
 public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
-    @Select("select distinct * from mp_auth_role where id in " +
-            "(select role from mp_auth_user_role where user = #{userId})")
-    List<RoleModel> listByUserId(@Param("userId") String userId);
+    @Select("<script>" +
+            "select distinct * from mp_auth_role where id in " +
+            "(select role from mp_auth_user_role where user = #{userId})" +
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND id not in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "  </if>" +
+            "</script>")
+    List<RoleModel> listByUserId(@Param("userId") String userId, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 
     @Select("<script>" +
@@ -31,8 +39,14 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
             "           #{userId} " +
             "       </foreach>" +
             "   )" +
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND id not in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "  </if>" +
             "</script>")
-    List<RoleModel> listByUserIds(@Param("userIds") List<String> userIds);
+    List<RoleModel> listByUserIds(@Param("userIds") List<String> userIds, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 
     @Select("select distinct * from mp_auth_user where id in " +

@@ -106,7 +106,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listAll() {
-        List<RoleModel> roles = getModelMapper().listAll();
+        List<RoleModel> roles = getModelMapper().listAll(opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         return roles;
     }
 
@@ -134,7 +134,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public List<RoleModel> listByNames(List<String> names) {
         Assert.notEmpty(names, "names不能为空！");
-        List<RoleModel> roleModels = getModelMapper().listByNames(names);
+        List<RoleModel> roleModels = getModelMapper().listByNames(names, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         return roleModels;
     }
 
@@ -167,6 +167,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleDto getRoleDto(String id) {
         Assert.notBlank(id, "id不能为空！");
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(id.trim())) {
+            return null;
+        }
         RoleModel roleModel = getModelMapper().get(id);
         RoleDto roleDto = roleModel2RoleDto(roleModel);
         return roleDto;
@@ -175,6 +179,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RolePermDto getRolePermDto(String id) {
         Assert.notBlank(id, "id不能为空！");
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(id.trim())) {
+            return null;
+        }
         RoleModel roleModel = getModelMapper().get(id);
         RolePermDto rolePermDto = roleModel2RolePermDto(roleModel);
         return rolePermDto;
@@ -230,6 +238,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         String roleId = modifyRequest.getId();
         Assert.notBlank(roleId, "id不能为空！");
         log.info("roleid:{}", roleId);
+        modifyRequest.setIdentifier(null);
 
         var result = get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
@@ -367,6 +376,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
             throw new MpRuntimeException("角色编号不能是ADMIN");
+        }
+
+        if (Objects.equals(AuthConstant.ROLE_SUPERUSER, roleModel.getIdentifier())) {
+            throw new MpRuntimeException("角色编号不能是SUPERUSER");
         }
     }
 

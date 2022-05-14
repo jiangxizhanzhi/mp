@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -56,7 +57,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Cacheable(value = "roles_cache", key = "'list_by_user_id_'+#userId")
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        List<RoleModel> roles = getModelMapper().listByUserId(userId);
+        List<RoleModel> roles = getModelMapper().listByUserId(userId, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
 
         return roles;
     }
@@ -65,7 +66,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Cacheable(value = "roles_cache", key = "'list_by_user_ids_'+#userIds")
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        List<RoleModel> roles = getModelMapper().listByUserIds(userIds);
+        List<RoleModel> roles = getModelMapper().listByUserIds(userIds, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
 
         return roles;
     }
@@ -84,7 +85,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
-        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId());
+        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId(), opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(roles);
         // todo 查询用户所在组织（上级组织）的角色  暂无此功能
         return pageInfo;
@@ -94,6 +95,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         Assert.notBlank(pageRequest.getRoleId(), "roleId不能为空！");
+        List<String> excludeRoleIds = opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(pageRequest.getRoleId())) {
+            new PageInfo<>(Collections.emptyList());
+        }
+
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<UserModel> userModels = getModelMapper().listByRoleId(pageRequest.getRoleId());
         PageInfo pageInfo = new PageInfo(userModels);
