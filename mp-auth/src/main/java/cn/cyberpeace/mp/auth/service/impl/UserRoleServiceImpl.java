@@ -57,7 +57,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Cacheable(value = "roles_cache", key = "'list_by_user_id_'+#userId")
     public List<RoleModel> listByUserId(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        //List<RoleModel> roles = getModelMapper().listByUserId(userId, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         List<RoleModel> roles = getModelMapper().listByUserId(userId, null);
 
         return roles;
@@ -67,7 +66,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Cacheable(value = "roles_cache", key = "'list_by_user_ids_'+#userIds")
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        //List<RoleModel> roles = getModelMapper().listByUserIds(userIds, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         List<RoleModel> roles = getModelMapper().listByUserIds(userIds, null);
 
         return roles;
@@ -89,7 +87,6 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId(), opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(roles);
-        // todo 查询用户所在组织（上级组织）的角色  暂无此功能
         return pageInfo;
     }
 
