@@ -51,10 +51,19 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
             "  <if test=\"roleName != null and roleName != ''\">" +
             "    AND r.name like CONCAT('%', #{roleName}, '%')" +
             "  </if>" +
-            "</where></script>")
+            "  <if test=\"excludeRoleIds != null and excludeRoleIds.size() > 0\">" +
+            "    AND r.id not in " +
+            "     (select distinct user from mp_auth_user_role where role in " +
+            "       <foreach item=\"roleId\" index=\"index\" collection=\"excludeRoleIds\" open=\"(\" separator=\",\" close=\")\"> " +
+            "         #{roleId} " +
+            "       </foreach>" +
+            "     )" +
+            "  </if>" +
+            "</where>" +
+            "</script>")
     @Results({
             @Result(column = "cnt", property = "userCnt"),
     })
-    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName);
+    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 }

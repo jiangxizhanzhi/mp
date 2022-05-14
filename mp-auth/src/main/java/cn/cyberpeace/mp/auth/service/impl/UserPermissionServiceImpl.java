@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class UserPermissionServiceImpl
         extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
@@ -246,6 +248,10 @@ public class UserPermissionServiceImpl
     @Override
     public List<TargetModel> listMenusByLoginUser() {
         UserModel user = UserUtils.getLoginUser();
+        if (Objects.isNull(user)) {
+            log.info("user not login!");
+            return Collections.emptyList();
+        }
         List<TargetModel> menus = listMenusByUserId(user.getId());
         return menus;
     }

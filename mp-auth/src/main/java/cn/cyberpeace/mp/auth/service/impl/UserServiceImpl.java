@@ -144,6 +144,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public UserDto getCurrentUserDto() {
         UserModel userModel = UserUtils.getLoginUser();
+        if (Objects.isNull(userModel)) {
+            log.info("user not login!");
+            return null;
+        }
 
         UserDto userDto = userModel2UserDto(userModel);
         desensitizedService.desensitiveUserDtos(Arrays.asList(userDto));
@@ -770,11 +774,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public void heartbeat(UserHeartbeatRequest hbrequest) {
         UserModel userModel = UserUtils.getLoginUser();
+        if (Objects.nonNull(userModel)) {
+            UserHeartbeatModel heartbeat = new UserHeartbeatModel();
+            heartbeat.setUser(userModel.getId());
 
-        UserHeartbeatModel heartbeat = new UserHeartbeatModel();
-        heartbeat.setUser(userModel.getId());
-
-        userHeartbeatService.create(heartbeat);
+            userHeartbeatService.create(heartbeat);
+        }
     }
 
 //    @Override

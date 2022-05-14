@@ -11,6 +11,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -106,6 +108,26 @@ public class OperatePermissionService {
                 "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
         throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
 
+    }
+
+
+
+    public List<String> getExcludeRoleIdsByLoginUserForSearching() {
+
+        boolean isSupserUser = isLoginUserSuperUser();
+        if (isSupserUser) {
+            // 超级用户不受限制
+            return Collections.emptyList();
+        }
+
+        boolean isAdmin = isLoginUserAdmin();
+        if (isAdmin) {
+            // 管理员不可查询同级管理员和超级用户
+            return Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID, AuthConstant.ROLE_ADMIN_ID);
+        }
+
+        // 普通用户不可查询管理员和超级用户
+        return Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID, AuthConstant.ROLE_ADMIN_ID);
     }
 
 

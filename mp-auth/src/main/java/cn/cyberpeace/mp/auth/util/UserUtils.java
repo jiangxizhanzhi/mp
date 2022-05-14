@@ -98,6 +98,9 @@ public class UserUtils {
 
     public static UserDto getLoginUserDtoWithoutOrg() {
         UserModel currentUserModel = getLoginUser();
+        if (Objects.isNull(currentUserModel)) {
+            return null;
+        }
         return userService.userModel2UserDtoWithoutOrg(currentUserModel);
     }
 
