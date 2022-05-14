@@ -11,20 +11,18 @@ import org.apache.commons.pool2.impl.DefaultPooledObject;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.csource.common.MyException;
-import org.csource.fastdfs.StorageClient1;
-import org.csource.fastdfs.TrackerClient;
-import org.csource.fastdfs.TrackerGroup;
-import org.csource.fastdfs.TrackerServer;
+import org.csource.fastdfs.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
-public class FdfsClient {
+public class FdfsClient implements FileClient {
 
     public static final String TMP_DIR_NAME = "fdfs";
 
@@ -106,19 +104,28 @@ public class FdfsClient {
     public String upload(InputStream is, String fileSuffix) {
         String fdfsFilePath;
         try (is; var connection = getConnection()) {
-            var fileBuff = new byte[is.available()];
-            is.read(fileBuff, 0, fileBuff.length);
-            fdfsFilePath = connection.getStorageClient().upload_file1(fileBuff, fileSuffix, null);
+            var filesize = is.available();
+            fdfsFilePath = connection.getStorageClient().upload_file1(null, filesize,
+                    new UploadStream(is, filesize), fileSuffix, null);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs upload with input stream error: %s", e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
-
         return fdfsFilePath;
     }
 
-    public void download(String fdfsFilepath, String localFilepath) {
+    public void download(String fdfsFilepath, OutputStream os) {
+        try (var connection = getConnection()) {
+            connection.getStorageClient().download_file1(fdfsFilepath, new DownloadStream(os));
+        } catch (IOException | MyException e) {
+            var msg = String.format("Fdfs download %s to output stream error: %s", fdfsFilepath, e.getMessage());
+            log.error(msg);
+            throw new MpRuntimeException(msg);
+        }
+    }
+
+    public boolean download(String fdfsFilepath, String localFilepath) {
         try (var connection = getConnection()) {
             connection.getStorageClient().download_file1(fdfsFilepath, localFilepath);
         } catch (IOException | MyException e) {
@@ -127,6 +134,7 @@ public class FdfsClient {
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
+        return true;
     }
 
     public String downloadTmp(String fdfsFilepath) {
@@ -159,15 +167,16 @@ public class FdfsClient {
         return new String(byteContent, StandardCharsets.UTF_8);
     }
 
-    public void delete(String fdfsFilepath) {
+    public boolean delete(String fdfsFilepath) {
         try (var connection = getConnection()) {
-            log.info("delete fdfs file,file path:{}", fdfsFilepath);
+            log.info("delete fdfs file, file path: {}", fdfsFilepath);
             connection.getStorageClient().delete_file1(fdfsFilepath);
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs delete %s error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
+        return true;
     }
 
     public static class Connection implements AutoCloseable {
