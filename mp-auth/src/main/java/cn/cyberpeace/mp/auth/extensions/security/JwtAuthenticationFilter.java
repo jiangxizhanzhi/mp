@@ -47,6 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = JwtCommon.getToken(request);
         if (StringUtils.isNotBlank(token)) {
             UserModel user = JwtCommon.verifyToken(token);
+            // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
+            UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
             UsernamePasswordAuthenticationToken authenticationToken = null;
             if (user != null) {
                 // 暂时不用加载权限信息
@@ -56,7 +58,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authenticationToken = new UsernamePasswordAuthenticationToken(new AuthUserDetails(user, authoritySet), token,
                         null);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
             }
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
