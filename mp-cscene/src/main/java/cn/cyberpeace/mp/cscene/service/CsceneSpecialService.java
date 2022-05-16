@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -547,22 +548,34 @@ public class CsceneSpecialService {
      * @param resourceNames
      * @return
      */
-    public ServiceResult<List<CsceneNodeInfoBO>> getSceneInfoByNodeResourceName(List<String> resourceNames) {
+    public ServiceResult<Map<String, CsceneNodeInfoBO>> getSceneInfoByNodeResourceName(List<String> resourceNames) {
         if (CollectionUtils.isEmpty(resourceNames)) {
-            return new ServiceResult<>(new ArrayList<>());
+            return new ServiceResult<>(new HashMap<>());
         }
-        List<String> elementEids = new ArrayList<>();
         String prefix = CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();
+        Map<String, String> eid2Name = new HashMap<>();
         for (String name : resourceNames) {
             if (name.startsWith(CloudSingleton.cloudAppConfig.getCpcloudResourceGroup())) {
                 String sceneInfo = name.replace(prefix + "_", "");
                 String[] sp = sceneInfo.split("_");
                 if (sp.length > 0) {
-                    elementEids.add(sp[0]);
+                    eid2Name.put(sp[0], name);
                 }
             }
         }
-        return this.getSceneInfoByElementEids(elementEids);
+        if (eid2Name.isEmpty()) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var elementInfos = this.getSceneInfoByElementEids(new ArrayList<>(eid2Name.keySet())).getSource();
+        if (CollectionUtils.isEmpty(elementInfos)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var resourceName2Info = elementInfos.stream()
+                .collect(Collectors.toMap(e -> eid2Name.get(e.getNodeEid()), e -> {
+                    e.setResourceName(eid2Name.get(e.getNodeEid()));
+                    return e;
+                }));
+        return new ServiceResult<>(resourceName2Info);
     }
 
 }
