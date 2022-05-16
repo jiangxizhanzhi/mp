@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
+import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.base.util.remotefile.FdfsClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
@@ -12,10 +14,21 @@ public class FdfsCommon {
 
     public static FdfsClient fdfsClient;
 
+    public static BaseAppConfig baseAppConfig;
+
     private FdfsCommon(BaseAppConfig baseAppConfig) {
         FdfsCommon.fdfsClient = FdfsClient.builder()
                 .configServers(baseAppConfig.getFdfsTrackerServers())
                 .build();
+        FdfsCommon.baseAppConfig = baseAppConfig;
+    }
+
+    public static String genHttpUrl(String fdfsFilepath) {
+        return StringUtils.joinWith("/", baseAppConfig.getFdfsOuterHttpServer(), fdfsFilepath);
+    }
+
+    public static String genInnerHttpUrl(String fdfsFilepath) {
+        return StringUtils.joinWith("/", baseAppConfig.getFdfsInnerHttpServer(), fdfsFilepath);
     }
 
     public static String upload(String localFilepath) {

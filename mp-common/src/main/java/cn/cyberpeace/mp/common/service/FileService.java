@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.service;
+package cn.cyberpeace.mp.common.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;

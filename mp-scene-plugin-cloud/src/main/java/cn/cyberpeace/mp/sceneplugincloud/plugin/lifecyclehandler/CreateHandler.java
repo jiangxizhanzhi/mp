@@ -1071,12 +1071,6 @@ public class CreateHandler extends HandlerCommon {
             }
             return;
         }
-        // todo 必须单独执行更新路由名字的命令?
-        var setName = new RouterConfigCmdData();
-        setName.setSerialIp(defaultPort.getAccessModes().get(0).getAccessIp());
-        setName.setSerialPort(defaultPort.getAccessModes().get(0).getAccessPort());
-        setName.setCmds(VyosNetworkCommandUtils.genSetHostNameCmds(elementBO, getPluginHandler()));
-        vmRouter.createConfig(setName);
     }
 
     private void waitSeconds(long millSeconds) {
