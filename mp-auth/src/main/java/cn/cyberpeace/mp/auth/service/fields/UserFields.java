@@ -16,9 +16,9 @@ public class UserFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(UserModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(UserModel::getTenant,
-            UserModel::getIdentifier, UserModel::getUsername, UserModel::getName, UserModel::getNickname,
-            UserModel::getAvatar, UserModel::getBirthday, UserModel::getEmail, UserModel::getMobile,
-            UserModel::getIdCard, UserModel::getAddress, UserModel::getIsEnabled, UserModel::getIsAudited, UserModel::getInitCheck, UserModel::getDescription, UserModel::getDateJoined,
+            UserModel::getUsername, UserModel::getName, UserModel::getNickname,
+            UserModel::getAvatar, UserModel::getBirthday, UserModel::getEmail,
+            UserModel::getIsEnabled, UserModel::getIsAudited, UserModel::getInitCheck, UserModel::getDescription, UserModel::getDateJoined,
             UserModel::getExpiredTime, UserModel::getLastLogin, UserModel::getRes
     ).merge(BaseModelFields.availableFields);
 
@@ -27,8 +27,7 @@ public class UserFields extends BaseModelFields {
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
     public static final DynamicFields searchFields = new DynamicFields(UserModel::getUsername, UserModel::getName,
-            UserModel::getNickname, UserModel::getEmail,UserModel::getMobile
-    );
+            UserModel::getNickname, UserModel::getEmail);
 
     public static final DynamicFields orderFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 }
