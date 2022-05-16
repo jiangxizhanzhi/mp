@@ -26,6 +26,12 @@ public class ContainerPageResponse extends BaseCloudPlatformResponse {
     private String name;
 
     /**
+     * 场景名称
+     */
+    @ApiModelProperty("场景名称")
+    private String sceneName;
+
+    /**
      * 镜像名称
      */
     @ApiModelProperty("镜像名称")
