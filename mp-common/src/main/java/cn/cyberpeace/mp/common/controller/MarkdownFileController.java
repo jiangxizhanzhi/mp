@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.ControllerConstant;
 import cn.cyberpeace.mp.common.service.MarkdownFileService;
 import cn.hutool.core.io.FileUtil;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
+@Api(value = "markdown共用接口", tags = "COMMON-markdown共用接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/markdown")
