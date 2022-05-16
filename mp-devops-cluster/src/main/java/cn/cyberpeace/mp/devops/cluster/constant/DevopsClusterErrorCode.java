@@ -13,7 +13,8 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH("MP-110603", "image_description_exceed_max_length"),
     IMAGE_REFERENCED_SCENE("MP-110604", "image_referenced_scene"),
     IMAGE_USED_SCENE("MP-110605", "image_used_scene"),
-    REQUEST_CLOUD_INTERFACE_ERROR("MP-110606", "request_cloud_interface_error");
+    REQUEST_CLOUD_INTERFACE_ERROR("MP-110606", "request_cloud_interface_error"),
+    CUSTOM_UPLOAD_TYPE_ERROR("MP-110607", "custom_upload_type_error");
 
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);

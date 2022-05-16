@@ -26,6 +26,13 @@ public class InstancePageResponse extends BaseCloudPlatformResponse {
     private String name;
 
     /**
+     * 场景名称
+     */
+    @ApiModelProperty("场景名称")
+    private String sceneName;
+
+
+    /**
      * 节点名称
      */
     @ApiModelProperty("节点名称")

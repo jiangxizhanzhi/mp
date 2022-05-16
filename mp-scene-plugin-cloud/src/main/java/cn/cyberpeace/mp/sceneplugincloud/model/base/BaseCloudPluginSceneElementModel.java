@@ -89,8 +89,6 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     @DefaultStr
     private String image;
     @DefaultStr
-    private String imageUuid;
-    @DefaultStr
     private String initialTools;
 
     // 靶标属性

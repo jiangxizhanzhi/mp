@@ -842,10 +842,11 @@ public class CreateHandler extends HandlerCommon {
 
         receiveVirtualPortInfo(cloudElement, virtualMachine.getNetworks());
 
-        checkAccessModes(cloudElement);
         if (ElementTypeUtils.isCoreRouter(cloudElement)) {
             this.configVyosNetwork(cloudElement);
         }
+
+        checkAccessModes(cloudElement);
     }
 
     protected void createContainer(CloudPluginSceneElementBO cloudElement) {
