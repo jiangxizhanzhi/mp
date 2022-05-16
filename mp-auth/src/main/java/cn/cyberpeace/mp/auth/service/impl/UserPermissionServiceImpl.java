@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -28,6 +29,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +52,9 @@ import java.util.stream.Collectors;
 public class UserPermissionServiceImpl
         extends BaseModelServiceImpl<UserPermissionModel, UserPermissionMapper, UserPermissionFields, QueryParams>
         implements UserPermissionService {
+
+    public static final String CACHE_VAL_USER_TARGETS= "USER_TARGETS_CACHE";
+
 
     @Autowired
     private UserRoleService userRoleService;
@@ -76,6 +81,7 @@ public class UserPermissionServiceImpl
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listTargetsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
@@ -100,17 +106,17 @@ public class UserPermissionServiceImpl
         });
 
         // 用户直接绑定的target
-        List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);
-        authorizedTargetsSet.addAll(userTargets);
+        //List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);
+        //authorizedTargetsSet.addAll(userTargets);
 
         // 用户所在组织绑定的target
-        List<OrgModel> userOrgs = orgUserService.listOrgsByUserId(userId);
-        Set<TargetModel> allTargetsByOrgSet = new HashSet<>();
-        userOrgs.forEach(o -> {
-            Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
-            allTargetsByOrgSet.addAll(tset);
-        });
-        authorizedTargetsSet.addAll(allTargetsByOrgSet);
+        //List<OrgModel> userOrgs = orgUserService.listOrgsByUserId(userId);
+        //Set<TargetModel> allTargetsByOrgSet = new HashSet<>();
+        //userOrgs.forEach(o -> {
+        //    Set<TargetModel> tset = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(o.getId());
+        //    allTargetsByOrgSet.addAll(tset);
+        //});
+        //authorizedTargetsSet.addAll(allTargetsByOrgSet);
 
 
         List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());

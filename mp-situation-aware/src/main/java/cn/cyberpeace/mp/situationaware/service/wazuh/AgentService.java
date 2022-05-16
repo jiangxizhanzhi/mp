@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
@@ -41,7 +42,7 @@ public class AgentService extends RequestProcessor {
      *
      * @return
      */
-    @Cacheable(cacheManager = "situationCacheManager", value = CACHE_KEY_AGENTS)
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         log.info("agentRequest:{}", agentRequest);
