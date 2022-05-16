@@ -1,7 +1,6 @@
-package cn.cyberpeace.mp.base.util.fdfsclient;
+package cn.cyberpeace.mp.base.util.remotefile;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.remotefile.FileClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.BasePooledObjectFactory;

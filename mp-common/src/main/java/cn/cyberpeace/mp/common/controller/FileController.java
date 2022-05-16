@@ -1,7 +1,7 @@
-package cn.cyberpeace.mp.base.controller;
+package cn.cyberpeace.mp.common.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.FileService;
+import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import io.swagger.annotations.Api;
