@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
@@ -38,7 +37,7 @@ public class RouterConverter implements BaseConverter{
         List<RouterModel> routers = model.getList();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
-                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreatedAt()).build()
+                        .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         RouterPageConverterModel convertModel = new RouterPageConverterModel();
         convertModel.setModelList(list);

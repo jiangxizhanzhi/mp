@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -28,8 +33,11 @@ public class ContainerController {
 
     private ContainerConverter containerConverter;
 
-    public ContainerController(ContainerConverter containerConverter) {
+    private CsceneSpecialService csceneSpecialService;
+
+    public ContainerController(ContainerConverter containerConverter, CsceneSpecialService csceneSpecialService) {
         this.containerConverter = containerConverter;
+        this.csceneSpecialService = csceneSpecialService;
     }
 
     /**
@@ -41,8 +49,12 @@ public class ContainerController {
     @GetMapping("/page")
     public PageResult<ContainerPageResponse> page(ContainerPageRequest request){
         ContainerConvertModel model = containerConverter.page(request);
+        List<String> nameList = model.getModelList().stream().map(ContainerConvertModel.Model::getName).collect(Collectors.toList());
+        ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
+        Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         List<ContainerPageResponse> list = model.getModelList().stream().map(containerModel ->
                 ContainerPageResponse.builder().name(containerModel.getName())
+                        .sceneName(Objects.isNull(source.get(containerModel.getName())) ? "" : source.get(containerModel.getName()).getCsceneName())
                 .image(containerModel.getImage()).node(containerModel.getNode())
                 .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
                         .vlanIdList(containerModel.getVlanIdList()).build())
