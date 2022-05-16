@@ -3,12 +3,22 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.*;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRestartData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineResumeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineSuspendData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -21,6 +31,16 @@ public class VirtualMachine extends CloudClient {
                 null, new TypeReference<CloudResponse<VirtualMachineCreateData>>() {
                 }, true);
         return result.getData();
+    }
+
+    public VirtualMachineGetResult get(String instanceId) {
+        CloudResponse<VirtualMachineGetResult> result = cloudGet(CloudUrlConstant.GET_INSTANCE_URL.replace("{instance_id}", instanceId),
+                null, new TypeReference<>() {
+                }, true);
+        if (result.isSuccess() && result.getData() != null) {
+            return result.getData();
+        }
+        return null;
     }
 
     public boolean delete(VirtualMachineDeleteData deleteData) {
@@ -40,11 +60,33 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean pause(String instanceId) {
-        return doAction(instanceId, new VirtualMachinePauseData());
+        try {
+            return doAction(instanceId, new VirtualMachinePauseData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否已是暂停状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.PAUSED.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public boolean unpause(String instanceId) {
-        return doAction(instanceId, new VirtualMachineUnPauseData());
+        try {
+            return doAction(instanceId, new VirtualMachineUnPauseData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否是活动状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public boolean restart(String instanceId) {
@@ -52,11 +94,33 @@ public class VirtualMachine extends CloudClient {
     }
 
     public boolean resume(String instanceId) {
-        return doAction(instanceId, new VirtualMachineResumeData());
+        try {
+            return doAction(instanceId, new VirtualMachineResumeData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否已是活动状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.ACTIVE.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public boolean suspend(String instanceId) {
-        return doAction(instanceId, new VirtualMachineSuspendData());
+        try {
+            return doAction(instanceId, new VirtualMachineSuspendData());
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("Conflict")) {
+                // 判断实例是否已是挂起状态
+                var instance = this.get(instanceId);
+                if (instance != null && VirtualMachineGetResult.Status.SUSPENDED.equalsIgnoreCase(instance.getStatus())) {
+                    return true;
+                }
+            }
+            throw e;
+        }
     }
 
     public ConsoleInfoGetResult getConsoleInfo(String instanceId, String hostname) {

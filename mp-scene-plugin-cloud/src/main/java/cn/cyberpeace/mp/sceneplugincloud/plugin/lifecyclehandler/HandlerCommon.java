@@ -38,6 +38,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         // 同样ip、端口可能对应多个接入方式
         Map<String, List<CloudAccessMode>> ipAccessModesMap = new HashMap<>();
         cloudPorts.forEach(cloudPort -> {
+            if (Boolean.TRUE.equals(cloudPort.getSrcPort().getIsAuxiliary())) {
+                return;
+            }
             var accessModes = cloudPort.getAccessModes();
             if (accessModes == null) {
                 return;

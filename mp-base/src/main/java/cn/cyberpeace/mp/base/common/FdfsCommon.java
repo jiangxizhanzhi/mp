@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 @Component
 public class FdfsCommon {
@@ -37,8 +38,12 @@ public class FdfsCommon {
         return fdfsClient.upload(is, fileSuffix);
     }
 
-    public static void download(String fdfsFilepath, String localFilepath) {
-        fdfsClient.download(fdfsFilepath, localFilepath);
+    public void download(String fdfsFilepath, OutputStream os) {
+        fdfsClient.download(fdfsFilepath, os);
+    }
+
+    public static boolean download(String fdfsFilepath, String localFilepath) {
+        return fdfsClient.download(fdfsFilepath, localFilepath);
     }
 
     public static String downloadTmp(String fdfsFilepath) {
@@ -53,8 +58,8 @@ public class FdfsCommon {
         return fdfsClient.downloadContent(fdfsFilepath);
     }
 
-    public static void delete(String fdfsFilepath) {
-        fdfsClient.delete(fdfsFilepath);
+    public static boolean delete(String fdfsFilepath) {
+        return fdfsClient.delete(fdfsFilepath);
     }
 
 }
