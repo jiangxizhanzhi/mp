@@ -30,6 +30,8 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
     RoleModel selectByName(@Param("name") String name);
 
+    List<RoleModel> listByNames(@Param("names") List<String> names);
+
     List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders);
 
 }

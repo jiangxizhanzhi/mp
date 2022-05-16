@@ -735,7 +735,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userDto.setRoles(roles);
 
-            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ROLE_ADMIN));
+            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             if (isAdmin) {
@@ -788,13 +788,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public void setModelMapper(UserMapper modelMapper) {
         super.setModelMapper(modelMapper);
-    }
-
-    @Override
-    public boolean isAdmin(String userId) {
-        List<RoleModel> roleModels = userRoleService.listByUserId(userId);
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-        return isAdmin;
     }
 
 
