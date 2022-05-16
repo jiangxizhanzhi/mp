@@ -140,19 +140,28 @@ public class VyosNetworkCommandUtils {
             }
             List<String> cmds = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
-                if (StringUtils.isNotEmpty(p.getBgpAs())) {
+                if (StringUtils.isNotEmpty(p.getBgpIp())) {
+                    String interfaceIp = p.getSrcPort().getIp() + "/" + p.getBgpIp().split("/")[1];
                     cmds.add(
-                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), p.getBgpIp())
+                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp)
                     );
+                }
+                if (StringUtils.isNotEmpty(p.getBgpPeer())) {
                     cmds.add(
                             String.format(SET_PEER, p.getBgpPeer())
                     );
+                }
+                if (StringUtils.isNotEmpty(p.getBgpAs()) && StringUtils.isNotEmpty(p.getBgpIp())) {
                     cmds.add(
                             String.format(SET_AS, p.getBgpAs(), IpUtils.getFormatCidrIp(p.getBgpIp()))
                     );
+                }
+                if (StringUtils.isNotEmpty(p.getBgpAs()) && StringUtils.isNotEmpty(p.getBgpPeer())) {
                     cmds.add(
                             String.format(SET_NEIGHBOR_BFD, p.getBgpAs(), p.getBgpPeer())
                     );
+                }
+                if (StringUtils.isNotEmpty(p.getBgpAs()) && StringUtils.isNotEmpty(p.getBgpPeer()) && StringUtils.isNotEmpty(p.getBgpPeerAs())) {
                     cmds.add(
                             String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs())
                     );

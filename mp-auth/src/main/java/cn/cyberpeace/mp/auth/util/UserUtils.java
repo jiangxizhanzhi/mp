@@ -54,6 +54,8 @@ public class UserUtils {
 
     /**
      * 获取当前登录用户
+     * 如果返回null，有可能是client认证，也有可能是免认证的接口
+     * 需要另外根据 request.getAttribute(LogConstant.USER_TYPE_KEY) 来判断
      * @return
      */
     @Nullable
@@ -71,7 +73,6 @@ public class UserUtils {
 
         if (principal instanceof ClientDetailsModel) {
             log.error("Login account type is Client:{}, return null!", principal);
-//            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
             user = null;
         }
 

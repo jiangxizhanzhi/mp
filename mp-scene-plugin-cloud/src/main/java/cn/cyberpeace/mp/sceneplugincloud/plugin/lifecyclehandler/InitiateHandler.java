@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -328,7 +329,8 @@ public class InitiateHandler extends HandlerCommon {
             if (StringUtils.isEmpty(network.getGateway())) {
                 String gatewayIp = null;
                 if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                        || ElementTypeUtils.isCoreRouter(element)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
                             gatewayIp = p.getIp();
@@ -651,6 +653,26 @@ public class InitiateHandler extends HandlerCommon {
             log.warn("Element({}) {} has no virtual type", cloudElement.getSrcElement().getEid(),
                     cloudElement.getSrcElement().getId());
             return;
+        }
+
+        // 核心路由 处理下ip
+        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        return;
+                    }
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort == null) {
+                        return;
+                    }
+                    if (StringUtils.isNotEmpty(pluginPort.getOspfIp())) {
+                        p.setIp(pluginPort.getOspfIp().split("/")[0]);
+                    } else if (StringUtils.isNotEmpty(pluginPort.getBgpIp())) {
+                        p.setIp(pluginPort.getBgpIp().split("/")[0]);
+                    }
+                });
+            }
         }
 
         // 重置资源id

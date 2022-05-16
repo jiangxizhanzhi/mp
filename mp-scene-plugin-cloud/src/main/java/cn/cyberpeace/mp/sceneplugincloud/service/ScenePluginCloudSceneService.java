@@ -465,7 +465,8 @@ public class ScenePluginCloudSceneService {
         Map<String, Map<Object, Long>> result = new HashMap<>();
         if (!countFieldNames.isEmpty()) {
             countFieldNames.forEach(fieldName -> {
-                result.put(fieldName, cloudSceneStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, fieldName, false));
+                var countResult = cloudSceneStatCommon.groupCountElement(sceneIds, nodeIds, fieldName, List.of(fieldName), false);
+                result.put(fieldName, countResult.get(fieldName));
             });
         }
 
@@ -493,7 +494,7 @@ public class ScenePluginCloudSceneService {
 
         Map<String, Long> result = new HashMap<>();
         if (!countFieldNames.isEmpty()) {
-            result.putAll(cloudSceneStatCommon.countElement(sceneIds, nodeIds, countFieldNames));
+            result.putAll(cloudSceneStatCommon.countElement(sceneIds, nodeIds, countFieldNames, true));
         }
         if (!calcCountFieldNames.isEmpty()) {
             result.putAll(cloudSceneStatCommon.calcCountElement(sceneIds, nodeIds, calcCountFieldNames));
@@ -523,7 +524,7 @@ public class ScenePluginCloudSceneService {
 
         Map<String, Long> result = new HashMap<>();
         if (!countFieldNames.isEmpty()) {
-            result.putAll(cloudSceneStatCommon.countPort(sceneIds, nodeIds, countFieldNames));
+            result.putAll(cloudSceneStatCommon.countPort(sceneIds, nodeIds, countFieldNames, true));
         }
         if (!calcCountFieldNames.isEmpty()) {
             result.putAll(cloudSceneStatCommon.calcCountPort(sceneIds, nodeIds, calcCountFieldNames));
