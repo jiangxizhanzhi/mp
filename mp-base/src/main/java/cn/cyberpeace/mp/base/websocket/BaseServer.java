@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.config.websocket.WebSocketConfig;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.message.MessageConverter;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
