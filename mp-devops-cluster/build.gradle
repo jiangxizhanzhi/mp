@@ -1,6 +1,8 @@
 dependencies {
     implementation project(':mp-base')
 
+    implementation project(':mp-common')
+
     implementation project(':mp-auth')
 
     implementation project(':mp-front-admin')
