@@ -18,4 +18,5 @@ public class CsceneNodeInfoBO {
     private String nodeEid;
     private String nodeId;
     private String nodeName;
+    private String resourceName;
 }

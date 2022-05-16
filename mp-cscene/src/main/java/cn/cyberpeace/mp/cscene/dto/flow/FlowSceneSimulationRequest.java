@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * 流量分析Request
- *
  * @author wanggang
  */
 @Data
