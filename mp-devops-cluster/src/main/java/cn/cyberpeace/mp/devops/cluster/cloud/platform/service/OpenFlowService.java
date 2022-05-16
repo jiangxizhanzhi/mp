@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.OpenFlowPageResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.OpenFlow;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.OpenFlowPageParams;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.OpenFlowCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,12 +35,12 @@ public class OpenFlowService extends BaseOpenStackService {
      * @param request
      * @return
      */
-    public OpenFlowCloudPlatformModel page(OpenFlowPageParams request) {
-        OpenFlowPageResult pageResult = super.sendPost(CPCLOUD_OPENFLOW + URL_VERSION + "/openflow/action", JsonUtils.toUnderlineJSONString(request), OpenFlowPageResult.class);
+    public CloudPlatformPageModel<OpenFlow> page(OpenFlowPageParams request) {
+        CloudPlatformResult<List<OpenFlow>> pageResult = super.sendPost(CPCLOUD_OPENFLOW + URL_VERSION + "/openflow/action", JsonUtils.toUnderlineJSONString(request), CloudPlatformResult.class);
         super.checkResult(pageResult);
-        List<OpenFlow> openFlows = pageResult.getData();
-        OpenFlowCloudPlatformModel model = new OpenFlowCloudPlatformModel();
-        model.setOpenFlows(CollectionUtils.isEmpty(openFlows) ? Lists.newArrayList() : openFlows);
+        List<OpenFlow> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData()),OpenFlow.class);
+        CloudPlatformPageModel<OpenFlow> model = new CloudPlatformPageModel();
+        model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(pageResult.getTotal());
         model.setCode(pageResult.getCode());
         return model;

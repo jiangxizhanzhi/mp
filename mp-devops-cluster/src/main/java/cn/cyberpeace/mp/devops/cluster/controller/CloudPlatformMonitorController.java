@@ -7,7 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorServiceStatusModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
@@ -141,12 +142,12 @@ public class CloudPlatformMonitorController {
         ).collect(Collectors.toList());
 
         // 获取所有物理主机服务状态
-        HypervisorServiceStatusModel serviceStatusModel = imagesConverter.listServiceStatus();
+        CloudPlatformPageModel<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
         hypervisorPageResponses.forEach(v -> {
             String name = v.getName();
-            Optional<HypervisorServiceStatusModel.ServiceStatus> serviceStatus =
-                    serviceStatusModel.getData().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
+            Optional<ServiceStatus> serviceStatus =
+                    serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
             // 设置物理主机服务状态
             v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 

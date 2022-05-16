@@ -3,8 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,12 +37,12 @@ public class VmConverter implements BaseConverter{
     public InstanceConvertModel page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        InstanceCloudPlatformModel model = vmService.page(getParams);
-        List<InstanceConvertModel.Model> list = model.getInstances().stream().map(instanceModel ->
+        CloudPlatformPageModel<InstanceModel> model = vmService.page(getParams);
+        List<InstanceConvertModel.Model> list = model.getList().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
-                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
+                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         InstanceConvertModel convertModel = new InstanceConvertModel();
         convertModel.setModelList(list);
@@ -59,7 +58,7 @@ public class VmConverter implements BaseConverter{
     public Integer getTotalInstances(InstancePageRequest request) {
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        InstanceCloudPlatformModel page = vmService.page(getParams);
+        CloudPlatformPageModel<InstanceModel> page = vmService.page(getParams);
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
     }
 }

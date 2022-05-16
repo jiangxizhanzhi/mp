@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
@@ -103,13 +103,13 @@ public class TargetConverter{
             sceneConvertModel.setDeviceList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+        CloudPlatformPageModel<Device>  model = deviceService.findByIds(ids);
 
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             sceneConvertModel.setDeviceList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        sceneConvertModel.setDeviceList(model.getItems());
+        sceneConvertModel.setDeviceList(model.getList());
         return sceneConvertModel;
     }
 
@@ -118,12 +118,8 @@ public class TargetConverter{
      * @return
      */
     public List<Device> getCommonTargets(String name) {
-        DeviceCloudPlatformModel model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
-        if (Objects.isNull(model) || !model.isSuccess()){
-            return Lists.newArrayList();
-        }
-
-        return model.getItems();
+        CloudPlatformPageModel<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
+        return model.getList();
     }
 
     /**
@@ -178,11 +174,8 @@ public class TargetConverter{
      * @return
      */
     public List<Device> multiAsync(Integer offset,Integer limit){
-        DeviceCloudPlatformModel model = deviceService.page("?offset=" + offset + "&limit=" + limit);
-        if (Objects.isNull(model) || !model.isSuccess()){
-            return Lists.newArrayList();
-        }
-        return model.getItems();
+        CloudPlatformPageModel<Device> model = deviceService.page("?offset=" + offset + "&limit=" + limit);
+        return model.getList();
     }
 
 }

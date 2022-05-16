@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.SnapshotCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -34,8 +35,13 @@ public class SnapshotService extends BaseOpenStackService {
      * 查询列表
      * @param deviceUuid
      */
-    public SnapshotCloudPlatformModel list(String deviceUuid){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, SnapshotCloudPlatformModel.class);
+    public CloudPlatformPageModel<Snapshot> list(String deviceUuid){
+        CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT + "?device_uuid=" + deviceUuid, CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<Snapshot> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Snapshot.class);
+        CloudPlatformPageModel<Snapshot> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 
 

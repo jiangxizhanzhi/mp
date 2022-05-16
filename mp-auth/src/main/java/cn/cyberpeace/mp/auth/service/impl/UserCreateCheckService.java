@@ -41,18 +41,19 @@ public class UserCreateCheckService implements UserCheckService {
         }
 
         // 手机号是否合法
+        /*
         if (StringUtils.isNotBlank(user.getMobile())) {
 
-            /*
             // todo 国际化手机号校验
             if (!PhoneUtil.isMobile(user.getMobile())) {
                 throw new MpRuntimeException(AuthErrorCode.MOBILE_INVALID);
-            }*/
-
-            if (userService.getByMobile(user.getMobile()) != null) {
-                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_MOBILE_EXISTED);
             }
-        }
+
+            //if (userService.getByMobile(user.getMobile()) != null) {
+            //    throw new MpRuntimeException(AuthErrorCode.ACCOUNT_MOBILE_EXISTED);
+            //}
+        }*/
+
 
         if (StringUtils.isNotBlank(user.getUsername())) {
             if (userService.getByUserName(user.getUsername()) != null) {
@@ -60,11 +61,6 @@ public class UserCreateCheckService implements UserCheckService {
             }
         }
 
-        if (StringUtils.isNotBlank(user.getIdentifier())) {
-            if (userService.getByIdent(user.getIdentifier()) != null) {
-                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_IDENTIFIER_EXISTED);
-            }
-        }
 
     }
 

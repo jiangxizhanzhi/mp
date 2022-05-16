@@ -2,11 +2,19 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentByParams;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpInterfaceResourceCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.*;
 
@@ -31,8 +39,13 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public DeviceCloudPlatformModel page(String getParams){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, DeviceCloudPlatformModel.class);
+    public CloudPlatformPageModel<Device> page(String getParams){
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
+        CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 
     /**
@@ -100,8 +113,13 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param switchName
      * @return
      */
-    public RealEquipmentBySwitchNameCloudPlatform findBySwitchName(String switchName){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,RealEquipmentBySwitchNameCloudPlatform.class);
+    public CloudPlatformPageModel<RealEquipmentByParams> findBySwitchName(String switchName){
+        CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
+        CloudPlatformPageModel<RealEquipmentByParams> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 
     /**
@@ -109,8 +127,13 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param serialPort
      * @return
      */
-    public RealEquipmentBySerialPortCloudPlatform findBySerialPort(String serialPort){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,RealEquipmentBySerialPortCloudPlatform.class);
+    public CloudPlatformPageModel<RealEquipmentByParams>  findBySerialPort(String serialPort){
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
+        CloudPlatformPageModel<RealEquipmentByParams> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 
     /**
@@ -118,7 +141,12 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param deviceUuid
      * @return
      */
-    public RealEquipmentConnectionCloudPlatform connection(String deviceUuid){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,RealEquipmentConnectionCloudPlatform.class);
+    public CloudPlatformPageModel<TargetConnection> connection(String deviceUuid){
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
+        CloudPlatformPageModel<TargetConnection> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        return model;
     }
 }

@@ -286,6 +286,21 @@ public class CsceneDataModifier {
                     });
                 }
             }
+            if (csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = csceneBO.getSceneConfig().getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(e -> {
+                        if (e.get("probes") != null) {
+                            List<Map> probes = (List<Map>) e.get("probes");
+                            probes.forEach(probe -> {
+                                if (probe.get("script_url") != null) {
+                                    probe.put("script_url", removePrefix(probe.get("script_url").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -556,6 +571,21 @@ public class CsceneDataModifier {
                             accessModes.forEach(accessMode -> {
                                 if (accessMode.get("private_key_path") != null) {
                                     accessMode.put("private_key_path", addFilePrefix(accessMode.get("private_key_path").toString(), baseAppConfig.getFdfsOuterHttpServer()));
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            if (baseSceneDataBO.getPlugins() != null && baseSceneDataBO.getPlugins().get("cpcollection") != null) {
+                ScenePluginDataBO scenePluginDataBO = (ScenePluginDataBO) baseSceneDataBO.getPlugins().get("cpcollection");
+                if (scenePluginDataBO.getElements() != null) {
+                    scenePluginDataBO.getElements().values().forEach(p -> {
+                        if (p.get("probes") != null) {
+                            List<Map> accessModes = (List<Map>) p.get("probes");
+                            accessModes.forEach(accessMode -> {
+                                if (accessMode.get("script_url") != null) {
+                                    accessMode.put("script_url", addFilePrefix(accessMode.get("script_url").toString(), baseAppConfig.getFdfsOuterHttpServer()));
                                 }
                             });
                         }

@@ -54,7 +54,7 @@ public class CollectionTemplateProbeDto {
      * 创建者用户名
      */
     @ApiModelProperty(value = "创建者用户名")
-    private Integer creator;
+    private String creator;
 
     /**
      * 探针执行间隔，为大于1的数值，单位秒，默认60秒
@@ -122,10 +122,16 @@ public class CollectionTemplateProbeDto {
     @ApiModelProperty(value = "探针配置，json串，数组 {\"paths\": [\n\"/var/log/mp.log,/var/log/cr.log\",\n\"/etc/ossec\"]}")
     private Map<String, String> configMap;
 
+//    /**
+//     * 参数列表
+//     */
+//    @ApiModelProperty(value = "参数列表")
+//    private List<ProbeParamModel> paramList;
+
     /**
-     * 参数列表
+     * 脚本参数(JSON)
      */
-    @ApiModelProperty(value = "参数列表")
-    private List<ProbeParamModel> paramList;
+    @ApiModelProperty(value = "脚本参数")
+    private String parameter;
 
 }

@@ -3,8 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.ContainerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import com.alibaba.fastjson.JSONArray;
@@ -38,9 +37,9 @@ public class ContainerConverter implements BaseConverter {
     public ContainerConvertModel page(ContainerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        ContainerCloudPlatformModel model = containerService.page(getParams);
+        CloudPlatformPageModel<ContainerModel> model = containerService.page(getParams);
         ContainerConvertModel convertModel = new ContainerConvertModel();
-        convertModel.setModelList(this.convertContainerModelList(model.getContainers()));
+        convertModel.setModelList(this.convertContainerModelList(model.getList()));
         convertModel.setTotal(Objects.isNull(model.getTotal()) ? NumberUtils.INTEGER_ZERO : model.getTotal());
         return convertModel;
     }
@@ -53,7 +52,7 @@ public class ContainerConverter implements BaseConverter {
     public Integer getTotalContainers(ContainerPageRequest request) {
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        ContainerCloudPlatformModel page = containerService.page(getParams);
+        CloudPlatformPageModel page = containerService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 
@@ -70,7 +69,7 @@ public class ContainerConverter implements BaseConverter {
                 ContainerConvertModel.Model response = ContainerConvertModel.Model.builder()
                         .name(containerModel.getName()).image(containerModel.getImage())
                         .node(containerModel.getHost())
-                        .status(CloudPlatformEnum.fromValue(containerModel.getStatus()))
+                        .status(containerModel.getStatus())
                         .build();
                 Map<String, Object> addresses = containerModel.getAddresses();
                 if (MapUtils.isNotEmpty(addresses)) {

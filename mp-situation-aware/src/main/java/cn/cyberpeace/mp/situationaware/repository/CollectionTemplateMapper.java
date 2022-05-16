@@ -28,4 +28,6 @@ public interface CollectionTemplateMapper extends BaseModelMapper<CollectionTemp
 //    int updateByPrimaryKey(CollectionTemplateModel record);
 
     List<CollectionTemplatePageItemDto> listTemplateItemDtos(@Param("condition") CollectionTemplateSearchCondition condition);
+
+    CollectionTemplateModel getByName(@Param("name") String name);
 }

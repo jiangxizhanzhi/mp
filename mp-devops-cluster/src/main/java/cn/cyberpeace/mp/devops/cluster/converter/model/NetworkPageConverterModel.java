@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,7 +40,7 @@ public class NetworkPageConverterModel extends BasePageConvertModel {
         /**
          * 状态
          */
-        private CloudPlatformEnum status;
+        private String status;
 
         /**
          * 已连接子网

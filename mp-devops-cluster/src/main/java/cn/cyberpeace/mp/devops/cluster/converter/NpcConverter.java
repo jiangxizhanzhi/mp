@@ -3,7 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.NpcCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -34,12 +35,9 @@ public class NpcConverter implements BaseConverter{
     public NpcPageConverterModel page(NpcPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        NpcCloudPlatformModel model = npcService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getNpcModels())){
-            return null;
-        }
+        CloudPlatformPageModel<NpcModel> model = npcService.page(getParams);
         NpcPageConverterModel convertModel = new NpcPageConverterModel();
-        convertModel.setModelList(model.getNpcModels());
+        convertModel.setModelList(model.getList());
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }
@@ -50,7 +48,7 @@ public class NpcConverter implements BaseConverter{
      */
     public Integer getTotalNpcs(NpcPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        NpcCloudPlatformModel page = npcService.page(getParams);
+        CloudPlatformPageModel<NpcModel> page = npcService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 }

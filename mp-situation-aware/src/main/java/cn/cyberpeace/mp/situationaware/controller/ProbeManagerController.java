@@ -67,9 +67,9 @@ public class ProbeManagerController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping
     @ApiOperation(value = "根据id查询单个探针详情，包含探针脚本内容")
-    public ServiceResult<ProbeDto> getById(@PathVariable String id) {
+    public ServiceResult<ProbeDto> getById(@RequestParam String id) {
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(id));
         if (CollectionUtil.isNotEmpty(probeDtos)) {
             return ServiceResult.success(probeDtos.get(0));
@@ -77,7 +77,7 @@ public class ProbeManagerController {
         return ServiceResult.successful();
     }
 
-    @GetMapping
+    @GetMapping("/batch")
     @ApiOperation(value = "根据id数组批量查询探针详情，包含探针脚本内容")
     public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 

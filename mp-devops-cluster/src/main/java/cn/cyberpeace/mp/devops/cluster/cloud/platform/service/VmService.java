@@ -1,16 +1,15 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstanceOsServicePageResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.InstancePageResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceOsServiceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -39,13 +38,13 @@ public class VmService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public InstanceCloudPlatformModel page(String getParams){
-        InstancePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + getParams, InstancePageResult.class);
+    public CloudPlatformPageModel<InstanceModel> page(String getParams){
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + getParams, CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<InstanceModel> data = pageResult.getData();
-        List<InstanceModel> instanceModels = data.getList();
-        InstanceCloudPlatformModel model = new InstanceCloudPlatformModel();
-        model.setInstances(CollectionUtils.isEmpty(instanceModels) ? Lists.newArrayList() : instanceModels);
+        CloudPlatformPageData data = pageResult.getData();
+        List<InstanceModel> instanceModels = JSONObject.parseArray(JSONObject.toJSONString(data.getList()), InstanceModel.class);
+        CloudPlatformPageModel<InstanceModel> model = new CloudPlatformPageModel();
+        model.setList(CollectionUtils.isEmpty(instanceModels) ? Lists.newArrayList() : instanceModels);
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
         return model;
@@ -65,13 +64,13 @@ public class VmService extends BaseOpenStackService {
      *
      * @return
      */
-    public InstanceOsServiceCloudPlatformModel osServicesStateFromInstances(){
-        InstanceOsServicePageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + "/os-services", InstanceOsServicePageResult.class);
+    public CloudPlatformPageModel<InstanceOsServiceModel> osServicesStateFromInstances(){
+        CloudPlatformPageResult pageResult = super.sendGet(URL_VERSION + INSTANCES + "/os-services", CloudPlatformPageResult.class);
         super.checkResult(pageResult);
-        CloudPlatformPageResult<InstanceOsServiceModel> data = pageResult.getData();
-        List<InstanceOsServiceModel> list = data.getList();
-        InstanceOsServiceCloudPlatformModel model = new InstanceOsServiceCloudPlatformModel();
-        model.setServices(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
+        CloudPlatformPageData data = pageResult.getData();
+        List<InstanceOsServiceModel> list =  JSONObject.parseArray(JSONObject.toJSONString(data.getList()), InstanceOsServiceModel.class);
+        CloudPlatformPageModel<InstanceOsServiceModel> model = new CloudPlatformPageModel();
+        model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
         return model;

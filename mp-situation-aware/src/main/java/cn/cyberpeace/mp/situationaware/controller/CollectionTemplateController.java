@@ -46,16 +46,16 @@ public class CollectionTemplateController {
 
 
     @GetMapping("/page")
-    @ApiOperation(value = "分页查询采集模板")
+    @ApiOperation(value = "分页查询采集模板，不含探针详细内容（如脚本，参数等）")
     public ListObjServiceResult<CollectionTemplatePageItemDto> page(CollectionTemplatePageQueryRequest pageQueryRequest) {
         PageInfo<CollectionTemplatePageItemDto> pageInfo = templateService.page(pageQueryRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
 
-    @GetMapping("/{id}")
-    @ApiOperation(value = "查询采集模板")
-    public ServiceResult<CollectionTemplateDto> getById(@PathVariable String id) {
+    @GetMapping
+    @ApiOperation(value = "查询采集模板，不含探针详细内容（如脚本，参数等）")
+    public ServiceResult<CollectionTemplateDto> getById(@RequestParam String id) {
         List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ArrayUtils.toArray(id));
         if (CollectionUtil.isNotEmpty(colTempDtos)) {
             return ServiceResult.success(colTempDtos.get(0));

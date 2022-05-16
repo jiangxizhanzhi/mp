@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -11,6 +12,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;
@@ -53,7 +57,28 @@ public class UserUtils {
     }
 
     /**
+     * 获取当前登录用户类型
+     * @return
+     */
+    public static String getLoginUserType() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+
+        if (Objects.nonNull(request)) {
+            Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
+            if (Objects.nonNull(userType)) {
+                return String.valueOf(userType);
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * 获取当前登录用户
+     * 如果返回null，有可能是client认证，也有可能是免认证的接口
+     * 需要另外根据 request.getAttribute(LogConstant.USER_TYPE_KEY) 来判断
      * @return
      */
     @Nullable
@@ -71,11 +96,19 @@ public class UserUtils {
 
         if (principal instanceof ClientDetailsModel) {
             log.error("Login account type is Client:{}, return null!", principal);
-//            throw new MpRuntimeException(AuthErrorCode.ACCOUNT_TYPE_ERROR);
             user = null;
         }
 
         return user;
+    }
+
+
+    public static UserDto getLoginUserDtoWithoutOrg() {
+        UserModel currentUserModel = getLoginUser();
+        if (Objects.isNull(currentUserModel)) {
+            return null;
+        }
+        return userService.userModel2UserDtoWithoutOrg(currentUserModel);
     }
 
 }

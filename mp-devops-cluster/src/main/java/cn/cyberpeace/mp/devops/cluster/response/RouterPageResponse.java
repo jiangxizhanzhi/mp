@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -28,7 +27,7 @@ public class RouterPageResponse extends BaseCloudPlatformResponse {
      * 状态
      */
     @ApiModelProperty("状态")
-    private CloudPlatformEnum status;
+    private String status;
 
     /**
      * 创建时间

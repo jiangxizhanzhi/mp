@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
@@ -18,9 +20,8 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
-import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageConnectionCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.ImageCheckPortResponse;
@@ -35,8 +36,12 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
@@ -63,6 +68,10 @@ public class ImagesController {
     private InjectFileConverter injectFileConverter;
 
     private ImagesService imagesService;
+
+    @Qualifier("fastDfsFileServiceImpl")
+    @Autowired
+    private FileService fileService;
 
     public ImagesController(ImagesConverter imagesConverter, SnapshotConverter snapshotConverter,
                             FlavorService flavorService, ImagesService imagesService,
@@ -376,11 +385,8 @@ public class ImagesController {
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-        FlavorCloudPlatformModel page = flavorService.page(getParams);
-        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
-            return new Result();
-        }
-        List<Flavor> flavorList = page.getData().getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
+        CloudPlatformPageModel<Flavor> page = flavorService.page(getParams);
+        List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
         return new Result<>(flavorList);
@@ -389,11 +395,8 @@ public class ImagesController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        ImageConnectionCloudPlatform connection = imagesService.connection(uuid);
-        if (Objects.isNull(connection)){
-            return new Result<>();
-        }
-        return new Result<>(connection.getItems());
+        CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
+        return new Result<>(connection.getList());
     }
 
     @ApiOperation("同步镜像数据")
@@ -422,6 +425,34 @@ public class ImagesController {
             imageCheckPorts.add(checkPort);
         }
         return new Result(new ImageCheckPortResponse(imageCheckPorts));
+    }
+
+    /**
+     * SSH文件上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("SSH文件上传方法")
+    @PostMapping(value = "/file/upload/ssh")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadSshFile(MultipartFile file, HttpServletRequest request) {
+        return fileService.uploadFile(file, request);
+    }
+
+    /**
+     * 文件注入上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("文件注入上传方法")
+    @PostMapping(value = "/file/upload/inject")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadInjectFile(MultipartFile file, HttpServletRequest request) {
+        return fileService.uploadFile(file, request);
     }
 
     /**

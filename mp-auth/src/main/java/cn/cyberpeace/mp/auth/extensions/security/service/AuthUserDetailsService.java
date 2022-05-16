@@ -91,7 +91,6 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     /**
      * @param userId
-     * @param targetType   @see cn.cyberpeace.mp.auth.model.TargetModel
      * @return
      */
     public Set<GrantedAuthority> loadAuthorities(String userId) {

@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Mapper
 @Repository
 @ModelClass(ProbeParamModel.class)
@@ -23,6 +25,8 @@ public interface ProbeParamMapper extends BaseModelMapper<ProbeParamModel> {
 //    int updateByPrimaryKeySelective(ProbeParamModel record);
 //
 //    int updateByPrimaryKey(ProbeParamModel record);
+
+    List<ProbeParamModel> selectByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
 
     int deleteByProbeIdAndTemplateId(@Param("probeId") String probeId, @Param("templateId") String templateId);
 
