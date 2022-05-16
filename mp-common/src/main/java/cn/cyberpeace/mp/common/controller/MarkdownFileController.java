@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.common.controller;
 
+import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
+import cn.cyberpeace.mp.base.controller.response.FdfsFileUploadResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.ControllerConstant;
 import cn.cyberpeace.mp.common.service.MarkdownFileService;
@@ -35,9 +37,12 @@ public class MarkdownFileController {
      */
     @ApiOperation("上传文件")
     @PostMapping("/image_upload")
-    public ServiceResult<String> uploadImage(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        return getMarkdownFileService().uploadImage(file.getInputStream(),
-                FileUtil.getSuffix(file.getOriginalFilename())).asResult();
+    public ServiceResult<FdfsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
+            throws IOException {
+        var uploadResult = getMarkdownFileService().uploadImage(file.getInputStream(),
+                FileUtil.getSuffix(file.getOriginalFilename()));
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+                .asResult();
     }
 
     /**
@@ -46,9 +51,12 @@ public class MarkdownFileController {
      */
     @ApiOperation("上传文件")
     @PostMapping("/file_upload")
-    public ServiceResult<String> uploadFile(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        return getMarkdownFileService().uploadFile(file.getInputStream(),
-                FileUtil.getSuffix(file.getOriginalFilename())).asResult();
+    public ServiceResult<FdfsFileUploadResponse> uploadFile(@RequestParam(value = "file") MultipartFile file)
+            throws IOException {
+        var uploadResult = getMarkdownFileService().uploadFile(file.getInputStream(),
+                FileUtil.getSuffix(file.getOriginalFilename()));
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+                .asResult();
     }
 
 }
