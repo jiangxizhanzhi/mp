@@ -37,7 +37,7 @@ public class MarkdownFileController {
      * markdown上传图片
      * @return 文件id
      */
-    @ApiOperation("上传文件")
+    @ApiOperation("上传图片")
     @PostMapping("/image_upload")
     public ServiceResult<FdfsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
             throws IOException {
