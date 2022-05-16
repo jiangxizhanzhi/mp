@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
@@ -46,7 +45,7 @@ public class NetworkConverter implements BaseConverter{
                 subnets = List.of(new NetworkPageConverterModel.Model.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp()));
             }
             return  NetworkPageConverterModel.Model.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
-                    .status(CloudPlatformEnum.fromValue(networkModel.getStatus()))
+                    .status(networkModel.getStatus())
                     .subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
         }).collect(Collectors.toList());
         NetworkPageConverterModel convertModel = new NetworkPageConverterModel();

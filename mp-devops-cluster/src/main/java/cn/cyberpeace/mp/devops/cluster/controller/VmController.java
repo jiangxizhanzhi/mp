@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
@@ -15,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -29,8 +34,11 @@ public class VmController {
 
     private VmConverter vmConverter;
 
-    public VmController(VmConverter vmConverter) {
+    private CsceneSpecialService csceneSpecialService;
+
+    public VmController(VmConverter vmConverter,CsceneSpecialService csceneSpecialService) {
         this.vmConverter = vmConverter;
+        this.csceneSpecialService = csceneSpecialService;
     }
 
     /**
@@ -43,8 +51,13 @@ public class VmController {
     public PageResult<InstancePageResponse> page(InstancePageRequest request){
         InstanceConvertModel model = vmConverter.page(request);
         List<InstanceConvertModel.Model> instances = model.getModelList();
+        List<String> instanceNames = instances.stream().map(InstanceConvertModel.Model::getName).collect(Collectors.toList());
+        ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
+        Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         List<InstancePageResponse> list = instances.stream().map(instanceModel ->
-            InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())
+            InstancePageResponse.builder().name(instanceModel.getName())
+                    .sceneName(Objects.isNull(source.get(instanceModel.getName())) ? "" : source.get(instanceModel.getName()).getCsceneName())
+                    .node(instanceModel.getNode())
                     .addressList(instanceModel.getAddressList())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
         ).collect(Collectors.toList());

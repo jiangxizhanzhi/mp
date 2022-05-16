@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
@@ -70,7 +69,7 @@ public class ContainerConverter implements BaseConverter {
                 ContainerConvertModel.Model response = ContainerConvertModel.Model.builder()
                         .name(containerModel.getName()).image(containerModel.getImage())
                         .node(containerModel.getHost())
-                        .status(CloudPlatformEnum.fromValue(containerModel.getStatus()))
+                        .status(containerModel.getStatus())
                         .build();
                 Map<String, Object> addresses = containerModel.getAddresses();
                 if (MapUtils.isNotEmpty(addresses)) {
