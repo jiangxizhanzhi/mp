@@ -252,6 +252,9 @@ public class ProbeService {
         PageHelper.startPage(pageQueryRequest.getPage(), pageQueryRequest.getPageSize());
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         probeDtos.forEach(p -> processProbeDtoOsTypes(p));
+        probeDtos.forEach(p -> {
+            processProbeDtoParams(p);
+        });
         // 分页查询不附带参数
         PageInfo pageInfo = new PageInfo(probeDtos);
         return pageInfo;
