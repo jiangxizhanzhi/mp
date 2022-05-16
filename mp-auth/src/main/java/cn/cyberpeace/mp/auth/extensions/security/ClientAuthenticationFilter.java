@@ -48,7 +48,6 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
             log.info("client auth... clientId:{}", clientId);
-            log.info("【前置增强】>>  来源IP: {}, 请求地址URL: {}, 头部header: {}, 方法名称method: {}", SnUtils.getRealRemoteIp(request), request.getRequestURI(), SnUtils.getRequestHeaders(request), request.getMethod());
             if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就会出问题
                 UserUtils.setLoginUser2RequestAttr(request, clientDetails.getId(), clientDetails.getClientId(), LogConstant.USER_TYPE_CLIENT);
