@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountActivitySceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
@@ -29,6 +30,7 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -46,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -520,4 +523,59 @@ public class CsceneSpecialService {
         SceneModel sceneModel = sceneMapper.get(csceneInstanceModel.getScene());
         return new ServiceResult<>(new SceneStateInfo(sceneModel));
     }
+
+    public ServiceResult<List<CsceneNodeInfoBO>> getSceneInfoByElementEids(List<String> elementEids) {
+        if (CollectionUtils.isEmpty(elementEids)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        var condition = new HumanCondition()
+                .link(SceneElementModel.class, CsceneInstanceModel.class)
+                .filterLink(SceneElementModel.class, SceneElementModel::getScene, CsceneInstanceModel.class, CsceneInstanceModel::getScene)
+                .currentLink(SceneElementModel.class)
+                .filterIn(SceneElementModel::getId, elementEids.toArray())
+                .selectAs(SceneElementModel::getId, CsceneNodeInfoBO::getNodeEid)
+                .selectAs(SceneElementModel::getNodeId, CsceneNodeInfoBO::getNodeId)
+                .selectAs(SceneElementModel::getName, CsceneNodeInfoBO::getNodeName)
+                .currentLink(CsceneInstanceModel.class)
+                .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
+                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
+        var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 根据资源名称反查节点信息
+     * @param resourceNames
+     * @return
+     */
+    public ServiceResult<Map<String, CsceneNodeInfoBO>> getSceneInfoByNodeResourceName(List<String> resourceNames) {
+        if (CollectionUtils.isEmpty(resourceNames)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        String prefix = CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();
+        Map<String, String> eid2Name = new HashMap<>();
+        for (String name : resourceNames) {
+            if (name.startsWith(CloudSingleton.cloudAppConfig.getCpcloudResourceGroup())) {
+                String sceneInfo = name.replace(prefix + "_", "");
+                String[] sp = sceneInfo.split("_");
+                if (sp.length > 0) {
+                    eid2Name.put(sp[0], name);
+                }
+            }
+        }
+        if (eid2Name.isEmpty()) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var elementInfos = this.getSceneInfoByElementEids(new ArrayList<>(eid2Name.keySet())).getSource();
+        if (CollectionUtils.isEmpty(elementInfos)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var resourceName2Info = elementInfos.stream()
+                .collect(Collectors.toMap(e -> eid2Name.get(e.getNodeEid()), e -> {
+                    e.setResourceName(eid2Name.get(e.getNodeEid()));
+                    return e;
+                }));
+        return new ServiceResult<>(resourceName2Info);
+    }
+
 }
