@@ -149,7 +149,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public List<RoleModel> listByNames(List<String> names) {
         Assert.notEmpty(names, "names不能为空！");
-        List<RoleModel> roleModels = getModelMapper().listByNames(names, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<RoleModel> roleModels = getModelMapper().listByNames(names, null);
         return roleModels;
     }
 
