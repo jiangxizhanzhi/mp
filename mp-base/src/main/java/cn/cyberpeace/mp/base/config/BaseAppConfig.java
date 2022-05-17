@@ -64,6 +64,9 @@ public class BaseAppConfig {
     @Value("${mp.base.resources-dir:}")
     private String resourcesDir;
 
+    @Value("${mp.base.file-server-dir:}")
+    private String fileServerDir;
+
     @Value("${mp.base.run-init:false}")
     private boolean runInit;
 
@@ -95,6 +98,15 @@ public class BaseAppConfig {
 
         resourcesDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, getHomeDir(), "resources");
         return resourcesDir;
+    }
+
+    public String getFileServerDir() {
+        if (!StringUtils.isEmpty(fileServerDir)) {
+            return fileServerDir;
+        }
+
+        fileServerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, getHomeDir(), "files");
+        return fileServerDir;
     }
 
 }

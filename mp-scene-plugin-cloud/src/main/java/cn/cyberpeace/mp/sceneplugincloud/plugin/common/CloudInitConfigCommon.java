@@ -26,13 +26,15 @@ public class CloudInitConfigCommon {
     private static final String SSH_PWAUTH = "ssh_pwauth: true";
     private static final String DISABLE_ROOT = "disable_root: 0";
 
-    private static final Set<String> CHANGE_USER_PROTOCOL = new HashSet<>() {{
-        this.add(AccessMode.Protocol.CONSOLE);
-        this.add(AccessMode.Protocol.RDP);
-        this.add(AccessMode.Protocol.VNC);
-        this.add(AccessMode.Protocol.SSH);
-        this.add(AccessMode.Protocol.TELNET);
-    }};
+    private static final Set<String> CHANGE_USER_PROTOCOL = new HashSet<>();
+
+    static {
+        CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.CONSOLE);
+        CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.RDP);
+        CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.VNC);
+        CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.SSH);
+        CHANGE_USER_PROTOCOL.add(AccessMode.Protocol.TELNET);
+    }
 
     public static boolean canChangeUser(String protocol) {
         return CHANGE_USER_PROTOCOL.contains(protocol);
