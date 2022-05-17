@@ -388,7 +388,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         // 如果组织下有人员，不允许删除
-        List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
+        List<UserModel> users = orgUserService.listUsersByOrgIdNoRestrict(orgId);
         if (CollectionUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
         }

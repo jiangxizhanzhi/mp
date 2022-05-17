@@ -26,6 +26,13 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
      */
     List<UserModel> listUsersByOrgId(String orgId);
 
+    /**
+     * 查询组织内所有用户，不做登录用户权限校验
+     * @param orgId
+     * @return
+     */
+    List<UserModel> listUsersByOrgIdNoRestrict(String orgId);
+
     List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds);
 
     /**
