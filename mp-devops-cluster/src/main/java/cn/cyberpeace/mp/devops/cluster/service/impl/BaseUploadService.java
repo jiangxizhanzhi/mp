@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.FileService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
