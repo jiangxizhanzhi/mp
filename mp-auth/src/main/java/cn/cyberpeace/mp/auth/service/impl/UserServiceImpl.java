@@ -157,8 +157,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
-        ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
+        ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;
         if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
