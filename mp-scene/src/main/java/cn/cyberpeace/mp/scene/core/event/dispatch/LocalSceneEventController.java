@@ -21,8 +21,10 @@ public class LocalSceneEventController implements SceneEventControl {
     private ReentrantLock lock;
 
     private String sceneId;
+    // 正在处理的场景事件
     private int event;
     private int eventStatus;
+    // 下一个优先级更高的场景事件
     private Integer latestEvent;
     private Integer latestEventStatus;
 
@@ -46,7 +48,7 @@ public class LocalSceneEventController implements SceneEventControl {
             var validEvents = SceneEventTransition.SCENE_EVENT_TRANSITION.getOrDefault(
                     EventTransition.genKey(compareEvent, compareEventStatus), new ArrayList<>()
             );
-            if (validEvents.contains(event)) {
+            if (validEvents.contains(event) && event != compareEvent) {
                 this.latestEvent = event;
                 this.latestEventStatus = eventStatus;
                 log.info("scene {} , try update latest event success", sceneId, event, eventStatus);
