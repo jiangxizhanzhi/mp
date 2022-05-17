@@ -19,7 +19,6 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -59,7 +58,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     private UserRoleService userRoleService;
 
     @Autowired
-    private OperateRolePermissionService opRolePermCheckService;
+    private OperateRolePermissionService opRolePermService;
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -108,18 +107,18 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listAll() {
-        List<RoleModel> roles = getModelMapper().listAll(opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<RoleModel> roles = getModelMapper().listAll(opRolePermService.getExcludeRoleIdsByLoginUserForSearching());
         return roles;
     }
 
     @Override
     public List<RoleModel> listAllExcludeSuperUserRole() {
-        boolean isSuperUser = opRolePermCheckService.isLoginUserSuperUser();
+        boolean isSuperUser = opRolePermService.isLoginUserSuperUser();
         List<String > excludeRoleIds = null;
         if (isSuperUser) {
             excludeRoleIds = Arrays.asList(AuthConstant.ROLE_SUPERUSER_ID);
         } else {
-            excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+            excludeRoleIds = opRolePermService.getExcludeRoleIdsByLoginUserForSearching();
         }
         List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
         return roles;
@@ -164,7 +163,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
 
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName(), opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(rolePageRequest.getName(), opRolePermService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {
@@ -182,7 +181,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleDto getRoleDto(String id) {
         Assert.notBlank(id, "id不能为空！");
-        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opRolePermService.getExcludeRoleIdsByLoginUserForSearching();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }
@@ -194,7 +193,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RolePermDto getRolePermDto(String id) {
         Assert.notBlank(id, "id不能为空！");
-        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opRolePermService.getExcludeRoleIdsByLoginUserForSearching();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }

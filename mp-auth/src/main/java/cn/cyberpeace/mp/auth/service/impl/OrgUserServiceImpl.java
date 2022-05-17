@@ -29,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -58,7 +57,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermService;
 
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
@@ -72,7 +71,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null);
         desensitizedService.desensitiveUserModels(users);
         return users;
     }
@@ -90,7 +89,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, uname, userIds, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         desensitizedService.desensitiveUserModels(users);
         return users;
     }
@@ -125,7 +124,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
         Assert.notBlank(orgId, "orgId不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
         var objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
@@ -183,7 +182,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         log.info("orgIds: {}", orgIds);
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList, opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, req.getUsername(), idsList, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

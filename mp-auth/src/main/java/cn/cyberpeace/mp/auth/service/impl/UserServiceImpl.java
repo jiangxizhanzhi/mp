@@ -123,7 +123,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermService;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -133,7 +133,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public UserDto getUserDto(String id) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
@@ -157,7 +157,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;
@@ -234,7 +234,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel add(UserRequest createRequest) {
         Assert.notNull(createRequest, "userDto不能为空");
 
-        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
+        opUserPermService.checkByTargetRoleIds(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -290,7 +290,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
 
-        opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+        opUserPermService.checkByTargetRoleIds(modifyRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -406,7 +406,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
         Assert.isFalse(PasswordUtils.isPasswordStrengthLowLevel(newPwd), AuthConstant.ERROR_CODE_PREFIX + "password_strength_invalid");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
 
         var source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
@@ -420,7 +420,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean disable(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
 
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
@@ -443,7 +443,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -459,7 +459,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean enable(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -481,7 +481,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -498,7 +498,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean approve(String userId) {
         Assert.notBlank(userId, "userId不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -520,7 +520,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -601,7 +601,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         });
 
         if (CollectionUtil.isNotEmpty(roleNameSet)) {
-            opUserPermCheckService.checkByTargetRoleNames(roleNameSet.stream().collect(Collectors.toList()));
+            opUserPermService.checkByTargetRoleNames(roleNameSet.stream().collect(Collectors.toList()));
         }
 
         for (ImportUser importUser : list) {
@@ -654,7 +654,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
         Assert.notBlank(userId, "userId不能为空！");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
 
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {

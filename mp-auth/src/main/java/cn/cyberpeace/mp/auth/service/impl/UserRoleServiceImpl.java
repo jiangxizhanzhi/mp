@@ -45,7 +45,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     private AuthDesensitizedService desensitizedService;
 
     @Autowired
-    private OperateUserPermissionService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -83,9 +83,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         Assert.notBlank(pageRequest.getUserId(), "userId不能为空！");
+        opUserPermService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
-        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId(), opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<RoleModel> roles = getModelMapper().listByUserId(pageRequest.getUserId(), null);
         PageInfo pageInfo = new PageInfo(roles);
         return pageInfo;
     }
@@ -94,7 +95,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         Assert.notBlank(pageRequest.getRoleId(), "roleId不能为空！");
-        List<String> excludeRoleIds = opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearching();
         if (excludeRoleIds.contains(pageRequest.getRoleId())) {
             new PageInfo<>(Collections.emptyList());
         }
@@ -116,7 +117,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles) {
         Assert.notNull(userId, "userId不能为空");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
 
         var objResult = userService.get(userId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -154,7 +155,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean bindRoleUsers(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {
@@ -219,7 +220,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @CacheEvict(value = "roles_cache", allEntries = true)
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         Assert.notNull(roleId, "roleId不能为空");
-        opUserPermCheckService.checkByTargetUserIds(userIds);
+        opUserPermService.checkByTargetUserIds(userIds);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {

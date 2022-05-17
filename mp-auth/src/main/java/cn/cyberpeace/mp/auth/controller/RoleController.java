@@ -58,7 +58,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     }
 
     @Autowired
-    private OperateRolePermissionService opRolePermCheckService;
+    private OperateRolePermissionService opRolePermService;
 
 
     @Override
@@ -85,7 +85,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
                                               @RequestParam(required = false) String[] fields) {
-        opRolePermCheckService.checkByTargetRoleIds(Arrays.asList(id));
+        opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
         return super.update(id, obj, fields);
     }
 
@@ -98,7 +98,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = AuthLogConstant.TARGET_ROLE)
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        opRolePermCheckService.checkByTargetRoleIds(Arrays.asList(id));
+        opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
         return super.delete(id);
     }
 
@@ -216,7 +216,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkUpdate(@RequestBody List<RoleModel> objs) {
         List<String> roleIds = objs.stream().map(RoleModel::getId).filter(Objects::nonNull).collect(Collectors.toList());
-        opRolePermCheckService.checkByTargetRoleIds(roleIds);
+        opRolePermService.checkByTargetRoleIds(roleIds);
         return getModelService().bulkUpdate(objs).asResult();
     }
 
@@ -230,7 +230,7 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
-        opRolePermCheckService.checkByTargetRoleIds(CollectionUtil.toList(ids));
+        opRolePermService.checkByTargetRoleIds(CollectionUtil.toList(ids));
         return getModelService().bulkDelete(ids).asResult();
     }
 

@@ -69,7 +69,7 @@ public class UserPermissionServiceImpl
     private OrgPermissionService orgPermissionService;
 
     @Autowired
-    private OperateUserPermissionService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermService;
 
     @Autowired
     public UserPermissionServiceImpl(UserPermissionMapper modelMapper, UserPermissionFields modelFields) {
@@ -145,7 +145,7 @@ public class UserPermissionServiceImpl
     @CacheEvict(value = "targets_cache", allEntries = true)
     public boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets) {
         Assert.notNull(userId, "userId不能为空");
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(userId));
         var result = userService.get(userId);
         ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 
