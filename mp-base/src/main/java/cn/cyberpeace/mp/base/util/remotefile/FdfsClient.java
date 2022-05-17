@@ -102,6 +102,7 @@ public class FdfsClient implements FileClient {
     public void download(String fdfsFilepath, OutputStream os) {
         try (var connection = getConnection()) {
             connection.getStorageClient().download_file1(fdfsFilepath, new DownloadStream(os));
+            os.flush();
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs download %s to output stream error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
