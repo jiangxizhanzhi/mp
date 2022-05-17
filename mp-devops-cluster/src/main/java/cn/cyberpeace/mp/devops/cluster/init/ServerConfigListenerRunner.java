@@ -4,13 +4,14 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterServic
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.context.WebServerInitializedEvent;
-import org.springframework.context.ApplicationListener;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class ServerConfigListener implements ApplicationListener<WebServerInitializedEvent> {
+public class ServerConfigListenerRunner implements ApplicationRunner {
 
     @Autowired
     private InitRegisterService initRegisterService;
@@ -18,20 +19,22 @@ public class ServerConfigListener implements ApplicationListener<WebServerInitia
     @Autowired
     private IpAddressConfig ipAddressConfig;
 
-    private int serverPort;
+    @Autowired
+    private Environment environment;
+
+    private String serverPort;
 
     public String getUrl() {
         return "http://" + ipAddressConfig.getMp() + ":" + this.serverPort;
     }
 
     @Override
-    public void onApplicationEvent(WebServerInitializedEvent event) {
-        this.serverPort = event.getWebServer().getPort();
+    public void run(ApplicationArguments args) {
+        this.serverPort = environment.getProperty("server.port", "8080");
         try {
             initRegisterService.register(getUrl());
         }catch (Exception e){
             log.error("ServerConfigListener onApplicationEvent error : {} ",e);
         }
     }
-
 }

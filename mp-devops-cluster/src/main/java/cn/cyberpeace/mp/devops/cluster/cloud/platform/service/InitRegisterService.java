@@ -1,12 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.init.ServerConfigListener;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -23,9 +21,6 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
 @Slf4j
 public class InitRegisterService extends BaseOpenStackService {
 
-    @Autowired
-    private ServerConfigListener serverConfigListener;
-
     public InitRegisterService(DevopsConfig devopsConfig) {
         super(devopsConfig);
     }
@@ -34,9 +29,10 @@ public class InitRegisterService extends BaseOpenStackService {
      * 注册MP地址
      * @return
      */
+    @Async
     public BaseCloudPlatformModel register(String url) {
         Map<String,Object> map = new HashMap<>();
-        map.put("ip_port", StringUtils.isBlank(url) ? serverConfigListener.getUrl() : url);
+        map.put("ip_port", url);
         BaseCloudPlatformModel pageResult = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/register_mp",JSONObject.toJSONString(map),BaseCloudPlatformModel.class);
         super.checkResult(pageResult);
         return pageResult;

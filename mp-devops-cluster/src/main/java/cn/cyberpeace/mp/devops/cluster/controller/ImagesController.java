@@ -97,11 +97,6 @@ public class ImagesController {
         this.imagesService = imagesService;
     }
 
-    @GetMapping("/test")
-    public void s(@RequestParam String msg){
-        imagesConnectSocketServer.batchSendInfo(msg);
-    }
-
     /**
      * 分页查询
      */
