@@ -2,9 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Installer;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -49,8 +50,14 @@ public class InstallerService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public InstallerCloudPlatformModel page(String getParams){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS + getParams, InstallerCloudPlatformModel.class);
+    public CloudPlatformPageModel<Installer> page(String getParams){
+        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS + getParams, CloudPlatformItemsPageResult.class);
+        super.checkResult(pageResult);
+        List<Installer> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Installer.class);
+        CloudPlatformPageModel<Installer> model = new CloudPlatformPageModel<>();
+        model.setList(list);
+        model.setTotal(pageResult.getTotal());
+        return model;
     }
 
     /**

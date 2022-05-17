@@ -51,14 +51,14 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
     /**
      * 获取事件锁
      */
-    private boolean acquireEventLock(int event, String process, int processStatus) {
+    protected boolean acquireEventLock(int event, int eventStatus, String process, int processStatus) {
         return true;
     }
 
     /**
      * 释放事件锁
      */
-    private boolean releaseEventLock(int event, String process, int processStatus) {
+    protected boolean releaseEventLock(int event, int eventStatus, String process, int processStatus) {
         return true;
     }
 
@@ -95,10 +95,10 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      * @return 事件触发结果
      */
     private int triggerEvent(int event, int eventStatus, String process, int processStatus, String processMessage) {
-        if (acquireEventLock(event, process, processStatus)) {
+        if (acquireEventLock(event, eventStatus, process, processStatus)) {
             var eventObj = saveEvent(event, eventStatus, process, processStatus, processMessage);
             if (eventObj == null) {
-                releaseEventLock(event, process, processStatus);
+                releaseEventLock(event, eventStatus, process, processStatus);
                 log.error("{} save event failed: event({}), eventStatus({}), process({}), processStatus({}), processMessage({})",
                         getTargetName(), event, eventStatus, process, processStatus, processMessage);
                 return EventFlag.SAVE_FAILED;

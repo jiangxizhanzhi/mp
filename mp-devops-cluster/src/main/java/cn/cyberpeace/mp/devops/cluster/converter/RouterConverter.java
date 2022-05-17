@@ -3,8 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.RouterCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,11 +33,11 @@ public class RouterConverter implements BaseConverter{
     public RouterPageConverterModel page(RouterPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        RouterCloudPlatformModel model = routerService.page(getParams);
-        List<RouterModel> routers = model.getRouters();
+        CloudPlatformPageModel<RouterModel> model = routerService.page(getParams);
+        List<RouterModel> routers = model.getList();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
-                        .status(CloudPlatformEnum.fromValue(routerModel.getStatus())).createdAt(routerModel.getCreatedAt()).build()
+                        .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         RouterPageConverterModel convertModel = new RouterPageConverterModel();
         convertModel.setModelList(list);
@@ -52,7 +51,7 @@ public class RouterConverter implements BaseConverter{
      */
     public Integer getTotalRouters(RouterPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        RouterCloudPlatformModel page = routerService.page(getParams);
+        CloudPlatformPageModel page = routerService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 }

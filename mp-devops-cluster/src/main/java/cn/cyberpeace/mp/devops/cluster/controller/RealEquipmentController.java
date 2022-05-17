@@ -286,9 +286,9 @@ public class RealEquipmentController {
                 }
             }
         }
-        RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(id);
+        CloudPlatformPageModel<TargetConnection> connection = realEquipmentService.connection(id);
         if (Objects.nonNull(connection)){
-            response.setConnections(connection.getItems());
+            response.setConnections(connection.getList());
         }
         return new Result<>(response);
     }
@@ -344,30 +344,30 @@ public class RealEquipmentController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        RealEquipmentConnectionCloudPlatform connection = realEquipmentService.connection(uuid);
+        CloudPlatformPageModel<TargetConnection> connection = realEquipmentService.connection(uuid);
         if (Objects.isNull(connection)){
             return new Result<>();
         }
-        return new Result<>(connection.getItems());
+        return new Result<>(connection.getList());
     }
 
     @ApiOperation("根据交换机名称查询实体装备")
     @GetMapping("/by-switch-name")
     public Result<List<RealEquipmentByParams>> findBySwitchName(@RequestParam("switchName") String switchName){
-        RealEquipmentBySwitchNameCloudPlatform bySwitchName = realEquipmentService.findBySwitchName(switchName);
+        CloudPlatformPageModel<RealEquipmentByParams> bySwitchName = realEquipmentService.findBySwitchName(switchName);
         if (Objects.isNull(bySwitchName)){
             return new Result<>();
         }
-        return new Result<>(bySwitchName.getItems());
+        return new Result<>(bySwitchName.getList());
     }
 
     @ApiOperation("根据串口名称查询实体装备")
     @GetMapping("/by-serial-port")
     public Result<List<RealEquipmentByParams>> findBySerialPort(@RequestParam("serialPort") String serialPort){
-        RealEquipmentBySerialPortCloudPlatform bySerialPort = realEquipmentService.findBySerialPort(serialPort);
+        CloudPlatformPageModel<RealEquipmentByParams>  bySerialPort = realEquipmentService.findBySerialPort(serialPort);
         if (Objects.isNull(bySerialPort)){
             return new Result<>();
         }
-        return new Result<>(bySerialPort.getItems());
+        return new Result<>(bySerialPort.getList());
     }
 }

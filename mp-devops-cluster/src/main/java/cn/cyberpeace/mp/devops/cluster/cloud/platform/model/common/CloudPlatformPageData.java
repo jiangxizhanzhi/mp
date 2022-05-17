@@ -9,9 +9,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CloudPlatformPageData<T> {
+public class CloudPlatformPageData {
 
-    private List<T> list;
+    private List<?> list;
 
     private Integer total;
 }

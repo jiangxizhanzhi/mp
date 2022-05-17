@@ -1,10 +1,14 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
@@ -30,6 +34,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -61,15 +66,19 @@ public class DevopsTargetController {
 
     private ITask asyncTargetTask;
 
+    private InitRegisterService initRegisterService;
+
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService,IpAddressConfig ipAddressConfig,
-                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask) {
+                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask,
+                                  InitRegisterService initRegisterService) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
         this.ipAddressConfig = ipAddressConfig;
         this.deviceVoConverter = deviceVoConverter;
         this.asyncTargetTask = asyncTargetTask;
+        this.initRegisterService = initRegisterService;
     }
 
     /**
@@ -81,8 +90,6 @@ public class DevopsTargetController {
     public Result<String> getFtpAddress(){
         return new Result<>(ipAddressConfig.getCp());
     }
-
-
 
     /**
      * 查询所有靶标信息
@@ -166,10 +173,24 @@ public class DevopsTargetController {
 
     @ApiOperation("上传文件")
     @PostMapping("/upload")
+    @Deprecated
     public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
+        if (type.equals("image")){
+            String originalFilename = file.getOriginalFilename();
+            int index = StringUtils.isBlank(originalFilename) ? -1 : originalFilename.lastIndexOf(".");
+            if (index < 0){
+                throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            }
+            String suffix = originalFilename.substring(index + 1);
+            List<String> supportUploadTypeList = Lists.newArrayList("vmdk","raw","qcow2","vdi","zip","tar");
+            boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
+            if (!anyMatch){
+                throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            }
+        }
         Map<String,File> fileList = null;
         try {
-            fileList = FileUtils.transferToFileMap(Arrays.asList(file));
+            fileList = FileUtils.transferToFileMap(Collections.singletonList(file));
         } catch (IOException e) {
            log.error("file transfer error",e);
         }
@@ -189,6 +210,13 @@ public class DevopsTargetController {
         ServiceResult serviceResult = multiThreadUtils.execute(deviceList, new HashMap<>(), asyncTargetTask);
 
         return serviceResult.asResult();
+    }
+
+    @ApiOperation("注册MP地址")
+    @GetMapping("/register")
+    public ServiceResult register(@RequestParam(required = false) String url){
+        BaseCloudPlatformModel model = initRegisterService.register(url);
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 }

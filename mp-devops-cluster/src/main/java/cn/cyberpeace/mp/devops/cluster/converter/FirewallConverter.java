@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FirewallService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FirewallPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.FirewallCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.FirewallPageRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -32,9 +33,9 @@ public class FirewallConverter implements BaseConverter{
     public FirewallPageConverterModel page(FirewallPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        FirewallCloudPlatformModel model = firewallService.page(getParams);
+        CloudPlatformPageModel<Firewall> model = firewallService.page(getParams);
         FirewallPageConverterModel convertModel = new FirewallPageConverterModel();
-        convertModel.setModelList(model.getFirewalls());
+        convertModel.setModelList(model.getList());
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

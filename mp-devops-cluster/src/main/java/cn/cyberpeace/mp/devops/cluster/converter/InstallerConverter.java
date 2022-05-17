@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InstallerService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.InstallerCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
@@ -15,7 +15,6 @@ import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,14 +48,9 @@ public class InstallerConverter implements BaseConverter{
     public InstallerConvertPageModel page(InstallerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
-        InstallerCloudPlatformModel model = installerService.page(getParams);
+        CloudPlatformPageModel<Installer> model = installerService.page(getParams);
         InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
-            return convertModel;
-        }
-        List<InstallerConvertModel> modelList = model.getItems().stream()
+        List<InstallerConvertModel> modelList = model.getList().stream()
                 .map(this::convertInstaller).collect(Collectors.toList());
         convertModel.setModelList(modelList);
         convertModel.setTotal(model.getTotal());

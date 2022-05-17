@@ -22,11 +22,14 @@ import java.util.stream.Collectors;
  */
 public class VyosNetworkCommandUtils {
 
-    private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>() {{
-        this.add(new StaticRouteCmdBuilder());
-        this.add(new OSPFCmdBuilder());
-        this.add(new BGPCmdBuilder());
-    }};
+    private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>();
+
+    static {
+        builderChains.add(new StaticRouteCmdBuilder());
+        builderChains.add(new OSPFCmdBuilder());
+        builderChains.add(new BGPCmdBuilder());
+        builderChains.add(new RouterNameCmdBuilder());
+    }
 
     public static List<String> genOpenDhcpCommands() {
         return List.of("set interface ethernet eth0 address dhcp");
@@ -67,12 +70,24 @@ public class VyosNetworkCommandUtils {
         List<String> build(ConfigParamsWrapper paramsWrapper);
     }
 
+    private static class RouterNameCmdBuilder implements NetworkingCmdBuilder {
+        private String SET_HOST_NAME = "set system host-name %s";
+
+        @Override
+        public List<String> build(ConfigParamsWrapper paramsWrapper) {
+            return List.of(
+                    String.format(SET_HOST_NAME, paramsWrapper.element.getSrcElement().getName())
+            );
+        }
+    }
+
     /**
      * 设置静态路由
      */
     private static class StaticRouteCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_NEXT_HOP = "set protocols static route %s next-hop %s ";
         private static String SET_NEXT_HOP_INTERFACE = "next-hop-interface eth%s";
+        private static String SET_ROUTER_ID = "set protocols ospf parameters router-id %s";
 
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
@@ -89,6 +104,11 @@ public class VyosNetworkCommandUtils {
                 }
                 cmds.add(cmd);
             }
+            if (StringUtils.isNotEmpty(paramsWrapper.element.getOspfRouterId())) {
+                cmds.add(
+                        String.format(SET_ROUTER_ID, paramsWrapper.element.getOspfRouterId())
+                );
+            }
             return cmds;
         }
     }
@@ -99,7 +119,7 @@ public class VyosNetworkCommandUtils {
     private static class OSPFCmdBuilder implements NetworkingCmdBuilder {
 
         private static String SET_INTERFACES = "set interfaces ethernet eth%s address %s";
-        private static String SET_AREAS = "set protocols ospf area %s network %s";
+        private static String SET_AREA = "set protocols ospf area %s network %s";
 
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
@@ -114,7 +134,7 @@ public class VyosNetworkCommandUtils {
                             String.format(SET_INTERFACES, p.getSrcPort().getOrder(), p.getOspfIp())
                     );
                     setAreas.add(
-                            String.format(SET_AREAS, p.getOspfArea(), IpUtils.getFormatCidrIp(p.getOspfIp()))
+                            String.format(SET_AREA, p.getOspfArea(), IpUtils.getFormatCidrIp(p.getOspfIp()))
                     );
                 }
             });
@@ -129,7 +149,7 @@ public class VyosNetworkCommandUtils {
     private static class BGPCmdBuilder implements NetworkingCmdBuilder {
         private static String SET_INTERFACE_ADDRESS = "set interfaces ethernet eth%s address %s";
         private static String SET_PEER = "set protocols bfd peer %s";
-        private static String SET_AS = "set protocols bgp %s address-family ipv4-unicast network %s";
+        private static String SET_DECLARE_NET = "set protocols bgp %s address-family ipv4-unicast network %s";
         private static String SET_NEIGHBOR_BFD = "set protocols bgp %s neighbor %s bfd";
         private static String SET_NEIGHBOR_AS = "set protocols bgp %s neighbor %s remote-as %s";
 
@@ -138,24 +158,38 @@ public class VyosNetworkCommandUtils {
             if (CollectionUtils.isEmpty(paramsWrapper.pluginPorts)) {
                 return new ArrayList<>();
             }
+            var bgpPorts = paramsWrapper.pluginPorts.stream()
+                    .filter(p -> StringUtils.isNotEmpty(p.getBgpAs()))
+                    .collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(bgpPorts)) {
+                return new ArrayList<>();
+            }
+            String defaultSelfAs = bgpPorts.get(0).getBgpAs();
             List<String> cmds = new ArrayList<>();
             paramsWrapper.pluginPorts.forEach(p -> {
-                if (StringUtils.isNotEmpty(p.getBgpAs())) {
-                    cmds.add(
-                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), p.getBgpIp())
-                    );
-                    cmds.add(
-                            String.format(SET_PEER, p.getBgpPeer())
-                    );
-                    cmds.add(
-                            String.format(SET_AS, p.getBgpAs(), IpUtils.getFormatCidrIp(p.getBgpIp()))
-                    );
-                    cmds.add(
-                            String.format(SET_NEIGHBOR_BFD, p.getBgpAs(), p.getBgpPeer())
-                    );
-                    cmds.add(
+                if (bgpPorts.contains(p)) {
+                    // 端口有bgp配置 根据配置创建命令
+                    String interfaceIp = p.getSrcPort().getIp() + "/" + p.getBgpIp().split("/")[1];
+                    cmds.addAll(List.of(new String[]{
+                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
+                            String.format(SET_PEER, p.getBgpPeer()),
+                            String.format(SET_DECLARE_NET, p.getBgpAs(), IpUtils.getFormatCidrIp(p.getBgpIp())),
+                            String.format(SET_NEIGHBOR_BFD, p.getBgpAs(), p.getBgpPeer()),
                             String.format(SET_NEIGHBOR_AS, p.getBgpAs(), p.getBgpPeer(), p.getBgpPeerAs())
-                    );
+                    }));
+                } else if (!Boolean.TRUE.equals(p.getSrcPort().getIsAuxiliary())) {
+                    // 非辅助端口 且 bgp无配置 设置下地址,宣告下网络
+                    String interfaceIp = null;
+                    var network = paramsWrapper.pluginHandler.getHandlerUtils().getNetworkByPort(p.getSrcPort());
+                    if (network != null && StringUtils.isNotEmpty(network.getCidr())) {
+                        interfaceIp = p.getSrcPort().getIp() + "/" + network.getCidr().split("/")[1];
+                    } else {
+                        interfaceIp = p.getSrcPort().getIp() + "/24";
+                    }
+                    cmds.addAll(List.of(new String[]{
+                            String.format(SET_INTERFACE_ADDRESS, p.getSrcPort().getOrder(), interfaceIp),
+                            String.format(SET_DECLARE_NET, defaultSelfAs, IpUtils.getFormatCidrIp(interfaceIp))
+                    }));
                 }
             });
             return cmds;

@@ -15,14 +15,18 @@ import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerByIdResponse;
 import cn.cyberpeace.mp.devops.cluster.response.InstallerPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.impl.InstallerDockerUploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -39,8 +43,11 @@ public class InstallerController {
 
     private InstallerConverter installerConverter;
 
-    public InstallerController(InstallerConverter installerConverter) {
+    private InstallerDockerUploadService installerDockerUploadService;
+
+    public InstallerController(InstallerConverter installerConverter,InstallerDockerUploadService installerDockerUploadService) {
         this.installerConverter = installerConverter;
+        this.installerDockerUploadService = installerDockerUploadService;
     }
 
     /**
@@ -122,5 +129,20 @@ public class InstallerController {
             return ServiceResult.fail("");
         }
         return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+    }
+
+    /**
+     * 自定义上传Docker文件方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("自定义上传Docker文件方法")
+    @PostMapping(value = "/upload/docker")
+    @ResponseBody
+    public ServiceResult<TargetUploadResponse> customUpload(MultipartFile file, HttpServletRequest request) {
+        installerDockerUploadService = installerDockerUploadService.build(file);
+        return installerDockerUploadService.upload();
     }
 }

@@ -7,6 +7,7 @@ ip:
   wazuh: 10.100.7.1           # wazuh的IP地址
   es: 10.100.0.101                 # MP新中台ES地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
+  mp: 10.100.1.12                       # MP中台地址
 
 server:
   servlet:

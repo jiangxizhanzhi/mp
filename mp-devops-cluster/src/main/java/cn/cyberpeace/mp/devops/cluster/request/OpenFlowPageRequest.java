@@ -21,6 +21,7 @@ public class OpenFlowPageRequest extends BasePageRequest{
 
     @ApiModelProperty(value = "执行动作", hidden = true)
     @NotNull(message = "执行动作不能为空")
+    @Builder.Default
     private String method = "list";
 
 }

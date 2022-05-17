@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
@@ -70,7 +70,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        DeviceCloudPlatformModel page = realEquipmentService.page(getParams);
+        CloudPlatformPageModel<Device> page = realEquipmentService.page(getParams);
         return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
     }
 
@@ -107,16 +107,16 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
-        DeviceCloudPlatformModel model = deviceService.findByIds(ids);
+        CloudPlatformPageModel<Device> model = deviceService.findByIds(ids);
 
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
 
         Map<String, TargetModel> map = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, Function.identity()));
-        List<RealEquipment> modelList = model.getItems().stream().map(device -> {
+        List<RealEquipment> modelList = model.getList().stream().map(device -> {
             RealEquipment realEquipment = convertDevice(device);
             TargetModel targetModel = map.get(device.getUuid());
             if (Objects.nonNull(targetModel)){

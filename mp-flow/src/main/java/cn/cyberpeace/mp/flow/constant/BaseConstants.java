@@ -92,4 +92,9 @@ public interface BaseConstants {
      */
     String STR_LIST = "list";
 
+    /**
+     * pcap字符串
+     */
+    String STR_PCAP = "pcap";
+
 }

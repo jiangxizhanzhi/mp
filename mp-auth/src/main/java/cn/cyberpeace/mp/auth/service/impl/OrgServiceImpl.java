@@ -339,7 +339,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     private List<OrgDto> toTree(List<OrgModel> orgs) {
         ParamCheck.notEmpty(orgs, AuthBasei18nCode.ORG_LIST);
-        Map<String, List<OrgModel>> map = new HashMap<>();
         Map<String, OrgDto> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
@@ -357,7 +356,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             if (StringUtils.isNotBlank(parentId)) {
                 OrgDto parent = mapTmp.get(parentId);
                 if (parent != null) {
-                    //                    current.(parent);
                     if (parent.getChildren() == null) {
                         parent.setChildren(new ArrayList<>());
                     }
@@ -390,7 +388,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         // 如果组织下有人员，不允许删除
-        List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
+        List<UserModel> users = orgUserService.listUsersByOrgIdNoRestrict(orgId);
         if (CollectionUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
         }

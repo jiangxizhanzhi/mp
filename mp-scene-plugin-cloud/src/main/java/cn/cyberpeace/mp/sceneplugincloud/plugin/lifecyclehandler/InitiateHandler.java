@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementM
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -653,6 +654,26 @@ public class InitiateHandler extends HandlerCommon {
             return;
         }
 
+        // 核心路由 处理下ip
+        if (ElementTypeUtils.isCoreRouter(cloudElement)) {
+            if (CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                    if (StringUtils.isNotEmpty(p.getIp())) {
+                        return;
+                    }
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort == null) {
+                        return;
+                    }
+                    if (StringUtils.isNotEmpty(pluginPort.getOspfIp())) {
+                        p.setIp(pluginPort.getOspfIp().split("/")[0]);
+                    } else if (StringUtils.isNotEmpty(pluginPort.getBgpIp())) {
+                        p.setIp(pluginPort.getBgpIp().split("/")[0]);
+                    }
+                });
+            }
+        }
+
         // 重置资源id
         cloudElement.setResourceId(StringUtils.EMPTY);
         // defaultConnectedNetwork
@@ -927,6 +948,26 @@ public class InitiateHandler extends HandlerCommon {
                                 port.setIp(newIp);
                             }
                         }
+                    }
+                    if (ElementTypeUtils.isCoreRouter(element)) {
+                        // 核心路由的网络其网关为核心路由的ip
+                        if (CollectionUtils.isEmpty(element.getDeriveNetworks())) {
+                            continue;
+                        }
+                        element.getDeriveNetworks().forEach(net -> {
+                            if (CollectionUtils.isNotEmpty(net.getFromPorts())) {
+                                String gatewayIp = null;
+                                for (var p : net.getFromPorts()) {
+                                    if (StringUtils.isNotEmpty(p.getIp())) {
+                                        gatewayIp = p.getIp();
+                                        break;
+                                    }
+                                }
+                                if (gatewayIp != null) {
+                                    net.network.setGateway(gatewayIp);
+                                }
+                            }
+                        });
                     }
                 } catch (Exception e) {
                     log.error("reallocate ip error , network is {} ", JsonCommon.stringify(network), e);

@@ -1,20 +1,33 @@
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.util.fdfsclient.FdfsClient;
+import cn.cyberpeace.mp.base.util.remotefile.FdfsClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 
 @Component
 public class FdfsCommon {
 
     public static FdfsClient fdfsClient;
 
+    public static BaseAppConfig baseAppConfig;
+
     private FdfsCommon(BaseAppConfig baseAppConfig) {
         FdfsCommon.fdfsClient = FdfsClient.builder()
                 .configServers(baseAppConfig.getFdfsTrackerServers())
                 .build();
+        FdfsCommon.baseAppConfig = baseAppConfig;
+    }
+
+    public static String genHttpUrl(String fdfsFilepath) {
+        return StringUtils.joinWith("/", baseAppConfig.getFdfsOuterHttpServer(), fdfsFilepath);
+    }
+
+    public static String genInnerHttpUrl(String fdfsFilepath) {
+        return StringUtils.joinWith("/", baseAppConfig.getFdfsInnerHttpServer(), fdfsFilepath);
     }
 
     public static String upload(String localFilepath) {
@@ -37,8 +50,12 @@ public class FdfsCommon {
         return fdfsClient.upload(is, fileSuffix);
     }
 
-    public static void download(String fdfsFilepath, String localFilepath) {
-        fdfsClient.download(fdfsFilepath, localFilepath);
+    public void download(String fdfsFilepath, OutputStream os) {
+        fdfsClient.download(fdfsFilepath, os);
+    }
+
+    public static boolean download(String fdfsFilepath, String localFilepath) {
+        return fdfsClient.download(fdfsFilepath, localFilepath);
     }
 
     public static String downloadTmp(String fdfsFilepath) {
@@ -53,8 +70,8 @@ public class FdfsCommon {
         return fdfsClient.downloadContent(fdfsFilepath);
     }
 
-    public static void delete(String fdfsFilepath) {
-        fdfsClient.delete(fdfsFilepath);
+    public static boolean delete(String fdfsFilepath) {
+        return fdfsClient.delete(fdfsFilepath);
     }
 
 }

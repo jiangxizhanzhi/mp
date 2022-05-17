@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
@@ -18,26 +19,32 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
-import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.ImageConnectionCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.ImageCheckPortResponse;
-import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
-import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.impl.CustomImageUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.impl.InjectFileUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
+import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -64,6 +71,21 @@ public class ImagesController {
 
     private ImagesService imagesService;
 
+    @Autowired
+    private InjectFileUploadService injectFileUploadService;
+
+    @Autowired
+    private ImagesConnectSocketServer imagesConnectSocketServer;
+
+    @Autowired
+    private ImagesByUuidSocketServer imagesByUuidSocketServer;
+
+    @Autowired
+    private SshPrivateKeyUploadService sshPrivateKeyUploadService;
+
+    @Autowired
+    private CustomImageUploadService customImageUploadService;
+
     public ImagesController(ImagesConverter imagesConverter, SnapshotConverter snapshotConverter,
                             FlavorService flavorService, ImagesService imagesService,
                             ScenariosService scenariosService, InjectFileConverter injectFileConverter) {
@@ -73,6 +95,11 @@ public class ImagesController {
         this.scenariosService = scenariosService;
         this.injectFileConverter = injectFileConverter;
         this.imagesService = imagesService;
+    }
+
+    @GetMapping("/test")
+    public void s(@RequestParam String msg){
+        imagesConnectSocketServer.batchSendInfo(msg);
     }
 
     /**
@@ -163,7 +190,9 @@ public class ImagesController {
         imagesByIdResponse.setExtVm(extVm);
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
-        return new Result<>(imagesByIdResponse);
+        Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
+        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(imagesByIdResponseResult));
+        return imagesByIdResponseResult;
     }
 
 
@@ -376,11 +405,8 @@ public class ImagesController {
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-        FlavorCloudPlatformModel page = flavorService.page(getParams);
-        if (Objects.isNull(page) ||  Objects.isNull(page.getData())){
-            return new Result();
-        }
-        List<Flavor> flavorList = page.getData().getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
+        CloudPlatformPageModel<Flavor> page = flavorService.page(getParams);
+        List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
         return new Result<>(flavorList);
@@ -389,11 +415,9 @@ public class ImagesController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        ImageConnectionCloudPlatform connection = imagesService.connection(uuid);
-        if (Objects.isNull(connection)){
-            return new Result<>();
-        }
-        return new Result<>(connection.getItems());
+        CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
+        imagesConnectSocketServer.batchSendInfo(JSON.toJSONString(new Result<>(connection.getList())), Arrays.asList(uuid));
+        return new Result<>(connection.getList());
     }
 
     @ApiOperation("同步镜像数据")
@@ -422,6 +446,51 @@ public class ImagesController {
             imageCheckPorts.add(checkPort);
         }
         return new Result(new ImageCheckPortResponse(imageCheckPorts));
+    }
+
+    /**
+     * 自定义上传镜像方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("自定义上传镜像方法")
+    @PostMapping(value = "/custom/upload")
+    @ResponseBody
+    public ServiceResult<TargetUploadResponse> customUpload(MultipartFile file, HttpServletRequest request) {
+        customImageUploadService = customImageUploadService.build(file);
+        return customImageUploadService.upload();
+    }
+
+    /**
+     * SSH文件上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("SSH文件上传方法")
+    @PostMapping(value = "/file/upload/ssh")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadSshFile(MultipartFile file, HttpServletRequest request) {
+        sshPrivateKeyUploadService = sshPrivateKeyUploadService.build(file);
+        return sshPrivateKeyUploadService.upload();
+    }
+
+    /**
+     * 文件注入上传方法
+     *
+     * @param file
+     * @param request
+     * @return 返回文件路径等信息
+     */
+    @ApiOperation("文件注入上传方法")
+    @PostMapping(value = "/file/upload/inject")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadInjectFile(MultipartFile file, HttpServletRequest request) {
+        injectFileUploadService = injectFileUploadService.build(file);
+        return injectFileUploadService.upload();
     }
 
     /**

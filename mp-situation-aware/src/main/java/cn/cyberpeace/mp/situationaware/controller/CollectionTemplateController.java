@@ -53,9 +53,9 @@ public class CollectionTemplateController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping
     @ApiOperation(value = "查询采集模板，不含探针详细内容（如脚本，参数等）")
-    public ServiceResult<CollectionTemplateDto> getById(@PathVariable String id) {
+    public ServiceResult<CollectionTemplateDto> getById(@RequestParam String id) {
         List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ArrayUtils.toArray(id));
         if (CollectionUtil.isNotEmpty(colTempDtos)) {
             return ServiceResult.success(colTempDtos.get(0));

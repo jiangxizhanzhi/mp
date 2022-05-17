@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
@@ -35,11 +36,8 @@ public class SnapshotConverter {
      * @return
      */
     public SnapshotListConvertModel list(String deviceUuid) {
-        SnapshotCloudPlatformModel model = snapshotService.list(deviceUuid);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getItems())){
-            return null;
-        }
-        List<SnapshotConvertModel> list = model.getItems().stream().map(item ->
+        CloudPlatformPageModel<Snapshot>  model = snapshotService.list(deviceUuid);
+        List<SnapshotConvertModel> list = model.getList().stream().map(item ->
                 new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                         item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());

@@ -23,16 +23,21 @@ import java.util.concurrent.ConcurrentHashMap;
  * @ServerEndpoint("/ws_test_group")
  * public class TestGroupServer extends BaseGroupServer {
  *
- *     public static void sendToGroup(String groupKey, String message) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, groupKey, message);
+ *     public static <T> void sendToGroup(String groupKey, T data) {
+ *         BaseGroupServer.sendToGroup(TestGroupServer.class, groupKey, data, null, null);
  *     }
  *
- *     public static void sendToSession(String sessionKey, String message) {
- *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, message);
+ *     public static <T> void sendToSession(String sessionKey, T data) {
+ *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, data, null, null);
  *     }
  *
- *     public static void sendToAllSessions(String message) {
- *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, message);
+ *     public static <T> void sendToAllSessions(T data) {
+ *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
+ *     }
+ *
+ *     @Autowired
+ *     public TestGroupServer(SnakeJsonMessageConverter messageConverter) {
+ *         setMessageConverter(messageConverter);
  *     }
  *
  *     @Override
@@ -48,6 +53,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *         }
  *     }
  *
+ *     @Override
+ *     public MessageConverter getMessageConverter() {
+ *         return BeanCommon.getBean(SnakeJsonMessageConverter.class);
+ *     }
+ *
  * }
  *
  *
@@ -58,28 +68,33 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  *     public static final int groupIndexSize = 2;
  *
- *     public static void sendToFirst(String groupKey, String message) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, 0, groupKey, message);
+ *     public static <T> void sendToFirst(String groupKey, T data) {
+ *         BaseGroupServer.sendToGroup(TestGroupServer.class, 0, groupKey, data, null, null);
  *     }
  *
- *     public static void sendToSecond(String groupKey, String message) {
- *         BaseGroupServer.sendToGroup(TestGroupServer.class, 1, groupKey, message);
+ *     public static <T> void sendToSecond(String groupKey, T data) {
+ *         BaseGroupServer.sendToGroup(TestGroupServer.class, 1, groupKey, data, null, null);
  *     }
  *
- *     public static void sendToFirstAll(String message) {
- *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 0, message);
+ *     public static <T> void sendToFirstAll(T data) {
+ *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 0, data, null, null);
  *     }
  *
- *     public static void sendToSecondAll(String message) {
- *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 1, message);
+ *     public static <T> void sendToSecondAll(T data) {
+ *         BaseGroupServer.sendToGroupIndex(TestGroupServer.class, 1, data, null, null);
  *     }
  *
- *     public static void sendToSession(String sessionKey, String message) {
- *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, message);
+ *     public static <T> void sendToSession(String sessionKey, T data) {
+ *         BaseGroupServer.sendToSession(TestGroupServer.class, sessionKey, data, null, null);
  *     }
  *
- *     public static void sendToAllSessions(String message) {
- *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, message);
+ *     public static <T> void sendToAllSessions(T data) {
+ *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
+ *     }
+ *
+ *     @Autowired
+ *     public TestGroupServer(SnakeJsonMessageConverter messageConverter) {
+ *         setMessageConverter(messageConverter);
  *     }
  *
  *     @Override
@@ -93,6 +108,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *         if (...validate error) {
  *             throw new ValidateException("validate failed");
  *         }
+ *     }
+ *
+ *     @Override
+ *     public MessageConverter getMessageConverter() {
+ *         return BeanCommon.getBean(SnakeJsonMessageConverter.class);
  *     }
  *
  * }
@@ -124,11 +144,13 @@ public abstract class BaseGroupServer extends BaseServer {
         });
     }
 
-    public static void sendToGroup(Class<?> serverClass, String groupKey, String message) {
-        sendToGroup(serverClass, 0, groupKey, message);
+    public static <T> void sendToGroup(Class<?> serverClass, String groupKey,
+                                       T data, String type, Map<String, Object> context) {
+        sendToGroup(serverClass, 0, groupKey, data, type, context);
     }
 
-    public static void sendToGroup(Class<?> serverClass, int groupIndex, String groupKey, String message) {
+    public static <T> void sendToGroup(Class<?> serverClass, int groupIndex, String groupKey,
+                                       T data, String type, Map<String, Object> context) {
         var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
@@ -139,26 +161,29 @@ public abstract class BaseGroupServer extends BaseServer {
             return;
         }
 
-        sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, message));
+        sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
     }
 
-    public static void sendToGroupIndex(Class<?> serverClass, int groupIndex, String message) {
+    public static <T> void sendToGroupIndex(Class<?> serverClass, int groupIndex,
+                                            T data, String type, Map<String, Object> context) {
         var groupSessionsList = serverGroupSessionsListMap.get(serverClass);
         if (groupSessionsList.size() < groupIndex + 1) {
             return;
         }
         var groupSessionsMap = groupSessionsList.get(groupIndex);
         groupSessionsMap.forEach((groupKey, sessions) -> {
-            sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, message));
+            sessions.forEach((sessionKey, session) -> BaseServer.sendToSession(serverClass, sessionKey, data, type, context));
         });
     }
 
-    public static void sendToSession(Class<?> serverClass, String sessionKey, String message) {
-        BaseServer.sendToSession(serverClass, sessionKey, message);
+    public static <T> void sendToSession(Class<?> serverClass, String sessionKey,
+                                         T data, String type, Map<String, Object> context) {
+        BaseServer.sendToSession(serverClass, sessionKey, data, type, context);
     }
 
-    public static void sendToAllSessions(Class<?> serverClass, String message) {
-        BaseServer.sendToAllSessions(serverClass, message);
+    public static <T> void sendToAllSessions(Class<?> serverClass,
+                                             T data, String type, Map<String, Object> context) {
+        BaseServer.sendToAllSessions(serverClass, data, type, context);
     }
 
     private List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> getGroupSessionsList() {

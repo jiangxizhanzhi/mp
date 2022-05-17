@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.controller.request.BaseBulkDeleteData;
-import cn.cyberpeace.mp.base.controller.request.BaseDeleteData;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;

@@ -5,6 +5,7 @@
     <id column="pk" jdbcType="INTEGER" property="pk" />
     <result column="id" jdbcType="VARCHAR" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="creator" jdbcType="VARCHAR" property="creator" />
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="OS_type" jdbcType="INTEGER" property="osType" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
@@ -126,7 +127,6 @@
   </update>
   <select id="listTemplateItemDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto">
      select * from mp_situation_collection_template temp
-     left join mp_situation_collection_template_probe tempp on temp.id = tempp.template_id
     <where>
       <if test="condition.ids != null and condition.ids.length > 0">
         AND temp.id in

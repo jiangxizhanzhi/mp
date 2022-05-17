@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.scene;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
@@ -50,6 +51,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * 场景实例的处理
@@ -286,7 +288,15 @@ public class SceneHandler extends BaseSceneHandler<
     public CollectedSceneElementBO getCollectedSceneElementBO(String nodeId) {
         var collectedSceneElementBO = new CollectedSceneElementBO();
         collectedSceneElementBO.setSceneId(getScene().getEid());
-        var sceneElement = getElement(nodeId);
+        // 深拷贝一个
+        var sceneElement = JsonCommon.parse(JsonCommon.stringify(getElement(nodeId)), SceneElementBO.class);
+        if (CollectionUtils.isNotEmpty(sceneElement.getPorts())) {
+            // 所有非辅助端口
+            var ports = sceneElement.getPorts().stream()
+                    .filter(p -> !Boolean.TRUE.equals(p.getIsAuxiliary()))
+                    .collect(Collectors.toList());
+            sceneElement.setPorts(ports);
+        }
         collectedSceneElementBO.setSceneElement(sceneElement);
         var sceneElementPorts = sceneElement.getPorts();
         String message = null;
@@ -332,6 +342,10 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void reportElementUpdated(String nodeId) {
+        // 辅助节点无需通知
+        if (Boolean.TRUE.equals(getElement(nodeId).getIsAuxiliary())) {
+            return;
+        }
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
         reporters.forEach(reporter -> reportTaskPool.executeTask(() -> reporter.reportElement(collectedSceneElement)));
     }

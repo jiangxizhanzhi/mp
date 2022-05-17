@@ -35,12 +35,6 @@ public class ExtVm implements Serializable {
     private Boolean quickCreateSupport;
 
     /**
-     * 快速创建参数
-     */
-    @ApiModelProperty("快速创建参数")
-    private Object quickCreateParams;
-
-    /**
      * 接入方式
      */
     @ApiModelProperty("接入方式")

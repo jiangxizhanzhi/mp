@@ -22,6 +22,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     UserDto getUserDto(String id);
 
+    UserDto getUserDtoNoRestrict(String id);
+
     UserDto getCurrentUserDto();
 
     UserModel add(UserRequest createRequest);
@@ -95,8 +97,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     List<UserDto> listByUserIds(String[] userIds);
 
     int totalUserCnt();
-
-    boolean isAdmin(String userId);
 
     String getDefaultUserAvatar();
 

@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.scene.core.event;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.event.base.BaseEventHandler;
 import cn.cyberpeace.mp.scene.core.event.base.EventModel;
+import cn.cyberpeace.mp.scene.core.event.dispatch.SceneEventControllerUtils;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import org.apache.commons.collections4.MapUtils;
 
@@ -41,5 +42,11 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
     @Override
     public String getTargetName() {
         return MessageCommon.get(EVENT_NAME_PREFIX + "scene", getTarget().getName());
+    }
+
+    @Override
+    protected boolean acquireEventLock(int event, int eventStatus, String process, int processStatus) {
+        SceneEventControllerUtils.acquireEventLock(getTarget().getEid(), event, eventStatus);
+        return true;
     }
 }

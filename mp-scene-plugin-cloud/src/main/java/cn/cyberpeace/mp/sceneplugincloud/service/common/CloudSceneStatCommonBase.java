@@ -83,19 +83,20 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param groupFieldName 分组聚合字段
-     * @param countFieldName 统计字段
+     * @param countFieldNames 统计字段
      * @param distinct 是否去重
      * @param <T> 分组聚合字段的值类型
-     * @return 字段的聚合统计数量 Map<字段值, 该字段值统计数量>
+     * @return 字段的聚合统计数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
      */
-    public <T> Map<T, Long> groupCountElement(List<String> sceneIds, List<String> nodeIds, String groupFieldName,
-                                              String countFieldName, boolean distinct) {
+    public <T> Map<String, Map<T, Long>> groupCountElement(List<String> sceneIds, List<String> nodeIds,
+                                                           String groupFieldName, List<String> countFieldNames,
+                                                           boolean distinct) {
         var condition = genNodeCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementMapper().getModelClass());
 
-        Map<T, Long> result;
+        Map<String, Map<T, Long>> result;
         try {
-            result = StatCommon.groupCount(getCloudElementMapper(), condition, groupFieldName, countFieldName,
+            result = StatCommon.groupCount(getCloudElementMapper(), condition, groupFieldName, countFieldNames,
                     distinct);
         } catch (Exception e) {
             log.error("Group count cloud element on field {} error: {}", groupFieldName, e);
@@ -111,7 +112,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @param nodeIds 节点id列表，不传默认为全部
      * @param groupFieldName 分组聚合字段
      * @param fieldNames 聚合统计字段 有效字段 CALC_COUNT_ELEMENT_FIELD_CALC_MAP
-     * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
+     * @return 字段的聚合统计数量 Map<字段名, Map<分组字段值, 该字段值聚合结果>>
      */
     public <T> Map<String, Map<T, Long>> groupCalcCountElement(List<String> sceneIds, List<String> nodeIds,
                                                                String groupFieldName, List<String> fieldNames) {
@@ -144,14 +145,16 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段
+     * @param distinct 是否去重
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
-    public Map<String, Long> countElement(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
+    public Map<String, Long> countElement(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames,
+                                          boolean distinct) {
         var condition = genNodeCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementMapper().getModelClass());
         Map<String, Long> result;
         try {
-            result = StatCommon.count(getCloudElementMapper(), condition, fieldNames);
+            result = StatCommon.count(getCloudElementMapper(), condition, fieldNames, distinct);
         } catch (Exception e) {
             log.error("Count cloud element on fields {} error: {}", fieldNames, e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
@@ -161,7 +164,7 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
     }
 
     /**
-     * 查询端口指定字段的聚合统计数量, 需要自定义计算结果
+     * 查询网元指定字段的聚合统计数量, 需要自定义计算结果
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段 有效字段 CALC_COUNT_ELEMENT_FIELD_CALC_MAP
@@ -193,14 +196,16 @@ public abstract class CloudSceneStatCommonBase<P1 extends BasePluginSceneElement
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param fieldNames 聚合统计字段  有效字段CALC_COUNT_PORT_FIELDS
+     * @param distinct 是否去重
      * @return 字段的聚合统计数量 Map<字段名称, 该字段统计数量>
      */
-    public Map<String, Long> countPort(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames) {
+    public Map<String, Long> countPort(List<String> sceneIds, List<String> nodeIds, List<String> fieldNames,
+                                       boolean distinct) {
         var condition = genNodePortCondition(sceneIds, nodeIds);
         condition.currentLink(getCloudElementPortMapper().getModelClass());
         Map<String, Long> result;
         try {
-            result = StatCommon.count(getCloudElementPortMapper(), condition, fieldNames);
+            result = StatCommon.count(getCloudElementPortMapper(), condition, fieldNames, distinct);
         } catch (Exception e) {
             log.error("Count cloud element port on fields {} error: {}", fieldNames, e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, e);
