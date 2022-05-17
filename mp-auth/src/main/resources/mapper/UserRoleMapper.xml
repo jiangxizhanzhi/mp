@@ -7,12 +7,19 @@
             (select role from mp_auth_user_role where user = #{userId})
     </select>
 
+    <select id="listRolesByUserIds" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select distinct * from mp_auth_role where id in
+        (select role from mp_auth_user_role where user in
+            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+             #{userId}
+            </foreach>
+        )
+    </select>
 
     <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
         select distinct * from mp_auth_user where id in
             (select user from mp_auth_user_role where role = #{roleId})
     </select>
-
 
     <select id="getUserRoleStatistics" resultType="cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic">
         select tabA.rid roleId, tabR.name roleName, tabA.cnt userCnt

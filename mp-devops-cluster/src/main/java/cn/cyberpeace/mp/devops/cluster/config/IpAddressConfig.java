@@ -19,4 +19,9 @@ public class IpAddressConfig {
      */
     private String cp;
 
+    /**
+     * MP接口IP
+     */
+    private String mp;
+
 }

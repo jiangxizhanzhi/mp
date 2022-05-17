@@ -26,7 +26,7 @@ public class VyosNetworkCommandUtils {
         this.add(new StaticRouteCmdBuilder());
         this.add(new OSPFCmdBuilder());
         this.add(new BGPCmdBuilder());
-//        this.add(new RouterNameCmdBuilder());
+        this.add(new RouterNameCmdBuilder());
     }};
 
     public static List<String> genOpenDhcpCommands() {
@@ -41,11 +41,6 @@ public class VyosNetworkCommandUtils {
             result.addAll(cmds);
         }
         return result;
-    }
-
-    public static List<String> genSetHostNameCmds(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {
-        ConfigParamsWrapper paramsWrapper = new ConfigParamsWrapper(element, pluginHandler);
-        return new RouterNameCmdBuilder().build(paramsWrapper);
     }
 
     private static class ConfigParamsWrapper {
@@ -77,7 +72,6 @@ public class VyosNetworkCommandUtils {
         private String SET_HOST_NAME = "set system host-name %s";
 
         @Override
-
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             return List.of(
                     String.format(SET_HOST_NAME, paramsWrapper.element.getSrcElement().getName())

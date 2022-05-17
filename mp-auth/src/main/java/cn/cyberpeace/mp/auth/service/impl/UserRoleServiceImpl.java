@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -19,9 +20,11 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +40,9 @@ import java.util.List;
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields, QueryParams>
         implements UserRoleService {
 
+    public static final String CACHE_VAL_ROLES= "USER_ROLES_CACHE";
+
+
     @Autowired
     private UserService userService;
 
@@ -50,9 +56,20 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<RoleModel> roles = getModelMapper().listRolesByUserId(userId);
+        return roles;
+    }
+
+
+    @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_ROLES)
+    public List<RoleModel> listByUserIds(List<String> userIds) {
+        Assert.notEmpty(userIds, "userIds不能为空！");
+        List<RoleModel> roles = getModelMapper().listRolesByUserIds(userIds);
+
         return roles;
     }
 
