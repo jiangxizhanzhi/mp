@@ -23,6 +23,13 @@
         select * from mp_auth_role where name = #{name}
     </select>
 
+    <select id="listByNames" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
+        select * from mp_auth_role where name in
+        <foreach item="name" index="index" collection="names" open="(" separator="," close=")">
+          #{name}
+        </foreach>
+    </select>
+
     <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.dto.role.RoleDto">
         select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from
         mp_auth_role r

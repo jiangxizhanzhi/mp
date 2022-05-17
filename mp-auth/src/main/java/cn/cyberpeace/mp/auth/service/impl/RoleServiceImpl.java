@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -28,12 +29,14 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +55,8 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
         implements RoleService {
 
+    public static final String CACHE_VAL_ROLES = "ROLES_CACHE";
+
     @Autowired
     private RolePermissionModelService rolePermissionService;
 
@@ -60,6 +65,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Autowired
     private UserRoleService userRoleService;
+
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -125,11 +131,21 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLES)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
 
         RoleModel roleModel = getModelMapper().selectByName(name);
         return roleModel;
+    }
+
+
+    @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLES)
+    public List<RoleModel> listByNames(List<String> names) {
+        ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
+        List<RoleModel> roleModels = getModelMapper().listByNames(names);
+        return roleModels;
     }
 
     @Override
@@ -154,7 +170,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {
-            if (r.getIdentifier().equals(AuthConstant.ROLE_ADMIN)) {
+            if (r.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
                 r.setTargets(targetService.listAll(AuthConstant.DEFAULT_TENANT, null));
             } else {
                 List<TargetModel> targetModels = rolePermissionService.listTargetsByRoleId(r.getId());
@@ -234,14 +250,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
         log.info("roleid:{}", roleId);
-
-        var result = get(roleId);
-        ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
-
-        RoleModel roleModel = result.getSource().getObj();
-        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
-            log.info("ADMIN ROLE can not update！");
-            return roleModel;
+        if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleId)) {
+            log.error("ADMIN ROLE can not update！");
+            throw new MpRuntimeException("ADMIN ROLE can not update!");
         }
 
         RoleModel roleUpdate = new RoleModel();
@@ -308,7 +319,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     private List<TargetModel> getRoleTargets(RoleModel roleModel) {
         List<TargetModel> targets = new ArrayList<>();
-        if (Objects.equals(roleModel.getIdentifier(), AuthConstant.ROLE_ADMIN)) {
+        if (Objects.equals(roleModel.getId(), AuthConstant.ROLE_ADMIN_ID)) {
             // 管理员特殊处理 直接查询该租户下所有权限返回
             targets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
         } else {
@@ -336,8 +347,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }
 
         // 管理员角色不能删除
-        RoleModel roleModel = getModelMapper().get(roleId);
-        if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
+        if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleId)) {
             log.info("ADMIN ROLE can not delete！");
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
