@@ -84,7 +84,11 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
 
-    public static final String CACHE_VAL_USER = "USER_CACHE";
+    public static final String CACHE_VAL_USERMODEL = "USERMODEL_CACHE";
+
+    public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
+
+    public static final String[] USER_ENTRIES = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL};
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -136,13 +140,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
     public ObjServiceResult<UserModel> get(String id) {
         return super.get(id);
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERDTO)
     public UserDto getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
@@ -217,7 +221,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public ServiceResult<Boolean>  delete(String userId) {
         deleteReleated(userId);
 
@@ -227,7 +231,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
 
         for (String userId : userIds) {
@@ -296,7 +300,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public UserModel modify(UserRequest modifyRequest) {
         opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
 
@@ -364,7 +368,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
@@ -373,7 +377,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER)
     public List<UserModel> listByUserName(List<String> userNames) {
         List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
         return userModels;
@@ -394,7 +397,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
         var currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
@@ -419,7 +422,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(newPwd)) {
@@ -440,7 +443,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -464,7 +467,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchDisable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -482,7 +485,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -505,7 +508,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchEnable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -524,7 +527,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean approve(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
@@ -546,7 +549,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchApprove(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -626,7 +629,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = CACHE_VAL_USER, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public void importExcel(List<ImportUser> list) {
         log.info("Now import users from excel...");
         // 初始化默认头像信息
