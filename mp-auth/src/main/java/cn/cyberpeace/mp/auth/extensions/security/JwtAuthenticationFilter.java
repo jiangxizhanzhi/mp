@@ -22,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Set;
 
 @Component
@@ -40,10 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = JwtCommon.getToken(request);
         if (StringUtils.isNotBlank(token)) {
             UserModel user = JwtCommon.verifyToken(token);
-            // 第一步就要把认证类型写入request attribute中，否则后面的loadAuthorities()就可能出问题
-            UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getName(), LogConstant.USER_TYPE_USER);
             UsernamePasswordAuthenticationToken authenticationToken = null;
-            if (user != null) {
+            if (Objects.nonNull(user)) {
+                // 第一步就要把认证类型写入request attribute中，否则后面的loadAuthorities()就可能出问题
+                UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getName(), LogConstant.USER_TYPE_USER);
                 // 暂时不用加载权限信息
                  Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
 
