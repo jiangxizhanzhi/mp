@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeve
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
@@ -341,6 +342,49 @@ public class ScenePluginCollectionSceneService {
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
+    }
+
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String sceneId, String probeId, HostEventQueryParams queryParams) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        var element = sceneHandler.getElement(queryParams.getNodeIds().get(0));
+        List<CollectionHostEventBO> result = new ArrayList<>();
+        List<?> res = null;
+        if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
+            res = sysCollectorService.getHardware(element.getEid());
+        } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
+            //todo 查询操作系统信息
+        } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
+            WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+            request.setAgentNames(CollectionUtil.toList(element.getEid()));
+            res = dataCollectionService.queryNetConnEventsWithTimeRange(request);
+        } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
+            CollectorBaseRequest request = new CollectorBaseRequest();
+            request.setAgentName(element.getEid());
+            res = sysCollectorService.pagePorts(request).getList();
+        } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
+            CollectorBaseRequest request = new CollectorBaseRequest();
+            request.setAgentName(element.getEid());
+            res = sysCollectorService.pageProcesses(request).getList();
+        } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
+            //todo 查询文件变更信息
+        } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
+            //todo 查询注册表变更信息
+        } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
+                ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+            return new ListObjServiceResult<>();
+        } else {
+            //todo 查询自定义探针信息
+        }
+        res.forEach(h -> {
+            CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+            hostEventBO.setSceneId(sceneId);
+            hostEventBO.setNodeId(queryParams.getNodeIds().get(0));
+            hostEventBO.setNodeName(element.getName());
+            hostEventBO.setProbeId(probeId);
+            hostEventBO.setContent(JsonCommon.beanToMap(h));
+            result.add(hostEventBO);
+        });
+        return new ListObjServiceResult<>(new ListObjResult(result, result.size()));
     }
 
     /**

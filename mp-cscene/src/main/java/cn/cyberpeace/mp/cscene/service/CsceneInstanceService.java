@@ -354,6 +354,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
     }
 
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String id, String probeId, HostEventQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.getProbeCollectionData(sceneId, probeId, queryParams);
+    }
+
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
