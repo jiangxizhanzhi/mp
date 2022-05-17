@@ -278,7 +278,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
 
         // 管理员，查看所有公告消息
         if (isAdmin) {
@@ -338,7 +338,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
 
         // 管理员，查看所有公告消息
         if (isAdmin) {

@@ -18,9 +18,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
@@ -396,6 +394,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                       HostEventQueryParams queryParams) {
         handleQueryParams("listHostEvents", queryParams);
         return modelService.listHostEvents(id, queryParams).asResult();
+    }
+
+    @ApiOperation("场景实例获取指定探针采集数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class)
+    })
+    @GetMapping(value = "/get_probe_collection_data", params = "id")
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(@RequestParam String id,
+                                                                              @RequestParam String probeId,
+                                                                              HostEventQueryParams queryParams) {
+        handleQueryParams("getProbeCollectionData", queryParams);
+        return new ListObjServiceResult<>();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")

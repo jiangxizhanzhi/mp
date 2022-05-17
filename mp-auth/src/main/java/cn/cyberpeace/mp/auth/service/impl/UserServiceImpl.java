@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.DefaultImgService;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -62,6 +63,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -118,6 +120,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private DefaultImgService defaultImgService;
 
+    @Autowired
+    private OperateUserPermissionService opUserPermCheckService;
+
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -127,6 +132,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public UserDto getUserDto(String id) {
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
@@ -148,6 +154,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;
@@ -179,9 +186,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
-        if (StringUtils.isBlank(obj.getIdentifier())) {
-            obj.setIdentifier(null);
-        }
         obj.setUpdateTime(LocalDateTime.now());
         return super.update(obj, fields);
     }
@@ -223,6 +227,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
+        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -230,11 +235,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
-
-        if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 如果ident为空，设置为null
-            userModel.setIdentifier(null);
-        }
 
         createCheckService.check(userModel);
 
@@ -283,6 +283,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
+        opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+
         // 保存用户
         UserModel userModel = new UserModel();
         org.springframework.beans.BeanUtils.copyProperties(modifyRequest, userModel);
@@ -293,7 +295,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         } else {
             userModel.setPassword(null);
         }
-
 
         updateCheckService.check(userModel);
 
@@ -308,11 +309,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
         log.info("user has been modified id:{}", userId);
-
-        if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
-            getModelMapper().updateIdentToNull(userId);
-        }
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
@@ -411,6 +407,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
         }
 
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
         var source = get(userId).getSource();
         UserModel user = Objects.isNull(source) ? null : source.getObj();
         if (Objects.isNull(user)) {
@@ -425,6 +423,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -446,6 +446,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        opUserPermCheckService.checkByTargetUserIds(userIds);
+
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -461,6 +463,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -482,6 +485,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        opUserPermCheckService.checkByTargetUserIds(userIds);
+
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -519,6 +524,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        opUserPermCheckService.checkByTargetUserIds(userIds);
+
         StringBuilder errMsg = new StringBuilder();
         for (String userId : userIds) {
             try {
@@ -655,6 +662,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
+
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             // 上传服务器
@@ -748,7 +757,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
             userDto.setRoles(roles);
 
-            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getIdentifier(), AuthConstant.ROLE_ADMIN));
+            boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
             if (isAdmin) {
@@ -801,13 +810,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public void setModelMapper(UserMapper modelMapper) {
         super.setModelMapper(modelMapper);
-    }
-
-    @Override
-    public boolean isAdmin(String userId) {
-        List<RoleModel> roleModels = userRoleService.listByUserId(userId);
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getIdentifier().equals(AuthConstant.ROLE_ADMIN));
-        return isAdmin;
     }
 
 
