@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.common;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.constant.BaseSingleton;
 import cn.cyberpeace.mp.base.util.remotefile.FdfsClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;

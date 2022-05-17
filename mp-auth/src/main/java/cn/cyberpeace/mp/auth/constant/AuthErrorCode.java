@@ -96,7 +96,10 @@ public enum AuthErrorCode implements ErrorCode {
     EXCEL_LIST_ROLE_EMPTY("MP-110129", "excel_list_role_empty"),
     EXCEL_LIST_ROLE_NOT_EXISTED("MP-110130", "excel_list_role_not_existed"),
     EXCEL_LIST_ORG_NOT_EXISTED("MP-110131", "excel_list_org_not_existed"),
-    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110132", "excel_template_download_error");
+    EXCEL_TEMPLATE_DOWNLOAD_ERROR("MP-110132", "excel_template_download_error"),
+
+
+    PERMISSION_DENIED("MP-110140", "permission_denied");
 
 
     AuthErrorCode(String code, String message) {

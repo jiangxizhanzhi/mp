@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
@@ -68,6 +69,10 @@ public class UserExcelController {
     @Autowired
     private OrgService orgService;
 
+    @Autowired
+    private OperateUserPermissionService opUserPermCheckService;
+
+
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @PostMapping("/excel/export")
     public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
@@ -107,7 +112,7 @@ public class UserExcelController {
     public ServiceResult importUsers(MultipartFile file) throws IOException {
         ExcelCheck.check(file);
         try {
-            EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService)).headRowNumber(2).sheet().doRead();
+            EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService)).headRowNumber(2).sheet().doRead();
         } catch (ExcelCommonException | ExcelAnalysisException | ExcelDataConvertException | ExcelGenerateException ex) {
             log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));
             throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);

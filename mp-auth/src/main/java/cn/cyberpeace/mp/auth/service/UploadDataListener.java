@@ -13,6 +13,7 @@ import com.alibaba.excel.event.AnalysisEventListener;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,16 +49,19 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
     private OrgService orgService;
 
+    private OperateUserPermissionService opUserPermCheckService;
+
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
      */
-    public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService) {
+    public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService, OperateUserPermissionService opUserPermCheckService) {
         log.info("New UploadDataListener Instance...");
         this.userService = userService;
         this.roleService = roleService;
         this.orgService = orgService;
+        this.opUserPermCheckService = opUserPermCheckService;
     }
 
     /**
@@ -207,8 +211,17 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         user.setRoleIdList(new ArrayList<>());
         String[] roleNameArr = StringUtils.split(roles, ",");
 
+        //try {
+            opUserPermCheckService.checkByTargetRoleNames(Arrays.asList(roleNameArr));
+        //} catch (MpRuntimeException me) {
+        //    if (me.getServiceCode().equals(AuthErrorCode.PERMISSION_DENIED)) {
+        //        throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
+        //    }
+        //}
+
         for (String roleName : roleNameArr) {
             RoleModel roleModel = roleService.getByName(roleName.trim());
+
             if (Objects.isNull(roleModel)) {
                 log.error("No {} row error! role {} not existed!", index, roleName.trim());
                 throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
