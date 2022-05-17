@@ -42,9 +42,61 @@ public class CsceneFileController {
      */
     @ApiOperation("上传场景中的附件")
     @PostMapping("/attachment_upload")
-    public ServiceResult<FdfsFileUploadResponse> uploaAttactmentdElementAttactment(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        var uploadResult = csceneFileService.uploadAttachment(file.getInputStream(), FileUtil.getSuffix(file.getOriginalFilename()));
+    public ServiceResult<FdfsFileUploadResponse> attachmentUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalType = new String[]{ "zip" };
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        var uploadResult = csceneFileService.sceneUpload(inputStream, fileSuffix, legalType);
         return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
                 .asResult();
     }
+
+    /**
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation("上传场景中的图标")
+    @PostMapping("/icon_upload")
+    public ServiceResult<FdfsFileUploadResponse> iconUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalSuffix = new String[]{ "png" };
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        var uploadResult = csceneFileService.sceneUpload(inputStream, fileSuffix, legalSuffix);
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+                .asResult();
+    }
+
+    /**
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation("上传节点秘钥")
+    @PostMapping("/private_key_upload")
+    public ServiceResult<FdfsFileUploadResponse> privateKeyUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalSuffix = new String[]{ "pub" };
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        var uploadResult = csceneFileService.sceneUpload(inputStream, fileSuffix, legalSuffix);
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+                .asResult();
+    }
+
+    /**
+     * @param file
+     * @return
+     * @throws IOException
+     */
+    @ApiOperation("上传场景模板截图")
+    @PostMapping("/scene_template_screenshot_upload")
+    public ServiceResult<FdfsFileUploadResponse> sceneTemplateScreenshotUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalSuffix = new String[]{ "png" };
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        var uploadResult = csceneFileService.sceneUpload(inputStream, fileSuffix, legalSuffix);
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+                .asResult();
+    }
+
 }

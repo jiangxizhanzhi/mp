@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @Description
@@ -18,21 +18,17 @@ import java.util.Set;
  */
 @Service
 public class CsceneFileService extends BaseRemoteFileServiceImpl {
-    private static Set<String> LEGAL_ATTACHMENT_TYPE = new HashSet<>();
-
-    static {
-        LEGAL_ATTACHMENT_TYPE.add("zip");
-    }
 
     @Autowired
     public CsceneFileService(FdfsCommon fdfsCommon) {
         setFileClient(FdfsCommon.fdfsClient);
     }
 
-    public ServiceResult<String> uploadAttachment(InputStream is, String fileSuffix) {
-        if (!LEGAL_ATTACHMENT_TYPE.contains(fileSuffix)) {
+    public ServiceResult<String> sceneUpload(InputStream is, String fileSuffix, String... legalSuffix) {
+        if (!new HashSet<>(Arrays.asList(legalSuffix)).contains(fileSuffix)) {
             return new ServiceResult<>(null, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
         return super.upload(is);
     }
+
 }
