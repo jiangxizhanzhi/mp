@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -29,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -48,6 +51,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private OperateUserPermissionService opUserPermCheckService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -74,7 +80,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public List<UserModel> listUsersByRoleId(String roleId) {
+    public List<UserModel> listUsersByRoleIdNoRestrict(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
         List<UserModel> users = getModelMapper().listUsersByRoleId(roleId);
         return users;
@@ -84,6 +90,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
@@ -96,6 +103,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
+        List<String> excludeRoleIds = opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(pageRequest.getRoleId())) {
+            new PageInfo<>(Collections.emptyList());
+        }
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<UserModel> userModels = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
         PageInfo pageInfo = new PageInfo(userModels);

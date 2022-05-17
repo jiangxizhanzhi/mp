@@ -6,12 +6,14 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
+import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -21,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @Api(tags = "流量执行器接口")
-//@RestController
+@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/actuator")
 public class FlowActuatorController extends BaseModelController<FlowActuatorModel, QueryParams, FlowActuatorService> {
 
@@ -39,11 +41,22 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      */
     @ApiOperation("创建trex虚拟机")
     @PostMapping("/vm/add")
-    public ServiceResult<String> addExecutor() {
+    public ServiceResult<String> addExecutor(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
         String uuid = TextUtils.uuid();
-        asyncPlatFlowTaskService.addExecutor(uuid);
+        asyncPlatFlowTaskService.addExecutor(uuid, addVmInstanceRequest.getNetworkInfos());
         return ServiceResult.success(uuid);
     }
+
+
+
+//    @Autowired
+//    private FlowPortService flowPortService;
+//    @PostMapping("/vm/add/test")
+//    public ServiceResult<String> addExecutorTest(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
+//        ObjServiceResult<FlowActuatorModel> result = getModelService().get("f1d51767b8cd4d618834baff1b6e6618");
+//        flowPortService.batchCreatePorts(addVmInstanceRequest.getNetworkInfos(), result.getSource().asResult());
+//        return ServiceResult.successful();
+//    }
 
     /**
      * 删除虚拟机实例

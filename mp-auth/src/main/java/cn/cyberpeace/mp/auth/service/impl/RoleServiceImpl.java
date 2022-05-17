@@ -30,7 +30,6 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -161,7 +160,6 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public PageInfo getPageWithUserCnt(RolePageRequest rolePageRequest) {
-
         ArrayList<String> orders = null;
         if (rolePageRequest.getOrders() != null && rolePageRequest.getOrders().length > 0) {
             orders = CollectionUtil.newArrayList(rolePageRequest.getOrders());
@@ -187,7 +185,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleDto getRoleDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
-
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(id.trim())) {
+            return null;
+        }
         RoleModel roleModel = getModelMapper().get(id);
         RoleDto roleDto = roleModel2RoleDto(roleModel);
         return roleDto;
@@ -196,7 +197,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RolePermDto getRolePermDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
-
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        if (excludeRoleIds.contains(id.trim())) {
+            return null;
+        }
         RoleModel roleModel = getModelMapper().get(id);
         RolePermDto rolePermDto = roleModel2RolePermDto(roleModel);
         return rolePermDto;
@@ -355,7 +359,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_ADMIN);
         }
 
-        List<UserModel> users = userRoleService.listUsersByRoleId(roleId);
+        List<UserModel> users = userRoleService.listUsersByRoleIdNoRestrict(roleId);
         if (CollectionUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_CANNOT_DELETE_WITH_USER_EXISTED);
         }

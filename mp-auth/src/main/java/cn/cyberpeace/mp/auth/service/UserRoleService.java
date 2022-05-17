@@ -22,7 +22,7 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
 
     List<RoleModel> listByUserIds(List<String> userIds);
 
-    List<UserModel> listUsersByRoleId(String roleId);
+    List<UserModel> listUsersByRoleIdNoRestrict(String roleId);
 
     PageInfo pageByUserId(UserRolePageRequest pageRequest);
 

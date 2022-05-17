@@ -8,7 +8,10 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
+import cn.cyberpeace.mp.flow.request.BatchActuatorTaskRequest;
+import cn.cyberpeace.mp.flow.request.BatchAddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.BatchDeleteFlowTaskRequest;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import io.swagger.annotations.Api;
@@ -18,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,7 +31,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Api(tags = "流量任务管理接口")
-//@RestController
+@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/task")
 public class FlowTaskController extends BaseModelController<FlowTaskModel, QueryParams, FlowTaskService> {
 
@@ -121,13 +125,46 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * 执行流量任务
      *
      * @param id
-     * @param taskAction 1 start， 2 stop, 3 reset
+     * @param taskAction 1 start， 2 stop
      * @return
      */
     @ApiOperation("执行流量任务")
     @PostMapping("/actuator/{id}/{taskAction}")
     public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
         return flowTaskService.actuator(id, taskAction, null, null);
+    }
+
+    /**
+     * 查询任务流量记录信息
+     * @param taskId
+     * @return
+     */
+    @ApiOperation("查询任务流量记录信息")
+    @GetMapping("/flow/records")
+    public ServiceResult<FlowRecordsResponse> queryFlowRecords(@RequestParam String taskId) {
+        return flowTaskService.queryFlowRecords(taskId);
+    }
+
+    /**
+     * 批量新增流量任务
+     * @param request
+     * @return
+     */
+    @ApiOperation("批量新增流量任务")
+    @PostMapping("/batch/add")
+    public ServiceResult<List<FlowTaskModel>> batchAddFlowTask(@RequestBody @Validated BatchAddFlowTaskRequest request) {
+        return ServiceResult.success(flowTaskService.batchSavePlatFlowTask(request.getAddTaskRequestList()));
+    }
+
+    /**
+     * 批量执行流量任务
+     * @param request
+     * @return
+     */
+    @ApiOperation("批量执行流量任务")
+    @PostMapping("/batch/actuator")
+    public ServiceResult<Boolean> batchActuator(@RequestBody @Validated BatchActuatorTaskRequest request) {
+        return flowTaskService.batchActuator(request);
     }
 
 }
