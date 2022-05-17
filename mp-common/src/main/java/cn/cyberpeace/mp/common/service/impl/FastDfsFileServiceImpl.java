@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 
@@ -36,11 +35,10 @@ public class FastDfsFileServiceImpl implements FileService {
     /**
      * 文件上传
      * @param file
-     * @param request
      * @return
      */
     @Override
-    public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
+    public ServiceResult<FileResponseData> uploadFile(MultipartFile file) {
         FileResponseData responseData = uploadSample(file);
         if (responseData.isSuccess()) {
             return ServiceResult.success(responseData);
