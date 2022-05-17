@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.base.util.http;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
-import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,14 +13,16 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -99,6 +100,8 @@ public class HttpClient {
                         multipartEntity.addBinaryBody(fieldName, (InputStream) fieldValue);
                     } else if (fieldValue instanceof byte[]) {
                         multipartEntity.addBinaryBody(fieldName, (byte[]) fieldValue);
+                    } else if (fieldValue instanceof ContentBody) {
+                        multipartEntity.addPart(fieldName, (ContentBody) fieldValue);
                     }
                 });
                 entity = multipartEntity.build();
@@ -243,7 +246,7 @@ public class HttpClient {
         return request(HttpGet.class, url, null, param, headers, timeout, false);
     }
 
-    public HttpResult download(String targetPath, String url, HttpParam param, Map<String, String> headers,
+    public HttpResult download(OutputStream os, String url, HttpParam param, Map<String, String> headers,
                                Integer timeout) {
         var httpResult = streamGet(url, param, headers, timeout);
         if (!httpResult.isSuccess()) {
@@ -255,7 +258,7 @@ public class HttpClient {
 
         var entity = httpResult.getResponse().getEntity();
         try {
-            FileCopyUtils.copy(entity.getContent(), FileUtil.getOutputStream(targetPath));
+            StreamUtils.copy(entity.getContent(), os);
         } catch (IOException e) {
             log.error("download http file {} get content error: {}", url, e);
             httpResult.setException(e);

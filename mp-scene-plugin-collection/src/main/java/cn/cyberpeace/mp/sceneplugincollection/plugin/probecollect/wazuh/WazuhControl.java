@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.remotefile.GodfsClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.Getter;
@@ -194,7 +195,12 @@ public class WazuhControl {
 
     private WazuhControl(WazuhLauncher wazuhLauncher, String godfsServer) {
         this.wazuhLauncher = wazuhLauncher;
-        this.godfsClient = new GodfsClient(godfsServer);
+        this.godfsClient = GodfsClient.builder()
+                .configServer(godfsServer)
+                .configTimeout(600000)
+                .configMaxConnTotal(200)
+                .configMaxConnPerRoute(200)
+                .build();
     }
 
     public static WazuhControlBuilder builder() {

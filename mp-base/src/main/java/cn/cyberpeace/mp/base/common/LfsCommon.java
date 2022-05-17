@@ -16,16 +16,20 @@ public class LfsCommon {
         LfsCommon.lfsClient = new LfsClient(baseAppConfig.getFileServerDir());
     }
 
-    public static String upload(String localFilepath) {
-        return lfsClient.upload(localFilepath);
-    }
-
     public static String uploadContent(String content) {
         return lfsClient.uploadContent(content);
     }
 
     public static String uploadContent(String content, String fileSuffix) {
         return lfsClient.uploadContent(content, fileSuffix);
+    }
+
+    public static String uploadRawContent(byte[] content, String fileSuffix) {
+        return lfsClient.uploadRawContent(content, fileSuffix);
+    }
+
+    public static String upload(String localFilepath) {
+        return lfsClient.upload(localFilepath);
     }
 
     public static String upload(InputStream is) {
@@ -54,6 +58,10 @@ public class LfsCommon {
 
     public static String downloadContent(String fileKey) {
         return lfsClient.downloadContent(fileKey);
+    }
+
+    public static byte[] downloadRawContent(String fileKey) {
+        return lfsClient.downloadRawContent(fileKey);
     }
 
     public static boolean delete(String fileKey) {

@@ -10,11 +10,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class LfsClient implements FileClient {
+
+    public static final String TMP_DIR_NAME = "lfs";
 
     public static final String DEFAULT_GROUP = "default";
 
@@ -63,14 +64,6 @@ public class LfsClient implements FileClient {
         return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, groupDir, fileKey);
     }
 
-    public String upload(String localFilepath) {
-        var fileSuffix = FileUtil.getSuffix(localFilepath);
-        var fileKey = genFileKey(fileSuffix);
-        var targetFilePath = getTargetFilePath(fileKey);
-        FileUtil.copyFile(localFilepath, targetFilePath);
-        return fileKey;
-    }
-
     public String upload(InputStream is, long filesize, String fileSuffix) {
         var fileKey = genFileKey(fileSuffix);
         var targetFilePath = getTargetFilePath(fileKey);
@@ -100,40 +93,6 @@ public class LfsClient implements FileClient {
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
-    }
-
-    public boolean download(String fileKey, String localFilepath) {
-        validateFileKey(fileKey);
-
-        var targetFilePath = getTargetFilePath(fileKey);
-        if (!FileUtil.exist(targetFilePath)) {
-            var msg = String.format("Local download %s to %s error: file not found", fileKey, localFilepath);
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-        FileUtil.copyFile(targetFilePath, localFilepath);
-        return true;
-    }
-
-    public String downloadContent(String fileKey) {
-        validateFileKey(fileKey);
-
-        var targetFilePath = getTargetFilePath(fileKey);
-        if (!FileUtil.exist(targetFilePath)) {
-            var msg = String.format("Local download %s content error: file not found", fileKey);
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-
-        byte[] byteContent;
-        try (var is = new FileInputStream(targetFilePath)) {
-            byteContent = is.readAllBytes();
-        } catch (IOException e) {
-            var msg = String.format("Local download %s to content error: %s", fileKey, e.getMessage());
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-        return new String(byteContent, StandardCharsets.UTF_8);
     }
 
     public boolean delete(String fileKey) {
