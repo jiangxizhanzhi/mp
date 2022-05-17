@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.model.FlowRecords;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
@@ -14,6 +15,7 @@ import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,33 +56,51 @@ public class ScenePluginFlowSceneService {
 
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String sceneId, String nodeId, String flowId,
                                                                     SceneContextBO context, Boolean isBatch) {
-        var sceneHandler = new SceneHandler(sceneId, null, false, context);
-        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var flowElement = pluginHandler.getElement(nodeId);
-        if (flowElement == null) {
-            return new ServiceResult<>();
-        }
-
-        List<Flow> flows = SceneFlowCacheUtil.get(pluginHandler.getSourceSceneId(), nodeId);
-        flowElement.setFlows(flows);
-        if (flows == null) {
-            return new ServiceResult<>();
-        }
-
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
-        var flow = flowMap.getOrDefault(flowId, null);
-        if (flow == null) {
-            return new ServiceResult<>();
-        }
-        ServiceResult<FlowRecordsResponse> result;
-        if (isBatch) {
-            result = flowService3.queryFlowRecords(nodeId);
-        } else {
-            result = flowService3.queryFlowRecords(flow.getTaskId());
+        List<FlowRecords> flowRecords = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            FlowRecords records = new FlowRecords();
+            records.setId(i);
+            records.setCreateTime("2022-5-17 18:33");
+            records.setGroupCount(i);
+            records.setObytes(i + 10);
+            records.setOerrors(i);
+            records.setOpackets(i);
+            records.setTaskUuid("" + i);
+            records.setRecordTime(records.getCreateTime());
+            records.setSecond(i + 11);
+            records.setTxBps(20.20 + i);
+            flowRecords.add(records);
         }
         SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
-        response.setFlowRecordsList(result.getData().getFlowRecordsList());
+        response.setFlowRecordsList(flowRecords);
         return new ServiceResult<>(response);
+//        var sceneHandler = new SceneHandler(sceneId, null, false, context);
+//        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+//        var flowElement = pluginHandler.getElement(nodeId);
+//        if (flowElement == null) {
+//            return new ServiceResult<>();
+//        }
+//
+//        List<Flow> flows = SceneFlowCacheUtil.get(pluginHandler.getSourceSceneId(), nodeId);
+//        flowElement.setFlows(flows);
+//        if (flows == null) {
+//            return new ServiceResult<>();
+//        }
+//
+//        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+//        var flow = flowMap.getOrDefault(flowId, null);
+//        if (flow == null) {
+//            return new ServiceResult<>();
+//        }
+//        ServiceResult<FlowRecordsResponse> result;
+//        if (isBatch) {
+//            result = flowService3.queryFlowRecords(nodeId);
+//        } else {
+//            result = flowService3.queryFlowRecords(flow.getTaskId());
+//        }
+//        SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
+//        response.setFlowRecordsList(result.getData().getFlowRecordsList());
+////        return new ServiceResult<>(response);
     }
 
 }
