@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -13,7 +12,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public interface FileService {
 
-    ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request);
+    ServiceResult<FileResponseData> uploadFile(MultipartFile file);
 
     void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException;
 

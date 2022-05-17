@@ -41,7 +41,7 @@ public class FileController {
     @PostMapping(value = "/file/upload")
     @ResponseBody
     public ServiceResult<FileResponseData> uploadFile(MultipartFile file, HttpServletRequest request) {
-        return fileService.uploadFile(file, request);
+        return fileService.uploadFile(file);
     }
 
     /**
