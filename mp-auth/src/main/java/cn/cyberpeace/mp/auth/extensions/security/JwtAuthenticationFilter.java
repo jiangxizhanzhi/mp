@@ -42,6 +42,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private AuthUserDetailsService authUserDetailsService;
 
+    public static String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

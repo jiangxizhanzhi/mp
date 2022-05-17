@@ -53,7 +53,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     private RoleService roleService;
 
     @Autowired
-    private OperateUserPermissionService opUserPermCheckService;
+    private OperateUserPermissionService opUserPermService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -90,7 +90,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
+        opUserPermService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
@@ -103,7 +103,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
-        List<String> excludeRoleIds = opUserPermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearching();
         if (excludeRoleIds.contains(pageRequest.getRoleId())) {
             new PageInfo<>(Collections.emptyList());
         }
@@ -219,6 +219,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public boolean deleteByRoleIdAndUserIds(String roleId, List<String> userIds) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
+        opUserPermService.checkByTargetUserIds(userIds);
 
         var objResult = roleService.get(roleId).getSource();
         if (objResult == null || objResult.getObj() == null) {

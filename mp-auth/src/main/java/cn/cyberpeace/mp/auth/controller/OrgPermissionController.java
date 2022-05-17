@@ -19,11 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/org_permissions")
-public class OrgPermissionController extends BaseModelController<OrgPermissionModel, QueryParams, OrgPermissionService> {
+public class OrgPermissionController {
 
-    @Autowired
-    public OrgPermissionController(OrgPermissionService modelService) {
-        setModelService(modelService);
-    }
 
 }

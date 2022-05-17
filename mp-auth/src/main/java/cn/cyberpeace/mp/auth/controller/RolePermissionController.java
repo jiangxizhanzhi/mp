@@ -19,11 +19,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/role_permissions")
-public class RolePermissionController extends BaseModelController<RolePermissionModel, QueryParams, RolePermissionModelService> {
-
-    @Autowired
-    public RolePermissionController(RolePermissionModelService modelService) {
-        setModelService(modelService);
-    }
+public class RolePermissionController {
 
 }

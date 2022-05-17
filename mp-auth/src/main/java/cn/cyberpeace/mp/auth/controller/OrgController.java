@@ -35,14 +35,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
-public class OrgController extends BaseModelController<OrgModel, QueryParams, OrgService> {
+public class OrgController {
 
     @Autowired
-    public OrgController(OrgService modelService) {
-        setModelService(modelService);
-    }
+    private OrgService orgService;
 
-    @Override
     @ApiOperation("创建组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -50,10 +47,9 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "创建组织", target = OpTargetEnums.ORG)
     @PostMapping
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
-        return super.create(obj, fields);
+        return orgService.create(obj, fields);
     }
 
-    @Override
     @ApiOperation("更新指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -63,10 +59,10 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @PatchMapping("/{id}")
     public ObjServiceResult update(@PathVariable String id, @RequestBody OrgModel obj,
                                       @RequestParam(required = false) String[] fields) {
-        return super.update(id, obj, fields);
+        obj.setId(id);
+        return orgService.update(obj, fields);
     }
 
-    @Override
     @ApiOperation("删除指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -74,24 +70,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除组织", target = OpTargetEnums.ORG)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        return super.delete(id);
+        return orgService.delete(id);
     }
-
-
-    /*
-    @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
-    @GetMapping("/byparent")
-    public ServiceResult getByParent(@RequestParam String parentId) {
-        List<OrgModel> orgs = getModelService().listByParent(parentId);
-        return ServiceResult.builder().source(orgs).build().asResult();
-    }
-
-    @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
-    @GetMapping("/tree")
-    public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
-        List<OrgDto> tree = getModelService().getTree(orgId);
-        return ServiceResult.builder().source(tree).build().asResult();
-    }
-    */
 
 }

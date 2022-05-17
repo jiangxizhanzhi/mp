@@ -19,11 +19,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/user_permissions")
-public class UserPermissionController extends BaseModelController<UserPermissionModel, QueryParams, UserPermissionService> {
-
-    @Autowired
-    public UserPermissionController(UserPermissionService modelService) {
-        setModelService(modelService);
-    }
+public class UserPermissionController {
 
 }
