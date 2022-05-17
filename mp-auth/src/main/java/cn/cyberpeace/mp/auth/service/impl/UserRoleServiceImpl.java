@@ -40,7 +40,7 @@ import java.util.List;
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields, QueryParams>
         implements UserRoleService {
 
-    public static final String CACHE_VAL_ROLES= "ROLES_CACHE";
+    public static final String CACHE_VAL_ROLES= "USER_ROLES_CACHE";
 
 
     @Autowired
@@ -68,7 +68,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        List<RoleModel> roles = getModelMapper().listByUserIds(userIds);
+        List<RoleModel> roles = getModelMapper().listRolesByUserIds(userIds);
 
         return roles;
     }
