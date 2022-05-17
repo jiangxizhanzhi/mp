@@ -9,12 +9,14 @@
     
     <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select * from mp_auth_role
-        <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
-          AND id not in
-          <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-            #{roleId}
-          </foreach>
-        </if>
+        <where>
+            <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
+                AND id not in
+                <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                    #{roleId}
+                </foreach>
+            </if>
+        </where>
     </select>
     
     <select id="listByOrgId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
@@ -40,6 +42,12 @@
         select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from
         mp_auth_role r
         <where>
+            <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
+                AND r.id not in
+                <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                    #{roleId}
+                </foreach>
+            </if>
             <if test="roleName != null and roleName != ''">
                 AND r.name like CONCAT('%', #{roleName}, '%')
             </if>
