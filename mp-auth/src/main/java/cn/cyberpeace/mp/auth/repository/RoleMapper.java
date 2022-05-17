@@ -22,7 +22,7 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
     List<RoleModel> listByTenantId(@Param("tenantId") String tenantId);
 
-    List<RoleModel> listAll();
+    List<RoleModel> listAll(@Param("excludeRoleIds") List<String> excludeRoleIds);
 
     List<RoleModel> listByOrgId(@Param("orgId") String orgId);
 
@@ -32,6 +32,6 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
     List<RoleModel> listByNames(@Param("names") List<String> names);
 
-    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders);
+    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 }

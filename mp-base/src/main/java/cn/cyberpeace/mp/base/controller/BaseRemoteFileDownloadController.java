@@ -44,7 +44,6 @@ public interface BaseRemoteFileDownloadController<S extends BaseRemoteFileServic
         response.setContentType("application/octet-stream;charset=utf-8");
         var os = response.getOutputStream();
         getRemoteFileService().download(id, os);
-        os.flush();
     }
 
 }

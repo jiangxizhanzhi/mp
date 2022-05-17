@@ -171,10 +171,10 @@ public class SceneEventTransition {
                             SceneModel.Event.PAUSE, SceneModel.Event.DELETE
                     ),
                     EventTransition.genKey(SceneModel.Event.PAUSE, EventStatus.OVER), List.of(
-                            SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE
+                            SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE, SceneModel.Event.PAUSE
                     ),
                     EventTransition.genKey(SceneModel.Event.PAUSE, EventStatus.ABNORMAL), List.of(
-                            SceneModel.Event.PAUSE, SceneModel.Event.DELETE
+                            SceneModel.Event.PAUSE, SceneModel.Event.DELETE, SceneModel.Event.PAUSE
                     ),
 
                     // 暂停恢复事件
@@ -193,10 +193,10 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.UNPAUSE, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.PAUSE,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.SUSPEND
+                            SceneModel.Event.SUSPEND, SceneModel.Event.UNPAUSE
                     ),
                     EventTransition.genKey(SceneModel.Event.UNPAUSE, EventStatus.ABNORMAL), List.of(
-                            SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE
+                            SceneModel.Event.UNPAUSE, SceneModel.Event.DELETE, SceneModel.Event.UNPAUSE
                     ),
 
                     // 挂起事件
@@ -213,10 +213,10 @@ public class SceneEventTransition {
                             SceneModel.Event.SUSPEND, SceneModel.Event.DELETE
                     ),
                     EventTransition.genKey(SceneModel.Event.SUSPEND, EventStatus.OVER), List.of(
-                            SceneModel.Event.RESUME, SceneModel.Event.DELETE
+                            SceneModel.Event.RESUME, SceneModel.Event.DELETE, SceneModel.Event.SUSPEND
                     ),
                     EventTransition.genKey(SceneModel.Event.SUSPEND, EventStatus.ABNORMAL), List.of(
-                            SceneModel.Event.SUSPEND, SceneModel.Event.DELETE
+                            SceneModel.Event.SUSPEND, SceneModel.Event.DELETE, SceneModel.Event.SUSPEND
                     ),
 
                     // 挂起恢复事件
@@ -235,10 +235,10 @@ public class SceneEventTransition {
                     EventTransition.genKey(SceneModel.Event.RESUME, EventStatus.OVER), List.of(
                             SceneModel.Event.STOP, SceneModel.Event.RESTART, SceneModel.Event.SUSPEND,
                             SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY, SceneModel.Event.DELETE,
-                            SceneModel.Event.PAUSE
+                            SceneModel.Event.PAUSE, SceneModel.Event.RESUME
                     ),
                     EventTransition.genKey(SceneModel.Event.RESUME, EventStatus.ABNORMAL), List.of(
-                            SceneModel.Event.RESUME, SceneModel.Event.DELETE
+                            SceneModel.Event.RESUME, SceneModel.Event.DELETE, SceneModel.Event.RESUME
                     ),
 
                     // 快照事件

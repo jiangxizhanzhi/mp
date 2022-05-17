@@ -12,10 +12,11 @@ import java.util.Map;
 @Setter
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class VirtualMachineRestartData implements CloudHttpData {
     private Boolean waitForStatus = true;
-    private Map reboot = new HashMap() {{
-        this.put("reboot_type", "HARD");
-    }};
+    private Map reboot = new HashMap();
+
+    public VirtualMachineRestartData() {
+        this.reboot.put("reboot_type", "HARD");
+    }
 }

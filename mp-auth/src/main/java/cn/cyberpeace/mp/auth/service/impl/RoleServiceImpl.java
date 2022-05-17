@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.TargetService;
@@ -55,7 +56,6 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
         implements RoleService {
 
-    public static final String CACHE_VAL_ROLES = "ROLES_CACHE";
 
     @Autowired
     private RolePermissionModelService rolePermissionService;
@@ -66,6 +66,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    private OperateRolePermissionService opRolePermCheckService;
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -112,7 +114,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listAll() {
-        List<RoleModel> roles = getModelMapper().listAll();
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
         return roles;
     }
 
@@ -126,12 +129,12 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleModel getByIdent(String ident) {
         ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
-        RoleModel roleModel = getModelMapper().selectByIdent(ident);
+        RoleModel roleModel = getModelMapper().selectByIdent(ident); 
         return roleModel;
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLES)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
 
@@ -141,7 +144,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLES)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
     public List<RoleModel> listByNames(List<String> names) {
         ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
         List<RoleModel> roleModels = getModelMapper().listByNames(names);
@@ -166,7 +169,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders);
+        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {

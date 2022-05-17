@@ -21,10 +21,13 @@ public class BaseInit implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         var homeDir = baseAppConfig.getHomeDir();
         var resourcesDir = baseAppConfig.getResourcesDir();
+        var fileServerDir = baseAppConfig.getFileServerDir();
         FileUtil.mkdir(homeDir);
         FileUtil.mkdir(resourcesDir);
+        FileUtil.mkdir(fileServerDir);
         log.info("Home dir: {}", homeDir);
         log.info("Resource dir: {}", resourcesDir);
+        log.info("Local file server dir: {}", fileServerDir);
 
         BaseServer.initServerSessionMap();
         BaseGroupServer.initServerGroupSessionsListMap();

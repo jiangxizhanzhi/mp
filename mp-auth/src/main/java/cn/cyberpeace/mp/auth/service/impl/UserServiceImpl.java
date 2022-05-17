@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -48,8 +50,11 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,6 +85,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
+
+    public static final String CACHE_VAL_USERMODEL = "USERMODEL_CACHE";
+
+    public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
+
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -131,10 +141,25 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
+    public ObjServiceResult<UserModel> get(String id) {
+        return super.get(id);
+    }
+
+    @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERDTO)
     public UserDto getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
+        UserDto userDto = userModel2UserDto(userModel);
+
+        return userDto;
+    }
+
+    @Override
+    public UserDto getUserDtoNoRestrict(String id) {
+        UserModel userModel = getModelMapper().get(id);
         UserDto userDto = userModel2UserDto(userModel);
 
         return userDto;
@@ -205,6 +230,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Boolean>  delete(String userId) {
         deleteReleated(userId);
 
@@ -214,6 +240,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
 
         for (String userId : userIds) {
@@ -282,6 +309,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public UserModel modify(UserRequest modifyRequest) {
         opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
 
@@ -349,6 +377,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
@@ -377,6 +406,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
         var currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
@@ -401,6 +431,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(newPwd)) {
@@ -421,6 +452,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -444,6 +476,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchDisable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -461,6 +494,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -483,6 +517,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchEnable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -501,6 +536,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean approve(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
@@ -522,6 +558,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchApprove(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -601,6 +638,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public void importExcel(List<ImportUser> list) {
         log.info("Now import users from excel...");
         // 初始化默认头像信息
