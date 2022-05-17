@@ -9,6 +9,12 @@
     
     <select id="listAll" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select * from mp_auth_role
+        <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
+          AND id not in
+          <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+            #{roleId}
+          </foreach>
+        </if>
     </select>
     
     <select id="listByOrgId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">

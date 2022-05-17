@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.TargetService;
@@ -66,6 +67,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Autowired
     private UserRoleService userRoleService;
 
+    @Autowired
+    private OperateRolePermissionService opRolePermCheckService;
 
     @Autowired
     public RoleServiceImpl(RoleMapper modelMapper, RoleFields modelFields) {
@@ -112,7 +115,8 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listAll() {
-        List<RoleModel> roles = getModelMapper().listAll();
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
         return roles;
     }
 
@@ -126,7 +130,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleModel getByIdent(String ident) {
         ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
-        RoleModel roleModel = getModelMapper().selectByIdent(ident);
+        RoleModel roleModel = getModelMapper().selectByIdent(ident); 
         return roleModel;
     }
 
