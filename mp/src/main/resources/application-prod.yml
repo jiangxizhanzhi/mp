@@ -8,6 +8,7 @@ ip:
   trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
+  mp: ${MP_API_IP:10.100.1.12}                       # MP中台API地址
 server:
   servlet:
     context-path: /api/mp

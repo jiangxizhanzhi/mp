@@ -1,14 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.init;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
+import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 @Slf4j
 @Component
@@ -17,16 +15,13 @@ public class ServerConfigListener implements ApplicationListener<WebServerInitia
     @Autowired
     private InitRegisterService initRegisterService;
 
+    @Autowired
+    private IpAddressConfig ipAddressConfig;
+
     private int serverPort;
 
     public String getUrl() {
-        InetAddress address = null;
-        try {
-            address = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            log.error("getLocalHost error : {} ",e);
-        }
-        return "http://" + address.getHostAddress() + ":" + this.serverPort;
+        return "http://" + ipAddressConfig.getMp() + ":" + this.serverPort;
     }
 
     @Override
