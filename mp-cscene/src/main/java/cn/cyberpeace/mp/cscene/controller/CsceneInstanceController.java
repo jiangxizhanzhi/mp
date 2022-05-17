@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -246,13 +247,22 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("场景实例批量启动节点流量")
     @PostMapping(value = "/start_flows")
     public ServiceResult<Boolean> startFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return new ServiceResult<>();
+        return modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
+                request.getContext(), request.getRunType()).asResult();
     }
 
     @ApiOperation("场景实例批量停止节点流量")
     @PostMapping(value = "/stop_flows")
     public ServiceResult<Boolean> stopFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return new ServiceResult<>();
+        return modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
+                request.getContext()).asResult();
+    }
+
+    @ApiOperation("场景实例查询节点流量执行记录")
+    @PostMapping(value = "/query_flow_records")
+    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(@RequestBody CsceneInstanceNodeFlowRecordsRequest request) {
+        return modelService.queryFlowRecords(request.getId(), request.getNodeId(), request.getFlowId(),
+                request.getContext(), request.getIsBatch()).asResult();
     }
 
     @ApiOperation("场景实例启动节点探针")

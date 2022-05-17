@@ -5,7 +5,6 @@ ip:
   cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
   moloch: ${MOLOCH_IP:10.100.0.101}        # moloch的IP地址
   wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
-  trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
   mp: ${MP_API_IP:10.100.1.12}                       # MP中台API地址
@@ -130,8 +129,6 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
   flow:
-    # 流量发生器资源地址
-    actuator-resource-url: http://${ip.trex:10.100.7.102}:${TREX_PORT:80}/api/v1/resource
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
