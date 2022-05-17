@@ -29,6 +29,9 @@ public class AuthConstant {
 
     public static final String ROLE_ADMIN = "ADMIN";
 
+    public static final String ROLE_ADMIN_ID = "5827ff7847504ffd806e0a85c417228d";
+
+
     public static final String ORG_PATH_SEPARATOR = "/";
 
     private AuthConstant() {
