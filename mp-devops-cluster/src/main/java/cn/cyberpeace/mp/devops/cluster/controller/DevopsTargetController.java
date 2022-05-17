@@ -2,8 +2,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
@@ -64,15 +66,19 @@ public class DevopsTargetController {
 
     private ITask asyncTargetTask;
 
+    private InitRegisterService initRegisterService;
+
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService,IpAddressConfig ipAddressConfig,
-                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask) {
+                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask,
+                                  InitRegisterService initRegisterService) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
         this.ipAddressConfig = ipAddressConfig;
         this.deviceVoConverter = deviceVoConverter;
         this.asyncTargetTask = asyncTargetTask;
+        this.initRegisterService = initRegisterService;
     }
 
     /**
@@ -204,6 +210,13 @@ public class DevopsTargetController {
         ServiceResult serviceResult = multiThreadUtils.execute(deviceList, new HashMap<>(), asyncTargetTask);
 
         return serviceResult.asResult();
+    }
+
+    @ApiOperation("注册MP地址")
+    @GetMapping("/register")
+    public ServiceResult register(@RequestParam(required = false) String url){
+        BaseCloudPlatformModel model = initRegisterService.register(url);
+        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
     }
 
 }
