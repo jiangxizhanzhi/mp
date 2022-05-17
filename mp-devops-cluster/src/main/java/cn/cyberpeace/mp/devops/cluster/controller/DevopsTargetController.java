@@ -85,8 +85,6 @@ public class DevopsTargetController {
         return new Result<>(ipAddressConfig.getCp());
     }
 
-
-
     /**
      * 查询所有靶标信息
      * @param request
@@ -169,6 +167,7 @@ public class DevopsTargetController {
 
     @ApiOperation("上传文件")
     @PostMapping("/upload")
+    @Deprecated
     public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
         if (type.equals("image")){
             String originalFilename = file.getOriginalFilename();
@@ -176,8 +175,8 @@ public class DevopsTargetController {
             if (index < 0){
                 throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
             }
-            String suffix = originalFilename.substring(index);
-            List<String> supportUploadTypeList = Lists.newArrayList("iso","bin","img","tao","dao","cif","fcd");
+            String suffix = originalFilename.substring(index + 1);
+            List<String> supportUploadTypeList = Lists.newArrayList("vmdk","raw","qcow2","vdi","zip","tar");
             boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
             if (!anyMatch){
                 throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
