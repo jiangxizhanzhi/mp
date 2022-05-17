@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -111,6 +113,20 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = getModelService().getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
+    }
+
+
+    @ApiOperation(value = "查询指定id数据 返回有限数据，无登录用户权限拦截", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping("/no_restrict/{id}")
+    public ObjServiceResult<UserSimpleDto> get(@PathVariable String id) {
+        UserDto userDto = getModelService().getUserDtoNoRestrict(id);
+        UserSimpleDto userSimpleDto = new UserSimpleDto();
+        BeanUtils.copyProperties(userDto, userSimpleDto);
+
+        return ResultUtils.obj2ObjServiceResult(userSimpleDto);
     }
 
 

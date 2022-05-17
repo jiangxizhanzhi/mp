@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -49,6 +50,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -88,7 +90,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
 
-    public static final String[] USER_ENTRIES = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL};
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -151,6 +152,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
+        UserDto userDto = userModel2UserDto(userModel);
+
+        return userDto;
+    }
+
+    @Override
+    public UserDto getUserDtoNoRestrict(String id) {
+        UserModel userModel = getModelMapper().get(id);
         UserDto userDto = userModel2UserDto(userModel);
 
         return userDto;
@@ -221,7 +230,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Boolean>  delete(String userId) {
         deleteReleated(userId);
 
