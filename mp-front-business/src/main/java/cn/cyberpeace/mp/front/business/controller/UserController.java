@@ -16,11 +16,11 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
+import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @Description: 用户管理接口(业务)
@@ -113,11 +112,8 @@ public class UserController {
     @PostMapping("/update_avatar")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = OpTargetEnums.USER)
     public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
-        if (Objects.nonNull(file)) {
-            String suffix = FileUtil.getSuffix(file.getOriginalFilename());
-            if (!FileSuffixConstant.UPLOAD_HEAD_IMAGE_LIST.contains(suffix)) {
-                return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
-            }
+        if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.UPLOAD_HEAD_IMAGE_LIST)) {
+            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
 
         boolean success = userService.updateAvatar(userId, file);

@@ -52,5 +52,22 @@ public interface FileSuffixConstant {
         add("jpg");
     }};
 
+    /**
+     * 导入系统logo支持后缀：jpg，png，jpeg
+     */
+    List<String> IMPORT_SYSTEM_LOGO_LIST = new ArrayList<>(){{
+        add("jpg");
+        add("png");
+        add("jpeg");
+    }};
+
+
+    /**
+     * 导入VPN软件包支持后缀：zip，rar
+     */
+    List<String> IMPORT_VPN_LIST = new ArrayList<>(){{
+        add("zip");
+        add("rar");
+    }};
 
 }
