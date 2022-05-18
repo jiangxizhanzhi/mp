@@ -677,10 +677,17 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         if (Objects.nonNull(rows)) {
             List<FlowRecords> flowRecordsList = new ArrayList<>();
             JSONArray flowRecordsArray = rows.getJSONObject(0).getJSONArray("flow_records");
+            // 流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过
+            Integer status = rows.getJSONObject(0).getInteger("status");
+            // 流量运行结果：1 成功， 2 失败
+            Integer result = rows.getJSONObject(0).getInteger("result");
+
             if (Objects.nonNull(flowRecordsArray)) {
                 flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
             }
             response.setFlowRecordsList(flowRecordsList);
+            response.setStatus(status);
+            response.setResult(result);
         }
 
         return ServiceResult.success(response);
