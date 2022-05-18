@@ -4,10 +4,12 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementNetiface;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import io.swagger.annotations.Api;
@@ -88,5 +90,12 @@ public class HostStateController {
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
+
+    @ApiOperation(value = "节点网卡信息")
+    @GetMapping("/element_netifaces")
+    public ListObjServiceResult<ElementNetiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
+        return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();
+    }
+
 
 }

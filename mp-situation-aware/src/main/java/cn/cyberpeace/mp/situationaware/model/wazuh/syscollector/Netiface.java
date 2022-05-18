@@ -10,13 +10,15 @@ import lombok.Data;
  * @Author zhouxinghuai
  * @Date：2022/5/18 10:58
  */
+@Data
+@ApiModel("网卡信息")
 public class Netiface {
 
     @ApiModelProperty(value = "接收包")
-    private RAX rx;
+    private X rx;
 
     @ApiModelProperty(value = "发送包")
-    private RAX tx;
+    private X tx;
 
     private Scan scan;
 
@@ -40,9 +42,12 @@ public class Netiface {
     private String agentId;
 
 
+    /**
+     * 接收或者发送的包
+     */
     @Data
-    @ApiModel("R/AX")
-    public static class RAX {
+    @ApiModel("X")
+    public static class X {
 
         @ApiModelProperty(value = "核心数")
         private Integer bytes;

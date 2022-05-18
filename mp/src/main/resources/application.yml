@@ -97,7 +97,7 @@ mp:
       base-url: http://${ip.wazuh}:15500
       #wazuh 开放接口用户名密码
       username: wazuh
-      password: wazuh
+      password: Abcd123#
       flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
     wazuh-probe-manager:
       url: http://10.100.0.111:8002

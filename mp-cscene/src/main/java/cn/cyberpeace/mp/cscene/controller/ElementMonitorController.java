@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +38,10 @@ public class ElementMonitorController {
 
     @Autowired
     private CsceneSpecialService csceneSpecialService;
+
+
+    @Autowired
+    private HostStateService hostStateService;
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -64,27 +72,13 @@ public class ElementMonitorController {
     }
 
 
-    /*
-    @ApiOperation(value = "查询节点进程状态")
-    @GetMapping("/process_state")
-    public ListObjServiceResult<ProcessState> pageProcessesStates(StatePageRequest pageRequest) {
-        log.info("{}", pageRequest);
-        pageRequest.ensure();
-        // todo 1201 mock data
-        List<ProcessState> processStates = mockProcessStates(pageRequest.getSceneId());
-        return new ListObjServiceResult(new ListObjResult(processStates, processStates.size()).asResult()).asResult();
-    }*/
+    @ApiOperation(value = "节点操作系统信息")
+    @GetMapping("/os")
+    public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
+        OS os = sceneElementMonitorService.getOSInfo(baseRequest);
+        return ServiceResult.success(os);
+    }
 
-    /*
-    @ApiOperation(value = "查询节点端口状态")
-    @GetMapping("/port_state")
-    public ListObjServiceResult<PortState> pagePortStates(StatePageRequest pageRequest) {
-        log.info("{}", pageRequest);
-        pageRequest.ensure();
-        // todo 1201 mock data
-        List<PortState> portStates = mockPortStates(pageRequest.getSceneId());
-        return new ListObjServiceResult(new ListObjResult(portStates, portStates.size()).asResult()).asResult();
-    }*/
 
     @ApiOperation(value = "查询节点网络连接状态")
     @GetMapping("/connection_state")

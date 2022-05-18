@@ -22,8 +22,10 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -64,6 +66,9 @@ public class SceneElementMonitorService {
 
     @Autowired
     private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -116,6 +121,27 @@ public class SceneElementMonitorService {
 
         return new ListObjServiceResult<>(new ListObjResult<>(connectionStates, netConns.getSource().getTotal()).asResult()).asResult();
     }
+
+    /**
+     * 查询操作系统信息
+     * @param baseRequest
+     * @return
+     */
+    public OS getOSInfo(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return null;
+        }
+        String agentName = agentNames.get(0);
+        List<OS> osList = sysCollectorService.getOS(agentName);
+        if (CollectionUtil.isEmpty(osList)) {
+            return null;
+        }
+
+        return osList.get(0);
+    }
+
 
     public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
