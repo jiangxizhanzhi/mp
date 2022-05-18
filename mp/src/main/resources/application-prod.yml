@@ -7,7 +7,7 @@ ip:
   wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
-  mp: ${MP_API_IP:10.100.1.12}                       # MP中台API地址
+  mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
 server:
   servlet:
     context-path: /api/mp
