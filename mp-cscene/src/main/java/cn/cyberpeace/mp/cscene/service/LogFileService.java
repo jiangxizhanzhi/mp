@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -46,7 +47,7 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-//    private WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
+    private WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
 
 
     /**
@@ -74,8 +75,8 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-//        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
+        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
