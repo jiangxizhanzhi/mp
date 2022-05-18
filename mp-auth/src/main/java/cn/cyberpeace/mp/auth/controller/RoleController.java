@@ -72,6 +72,15 @@ public class RoleController {
         return ResultUtils.obj2ObjServiceResult(roleDto);
     }
 
+    @ApiOperation("获取指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
+    })
+    @GetMapping
+    public ObjServiceResult<RoleModel> getByParam(@RequestParam String id) {
+        return roleService.get(id).asResult();
+    }
+
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)

@@ -42,13 +42,21 @@ public class OrgController {
     @Autowired
     private OrgService orgService;
 
-    @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
+    @ApiOperation(value = "查询指定id数据", notes = "")
     @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
     @GetMapping("/{id}")
     public ObjServiceResult get(@PathVariable String id) {
+        return orgService.get(id).asResult();
+    }
+
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping
+    public ObjServiceResult getByParam(@RequestParam String id) {
         return orgService.get(id).asResult();
     }
 
