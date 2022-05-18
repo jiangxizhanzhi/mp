@@ -11,15 +11,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
-import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,46 +52,25 @@ public class NetworkTrafficGroupService {
      */
     private static String indexPrefix = "mp_";
 
-    @Autowired
-    private FlowAnalysisService flowAnalysisService;
+    private static String ARKIMENETWORKNAME = "oj_ext";
 
     /**
-     * 查询底层所有分组数据
-     *
-     * @return List<GroupModel>
+     * 初始化arkime网络配置
      */
-    public List<GroupModel> queryAllGroups() {
-        return Lists.newArrayList();
-    }
-
-    /**
-     * 根据分组id查询分组
-     *
-     * @param groupId groupId
-     * @return GroupModel
-     */
-    public GroupModel queryGroupById(String groupId) {
-//        if (ObjectUtils.isEmpty(groupId)) {
-//            throw new MpRuntimeException("groupId 不为空");
-//        }
-//
-//        String requestUri = situationAwareConfig.getGroupUrl() + "/" + groupId;
-//
-//        String res;
-//        try {
-//            res = HttpUtils.sendGet(requestUri);
-//        } catch (IOException e) {
-//            log.error("查询所有分组错误:"+ e);
-//            throw new MpRuntimeException("查询分组错误:"+ e);
-//        }
-//        JSONObject jsonObject = JSONObject.parseObject(res);
-//
-//        String groupIdRes = (String) JSONPath.eval(jsonObject, "$.scene.id");
-//        JSONArray  macIdJsonArray= (JSONArray) JSONPath.eval(jsonObject, "$.scene.macs");
-//        String  url= (String) JSONPath.eval(jsonObject, "$.scene.viewer_url");
-//        List<String> macIds = macIdJsonArray.stream().map(String.class::cast).collect(Collectors.toList());
-//        return GroupModel.builder().groupId(groupIdRes).macIds(macIds).url(url).build();
-        return new GroupModel();
+    @Async
+    public void initArkimeNetwork() {
+        log.info("init arkime network");
+        try {
+            String result = HttpUtils.sendGet(cpCloudUrl + "/networks?fetch_all=true");
+            log.info("init arkime network result {}", result);
+            JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
+            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network -> {
+                SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
+                log.info("ArkimeNetworkId {}", SituationalAwareConstant.ArkimeNetworkId);
+            });
+        } catch (Exception e) {
+            log.info("init arkime network error {}", ExceptionUtils.getMessage(e));
+        }
     }
 
     /**
