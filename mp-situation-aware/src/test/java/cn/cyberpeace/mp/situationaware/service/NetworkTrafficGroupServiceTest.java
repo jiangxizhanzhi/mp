@@ -10,16 +10,16 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.google.common.collect.Lists;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Assert;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
 @RunWith(SpringRunner.class)
@@ -27,17 +27,17 @@ public class NetworkTrafficGroupServiceTest {
     @Autowired
     private NetworkTrafficGroupService networkTrafficGroupService;
 
-    @Test
-    public void testGroupServiceQuery() {
-        List<GroupModel> list = networkTrafficGroupService.queryAllGroups();
-        Assert.isTrue(list.size() > 0, "123");
-    }
-
-    @Test
-    public void testQueryGroupById() {
-        GroupModel groupModel = networkTrafficGroupService.queryGroupById("9787c63b-d79f-4644-8027-b268f89aa8a9");
-        Assert.isTrue(groupModel.getGroupId().equals("9787c63b-d79f-4644-8027-b268f89aa8a9"), "is not equal");
-    }
+//    @Test
+//    public void testGroupServiceQuery() {
+//        List<GroupModel> list = networkTrafficGroupService.queryAllGroups();
+//        Assert.isTrue(list.size() > 0, "123");
+//    }
+//
+//    @Test
+//    public void testQueryGroupById() {
+//        GroupModel groupModel = networkTrafficGroupService.queryGroupById("9787c63b-d79f-4644-8027-b268f89aa8a9");
+//        Assert.isTrue(groupModel.getGroupId().equals("9787c63b-d79f-4644-8027-b268f89aa8a9"), "is not equal");
+//    }
 
     /**
      * 新增分组

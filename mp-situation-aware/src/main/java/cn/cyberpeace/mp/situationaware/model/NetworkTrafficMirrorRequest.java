@@ -35,4 +35,9 @@ public class NetworkTrafficMirrorRequest {
      */
     @Builder.Default
     private List<String> arkimeInstanceNames = Lists.newArrayList();
+
+    /**
+     * 场景ID
+     */
+    private String sceneId;
 }
