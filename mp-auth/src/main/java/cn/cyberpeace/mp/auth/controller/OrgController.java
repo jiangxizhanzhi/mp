@@ -49,7 +49,7 @@ public class OrgController {
     })
     @GetMapping("/{id}")
     public ObjServiceResult get(@PathVariable String id) {
-        return orgService.get(id);
+        return orgService.get(id).asResult();
     }
 
     @ApiOperation("创建组织")

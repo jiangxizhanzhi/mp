@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
@@ -123,6 +124,30 @@ public class SysCollectorService extends RequestProcessor {
         log.info("{}", result);
         List<Hardware> hardwares = result.getData().getAffectedItems();
         return hardwares;
+    }
+
+
+
+    /**
+     * @param
+     * @return
+     */
+    public List<OS> getOS(String agentName) {
+
+        String agentId = agentService.getSingleAgentId(agentName);
+        if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null, agentName:{}", agentName);
+            return null;
+        }
+
+        var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/os";
+
+        String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
+        BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<OS> oslist = result.getData().getAffectedItems();
+        return oslist;
     }
 
     /**
