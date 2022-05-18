@@ -1,21 +1,21 @@
 package cn.cyberpeace.mp.scenepluginflow.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.flow.model.FlowRecords;
+import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
-import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,10 +25,10 @@ public class ScenePluginFlowSceneService {
     @Resource
     private FlowTaskServiceImpl flowService3;
 
-    public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, SceneContextBO context) {
+    public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var result = pluginHandler.startFlow(nodeId, flowId, true);
+        var result = pluginHandler.startFlow(nodeId, flowId, sourceIp, true);
         return new ServiceResult<>(result);
     }
 
@@ -37,6 +37,20 @@ public class ScenePluginFlowSceneService {
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var result = pluginHandler.stopFlow(nodeId, flowId);
         return new ServiceResult<>(result);
+    }
+
+    @Transactional
+    public ServiceResult<Boolean> updateFlowParams(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, context);
+        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var flow = pluginHandler.updateFlowParams(nodeId, flowId, sourceIp);
+        if (flow != null && flow.getTaskId() != null) {
+            FlowTaskModel model = new FlowTaskModel();
+            model.setId(flow.getTaskId());
+            model.setOriginIps(sourceIp);
+            flowService3.updateFlowTaskInfo(model);
+        }
+        return new ServiceResult<>(true);
     }
 
     public ServiceResult<Boolean> startFlows(String sceneId, String nodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
@@ -71,7 +85,7 @@ public class ScenePluginFlowSceneService {
 
         var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
         var flow = flowMap.getOrDefault(flowId, null);
-        if (flow == null) {
+        if (flow == null && !isBatch) {
             return new ServiceResult<>();
         }
         ServiceResult<FlowRecordsResponse> result;

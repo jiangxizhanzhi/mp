@@ -130,7 +130,7 @@ public class SceneHandlerUtils {
         flowExecutor.deleteExecutor(executorId);
     }
 
-    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow, Runnable stopCallback,
+    public boolean startFlow(FlowPluginSceneElementBO flowElement, Flow flow,String sourceIp, Runnable stopCallback,
                              boolean async, Runnable asyncCallback) {
         var taskId = flow.getTaskId();
         if (!StringUtils.isEmpty(taskId)) {
@@ -190,10 +190,11 @@ public class SceneHandlerUtils {
         final String flowNetworkId = networkId;
         final String flowIp = ip;
         String finalIp = ip;
+        String fromIps = sourceIp == null ? StringUtils.EMPTY : sourceIp;
         Callable<Boolean> start = () -> {
             String flowTaskId;
             try {
-                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, StringUtils.EMPTY, flowIp, null, null, null, flow, finalIp);
+                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, fromIps, flowIp, null, null, null, flow, finalIp);
                 log.info("flowExecutor createFlow success:[{}]", flowTaskId);
             } catch (Exception e) {
                 errorFLow(flow, e.getMessage());
