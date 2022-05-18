@@ -32,5 +32,6 @@ public class CollectionTemplateProbeDtoSearchCondition {
     private Integer[] scriptTypes;
 
     // 是否显示脚本内容, 默认不显示
+    @Builder.Default
     private Boolean needScriptContent = false;
 }

@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
@@ -215,8 +214,8 @@ public class DevopsTargetController {
     @ApiOperation("注册MP地址")
     @GetMapping("/register")
     public ServiceResult register(@RequestParam(required = false) String url){
-        BaseCloudPlatformModel model = initRegisterService.register(url);
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        initRegisterService.register(url);
+        return ServiceResult.successful();
     }
 
 }
