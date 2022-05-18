@@ -40,4 +40,17 @@ public interface FileSuffixConstant {
         add("avif");
     }};
 
+    /**
+     * 导入用户头像支持后缀：png，jfif，pjpeg，jpeg，pjp，jpg
+     */
+    List<String> UPLOAD_HEAD_IMAGE_LIST = new ArrayList<>(){{
+        add("png");
+        add("jfif");
+        add("pjpeg");
+        add("jpeg");
+        add("pjp");
+        add("jpg");
+    }};
+
+
 }
