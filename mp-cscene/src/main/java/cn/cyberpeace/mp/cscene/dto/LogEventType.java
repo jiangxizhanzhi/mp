@@ -1,7 +1,5 @@
-package cn.cyberpeace.mp.cscene.dto.type;
+package cn.cyberpeace.mp.cscene.dto;
 
-
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -11,15 +9,17 @@ import java.util.List;
 /**
  * @Description:
  * @Author zhouxinghuai
- * @Date：2022/5/18 16:11
+ * @Date：2022/5/18 17:02
  */
 @Data
 @Builder
-@ApiModel("日志事件类别")
 public class LogEventType {
 
     @ApiModelProperty(value = "名称")
     private String name;
+
+    @ApiModelProperty(value = "编码")
+    private String code;
 
     @ApiModelProperty(value = "描述")
     private String desc;
