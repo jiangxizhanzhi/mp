@@ -16,9 +16,7 @@ public class FlowPortFields extends BaseModelFields {
 
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
-    public static final DynamicFields searchFields = new DynamicFields(FlowPortModel::getServerIp, FlowPortModel::getServerMac,
-            FlowPortModel::getServerPortId, FlowPortModel::getServerGateway, FlowPortModel::getClientIp, FlowPortModel::getClientMac,
-            FlowPortModel::getClientPortId, FlowPortModel::getClientGateway);
+    public static final DynamicFields searchFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowPortModel.class));
 
     public static final DynamicFields orderFields = new DynamicFields(new String[]{}).merge(BaseModelFields.readonlyFields);
 }

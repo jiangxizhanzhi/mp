@@ -19,11 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/org_users")
-public class OrgUserController extends BaseModelController<OrgUserModel, QueryParams, OrgUserService> {
+public class OrgUserController {
 
-    @Autowired
-    public OrgUserController(OrgUserService modelService) {
-        setModelService(modelService);
-    }
 
 }

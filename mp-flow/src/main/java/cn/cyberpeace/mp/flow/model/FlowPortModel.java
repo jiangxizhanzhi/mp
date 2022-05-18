@@ -77,4 +77,18 @@ public class FlowPortModel extends BaseModel {
     @DefaultStr
     private String clientGateway;
 
+    /**
+     * 网络id
+     */
+    @ApiModelProperty(value = "网络id")
+    @DefaultStr
+    private String networkId;
+
+    /**
+     * 流量执行器id
+     */
+    @ApiModelProperty(value = "流量执行器id")
+    @DefaultStr
+    private String actuatorId;
+
 }

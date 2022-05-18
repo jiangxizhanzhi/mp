@@ -134,7 +134,7 @@ public class BaseService {
                 log.info(POST_LOG_INFO, url, body, result);
             }
         }catch (ConnectException e){
-            log.error(POST_LOG_ERROR,url,result,e.getMessage(),e);
+            log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
@@ -162,7 +162,7 @@ public class BaseService {
             }
             model = JsonUtils.toSnakeObject(result,valueType);
         }catch (ConnectException e){
-            log.error(POST_LOG_ERROR,url,result,e.getMessage(),e);
+            log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error(POST_LOG_ERROR,url,body,result,e.getMessage(),e);
@@ -214,7 +214,7 @@ public class BaseService {
             }
             model = JsonUtils.toSnakeObject(result,valueType);
         }catch (ConnectException e){
-            log.error(PUT_LOG_ERROR,url,result,e.getMessage(),e);
+            log.error(PUT_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error(PUT_LOG_ERROR,url,body,result,e.getMessage(),e);
@@ -238,7 +238,7 @@ public class BaseService {
                 log.info(DELETE_LOG_INFO, url, body, result);
             }
         }catch (ConnectException e){
-            log.error(DELETE_LOG_ERROR,url,result,e.getMessage(),e);
+            log.error(DELETE_LOG_ERROR,url,body,result,e.getMessage(),e);
             throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
         } catch (IOException e) {
             log.error(DELETE_LOG_ERROR,url,body,result,e.getMessage(),e);

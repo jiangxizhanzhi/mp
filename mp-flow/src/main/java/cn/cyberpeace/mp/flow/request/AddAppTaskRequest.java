@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 新增app任务请求
@@ -51,6 +52,12 @@ public class AddAppTaskRequest {
         private String srcIpRange;
         private String dstIpRange;
         private List<CapList> capList;
+        // 流量协议
+        private String flowProtocol;
+        // 流量内容
+        private String content;
+        // 倍数,默认为1
+        private Integer mult;
     }
 
     @Data
@@ -80,7 +87,14 @@ public class AddAppTaskRequest {
         AddAppTaskRequest.Specifics specifics = new AddAppTaskRequest.Specifics();
         int duration = flowTaskModel.getCount() * flowTaskModel.getIntervalTime();
         specifics.setDuration(duration);
-        specifics.setSrcIpRange(flowTaskModel.getOriginIps());
+        String[] srcIps = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH);
+        String srcIpRange;
+        if (srcIps.length < 2) {
+            srcIpRange = srcIps[0] + BaseConstants.SHORT_DASH + srcIps[0];
+        } else {
+            srcIpRange = flowTaskModel.getOriginIps();
+        }
+        specifics.setSrcIpRange(srcIpRange);
         String[] targetIps = flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH);
         String dstIpRange;
         if (targetIps.length < 2) {
@@ -90,20 +104,21 @@ public class AddAppTaskRequest {
         }
         specifics.setDstIpRange(dstIpRange);
         specifics.setCapList(Collections.singletonList(capList));
+        specifics.setFlowProtocol(flowTaskModel.getFlowProtocol());
+        specifics.setContent(flowTaskModel.getContent());
+        specifics.setMult(Objects.isNull(flowTaskModel.getMult()) ? 1 : flowTaskModel.getMult());
 
         AddAppTaskRequest.Client client = new AddAppTaskRequest.Client();
         client.setIp(flowPortModel.getClientIp());
         client.setPort(flowPortModel.getClientMac());
         // 目标ip作为客户端网关
-        String clientGw = targetIps[0];
-        client.setDefaultGw(clientGw);
+        client.setDefaultGw(flowPortModel.getClientGateway());
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
         // 目标ip作为服务端网关
-//        String serverGw = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH)[0];
-        server.setDefaultGw(clientGw);
+        server.setDefaultGw(flowPortModel.getServerGateway());
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
         networkConfig.setClient(Collections.singletonList(client));

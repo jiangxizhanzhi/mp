@@ -3,6 +3,11 @@ package cn.cyberpeace.mp.front.admin.business.controller;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.constant.CommonErrorCode;
+import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
+import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.front.admin.business.service.SysConfigCheckService;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
@@ -12,11 +17,9 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.Arrays;
@@ -39,6 +42,13 @@ public class SysConfigController {
 
     @Autowired
     private SysConfigCheckService checkService;
+
+    /**
+     * 文件上传客户端
+     */
+    @Qualifier("fastDfsFileServiceImpl")
+    @Autowired
+    private FileService fileService;
 
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
@@ -79,6 +89,40 @@ public class SysConfigController {
             log.error("update config failed!");
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
         }
+    }
+
+    /**
+     * 系统logo导入
+     *
+     * @param file
+     * @return
+     */
+    @ApiOperation("系统logo导入")
+    @PostMapping(value = "/logo/upload")
+    @ResponseBody
+    public ServiceResult<FileResponseData> logoUpload(@RequestParam(value = "file") MultipartFile file) {
+        if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.IMPORT_SYSTEM_LOGO_LIST)) {
+            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
+        }
+
+        return fileService.uploadFile(file);
+    }
+
+    /**
+     * VPN软件包导入
+     *
+     * @param file
+     * @return
+     */
+    @ApiOperation("VPN软件包导入")
+    @PostMapping(value = "/vpn/upload")
+    @ResponseBody
+    public ServiceResult<FileResponseData> importVPN(@RequestParam(value = "file") MultipartFile file) {
+        if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.IMPORT_VPN_LIST)) {
+            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
+        }
+
+        return fileService.uploadFile(file);
     }
 
 }

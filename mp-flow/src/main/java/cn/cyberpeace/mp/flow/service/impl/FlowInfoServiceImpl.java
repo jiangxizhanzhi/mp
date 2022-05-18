@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -41,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -62,9 +64,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -278,8 +277,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(String id) {
         BackgroundFlowResponse response;
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -302,8 +300,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> queryAttackDetail(String id) {
         AttackFlowResponse response;
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -328,8 +325,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(flowInfoModel, prefixUrl, flowScriptParamModels);
 
             // 下载攻击脚本
-            byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.toString());
-            String code = new String(fileByte, StandardCharsets.UTF_8);
+            String code = FdfsCommon.downloadContent(flowInfoModel.getScriptFile());
             response.setCode(code);
         } else {
             return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
@@ -348,12 +344,19 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
-        if (!addRequest.getFileName().endsWith(".pcap")) {
+        String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
+        if (!addRequest.getFileName().endsWith(".pcap") || !BaseConstants.STR_PCAP.equals(suffix)) {
             return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
         // 上传文件获取路径
-        String filePath = fastDFSClient.upload(addRequest.getPcapFile(), null, FdfsGroupEnum.DEFAULT.toString());
+        String filePath = null;
+        try {
+            filePath = FdfsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+        } catch (IOException e) {
+            log.error("upload pcap file error", e);
+            return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+        }
         addRequest.setPcapFilePath(filePath);
 
         // 请求对象转换
@@ -361,8 +364,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -421,17 +423,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 判断是否有文件名，没有则根据脚本语言默认生成一个
         String fileName;
+        String suffix = addRequest.getSuffix() == 1 ? ".sh" : ".py";
         if (StringUtils.isBlank(addRequest.getFileName())) {
-            fileName = TextUtils.uuid() + (addRequest.getSuffix() == 1 ? ".sh" : ".py");
+            fileName = TextUtils.uuid() + suffix;
             addRequest.setFileName(fileName);
-        } else {
-            fileName = addRequest.getFileName();
         }
 
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(addRequest.getCode().getBytes());
-            String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
+            String filePath = FdfsCommon.upload(is, suffix);
             addRequest.setFilePath(filePath);
         } catch (MpRuntimeException e) {
             log.error("add attack flow error", e);
@@ -453,8 +454,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
         response.setCode(addRequest.getCode());
@@ -487,8 +487,19 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         if (Objects.nonNull(modifyRequest.getPcapFile())) {
+            // 文件后缀校验
+            String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
+            if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+            }
             // 上传文件获取路径
-            String filePath = fastDFSClient.upload(modifyRequest.getPcapFile(), null, FdfsGroupEnum.DEFAULT.toString());
+            String filePath = null;
+            try {
+                filePath = FdfsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
+            } catch (IOException e) {
+                log.error("upload pcap file for update error", e);
+                return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+            }
             modifyRequest.setPcapFilePath(filePath);
         }
 
@@ -497,8 +508,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -561,25 +571,23 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (StringUtils.isNotBlank(modifyRequest.getCode())) {
             // 判断是否有文件名，没有则根据脚本语言默认生成一个
             String fileName;
+            String suffix = null;
+            if (Objects.nonNull(modifyRequest.getSuffix())) {
+                suffix = modifyRequest.getSuffix() == 1 ? ".sh" : ".py";
+            } else {
+                // 没变更suffix时，根据文件名后缀判断之前类型
+                suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? ".sh" : ".py";
+            }
+
             if (StringUtils.isBlank(modifyRequest.getFileName())) {
-                // 文件后缀
-                String suffix = "";
-                if (Objects.nonNull(modifyRequest.getSuffix())) {
-                    suffix = modifyRequest.getSuffix() == 1 ? ".sh" : ".py";
-                } else {
-                    // 没变更suffix时，根据文件名后缀判断之前类型
-                    suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? ".sh" : ".py";
-                }
                 fileName = TextUtils.uuid() + suffix;
                 modifyRequest.setFileName(fileName);
-            } else {
-                fileName = modifyRequest.getFileName();
             }
 
             InputStream is = null;
             try {
                 is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
-                String filePath = fastDFSClient.upload(is, fileName, null, FdfsGroupEnum.DEFAULT.toString());
+                String filePath = FdfsCommon.upload(is, suffix);
                 modifyRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
                 log.error("modify attack flow error", e);
@@ -602,8 +610,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
         response.setCode(modifyRequest.getCode());

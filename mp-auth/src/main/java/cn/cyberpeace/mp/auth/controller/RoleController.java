@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -32,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -43,39 +45,15 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/roles")
-public class RoleController extends BaseModelController<RoleModel, QueryParams, RoleService> {
+public class RoleController {
 
     @Autowired
-    public RoleController(RoleService modelService) {
-        setModelService(modelService);
-    }
+    private RoleService roleService;
+
+    @Autowired
+    private OperateRolePermissionService opRolePermService;
 
 
-    @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
-    @ApiIgnore
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
-    })
-    @PostMapping
-    public ObjServiceResult<RoleModel> create(@RequestBody RoleModel obj, @RequestParam String[] fields) {
-        return super.create(obj, fields);
-    }
-
-
-    @Override
-    @ApiIgnore
-    @ApiOperation(value = "(弃用，建议用/modify) 修改数据", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
-    })
-    @PatchMapping("/{id}")
-    public ObjServiceResult<RoleModel> update(@PathVariable String id, @RequestBody RoleModel obj,
-                                              @RequestParam(required = false) String[] fields) {
-        return super.update(id, obj, fields);
-    }
-
-    @Override
     @ApiOperation("删除指定id角色")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
@@ -83,21 +61,31 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = OpTargetEnums.ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        return super.delete(id);
+        opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
+        return roleService.delete(id);
     }
 
-    @Override
+    @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
-    public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        RoleDto roleDto = getModelService().getRoleDto(id);
+    public ObjServiceResult get(@PathVariable String id) {
+        RoleDto roleDto = roleService.getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleDto);
+    }
+
+    @ApiOperation("获取指定id数据")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "数据id", dataTypeClass = String.class)
+    })
+    @GetMapping
+    public ObjServiceResult<RoleModel> getByParam(@RequestParam String id) {
+        return roleService.get(id).asResult();
     }
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
-        RoleModel roleModel = getModelService().add(createRequest);
+        RoleModel roleModel = roleService.add(createRequest);
         return ServiceResult.success(roleModel);
     }
 
@@ -106,41 +94,15 @@ public class RoleController extends BaseModelController<RoleModel, QueryParams, 
     @PostMapping("modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
-        RoleModel roleModel = getModelService().modify(modifyRequest);
+        RoleModel roleModel = roleService.modify(modifyRequest);
         return ServiceResult.success(roleModel);
     }
 
     @ApiOperation(value = "查询所有角色", notes = "")
     @GetMapping("/all")
-    public ServiceResult<List<RoleModel>> getRoleByTenant() {
-        List<RoleModel> roles = getModelService().listAll();
+    public ServiceResult<List<RoleModel>> listAll() {
+        List<RoleModel> roles = roleService.listAll();
         return ServiceResult.success(roles);
     }
-
-    /*
-    @ApiOperation(value = "根据租户查询所有角色", notes = "")
-    @GetMapping("/bytenant")
-    public ServiceResult<List<RoleModel>> getRoleByTenant(@RequestParam(required = false) String tenant) {
-        List<RoleModel> roles;
-        if (StringUtils.isNotBlank(tenant)) {
-            roles = getModelService().listByTenantId(tenant);
-        } else {
-            roles = getModelService().listAll();
-        }
-        return ServiceResult.success(roles);
-    }
-
-
-    @ApiOperation(value = "分页查询角色列表（附加权限信息，绑定的用户信息）", notes = "")
-    @GetMapping("/page")
-    public ServiceResult getRolesWithUserCnt(RolePageRequest pageRequest) {
-        pageRequest.ensure();
-        PageInfo page = getModelService().getPageWithUserCnt(pageRequest);
-
-        return ResultUtils.pageInfo2ObjServiceResult(page);
-    }
-
-    */
-
 
 }

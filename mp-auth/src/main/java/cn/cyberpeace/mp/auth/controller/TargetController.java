@@ -24,17 +24,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/targets")
-public class TargetController extends BaseModelController<TargetModel, QueryParams, TargetService> {
-
-    @Override
-    public ObjServiceResult<TargetModel> create(@Validated(AddGroup.class) @RequestBody TargetModel obj, @RequestParam(required = false) String[] fields) {
-        return super.create(obj, fields);
-    }
-
-    @Autowired
-    public TargetController(TargetService modelService) {
-        setModelService(modelService);
-    }
+public class TargetController {
 
 
 }

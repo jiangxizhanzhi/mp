@@ -22,7 +22,7 @@ import java.util.List;
 @ModelClass(OrgUserModel.class)
 public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
-    List<UserModel> listUsersByOrgId(@Param("orgId") String orgId);
+    List<UserModel> listUsersByOrgId(@Param("orgId") String orgId, List<String> excludeRoleIds);
 
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
@@ -35,7 +35,8 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
     List<UserModel> listUsers(@Param("orgIds") List<String> orgIds,
                               @Param("userIds") List<String> userIds,
                               @Param("orders") List<String> orders,
-                              @Param("userCondition") UserDto userDto
+                              @Param("userCondition") UserDto userDto,
+                              @Param("excludeRoleIds") List<String> excludeRoleIds
     );
 
     Integer selectUserCnt(@Param("orgId") String orgId);

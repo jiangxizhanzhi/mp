@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
@@ -24,7 +26,9 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.io.IOException;
@@ -39,11 +43,11 @@ import java.util.concurrent.ExecutionException;
  * @Author zhouxinghuai
  * @Date：2022/2/21 17:37
  */
-@ApiIgnore
+//@ApiIgnore
 @Api(value = "SITUATION-TEST", tags = "SITUATION-TEST")
 @Slf4j
-//@RestController
-//@RequestMapping("/situation/test")
+@RestController
+@RequestMapping("/situation/test")
 public class SituationAwareTestController {
 
     @Autowired
@@ -78,6 +82,13 @@ public class SituationAwareTestController {
 
     }
 
+    @GetMapping("/page/netiface")
+    public ListObjServiceResult pageNetifaces(@RequestParam(required = false) String agentName) throws IOException {
+        PageInfo<Netiface> pageInfo = sysCollectorService.pageNetifaces(new CollectorBaseRequest(agentName));
+        log.info("{}", pageInfo);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
 
     @GetMapping("/hardware")
     public ServiceResult info(@RequestParam(required = false) String agentName) throws IOException {
@@ -85,6 +96,15 @@ public class SituationAwareTestController {
         log.info("{}", hardwares);
 
         return ServiceResult.success(hardwares);
+    }
+
+
+    @GetMapping("/os")
+    public ServiceResult osifo(@RequestParam(required = false) String agentName) throws IOException {
+        List<OS> osList = sysCollectorService.getOS(agentName);
+        log.info("{}", osList);
+
+        return ServiceResult.success(osList);
     }
 
 

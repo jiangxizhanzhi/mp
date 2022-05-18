@@ -34,7 +34,6 @@ public class RoleController {
     @Autowired
     private RoleService roleService;
 
-
     @ApiOperation("查询指定id角色（附带权限、用户数）")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),

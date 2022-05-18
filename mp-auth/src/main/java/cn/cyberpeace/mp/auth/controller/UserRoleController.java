@@ -19,11 +19,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/user_roles")
-public class UserRoleController extends BaseModelController<UserRoleModel, QueryParams, UserRoleService> {
-
-    @Autowired
-    public UserRoleController(UserRoleService modelService) {
-        setModelService(modelService);
-    }
+public class UserRoleController {
 
 }

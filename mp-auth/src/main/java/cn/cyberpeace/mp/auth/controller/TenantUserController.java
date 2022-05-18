@@ -19,11 +19,7 @@ import springfox.documentation.annotations.ApiIgnore;
 @Slf4j
 //@RestController
 //@RequestMapping(ControllerConstant.BASE_API_PATH + "/tenant_users")
-public class TenantUserController extends BaseModelController<TenantUserModel, QueryParams, TenantUserService> {
+public class TenantUserController {
 
-    @Autowired
-    public TenantUserController(TenantUserService modelService) {
-        setModelService(modelService);
-    }
 
 }

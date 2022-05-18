@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -76,16 +75,6 @@ public class FdfsClient implements FileClient {
         connectionPool = new GenericObjectPool<>(new ConnectionFactory(trackerClient), poolConfig);
     }
 
-    public String upload(String localFilepath) {
-        try (var connection = getConnection()) {
-            return connection.getStorageClient().upload_file1(localFilepath, null, null);
-        } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs upload local file %s error: %s", localFilepath, e.getMessage());
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-    }
-
     public String upload(InputStream is, long filesize, String fileSuffix) {
         String fdfsFilePath;
         try (is; var connection = getConnection()) {
@@ -102,35 +91,12 @@ public class FdfsClient implements FileClient {
     public void download(String fdfsFilepath, OutputStream os) {
         try (var connection = getConnection()) {
             connection.getStorageClient().download_file1(fdfsFilepath, new DownloadStream(os));
+            os.flush();
         } catch (IOException | MyException e) {
             var msg = String.format("Fdfs download %s to output stream error: %s", fdfsFilepath, e.getMessage());
             log.error(msg);
             throw new MpRuntimeException(msg);
         }
-    }
-
-    public boolean download(String fdfsFilepath, String localFilepath) {
-        try (var connection = getConnection()) {
-            connection.getStorageClient().download_file1(fdfsFilepath, localFilepath);
-        } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs download %s to %s error: %s", fdfsFilepath, localFilepath,
-                    e.getMessage());
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-        return true;
-    }
-
-    public String downloadContent(String fdfsFilepath) {
-        byte[] byteContent;
-        try (var connection = getConnection()) {
-            byteContent = connection.getStorageClient().download_file1(fdfsFilepath);
-        } catch (IOException | MyException e) {
-            var msg = String.format("Fdfs download %s content error: %s", fdfsFilepath, e.getMessage());
-            log.error(msg);
-            throw new MpRuntimeException(msg);
-        }
-        return new String(byteContent, StandardCharsets.UTF_8);
     }
 
     public boolean delete(String fdfsFilepath) {

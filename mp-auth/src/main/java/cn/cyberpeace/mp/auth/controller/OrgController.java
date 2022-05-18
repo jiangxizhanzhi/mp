@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,14 +37,29 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/orgs")
-public class OrgController extends BaseModelController<OrgModel, QueryParams, OrgService> {
+public class OrgController {
 
     @Autowired
-    public OrgController(OrgService modelService) {
-        setModelService(modelService);
+    private OrgService orgService;
+
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping("/{id}")
+    public ObjServiceResult get(@PathVariable String id) {
+        return orgService.get(id).asResult();
     }
 
-    @Override
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping
+    public ObjServiceResult getByParam(@RequestParam String id) {
+        return orgService.get(id).asResult();
+    }
+
     @ApiOperation("创建组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
@@ -50,10 +67,9 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "创建组织", target = OpTargetEnums.ORG)
     @PostMapping
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
-        return super.create(obj, fields);
+        return orgService.create(obj, fields);
     }
 
-    @Override
     @ApiOperation("更新指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -63,10 +79,10 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @PatchMapping("/{id}")
     public ObjServiceResult update(@PathVariable String id, @RequestBody OrgModel obj,
                                       @RequestParam(required = false) String[] fields) {
-        return super.update(id, obj, fields);
+        obj.setId(id);
+        return orgService.update(obj, fields);
     }
 
-    @Override
     @ApiOperation("删除指定id组织")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -74,24 +90,7 @@ public class OrgController extends BaseModelController<OrgModel, QueryParams, Or
     @DeleteMapping("/{id}")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除组织", target = OpTargetEnums.ORG)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
-        return super.delete(id);
+        return orgService.delete(id);
     }
-
-
-    /*
-    @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
-    @GetMapping("/byparent")
-    public ServiceResult getByParent(@RequestParam String parentId) {
-        List<OrgModel> orgs = getModelService().listByParent(parentId);
-        return ServiceResult.builder().source(orgs).build().asResult();
-    }
-
-    @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
-    @GetMapping("/tree")
-    public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
-        List<OrgDto> tree = getModelService().getTree(orgId);
-        return ServiceResult.builder().source(tree).build().asResult();
-    }
-    */
 
 }

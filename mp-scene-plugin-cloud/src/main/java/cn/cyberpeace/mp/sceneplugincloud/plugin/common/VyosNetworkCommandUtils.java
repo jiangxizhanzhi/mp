@@ -22,12 +22,14 @@ import java.util.stream.Collectors;
  */
 public class VyosNetworkCommandUtils {
 
-    private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>() {{
-        this.add(new StaticRouteCmdBuilder());
-        this.add(new OSPFCmdBuilder());
-        this.add(new BGPCmdBuilder());
-        this.add(new RouterNameCmdBuilder());
-    }};
+    private static List<NetworkingCmdBuilder> builderChains = new ArrayList<>();
+
+    static {
+        builderChains.add(new StaticRouteCmdBuilder());
+        builderChains.add(new OSPFCmdBuilder());
+        builderChains.add(new BGPCmdBuilder());
+        builderChains.add(new RouterNameCmdBuilder());
+    }
 
     public static List<String> genOpenDhcpCommands() {
         return List.of("set interface ethernet eth0 address dhcp");

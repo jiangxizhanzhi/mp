@@ -35,4 +35,11 @@ public interface FlowTaskMapper extends BaseModelMapper<FlowTaskModel> {
      */
     int updateTaskInfo(FlowTaskModel flowTaskModel);
 
+    /**
+     * 批量更新流量任务信息
+     * @param taskIds
+     * @return
+     */
+    int batchUpdateTaskStatus(@Param("taskStatus") Integer taskStatus, @Param("runCount") Boolean runCount, @Param("taskIds") List<String> taskIds);
+
 }

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -60,6 +61,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Autowired
     private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
 
+    @Autowired
+    private OperateUserPermissionService opUserPermService;
+
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
 
@@ -72,7 +76,15 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId);
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+
+        return users;
+    }
+
+    @Override
+    public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
+        ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null);
 
         return users;
     }
@@ -93,7 +105,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         UserDto userCondition = new UserDto();
         userCondition.setUsername(likeUname);
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         return users;
     }
 
@@ -125,6 +137,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public boolean additionalBindOrgUsers(String orgId, List<String> userIds) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
+        opUserPermService.checkByTargetUserIds(userIds);
+
         var objResult = orgService.get(orgId).getSource();
         if (objResult == null || objResult.getObj() == null) {
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
@@ -202,7 +216,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         userCondition.setIsExpired(req.getIsExpired());
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition);
+        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

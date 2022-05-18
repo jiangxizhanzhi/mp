@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.TimeCommon;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.flow.model.base.FlowBaseModel;
 import cn.cyberpeace.mp.flow.request.FlowExecuteRequest;
@@ -9,6 +10,8 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 /**
  * @Description: 流量执行实现类
@@ -30,6 +33,7 @@ public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
             JSONObject object = new JSONObject();
             object.put("uuid", request.getUuid());
             object.put("action", request.getAction());
+            object.put("time", TimeCommon.localDateTimeToString(LocalDateTime.now()));
 
             String actuatorTaskRsp = HttpUtils.sendPost(request.getUrlPath(),
                     JSONObject.toJSONString(object));

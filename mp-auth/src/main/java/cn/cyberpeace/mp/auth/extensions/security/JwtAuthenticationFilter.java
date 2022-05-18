@@ -42,16 +42,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private AuthUserDetailsService authUserDetailsService;
 
+    public static String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         String token = JwtCommon.getToken(request);
         if (StringUtils.isNotBlank(token)) {
             UserModel user = JwtCommon.verifyToken(token);
-            // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
-            UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
             UsernamePasswordAuthenticationToken authenticationToken = null;
             if (Objects.nonNull(user)) {
+                // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
+                UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
+
                 // 暂时不用加载权限信息
                  Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
 

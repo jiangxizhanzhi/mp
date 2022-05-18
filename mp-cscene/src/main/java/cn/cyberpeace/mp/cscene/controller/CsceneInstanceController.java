@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -9,7 +10,16 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -25,6 +35,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -34,7 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -96,13 +113,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     private CsceneInstanceNodeFlowActionRequest formatNodeFlowActionRequest(
-            CsceneInstanceNodeFlowActionRequest request, String paramId, String paramNodeId, String paramFlowId) {
+            CsceneInstanceNodeFlowActionRequest request, String paramId, String paramNodeId, String paramFlowId, String sourceIp) {
         if (request == null) {
             request = new CsceneInstanceNodeFlowActionRequest();
         }
         request = (CsceneInstanceNodeFlowActionRequest) formatNodeActionRequest(request, paramId, paramNodeId);
         if (!StringUtils.isEmpty(paramFlowId)) {
             request.setFlowId(paramFlowId);
+        }
+        if (!StringUtils.isEmpty(sourceIp)) {
+            request.setSourceIp(sourceIp);
         }
         return request;
     }
@@ -221,9 +241,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> startFlow(@RequestParam(required = false) String id,
                                             @RequestParam(required = false) String nodeId,
                                             @RequestParam(required = false) String flowId,
+                                            @RequestParam(required = false) String sourceIp,
                                             @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
-        request = formatNodeFlowActionRequest(request, id, nodeId, flowId);
-        return modelService.startFlow(request.getId(), request.getNodeId(), request.getFlowId(),
+        request = formatNodeFlowActionRequest(request, id, nodeId, flowId, sourceIp);
+        return modelService.startFlow(request.getId(), request.getNodeId(), request.getFlowId(), request.getSourceIp(),
                 request.getContext()).asResult();
     }
 
@@ -238,21 +259,42 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                            @RequestParam(required = false) String nodeId,
                                            @RequestParam(required = false) String flowId,
                                            @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
-        request = formatNodeFlowActionRequest(request, id, nodeId, flowId);
+        request = formatNodeFlowActionRequest(request, id, nodeId, flowId, null);
         return modelService.stopFlow(request.getId(), request.getNodeId(), request.getFlowId(),
                 request.getContext()).asResult();
+    }
+
+    @ApiOperation("场景更新流量任务参数")
+    @PostMapping(value = "/update_flow_params")
+    public ServiceResult<Boolean> updateFlowParams(@RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
+        if (request == null || request.getId() == null || request.getNodeId() == null || request.getFlowId() == null) {
+            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+        }
+        return modelService.updateFlowParams(request.getId(), request.getNodeId(),
+                        request.getFlowId(), request.getSourceIp(), request.getContext())
+                .asResult();
     }
 
     @ApiOperation("场景实例批量启动节点流量")
     @PostMapping(value = "/start_flows")
     public ServiceResult<Boolean> startFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return new ServiceResult<>();
+        return modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
+                request.getContext(), request.getRunType()).asResult();
     }
 
     @ApiOperation("场景实例批量停止节点流量")
     @PostMapping(value = "/stop_flows")
     public ServiceResult<Boolean> stopFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return new ServiceResult<>();
+        return modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
+                request.getContext()).asResult();
+    }
+
+    @ApiOperation("场景实例查询节点流量执行记录")
+    @PostMapping(value = "/query_flow_records")
+    public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(@RequestBody CsceneInstanceNodeFlowRecordsRequest request) {
+        SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
+        return modelService.queryFlowRecords(request.getId(), request.getNodeId(), request.getFlowId(),
+                request.getContext(), request.getIsBatch()).asResult();
     }
 
     @ApiOperation("场景实例启动节点探针")

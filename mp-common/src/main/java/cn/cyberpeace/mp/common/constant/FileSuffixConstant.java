@@ -40,4 +40,34 @@ public interface FileSuffixConstant {
         add("avif");
     }};
 
+    /**
+     * 导入用户头像支持后缀：png，jfif，pjpeg，jpeg，pjp，jpg
+     */
+    List<String> UPLOAD_HEAD_IMAGE_LIST = new ArrayList<>(){{
+        add("png");
+        add("jfif");
+        add("pjpeg");
+        add("jpeg");
+        add("pjp");
+        add("jpg");
+    }};
+
+    /**
+     * 导入系统logo支持后缀：jpg，png，jpeg
+     */
+    List<String> IMPORT_SYSTEM_LOGO_LIST = new ArrayList<>(){{
+        add("jpg");
+        add("png");
+        add("jpeg");
+    }};
+
+
+    /**
+     * 导入VPN软件包支持后缀：zip，rar
+     */
+    List<String> IMPORT_VPN_LIST = new ArrayList<>(){{
+        add("zip");
+        add("rar");
+    }};
+
 }

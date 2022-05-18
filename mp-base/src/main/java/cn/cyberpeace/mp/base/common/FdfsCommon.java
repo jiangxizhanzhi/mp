@@ -30,16 +30,20 @@ public class FdfsCommon {
         return StringUtils.joinWith("/", baseAppConfig.getFdfsInnerHttpServer(), fdfsFilepath);
     }
 
-    public static String upload(String localFilepath) {
-        return fdfsClient.upload(localFilepath);
-    }
-
     public static String uploadContent(String content) {
         return fdfsClient.uploadContent(content);
     }
 
     public static String uploadContent(String content, String fileSuffix) {
         return fdfsClient.uploadContent(content, fileSuffix);
+    }
+
+    public static String uploadRawContent(byte[] content, String fileSuffix) {
+        return fdfsClient.uploadRawContent(content, fileSuffix);
+    }
+
+    public static String upload(String localFilepath) {
+        return fdfsClient.upload(localFilepath);
     }
 
     public static String upload(InputStream is) {
@@ -68,6 +72,10 @@ public class FdfsCommon {
 
     public static String downloadContent(String fdfsFilepath) {
         return fdfsClient.downloadContent(fdfsFilepath);
+    }
+
+    public static byte[] downloadRawContent(String fdfsFilepath) {
+        return fdfsClient.downloadRawContent(fdfsFilepath);
     }
 
     public static boolean delete(String fdfsFilepath) {
