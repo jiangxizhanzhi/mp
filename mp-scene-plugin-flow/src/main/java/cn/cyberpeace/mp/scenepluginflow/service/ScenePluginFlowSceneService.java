@@ -56,51 +56,39 @@ public class ScenePluginFlowSceneService {
 
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String sceneId, String nodeId, String flowId,
                                                                     SceneContextBO context, Boolean isBatch) {
-        List<FlowRecords> flowRecords = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            FlowRecords records = new FlowRecords();
-            records.setId(i);
-            records.setCreateTime("2022-5-17 18:33");
-            records.setGroupCount(i);
-            records.setObytes(i + 10);
-            records.setOerrors(i);
-            records.setOpackets(i);
-            records.setTaskUuid("" + i);
-            records.setRecordTime(records.getCreateTime());
-            records.setSecond(i + 11);
-            records.setTxBps(20.20 + i);
-            flowRecords.add(records);
+        var sceneHandler = new SceneHandler(sceneId, null, false, context);
+        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var flowElement = pluginHandler.getElement(nodeId);
+        if (flowElement == null) {
+            return new ServiceResult<>();
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(pluginHandler.getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+        if (flows == null) {
+            return new ServiceResult<>();
+        }
+
+        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+        var flow = flowMap.getOrDefault(flowId, null);
+        if (flow == null) {
+            return new ServiceResult<>();
+        }
+        ServiceResult<FlowRecordsResponse> result;
+        if (isBatch) {
+            result = flowService3.queryFlowRecords(flowElement.getSrcElement().getEid());
+        } else {
+            result = flowService3.queryFlowRecords(flow.getTaskId());
         }
         SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
-        response.setFlowRecordsList(flowRecords);
-        return new ServiceResult<>(response);
-//        var sceneHandler = new SceneHandler(sceneId, null, false, context);
-//        FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-//        var flowElement = pluginHandler.getElement(nodeId);
-//        if (flowElement == null) {
-//            return new ServiceResult<>();
-//        }
-//
-//        List<Flow> flows = SceneFlowCacheUtil.get(pluginHandler.getSourceSceneId(), nodeId);
-//        flowElement.setFlows(flows);
-//        if (flows == null) {
-//            return new ServiceResult<>();
-//        }
-//
-//        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
-//        var flow = flowMap.getOrDefault(flowId, null);
-//        if (flow == null) {
-//            return new ServiceResult<>();
-//        }
-//        ServiceResult<FlowRecordsResponse> result;
-//        if (isBatch) {
-//            result = flowService3.queryFlowRecords(nodeId);
-//        } else {
-//            result = flowService3.queryFlowRecords(flow.getTaskId());
-//        }
-//        SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
-//        response.setFlowRecordsList(result.getData().getFlowRecordsList());
-////        return new ServiceResult<>(response);
+        if (result.isSuccess()) {
+            response.setResult(result.getData().getResult());
+            response.setStatus(result.getData().getStatus());
+            response.setFlowRecordsList(result.getData().getFlowRecordsList());
+            return new ServiceResult<>(response);
+        } else {
+            return new ServiceResult<>(null, result.getServiceCode(), result.getDetail());
+        }
     }
 
 }
