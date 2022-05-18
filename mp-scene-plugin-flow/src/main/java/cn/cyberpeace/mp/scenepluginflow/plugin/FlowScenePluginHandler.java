@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin;
 
-import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
-import cn.cyberpeace.mp.scenepluginflow.bo.*;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementBO;
+import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneElementPortBO;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.common.SceneHandlerUtils;
@@ -118,7 +120,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         deleteHandler.delete();
     }
 
-    public boolean startFlow(String nodeId, String flowId, boolean async) {
+    public boolean startFlow(String nodeId, String flowId, String sourceIp, boolean async) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
@@ -137,7 +139,8 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flag = handlerUtils.startFlow(flowElement, flow, () -> {
+        String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
+        var flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, () -> {
             asyncAckElementChanged(nodeId, true);
         }, async, () -> {
             asyncAckElementChanged(nodeId, true);
@@ -228,5 +231,24 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         var flag = handlerUtils.stopFlows(newFlows);
         asyncAckElementChanged(nodeId, true);
         return flag;
+    }
+
+    public Flow updateFlowParams(String nodeId, String flowId, String sourceIp) {
+        var flowElement = getElement(nodeId);
+        if (flowElement == null) {
+            return null;
+        }
+
+        List<Flow> flows = SceneFlowCacheUtil.get(getSourceSceneId(), nodeId);
+        flowElement.setFlows(flows);
+        if (flows == null) {
+            return null;
+        }
+        Flow flow = flows.stream().filter(f -> flowId.equals(f.getId())).findFirst().get();
+        if (flow != null) {
+            flow.setSourceIp(sourceIp);
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
+        return flow;
     }
 }
