@@ -356,7 +356,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
     }
 
-    public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, CsceneContextBO context) {
+    public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
@@ -368,7 +368,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ServiceResult<>(false);
         }
 
-        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId,
+        return scenePluginFlowSceneService.startFlow(sceneId, toNodeId, flowId, sourceIp,
                 context == null ? null : context.toSceneContext());
     }
 
@@ -386,6 +386,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         return scenePluginFlowSceneService.stopFlow(sceneId, toNodeId, flowId,
                 context == null ? null : context.toSceneContext());
+    }
+
+    public ServiceResult<Boolean> updateFlowParams(String id, String nodeId, String flowId, String sourceIp, CsceneContextBO context) {
+        CsceneContextHolder.setCsceneInstanceId(id);
+        if (context != null) {
+            context.loadTransparentContext();
+        }
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ServiceResult<>(false);
+        }
+
+        return scenePluginFlowSceneService.updateFlowParams(sceneId, nodeId, flowId, sourceIp, context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<Boolean> startFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,

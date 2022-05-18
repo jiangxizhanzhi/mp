@@ -7,4 +7,6 @@ import lombok.Data;
 public class CsceneInstanceNodeFlowActionRequest extends CsceneInstanceNodeActionRequest {
     @ApiModelProperty(value = "流量id")
     private String flowId;
+    @ApiModelProperty(value = "源ip")
+    private String sourceIp;
 }

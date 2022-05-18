@@ -33,6 +33,8 @@ public class Flow {
     @ApiModelProperty(value = "流量脚本参数列表")
     @Valid
     private List<FlowScriptParam> scriptParamModels;
+    @ApiModelProperty(value = "源ip")
+    private String sourceIp;
     @ApiModelProperty(value = "流量分类")
     private Integer category;
 
