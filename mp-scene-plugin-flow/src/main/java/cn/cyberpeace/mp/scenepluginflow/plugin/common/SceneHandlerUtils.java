@@ -193,7 +193,7 @@ public class SceneHandlerUtils {
         Callable<Boolean> start = () -> {
             String flowTaskId;
             try {
-                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, flowId, StringUtils.EMPTY, flowIp, null, null, null, flow, finalIp);
+                flowTaskId = flowExecutor.createFlow(executorId, flowNetworkId, srcElement.getEid(), flowId, StringUtils.EMPTY, flowIp, null, null, null, flow, finalIp);
                 log.info("flowExecutor createFlow success:[{}]", flowTaskId);
             } catch (Exception e) {
                 errorFLow(flow, e.getMessage());
@@ -330,7 +330,7 @@ public class SceneHandlerUtils {
         final String flowNetworkId = networkId;
         final String flowIp = ip;
         String finalIp = ip;
-        String nodeId = flowElement.getSrcElement().getId();
+        String nodeEid = flowElement.getSrcElement().getEid();
         Callable<Boolean> start = () -> {
             List<FlowTaskModel> flowTaskModels;
             //构建批量创建流量任务参数
@@ -338,7 +338,7 @@ public class SceneHandlerUtils {
             newFlows.forEach(flow -> {
                 AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
                         StringUtils.EMPTY, flowIp, null, null, null, flow.getFlow(), finalIp,
-                        flow.getSourceIp(), nodeId);
+                        flow.getSourceIp(), nodeEid);
                 requests.add(request);
             });
             try {

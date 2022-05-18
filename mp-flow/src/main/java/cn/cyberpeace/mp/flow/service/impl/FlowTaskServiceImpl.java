@@ -674,7 +674,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         }
 
         JSONArray rows = this.queryTaskStatus(Collections.singletonList(thirdTaskId), CommonUtil.getHostUrl(flowActuatorModel.getIp()));
-        if (Objects.nonNull(rows)) {
+        if (CollectionUtils.isNotEmpty(rows)) {
             List<FlowRecords> flowRecordsList = new ArrayList<>();
             JSONArray flowRecordsArray = rows.getJSONObject(0).getJSONArray("flow_records");
             // 流量运行状态：0 初始化， 1 运行中， 2 停止中， 3 已停止， 4 未启动过
@@ -760,6 +760,15 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
+        if (StringUtils.isNotBlank(flowTaskModel.getOriginIps())) {
+            // 更新来源ip时，封装成范围格式
+            String[] srcIps = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH);
+            String srcIpRange;
+            if (srcIps.length < 2) {
+                srcIpRange = srcIps[0] + BaseConstants.SHORT_DASH + srcIps[0];
+                flowTaskModel.setOriginIps(srcIpRange);
+            }
+        }
         return getModelMapper().updateTaskInfo(flowTaskModel);
     }
 
