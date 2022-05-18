@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -18,6 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +41,24 @@ public class OrgController {
 
     @Autowired
     private OrgService orgService;
+
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping("/{id}")
+    public ObjServiceResult get(@PathVariable String id) {
+        return orgService.get(id).asResult();
+    }
+
+    @ApiOperation(value = "查询指定id数据", notes = "")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
+    })
+    @GetMapping
+    public ObjServiceResult getByParam(@RequestParam String id) {
+        return orgService.get(id).asResult();
+    }
 
     @ApiOperation("创建组织")
     @ApiImplicitParams({
