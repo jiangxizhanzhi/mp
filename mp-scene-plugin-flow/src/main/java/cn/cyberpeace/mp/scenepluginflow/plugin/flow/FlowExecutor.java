@@ -50,7 +50,7 @@ public class FlowExecutor {
         flowService2.delExecutor(executorId);
     }
 
-    public String createFlow(String executorId, String targetNetId, String flowId, String fromIps, String toIps,
+    public String createFlow(String executorId, String targetNetId, String nodeId, String flowId, String fromIps, String toIps,
                              Integer delay, Integer count, Integer interval, Flow flow, String instanceIp) {
         var addFlowTaskRequest = new AddFlowTaskRequest();
         addFlowTaskRequest.setActuatorId(executorId);
@@ -60,6 +60,7 @@ public class FlowExecutor {
         addFlowTaskRequest.setTargetIps(toIps);
         addFlowTaskRequest.setTitle(TextUtils.uuid());
         addFlowTaskRequest.setScriptParamModels(new ArrayList<>());
+        addFlowTaskRequest.setNodeId(nodeId);
         boolean ipParamLoaded = false;
         if (CollectionUtils.isNotEmpty(flow.getScriptParamModels())) {
             for (Flow.FlowScriptParam param : flow.getScriptParamModels()) {
