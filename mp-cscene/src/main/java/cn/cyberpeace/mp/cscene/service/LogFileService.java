@@ -47,7 +47,7 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    private WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
+    public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
 
 
     /**
