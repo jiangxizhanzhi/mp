@@ -128,6 +128,11 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+    authenticate:
+      urls:
+        - /sys/notice/**
+        - /systemOperation/**
+        - /devops/log/operate/page
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
