@@ -47,7 +47,7 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
+    //public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
 
 
     /**
@@ -75,8 +75,8 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
-        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
+        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
