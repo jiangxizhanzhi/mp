@@ -88,14 +88,14 @@ public class UserUtils {
         if (Objects.isNull(authentication)) {
             return null;
         }
-        log.info("authentication:{}  authentication type:{}", authentication, authentication.getClass());
+        log.info("authentication type:{}", authentication.getClass());
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
             user = ((AuthUserDetails) principal).getUser();
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.error("Login account type is Client:{}, return null!", principal);
+            log.error("Login account type is Client:{}, return null!");
             user = null;
         }
 
