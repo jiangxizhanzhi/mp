@@ -61,6 +61,8 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
                 var clientAuthenticationToken = new ClientAuthenticationToken(clientDetails, clientSecret, authoritySet);
                 clientAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(clientAuthenticationToken);
+
+                request.setAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER, Boolean.TRUE);
             }
         }
 
