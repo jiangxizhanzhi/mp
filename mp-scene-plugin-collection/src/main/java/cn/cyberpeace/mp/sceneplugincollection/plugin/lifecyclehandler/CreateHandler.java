@@ -130,10 +130,11 @@ public class CreateHandler extends HandlerCommon {
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
 
+            var sceneId = getPluginHandler().getSrcScene().getEid();
             // 绑定网络端口到流量采集器
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
-                getFlowCollector().bindNetworkPorts(flowCollectorId, new ArrayList<>(vmInstanceIds),
+                getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds),
                         new ArrayList<>(containerInstanceIds));
             });
         }

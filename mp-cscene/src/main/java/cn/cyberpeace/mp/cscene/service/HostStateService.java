@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementNetiface;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
@@ -19,12 +20,14 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -322,6 +325,34 @@ public class HostStateService {
         return listResult;
     }
 
+    /**
+     * 分页查询网卡信息
+     * @param listPageInfoQueryParams
+     * @return
+     */
+    public ListObjServiceResult<ElementNetiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
+        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+            return new ListObjServiceResult(new ListObjResult()).asResult();
+        }
+
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
+        List<ElementNetiface> elementNetifaces = new ArrayList<>();
+        if (Objects.nonNull(netifacesResult.getSource())) {
+            List<Netiface> netifaceList = netifacesResult.getSource().getList();
+            netifaceList.forEach(n -> {
+                ElementNetiface eNetiface = new ElementNetiface();
+                BeanUtils.copyProperties(n, eNetiface);
+                // todo 网卡IP地址
+                eNetiface.setIp("127.0.0.1");
+                elementNetifaces.add(eNetiface);
+            });
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult<>(elementNetifaces, netifacesResult.getSource().getTotal()).asResult()).asResult();
+    }
 
 
     private void checkListPageParams(ListPageInfoQueryParams params) {

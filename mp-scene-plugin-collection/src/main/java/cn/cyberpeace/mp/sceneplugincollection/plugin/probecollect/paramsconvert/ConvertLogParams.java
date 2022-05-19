@@ -37,12 +37,12 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
         if (probe.getDisabled()) {
             return new ArrayList<>();
         }
-        if (ProbeConstant.ProbeId.LOG_ID.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
+        if (ProbeConstant.ProbeId.LOG_FILE.equals(probe.getId()) && (probe.getCollectPath() == null || probe.getCollectPath().isEmpty())) {
             return new ArrayList<>();
         }
         int i = 1;
         //日志文件或日志路径探针单独处理
-        if (ProbeConstant.ProbeId.LOG_ID.equals(probe.getId())) {
+        if (ProbeConstant.ProbeId.LOG_FILE.equals(probe.getId())) {
             //每有一个路径添加一个参数
             for (String path : probe.getCollectPath()) {
                 WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();

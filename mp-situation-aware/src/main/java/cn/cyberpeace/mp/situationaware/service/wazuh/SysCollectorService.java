@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
@@ -103,6 +104,36 @@ public class SysCollectorService extends RequestProcessor {
 
         return pageInfo;
     }
+
+
+    /**
+     * 查询网卡列表
+     *
+     * @return 进程集合
+     */
+    public PageInfo<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
+        String agentId = agentService.getSingleAgentId(collectorBaseRequest.getAgentName());
+        if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
+            return new PageInfo<>(new ArrayList<>());
+        }
+        var requestUri = "/syscollector/" + agentId + "/netiface";
+        var requestUrl = wazuhUrl + requestUri;
+
+        List<NameValuePair> params = processRequestParams(collectorBaseRequest);
+
+        log.info("requestUrl:{}", requestUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
+        BaseResponse<Netiface> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<Netiface> netifaces = result.getData().getAffectedItems();
+        PageInfo pageInfo = new PageInfo(netifaces);
+        pageInfo.setTotal(result.getData().getTotalAffectedItems());
+
+        return pageInfo;
+    }
+
 
     /**
      * @param

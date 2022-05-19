@@ -28,11 +28,12 @@ public class FlowCollector {
         return networkTrafficGroupService.addArkimeImageInstance(null);
     }
 
-    public void bindNetworkPorts(String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
+    public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
         var request = new NetworkTrafficMirrorRequest();
         request.setArkimeInstanceNames(List.of(collectorId));
         request.setVmInstanceIds(vmInstanceIds);
         request.setContainerInstanceIds(containerInstanceIds);
+        request.setSceneId(sceneId);
         networkTrafficGroupService.doBindingNetworkTrafficMirror(request);
     }
 
