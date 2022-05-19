@@ -137,7 +137,7 @@ public class ElementMonitorController {
         List<String> types = new ArrayList<>(CollectionUtil.toList("VNC", "SNMP", "HTTP", "UPnP-HTTPU", "unknown", "ASF-RMCP", "SSH", "MySQL", "ASF", "HTTPS"));
         for (int i = 0; i < 10; i++) {
             ElementVulnerabilityCountInfo vulnerabilityCountInfo = new ElementVulnerabilityCountInfo();
-            vulnerabilityCountInfo.setType(types.get(i));
+            vulnerabilityCountInfo.setPackageName(types.get(i));
             vulnerabilityCountInfo.setCount(i + 10);
             vulnerabilityCountInfos.add(vulnerabilityCountInfo);
         }
@@ -154,7 +154,7 @@ public class ElementMonitorController {
         List<ElementVulnerabilityPieChartInfo> vulnerabilityPieChartInfos = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             ElementVulnerabilityPieChartInfo vulnerabilityPieChartInfo = new ElementVulnerabilityPieChartInfo();
-            vulnerabilityPieChartInfo.setLevel(i);
+            vulnerabilityPieChartInfo.setSeverity("low");
             vulnerabilityPieChartInfo.setPercent(6.7 * i);
             vulnerabilityPieChartInfos.add(vulnerabilityPieChartInfo);
         }
@@ -172,27 +172,27 @@ public class ElementMonitorController {
         for (int i = 0; i < 5; i++) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName("node_" + i);
-            vulnerabilityInfo.setLevel(i);
-            vulnerabilityInfo.setDescription("漏洞描述" + i);
-            vulnerabilityInfo.setLogo("logo_" + i);
+            vulnerabilityInfo.setSeverity("High");
+            vulnerabilityInfo.setTitle("漏洞描述" + i);
+            vulnerabilityInfo.setCve("logo_" + i);
             vulnerabilityInfo.setTime(LocalDateTime.now());
             vulnerabilityInfos.add(vulnerabilityInfo);
         }
         for (int i = 0; i < 5; i++) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName("node_1" + i);
-            vulnerabilityInfo.setLevel(i);
-            vulnerabilityInfo.setDescription("漏洞影响" + i);
-            vulnerabilityInfo.setLogo("logo_1" + i);
+            vulnerabilityInfo.setSeverity("low");
+            vulnerabilityInfo.setTitle("漏洞影响" + i);
+            vulnerabilityInfo.setCve("logo_1" + i);
             vulnerabilityInfo.setTime(LocalDateTime.now());
             vulnerabilityInfos.add(vulnerabilityInfo);
         }
         for (int i = 0; i < 5; i++) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName("node_2" + i);
-            vulnerabilityInfo.setLevel(i);
-            vulnerabilityInfo.setDescription("漏洞影响描述" + i);
-            vulnerabilityInfo.setLogo("logo_2" + i);
+            vulnerabilityInfo.setSeverity("critical");
+            vulnerabilityInfo.setTitle("漏洞影响描述" + i);
+            vulnerabilityInfo.setCve("logo_2" + i);
             vulnerabilityInfo.setTime(LocalDateTime.now());
             vulnerabilityInfos.add(vulnerabilityInfo);
         }
