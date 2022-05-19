@@ -97,7 +97,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_file"));
+        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_file")).asResult();
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
@@ -106,7 +106,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_file")));
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_file"))).asResult();
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -115,7 +115,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_registry"));
+        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_registry")).asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
@@ -124,7 +124,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_registry")));
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_registry"))).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
@@ -142,7 +142,7 @@ public class ElementMonitorController {
             vulnerabilityCountInfos.add(vulnerabilityCountInfo);
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityCountInfos, vulnerabilityCountInfos.size()));
+        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityCountInfos, vulnerabilityCountInfos.size()).asResult()).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞饼状图")
@@ -159,7 +159,7 @@ public class ElementMonitorController {
             vulnerabilityPieChartInfos.add(vulnerabilityPieChartInfo);
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityPieChartInfos, vulnerabilityPieChartInfos.size()));
+        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityPieChartInfos, vulnerabilityPieChartInfos.size()).asResult()).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞列表")
@@ -197,7 +197,7 @@ public class ElementMonitorController {
             vulnerabilityInfos.add(vulnerabilityInfo);
         }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityInfos, vulnerabilityInfos.size()));
+        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityInfos, vulnerabilityInfos.size()).asResult()).asResult();
     }
 
 }

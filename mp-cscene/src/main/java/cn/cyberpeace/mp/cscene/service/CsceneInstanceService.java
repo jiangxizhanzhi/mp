@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
@@ -39,6 +40,8 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
@@ -69,6 +72,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -387,8 +391,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeIds = sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList());
         }
         Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
-        CollectionScenePluginHandler scenePluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        scenePluginHandler.getElementMap().values().forEach(e -> {
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        pluginHandler.getElementMap().values().forEach(e -> {
             Map<String, String> probeId2Name = new HashMap<>();
             e.getProbes().forEach(probe -> {
                 probeId2Name.put(probe.getId(), probe.getName());
@@ -396,8 +401,24 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeId2ProbeNameMap.put(e.getSrcElement().getId(), probeId2Name);
         });
         List<CollectionHostEventBO> result = new ArrayList<>();
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        if (queryParams.getStartTime() == null) {
+            startTime = sceneHandler.getScene().getCreateTime();
+        } else {
+            startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
+        }
+        if (queryParams.getEndTime() == null) {
+            endTime = LocalDateTime.now();
+        } else {
+            endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
+        }
         if (probeId != null) {
             for (String nodeId : nodeIds) {
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
+                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
+                    continue;
+                }
                 var element = sceneHandler.getElement(nodeId);
                 Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
                 List<?> res = null;
@@ -408,12 +429,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     //操作系统信息
                     BaseSceneElementRequest request = new BaseSceneElementRequest();
                     request.setSceneId(id);
-                    request.setElementIds(CollectionUtil.toList(element.getEid()));
+                    request.setElementIds(CollectionUtil.toList(element.getId()));
                     res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
                 } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
                     //网络连接信息
                     WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
                     request.setAgentNames(CollectionUtil.toList(element.getEid()));
+                    request.setStartTime(startTime);
+                    request.setEndTime(endTime);
                     res = dataCollectionService.queryNetConnEventsWithTimeRange(request);
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
@@ -445,7 +468,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     //todo 查询自定义探针信息
                 }
                 if (res == null) {
-                    return new ListObjServiceResult<>();
+                    continue;
                 }
                 res.forEach(r -> {
                     CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
@@ -460,6 +483,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         } else {
             for (String nodeId : nodeIds) {
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
+                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
+                    continue;
+                }
                 //mock数据
                 var element = sceneHandler.getElement(nodeId);
                 for (int i = 0; i < 5; i++) {
@@ -469,7 +496,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     hostEventBO.setNodeName(element.getName());
                     hostEventBO.setProbeId("probeId_" + i);
                     hostEventBO.setProbeName("probeName_" + i);
-                    hostEventBO.setContent(JsonCommon.beanToMap("content" + i));
                     result.add(hostEventBO);
                 }
             }
