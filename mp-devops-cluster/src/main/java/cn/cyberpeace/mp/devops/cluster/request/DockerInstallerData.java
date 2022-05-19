@@ -34,6 +34,12 @@ public class DockerInstallerData implements Serializable {
     }
 
     /**
+     * 文件地址
+     */
+    @ApiModelProperty(value = "文件地址路径")
+    private String file;
+
+    /**
      * 临时文件ID
      */
     @ApiModelProperty("临时文件ID")

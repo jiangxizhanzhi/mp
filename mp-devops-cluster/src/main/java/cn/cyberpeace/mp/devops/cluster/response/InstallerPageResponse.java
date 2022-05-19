@@ -58,4 +58,10 @@ public class InstallerPageResponse extends BaseCloudPlatformResponse{
      */
     @ApiModelProperty("启动参数")
     private List<StartUpParameter> startUpParameterList;
+
+    /**
+     * 文件地址
+     */
+    @ApiModelProperty(value = "文件地址")
+    private String file;
 }
