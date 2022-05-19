@@ -390,9 +390,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (nodeIds == null || nodeIds.isEmpty()) {
             nodeIds = sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList());
         }
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        //非虚拟机和容器节点不支持探针采集
+        for (String nodeId : nodeIds) {
+            var cloudElement = cloudPluginHandler.getElement(nodeId);
+            if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&
+                    cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                nodeIds.remove(nodeId);
+            }
+        }
         Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         pluginHandler.getElementMap().values().forEach(e -> {
             Map<String, String> probeId2Name = new HashMap<>();
             e.getProbes().forEach(probe -> {
@@ -415,10 +423,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         if (probeId != null) {
             for (String nodeId : nodeIds) {
-                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
-                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
-                    continue;
-                }
                 var element = sceneHandler.getElement(nodeId);
                 Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
                 List<?> res = null;
@@ -465,7 +469,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     //日志信息不支持查询
                     return new ListObjServiceResult<>();
                 } else {
-                    //todo 查询自定义探针信息
+                    //自定义探针信息
+                    WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+                    request.setAgentNames(CollectionUtil.toList(element.getEid()));
+                    request.setStartTime(startTime);
+                    request.setEndTime(endTime);
+                    res = dataCollectionService.getCustomProbeCollectData(request, probeId);
                 }
                 if (res == null) {
                     continue;
@@ -483,10 +492,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         } else {
             for (String nodeId : nodeIds) {
-                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
-                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
-                    continue;
-                }
                 //mock数据
                 var element = sceneHandler.getElement(nodeId);
                 for (int i = 0; i < 5; i++) {
@@ -496,6 +501,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     hostEventBO.setNodeName(element.getName());
                     hostEventBO.setProbeId("probeId_" + i);
                     hostEventBO.setProbeName("probeName_" + i);
+                    hostEventBO.setTime(LocalDateTime.now());
                     result.add(hostEventBO);
                 }
             }
