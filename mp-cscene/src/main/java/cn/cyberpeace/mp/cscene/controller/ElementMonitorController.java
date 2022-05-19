@@ -172,7 +172,7 @@ public class ElementMonitorController {
         for (int i = 0; i < 5; i++) {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName("node_" + i);
-            vulnerabilityInfo.setSeverity("High");
+            vulnerabilityInfo.setSeverity("high");
             vulnerabilityInfo.setTitle("漏洞描述" + i);
             vulnerabilityInfo.setCve("logo_" + i);
             vulnerabilityInfo.setTime(LocalDateTime.now());
