@@ -530,6 +530,7 @@ public class CreateHandler extends HandlerCommon {
                         installer.setDocker(true);
                         installer.setFile(p.getDockerInstallerData().getDockerUrl());
                         installer.setName(p.getDockerInstallerData().getUserFilename());
+                        installer.setFilePathPrefix(CloudSingleton.cloudAppConfig.getQuickCreateDockerResourceMetaServer());
                         if (StringUtils.isEmpty(installer.getName())) {
                             installer.setName(FileNameUtil.getName(installer.getFile()));
                         }

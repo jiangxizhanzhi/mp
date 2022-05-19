@@ -117,6 +117,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.ignore_delete_exception:true}")
     private Boolean ignoreDeleteException;
 
+    @Value("${mp.sceneplugincloud.quick_create_docker_resource_metaserver:http://169.254.169.254/installer_upload}")
+    private String quickCreateDockerResourceMetaServer;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
