@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.common;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.List;
  */
 @Data
 @Builder
+@ApiModel
 public class CollectionType {
 
     public static final Integer TYPE_CHANGE_EVENT_FILE = 0;

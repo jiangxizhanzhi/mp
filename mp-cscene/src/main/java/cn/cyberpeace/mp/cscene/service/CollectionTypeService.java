@@ -62,9 +62,9 @@ public class CollectionTypeService {
      */
     private CollectionType logEvent(String code, Integer type) {
         CollectionType logEvent = CollectionType.builder().name("日志事件").code(code).type(-1).build();
-        CollectionType osType = logEventOSType(code, type);
-        CollectionType app = logEventApp(code, type);
-        CollectionType securitySystem = logEventSecuritySystem(code, type);
+        CollectionType osType = logEventOSType(code + "01", type);
+        CollectionType app = logEventApp(code + "02", type);
+        CollectionType securitySystem = logEventSecuritySystem(code + "03", type);
         logEvent.setChildren(Arrays.asList(osType, app, securitySystem));
         return logEvent;
     }
@@ -76,12 +76,12 @@ public class CollectionTypeService {
     private CollectionType logEventOSType(String code, Integer type) {
         CollectionType osType = CollectionType.builder().name("操作系统日志").code(code).type(-1).build();
 
-        CollectionType windows = CollectionType.builder().name("Windows").code("0101").type(type).build();
-        CollectionType linux = CollectionType.builder().name("Linux").code("0102").type(type).build();
-        CollectionType cisco = CollectionType.builder().name("Cisco").code("0103").type(type).build();
-        CollectionType hp = CollectionType.builder().name("HP").code("0104").type(type).build();
-        CollectionType freebsd = CollectionType.builder().name("FreeBSD").code("0105").type(type).build();
-        CollectionType junos = CollectionType.builder().name("Junos").code("0106").type(type).build();
+        CollectionType windows = CollectionType.builder().name("Windows").code(code + "01").type(type).build();
+        CollectionType linux = CollectionType.builder().name("Linux").code(code + "02").type(type).build();
+        CollectionType cisco = CollectionType.builder().name("Cisco").code(code + "03").type(type).build();
+        CollectionType hp = CollectionType.builder().name("HP").code(code + "04").type(type).build();
+        CollectionType freebsd = CollectionType.builder().name("FreeBSD").code(code + "05").type(type).build();
+        CollectionType junos = CollectionType.builder().name("Junos").code(code + "06").type(type).build();
         List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos);
         osType.setChildren(osSubTypes);
 
