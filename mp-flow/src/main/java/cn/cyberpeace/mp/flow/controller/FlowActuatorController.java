@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @Api(tags = "流量执行器接口")
-@RestController
+//@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/actuator")
 public class FlowActuatorController extends BaseModelController<FlowActuatorModel, QueryParams, FlowActuatorService> {
 
@@ -47,16 +47,6 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
         return ServiceResult.success(uuid);
     }
 
-
-
-//    @Autowired
-//    private FlowPortService flowPortService;
-//    @PostMapping("/vm/add/test")
-//    public ServiceResult<String> addExecutorTest(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
-//        ObjServiceResult<FlowActuatorModel> result = getModelService().get("f1d51767b8cd4d618834baff1b6e6618");
-//        flowPortService.batchCreatePorts(addVmInstanceRequest.getNetworkInfos(), result.getSource().asResult());
-//        return ServiceResult.successful();
-//    }
 
     /**
      * 删除虚拟机实例
