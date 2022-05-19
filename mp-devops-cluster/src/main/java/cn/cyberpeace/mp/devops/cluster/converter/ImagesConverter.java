@@ -198,10 +198,11 @@ public class ImagesConverter implements BaseConverter{
             QuickCreateParam params = new QuickCreateParam();
             params.setInstallerUuid(v.getUuid());
             params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
+            params.setFile(v.getDockerInstallerData().getFile());
             return params;
         }).collect(Collectors.toList());
         model.setQuickCreateParams(quickCreateParams);
-        Device device =  imagesService.quickCreate(model);
+        Device device = imagesService.quickCreate(model);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
