@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -14,12 +15,14 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -33,14 +36,20 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
@@ -48,7 +57,12 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +72,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,6 +110,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ProbeService probeService;
+
+    @Autowired
+    private SysCollectorService sysCollectorService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private SceneElementMonitorService sceneElementMonitorService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -354,6 +378,130 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String id, String probeId, HostEventQueryParams queryParams) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        List<String> nodeIds = queryParams.getNodeIds();
+        if (nodeIds == null || nodeIds.isEmpty()) {
+            nodeIds = sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList());
+        }
+        Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        pluginHandler.getElementMap().values().forEach(e -> {
+            Map<String, String> probeId2Name = new HashMap<>();
+            e.getProbes().forEach(probe -> {
+                probeId2Name.put(probe.getId(), probe.getName());
+            });
+            nodeId2ProbeNameMap.put(e.getSrcElement().getId(), probeId2Name);
+        });
+        List<CollectionHostEventBO> result = new ArrayList<>();
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        if (queryParams.getStartTime() == null) {
+            startTime = sceneHandler.getScene().getCreateTime();
+        } else {
+            startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
+        }
+        if (queryParams.getEndTime() == null) {
+            endTime = LocalDateTime.now();
+        } else {
+            endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
+        }
+        if (probeId != null) {
+            for (String nodeId : nodeIds) {
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
+                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
+                    continue;
+                }
+                var element = sceneHandler.getElement(nodeId);
+                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
+                List<?> res = null;
+                if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
+                    //硬件信息
+                    res = sysCollectorService.getHardware(element.getEid());
+                } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
+                    //操作系统信息
+                    BaseSceneElementRequest request = new BaseSceneElementRequest();
+                    request.setSceneId(id);
+                    request.setElementIds(CollectionUtil.toList(element.getId()));
+                    res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
+                } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
+                    //网络连接信息
+                    WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+                    request.setAgentNames(CollectionUtil.toList(element.getEid()));
+                    request.setStartTime(startTime);
+                    request.setEndTime(endTime);
+                    res = dataCollectionService.queryNetConnEventsWithTimeRange(request);
+                } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
+                    //端口信息
+                    CollectorBaseRequest request = new CollectorBaseRequest();
+                    request.setAgentName(element.getEid());
+                    res = sysCollectorService.pagePorts(request).getList();
+                } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
+                    //进程信息
+                    CollectorBaseRequest request = new CollectorBaseRequest();
+                    request.setAgentName(element.getEid());
+                    res = sysCollectorService.pageProcesses(request).getList();
+                } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
+                    //文件变更信息
+                    HostEventQueryParams params = new HostEventQueryParams();
+                    params.setNodeIds(CollectionUtil.toList(nodeId));
+                    params.setRuleGroups(CollectionUtil.toList("syscheck_file"));
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getData().getList();
+                } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
+                    //注册表变更信息
+                    HostEventQueryParams params = new HostEventQueryParams();
+                    params.setNodeIds(CollectionUtil.toList(nodeId));
+                    params.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getData().getList();
+                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
+                        ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+                    //日志信息不支持查询
+                    return new ListObjServiceResult<>();
+                } else {
+                    //todo 查询自定义探针信息
+                }
+                if (res == null) {
+                    continue;
+                }
+                res.forEach(r -> {
+                    CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+                    hostEventBO.setSceneId(sceneId);
+                    hostEventBO.setNodeId(nodeId);
+                    hostEventBO.setNodeName(element.getName());
+                    hostEventBO.setProbeId(probeId);
+                    hostEventBO.setProbeName(probeId2Name.get(probeId));
+                    hostEventBO.setContent(JsonCommon.beanToMap(r));
+                    result.add(hostEventBO);
+                });
+            }
+        } else {
+            for (String nodeId : nodeIds) {
+                if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE != cloudPluginHandler.getElement(nodeId).getVirtualType()
+                        && BaseCloudPluginSceneElementModel.VirtualType.CONTAINER != cloudPluginHandler.getElement(nodeId).getVirtualType()) {
+                    continue;
+                }
+                //mock数据
+                var element = sceneHandler.getElement(nodeId);
+                for (int i = 0; i < 5; i++) {
+                    CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+                    hostEventBO.setSceneId(sceneId);
+                    hostEventBO.setNodeId(nodeId);
+                    hostEventBO.setNodeName(element.getName());
+                    hostEventBO.setProbeId("probeId_" + i);
+                    hostEventBO.setProbeName("probeName_" + i);
+                    result.add(hostEventBO);
+                }
+            }
+        }
+
+        return new ListObjServiceResult<>(new ListObjResult(result, result.size()));
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {

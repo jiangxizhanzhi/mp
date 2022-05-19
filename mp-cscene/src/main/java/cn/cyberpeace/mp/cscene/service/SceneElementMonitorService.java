@@ -1,20 +1,22 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
-import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
-import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
-import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
-import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
@@ -33,12 +35,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -276,6 +274,58 @@ public class SceneElementMonitorService {
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
+    public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups) {
+        if (pageRequest.getSceneId().isEmpty()) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
+        }
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
+            pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
+        }
+        HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
+        hostEventQueryParams.setNodeIds(pageRequest.getElementIds());
+        hostEventQueryParams.setStartTime(TimeUtils.localDateTimeToString(pageRequest.getStartTime()));
+        hostEventQueryParams.setEndTime(TimeUtils.localDateTimeToString(pageRequest.getEndTime()));
+        hostEventQueryParams.setLevels(pageRequest.getLevels());
+        hostEventQueryParams.setRuleGroups(ruleGroups);
+        return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
+    }
+
+    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups) {
+        if (pageRequest.getSceneId().isEmpty()) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
+        }
+        LocalDateTime startTime = pageRequest.getStartTime();
+        LocalDateTime endTime = pageRequest.getEndTime();
+        var result = getModifyData(pageRequest, ruleGroups);
+        result.getData().getList().sort(Comparator.comparing(r -> r.getTime()));
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, 10);
+        List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
+        Map<String, Integer> time2Count = new HashMap<>();
+        for (int i = 1; i <= 10; i++) {
+            String time = TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i));
+            ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
+            histogramInfo.setTime(time);
+            histogramInfo.setCount(0);
+            histogramInfos.add(histogramInfo);
+            time2Count.put(time, 0);
+        }
+        for (CollectionHostEventBO collectionData : result.getData().getList()) {
+            LocalDateTime nextTime = startTime.plusSeconds(intervalSeconds);
+            String nextTimeString = TimeUtils.localDateTimeToString(nextTime);
+            if (collectionData.getTime().isAfter(startTime) && collectionData.getTime().isBefore(nextTime)) {
+                time2Count.put(nextTimeString, time2Count.get(nextTimeString) + 1);
+            } else {
+                time2Count.put(nextTimeString, time2Count.get(nextTimeString) + 1);
+                startTime = startTime.plusSeconds(intervalSeconds);
+            }
+        }
+        histogramInfos.forEach(h -> {
+            h.setCount(time2Count.get(h.getTime()));
+        });
+        return histogramInfos;
+    }
 
     private ConnectionState convertWazuhNetConn2ConnState(WazuhNetworkConnectionModel model) {
         ConnectionState connectionState = new ConnectionState();

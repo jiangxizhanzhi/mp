@@ -18,18 +18,28 @@ public class ProbeConstant {
 
     //探针ID
     public interface ProbeId {
+        //硬件信息
+        String HARDWARE_INFO = "001";
+        //操作系统信息
+        String OS_INFO = "002";
+        //网络接口信息
+        String NETWORK_INTERFACE_INFO = "003";
+        //端口信息
+        String PORT_INFO = "004";
+        //进程信息
+        String PROCESS_INFO = "005";
         //文件变更
-        String FILE_ID = "006";
+        String FILE_MODIFY = "006";
         //注册表变更
-        String REGISTRY_ID = "007";
+        String REGISTRY_MODIFY = "007";
         //操作系统
-        String OS_ID = "008";
+        String OS_LOG = "008";
         //应用系统
-        String APPLICATION_ID = "009";
+        String APPLICATION_LOG = "009";
         //安全软件
-        String SECURITY_ID = "010";
+        String SECURITY_LOG = "010";
         //日志文件
-        String LOG_ID = "011";
+        String LOG_FILE = "011";
     }
 
     public ProbeConstant() {
