@@ -130,6 +130,7 @@ mp:
       licenseDir: /home/mp/config/license
     authenticate:
       urls:
+        - /auth/**
         - /sys/notice/**
         - /systemOperation/**
         - /devops/log/operate/page
