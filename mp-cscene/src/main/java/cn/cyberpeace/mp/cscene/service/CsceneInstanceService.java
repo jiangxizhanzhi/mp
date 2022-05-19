@@ -392,11 +392,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         //非虚拟机和容器节点不支持探针采集
+        List<String> newNodeIds = new ArrayList<>();
         for (String nodeId : nodeIds) {
             var cloudElement = cloudPluginHandler.getElement(nodeId);
-            if (cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE &&
-                    cloudElement.getVirtualType() != BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
-                nodeIds.remove(nodeId);
+            if (cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                    cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER) {
+                newNodeIds.add(nodeId);
             }
         }
         Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
@@ -422,7 +423,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         }
         if (probeId != null) {
-            for (String nodeId : nodeIds) {
+            for (String nodeId : newNodeIds) {
                 var element = sceneHandler.getElement(nodeId);
                 Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
                 List<?> res = null;
@@ -491,7 +492,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 });
             }
         } else {
-            for (String nodeId : nodeIds) {
+            for (String nodeId : newNodeIds) {
                 //mock数据
                 var element = sceneHandler.getElement(nodeId);
                 for (int i = 0; i < 5; i++) {
