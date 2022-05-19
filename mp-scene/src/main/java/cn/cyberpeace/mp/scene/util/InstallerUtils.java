@@ -115,7 +115,8 @@ public class InstallerUtils {
             "mkdir -p %s/docker_install/%s",
             "unzip -o %s -d %s/docker_install/%s",
             "cd %s/docker_install/%s",
-            "repo_tag=$(docker load -i %s | grep 'Loaded image' | awk '{print $3}')",
+            "tarname=$(ls)",
+            "repo_tag=$(docker load -i $tarname | grep 'Loaded image' | awk '{print $3}')",
             "%s"
     };
 
@@ -301,7 +302,6 @@ public class InstallerUtils {
                         installerDir, installFolder,
                         filePath, installerDir, installFolder,
                         installerDir, installFolder,
-                        imageName,
                         installCommand);
             } else {
                 var installFolder = TextUtils.uuid();
@@ -376,7 +376,8 @@ public class InstallerUtils {
                 subInstallCommands.add(installCommand);
             } else {
                 var fileName = FileUtil.getName(installerFile);
-                var fileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, metadataFileServer, installerFile);
+                String serverPath = installer.getFilePathPrefix() == null ? metadataFileServer : installer.getFilePathPrefix();
+                var fileUrl = StringUtils.joinWith(FILE_URL_SEPARATOR, serverPath, installerFile);
                 boolean isWinFileContainZh = isWindowsOS && TextUtils.containChinese(fileName);
                 String downloadFileName;
                 if (isWinFileContainZh) {
@@ -462,5 +463,6 @@ public class InstallerUtils {
         private String file;
         private String installCommand;
         private boolean docker;
+        private String filePathPrefix;
     }
 }
