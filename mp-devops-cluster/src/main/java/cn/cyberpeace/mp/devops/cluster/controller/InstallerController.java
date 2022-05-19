@@ -63,6 +63,7 @@ public class InstallerController {
                         .logo(installer.getLogo()).description(installer.getDescription())
                         .categories(installer.getCategories()).deployType(installer.getDeployType())
                         .startUpParameterList(installer.getStartUpParameterList())
+                        .file(Objects.nonNull(installer.getExtDocker()) ? installer.getExtDocker().getFile() : null)
                         .build()
         ).collect(Collectors.toList());
 
