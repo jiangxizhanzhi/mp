@@ -159,6 +159,11 @@ public class ElementMonitorController {
             vulnerabilityPieChartInfos.add(vulnerabilityPieChartInfo);
         }
 
+        vulnerabilityPieChartInfos.get(1).setSeverity("high");
+        vulnerabilityPieChartInfos.get(2).setSeverity("medium");
+        vulnerabilityPieChartInfos.get(3).setSeverity("critical");
+        vulnerabilityPieChartInfos.get(4).setSeverity("unknown");
+
         return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityPieChartInfos, vulnerabilityPieChartInfos.size()).asResult()).asResult();
     }
 
