@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.StartUpParameter;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.QuickCreateParam;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,16 +25,8 @@ public class DeviceQuickCreateCloudPlatformModel {
     /**
      * 快速构建
      */
-    private List<QuickCreateParams> quickCreateParams;
+    private List<QuickCreateParam> quickCreateParams;
 
-    @Data
-    @NoArgsConstructor
-    public static class QuickCreateParams{
-
-        private String installerUuid;
-
-        private List<StartUpParameter> settings;
-    }
 
     public DeviceQuickCreateCloudPlatformModel(String name, String quickName) {
         this.name = name;
