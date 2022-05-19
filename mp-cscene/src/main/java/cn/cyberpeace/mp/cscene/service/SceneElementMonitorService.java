@@ -283,6 +283,12 @@ public class SceneElementMonitorService {
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
             pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
         }
+        if (pageRequest.getStartTime() == null) {
+            pageRequest.setStartTime(sceneHandler.getScene().getCreateTime());
+        }
+        if (pageRequest.getEndTime() == null) {
+            pageRequest.setEndTime(LocalDateTime.now());
+        }
         HostEventQueryParams hostEventQueryParams = new HostEventQueryParams();
         hostEventQueryParams.setNodeIds(pageRequest.getElementIds());
         hostEventQueryParams.setStartTime(TimeUtils.localDateTimeToString(pageRequest.getStartTime()));
@@ -296,11 +302,28 @@ public class SceneElementMonitorService {
         if (pageRequest.getSceneId().isEmpty()) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
-        LocalDateTime startTime = pageRequest.getStartTime();
-        LocalDateTime endTime = pageRequest.getEndTime();
+        var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        LocalDateTime startTime;
+        LocalDateTime endTime;
+        if (pageRequest.getStartTime() == null) {
+            startTime = sceneHandler.getScene().getCreateTime();
+            pageRequest.setStartTime(startTime);
+        } else {
+            startTime = pageRequest.getStartTime();
+        }
+        if (pageRequest.getEndTime() == null) {
+            endTime = LocalDateTime.now();
+            pageRequest.setEndTime(endTime);
+        } else {
+            endTime = pageRequest.getEndTime();
+        }
         var result = getModifyData(pageRequest, ruleGroups);
+        if (result == null || result.getData() == null || CollectionUtil.isEmpty(result.getData().getList())) {
+            return new ArrayList<>();
+        }
         result.getData().getList().sort(Comparator.comparing(r -> r.getTime()));
-        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, 10);
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, 15);
         List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
         Map<String, Integer> time2Count = new HashMap<>();
         for (int i = 1; i <= 10; i++) {
