@@ -438,14 +438,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostEvents(id, queryParams).asResult();
     }
 
-    @ApiOperation("场景实例获取指定探针采集数据")
+    @ApiOperation("场景实例获取探针采集数据")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class)
     })
     @GetMapping(value = "/get_probe_collection_data", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(@RequestParam String id,
-                                                                              @RequestParam String probeId,
+                                                                              @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
         handleQueryParams("getProbeCollectionData", queryParams);
         return modelService.getProbeCollectionData(id, probeId, queryParams).asResult();
