@@ -41,6 +41,11 @@ public class ExtVm implements Serializable {
     private List<AccessProtocol> accessProtocols;
 
     /**
+     * 快速构建
+     */
+    private List<QuickCreateParam> quickCreateParams;
+
+    /**
      * 额外信息
      */
     @ApiModelProperty("扩展信息")
