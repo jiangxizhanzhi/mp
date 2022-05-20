@@ -13,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,28 +45,36 @@ public class UrlACService {
      * @return
      */
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
-    public Map<String, List<UrlAccessCtlDto>> listAllUrlAccessCtlDtosMap() {
+    public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
-        Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
+        //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
 
         dtos.forEach(d -> {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
             }
 
-            List<UrlAccessCtlDto> urlacList = urlAcDtoMap.get(d.getUrl());
-            if (CollectionUtil.isEmpty(urlacList)) {
-                urlacList = new ArrayList<>();
-                urlAcDtoMap.put(d.getUrl(), urlacList);
+            if (StringUtils.isNotBlank(d.getMethodStr())) {
+                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
             }
 
-            urlAcDtoMap.get(d.getUrl()).add(d);
+            //List<UrlAccessCtlDto> urlacList = urlAcDtoMap.get(d.getUrl());
+            //if (CollectionUtil.isEmpty(urlacList)) {
+            //    urlacList = new ArrayList<>();
+            //    urlAcDtoMap.put(d.getUrl(), urlacList);
+            //}
+            //
+            //urlAcDtoMap.get(d.getUrl()).add(d);
         });
 
-        return urlAcDtoMap;
+        return dtos;
     }
 
 
+
+
+
+    @Transactional(rollbackFor = Exception.class)
     public void saveUrlAccessCtl(List<ImportUrlAuth> importUrlAuths) {
         if (CollectionUtil.isNotEmpty(importUrlAuths)) {
             List<UrlACModel> urlACModels = new ArrayList<>();
@@ -74,7 +84,7 @@ public class UrlACService {
                 String urlacId = TextUtils.uuid();
                 UrlACModel urlACModel = UrlACModel.builder()
                         .url(importUrlAuth.getUrl())
-                        .methods(importUrlAuth.getMethod())
+                        .methods(importUrlAuth.getMethod().toLowerCase())
                         .desc(importUrlAuth.getMenuDesc())
                         .build();
                 urlACModel.setId(urlacId);

@@ -7,6 +7,7 @@
         <result column="id"  property="id"/>
         <result column="uuid"  property="uuid"/>
         <result column="name"  property="name"/>
+        <result column="logo"  property="logo"/>
         <result column="main_category"  property="mainCategory"/>
         <result column="sub_category" property="subCategory"/>
         <result column="third_category" property="thirdCategory"/>
@@ -162,7 +163,7 @@
     </sql>
 
     <sql id="commonTargetColumn">
-        i.pk,i.id,i.uuid,i.name,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
         i.in_position,i.reference_status,i.use_status,i.create_time
     </sql>
     
@@ -348,8 +349,12 @@
         </where>
     </delete>
 
+    <delete id="deleteAllTarget">
+        delete from mp_devops_target
+    </delete>
+
     <insert id="batchInsert" parameterType="java.util.List">
-        insert into mp_devops_target( id, uuid, name, main_category,sub_category,third_category,
+        insert into mp_devops_target( id, uuid, name,logo, main_category,sub_category,third_category,
                                      role, image_type,is_public, quick_create_support,
                                      create_time, update_time, in_position,use_status,reference_status,parent_system_type,
                                      system_type,system_architecure, language,image_status,base_image_support,
@@ -357,7 +362,7 @@
         VALUES
         <foreach collection="list" item="item" index="index"  separator=",">
         (
-            #{item.id},#{item.uuid},#{item.name},#{item.mainCategory},#{item.subCategory},
+            #{item.id},#{item.uuid},#{item.name},#{item.logo},#{item.mainCategory},#{item.subCategory},
             #{item.thirdCategory}, #{item.role},
             #{item.imageType},#{item.isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.quickCreateSupport}, #{item.createTime},

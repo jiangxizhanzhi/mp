@@ -80,6 +80,12 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         return imageMapper.countEntityTarget();
     }
 
+    @Transactional
+    @Override
+    public int deleteAllTarget() {
+        return imageMapper.deleteAllTarget();
+    }
+
     protected TargetModel convertToTargetModel(Device device){
         TargetModel targetModel = convertDevice(device);
         targetModel.setIsPublic(PublicEnum.ALL_PUBLIC);
@@ -98,6 +104,7 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         targetModel.setId(device.getId().toString());
         targetModel.setUuid(device.getUuid());
         targetModel.setName(device.getName());
+        targetModel.setLogo(device.getLogo());
         targetModel.setRole(device.getRole());
         targetModel.setMainCategory(device.getCategory());
         targetModel.setSubCategory(device.getSecondCategory());

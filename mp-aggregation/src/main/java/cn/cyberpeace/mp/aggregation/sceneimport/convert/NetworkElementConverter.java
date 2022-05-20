@@ -44,19 +44,19 @@ class NetworkElementConverter implements IConverter {
             // 不存在未连接的节点,不需要单独处理外部网络
             return;
         } else {
-            // 存在未连接的节点,需要默认连上一个外部网络
-            // 查找已配置的外部网络
+            // 存在未连接的节点,需要默认连上一个内部网络
+            // 查找已配置的内部网络
             NetworkElementParseResult externalNetworkResult = null;
             if (CollectionUtils.isNotEmpty(results)) {
                 // 无外部网络则新建一个
                 externalNetworkResult = results.stream()
-                        .filter(network -> network.getId().toLowerCase().startsWith("internet"))
+                        .filter(network -> network.getId().toLowerCase().startsWith("network"))
                         .findFirst().get();
             }
             if (externalNetworkResult == null) {
                 externalNetworkResult = new NetworkElementParseResult();
-                externalNetworkResult.setId("internet_" + System.currentTimeMillis());
-                externalNetworkResult.setName("external_network");
+                externalNetworkResult.setId("network_" + System.currentTimeMillis());
+                externalNetworkResult.setName("network");
                 this.results.add(externalNetworkResult);
             }
             // 给未连接的节点新建端口并与外部网络相连
@@ -103,7 +103,7 @@ class NetworkElementConverter implements IConverter {
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
             pluginElement.setImage(TargetConstant.DefaultTargetName.NETWORK_EXTERNAL);
         } else {
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
+            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
             pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_NETWORK);
         }
@@ -119,7 +119,7 @@ class NetworkElementConverter implements IConverter {
 
             // 存在连线 先创建端口
             SceneConfigElementPortBO newPort = new SceneConfigElementPortBO();
-            newPort.setId(IConverter.getPortId(sceneConfigElementBO.getId(),sceneConfigElementBO.getType(), ports.size()));
+            newPort.setId(IConverter.getPortId(sceneConfigElementBO.getId(), sceneConfigElementBO.getType(), ports.size()));
             newPort.setGateway(network.getGateway());
             newPort.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
             newPort.setName(network.getName());

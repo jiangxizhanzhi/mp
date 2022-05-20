@@ -100,4 +100,10 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @return
      */
     Map<String,Object> countEntityTarget();
+
+    /**
+     * 删除所有靶标数据
+     * @return
+     */
+    Integer deleteAllTarget();
 }
