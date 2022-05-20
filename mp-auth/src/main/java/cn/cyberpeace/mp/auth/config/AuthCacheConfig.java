@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
  * @Author zhouxinghuai
  * @Date：2022/5/16 11:05
  */
-@EnableCaching
 @Configuration
 public class AuthCacheConfig {
 

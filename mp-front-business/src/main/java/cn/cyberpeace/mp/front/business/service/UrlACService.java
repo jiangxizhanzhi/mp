@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.business.service;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.front.business.dto.ImportUrlAuth;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
@@ -9,11 +10,16 @@ import cn.cyberpeace.mp.front.business.model.UrlACModel;
 import cn.cyberpeace.mp.front.business.model.UrlACTargetModel;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -24,15 +30,38 @@ import java.util.List;
 @Service
 public class UrlACService {
 
+    public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS_MAP";
+
     @Autowired
     private UrlACMapper urlACMapper;
 
     @Autowired
     private UrlACTargetMapper urlACTargetMapper;
 
-    public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
+    /**
+     * 查询所有的
+     * @return
+     */
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
+    public Map<String, List<UrlAccessCtlDto>> listAllUrlAccessCtlDtosMap() {
+        List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
+        Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
 
-        return null;
+        dtos.forEach(d -> {
+            if (StringUtils.isNotBlank(d.getTargetsStr())) {
+                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
+            }
+
+            List<UrlAccessCtlDto> urlacList = urlAcDtoMap.get(d.getUrl());
+            if (CollectionUtil.isEmpty(urlacList)) {
+                urlacList = new ArrayList<>();
+                urlAcDtoMap.put(d.getUrl(), urlacList);
+            }
+
+            urlAcDtoMap.get(d.getUrl()).add(d);
+        });
+
+        return urlAcDtoMap;
     }
 
 
@@ -42,16 +71,16 @@ public class UrlACService {
             List<UrlACTargetModel> urlACTargetModels = new ArrayList<>();
             for (ImportUrlAuth importUrlAuth : importUrlAuths) {
 
-                String urlACId = TextUtils.uuid();
+                String urlacId = TextUtils.uuid();
                 UrlACModel urlACModel = UrlACModel.builder()
                         .url(importUrlAuth.getUrl())
                         .methods(importUrlAuth.getMethod())
                         .desc(importUrlAuth.getMenuDesc())
                         .build();
-                urlACModel.setId(urlACId);
+                urlACModel.setId(urlacId);
 
                 UrlACTargetModel urlACTargetModel = UrlACTargetModel.builder()
-                        .urlACId(urlACId)
+                        .urlacId(urlacId)
                         .target(importUrlAuth.getMenuId())
                         .build();
 

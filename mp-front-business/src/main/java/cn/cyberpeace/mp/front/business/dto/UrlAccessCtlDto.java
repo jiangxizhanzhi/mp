@@ -19,10 +19,13 @@ import java.util.List;
 @NoArgsConstructor
 public class UrlAccessCtlDto {
 
+    private String id;
+
     private String url;
 
     private List<String> methods;
 
-    private List<TargetModel> targets;
+    private String targetsStr;
 
+    private List<String> targetIds;
 }
