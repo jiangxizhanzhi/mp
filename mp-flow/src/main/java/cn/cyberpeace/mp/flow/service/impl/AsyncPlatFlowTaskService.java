@@ -465,7 +465,7 @@ public class AsyncPlatFlowTaskService {
 
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
-        addVmRequest.setName(FlowPlatformEnum.TREX.toString() + "_" + trexName);
+        addVmRequest.setName(trexName);
         addVmRequest.setImage(trexImage);
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
         networks.setNetworkId(externalNetId);
