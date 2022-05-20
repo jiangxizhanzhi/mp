@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
 import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
+import cn.cyberpeace.mp.scenepluginflow.util.IFlowResourceName;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -123,7 +124,8 @@ public class SceneHandlerUtils {
     }
 
     public String createExecutor(String sceneEid, List<FlowNetworkInfo> networkInfos) {
-        return flowExecutor.createExecutor(sceneEid, networkInfos);
+        String name = BeanCommon.getBean(IFlowResourceName.class).generate(sceneEid, null);
+        return flowExecutor.createExecutor(name, networkInfos);
     }
 
     public void deleteExecutor(String executorId) {

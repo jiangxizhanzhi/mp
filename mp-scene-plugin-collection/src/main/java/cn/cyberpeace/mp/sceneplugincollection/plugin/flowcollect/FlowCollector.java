@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.sceneplugincollection.util.resourcename.ICollectionResourceName;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -30,14 +31,16 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
-import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
+import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +51,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -524,27 +528,8 @@ public class CsceneSpecialService {
         return new ServiceResult<>(new SceneStateInfo(sceneModel));
     }
 
-    public ServiceResult<List<CsceneNodeInfoBO>> getSceneInfoByElementEids(List<String> elementEids) {
-        if (CollectionUtils.isEmpty(elementEids)) {
-            return new ServiceResult<>(new ArrayList<>());
-        }
-        var condition = new HumanCondition()
-                .link(SceneElementModel.class, CsceneInstanceModel.class)
-                .filterLink(SceneElementModel.class, SceneElementModel::getScene, CsceneInstanceModel.class, CsceneInstanceModel::getScene)
-                .currentLink(SceneElementModel.class)
-                .filterIn(SceneElementModel::getId, elementEids.toArray())
-                .selectAs(SceneElementModel::getId, CsceneNodeInfoBO::getNodeEid)
-                .selectAs(SceneElementModel::getNodeId, CsceneNodeInfoBO::getNodeId)
-                .selectAs(SceneElementModel::getName, CsceneNodeInfoBO::getNodeName)
-                .currentLink(CsceneInstanceModel.class)
-                .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
-                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
-        var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
-        return new ServiceResult<>(result);
-    }
-
     /**
-     * 根据资源名称反查节点信息
+     * 根据资源名称反查节点和场景信息
      * @param resourceNames
      * @return
      */
@@ -552,30 +537,99 @@ public class CsceneSpecialService {
         if (CollectionUtils.isEmpty(resourceNames)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        String prefix = CloudSingleton.cloudAppConfig.getCpcloudResourceGroup();
-        Map<String, String> eid2Name = new HashMap<>();
+        Map<String, List<String>> nodeEid2Name = new HashMap<>();
+        Map<String, List<String>> sceneId2Name = new HashMap<>();
+        this.parseNameInfos(resourceNames, nodeEid2Name, sceneId2Name);
+        if (nodeEid2Name.isEmpty() && sceneId2Name.isEmpty()) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var elementInfos = this.getSceneInfoByElementEids(nodeEid2Name);
+        var sceneInfos = this.getSceneInfoBySceneEids(sceneId2Name);
+        var infos = CollectionUtils.union(elementInfos, sceneInfos);
+        if (CollectionUtils.isEmpty(infos)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        var result = infos.stream().collect(Collectors.toMap(CsceneNodeInfoBO::getResourceName, s -> s));
+        return new ServiceResult<>(result);
+    }
+
+    private void parseNameInfos(List<String> resourceNames, Map<String, List<String>> nodeEid2Name, Map<String, List<String>> sceneId2Name) {
+        var resourceNameUtilMap = BeanCommon.getBeanType(IResourceName.class);
+        if (resourceNameUtilMap == null || resourceNameUtilMap.isEmpty()) {
+            return;
+        }
         for (String name : resourceNames) {
-            if (name.startsWith(CloudSingleton.cloudAppConfig.getCpcloudResourceGroup())) {
-                String sceneInfo = name.replace(prefix + "_", "");
-                String[] sp = sceneInfo.split("_");
-                if (sp.length > 0) {
-                    eid2Name.put(sp[0], name);
+            resourceNameUtilMap.values().forEach(util -> {
+                var parseResult = util.parse(name);
+                if (parseResult.isSuccess()) {
+                    RsourceNameParams params = parseResult.getResult();
+                    if (params.getSceneId() != null) {
+                        if (!sceneId2Name.containsKey(params.getSceneId())) {
+                            sceneId2Name.put(params.getSceneId(), new ArrayList<>());
+                        }
+                        sceneId2Name.get(params.getSceneId()).add(name);
+                    }
+                    if (params.getNodeId() != null) {
+                        if (!nodeEid2Name.containsKey(params.getNodeId())) {
+                            nodeEid2Name.put(params.getNodeId(), new ArrayList<>());
+                        }
+                        nodeEid2Name.get(params.getNodeId()).add(name);
+                    }
                 }
-            }
+            });
         }
-        if (eid2Name.isEmpty()) {
-            return new ServiceResult<>(new HashMap<>());
+    }
+
+    private List<CsceneNodeInfoBO> getSceneInfoBySceneEids(Map<String, List<String>> sceneId2Name) {
+        List<String> sceneIds = new ArrayList<>(sceneId2Name.keySet());
+        var condition = new HumanCondition()
+                .filterIn(CsceneInstanceModel::getScene, sceneIds.toArray())
+                .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
+                .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
+                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
+        var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
+        if (CollectionUtils.isEmpty(result)) {
+            return new ArrayList<>();
         }
-        var elementInfos = this.getSceneInfoByElementEids(new ArrayList<>(eid2Name.keySet())).getSource();
+        return this.assembleInfos(result, sceneId2Name, CsceneNodeInfoBO::getInternalSceneEid);
+    }
+
+    private List<CsceneNodeInfoBO> getSceneInfoByElementEids(Map<String, List<String>> nodeEid2Name) {
+        List<String> elementEids = new ArrayList<>(nodeEid2Name.keySet());
+        var condition = new HumanCondition()
+                .link(SceneElementModel.class, CsceneInstanceModel.class)
+                .filterLink(SceneElementModel.class, SceneElementModel::getScene, CsceneInstanceModel.class, CsceneInstanceModel::getScene)
+                .currentLink(SceneElementModel.class)
+                .filterIn(SceneElementModel::getId, elementEids.toArray())
+                .selectAs(SceneElementModel::getId, CsceneNodeInfoBO::getInternalNodeEid)
+                .selectAs(SceneElementModel::getNodeId, CsceneNodeInfoBO::getNodeId)
+                .selectAs(SceneElementModel::getName, CsceneNodeInfoBO::getNodeName)
+                .currentLink(CsceneInstanceModel.class)
+                .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
+                .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
+                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
+        var elementInfos = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(elementInfos)) {
-            return new ServiceResult<>(new HashMap<>());
+            return new ArrayList<>();
         }
-        var resourceName2Info = elementInfos.stream()
-                .collect(Collectors.toMap(e -> eid2Name.get(e.getNodeEid()), e -> {
-                    e.setResourceName(eid2Name.get(e.getNodeEid()));
-                    return e;
-                }));
-        return new ServiceResult<>(resourceName2Info);
+        return this.assembleInfos(elementInfos, nodeEid2Name, CsceneNodeInfoBO::getInternalNodeEid);
+    }
+
+    private List<CsceneNodeInfoBO> assembleInfos(List<CsceneNodeInfoBO> infoBOS, Map<String, List<String>> nameMap, Function<CsceneNodeInfoBO, String> getFlag) {
+        List<CsceneNodeInfoBO> result = new ArrayList<>();
+        infoBOS.forEach(e -> {
+            List<String> names = nameMap.get(getFlag.apply(e));
+            if (CollectionUtils.isEmpty(names)) {
+                return;
+            }
+            names.forEach(name -> {
+                CsceneNodeInfoBO nodeInfoBO = new CsceneNodeInfoBO();
+                BeanUtils.copyProperties(e, nodeInfoBO);
+                nodeInfoBO.setResourceName(name);
+                result.add(nodeInfoBO);
+            });
+        });
+        return result;
     }
 
 }

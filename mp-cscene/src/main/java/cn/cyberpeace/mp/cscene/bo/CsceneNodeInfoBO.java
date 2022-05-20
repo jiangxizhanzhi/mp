@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 public class CsceneNodeInfoBO {
     private String csceneId;
     private String csceneName;
-    private String nodeEid;
+    private String InternalSceneEid;
+    private String InternalNodeEid;
     private String nodeId;
     private String nodeName;
     private String resourceName;
