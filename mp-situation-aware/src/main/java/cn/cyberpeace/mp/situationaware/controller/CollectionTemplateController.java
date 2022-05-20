@@ -2,12 +2,12 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
@@ -22,7 +22,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -79,8 +78,10 @@ public class CollectionTemplateController {
      */
     @GetMapping("/probes_to_import")
     @ApiOperation(value = "查询可以导入的自定义探针列表")
-    public ServiceResult<List<ProbeModel>> listCustomProbesForTemplate(@RequestParam(required = false) Integer category, @RequestParam(required = false) String name) {
-        List<ProbeModel> probes = templateService.listCustomProbesNotInTemplate(category, name);
+    public ServiceResult<List<ProbeDto>> listCustomProbesForTemplate(@RequestParam(required = false) String templateId,
+                                                                     @RequestParam(required = false) Integer category,
+                                                                     @RequestParam(required = false) String name) {
+        List<ProbeDto> probes = templateService.listCustomProbesForTemplate(templateId, category, name);
         return ServiceResult.success(probes);
     }
 

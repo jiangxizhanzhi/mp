@@ -653,9 +653,9 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             HumanCondition condition = new HumanCondition().filterEqual(FlowTaskModel::getNodeId, taskId);
             List<FlowTaskModel> flowTaskModelList = getModelMapper().list(condition);
             if (CollectionUtils.isEmpty(flowTaskModelList)) {
-                log.error("task info is empty for taskId:{}", taskId);
+                log.warn("task info is empty for taskId:{}", taskId);
                 // 流量任务不存在
-                return ServiceResult.fail(FlowErrorCode.TASK_NOT_EXIST);
+                return ServiceResult.success(new FlowRecordsResponse(null, null, new ArrayList<>()));
             } else {
                 flowTaskModel = flowTaskModelList.get(0);
             }
