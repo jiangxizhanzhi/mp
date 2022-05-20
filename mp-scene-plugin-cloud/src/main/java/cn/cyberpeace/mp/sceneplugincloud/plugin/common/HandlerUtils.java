@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -10,6 +11,8 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.ICloudResourceName;
+import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,11 +60,13 @@ public class HandlerUtils {
     }
 
     public static String genResourceName(String name) {
-        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name);
+        return BeanCommon.getBean(ICloudResourceName.class).generate(name, null);
     }
 
     public static String genResourceName(String name, int index) {
-        return StringUtils.joinWith("_", CloudSingleton.cloudAppConfig.getCpcloudResourceGroup(), name, index);
+        RsourceNameParams params = new RsourceNameParams();
+        params.setIndex(index);
+        return BeanCommon.getBean(ICloudResourceName.class).generate(name, params);
     }
 
     /**
