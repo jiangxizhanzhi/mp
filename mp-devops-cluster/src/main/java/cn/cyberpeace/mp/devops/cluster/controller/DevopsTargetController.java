@@ -24,12 +24,14 @@ import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
+import cn.hutool.core.date.StopWatch;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -71,10 +73,13 @@ public class DevopsTargetController {
 
     private TargetIconUploadService targetIconUploadService;
 
+    private DevopsTargetService devopsTargetService;
+
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService,IpAddressConfig ipAddressConfig,
                                   DeviceVoConverter deviceVoConverter,ITask asyncTargetTask,
-                                  InitRegisterService initRegisterService,TargetIconUploadService targetIconUploadService) {
+                                  InitRegisterService initRegisterService,TargetIconUploadService targetIconUploadService,
+                                  DevopsTargetService devopsTargetService) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
@@ -83,6 +88,7 @@ public class DevopsTargetController {
         this.asyncTargetTask = asyncTargetTask;
         this.initRegisterService = initRegisterService;
         this.targetIconUploadService = targetIconUploadService;
+        this.devopsTargetService = devopsTargetService;
     }
 
     /**
@@ -137,6 +143,67 @@ public class DevopsTargetController {
             }
         }
 
+        return new Result<>(new TargetSceneResponse(targetScenes));
+    }
+
+    /**
+     * 查询所有靶标信息
+     * @param request
+     * @return
+     */
+    @ApiOperation("查询所有靶标信息")
+    @GetMapping("/list-new")
+    public ServiceResult<TargetSceneResponse> listNew(TargetSceneRequest request){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        stopWatch.stop();
+        System.out.println("findL1AndL2AndL3Type花费时间："+ stopWatch.getTotalTimeSeconds());
+        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
+        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+
+        Integer category = request.getCategory();
+        if (Objects.nonNull(category)) {
+            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+        }
+        Integer secondCategory = request.getSecondCategory();
+        if (Objects.nonNull(secondCategory)) {
+            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
+        }
+
+        List<TargetScene> targetScenes = new ArrayList<>();
+        StopWatch stopWatch2 = new StopWatch();
+        stopWatch2.start();
+        for (TypeConvertModel first : firstTypeList){
+            Integer firstId = first.getId();
+            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
+                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+
+            for (TypeConvertModel second : typeConvertModels){
+                request.setCategory(firstId);
+                request.setSecondCategory(second.getId());
+                request.setPage(null);
+                request.setPerPage(null);
+                TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+                    continue;
+                }
+                List<Device> secondDeviceList = targetSceneConvertModel.getDeviceList();
+
+                TargetScene targetScene = new TargetScene();
+
+                targetScene.setFirstTypeId(firstId);
+                targetScene.setFirstTypeName(first.getName());
+                Integer secondId = second.getId();
+//                List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
+                targetScene.setSecondTypeId(secondId);
+                targetScene.setSecondTypeName(second.getName());
+                targetScene.setDeviceList(secondDeviceList);
+                targetScenes.add(targetScene);
+            }
+        }
+        stopWatch2.stop();
+        System.out.println("allTarget花费时间："+ stopWatch2.getTotalTimeSeconds());
         return new Result<>(new TargetSceneResponse(targetScenes));
     }
 
@@ -208,6 +275,7 @@ public class DevopsTargetController {
     @ApiOperation("批量同步靶标数据")
     @GetMapping("/multi-async")
     public ServiceResult multiAsync(TargetMultiAsyncRequest request){
+        devopsTargetService.deleteAllTarget();
         List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
         MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
 
