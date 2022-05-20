@@ -26,9 +26,8 @@ public class FlowCollector {
         setNetworkTrafficService(networkTrafficService);
     }
 
-    public String createCollector(String sceneId) {
-        var arkimeName = BeanCommon.getBean(ICollectionResourceName.class).generate(sceneId, null);
-        return networkTrafficGroupService.addArkimeImageInstance(arkimeName, null);
+    public String createCollector() {
+        return networkTrafficGroupService.addArkimeImageInstance(null);
     }
 
     public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {

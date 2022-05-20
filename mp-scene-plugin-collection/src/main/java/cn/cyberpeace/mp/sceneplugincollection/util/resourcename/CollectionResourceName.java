@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
  * @Author maojun
  * @Date 2022/5/20
  */
-@Component
+// 删除arkime时对arkime的name有依赖,先不使用
+//@Component
 public class CollectionResourceName implements ICollectionResourceName<RsourceNameParams> {
     @Override
     public String generate(String id, RsourceNameParams params) {

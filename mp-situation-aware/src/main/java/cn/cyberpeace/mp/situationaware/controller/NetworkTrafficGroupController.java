@@ -41,7 +41,7 @@ public class NetworkTrafficGroupController {
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
-        String res = networkTrafficGroupService.addArkimeImageInstance(null, groupModel);
+        String res = networkTrafficGroupService.addArkimeImageInstance(groupModel);
         return ServiceResult.builder().detail(res).serviceCode(BaseErrorCode.SUCCESS).build().asResult();
     }
 }
