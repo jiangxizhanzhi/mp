@@ -25,6 +25,11 @@ public class TargetModel extends BaseModel {
     private String name;
 
     /**
+     * 图标
+     */
+    private String logo;
+
+    /**
      * 角色
      */
     private Integer role;
