@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.flowcollect;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.sceneplugincollection.util.resourcename.ICollectionResourceName;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
@@ -24,8 +26,9 @@ public class FlowCollector {
         setNetworkTrafficService(networkTrafficService);
     }
 
-    public String createCollector() {
-        return networkTrafficGroupService.addArkimeImageInstance(null);
+    public String createCollector(String sceneId) {
+        var arkimeName = BeanCommon.getBean(ICollectionResourceName.class).generate(sceneId, null);
+        return networkTrafficGroupService.addArkimeImageInstance(arkimeName, null);
     }
 
     public void bindNetworkPorts(String sceneId, String collectorId, List<String> vmInstanceIds, List<String> containerInstanceIds) {

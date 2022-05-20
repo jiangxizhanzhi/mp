@@ -58,7 +58,7 @@ public class NetworkTrafficGroupServiceTest {
         macIds.add("fa:16:3e:00:00:02");
         macIds.add("fc:16:3e:00:00:02");
         GroupModel groupModel1 = GroupModel.builder().groupId("9787c63b-d79f-4644-8027-b268f89aa8a9").macIds(macIds).build();
-        networkTrafficGroupService.addArkimeImageInstance(groupModel1);
+        networkTrafficGroupService.addArkimeImageInstance(null, groupModel1);
     }
 
     @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
@@ -68,8 +68,8 @@ public class NetworkTrafficGroupServiceTest {
     public void testInit() {
         try {
             String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
-            JSONArray networkList = (JSONArray)JSONPath.eval(JSON.parse(result), "$.data.list");
-            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network ->{
+            JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
+            networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network -> {
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");
             });
         } catch (IOException e) {
@@ -80,7 +80,7 @@ public class NetworkTrafficGroupServiceTest {
     @Test
     public void testCreateArkimeImageInstance() {
         String arkimePrefixId = "mp_" + String.valueOf(System.currentTimeMillis());
-        networkTrafficGroupService.createArkimeImageInstance(arkimePrefixId);
+        networkTrafficGroupService.createArkimeImageInstance(arkimePrefixId, arkimePrefixId);
     }
 
     @Test

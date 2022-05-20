@@ -124,13 +124,13 @@ public class CreateHandler extends HandlerCommon {
             }
         });
         if (!vmInstanceIds.isEmpty() || !containerInstanceIds.isEmpty()) {
+            var sceneId = getPluginHandler().getSrcScene().getEid();
             // 创建流量采集器
             runSceneProgress(SceneProcess.CREATE_FLOW_COLLECTOR, () -> {
-                var flowCollectorId = getFlowCollector().createCollector();
+                var flowCollectorId = getFlowCollector().createCollector(sceneId);
                 getPluginHandler().getScene().setFlowCollector(flowCollectorId);
             });
 
-            var sceneId = getPluginHandler().getSrcScene().getEid();
             // 绑定网络端口到流量采集器
             var flowCollectorId = getPluginHandler().getScene().getFlowCollector();
             runSceneProgress(SceneProcess.BIND_FLOW_COLLECT_PORTS, () -> {
