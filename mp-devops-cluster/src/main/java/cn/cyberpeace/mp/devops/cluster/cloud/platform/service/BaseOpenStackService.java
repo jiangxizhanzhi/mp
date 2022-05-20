@@ -2,16 +2,23 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -129,6 +136,25 @@ public class BaseOpenStackService extends BaseService {
     @Override
     protected <T extends BaseModel> T sendFormDataPut(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         return super.sendFormDataPut(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
+    }
+
+    /**
+     * 通用分页接口
+     * @param url 请求URL 例如：/abc/page?name=test&type=1
+     * @param tClass 数据转换类
+     * @param <T>
+     * @return
+     */
+    protected <T> CloudPlatformPageModel<T> page(String url, Class<T> tClass) {
+        CloudPlatformPageResult pageResult = this.sendGet(url, CloudPlatformPageResult.class);
+        this.checkResult(pageResult);
+        CloudPlatformPageData data = pageResult.getData();
+        List<T> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()),tClass);
+        CloudPlatformPageModel<T> model = new CloudPlatformPageModel<>();
+        model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
+        model.setTotal(data.getTotal());
+        model.setCode(pageResult.getCode());
+        return model;
     }
 
     /**
