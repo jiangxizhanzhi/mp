@@ -123,9 +123,9 @@ public class CollectionTemplateService {
                     templateDto.setLogProbes(logProbeDtos);
                     templateDto.setCustomProbes(customProbeDtos);
 
-//                customProbeDtos.forEach(p -> {
-//                    processParams(p);
-//                });
+                    customProbeDtos.forEach(p -> {
+                        processParamsForColTempProbeDto(p);
+                    });
 
                     return templateDto;
                 }).collect(Collectors.toList());
