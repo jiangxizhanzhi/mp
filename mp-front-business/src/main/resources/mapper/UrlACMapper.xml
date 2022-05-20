@@ -6,7 +6,7 @@
         SELECT
                ua.id,
                ua.url,
-               ua.methods,
+               ua.methods as methodStr,
                group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
             left join mp_auth_url_ac_target mauat

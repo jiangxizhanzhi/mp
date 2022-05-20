@@ -23,6 +23,8 @@ public class UrlAccessCtlDto {
 
     private String url;
 
+    private String methodStr;
+
     private List<String> methods;
 
     private String targetsStr;
