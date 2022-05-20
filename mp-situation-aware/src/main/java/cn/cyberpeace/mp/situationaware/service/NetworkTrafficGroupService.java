@@ -113,10 +113,10 @@ public class NetworkTrafficGroupService {
      *
      * @param groupModel
      */
-    public String addArkimeImageInstance(String arkimeName, GroupModel groupModel) {
+    public String addArkimeImageInstance(GroupModel groupModel) {
         String arkimePrefixId = indexPrefix + String.valueOf(System.currentTimeMillis());
         log.info("index prefix generated {}", arkimePrefixId);
-        createArkimeImageInstance(arkimeName, arkimePrefixId);
+        createArkimeImageInstance(arkimePrefixId);
         return arkimePrefixId;
     }
 
@@ -125,14 +125,14 @@ public class NetworkTrafficGroupService {
      *
      * @param instanceId instanceId
      */
-    public void createArkimeImageInstance(String arkimeName, String instanceId) {
+    public void createArkimeImageInstance(String instanceId) {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
         String url = cpCloudUrl + "/scenarios/container";
         var paramObject = new JSONObject();
         //实例名称
-        paramObject.put("name", arkimeName == null ? instanceId : arkimeName);
+        paramObject.put("name", instanceId);
         //docker镜像名称
         paramObject.put("image", imageName);
         paramObject.put("cpu", 4);
