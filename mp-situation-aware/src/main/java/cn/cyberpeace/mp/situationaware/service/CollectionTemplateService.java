@@ -179,9 +179,9 @@ public class CollectionTemplateService {
         condition.setName(name);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
 
-        // 处理templateId相关的参数
+        // 因为导入的都是新的自定义探针，所以不需要templateId做关联
         probeDtos.forEach(p -> {
-            String paramStr = probeParamService.getProbeParamAsJsonStr(p.getId(), templateId);
+            String paramStr = probeParamService.getProbeParamAsJsonStr(p.getId(), null);
             p.setParameter(paramStr);
                 }
         );
