@@ -352,16 +352,9 @@ public class ProbeService {
     }
 
     private void processProbeDtoParams(ProbeDto probeDto) {
-        if (StringUtils.isNotBlank(probeDto.getId())) {
-            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeDto.getId(), null);
-            String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
-            probeDto.setParameter(paramStr);
-        }
+        String paramStr = probeParamService.getProbeParamAsJsonStr(probeDto.getId(), null);
+        probeDto.setParameter(paramStr);
     }
-
-
-
-
 
 
     /*@Transactional(rollbackFor = Exception.class, readOnly = true)

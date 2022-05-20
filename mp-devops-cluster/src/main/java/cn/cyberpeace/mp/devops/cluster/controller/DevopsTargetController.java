@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
@@ -23,6 +24,7 @@ import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
@@ -67,10 +69,12 @@ public class DevopsTargetController {
 
     private InitRegisterService initRegisterService;
 
+    private TargetIconUploadService targetIconUploadService;
+
     public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
                                   ImagesService imagesService,IpAddressConfig ipAddressConfig,
                                   DeviceVoConverter deviceVoConverter,ITask asyncTargetTask,
-                                  InitRegisterService initRegisterService) {
+                                  InitRegisterService initRegisterService,TargetIconUploadService targetIconUploadService) {
         this.targetConverter = targetConverter;
         this.typeConverter = typeConverter;
         this.imagesService = imagesService;
@@ -216,6 +220,13 @@ public class DevopsTargetController {
     public ServiceResult register(@RequestParam(required = false) String url){
         initRegisterService.register(url);
         return ServiceResult.successful();
+    }
+
+    @ApiOperation("上传靶标图标")
+    @PostMapping("/upload/icon")
+    @ResponseBody
+    public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
+        return targetIconUploadService.build(file).upload();
     }
 
 }

@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -21,9 +20,9 @@ import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSe
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
-import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateProbeMapper;
+import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +35,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -63,6 +61,9 @@ public class CollectionTemplateService {
 
     @Autowired
     private ProbeParamMapper probeParamMapper;
+
+    @Autowired
+    private ProbeMapper probeMapper;
 
     @Autowired
     private ProbeParamService probeParamService;
@@ -98,6 +99,7 @@ public class CollectionTemplateService {
 
     /**
      * 根据ids查询TemplateDto
+     *
      * @return
      */
     public List<CollectionTemplateDto> listByIds(String[] ids) {
@@ -107,26 +109,26 @@ public class CollectionTemplateService {
         List<CollectionTemplatePageItemDto> templatePageItemDtos = templateMapper.listTemplateItemDtos(condition);
 
         List<CollectionTemplateDto> templateDtoList =
-            templatePageItemDtos.stream().map(itemDto -> {
-                CollectionTemplateDto templateDto = new CollectionTemplateDto();
-                BeanUtils.copyProperties(itemDto, templateDto);
+                templatePageItemDtos.stream().map(itemDto -> {
+                    CollectionTemplateDto templateDto = new CollectionTemplateDto();
+                    BeanUtils.copyProperties(itemDto, templateDto);
 
-                List<CollectionTemplateProbeDto> basicProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateBasicInfoProbesCondition());
-                List<CollectionTemplateProbeDto> eventProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateEventProbesCondition());
-                List<CollectionTemplateProbeDto> logProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateLogProbesCondition());
-                List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateCustomProbesCondition());
+                    List<CollectionTemplateProbeDto> basicProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateBasicInfoProbesCondition());
+                    List<CollectionTemplateProbeDto> eventProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateEventProbesCondition());
+                    List<CollectionTemplateProbeDto> logProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateLogProbesCondition());
+                    List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateCustomProbesCondition());
 
-                templateDto.setBasicInfoProbes(basicProbeDtos);
-                templateDto.setEventProbes(eventProbeDtos);
-                templateDto.setLogProbes(logProbeDtos);
-                templateDto.setCustomProbes(customProbeDtos);
+                    templateDto.setBasicInfoProbes(basicProbeDtos);
+                    templateDto.setEventProbes(eventProbeDtos);
+                    templateDto.setLogProbes(logProbeDtos);
+                    templateDto.setCustomProbes(customProbeDtos);
 
-//                customProbeDtos.forEach(p -> {
-//                    processParams(p);
-//                });
+                    customProbeDtos.forEach(p -> {
+                        processParamsForColTempProbeDto(p);
+                    });
 
-                return templateDto;
-            }).collect(Collectors.toList());
+                    return templateDto;
+                }).collect(Collectors.toList());
 
         return templateDtoList;
     }
@@ -134,6 +136,7 @@ public class CollectionTemplateService {
 
     /**
      * 查询模板下探针内容（加载脚本内容）
+     *
      * @param templateId
      * @param probeId
      * @return
@@ -153,7 +156,7 @@ public class CollectionTemplateService {
                 colTempProbeDto.setScriptContent(scriptContent);
             }
             // 查询参数
-            processParams(colTempProbeDto);
+            processParamsForColTempProbeDto(colTempProbeDto);
             return colTempProbeDto;
         }
 
@@ -163,17 +166,27 @@ public class CollectionTemplateService {
 
     /**
      * 为采集模板查询可以导入的自定义探针
-     *
+     * 如果是编辑已有的采集模板，则必须传入templateId，这样才能查出之前保存的模板相关的参数
      * @param catetory
      * @param name
      * @return
      */
-    public List<ProbeModel> listCustomProbesNotInTemplate(Integer catetory, String name) {
-        log.info("category:{}, name:{}", catetory, name);
-        List<ProbeModel> probes = templateProbeMapper.listCustomProbes(catetory, name);
-        return probes;
-    }
+    public List<ProbeDto> listCustomProbesForTemplate(String templateId, Integer catetory, String name) {
+        log.info("templateId:{}, category:{}, name:{}", templateId, catetory, name);
+        ProbeSearchCondition condition = new ProbeSearchCondition();
+        condition.setTypes(ArrayUtils.toArray(ProbeModel.TYPE_CUSTOM));
+        condition.setProbeCategories(ArrayUtils.toArray(catetory));
+        condition.setName(name);
+        List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
 
+        // 因为导入的都是新的自定义探针，所以不需要templateId做关联
+        probeDtos.forEach(p -> {
+            String paramStr = probeParamService.getProbeParamAsJsonStr(p.getId(), null);
+            p.setParameter(paramStr);
+                }
+        );
+        return probeDtos;
+    }
 
 
     /**
@@ -319,6 +332,7 @@ public class CollectionTemplateService {
 
     /**
      * 创建模板检查
+     *
      * @param addRequest
      */
     private void addTemplateCheck(CollectionTemplateRequest addRequest) {
@@ -332,6 +346,7 @@ public class CollectionTemplateService {
 
     /**
      * 修改模板检查
+     *
      * @param modifyRequest
      */
     private void modifyTemplateCheck(CollectionTemplateRequest modifyRequest) {
@@ -352,6 +367,7 @@ public class CollectionTemplateService {
 
     /**
      * 处理采集模板请求实体
+     *
      * @param colTempReq
      * @param templateId
      * @param allColTempProbeList
@@ -445,10 +461,10 @@ public class CollectionTemplateService {
     }
 
 
-
     /**
      * 采集模板另存一份脚本内容
-     * @param customProbes 自定义探针
+     *
+     * @param customProbes        自定义探针
      * @param allColTempProbeList 采集模板-探针关联实体列表
      */
     private void processCustomProbeScripts(List<CollectionTemplateProbeRequest> customProbes,
@@ -471,6 +487,7 @@ public class CollectionTemplateService {
 
     /**
      * 处理通用探针--基础信息采集探针
+     *
      * @param templateId
      * @param allColTempProbeList
      */
@@ -481,7 +498,6 @@ public class CollectionTemplateService {
             allColTempProbeList.add(colTempProbeModel);
         }
     }
-
 
 
     private ProbeSearchCondition generateBasicInfoProbesCondition() {
@@ -513,11 +529,12 @@ public class CollectionTemplateService {
 
     /**
      * 处理自定义探针参数
+     *
      * @param colTempProbeDto
      */
-    private void processParams(CollectionTemplateProbeDto colTempProbeDto) {
+    private void processParamsForColTempProbeDto(CollectionTemplateProbeDto colTempProbeDto) {
         if (StringUtils.isNotBlank(colTempProbeDto.getProbeId())) {
-            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(colTempProbeDto.getProbeId(), null);
+            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(colTempProbeDto.getProbeId(), colTempProbeDto.getTemplateId());
             String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
             colTempProbeDto.setParameter(paramStr);
         }
