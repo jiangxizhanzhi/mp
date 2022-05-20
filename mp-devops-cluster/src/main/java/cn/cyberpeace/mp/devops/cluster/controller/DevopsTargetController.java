@@ -82,6 +82,7 @@ public class DevopsTargetController {
         this.deviceVoConverter = deviceVoConverter;
         this.asyncTargetTask = asyncTargetTask;
         this.initRegisterService = initRegisterService;
+        this.targetIconUploadService = targetIconUploadService;
     }
 
     /**
