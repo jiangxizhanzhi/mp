@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.business.controller.filter;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OperatePermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
@@ -57,23 +58,56 @@ public class UrlAuthFilter extends OncePerRequestFilter {
         }
 
         if (!skip) {
-            Map<String, List<String>> urlMethodsMap = urlACWrapperService.getUrlMethodsMap();
-            Map<String, List<String>> urlTargetsMap = urlACWrapperService.getUrlTargetsMap();
+
             //List<String> fuzzyUrls = urlacMap.keySet().stream().filter(url -> url.contains("*")).collect(Collectors.toList());
             //Set<String> currentUserAuthorities = UserUtils.getLoginUserAuthorities();
             //
-            //String url = request.getRequestURI();
-            //String method = request.getMethod().toLowerCase();
+            String url = request.getRequestURI();
+            String method = request.getMethod().toLowerCase();
             //
             //List<UrlAccessCtlDto> urlAccessCtlDtos = urlacMap.get(url);
             //if (CollectionUtil.isNotEmpty(urlAccessCtlDtos)) {
             //
             //}
+
+            //urlme
+
         }
 
         filterChain.doFilter(request, response);
 
     }
+
+
+
+    private boolean isRequestMethodSupport(String url, String method) {
+        Map<String, List<String>> urlMethodsMap = urlACWrapperService.getUrlMethodsMap();
+        List<String> methods = urlMethodsMap.get(url);
+        return methods.contains(method);
+    }
+
+
+    private boolean isUrlAuthorized(String url) {
+        Set<String> userAuthorities = UserUtils.getLoginUserAuthorities();
+        UserModel currentUser = UserUtils.getLoginUser();
+        String currentUsername = Objects.nonNull(currentUser) ? currentUser.getUsername() : "";
+
+        Map<String, List<String>> urlTargetsMap = urlACWrapperService.getUrlTargetsMap();
+        List<String> urlTargetIds = urlTargetsMap.get(url);
+        if (CollectionUtil.isNotEmpty(urlTargetIds)) {
+            for (String userAuthority : userAuthorities) {
+                for (String tid : urlTargetIds) {
+                    if (Objects.equals(userAuthority, tid)) {
+                        return true;
+                    }
+                }
+            }
+            log.warn("url:{} is blocked to current user:{} for not meetting specified url-authoritys:{}", url, currentUsername, urlTargetIds);
+        }
+
+        return false;
+    }
+
 
 
 

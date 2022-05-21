@@ -13,11 +13,11 @@ import java.util.List;
  * @Date：2022/4/25 09:41
  */
 @Data
-public class CollectionTemplateProbeResponse {
+public class ColTempCommonProbeRequest {
 
     /**
-//     * 探针ID
-//     */
+     * 探针ID
+     */
     @ApiModelProperty(value = "探针ID")
     @NotBlank
     private String probeId;
@@ -32,8 +32,8 @@ public class CollectionTemplateProbeResponse {
     /**
      * 探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec
      */
-    @ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec")
-    private Integer templateProbeIntervalSec;
+    //@ApiModelProperty(value = "探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec")
+    //private Integer templateProbeIntervalSec;
 
     /**
      * 探针配置，json串，数组
@@ -41,9 +41,4 @@ public class CollectionTemplateProbeResponse {
     @ApiModelProperty(value = "探针配置，路径数组 如：[\"/var/log/mp.log\", \"/etc/bin\"] 或者注册表选项 [\"HKEY_LOCAL_MACHINE\\SYSTEM\\Setup\"]")
     private List<String> paths;
 
-    /**
-     * 脚本参数(JSON)
-     */
-    @ApiModelProperty(value = "脚本参数")
-    private String parameter;
 }

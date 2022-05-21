@@ -19,12 +19,13 @@ public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
     //private List<CollectionTemplateProbeDto> basicInfoProbes;
 
     @ApiModelProperty(value = "事件采集探针列表")
-    private List<CollectionTemplateProbeResponse> eventProbes;
+    private List<ColTempCommonProbeDto> eventProbes;
 
     @ApiModelProperty(value = "日志采集探针列表")
-    private List<CollectionTemplateProbeResponse> logProbes;
+    private List<ColTempCommonProbeDto> logProbes;
 
+    // 返回参数比通用探针要多一些
     @ApiModelProperty(value = "自定义探针列表")
-    private List<CollectionTemplateProbeResponse> customProbes;
+    private List<ColTempCustomProbeDto> customProbes;
 
 }
