@@ -57,14 +57,29 @@ public class UrlACService {
             if (StringUtils.isNotBlank(d.getMethodStr())) {
                 d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
             }
+        });
 
-            //List<UrlAccessCtlDto> urlacList = urlAcDtoMap.get(d.getUrl());
-            //if (CollectionUtil.isEmpty(urlacList)) {
-            //    urlacList = new ArrayList<>();
-            //    urlAcDtoMap.put(d.getUrl(), urlacList);
-            //}
-            //
-            //urlAcDtoMap.get(d.getUrl()).add(d);
+        return dtos;
+    }
+
+
+    /**
+     * 查询所有的
+     * @return
+     */
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
+    public List<UrlAccessCtlDto> pageUrlAccessCtlDtos() {
+        List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
+        //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
+
+        dtos.forEach(d -> {
+            if (StringUtils.isNotBlank(d.getTargetsStr())) {
+                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
+            }
+
+            if (StringUtils.isNotBlank(d.getMethodStr())) {
+                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
+            }
         });
 
         return dtos;
