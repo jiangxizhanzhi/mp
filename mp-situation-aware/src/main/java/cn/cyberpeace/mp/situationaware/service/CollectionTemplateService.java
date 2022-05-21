@@ -130,6 +130,7 @@ public class CollectionTemplateService {
                             eventProbeDtos.stream().map(dto -> {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
                                         BeanUtils.copyProperties(dto, commonDto);
+                                        commonDto.setId(dto.getProbeId());
                                         return commonDto;
                                     }
                             ).collect(Collectors.toList());
@@ -138,7 +139,8 @@ public class CollectionTemplateService {
                             logProbeDtos.stream().map(dto -> {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
                                         BeanUtils.copyProperties(dto, commonDto);
-                                        return commonDto;
+                                        commonDto.setId(dto.getProbeId());
+                                return commonDto;
                                     }
                             ).collect(Collectors.toList());
 
@@ -146,6 +148,7 @@ public class CollectionTemplateService {
                             customProbeDtos.stream().map(dto -> {
                                 ColTempCustomProbeDto customDto = new ColTempCustomProbeDto();
                                         BeanUtils.copyProperties(dto, customDto);
+                                        customDto.setId(dto.getProbeId());
                                         return customDto;
                                     }
                             ).collect(Collectors.toList());
@@ -438,7 +441,7 @@ public class CollectionTemplateService {
             for (ColTempCommonProbeRequest colTempProbeReq : colTempCommonProbeReqs) {
 
                 CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
-                        .probeId(colTempProbeReq.getProbeId())
+                        .probeId(colTempProbeReq.getId())
                         .templateId(templateId)
                         //.intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
                         .disabled(colTempProbeReq.getDisabled())
@@ -509,7 +512,7 @@ public class CollectionTemplateService {
             for (ColTempCustomProbeRequest colTempCustomProbeReq : colTempCustomProbeReqs) {
 
                 CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
-                        .probeId(colTempCustomProbeReq.getProbeId())
+                        .probeId(colTempCustomProbeReq.getId())
                         .templateId(templateId)
                         //.intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
                         .disabled(0)
@@ -540,7 +543,7 @@ public class CollectionTemplateService {
                 List<ProbeParamModel> paramList =
                         paramReqs.stream().map(paramReq -> {
                             ProbeParamModel paramModel = ProbeParamModel.builder()
-                                    .probeId(colTempProbeReq.getProbeId())
+                                    .probeId(colTempProbeReq.getId())
                                     .templateId(templateId)
                                     .name(paramReq.getName())
                                     .defaultValue(paramReq.getDefaultValue())
@@ -571,7 +574,7 @@ public class CollectionTemplateService {
 
         // 处理脚本
         // 从探针里面查询scriptUrl，采集模板需要单独保存一份。 防止保存采集模板之后，修改了探针脚本对采集模板产生影响
-        List<String> probeIds = customProbes.stream().map(ColTempCustomProbeRequest::getProbeId).collect(Collectors.toList());
+        List<String> probeIds = customProbes.stream().map(ColTempCustomProbeRequest::getId).collect(Collectors.toList());
         List<ProbeDto> probeDtos = probeService.listByIds(probeIds);
 
         allColTempProbeList.forEach(tp -> {

@@ -20,7 +20,7 @@ public class ColTempCustomProbeRequest {
      */
     @ApiModelProperty(value = "探针ID")
     @NotBlank
-    private String probeId;
+    private String id;
 
     /**
      * 探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec

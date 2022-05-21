@@ -22,7 +22,7 @@ public class ColTempCommonProbeDto {
      */
     @ApiModelProperty(value = "探针ID")
     @NotBlank
-    private String probeId;
+    private String id;
 
     /**
      * 探针名称

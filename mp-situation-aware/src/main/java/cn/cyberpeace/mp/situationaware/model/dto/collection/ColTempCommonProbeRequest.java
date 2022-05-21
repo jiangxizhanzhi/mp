@@ -20,7 +20,7 @@ public class ColTempCommonProbeRequest {
      */
     @ApiModelProperty(value = "探针ID")
     @NotBlank
-    private String probeId;
+    private String id;
 
     /**
      * 0:启用，1:禁用
