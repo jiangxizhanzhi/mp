@@ -468,6 +468,9 @@ public class CollectionTemplateService {
                                                List<CollectionTemplateProbeModel> allColTempProbeList) {
 
         log.info("templateId:{},\ncolTempCommonProbeReqs:{},\nallColTempProbeList:{}", templateId, colTempCommonProbeReqs, allColTempProbeList);
+        if (CollectionUtil.isEmpty(colTempCommonProbeReqs)) {
+            return;
+        }
         for (ColTempCommonProbeRequest colTempProbeReq : colTempCommonProbeReqs) {
             CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
                     .probeId(colTempProbeReq.getId())
@@ -502,6 +505,9 @@ public class CollectionTemplateService {
                                                List<ProbeParamModel> allProbeParamList) {
 
         log.info("templateId:{},\ncolTempCustomProbeReqs:{},\n allColTempProbeList:{},\nallProbeParamList:{}", templateId, colTempCustomProbeReqs, allColTempProbeList, allProbeParamList);
+        if (CollectionUtil.isEmpty(colTempCustomProbeReqs)) {
+            return;
+        }
         for (ColTempCustomProbeRequest colTempCustomProbeReq : colTempCustomProbeReqs) {
             CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
                     .probeId(colTempCustomProbeReq.getId())
@@ -555,6 +561,9 @@ public class CollectionTemplateService {
     private void processCustomProbeScripts(String operate,
                                            List<ColTempCustomProbeRequest> customProbes,
                                            List<CollectionTemplateProbeModel> allColTempProbeList) {
+        if (CollectionUtil.isEmpty(customProbes)) {
+            return;
+        }
         // 处理脚本
         List<String> probeIds = new ArrayList<>();
         if (Objects.equals("add", operate)) {
@@ -571,7 +580,7 @@ public class CollectionTemplateService {
                 probeDtos.forEach(p -> {
                     if (Objects.equals(p.getId(), tp.getProbeId())) {
                         //if (Objects.equals("update", operate)) {
-                            log.info("operate:{}, colTempProbe Script reload:{}", operate, tp.getProbeId());
+                            log.info("reload script! operate:{}, colTempProbe Script reload, probeId:{}", operate, tp.getProbeId());
                         //}
                         tp.setScriptUrl(p.getScriptUrl());
                     }
