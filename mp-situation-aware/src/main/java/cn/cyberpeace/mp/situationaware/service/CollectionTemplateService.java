@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -39,8 +40,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.module.Configuration;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -131,6 +134,7 @@ public class CollectionTemplateService {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
                                         BeanUtils.copyProperties(dto, commonDto);
                                         commonDto.setId(dto.getProbeId());
+                                        commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
                                         return commonDto;
                                     }
                             ).collect(Collectors.toList());
@@ -140,6 +144,7 @@ public class CollectionTemplateService {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
                                         BeanUtils.copyProperties(dto, commonDto);
                                         commonDto.setId(dto.getProbeId());
+                                        commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
                                 return commonDto;
                                     }
                             ).collect(Collectors.toList());
@@ -640,6 +645,17 @@ public class CollectionTemplateService {
             String paramStr = probeParamService.paramModels2ParamStr(probeParamModels);
             colTempProbeDto.setParameter(paramStr);
         }
+    }
+
+    private List<String> processColTempProbePaths(String configJsonStr) {
+        if (StringUtils.isNotBlank(configJsonStr)) {
+            JSONArray jsonArray = JSONObject.parseObject(configJsonStr).getJSONArray("paths");
+            if (Objects.nonNull(jsonArray)) {
+                List<String> paths = jsonArray.stream().map(Object::toString).collect(Collectors.toList());
+                return paths;
+            }
+        }
+        return Collections.emptyList();
     }
 
 }

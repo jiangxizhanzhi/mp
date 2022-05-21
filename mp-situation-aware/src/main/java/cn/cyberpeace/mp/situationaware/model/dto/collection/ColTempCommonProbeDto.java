@@ -31,8 +31,8 @@ public class ColTempCommonProbeDto {
     private String name;
 
 
-    @ApiModelProperty(value = "采集模板ID")
-    private String templateId;
+    //@ApiModelProperty(value = "采集模板ID")
+    //private String templateId;
 
     /**
      * 0:启用，1:禁用
