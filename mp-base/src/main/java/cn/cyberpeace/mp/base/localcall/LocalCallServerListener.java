@@ -39,6 +39,13 @@ import java.util.stream.Stream;
  *     }
  *
  * }
+ *
+ * 调用:
+ * 使用生成的local_call.sh/local_call.bat调用，第一个参数方法，后续参数为方法参数，方法参数不能带空格
+ *     local_call.sh/local_call.bat 包名.类名::方法名 方法参数
+ * 调用例子:
+ *     local_call.sh com.test.test.TestLocalCallServer::test 123
+ *
  */
 @Slf4j
 public class LocalCallServerListener extends FileModifyListener {
