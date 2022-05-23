@@ -42,12 +42,13 @@ public class ImagesConnectSocketServer {
     @OnOpen
     public void onOpen(Session session, @PathParam("uuid") String uuid) {
         try {
+            session.setMaxIdleTimeout(60 * 60 * 1000);
             this.session = session;
             this.uuid = uuid;
             websocketMap.put(session, this);
-            log.info("websocket 新连接：{}", uuid);
+            log.info("查看机器websocket 新连接：{}", uuid);
         } catch (Exception e) {
-            log.error("websocket 新建连接 IO异常");
+            log.error("查看机器websocket  新建连接 异常：{}",e);
         }
     }
 
@@ -56,9 +57,8 @@ public class ImagesConnectSocketServer {
      */
     @OnClose
     public void onClose() {
-        // 删除
         websocketMap.remove(this.session);
-        log.info("close websocket : {}", this.uuid);
+        log.info("查看机器Close websocket : {}", this.uuid);
     }
 
     /**
@@ -67,7 +67,7 @@ public class ImagesConnectSocketServer {
      */
     @OnMessage
     public void onMessage(String message) {
-        log.info("来自客户端{}的消息:{}", this.uuid, message);
+        log.info("查看机器websocket 来自客户端{}的消息:{}", this.uuid, message);
     }
 
     /**
@@ -76,7 +76,7 @@ public class ImagesConnectSocketServer {
      */
     @OnError
     public void onError(Throwable error) {
-        log.info("websocket 发生错误,移除当前websocket:{},err:{}", this.uuid, error.getMessage());
+        log.info("查看机器websocket 发生错误,移除当前websocket:{},err:{}", this.uuid, error.getMessage());
         websocketMap.remove(this.session);
     }
 

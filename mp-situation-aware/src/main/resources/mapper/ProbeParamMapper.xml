@@ -154,10 +154,10 @@
   <select id="selectByProbeIdAndTemplateId" resultMap="BaseResultMap">
     select * from mp_situation_probe_param
     <where>
-      <if test="templateId != null and templateId != ''">
+      <if test="templateId != null">
         AND template_id = #{templateId}
       </if>
-      <if test="templateId == null or templateId = ''">
+      <if test="templateId == null">
         AND template_id = ''
       </if>
         AND probe_id = #{probeId}
@@ -167,10 +167,10 @@
   <delete id="deleteByProbeIdAndTemplateId">
     delete from mp_situation_probe_param
       <where>
-        <if test="templateId != null and templateId != ''">
+        <if test="templateId != null">
           AND template_id = #{templateId}
         </if>
-        <if test="templateId == null or templateId = ''">
+        <if test="templateId == null">
           AND template_id = ''
         </if>
           AND probe_id = #{probeId}

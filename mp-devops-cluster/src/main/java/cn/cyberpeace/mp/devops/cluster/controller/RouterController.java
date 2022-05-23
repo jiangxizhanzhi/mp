@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.response.RouterPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +24,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/router")
 @Api(tags = "网络实例管理-路由")
+@RequiredArgsConstructor
 public class RouterController {
 
-    private RouterConverter routerConverter;
-
-    public RouterController(RouterConverter routerConverter) {
-        this.routerConverter = routerConverter;
-    }
+    private final RouterConverter routerConverter;
 
     /**
      * 分页查询路由信息

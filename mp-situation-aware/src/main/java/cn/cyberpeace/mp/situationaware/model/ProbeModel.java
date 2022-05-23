@@ -97,9 +97,9 @@ public class ProbeModel extends BaseModel {
     private Integer isDeleted;
 
     /**
-     * (可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
+     * (可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
      */
-    @ApiModelProperty(value = "(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    @ApiModelProperty(value = "(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
     private String osType;
 
 }

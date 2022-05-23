@@ -1,9 +1,6 @@
 package cn.cyberpeace.mp.front.business.service;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.front.business.dto.ImportUrlAuth;
 import com.alibaba.excel.context.AnalysisContext;
@@ -13,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @Description: 模板的读取类
@@ -107,7 +103,7 @@ public class UploadUrlAuthListener extends AnalysisEventListener<ImportUrlAuth> 
         //checkImportUsers(list);
         //
         //userService.importExcel(list);
-        urlACService.saveUrlAccessCtl(list);
+        urlACService.importByExcel(list);
 
 
         log.info("save success！");

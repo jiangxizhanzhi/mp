@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class CollectionTemplateProbeDtoSearchCondition {
+public class ColTempProbeDtoSearchCondition {
 
     @ApiModelProperty(value = "探针ids")
     private String[] probeIds;

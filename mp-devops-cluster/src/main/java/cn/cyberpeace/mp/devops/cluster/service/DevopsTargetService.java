@@ -50,4 +50,10 @@ public interface DevopsTargetService {
      * @return
      */
     Map<String,Object> countEntityTarget();
+
+    /**
+     * 删除所有靶标数据
+     * @return
+     */
+    int deleteAllTarget();
 }

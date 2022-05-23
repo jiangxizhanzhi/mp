@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.front.business.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,9 @@ import java.io.Serializable;
 public class UrlACModel extends BaseModel implements Serializable {
 
     private String url;
+
+    @DefaultInt(0)
+    private Integer isPattern;
 
     private String methods;
 

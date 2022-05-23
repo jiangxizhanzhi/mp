@@ -219,6 +219,7 @@
           </foreach>
         </if>
     </where>
+    order by tempp.pk
   </select>
 
   <select id="listCustomProbesNotInTemplate" resultType="cn.cyberpeace.mp.situationaware.model.ProbeModel">

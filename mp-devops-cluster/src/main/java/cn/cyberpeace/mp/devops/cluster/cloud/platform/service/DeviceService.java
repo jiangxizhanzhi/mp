@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatform
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.hutool.core.date.StopWatch;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +59,13 @@ public class DeviceService extends BaseOpenStackService {
      * @return
      */
     public CloudPlatformPageModel<Device> findByIds(List<Integer> ids){
+        StopWatch stopWatch2 = new StopWatch();
+        stopWatch2.start();
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), CloudPlatformItemsPageResult.class);
+        stopWatch2.stop();
+        System.out.println("findByIds花费时间："+ stopWatch2.getTotalTimeSeconds());
         super.checkResult(pageResult);
+
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
         CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
         model.setList(list);

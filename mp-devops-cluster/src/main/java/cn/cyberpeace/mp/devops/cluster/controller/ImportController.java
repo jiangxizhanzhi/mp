@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/import")
 @Api(tags = "靶标导入管理")
+@RequiredArgsConstructor
 public class ImportController {
 
-    private ImportConverter importConverter;
-
-    public ImportController(ImportConverter importConverter) {
-        this.importConverter = importConverter;
-    }
+    private final ImportConverter importConverter;
 
     /**
      * 获取磁盘剩余空间

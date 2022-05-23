@@ -25,6 +25,12 @@ public class FileEventModel {
     @ApiModelProperty("文件大小")
     private String size;
 
+    @ApiModelProperty("变更前md5值")
+    private String md5Before;
+
+    @ApiModelProperty("变更后md5值")
+    private String md5After;
+
     //文件的时间
     @ApiModelProperty("文件时间")
     private LocalDateTime updateTime;

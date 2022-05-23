@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.front.business.config;
 
-import cn.cyberpeace.mp.front.business.controller.filter.UrlAuthFilter;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
+import cn.cyberpeace.mp.front.business.filter.UrlACFilter;
+import cn.cyberpeace.mp.front.business.service.UrlACWrapperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.filter.OrderedFilter;
@@ -23,6 +25,15 @@ public class FrontBusinessConfiguration {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private UrlACWrapperService urlACWrapperService;
+
+    @Autowired
+    private OperateUserPermissionService opPermService;
+
+    @Autowired
+    private UrlACFilterConfig urlACFilterConfig;
+
     @PostConstruct
     public void addBaseNames() {
         ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
@@ -33,7 +44,7 @@ public class FrontBusinessConfiguration {
     @Bean
     public FilterRegistrationBean urlAuthFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new UrlAuthFilter());
+        filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, urlACFilterConfig));
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 50);
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});

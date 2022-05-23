@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.front.business.mapper.UrlACMapper">
+
+    <select id="getById" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+        SELECT distinct ua.id,
+                        ua.url,
+                        ua.is_pattern,
+                        ua.methods                               as methodStr,
+                        group_concat(mauat.target separator ',') as targetsStr
+        FROM mp_auth_url_ac ua
+        left join mp_auth_url_ac_target mauat
+        on ua.id = mauat.urlac_id
+        where ua.id = #{id}
+        group by ua.id;
+    </select>
+
+    <select id="listAllUrlAccessCtlDtos" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+        SELECT
+               distinct ua.id,
+               ua.url,
+               ua.is_pattern,
+               ua.methods as methodStr,
+               group_concat(mauat.target separator ',') as targetsStr
+        FROM mp_auth_url_ac ua
+        left join mp_auth_url_ac_target mauat
+        on ua.id = mauat.urlac_id
+        group by ua.id
+    </select>
+
+
+    <select id="listByUrls" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+        SELECT
+            distinct ua.id,
+            ua.url,
+            ua.is_pattern,
+            ua.methods as methodStr,
+            group_concat(mauat.target separator ',') as targetsStr
+        FROM mp_auth_url_ac ua
+        left join mp_auth_url_ac_target mauat
+        on ua.id = mauat.urlac_id
+        <where>
+            ua.url like
+            <if test="urls != null and urls.size() > 0">
+                <foreach collection="urls" index="url" separator="OR" open="(" close=")" >
+                    CONCAT(#{url}, '%')
+                </foreach>
+            </if>
+        </where>
+        group by ua.id
+    </select>
+
+    <select id="listByTargetIds" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+        SELECT
+            distinct ua.id,
+            ua.url,
+            ua.is_pattern,
+            ua.methods as methodStr,
+        group_concat(mauat.target separator ',') as targetsStr
+        FROM mp_auth_url_ac ua
+        left join mp_auth_url_ac_target mauat
+        on ua.id = mauat.urlac_id
+        <where>
+            <if test="targetIds != null and targetIds.size() > 0">
+                and mauat.target in
+                <foreach collection="targetIds" index="targetId" separator="," open="(" close=")" >
+                    #{targetId}
+                </foreach>
+            </if>
+        </where>
+        group by ua.id
+    </select>
+
+</mapper>

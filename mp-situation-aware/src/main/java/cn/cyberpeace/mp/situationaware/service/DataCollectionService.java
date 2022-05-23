@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -43,8 +44,10 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ParsedNested;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
@@ -102,6 +105,8 @@ public class DataCollectionService {
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
 
+    public static final String CACHE_KEY_VULNERABILITY_INFO = "vulnerability_info";
+
     public static final String CACHE_KEY_MONITOR_EVENTS = "monitor_events";
 
     public static final String CACHE_KEY_HOST_STATE = "host_states";
@@ -154,6 +159,107 @@ public class DataCollectionService {
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    /**
+     * 查询漏洞信息分页
+     *
+     * @param wazuhEventRequest
+     * @return ListObjResult<WazuhVulnerabilityInfoModel>
+     */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_VULNERABILITY_INFO)
+    public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        //处理分页
+        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
+            var wazuhModelList = wazuhFileRootList.stream().map(root -> {
+                var result = JsonCommon.snakeParse(root.getData().toString(), WazuhVulnerabilityInfoModel.class);
+                result.setAgentId(root.getAgent().getId());
+                result.setAgentName(root.getAgent().getName());
+                result.setTime(TimeUtils.dateToLocalDateTime(root.getTimestamp()));
+                return result;
+            }).collect(Collectors.toList());
+            return new ListObjResult<>(wazuhModelList, total);
+        } catch (IOException e) {
+            log.error("es queryVulnerabilityInfo error:", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+
+    /**
+     * 查询漏洞信息数量
+     *
+     * @param wazuhEventRequest
+     * @return List<WazuhVulnerabilityInfoCountModel>
+     */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_VULNERABILITY_INFO)
+    public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
+                                                                              boolean isTop, String fieldPath, String fieldName) {
+        log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return new ArrayList<>();
+        }
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        sourceBuilder.aggregation(AggregationBuilders.terms(fieldName).field(fieldPath));
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        if (isTop) {
+            //获取前十条的数据
+            sourceBuilder.from(0).size(10);
+        }
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        List<WazuhVulnerabilityInfoCountModel> vulnerabilityInfoCounts;
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = response.getHits().getTotalHits().value;
+            if (totalHits == 0) {
+                return new ArrayList<>();
+            }
+            Aggregations aggregations = response.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get(fieldName);
+            List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+            vulnerabilityInfoCounts = buckets.stream().map(bucket -> {
+                WazuhVulnerabilityInfoCountModel countModel = new WazuhVulnerabilityInfoCountModel();
+                countModel.setFieldName(bucket.getKeyAsString());
+                countModel.setCount(bucket.getDocCount());
+                return countModel;
+            }).collect(Collectors.toList());
+            return vulnerabilityInfoCounts;
+        } catch (IOException e) {
+            log.error("es queryVulnerabilityCountInfo error:", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -763,7 +869,9 @@ public class DataCollectionService {
             builder.filePath(wazuhFileRoot.getSyscheck().getPath())
                     .size(wazuhFileRoot.getSyscheck().getSizeAfter())
                     .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-                    .action(wazuhFileRoot.getSyscheck().getEvent());
+                    .action(wazuhFileRoot.getSyscheck().getEvent())
+                    .md5Before(wazuhFileRoot.getSyscheck().getMd5Before())
+                    .md5After(wazuhFileRoot.getSyscheck().getMd5After());
         }
 
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {

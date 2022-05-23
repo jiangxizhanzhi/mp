@@ -24,7 +24,7 @@ import java.io.Serializable;
 @ApiModel("接口权限关系表")
 public class UrlACTargetModel extends BaseModel implements Serializable {
 
-    private String urlACId;
+    private String urlacId;
 
     private String target;
 

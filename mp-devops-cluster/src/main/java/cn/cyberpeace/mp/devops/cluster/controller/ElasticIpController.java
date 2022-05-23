@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ElasticIpResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,13 +24,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/elasticip")
 @Api(tags = "网络实例管理-弹性IP")
+@RequiredArgsConstructor
 public class ElasticIpController {
 
-    private ElasticIpConverter elasticIpConverter;
-
-    public ElasticIpController(ElasticIpConverter elasticIpConverter) {
-        this.elasticIpConverter = elasticIpConverter;
-    }
+    private final ElasticIpConverter elasticIpConverter;
 
     /**
      * 分页查询弹性IP信息

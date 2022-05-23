@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -87,16 +86,6 @@ public class InstallerService extends BaseOpenStackService {
         }else {
             return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS, builder.build(), Installer.class);
         }
-    }
-
-    /**
-     * 更新
-     * @param uuid
-     * @param installer
-     * @return
-     */
-    public Installer update(String uuid,Installer installer){
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + "/" + uuid, JsonUtils.toUnderlineJSONString(installer),Installer.class);
     }
 
     /**

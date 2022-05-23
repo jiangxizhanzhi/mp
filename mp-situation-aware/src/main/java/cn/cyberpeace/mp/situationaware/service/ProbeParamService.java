@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +52,8 @@ public class ProbeParamService {
     public List<ProbeParamRequest> paramStr2paramsRequest(String parameterStr) {
         if (StringUtils.isNotBlank(parameterStr)) {
             List<ProbeParamRequest> probeParamReqs = new ArrayList<>();
-            JSONObject paramObj = JSONObject.parseObject(parameterStr);
+            // 保持json字段原顺序
+            JSONObject paramObj = JSONObject.parseObject(parameterStr, Feature.OrderedField);
             paramObj.keySet().forEach(paramKey -> {
                 ProbeParamRequest paramReq = new ProbeParamRequest();
                 paramReq.setName(paramKey);
@@ -97,7 +99,8 @@ public class ProbeParamService {
      */
     public String paramModels2ParamStr(List<ProbeParamModel> probeParamModels) {
         if (CollectionUtils.isNotEmpty(probeParamModels)) {
-            JSONObject paramObj = new JSONObject();
+            // 保持json字段原顺序
+            JSONObject paramObj = new JSONObject(true);
             probeParamModels.forEach(param -> {
                 JSONArray paramArray = new JSONArray();
                 String type;

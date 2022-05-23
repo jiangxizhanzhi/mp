@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -11,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CloudPlatformPageData {
 
-    private List<?> list;
+    private List<?> list = new ArrayList<>();
 
-    private Integer total;
+    private Integer total = 0;
 }

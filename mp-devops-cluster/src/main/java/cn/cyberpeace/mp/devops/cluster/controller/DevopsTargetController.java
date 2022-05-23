@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
@@ -8,41 +7,37 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.CommonTargetResponse;
 import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
 import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
-import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
-import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
+import cn.hutool.core.date.StopWatch;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,37 +48,26 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/target")
 @Api(tags = "靶标管理")
+@RequiredArgsConstructor
 public class DevopsTargetController {
 
-    private TargetConverter targetConverter;
+    private final TargetConverter targetConverter;
 
-    private TypeConverter typeConverter;
+    private final TypeConverter typeConverter;
 
-    private ImagesService imagesService;
+    private final ImagesService imagesService;
 
-    private IpAddressConfig ipAddressConfig;
+    private final IpAddressConfig ipAddressConfig;
 
-    private DeviceVoConverter deviceVoConverter;
+    private final DeviceVoConverter deviceVoConverter;
 
-    private ITask asyncTargetTask;
+    private final ITask asyncTargetTask;
 
-    private InitRegisterService initRegisterService;
+    private final InitRegisterService initRegisterService;
 
-    private TargetIconUploadService targetIconUploadService;
+    private final TargetIconUploadService targetIconUploadService;
 
-    public DevopsTargetController(TargetConverter targetConverter,TypeConverter typeConverter,
-                                  ImagesService imagesService,IpAddressConfig ipAddressConfig,
-                                  DeviceVoConverter deviceVoConverter,ITask asyncTargetTask,
-                                  InitRegisterService initRegisterService,TargetIconUploadService targetIconUploadService) {
-        this.targetConverter = targetConverter;
-        this.typeConverter = typeConverter;
-        this.imagesService = imagesService;
-        this.ipAddressConfig = ipAddressConfig;
-        this.deviceVoConverter = deviceVoConverter;
-        this.asyncTargetTask = asyncTargetTask;
-        this.initRegisterService = initRegisterService;
-        this.targetIconUploadService = targetIconUploadService;
-    }
+    private final DevopsTargetService devopsTargetService;
 
     /**
      * 查询FTP信息
@@ -103,40 +87,55 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
     public ServiceResult<TargetSceneResponse> list(TargetSceneRequest request){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        stopWatch.stop();
+        System.out.println("findL1AndL2AndL3Type花费时间："+ stopWatch.getTotalTimeSeconds());
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
-        request.setPage(null);
-        request.setPerPage(null);
-        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
-        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
-            return ServiceResult.successful();
+
+        Integer category = request.getCategory();
+        if (Objects.nonNull(category)) {
+            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
         }
-        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
+        Integer secondCategory = request.getSecondCategory();
+        if (Objects.nonNull(secondCategory)) {
+            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
+        }
+
         List<TargetScene> targetScenes = new ArrayList<>();
-        if (Objects.nonNull(request.getCategory())) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(request.getCategory())).collect(Collectors.toList());
-        }
-        if (Objects.nonNull(request.getSecondCategory())) {
-            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(request.getSecondCategory())).collect(Collectors.toList());
-        }
+        StopWatch stopWatch2 = new StopWatch();
+        stopWatch2.start();
         for (TypeConvertModel first : firstTypeList){
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+
             for (TypeConvertModel second : typeConvertModels){
+                request.setCategory(firstId);
+                request.setSecondCategory(second.getId());
+                request.setPage(null);
+                request.setPerPage(null);
+                TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+                    continue;
+                }
+                List<Device> secondDeviceList = targetSceneConvertModel.getDeviceList();
+
                 TargetScene targetScene = new TargetScene();
+
                 targetScene.setFirstTypeId(firstId);
                 targetScene.setFirstTypeName(first.getName());
                 Integer secondId = second.getId();
-                List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
                 targetScene.setSecondTypeId(secondId);
                 targetScene.setSecondTypeName(second.getName());
                 targetScene.setDeviceList(secondDeviceList);
                 targetScenes.add(targetScene);
             }
         }
-
+        stopWatch2.stop();
+        System.out.println("allTarget花费时间："+ stopWatch2.getTotalTimeSeconds());
         return new Result<>(new TargetSceneResponse(targetScenes));
     }
 
@@ -174,40 +173,10 @@ public class DevopsTargetController {
         return new Result(new CommonTargetResponse(deviceVOList));
     }
 
-
-    @ApiOperation("上传文件")
-    @PostMapping("/upload")
-    @Deprecated
-    public ServiceResult<TargetUploadResponse> upload(@RequestParam("type") String type,@RequestParam("file") MultipartFile file){
-        if (type.equals("image")){
-            String originalFilename = file.getOriginalFilename();
-            int index = StringUtils.isBlank(originalFilename) ? -1 : originalFilename.lastIndexOf(".");
-            if (index < 0){
-                throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
-            }
-            String suffix = originalFilename.substring(index + 1);
-            List<String> supportUploadTypeList = Lists.newArrayList("vmdk","raw","qcow2","vdi","zip","tar");
-            boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
-            if (!anyMatch){
-                throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
-            }
-        }
-        Map<String,File> fileList = null;
-        try {
-            fileList = FileUtils.transferToFileMap(Collections.singletonList(file));
-        } catch (IOException e) {
-           log.error("file transfer error",e);
-        }
-        BaseCloudPlatformModel model = imagesService.upload(fileList,type);
-        if (Objects.isNull(model) || !model.isSuccess()){
-            return ServiceResult.fail("file upload error");
-        }
-        return new Result(new TargetUploadResponse(model.getTmpdirUuid(),model.getFileNames()));
-    }
-
     @ApiOperation("批量同步靶标数据")
     @GetMapping("/multi-async")
     public ServiceResult multiAsync(TargetMultiAsyncRequest request){
+        devopsTargetService.deleteAllTarget();
         List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
         MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
 
