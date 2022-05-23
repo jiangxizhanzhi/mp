@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -16,13 +17,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class RouterConverter implements BaseConverter{
 
-    private RouterService routerService;
-
-    public RouterConverter(RouterService routerService) {
-        this.routerService = routerService;
-    }
+    private final RouterService routerService;
 
     /**
      * 分页查询路由信息

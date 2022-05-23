@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -20,14 +21,10 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class VmConverter implements BaseConverter{
 
-    private VmService vmService;
-
-    public VmConverter(VmService vmService) {
-        this.vmService = vmService;
-    }
-
+    private final VmService vmService;
     /**
      * 分页查询虚拟机信息
      * @param request

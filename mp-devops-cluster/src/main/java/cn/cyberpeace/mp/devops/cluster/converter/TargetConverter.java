@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
@@ -31,20 +32,14 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class TargetConverter{
 
-    private ImageMapper imageMapper;
+    private final ImageMapper imageMapper;
 
-    private DeviceService deviceService;
+    private final DeviceService deviceService;
 
-    private CsceneSpecialService csceneSpecialService;
-
-    public TargetConverter(ImageMapper imageMapper, DeviceService deviceService,
-                               CsceneSpecialService csceneSpecialService) {
-        this.imageMapper = imageMapper;
-        this.deviceService = deviceService;
-        this.csceneSpecialService = csceneSpecialService;
-    }
+    private final CsceneSpecialService csceneSpecialService;
 
     /**
      * 分页查询

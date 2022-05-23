@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,44 +36,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ImagesConverter implements BaseConverter{
 
-    private ImagesService imagesService;
+    private final ImagesService imagesService;
 
-    private ImageMapper imageMapper;
+    private final ImageMapper imageMapper;
 
-    private ImageAuthMapper imageAuthMapper;
+    private final ImageAuthMapper imageAuthMapper;
 
-    private DeviceService deviceService;
+    private final DeviceService deviceService;
 
-    private VmService vmService;
+    private final VmService vmService;
 
-    private ContainerService containerService;
+    private final ContainerService containerService;
 
-    private DevopsTargetService devopsTargetService;
+    private final DevopsTargetService devopsTargetService;
 
-    private UserService userService;
+    private final UserService userService;
 
-    private ScenariosService scenariosService;
+    private final ScenariosService scenariosService;
 
-    private TargetConverter targetConverter;
-
-    public ImagesConverter(ImagesService imagesService, ImageMapper imageMapper,
-                           DeviceService deviceService, ImageAuthMapper imageAuthMapper,
-                           VmService vmService,ContainerService containerService,
-                               DevopsTargetService devopsTargetService,UserService userService,
-                               ScenariosService scenariosService, TargetConverter targetConverter) {
-        this.imagesService = imagesService;
-        this.imageMapper = imageMapper;
-        this.deviceService = deviceService;
-        this.imageAuthMapper = imageAuthMapper;
-        this.vmService = vmService;
-        this.containerService = containerService;
-        this.devopsTargetService = devopsTargetService;
-        this.userService = userService;
-        this.scenariosService = scenariosService;
-        this.targetConverter = targetConverter;
-    }
+    private final TargetConverter targetConverter;
 
     /**
      * 分页查询镜像列表

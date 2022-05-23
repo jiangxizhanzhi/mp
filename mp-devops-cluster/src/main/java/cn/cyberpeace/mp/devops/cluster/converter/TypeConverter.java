@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.TargetType;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemNameModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeTreeItemModel;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +19,10 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class TypeConverter {
 
-    private TypeService typeService;
-
-    public TypeConverter(TypeService typeService) {
-        this.typeService = typeService;
-    }
+    private final TypeService typeService;
 
     /**
      * 查询所有类型数据

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +21,10 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class NetworkConverter implements BaseConverter{
 
-    private NetworkService networkService;
-
-    public NetworkConverter(NetworkService networkService) {
-        this.networkService = networkService;
-    }
+    private final NetworkService networkService;
 
     /**
      * 分页查询网络信息
