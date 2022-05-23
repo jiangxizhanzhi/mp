@@ -3,12 +3,15 @@ package cn.cyberpeace.mp.base.localcall;
 import cn.cyberpeace.mp.base.annotation.LocalCallFunc;
 import cn.cyberpeace.mp.base.annotation.LocalCallServer;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.filelistener.FileModifyListener;
 import cn.hutool.core.io.FileUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.springframework.context.ApplicationContext;
 
 import java.io.File;
@@ -18,6 +21,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -41,7 +46,7 @@ public class LocalCallServerListener extends FileModifyListener {
     @Getter
     private final Map<String, Object> localCallServerMap = new HashMap<>();
 
-    private Lock fileChangedLock = new ReentrantLock(true);
+    private final Lock fileChangedLock = new ReentrantLock(true);
 
     private boolean hasNextChange = false;
 
@@ -52,9 +57,9 @@ public class LocalCallServerListener extends FileModifyListener {
     /**
      * run this method after bean initiated
      */
-    public static void initStart(String projectName, ApplicationContext context) {
+    public static void initStart(BaseAppConfig baseAppConfig, ApplicationContext context) {
         var messageFilepath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
-                FileUtil.getTmpDirPath(), projectName, "local_call_message_file");
+                FileUtil.getTmpDirPath(), baseAppConfig.getProjectName(), "local_call_message_file");
         log.info("Local call message file: {}", messageFilepath);
 
         var localCallServerListener = new LocalCallServerListener(messageFilepath);
@@ -62,7 +67,73 @@ public class LocalCallServerListener extends FileModifyListener {
         serverBeans.forEach((serverBeanName, serverBean) -> {
             localCallServerListener.getLocalCallServerMap().put(serverBean.getClass().getName(), serverBean);
         });
+
+        if (SystemUtils.IS_OS_WINDOWS) {
+            prepareWindowsClientScript(baseAppConfig.getHomeDir(), messageFilepath);
+        } else {
+            prepareLinuxClientScript(baseAppConfig.getHomeDir(), messageFilepath);
+        }
+
         localCallServerListener.startListen();
+    }
+
+    public static void prepareWindowsClientScript(String targetDir, String messageFilepath) {
+        var scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.bat");
+        log.info("Local call client script file: {}", scriptFilePath);
+
+        FileUtil.mkParentDirs(scriptFilePath);
+        List<String> contentLines = Stream.of(
+                "@echo off",
+                "set allparam=",
+                "",
+                ":param",
+                "set str=%~1",
+                "if not defined str (",
+                "    goto end",
+                ")",
+                "if defined allparam (",
+                "    set allparam=%allparam% \"%str%\"",
+                ") else (",
+                "    set allparam=\"%str%\"",
+                ")",
+                "shift /0",
+                "goto param",
+                "",
+                ":end",
+                "",
+                "echo %allparam%>> " + messageFilepath
+        ).collect(Collectors.toList());
+        FileUtil.writeUtf8Lines(contentLines, scriptFilePath);
+    }
+
+    public static void prepareLinuxClientScript(String targetDir, String messageFilepath) {
+        var scriptFilePath = StringUtils.joinWith(FileUtil.FILE_SEPARATOR, targetDir, "local_call.sh");
+        log.info("Local call client script file: {}", scriptFilePath);
+
+        FileUtil.mkParentDirs(scriptFilePath);
+        List<String> contentLines = Stream.of(
+                "#/bin/bash",
+                "allparam=",
+                "",
+                "args=(\"$@\")",
+                "for ((i=0;i<${#args[@]};i++))",
+                "do",
+                "if [ \"$allparam\" ];then",
+                "    allparam=$allparam\" \"\\\"${args[i]}\\\"",
+                "else",
+                "    allparam=\\\"${args[i]}\\\"",
+                "fi",
+                "done",
+                "",
+                "echo $allparam>> " + messageFilepath
+        ).collect(Collectors.toList());
+        FileUtil.writeUtf8Lines(contentLines, scriptFilePath);
+
+        try {
+            Runtime.getRuntime().exec(String.format("chmod +x %s", scriptFilePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -100,11 +171,27 @@ public class LocalCallServerListener extends FileModifyListener {
 
         List<Runnable> tasks = new ArrayList<>();
         lines.forEach(line -> {
+            line = line.trim();
             List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(" ")));
-            var methodName = lineParts.get(0);
-            final String[] args = lineParts.size() > 1 ?
-                    lineParts.subList(1, lineParts.size()).toArray(new String[0]) : new String[0];
-            tasks.add(() -> call(methodName, args));
+            String methodName = null;
+            List<String> methodArgs = new ArrayList<>();
+            for (var i = 0; i < lineParts.size(); i++) {
+                var linePart = lineParts.get(i);
+                if (i == 0) {
+                    methodName = linePart;
+                    methodName = TextUtils.coupleStrip(methodName, "\"");
+                    methodName = TextUtils.coupleStrip(methodName, "'");
+                } else {
+                    var methodArg = linePart;
+                    methodArg = TextUtils.coupleStrip(methodArg, "\"");
+                    methodArg = TextUtils.coupleStrip(methodArg, "'");
+                    methodArgs.add(methodArg);
+                }
+            }
+
+            final var taskMethodName = methodName;
+            final var taskMethodArgs = methodArgs.toArray(new String[0]);
+            tasks.add(() -> call(taskMethodName, taskMethodArgs));
         });
 
         TaskCommon.runTasks(tasks, true, true);

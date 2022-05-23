@@ -78,7 +78,7 @@ public abstract class FileModifyListener {
                     if (changed.endsWith(filename)) {
                         var lastModified = new File(filepath).lastModified();
                         if (fileLastModified == null || fileLastModified != lastModified) {
-                            log.info("File({}) watch changed", filepath);
+                            log.debug("File({}) watch changed", filepath);
                             fileLastModified = lastModified;
                             try {
                                 fileChanged(filepath);

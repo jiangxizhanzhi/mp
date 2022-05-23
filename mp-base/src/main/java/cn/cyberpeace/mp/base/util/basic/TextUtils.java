@@ -33,6 +33,18 @@ public class TextUtils {
         return UUID.randomUUID().toString().replace("-", StringUtils.EMPTY).toLowerCase();
     }
 
+    public static String coupleStrip(String str, final String stripChars) {
+        String result;
+        int strLength = str.length();
+        int stripCharsLength = stripChars.length();
+        if (strLength >= stripCharsLength * 2 && str.startsWith(stripChars) && str.endsWith(stripChars)) {
+            result = str.substring(stripCharsLength, strLength - stripCharsLength);
+        } else {
+            result = str;
+        }
+        return result;
+    }
+
     public static String lineToHump(String str) {
         if (str == null) {
             return null;

@@ -33,7 +33,7 @@ public class BaseInit implements ApplicationRunner {
 
         BaseServer.initServerSessionMap();
         BaseGroupServer.initServerGroupSessionsListMap();
-        LocalCallServerListener.initStart(baseAppConfig.getProjectName(), BeanCommon.getContext());
+        LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext());
     }
 
 }
