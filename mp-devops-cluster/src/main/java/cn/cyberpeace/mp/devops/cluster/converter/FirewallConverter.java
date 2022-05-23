@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FirewallService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FirewallPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.FirewallPageRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +17,10 @@ import java.util.Arrays;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class FirewallConverter implements BaseConverter{
 
-    private FirewallService firewallService;
-
-    public FirewallConverter(FirewallService firewallService) {
-        this.firewallService = firewallService;
-    }
+    private final FirewallService firewallService;
 
     /**
      * 分页查询

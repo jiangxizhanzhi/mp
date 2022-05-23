@@ -402,6 +402,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 newNodeIds.add(nodeId);
             }
         }
+        if (newNodeIds.isEmpty()) {
+            return new ListObjServiceResult<>();
+        }
         Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         if (Objects.isNull(pluginHandler)) {
@@ -431,7 +434,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             for (String nodeId : newNodeIds) {
                 var element = sceneHandler.getElement(nodeId);
                 Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
-                List<?> res = null;
+                List<?> res;
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     //硬件信息
                     res = sysCollectorService.getHardware(element.getEid());
@@ -463,13 +466,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setRuleGroups(CollectionUtil.toList("syscheck_file"));
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getData().getList();
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).asResult().getData().getList();
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
                     //注册表变更信息
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getData().getList();
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).asResult().getData().getList();
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
                         ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
                     //日志信息不支持查询
@@ -497,22 +500,46 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 });
             }
         } else {
+            //获取节点所有自定义探针id
+            Map<String, List<String>> nodeId2ProbeId = new HashMap<>();
+            pluginHandler.getElementMap().values().forEach(e -> {
+                List<String> probeIds = new ArrayList<>();
+                e.getProbes().forEach(probe -> {
+                    if (!probe.getCommon()) {
+                        probeIds.add(probe.getId());
+                    }
+                });
+                nodeId2ProbeId.put(e.getSrcElement().getId(), probeIds);
+            });
+            //构造查询请求
+            WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+            request.setStartTime(startTime);
+            request.setEndTime(endTime);
             for (String nodeId : newNodeIds) {
-                //mock数据
                 var element = sceneHandler.getElement(nodeId);
-                for (int i = 0; i < 5; i++) {
-                    CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
-                    hostEventBO.setSceneId(sceneId);
-                    hostEventBO.setNodeId(nodeId);
-                    hostEventBO.setNodeName(element.getName());
-                    hostEventBO.setProbeId("probeId_" + i);
-                    hostEventBO.setProbeName("probeName_" + i);
-                    hostEventBO.setTime(LocalDateTime.now());
-                    result.add(hostEventBO);
+                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
+                List<String> probeIds = nodeId2ProbeId.get(nodeId);
+                List<?> res;
+                //分别查询不同id探针数据
+                request.setAgentNames(CollectionUtil.toList(element.getEid()));
+                for (String customId : probeIds) {
+                    res = dataCollectionService.getCustomProbeCollectData(request, customId);
+                    if (res == null) {
+                        continue;
+                    }
+                    res.forEach(r -> {
+                        CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+                        hostEventBO.setSceneId(sceneId);
+                        hostEventBO.setNodeId(nodeId);
+                        hostEventBO.setNodeName(element.getName());
+                        hostEventBO.setProbeId(customId);
+                        hostEventBO.setProbeName(probeId2Name.get(customId));
+                        hostEventBO.setContent(JsonCommon.beanToMap(r));
+                        result.add(hostEventBO);
+                    });
                 }
             }
         }
-
         return new ListObjServiceResult<>(new ListObjResult(result, result.size()));
     }
 

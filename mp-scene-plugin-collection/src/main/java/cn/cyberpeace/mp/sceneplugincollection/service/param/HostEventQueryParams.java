@@ -36,6 +36,9 @@ public class HostEventQueryParams extends QueryParams {
     @ApiModelProperty(value = "keywords集合")
     private List<String> keyword;
 
+    @ApiModelProperty(value = "应用名称")
+    private List<String> appNames;
+
     @ApiModelProperty(value = "rule group集合")
     private List<String> ruleGroups;
 

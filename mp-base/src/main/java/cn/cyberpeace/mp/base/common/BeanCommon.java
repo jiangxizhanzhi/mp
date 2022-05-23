@@ -21,6 +21,10 @@ public class BeanCommon implements ApplicationContextAware {
         this.context = context;
     }
 
+    public static ApplicationContext getContext() {
+        return context;
+    }
+
     public static Object getBean(String beanName) {
         return context.getBean(beanName);
     }

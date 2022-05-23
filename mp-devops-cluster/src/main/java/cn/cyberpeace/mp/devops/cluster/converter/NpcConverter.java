@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,10 @@ import java.util.Objects;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class NpcConverter implements BaseConverter{
 
-    private NpcService npcService;
-
-    public NpcConverter(NpcService npcService) {
-        this.npcService = npcService;
-    }
+    private final NpcService npcService;
 
     /**
      * 分页查询NPC

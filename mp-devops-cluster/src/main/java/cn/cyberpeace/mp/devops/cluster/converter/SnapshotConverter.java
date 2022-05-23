@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -19,16 +20,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SnapshotConverter {
 
-    private SnapshotService snapshotService;
+    private final SnapshotService snapshotService;
 
-    private ScenariosService scenariosService;
-
-    public SnapshotConverter(SnapshotService snapshotService, ScenariosService scenariosService) {
-        this.snapshotService = snapshotService;
-        this.scenariosService = scenariosService;
-    }
+    private final ScenariosService scenariosService;
 
     /**
      * 根据设备UUID查询快照列表

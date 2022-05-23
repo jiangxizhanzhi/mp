@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.SwitchesCloudPlatform;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,13 +19,10 @@ import java.util.Objects;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class SwitchConverter {
 
-    private SwitchService switchService;
-
-    public SwitchConverter(SwitchService switchService) {
-        this.switchService = switchService;
-    }
+    private final SwitchService switchService;
 
     /**
      * 树形结构-交换机列表

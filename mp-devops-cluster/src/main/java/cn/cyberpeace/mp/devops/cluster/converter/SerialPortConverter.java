@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SerialPortService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.SerialPortCloudPlatform;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,13 +12,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class SerialPortConverter {
 
-    private SerialPortService serialPortService;
-
-    public SerialPortConverter(SerialPortService serialPortService) {
-        this.serialPortService = serialPortService;
-    }
+    private final SerialPortService serialPortService;
 
     /**
      * 查询串口列表
