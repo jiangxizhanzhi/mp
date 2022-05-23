@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,16 +30,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/container")
 @Api(tags = "计算实例管理-容器")
+@RequiredArgsConstructor
 public class ContainerController {
 
-    private ContainerConverter containerConverter;
+    private final ContainerConverter containerConverter;
 
-    private CsceneSpecialService csceneSpecialService;
-
-    public ContainerController(ContainerConverter containerConverter, CsceneSpecialService csceneSpecialService) {
-        this.containerConverter = containerConverter;
-        this.csceneSpecialService = csceneSpecialService;
-    }
+    private final CsceneSpecialService csceneSpecialService;
 
     /**
      * 分页查询容器列表

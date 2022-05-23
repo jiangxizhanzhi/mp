@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +26,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/network")
 @Api(tags = "网络实例管理-网络")
+@RequiredArgsConstructor
 public class NetworkController {
 
-    private NetworkConverter networkConverter;
-
-    public NetworkController(NetworkConverter networkConverter) {
-        this.networkConverter = networkConverter;
-    }
+    private final NetworkConverter networkConverter;
 
     /**
      * 分页查询网络信息
