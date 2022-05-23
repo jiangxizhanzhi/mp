@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,16 +31,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/instance")
 @Api(tags = "计算实例管理-虚拟机")
+@RequiredArgsConstructor
 public class VmController {
 
-    private VmConverter vmConverter;
+    private final VmConverter vmConverter;
 
-    private CsceneSpecialService csceneSpecialService;
-
-    public VmController(VmConverter vmConverter,CsceneSpecialService csceneSpecialService) {
-        this.vmConverter = vmConverter;
-        this.csceneSpecialService = csceneSpecialService;
-    }
+    private final CsceneSpecialService csceneSpecialService;
 
     /**
      * 分页查询虚拟机信息

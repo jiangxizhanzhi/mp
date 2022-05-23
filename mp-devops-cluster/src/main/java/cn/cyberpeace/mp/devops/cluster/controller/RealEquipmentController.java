@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,20 +40,14 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/real-equipment")
 @Api(tags = "靶标管理-实装管理")
+@RequiredArgsConstructor
 public class RealEquipmentController {
 
-    private RealEquipmentConverter realEquipmentConverter;
+    private final RealEquipmentConverter realEquipmentConverter;
 
-    private RealEquipmentService realEquipmentService;
+    private final RealEquipmentService realEquipmentService;
 
-    private TypeConverter typeConverter;
-
-    public RealEquipmentController(RealEquipmentConverter realEquipmentConverter,RealEquipmentService realEquipmentService,
-                                  TypeConverter typeConverter) {
-        this.realEquipmentConverter = realEquipmentConverter;
-        this.realEquipmentService = realEquipmentService;
-        this.typeConverter = typeConverter;
-    }
+    private final TypeConverter typeConverter;
 
     /**
      * 分页查询
