@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,13 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/openflow")
 @Api(tags = "流表监控")
+@RequiredArgsConstructor
 public class OpenFlowController {
 
-    private OpenFlowConverter openFlowConverter;
-
-    public OpenFlowController(OpenFlowConverter openFlowConverter) {
-        this.openFlowConverter = openFlowConverter;
-    }
+    private final OpenFlowConverter openFlowConverter;
 
     @ApiOperation("分页查询")
     @GetMapping("/page")

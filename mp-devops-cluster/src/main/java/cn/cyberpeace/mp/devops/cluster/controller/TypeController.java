@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,25 +35,18 @@ import java.util.Objects;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/types")
 @Api(tags = "靶标管理-分类管理")
+@RequiredArgsConstructor
 public class TypeController {
 
     private static final String CCM_1 = "CCM-1";
 
-    private TypeConverter typeConverter;
+    private final TypeConverter typeConverter;
 
-    private TypeService typeService;
+    private final TypeService typeService;
 
-    private SerialPortConverter serialPortConverter;
+    private final SerialPortConverter serialPortConverter;
 
-    private SwitchConverter switchConverter;
-
-    public TypeController(TypeConverter typeConverter,TypeService typeService,SerialPortConverter serialPortConverter,
-                          SwitchConverter switchConverter) {
-        this.typeConverter = typeConverter;
-        this.typeService = typeService;
-        this.serialPortConverter = serialPortConverter;
-        this.switchConverter = switchConverter;
-    }
+    private final SwitchConverter switchConverter;
 
     /**
      * 查询所有分类

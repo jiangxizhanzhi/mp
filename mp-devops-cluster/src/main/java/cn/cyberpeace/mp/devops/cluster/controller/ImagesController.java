@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
@@ -24,7 +23,10 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.*;
+import cn.cyberpeace.mp.devops.cluster.response.ImagesByIdResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ImagesByUuidsResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ImagesPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.impl.CustomImageUploadService;
@@ -33,14 +35,13 @@ import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
-import com.alibaba.fastjson.JSON;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,45 +60,33 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/images")
 @Api(tags = "靶标管理-镜像管理")
+@RequiredArgsConstructor
 public class ImagesController {
 
-    private ImagesConverter imagesConverter;
+    private final ImagesConverter imagesConverter;
 
-    private SnapshotConverter snapshotConverter;
+    private final SnapshotConverter snapshotConverter;
 
-    private FlavorService flavorService;
+    private final FlavorService flavorService;
 
-    private ScenariosService scenariosService;
+    private final ScenariosService scenariosService;
 
-    private InjectFileConverter injectFileConverter;
+    private final InjectFileConverter injectFileConverter;
 
-    private ImagesService imagesService;
+    private final ImagesService imagesService;
 
-    @Autowired
+    @NonNull
     private InjectFileUploadService injectFileUploadService;
 
-    @Autowired
-    private ImagesConnectSocketServer imagesConnectSocketServer;
+    private final ImagesConnectSocketServer imagesConnectSocketServer;
 
-    @Autowired
-    private ImagesByUuidSocketServer imagesByUuidSocketServer;
+    private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
-    @Autowired
+    @NonNull
     private SshPrivateKeyUploadService sshPrivateKeyUploadService;
 
-    @Autowired
+    @NonNull
     private CustomImageUploadService customImageUploadService;
-
-    public ImagesController(ImagesConverter imagesConverter, SnapshotConverter snapshotConverter,
-                            FlavorService flavorService, ImagesService imagesService,
-                            ScenariosService scenariosService, InjectFileConverter injectFileConverter) {
-        this.imagesConverter = imagesConverter;
-        this.snapshotConverter = snapshotConverter;
-        this.flavorService = flavorService;
-        this.scenariosService = scenariosService;
-        this.injectFileConverter = injectFileConverter;
-        this.imagesService = imagesService;
-    }
 
     /**
      * 分页查询
@@ -188,7 +177,7 @@ public class ImagesController {
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
         Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
-        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
         return imagesByIdResponseResult;
     }
 
@@ -426,24 +415,6 @@ public class ImagesController {
         }
         Integer result = imagesConverter.async(request);
         return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
-    }
-
-    @ApiOperation("检验IP+端口是否可连接")
-    @GetMapping("/check-access-protocols-connectable")
-    @Deprecated
-    public Result<ImageCheckPortResponse> checkAccessProtocolsConnectable(ImageCheckPortRequest request){
-        List<ImageCheckPortRequest.ImageCheckPort> list = request.getList();
-        List<ImageCheckPortResponse.ImageCheckPort> imageCheckPorts = Lists.newArrayList();
-        for (ImageCheckPortRequest.ImageCheckPort imageCheckPort : list) {
-            ImageCheckPortResponse.ImageCheckPort checkPort = new ImageCheckPortResponse.ImageCheckPort();
-            boolean pass = NetworkUtils.checkPortConnectable(imageCheckPort.getHost(), imageCheckPort.getPort(), 1000);
-            checkPort.setPort(imageCheckPort.getPort());
-            checkPort.setConnectionId(imageCheckPort.getConnectionId());
-            checkPort.setHost(imageCheckPort.getHost());
-            checkPort.setPass(pass);
-            imageCheckPorts.add(checkPort);
-        }
-        return new Result(new ImageCheckPortResponse(imageCheckPorts));
     }
 
     /**

@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,35 +42,22 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/monitor")
 @Api(tags = "云平台监控")
+@RequiredArgsConstructor
 public class CloudPlatformMonitorController {
 
-    private VmConverter vmConverter;
+    private final VmConverter vmConverter;
 
-    private ContainerConverter containerConverter;
+    private final ContainerConverter containerConverter;
 
-    private RouterConverter routerConverter;
+    private final RouterConverter routerConverter;
 
-    private RealEquipmentConverter realEquipmentConverter;
+    private final RealEquipmentConverter realEquipmentConverter;
 
-    private HypervisorConverter hypervisorConverter;
+    private final HypervisorConverter hypervisorConverter;
 
-    private ImagesConverter imagesConverter;
+    private final ImagesConverter imagesConverter;
 
-    private NpcConverter npcConverter;
-
-    public CloudPlatformMonitorController(VmConverter vmConverter, ContainerConverter containerConverter,
-                                          RouterConverter routerConverter, NpcConverter npcConverter,
-                                          RealEquipmentConverter realEquipmentConverter,
-                                          HypervisorConverter hypervisorConverter,
-                                          ImagesConverter imagesConverter) {
-        this.vmConverter = vmConverter;
-        this.containerConverter = containerConverter;
-        this.routerConverter = routerConverter;
-        this.realEquipmentConverter = realEquipmentConverter;
-        this.hypervisorConverter = hypervisorConverter;
-        this.imagesConverter = imagesConverter;
-        this.npcConverter = npcConverter;
-    }
+    private final NpcConverter npcConverter;
 
     /**
      * 资源统计

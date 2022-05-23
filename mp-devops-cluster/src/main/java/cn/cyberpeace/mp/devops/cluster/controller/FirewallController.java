@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.response.FirewallPageResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,13 +25,10 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/firewall")
 @Api(tags = "网络实例管理-防火墙")
+@RequiredArgsConstructor
 public class FirewallController {
 
-    private FirewallConverter firewallConverter;
-
-    public FirewallController(FirewallConverter firewallConverter) {
-        this.firewallConverter = firewallConverter;
-    }
+    private final FirewallConverter firewallConverter;
 
     /**
      * 分页查询
