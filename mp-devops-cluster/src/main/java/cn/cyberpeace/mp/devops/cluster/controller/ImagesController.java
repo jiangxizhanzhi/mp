@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.impl.CustomImageUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.InjectFileUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
 import com.alibaba.fastjson.JSON;
@@ -187,7 +188,7 @@ public class ImagesController {
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
         Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
-        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(imagesByIdResponse)));
+        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
         return imagesByIdResponseResult;
     }
 
@@ -412,7 +413,7 @@ public class ImagesController {
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
-        imagesConnectSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(connection.getList())), Arrays.asList(uuid));
+        imagesConnectSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(connection.getList(),"MP-image-connection")), Arrays.asList(uuid));
         return new Result<>(connection.getList());
     }
 

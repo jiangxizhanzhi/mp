@@ -42,6 +42,7 @@ public class ImagesConnectSocketServer {
     @OnOpen
     public void onOpen(Session session, @PathParam("uuid") String uuid) {
         try {
+            session.setMaxIdleTimeout(60 * 60 * 1000);
             this.session = session;
             this.uuid = uuid;
             websocketMap.put(session, this);
@@ -56,7 +57,6 @@ public class ImagesConnectSocketServer {
      */
     @OnClose
     public void onClose() {
-        // 删除
         websocketMap.remove(this.session);
         log.info("close websocket : {}", this.uuid);
     }

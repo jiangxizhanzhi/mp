@@ -80,6 +80,12 @@ public class BaseRequestUtil {
         }
     }
 
+    public static void checkBaseRequestWithSceneId(BaseSceneElementPageRequest pageRequest) {
+        if (StringUtils.isBlank(pageRequest.getSceneId())) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
+        }
+    }
+
     public static void processDefaultTimeRange(BaseTimeRangeRequest timeRangeRequest) {
         LocalDateTime now = LocalDateTime.now();
 

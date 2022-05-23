@@ -327,6 +327,10 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setLevel(srcHostEvent.getLevel());
             hostEvent.setCatagory(srcHostEvent.getCatagory());
             hostEvent.setContent(srcHostEvent.getContent());
+            hostEvent.setPath(srcHostEvent.getFilePath());
+            hostEvent.setFileSize(srcHostEvent.getSize());
+            hostEvent.setMd5Before(srcHostEvent.getMd5Before());
+            hostEvent.setMd5After(srcHostEvent.getMd5After());
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -175,6 +176,32 @@ public class SituationAwareTestController {
         wazuhRequest.setEndTime(LocalDateTime.now());
         wazuhRequest.setPageSize(1);
         dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+        return ServiceResult.successful();
+    }
+
+    @GetMapping("/query/vulnerability_info")
+    public ServiceResult queryVulnerabilityInfo(@RequestParam String agentName) {
+        WazuhEventRequest wazuhRequest = new WazuhEventRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("test_controller"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-14 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(10000);
+        wazuhRequest.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        dataCollectionService.queryVulnerabilityInfo(wazuhRequest);
+        return ServiceResult.successful();
+    }
+
+    @GetMapping("/query/vulnerability_count_info")
+    public ServiceResult queryVulnerabilityCountInfo(@RequestParam String agentName) {
+        WazuhEventRequest wazuhRequest = new WazuhEventRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList("test_controller"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-14 16:00:00", formatter));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        wazuhRequest.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        dataCollectionService.queryVulnerabilityCountInfo(wazuhRequest, false, "data.vulnerability.package.name", "package_name");
         return ServiceResult.successful();
     }
 

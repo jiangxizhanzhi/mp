@@ -129,80 +129,32 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
     @GetMapping("/get_service_vulnerability")
-    public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(BaseSceneElementPageRequest pageRequest) {
+    public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        //mock数据
-        List<ElementVulnerabilityCountInfo> vulnerabilityCountInfos = new ArrayList<>();
-        List<String> types = new ArrayList<>(CollectionUtil.toList("VNC", "SNMP", "HTTP", "UPnP-HTTPU", "unknown", "ASF-RMCP", "SSH", "MySQL", "ASF", "HTTPS"));
-        for (int i = 0; i < 10; i++) {
-            ElementVulnerabilityCountInfo vulnerabilityCountInfo = new ElementVulnerabilityCountInfo();
-            vulnerabilityCountInfo.setPackageName(types.get(i));
-            vulnerabilityCountInfo.setCount(i + 10);
-            vulnerabilityCountInfos.add(vulnerabilityCountInfo);
-        }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityCountInfos, vulnerabilityCountInfos.size()).asResult()).asResult();
+        var result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
+        return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞饼状图")
     @GetMapping("/get_vulnerability_pie_chart")
-    public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(BaseSceneElementPageRequest pageRequest) {
+    public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        //mock数据
-        List<ElementVulnerabilityPieChartInfo> vulnerabilityPieChartInfos = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            ElementVulnerabilityPieChartInfo vulnerabilityPieChartInfo = new ElementVulnerabilityPieChartInfo();
-            vulnerabilityPieChartInfo.setSeverity("low");
-            vulnerabilityPieChartInfo.setPercent(6.7 * i);
-            vulnerabilityPieChartInfos.add(vulnerabilityPieChartInfo);
-        }
 
-        vulnerabilityPieChartInfos.get(1).setSeverity("high");
-        vulnerabilityPieChartInfos.get(2).setSeverity("medium");
-        vulnerabilityPieChartInfos.get(3).setSeverity("critical");
-        vulnerabilityPieChartInfos.get(4).setSeverity("unknown");
-
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityPieChartInfos, vulnerabilityPieChartInfos.size()).asResult()).asResult();
+        var result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
+        return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞列表")
     @GetMapping("/get_vulnerability_list")
-    public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(BaseSceneElementPageRequest pageRequest) {
+    public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
-        //mock数据
-        List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
-            vulnerabilityInfo.setNodeName("node_" + i);
-            vulnerabilityInfo.setSeverity("high");
-            vulnerabilityInfo.setTitle("漏洞描述" + i);
-            vulnerabilityInfo.setCve("logo_" + i);
-            vulnerabilityInfo.setTime(LocalDateTime.now());
-            vulnerabilityInfos.add(vulnerabilityInfo);
-        }
-        for (int i = 0; i < 5; i++) {
-            ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
-            vulnerabilityInfo.setNodeName("node_1" + i);
-            vulnerabilityInfo.setSeverity("low");
-            vulnerabilityInfo.setTitle("漏洞影响" + i);
-            vulnerabilityInfo.setCve("logo_1" + i);
-            vulnerabilityInfo.setTime(LocalDateTime.now());
-            vulnerabilityInfos.add(vulnerabilityInfo);
-        }
-        for (int i = 0; i < 5; i++) {
-            ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
-            vulnerabilityInfo.setNodeName("node_2" + i);
-            vulnerabilityInfo.setSeverity("critical");
-            vulnerabilityInfo.setTitle("漏洞影响描述" + i);
-            vulnerabilityInfo.setCve("logo_2" + i);
-            vulnerabilityInfo.setTime(LocalDateTime.now());
-            vulnerabilityInfos.add(vulnerabilityInfo);
-        }
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vulnerabilityInfos, vulnerabilityInfos.size()).asResult()).asResult();
+        var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
+        return new ListObjServiceResult<>(result).asResult();
     }
 
 }
