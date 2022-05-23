@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.yaml.snakeyaml.nodes.CollectionNode;
 
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ import java.util.stream.Collectors;
 public class UrlACService {
 
     public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS_MAP";
+
+    private static final PathMatcher MATCHER = new AntPathMatcher();
 
     @Autowired
     private UrlACMapper urlACMapper;
@@ -211,6 +215,9 @@ public class UrlACService {
                         .desc(importUrlAuth.getMenuDesc())
                         .build();
                 urlACModel.setId(urlacId);
+                if (MATCHER.isPattern(importUrlAuth.getUrl())) {
+                    urlACModel.setIsPattern(1);
+                }
 
                 UrlACTargetModel urlACTargetModel = UrlACTargetModel.builder()
                         .urlacId(urlacId)

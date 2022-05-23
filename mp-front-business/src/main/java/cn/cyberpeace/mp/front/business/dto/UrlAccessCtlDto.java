@@ -24,6 +24,8 @@ public class UrlAccessCtlDto {
 
     private String url;
 
+    private Integer isPattern;
+
     @JsonIgnore
     private String methodStr;
 
