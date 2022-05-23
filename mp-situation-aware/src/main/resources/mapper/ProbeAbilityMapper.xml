@@ -6,6 +6,7 @@
     <result column="id" jdbcType="VARCHAR" property="id" />
     <result column="probe_id" jdbcType="VARCHAR" property="probeId" />
     <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="os_type" jdbcType="VARCHAR" property="osType" />
     <result column="description" jdbcType="VARCHAR" property="description" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
@@ -28,7 +29,7 @@
       `name`, description, create_time, 
       update_time)
     values (#{pk,jdbcType=INTEGER}, #{id,jdbcType=VARCHAR}, #{probeId,jdbcType=VARCHAR}, 
-      #{name,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{name,jdbcType=VARCHAR},  #{osType,jdbcType=VARCHAR}, #{description,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
       #{updateTime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel">
@@ -45,6 +46,9 @@
       </if>
       <if test="name != null">
         `name`,
+      </if>
+      <if test="osType != null">
+        `os_type`,
       </if>
       <if test="description != null">
         description,
@@ -69,6 +73,9 @@
       <if test="name != null">
         #{name,jdbcType=VARCHAR},
       </if>
+      <if test="osType != null">
+        #{os_type,jdbcType=VARCHAR},
+      </if>
       <if test="description != null">
         #{description,jdbcType=VARCHAR},
       </if>
@@ -92,6 +99,9 @@
       <if test="name != null">
         `name` = #{name,jdbcType=VARCHAR},
       </if>
+      <if test="osType != null">
+        `os_type` = #{osType,jdbcType=VARCHAR},
+      </if>
       <if test="description != null">
         description = #{description,jdbcType=VARCHAR},
       </if>
@@ -109,6 +119,7 @@
     set id = #{id,jdbcType=VARCHAR},
       probe_id = #{probeId,jdbcType=VARCHAR},
       `name` = #{name,jdbcType=VARCHAR},
+      `os_type` = #{osType,jdbcType=VARCHAR},
       description = #{description,jdbcType=VARCHAR},
       create_time = #{createTime,jdbcType=TIMESTAMP},
       update_time = #{updateTime,jdbcType=TIMESTAMP}
@@ -116,7 +127,7 @@
   </update>
 
   <select id="listProbeAbilityDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto">
-    select pa.*, p.id as probe_id, p.name as probe_name, p.OS_type as os_type
+    select pa.*, p.id as probe_id, p.name as probe_name
     from mp_situation_probe_ability pa
     left join mp_situation_probe p
     on p.id = pa.probe_id

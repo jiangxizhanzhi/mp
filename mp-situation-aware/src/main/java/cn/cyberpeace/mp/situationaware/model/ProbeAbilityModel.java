@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,13 @@ public class ProbeAbilityModel extends BaseModel {
      */
     @ApiModelProperty(value = "功能名称")
     private String name;
+
+
+    /**
+     * 探针功能自己的操作系统，跟探针的不完全一样
+     */
+    @JsonIgnore
+    private String osType;
 
     /**
      * 描述
