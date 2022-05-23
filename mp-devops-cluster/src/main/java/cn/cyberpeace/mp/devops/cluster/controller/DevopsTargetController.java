@@ -109,51 +109,6 @@ public class DevopsTargetController {
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
     public ServiceResult<TargetSceneResponse> list(TargetSceneRequest request){
-        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
-        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
-        request.setPage(null);
-        request.setPerPage(null);
-        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
-        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
-            return ServiceResult.successful();
-        }
-        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
-        List<TargetScene> targetScenes = new ArrayList<>();
-        if (Objects.nonNull(request.getCategory())) {
-            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(request.getCategory())).collect(Collectors.toList());
-        }
-        if (Objects.nonNull(request.getSecondCategory())) {
-            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(request.getSecondCategory())).collect(Collectors.toList());
-        }
-        for (TypeConvertModel first : firstTypeList){
-            Integer firstId = first.getId();
-            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
-                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-            for (TypeConvertModel second : typeConvertModels){
-                TargetScene targetScene = new TargetScene();
-                targetScene.setFirstTypeId(firstId);
-                targetScene.setFirstTypeName(first.getName());
-                Integer secondId = second.getId();
-                List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
-                targetScene.setSecondTypeId(secondId);
-                targetScene.setSecondTypeName(second.getName());
-                targetScene.setDeviceList(secondDeviceList);
-                targetScenes.add(targetScene);
-            }
-        }
-
-        return new Result<>(new TargetSceneResponse(targetScenes));
-    }
-
-    /**
-     * 查询所有靶标信息
-     * @param request
-     * @return
-     */
-    @ApiOperation("查询所有靶标信息")
-    @GetMapping("/list-new")
-    public ServiceResult<TargetSceneResponse> listNew(TargetSceneRequest request){
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
@@ -195,7 +150,6 @@ public class DevopsTargetController {
                 targetScene.setFirstTypeId(firstId);
                 targetScene.setFirstTypeName(first.getName());
                 Integer secondId = second.getId();
-//                List<Device> secondDeviceList = deviceList.stream().filter(device -> Objects.nonNull(device.getSecondCategory())).filter(device -> device.getSecondCategory().equals(secondId)).collect(Collectors.toList());
                 targetScene.setSecondTypeId(secondId);
                 targetScene.setSecondTypeName(second.getName());
                 targetScene.setDeviceList(secondDeviceList);
