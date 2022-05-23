@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.base.init;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.localcall.LocalCallServerListener;
 import cn.cyberpeace.mp.base.websocket.BaseGroupServer;
 import cn.cyberpeace.mp.base.websocket.BaseServer;
 import cn.hutool.core.io.FileUtil;
@@ -31,6 +33,7 @@ public class BaseInit implements ApplicationRunner {
 
         BaseServer.initServerSessionMap();
         BaseGroupServer.initServerGroupSessionsListMap();
+        LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext());
     }
 
 }

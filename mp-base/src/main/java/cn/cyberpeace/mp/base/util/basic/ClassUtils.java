@@ -121,6 +121,14 @@ public class ClassUtils {
         return castFieldType(value, expectedFieldType);
     }
 
+    public static boolean setFieldValue(Class<?> clazz, String fieldName, Object obj, Object value) {
+        var field = getField(clazz, fieldName, true, false);
+        if (field == null) {
+            return false;
+        }
+        return setFieldValue(field, obj, value);
+    }
+
     public static Object getStaticFieldValue(Class<?> clazz, String fieldName) {
         return getFieldValue(clazz, fieldName, null);
     }
@@ -129,12 +137,20 @@ public class ClassUtils {
         return getFieldValue(clazz, fieldName, null, expectedFieldType);
     }
 
+    public static boolean setStaticFieldValue(Class<?> clazz, String fieldName, Object value) {
+        return setFieldValue(clazz, fieldName, null, value);
+    }
+
     public static Object getObjFieldValue(Object obj, String fieldName) {
         return getFieldValue(obj.getClass(), fieldName, obj);
     }
 
     public static <T> T getObjFieldValue(Object obj, String fieldName, Class<T> expectedFieldType) {
         return getFieldValue(obj.getClass(), fieldName, obj, expectedFieldType);
+    }
+
+    public static boolean setObjFieldValue(Object obj, String fieldName, Object value) {
+        return setFieldValue(obj.getClass(), fieldName, obj, value);
     }
 
     public static Method getMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) {
