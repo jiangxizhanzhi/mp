@@ -32,6 +32,9 @@ public class CollectionHostEventBO {
     @ApiModelProperty(value = "操作系统名称")
     private String systemTypeName;
 
+    @ApiModelProperty(value = "应用名称")
+    private String appName;
+
     @ApiModelProperty("探针id")
     private String probeId;
 
