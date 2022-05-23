@@ -21,6 +21,8 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.impl.InstallerDockerUploadService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -39,16 +41,13 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/service")
 @Api(tags = "靶标管理-服务管理")
+@RequiredArgsConstructor
 public class InstallerController {
 
-    private InstallerConverter installerConverter;
+    private final InstallerConverter installerConverter;
 
+    @NonNull
     private InstallerDockerUploadService installerDockerUploadService;
-
-    public InstallerController(InstallerConverter installerConverter,InstallerDockerUploadService installerDockerUploadService) {
-        this.installerConverter = installerConverter;
-        this.installerDockerUploadService = installerDockerUploadService;
-    }
 
     /**
      * 分页查询

@@ -11,8 +11,8 @@ import cn.cyberpeace.mp.devops.cluster.response.ScreenRecordUsedSpaceResponse;
 import cn.cyberpeace.mp.devops.cluster.response.ScreenrecordResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,10 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 @Api(tags = "录屏文件管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/screenrecord")
+@RequiredArgsConstructor
 public class ScreenrecordController {
 
-    @Autowired
-    private ScreenrecordService screenrecordService;
+    private final ScreenrecordService screenrecordService;
 
     @ApiOperation("分页查询录屏文件")
     @GetMapping("/page")

@@ -27,9 +27,6 @@ public class ProbeAbilityDto extends ProbeAbilityModel {
     @ApiModelProperty(value = "探针名称")
     private String probeName;
 
-    @JsonIgnore
-    private String osType;
-
     @ApiModelProperty(value = "分析引擎")
     private String engine;
 
