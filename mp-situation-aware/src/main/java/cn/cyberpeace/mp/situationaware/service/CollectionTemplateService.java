@@ -118,16 +118,26 @@ public class CollectionTemplateService {
                     CollectionTemplateDto templateDto = new CollectionTemplateDto();
                     BeanUtils.copyProperties(itemDto, templateDto);
 
-                    //List<CollectionTemplateProbeDto> basicProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateBasicInfoProbesCondition());
+                    List<CollectionTemplateProbeDto> basicProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateBasicInfoProbesCondition());
                     List<CollectionTemplateProbeDto> eventProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateEventProbesCondition());
                     List<CollectionTemplateProbeDto> logProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateLogProbesCondition());
                     List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(itemDto.getId(), generateCustomProbesCondition());
 
-                    //templateDto.setBasicInfoProbes(basicProbeDtos);
                     customProbeDtos.forEach(p -> {
                         processParamsForColTempCustomProbeDto(p);
                     });
 
+                    // 通用探针
+                    List<ColTempCommonProbeDto> basicProbeResps =
+                            basicProbeDtos.stream().map(dto -> {
+                                        ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
+                                        BeanUtils.copyProperties(dto, commonDto);
+                                        commonDto.setId(dto.getProbeId());
+                                        return commonDto;
+                                    }
+                            ).collect(Collectors.toList());
+
+                    // 事件采集
                     List<ColTempCommonProbeDto> eventProbeResps =
                             eventProbeDtos.stream().map(dto -> {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
@@ -138,6 +148,7 @@ public class CollectionTemplateService {
                                     }
                             ).collect(Collectors.toList());
 
+                    // 日志采集
                     List<ColTempCommonProbeDto> logProbeResps =
                             logProbeDtos.stream().map(dto -> {
                                         ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
@@ -148,6 +159,7 @@ public class CollectionTemplateService {
                                     }
                             ).collect(Collectors.toList());
 
+                    // 自定义探针
                     List<ColTempCustomProbeDto> customProbeResps =
                             customProbeDtos.stream().map(dto -> {
                                         ColTempCustomProbeDto customDto = new ColTempCustomProbeDto();
@@ -157,6 +169,8 @@ public class CollectionTemplateService {
                                     }
                             ).collect(Collectors.toList());
 
+
+                    templateDto.setBasicInfoProbes(basicProbeResps);
                     templateDto.setEventProbes(eventProbeResps);
                     templateDto.setLogProbes(logProbeResps);
                     templateDto.setCustomProbes(customProbeResps);
