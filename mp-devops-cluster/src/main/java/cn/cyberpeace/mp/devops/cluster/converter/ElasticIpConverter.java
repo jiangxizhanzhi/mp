@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +19,10 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class ElasticIpConverter implements BaseConverter {
 
-    private NetworkService networkService;
-
-    public ElasticIpConverter(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
+    private final NetworkService networkService;
 
     /**
      * 分页查询弹性IP信息

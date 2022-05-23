@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.OpenFlowVoConverter;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +21,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class OpenFlowConverter implements BaseConverter{
 
-    private OpenFlowService openFlowService;
+    private final OpenFlowService openFlowService;
 
-    private OpenFlowVoConverter openFlowVoConverter;
-
-    public OpenFlowConverter(OpenFlowService openFlowService,OpenFlowVoConverter openFlowVoConverter) {
-        this.openFlowService = openFlowService;
-        this.openFlowVoConverter = openFlowVoConverter;
-    }
+    private final OpenFlowVoConverter openFlowVoConverter;
 
     /**
      * 分页查询流表信息

@@ -9,22 +9,19 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileDelete;
 import cn.cyberpeace.mp.devops.cluster.model.common.InjectFile;
 import cn.cyberpeace.mp.devops.cluster.request.ImageInjectFileDeleteRequest;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class InjectFileConverter {
 
-    private InjectFileService injectFileService;
+    private final InjectFileService injectFileService;
 
-    private ScenariosService scenariosService;
-
-    public InjectFileConverter(InjectFileService injectFileService, ScenariosService scenariosService) {
-        this.injectFileService = injectFileService;
-        this.scenariosService = scenariosService;
-    }
+    private final ScenariosService scenariosService;
 
     /**
      * 查询注入文件列表

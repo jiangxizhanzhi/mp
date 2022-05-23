@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
@@ -38,30 +39,20 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class RealEquipmentConverter implements BaseConverter{
 
-    private RealEquipmentService realEquipmentService;
+    private final RealEquipmentService realEquipmentService;
 
-    private DeviceService deviceService;
+    private final DeviceService deviceService;
 
-    private DevopsTargetService devopsTargetService;
+    private final DevopsTargetService devopsTargetService;
 
-    private ImageMapper imageMapper;
+    private final ImageMapper imageMapper;
 
-    private ImageAuthMapper imageAuthMapper;
+    private final ImageAuthMapper imageAuthMapper;
 
-    private TargetConverter targetConverter;
-
-    public RealEquipmentConverter(RealEquipmentService realEquipmentService, DeviceService deviceService,
-                                      DevopsTargetService devopsTargetService, ImageMapper imageMapper,
-                                      ImageAuthMapper imageAuthMapper,TargetConverter targetConverter) {
-        this.realEquipmentService = realEquipmentService;
-        this.deviceService = deviceService;
-        this.devopsTargetService = devopsTargetService;
-        this.imageMapper = imageMapper;
-        this.imageAuthMapper = imageAuthMapper;
-        this.targetConverter = targetConverter;
-    }
+    private final TargetConverter targetConverter;
 
     /**
      * 获取实装总数

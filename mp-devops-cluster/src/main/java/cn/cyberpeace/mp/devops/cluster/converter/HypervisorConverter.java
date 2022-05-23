@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import com.alibaba.fastjson.JSONObject;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -31,23 +32,16 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class HypervisorConverter implements BaseConverter {
 
-    private HypervisorService hypervisorService;
+    private final HypervisorService hypervisorService;
 
-    private SwitchService switchService;
+    private final SwitchService switchService;
 
-    private NetworkService networkService;
+    private final NetworkService networkService;
 
-    private VmService vmService;
-
-    public HypervisorConverter(HypervisorService hypervisorService, SwitchService switchService,
-                                   NetworkService networkService,VmService vmService) {
-        this.hypervisorService = hypervisorService;
-        this.switchService = switchService;
-        this.networkService = networkService;
-        this.vmService = vmService;
-    }
+    private final VmService vmService;
 
     /**
      * 资源统计
