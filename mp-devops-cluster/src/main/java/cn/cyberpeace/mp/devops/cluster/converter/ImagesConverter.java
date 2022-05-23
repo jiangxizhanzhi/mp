@@ -6,10 +6,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
@@ -197,14 +194,15 @@ public class ImagesConverter implements BaseConverter{
     public Device build(ImagesBuildRequest request) {
         DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
-        List<DeviceQuickCreateCloudPlatformModel.QuickCreateParams> quickCreateParams = installerDTOList.stream().map(v -> {
-            DeviceQuickCreateCloudPlatformModel.QuickCreateParams params = new DeviceQuickCreateCloudPlatformModel.QuickCreateParams();
+        List<QuickCreateParam> quickCreateParams = installerDTOList.stream().map(v -> {
+            QuickCreateParam params = new QuickCreateParam();
             params.setInstallerUuid(v.getUuid());
             params.setSettings(v.getDockerInstallerData().getStartUpParameterList());
+            params.setFile(v.getDockerInstallerData().getFile());
             return params;
         }).collect(Collectors.toList());
         model.setQuickCreateParams(quickCreateParams);
-        Device device =  imagesService.quickCreate(model);
+        Device device = imagesService.quickCreate(model);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }

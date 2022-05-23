@@ -1,8 +1,12 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -18,6 +22,7 @@ import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,7 +63,10 @@ public class LogFileService {
      */
     public ListObjServiceResult<LogFileVO> pageByElementId(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+        if (StringUtils.isBlank(pageRequest.getSceneId())) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
+        }
+
         if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
             return new ListObjServiceResult(new ListObjResult()).asResult();
         }

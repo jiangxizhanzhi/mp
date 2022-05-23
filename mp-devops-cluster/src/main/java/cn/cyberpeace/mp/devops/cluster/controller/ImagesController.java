@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
@@ -186,7 +187,7 @@ public class ImagesController {
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
         Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
-        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(imagesByIdResponseResult));
+        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(imagesByIdResponse)));
         return imagesByIdResponseResult;
     }
 
@@ -411,7 +412,7 @@ public class ImagesController {
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
-        imagesConnectSocketServer.batchSendInfo(JSON.toJSONString(new Result<>(connection.getList())), Arrays.asList(uuid));
+        imagesConnectSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(connection.getList())), Arrays.asList(uuid));
         return new Result<>(connection.getList());
     }
 
@@ -428,6 +429,7 @@ public class ImagesController {
 
     @ApiOperation("检验IP+端口是否可连接")
     @GetMapping("/check-access-protocols-connectable")
+    @Deprecated
     public Result<ImageCheckPortResponse> checkAccessProtocolsConnectable(ImageCheckPortRequest request){
         List<ImageCheckPortRequest.ImageCheckPort> list = request.getList();
         List<ImageCheckPortResponse.ImageCheckPort> imageCheckPorts = Lists.newArrayList();

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeParamRequest;
 import cn.cyberpeace.mp.situationaware.model.enums.ParamTypeEnum;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
@@ -19,15 +20,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
-  *@Desciption
-  *@Author zhangjin
-  *@Date 9/10/21 11:12 上午
-**/
 @Service
 @Slf4j
 public class ProbeParamService {
 
+    @Autowired
+    private ProbeParamMapper probeParamMapper;
+
+    /**
+     * 根绝probeId和templateId查询参数，并返回json字符串
+     * @param probeId
+     * @param templateId
+     * @return
+     */
+    public String getProbeParamAsJsonStr(String probeId, String templateId) {
+        if (StringUtils.isNotBlank(probeId)) {
+            List<ProbeParamModel> probeParamModels = probeParamMapper.selectByProbeIdAndTemplateId(probeId, templateId);
+            String paramStr = paramModels2ParamStr(probeParamModels);
+            return paramStr;
+        }
+
+        return null;
+    }
 
     /**
      * 将请求json字符串形式的参数内容，处理成ParamRequest

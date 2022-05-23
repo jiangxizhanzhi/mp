@@ -38,10 +38,10 @@ public class CollectionSceneConfigPluginHandler extends SceneConfigPluginHandler
                     //有脚本，脚本驱动类型
                     if (probe.getScriptUrl() != null) {
                         probe.setExecType(Probe.ExecType.SCRIPT_PROBE);
-                    } else if (ProbeConstant.ProbeId.REGISTRY_ID.equals(probe.getId())) {
+                    } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probe.getId())) {
                         //注册表变更类型
                         probe.setExecType(Probe.ExecType.REGISTRY_PROBE);
-                    } else if (ProbeConstant.ProbeId.FILE_ID.equals(probe.getId())) {
+                    } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probe.getId())) {
                         //文件变更类型
                         probe.setExecType(Probe.ExecType.FILE_PROBE);
                     } else if (probe.getCommon() && ProbeConstant.ProbeType.LOG_TYPE.equals(probe.getType())) {

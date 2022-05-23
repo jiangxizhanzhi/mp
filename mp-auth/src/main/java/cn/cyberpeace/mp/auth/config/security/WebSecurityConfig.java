@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthentica
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -42,6 +43,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private ClientAuthenticationFilter clientAuthenticationFilter;
 
     @Autowired
+    private AuthenticateConfig authenticateConfig;
+
+    @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
                              HttpAuthenticationEntryPoint authenticationEntryPoint,
                              HttpLogoutSuccessHandler logoutSuccessHandler,
@@ -65,13 +69,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+        // custom authenticate urls
+        String[] authenticateUrls = {};
+        if (CollectionUtil.isNotEmpty(authenticateConfig.getUrls())) {
+            authenticateUrls = authenticateConfig.getUrls().toArray(new String[authenticateConfig.getUrls().size()]);
+        }
+
         http.authorizeRequests()
-//                .antMatchers("/login", "/logout").permitAll()  // login logout
-//                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
-                .antMatchers("/auth/**").authenticated()
-                .antMatchers("/sys/notice/**").authenticated()
-                .antMatchers("/systemOperation/**").authenticated()
-                .antMatchers("/devops/log/operate/page").authenticated()
+                .antMatchers(authenticateUrls).authenticated()
                 .antMatchers("/unauth/**").permitAll()
                 .anyRequest().permitAll()
                 .and()

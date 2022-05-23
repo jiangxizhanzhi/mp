@@ -9,15 +9,7 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
@@ -113,6 +105,8 @@ public class DataCollectionService {
     public static final String CACHE_KEY_MONITOR_EVENTS = "monitor_events";
 
     public static final String CACHE_KEY_HOST_STATE = "host_states";
+
+    public static final String CACHE_KEY_CUSTOM_PROBE = "custom_probe";
 
     public static final String CACHE_KEY_NET_CONN = "net_conn";
 
@@ -300,6 +294,33 @@ public class DataCollectionService {
 //                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                 wazuhHostStateModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                 return wazuhHostStateModel;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return wazuhModelList;
+    }
+
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_CUSTOM_PROBE)
+    public List<WazuhProbeCommonModel> getCustomProbeCollectData(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String probeId) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, probeId);
+        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+                .getHits()).map(hit ->
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
+                })).collect(Collectors.toList());
+
+        var wazuhModelList = wazuhFileRootList.stream().map(model -> {
+            if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
+                String output = model.getData().getOutput().getRawOutput();
+                WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
+                wazuhProbeCommonModel.setRawOutPut(output);
+                wazuhProbeCommonModel.setAgentId(model.getAgent().getId());
+                wazuhProbeCommonModel.setAgentName(model.getAgent().getName());
+                wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
+                return wazuhProbeCommonModel;
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());

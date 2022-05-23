@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.front.business.mapper.UrlACTargetMapper">
+    <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.front.business.model.UrlACTargetModel">
+        <id column="pk" jdbcType="INTEGER" property="pk" />
+        <result column="id" jdbcType="VARCHAR" property="id" />
+        <result column="urlac_id" jdbcType="VARCHAR" property="urlACId" />
+        <result column="target" jdbcType="VARCHAR" property="target" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    </resultMap>
+
+</mapper>

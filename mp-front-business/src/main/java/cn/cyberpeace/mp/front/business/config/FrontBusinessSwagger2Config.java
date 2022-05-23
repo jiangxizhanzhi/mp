@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.front.business.controller.config;
+package cn.cyberpeace.mp.front.business.config;
 
 import cn.cyberpeace.mp.auth.config.AuthSwagger2Config;
 import cn.cyberpeace.mp.base.config.Swagger2Config;
