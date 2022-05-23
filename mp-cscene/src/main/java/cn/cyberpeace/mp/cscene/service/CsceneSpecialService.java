@@ -581,6 +581,9 @@ public class CsceneSpecialService {
     }
 
     private List<CsceneNodeInfoBO> getSceneInfoBySceneEids(Map<String, List<String>> sceneId2Name) {
+        if (sceneId2Name == null || sceneId2Name.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<String> sceneIds = new ArrayList<>(sceneId2Name.keySet());
         var condition = new HumanCondition()
                 .filterIn(CsceneInstanceModel::getScene, sceneIds.toArray())
@@ -595,6 +598,9 @@ public class CsceneSpecialService {
     }
 
     private List<CsceneNodeInfoBO> getSceneInfoByElementEids(Map<String, List<String>> nodeEid2Name) {
+        if (nodeEid2Name == null || nodeEid2Name.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<String> elementEids = new ArrayList<>(nodeEid2Name.keySet());
         var condition = new HumanCondition()
                 .link(SceneElementModel.class, CsceneInstanceModel.class)

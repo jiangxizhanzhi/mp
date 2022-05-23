@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
+import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
@@ -91,7 +92,10 @@ class DeviceInfoConverter implements IConverter {
         pluginElement.setIsBuildIn(device.getIsInternal());
         // 云平台数据库大小写不敏感,这里名字不能覆盖
 //        pluginElement.setImage(device.getName());
-        pluginElement.setRole(device.getRole());
+        // 默认交换机使用默认角色
+        if (!Boolean.TRUE.equals(device.getIsInternal()) || !TargetConstant.DefaultTargetName.DEFAULT_NETWORK.equals(device.getName())) {
+            pluginElement.setRole(device.getRole());
+        }
 
         if (device.getExtSystemInfo() != null) {
             this.loadExtSystemInfo(params.element, device.getExtSystemInfo());

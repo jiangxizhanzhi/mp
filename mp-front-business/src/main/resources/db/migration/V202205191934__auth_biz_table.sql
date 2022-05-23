@@ -4,6 +4,7 @@ CREATE TABLE mp_auth_url_ac
     `pk`          int(11)       NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id`          varchar(64)   NOT NULL COMMENT 'id',
     `url`         varchar(500)   NOT NULL COMMENT 'URL pattern',
+    `is_pattern`  int(11)       NOT NULL  DEFAULT 0 COMMENT '是否包含模式字符',
     `methods`     varchar(100)   NOT NULL COMMENT '支持的请求方法，如get,post',
     `desc`     varchar(500)      NULL COMMENT '描述',
     `create_time` datetime      NOT NULL                DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

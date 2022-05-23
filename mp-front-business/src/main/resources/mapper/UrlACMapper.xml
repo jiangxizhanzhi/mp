@@ -5,6 +5,7 @@
     <select id="getById" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
         SELECT distinct ua.id,
                         ua.url,
+                        ua.is_pattern,
                         ua.methods                               as methodStr,
                         group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
@@ -18,6 +19,7 @@
         SELECT
                distinct ua.id,
                ua.url,
+               ua.is_pattern,
                ua.methods as methodStr,
                group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
@@ -31,6 +33,7 @@
         SELECT
             distinct ua.id,
             ua.url,
+            ua.is_pattern,
             ua.methods as methodStr,
             group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua
@@ -51,6 +54,7 @@
         SELECT
             distinct ua.id,
             ua.url,
+            ua.is_pattern,
             ua.methods as methodStr,
         group_concat(mauat.target separator ',') as targetsStr
         FROM mp_auth_url_ac ua

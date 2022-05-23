@@ -20,7 +20,7 @@ create table mp_situation_probe
     output_format varchar(10) default 'none' not null comment '自定义探针输出格式: none, json, plain',
     engine varchar(40) null comment '分析引擎',
     is_deleted int default 0 null comment '1:删除 0:未删除',
-    OS_type varchar(20) null comment '(可多选)操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other',
+    OS_type varchar(20) null comment '(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     constraint mp_sita_probe_id unique (id)
@@ -40,6 +40,7 @@ create table mp_situation_probe_ability
     id varchar(64) not null,
     probe_id varchar(64) not null comment '探针id',
     name varchar(32) not null comment '功能名称',
+    OS_type varchar(20) null comment '比探针的os_type种类要多，0:Windows, 1:Unix, 2:Linux, 3:BSD, 5:cisco-ios, 6:HP, 7:junos, 8:openbsd',
     description varchar(400) null comment '描述',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
