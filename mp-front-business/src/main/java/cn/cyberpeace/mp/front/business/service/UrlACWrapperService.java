@@ -45,9 +45,44 @@ public class UrlACWrapperService {
     }
 
 
+    public Map<String, List<String>> getUrlPatternTargetsMap() {
+        List<UrlAccessCtlDto> dtos = urlACService.listAllUrlACPatternDtos();
+        Map<String, List<String>> urlTargetsMap = new HashMap<>();
+
+        dtos.forEach(d -> {
+            List<String> targetIds = urlTargetsMap.get(d.getUrl());
+            if (CollectionUtil.isEmpty(targetIds)) {
+                targetIds = new ArrayList<>();
+                urlTargetsMap.put(d.getUrl(), targetIds);
+            }
+
+            urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
+        });
+
+        return urlTargetsMap;
+    }
+
+
 
     public Map<String, List<String>> getUrlMethodsMap() {
         List<UrlAccessCtlDto> dtos = urlACService.listAllUrlAccessCtlDtos();
+        Map<String, List<String>> urlMethodsMap = new HashMap<>();
+
+        dtos.forEach(d -> {
+            List<String> methods = urlMethodsMap.get(d.getUrl());
+            if (CollectionUtil.isEmpty(methods)) {
+                methods = new ArrayList<>();
+                urlMethodsMap.put(d.getUrl(), methods);
+            }
+
+            urlMethodsMap.get(d.getUrl()).addAll(d.getMethods());
+        });
+
+        return urlMethodsMap;
+    }
+
+    public Map<String, List<String>> getUrlPatternMethodsMap() {
+        List<UrlAccessCtlDto> dtos = urlACService.listAllUrlACPatternDtos();
         Map<String, List<String>> urlMethodsMap = new HashMap<>();
 
         dtos.forEach(d -> {

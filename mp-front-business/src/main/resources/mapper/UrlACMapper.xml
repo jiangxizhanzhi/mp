@@ -25,6 +25,22 @@
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id
+        where ua.is_pattern = 0
+        group by ua.id
+    </select>
+
+
+    <select id="listAllUrlAccessCtlPatternDtos" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+        SELECT
+            distinct ua.id,
+                     ua.url,
+                     ua.is_pattern,
+                     ua.methods as methodStr,
+                     group_concat(mauat.target separator ',') as targetsStr
+        FROM mp_auth_url_ac ua
+        left join mp_auth_url_ac_target mauat
+        on ua.id = mauat.urlac_id
+        where ua.is_pattern = 1
         group by ua.id
     </select>
 

@@ -3,12 +3,16 @@ package cn.cyberpeace.mp.front.business.filter;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OperatePermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.business.config.UrlACFilterConfig;
 import cn.cyberpeace.mp.front.business.constant.FrontBizErrorCode;
 import cn.cyberpeace.mp.front.business.service.UrlACWrapperService;
 import cn.hutool.core.collection.CollectionUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,6 +22,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,10 +44,13 @@ public class UrlACFilter extends OncePerRequestFilter {
 
     private UrlACFilterConfig urlACFilterConfig;
 
-    public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, UrlACFilterConfig urlACFilterConfig) {
+    private ObjectMapper mapper;
+
+    public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, UrlACFilterConfig urlACFilterConfig, ObjectMapper mapper) {
         this.urlACWrapperService = urlACWrapperService;
         this.opPermService = opPermService;
         this.urlACFilterConfig = urlACFilterConfig;
+        this.mapper = mapper;
     }
 
     @Override
@@ -62,77 +70,92 @@ public class UrlACFilter extends OncePerRequestFilter {
             }
         }
 
+        ServiceResult<Object> result = null;
+
         if (!skip) {
-            String url = request.getRequestURI();
+            String requestUrl = request.getRequestURI();
             String method = request.getMethod().toLowerCase();
 
             // 方法拦截是否开启
             if (Objects.nonNull(urlACFilterConfig.getMethodMatch()) && urlACFilterConfig.getMethodMatch()) {
-                boolean isMethodMatch = isMethodMatch(url, method);
+                boolean isMethodMatch = isMethodMatch(requestUrl, method);
                 if (!isMethodMatch) {
                     // 请求方法不匹配
-                    log.error("url:{} method:{} not match!", url, method);
-                    throw new MpRuntimeException(FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(url, method));
+                    log.error("url:{} method:{} not match!", requestUrl, method);
+                    //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
+                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
                 }
             }
 
             // 权限拦截是否开启
             if (Objects.nonNull(urlACFilterConfig.getAuthorityMatch()) && urlACFilterConfig.getAuthorityMatch()) {
-                boolean isAuthoritiesMatch = isAuthoritiesMatch(url);
+                boolean isAuthoritiesMatch = isAuthoritiesMatch(requestUrl);
 
                 if (!isAuthoritiesMatch) {
                     // 权限不匹配
-                    log.error("url:{} access denied!", url);
-                    throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(url));
+                    log.error("url:{} access denied!", requestUrl);
+                    //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
+                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl, method));
                 }
             }
 
         }
 
-        filterChain.doFilter(request, response);
+        if (Objects.nonNull(result)) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            PrintWriter writer = response.getWriter();
+            mapper.writeValue(writer, result.asResult());
+            writer.flush();
+            return;
+        }
 
+        filterChain.doFilter(request, response);
     }
 
 
-    private boolean isMethodMatch(String url, String method) {
+    private boolean isMethodMatch(String requestUrl, String method) {
         Map<String, List<String>> urlMethodsMap = urlACWrapperService.getUrlMethodsMap();
+        Map<String, List<String>> urlPatternMethodsMap = urlACWrapperService.getUrlPatternMethodsMap();
 
-        boolean isAccurateUrlMethodMatch = isAccurateUrlMethodMatch(url, method, urlMethodsMap);
+
+        boolean isAccurateUrlMethodMatch = isAccurateUrlMethodMatch(requestUrl, method, urlMethodsMap);
 
         if (isAccurateUrlMethodMatch) {
             return true;
         }
 
-        boolean isPatternUrlMethodMatch = isPatternUrlMethodMatch(url, method, urlMethodsMap);
+        boolean isPatternUrlMethodMatch = isPatternUrlMethodMatch(requestUrl, method, urlPatternMethodsMap);
         if(isPatternUrlMethodMatch) {
             return true;
         }
 
         log.warn("isAccurateUrlMethodMatch:{}, isPatternUrlMethodMatch:{}", isAccurateUrlMethodMatch, isPatternUrlMethodMatch);
-        log.warn("url:{} is blocked for method:{} not match!", url, method);
+        log.warn("url:{} is blocked for method:{} not match!", requestUrl, method);
 
         return false;
     }
 
 
-    private boolean isAuthoritiesMatch(String url) {
+    private boolean isAuthoritiesMatch(String requestUrl) {
         Set<String> currentUserAuthorities = UserUtils.getLoginUserAuthorities();
         UserModel currentUser = UserUtils.getLoginUser();
         String currentUsername = Objects.nonNull(currentUser) ? currentUser.getUsername() : "";
         Map<String, List<String>> urlTargetsMap = urlACWrapperService.getUrlTargetsMap();
+        Map<String, List<String>> urlPatternTargetsMap = urlACWrapperService.getUrlPatternTargetsMap();
 
-        boolean isAccurateUrlAuthoritiesMatch = isAccurateUrlAuthoritiesMatch(url, urlTargetsMap, currentUserAuthorities);
+        boolean isAccurateUrlAuthoritiesMatch = isAccurateUrlAuthoritiesMatch(requestUrl, urlTargetsMap, currentUserAuthorities);
         if (isAccurateUrlAuthoritiesMatch) {
             return true;
         }
 
-        boolean isPatternUrlAuthoritiesMatch = isPatternUrlAuthoritiesMatch(url, urlTargetsMap, currentUserAuthorities);
+        boolean isPatternUrlAuthoritiesMatch = isPatternUrlAuthoritiesMatch(requestUrl, urlPatternTargetsMap, currentUserAuthorities);
         if(isPatternUrlAuthoritiesMatch) {
             return true;
         }
 
         log.warn("isAccurateUrlAuthoritiesMatch:{}, isPatternUrlAuthoritiesMatch:{}", isAccurateUrlAuthoritiesMatch, isPatternUrlAuthoritiesMatch);
-        log.warn("url:{} is blocked to current user:{} for not has specified url-authoritys:{}", url, currentUsername, urlTargetsMap.get(url));
+        log.warn("url:{} is blocked to current user:{} for not has specified url-authoritys:{}", requestUrl, currentUsername, urlTargetsMap.get(requestUrl));
 
         return false;
     }
@@ -140,11 +163,11 @@ public class UrlACFilter extends OncePerRequestFilter {
     /**
      * 精确url-method匹配
      *
-     * @param url
+     * @param requestUrl
      * @return
      */
-    private boolean isAccurateUrlMethodMatch(String url, String method, Map<String, List<String>> urlMethodsMap) {
-        List<String> methods = urlMethodsMap.get(url);
+    private boolean isAccurateUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> urlMethodsMap) {
+        List<String> methods = urlMethodsMap.get(requestUrl);
         if (CollectionUtil.isNotEmpty(methods)) {
             return methods.contains(method);
         }
@@ -155,14 +178,14 @@ public class UrlACFilter extends OncePerRequestFilter {
     /**
      * 规则url-method匹配
      *
-     * @param url
+     * @param requestUrl
      * @return
      */
-    private boolean isPatternUrlMethodMatch(String url, String method, Map<String, List<String>> urlMethodsMap) {
-        Set<String> urlPatterns = urlMethodsMap.keySet();
+    private boolean isPatternUrlMethodMatch(String requestUrl, String method, Map<String, List<String>> patternUrlMethodsMap) {
+        Set<String> urlPatterns = patternUrlMethodsMap.keySet();
         for (String urlPattern : urlPatterns) {
-            if (MATCHER.match(urlPattern, url)) {
-                List<String> methods = urlMethodsMap.get(url);
+            if (MATCHER.match(urlPattern, requestUrl)) {
+                List<String> methods = patternUrlMethodsMap.get(urlPattern);
                 if (CollectionUtil.isNotEmpty(methods)) {
                     boolean methodMatch = methods.contains(method);
                     if (methodMatch) {
@@ -178,26 +201,26 @@ public class UrlACFilter extends OncePerRequestFilter {
     /**
      * 精确url-authority匹配
      *
-     * @param url
+     * @param requestUrl
      * @return
      */
-    private boolean isAccurateUrlAuthoritiesMatch(String url, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
+    private boolean isAccurateUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
 
-        List<String> urlTargetIds = urlTargetsMap.get(url);
+        List<String> urlTargetIds = urlTargetsMap.get(requestUrl);
         return isUserAuthoritiesMatch(currentUserAuthorities, urlTargetIds);
     }
 
     /**
      * 规则url-authority匹配
      *
-     * @param url
+     * @param requestUrl
      * @return
      */
-    private boolean isPatternUrlAuthoritiesMatch(String url, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
+    private boolean isPatternUrlAuthoritiesMatch(String requestUrl, Map<String, List<String>> urlTargetsMap, Set<String> currentUserAuthorities) {
         Set<String> urlPatterns = urlTargetsMap.keySet();
         for (String urlPattern : urlPatterns) {
-            if (MATCHER.match(urlPattern, url)) {
-                List<String> urlTargetIds = urlTargetsMap.get(url);
+            if (MATCHER.match(urlPattern, requestUrl)) {
+                List<String> urlTargetIds = urlTargetsMap.get(urlPattern);
                 if (isUserAuthoritiesMatch(currentUserAuthorities, urlTargetIds)) {
                     return true;
                 }
@@ -214,11 +237,9 @@ public class UrlACFilter extends OncePerRequestFilter {
      */
     private boolean isUserAuthoritiesMatch(Set<String> currentUserAuthorities, List<String> urlTargetIds) {
         if (CollectionUtil.isNotEmpty(urlTargetIds)) {
-            for (String userAuthority : currentUserAuthorities) {
-                for (String tid : urlTargetIds) {
-                    if (Objects.equals(userAuthority, tid)) {
-                        return true;
-                    }
+            for (String tid : urlTargetIds) {
+                if (currentUserAuthorities.contains(tid)) {
+                    return true;
                 }
             }
         }

@@ -12,6 +12,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -115,12 +117,15 @@ public class UserUtils {
             return Collections.emptySet();
         }
 
-        Set<GrantedAuthority> authoritySet = (Set<GrantedAuthority>) authentication.getAuthorities();
-        if (CollectionUtil.isNotEmpty(authoritySet)) {
-            Set<String> set = authoritySet.stream().map(a -> a.getAuthority()).collect(Collectors.toSet());
-            return set;
-        }
-        return Collections.emptySet();
+        Collection authorities = authentication.getAuthorities();
+        Set<String> authoritySet = AuthorityUtils.authorityListToSet(authorities);
+        //Set<GrantedAuthority> authoritySet = authorities.stream().collect(Collectors.toSet());
+
+        //if (CollectionUtil.isNotEmpty(authoritySet)) {
+        //    Set<String> set = authoritySet.stream().map(a -> a.getAuthority()).collect(Collectors.toSet());
+        //    return set;
+        //}
+        return authoritySet;
     }
 
 

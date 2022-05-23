@@ -30,6 +30,11 @@ public class UrlACFilterConfig {
     private Boolean authorityMatch = true;
 
     /**
+     * unauth（未经过认证）的请求是否拦截，默认不跳过
+     */
+    private Boolean ignoreIfUnauth = false;
+
+    /**
      * 如果请求url在规则表中没有定义，是否跳过拦截，默认不跳过
      */
     private Boolean ignoreIfNotDefined = false;

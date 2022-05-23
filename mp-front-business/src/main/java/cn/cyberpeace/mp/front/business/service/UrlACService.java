@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +40,9 @@ import java.util.stream.Collectors;
 @Service
 public class UrlACService {
 
-    public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS_MAP";
+    public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";
+
+    public static final String CACHE_VAL_ALL_URLAC_PATTERN = "CACHE_VAL_ALL_URLAC_PATTERN";
 
     private static final PathMatcher MATCHER = new AntPathMatcher();
 
@@ -155,14 +158,33 @@ public class UrlACService {
     }
 
     /**
-     * 查询所有的
+     * 查询所有的urlac不包括pattern
      * @return
      */
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
-        //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
+        dtos.forEach(d -> {
+            if (StringUtils.isNotBlank(d.getTargetsStr())) {
+                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
+            }
 
+            if (StringUtils.isNotBlank(d.getMethodStr())) {
+                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
+            }
+        });
+
+        return dtos;
+    }
+
+
+    /**
+     * 查询所有的pattern
+     * @return
+     */
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC_PATTERN)
+    public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
+        List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
         dtos.forEach(d -> {
             if (StringUtils.isNotBlank(d.getTargetsStr())) {
                 d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
@@ -224,7 +246,6 @@ public class UrlACService {
                         .target(importUrlAuth.getMenuId())
                         .build();
 
-
                 urlACModels.add(urlACModel);
                 urlACTargetModels.add(urlACTargetModel);
             }
@@ -233,6 +254,14 @@ public class UrlACService {
             urlACTargetMapper.bulkCreate(urlACTargetModels);
         }
 
+    }
+
+
+    public static void main(String[] args) {
+        String pattern = "/api/mp/agg/default-img/get-default-img/?defaultImgDirEnum=TARGET";
+        String url = "/api/mp/agg/default-img/get-default-img/?defaultImgDirEnum=TARGET";
+        boolean match = MATCHER.match(pattern, url);
+        System.out.println(match);
     }
 
 
