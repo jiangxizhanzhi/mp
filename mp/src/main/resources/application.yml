@@ -130,7 +130,10 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
     url-ac-filter:
-      enabled: true
+      enabled: false
+      method-match: true
+      authority-match: true
+      ignore-if-not-defined: false
     authenticate:
       urls:
         - /auth/**

@@ -94,8 +94,8 @@ public class CollectionTemplateController {
     @PostMapping
     @ApiOperation(value = "新增采集模板")
     public ServiceResult addTemplate(@RequestBody @Validated(AddGroup.class) CollectionTemplateRequest addRequest) {
-        templateService.addTemplate(addRequest);
-        return ServiceResult.successful();
+        String id = templateService.addTemplate(addRequest);
+        return ServiceResult.success(id);
     }
 
     /**
