@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
 import cn.cyberpeace.mp.front.business.model.UrlACModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,6 +21,12 @@ import java.util.List;
 @ModelClass(UrlACModel.class)
 public interface UrlACMapper extends BaseModelMapper<UrlACModel> {
 
+    UrlAccessCtlDto getById(@Param("id") String id);
+
     List<UrlAccessCtlDto> listAllUrlAccessCtlDtos();
+
+    List<UrlAccessCtlDto> listByUrls(@Param("url") List<String> urls);
+
+    List<UrlAccessCtlDto> listByTargetIds(@Param("targetIds") List<String> targetIds);
 
 }

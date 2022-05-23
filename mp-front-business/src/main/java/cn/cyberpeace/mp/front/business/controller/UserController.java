@@ -53,7 +53,6 @@ public class UserController {
     @Autowired
     private UserHeartbeatService heartbeatService;
 
-
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
