@@ -869,7 +869,9 @@ public class DataCollectionService {
             builder.filePath(wazuhFileRoot.getSyscheck().getPath())
                     .size(wazuhFileRoot.getSyscheck().getSizeAfter())
                     .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-                    .action(wazuhFileRoot.getSyscheck().getEvent());
+                    .action(wazuhFileRoot.getSyscheck().getEvent())
+                    .md5Before(wazuhFileRoot.getSyscheck().getMd5Before())
+                    .md5After(wazuhFileRoot.getSyscheck().getMd5After());
         }
 
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
