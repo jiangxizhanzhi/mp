@@ -33,7 +33,6 @@ import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -188,7 +187,7 @@ public class ImagesController {
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
         Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
-        imagesByUuidSocketServer.batchSendInfo(JSON.toJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
         return imagesByIdResponseResult;
     }
 

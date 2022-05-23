@@ -127,7 +127,7 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param serialPort
      * @return
      */
-    public CloudPlatformPageModel<RealEquipmentByParams>  findBySerialPort(String serialPort){
+    public CloudPlatformPageModel<RealEquipmentByParams> findBySerialPort(String serialPort){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
