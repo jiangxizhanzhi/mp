@@ -10,4 +10,10 @@
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     </resultMap>
 
+    <delete id="deleteByUrlACId">
+        delete * from mp_auth_url_ac_target where urlac_id in
+        <foreach collection="urlacIds" index="urlacId" open="(" separator="," close=")">
+            #{urlacId}
+        </foreach>
+    </delete>
 </mapper>

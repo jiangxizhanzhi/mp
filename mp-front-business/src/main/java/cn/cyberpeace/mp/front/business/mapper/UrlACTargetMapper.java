@@ -15,5 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @ModelClass(UrlACTargetModel.class)
 public interface UrlACTargetMapper extends BaseModelMapper<UrlACTargetModel> {
-    
+
+    int deleteByUrlACId(String[] urlacId);
+
 }
