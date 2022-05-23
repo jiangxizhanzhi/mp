@@ -62,6 +62,18 @@ public class CollectionHostEventBO {
     @ApiModelProperty("底层信息")
     private Map<String, Object> content;
 
+    @ApiModelProperty("文件或注册表路径")
+    private String path;
+
+    @ApiModelProperty("文件大小")
+    private String fileSize;
+
+    @ApiModelProperty("变更前m5值")
+    private String md5Before;
+
+    @ApiModelProperty("变更后m5值")
+    private String md5After;
+
 
 
 }

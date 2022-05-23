@@ -30,6 +30,11 @@ public class ColTempCommonProbeDto {
     @ApiModelProperty(value = "探针名称")
     private String name;
 
+    /**
+     * 描述
+     */
+    @ApiModelProperty(value = "描述")
+    private String description;
 
     //@ApiModelProperty(value = "采集模板ID")
     //private String templateId;

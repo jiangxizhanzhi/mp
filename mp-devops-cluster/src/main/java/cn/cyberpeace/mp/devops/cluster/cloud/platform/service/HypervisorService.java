@@ -1,11 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.HypervisorStatisticsResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
+import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -31,10 +33,11 @@ public class HypervisorService extends BaseOpenStackService {
      * @return
      */
     public HypervisorStatisticsCloudPlatformModel statistics(){
-        HypervisorStatisticsResult result = super.sendGet(URL_VERSION + HYPERVISORS + "/statistics", HypervisorStatisticsResult.class);
+        CloudPlatformResult result = super.sendGet(URL_VERSION + HYPERVISORS + "/statistics", CloudPlatformResult.class);
         super.checkResult(result);
+        HypervisorStatistics data = JSONObject.parseObject(JSONObject.toJSONString(result.getData()), HypervisorStatistics.class);
         HypervisorStatisticsCloudPlatformModel model = new HypervisorStatisticsCloudPlatformModel();
-        model.setHypervisorStatistics(result.getData());
+        model.setHypervisorStatistics(data);
         model.setCode(result.getCode());
         return model;
     }

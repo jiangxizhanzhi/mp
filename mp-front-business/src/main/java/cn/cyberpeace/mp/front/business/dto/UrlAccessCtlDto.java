@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.front.business.dto;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,10 +24,12 @@ public class UrlAccessCtlDto {
 
     private String url;
 
+    @JsonIgnore
     private String methodStr;
 
     private List<String> methods;
 
+    @JsonIgnore
     private String targetsStr;
 
     private List<String> targetIds;
