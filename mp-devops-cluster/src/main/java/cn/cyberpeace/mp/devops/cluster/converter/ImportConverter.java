@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -20,22 +21,18 @@ import java.math.BigDecimal;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class ImportConverter implements BaseConverter{
 
-    private ImportService importService;
+    private final ImportService importService;
 
-    private SysActivationService sysActivationService;
+    private final SysActivationService sysActivationService;
 
     /**
      * 承诺最大支持靶标的磁盘大小(G)
      */
     @Value("${mp.devops.max-target-size:100}")
     private String maxTargetSize;
-
-    public ImportConverter(ImportService importService, SysActivationService sysActivationService) {
-        this.importService = importService;
-        this.sysActivationService = sysActivationService;
-    }
 
     /**
      * 获取磁盘剩余空间

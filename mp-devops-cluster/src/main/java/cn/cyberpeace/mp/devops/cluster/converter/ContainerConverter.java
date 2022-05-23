@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -20,13 +21,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ContainerConverter implements BaseConverter {
 
-    private ContainerService containerService;
-
-    public ContainerConverter(ContainerService containerService) {
-        this.containerService = containerService;
-    }
+    private final ContainerService containerService;
 
     /**
      * 分页查询容器列表

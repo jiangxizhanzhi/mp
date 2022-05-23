@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.base.Joiner;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,13 +32,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class InstallerConverter implements BaseConverter{
 
-    private InstallerService installerService;
-
-    public InstallerConverter(InstallerService installerService) {
-        this.installerService = installerService;
-    }
+    private final InstallerService installerService;
 
     /**
      * 分页查询服务列表
