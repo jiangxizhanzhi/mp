@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
@@ -27,13 +28,10 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class BaseOpenStackService extends BaseService {
 
-    private DevopsConfig devopsConfig;
-
-    public BaseOpenStackService(DevopsConfig devopsConfig) {
-       this.devopsConfig = devopsConfig;
-    }
+    private final DevopsConfig devopsConfig;
 
     /**
      * 通过Get方式查询信息

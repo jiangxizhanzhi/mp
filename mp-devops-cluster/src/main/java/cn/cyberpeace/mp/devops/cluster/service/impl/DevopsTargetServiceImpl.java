@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -23,17 +24,14 @@ import java.util.stream.Collectors;
  * @author wanggang
  */
 @Service
+@RequiredArgsConstructor
 public class DevopsTargetServiceImpl implements DevopsTargetService {
 
     private static final String VM = "vm";
 
     private static final String CONTAINER = "container";
 
-    private ImageMapper imageMapper;
-
-    public DevopsTargetServiceImpl(ImageMapper imageMapper) {
-        this.imageMapper = imageMapper;
-    }
+    private final ImageMapper imageMapper;
 
     @Override
     public Integer totalCount(ImagePageDTO dto) {
