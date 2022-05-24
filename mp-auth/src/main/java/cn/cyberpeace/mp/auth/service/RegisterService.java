@@ -35,7 +35,6 @@ public class RegisterService {
         UserModel user = UserModel.builder()
                 .username(req.getUsername())
                 .password(req.getPassword())
-                .mobile(req.getMobile())
                 .email(req.getEmail())
                 .nickname(req.getNickname())
                 .name(req.getName())

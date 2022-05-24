@@ -36,6 +36,8 @@ import java.util.Set;
 @Slf4j
 public class UrlACFilter extends OncePerRequestFilter {
 
+    private static final String NO_AUTH = "no_auth";
+
     private static final PathMatcher MATCHER = new AntPathMatcher();
 
     private UrlACWrapperService urlACWrapperService;
@@ -81,9 +83,9 @@ public class UrlACFilter extends OncePerRequestFilter {
                 boolean isMethodMatch = isMethodMatch(requestUrl, method);
                 if (!isMethodMatch) {
                     // 请求方法不匹配
-                    log.error("url:{} method:{} not match!", requestUrl, method);
+                    log.error("URLACFILTER -> url:{} method:{} not match!", requestUrl, method);
                     //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
-                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
+                    //result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
                 }
             }
 
@@ -93,7 +95,7 @@ public class UrlACFilter extends OncePerRequestFilter {
 
                 if (!isAuthoritiesMatch) {
                     // 权限不匹配
-                    log.error("url:{} access denied!", requestUrl);
+                    log.error("URLACFILTER -> url:{} access denied!", requestUrl);
                     //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
                     result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl, method));
                 }
@@ -237,6 +239,9 @@ public class UrlACFilter extends OncePerRequestFilter {
      */
     private boolean isUserAuthoritiesMatch(Set<String> currentUserAuthorities, List<String> urlTargetIds) {
         if (CollectionUtil.isNotEmpty(urlTargetIds)) {
+            if (urlTargetIds.contains(NO_AUTH)) {
+                return true;
+            }
             for (String tid : urlTargetIds) {
                 if (currentUserAuthorities.contains(tid)) {
                     return true;
