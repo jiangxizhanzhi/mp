@@ -27,17 +27,17 @@ public class CommonSwagger2Config {
     @Autowired
     private Swagger2Config swagger2Config;
 
-    @Bean
-    public Docket apiCommon() {
-        return new Docket(DocumentationType.SWAGGER_2)
-                .apiInfo(swagger2Config.apiInfo())
-                .enableUrlTemplating(true)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.common"))
-                .paths(PathSelectors.any())
-                .build()
-                .globalRequestParameters(CollectionUtil.toList(authParameter))
-                .groupName("common");
-    }
+//    @Bean
+//    public Docket apiCommon() {
+//        return new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(swagger2Config.apiInfo())
+//                .enableUrlTemplating(true)
+//                .select()
+//                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.common"))
+//                .paths(PathSelectors.any())
+//                .build()
+//                .globalRequestParameters(CollectionUtil.toList(authParameter))
+//                .groupName("common");
+//    }
 
 }

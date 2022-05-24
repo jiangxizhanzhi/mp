@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -277,7 +277,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(String id) {
         BackgroundFlowResponse response;
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -300,7 +300,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> queryAttackDetail(String id) {
         AttackFlowResponse response;
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -325,7 +325,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(flowInfoModel, prefixUrl, flowScriptParamModels);
 
             // 下载攻击脚本
-            String code = FdfsCommon.downloadContent(flowInfoModel.getScriptFile());
+            String code = FsCommon.downloadContent(flowInfoModel.getScriptFile());
             response.setCode(code);
         } else {
             return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
@@ -352,7 +352,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 上传文件获取路径
         String filePath = null;
         try {
-            filePath = FdfsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+            filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
         } catch (IOException e) {
             log.error("upload pcap file error", e);
             return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
@@ -364,7 +364,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -432,7 +432,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         InputStream is = null;
         try {
             is = new ByteArrayInputStream(addRequest.getCode().getBytes());
-            String filePath = FdfsCommon.upload(is, suffix);
+            String filePath = FsCommon.upload(is, suffix);
             addRequest.setFilePath(filePath);
         } catch (MpRuntimeException e) {
             log.error("add attack flow error", e);
@@ -454,7 +454,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
         response.setCode(addRequest.getCode());
@@ -495,7 +495,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 上传文件获取路径
             String filePath = null;
             try {
-                filePath = FdfsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
+                filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
                 log.error("upload pcap file for update error", e);
                 return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
@@ -508,7 +508,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -587,7 +587,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             InputStream is = null;
             try {
                 is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
-                String filePath = FdfsCommon.upload(is, suffix);
+                String filePath = FsCommon.upload(is, suffix);
                 modifyRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
                 log.error("modify attack flow error", e);
@@ -610,7 +610,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        String prefixUrl = FdfsCommon.genInnerHttpUrl("");
+        String prefixUrl = FsCommon.genInnerHttpUrl("");
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
         response.setCode(modifyRequest.getCode());
