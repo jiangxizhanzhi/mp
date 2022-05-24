@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
@@ -32,9 +31,6 @@ import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.impl.CustomImageUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.InjectFileUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
-import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
-import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -47,7 +43,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -77,10 +72,6 @@ public class ImagesController {
 
     @NonNull
     private InjectFileUploadService injectFileUploadService;
-
-    private final ImagesConnectSocketServer imagesConnectSocketServer;
-
-    private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
     @NonNull
     private SshPrivateKeyUploadService sshPrivateKeyUploadService;
@@ -177,7 +168,6 @@ public class ImagesController {
         imagesByIdResponse.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdResponse.setExtDocker(extDocker);
         Result<ImagesByIdResponse> imagesByIdResponseResult = new Result<>(imagesByIdResponse);
-        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(imagesByIdResponse,"MP-image-by-id")));
         return imagesByIdResponseResult;
     }
 
@@ -402,7 +392,6 @@ public class ImagesController {
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
-        imagesConnectSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(connection.getList(),"MP-image-connection")), Arrays.asList(uuid));
         return new Result<>(connection.getList());
     }
 

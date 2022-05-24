@@ -6,8 +6,8 @@ import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,13 +23,13 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class InstallerDockerUploadService extends BaseUploadService {
 
     /**
      * 文件上传客户端
      */
-    @Autowired
-    private ImagesService imagesService;
+    private final ImagesService imagesService;
 
     public InstallerDockerUploadService build(MultipartFile file) {
         this.file = file;
