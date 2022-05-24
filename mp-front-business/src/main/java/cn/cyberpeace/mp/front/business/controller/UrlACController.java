@@ -76,4 +76,14 @@ public class UrlACController {
         return ServiceResult.success(cnt);
     }
 
+
+
+    @ApiOperation(value = "删除缓存", notes = "")
+    @PostMapping("/evict_cache")
+    public ServiceResult evictCache() {
+        urlACService.evictURLACCache();
+        urlACService.evictURLACPatternCache();
+        return ServiceResult.successful();
+    }
+
 }
