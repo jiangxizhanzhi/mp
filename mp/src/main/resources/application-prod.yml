@@ -139,7 +139,6 @@ mp:
         - /sys/notice/**
         - /systemOperation/**
         - /devops/log/operate/page
-        - /devops/cluster/**
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
