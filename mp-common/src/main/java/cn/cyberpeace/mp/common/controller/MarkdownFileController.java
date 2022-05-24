@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @Api(value = "markdown共用接口", tags = "COMMON-markdown共用接口")
 @Slf4j
-// @RestController
+@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/markdown")
 @Data
 public class MarkdownFileController {
