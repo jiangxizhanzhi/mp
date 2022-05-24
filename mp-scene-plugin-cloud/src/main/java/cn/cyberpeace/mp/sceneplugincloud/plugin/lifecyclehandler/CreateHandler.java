@@ -377,7 +377,13 @@ public class CreateHandler extends HandlerCommon {
     private VirtualNic genConnectedNetwork(ConnectedNetworkBO connectedNetwork) {
         var network = connectedNetwork.network;
         List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
+        // 找到第一个有ip值的端口,否则使用第一个端口
         SceneElementPortBO samplePort = fromPorts.get(0);
+        for (SceneElementPortBO sceneElementPortBO : fromPorts) {
+            if (StringUtils.isNotEmpty(sceneElementPortBO.getIp())) {
+                samplePort = sceneElementPortBO;
+            }
+        }
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(network.getResourceId());
