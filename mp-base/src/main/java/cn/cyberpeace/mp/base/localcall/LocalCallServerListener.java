@@ -179,20 +179,16 @@ public class LocalCallServerListener extends FileModifyListener {
         List<Runnable> tasks = new ArrayList<>();
         lines.forEach(line -> {
             line = line.trim();
-            List<String> lineParts = new ArrayList<>(Arrays.asList(line.split(" ")));
+            List<String> lineParts = new ArrayList<>(Arrays.asList(
+                    TextUtils.coupleStrip(line, "\"").split("\" \"")));
             String methodName = null;
             List<String> methodArgs = new ArrayList<>();
             for (var i = 0; i < lineParts.size(); i++) {
                 var linePart = lineParts.get(i);
                 if (i == 0) {
                     methodName = linePart;
-                    methodName = TextUtils.coupleStrip(methodName, "\"");
-                    methodName = TextUtils.coupleStrip(methodName, "'");
                 } else {
-                    var methodArg = linePart;
-                    methodArg = TextUtils.coupleStrip(methodArg, "\"");
-                    methodArg = TextUtils.coupleStrip(methodArg, "'");
-                    methodArgs.add(methodArg);
+                    methodArgs.add(linePart);
                 }
             }
 

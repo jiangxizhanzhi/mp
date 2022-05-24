@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.vo;
 
-import cn.cyberpeace.mp.base.controller.response.FdfsFileUploadResponse;
-import cn.cyberpeace.mp.base.controller.response.FileUploadResponse;
+import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import lombok.Data;
 
 /**
@@ -10,7 +9,7 @@ import lombok.Data;
  * @Date 2022/5/18
  */
 @Data
-public class SceneFileUploadResponse extends FdfsFileUploadResponse {
+public class SceneFileUploadResponse extends FsFileUploadResponse {
     private String fileName;
 
     public SceneFileUploadResponse(String id, String fileName) {
