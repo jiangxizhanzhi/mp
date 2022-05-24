@@ -140,6 +140,7 @@ mp:
         - /systemOperation/**
         - /devops/log/operate/page
         - /flow/**
+        - /cscene/**
         - /devops/cluster/monitor/**
         - /devops/cluster/container/**
         - /devops/cluster/elasticip/**
