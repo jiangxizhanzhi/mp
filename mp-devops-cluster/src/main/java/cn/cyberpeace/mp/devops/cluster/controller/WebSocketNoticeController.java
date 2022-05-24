@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.ws.controller;
+package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
