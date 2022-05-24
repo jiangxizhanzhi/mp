@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.scene.util;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
@@ -430,7 +430,7 @@ public class InstallerUtils {
                     subInstallCommands.toArray(new String[0]));
             String tmpFile = null;
             try {
-                tmpFile = FdfsCommon.uploadContent(subInstallCommand);
+                tmpFile = FsCommon.uploadContent(subInstallCommand);
             } catch (Exception e) {
                 log.error("Upload windows installer script error: ", e);
                 installCommands.addAll(subInstallCommands);
