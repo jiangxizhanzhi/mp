@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
@@ -54,8 +53,6 @@ public class DevopsTargetController {
     private final TargetConverter targetConverter;
 
     private final TypeConverter typeConverter;
-
-    private final ImagesService imagesService;
 
     private final IpAddressConfig ipAddressConfig;
 
