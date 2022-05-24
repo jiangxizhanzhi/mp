@@ -58,6 +58,8 @@ public class UrlACController {
     @PostMapping("/add")
     public ServiceResult add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
         String urlACId = urlACService.add(addRequest);
+        urlACService.evictURLACCache();
+        urlACService.evictURLACPatternCache();
         return ServiceResult.success(urlACId);
     }
 
@@ -66,6 +68,8 @@ public class UrlACController {
     @PatchMapping("/modify")
     public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
         String urlACId = urlACService.modify(updateRequest);
+        urlACService.evictURLACCache();
+        urlACService.evictURLACPatternCache();
         return ServiceResult.success(urlACId);
     }
 
@@ -74,6 +78,8 @@ public class UrlACController {
     @DeleteMapping
     public ServiceResult delete(@RequestParam String[] ids) {
         int cnt = urlACService.delete(ids);
+        urlACService.evictURLACCache();
+        urlACService.evictURLACPatternCache();
         return ServiceResult.success(cnt);
     }
 
