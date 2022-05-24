@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.common.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseRemoteFileUploadController;
-import cn.cyberpeace.mp.base.controller.response.FdfsFileUploadResponse;
+import cn.cyberpeace.mp.base.controller.response.FsFileUploadResponse;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.ControllerConstant;
 import cn.cyberpeace.mp.common.service.MarkdownFileService;
@@ -21,7 +21,7 @@ import java.io.IOException;
 
 @Api(value = "markdown共用接口", tags = "COMMON-markdown共用接口")
 @Slf4j
-@RestController
+// @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/markdown")
 @Data
 public class MarkdownFileController {
@@ -39,11 +39,11 @@ public class MarkdownFileController {
      */
     @ApiOperation("上传图片")
     @PostMapping("/image_upload")
-    public ServiceResult<FdfsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
+    public ServiceResult<FsFileUploadResponse> uploadImage(@RequestParam(value = "file") MultipartFile file)
             throws IOException {
         var uploadResult = getMarkdownFileService().uploadImage(file.getInputStream(),
                 FileUtil.getSuffix(file.getOriginalFilename()));
-        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FsFileUploadResponse.class)
                 .asResult();
     }
 
@@ -53,11 +53,11 @@ public class MarkdownFileController {
      */
     @ApiOperation("上传文件")
     @PostMapping("/file_upload")
-    public ServiceResult<FdfsFileUploadResponse> uploadFile(@RequestParam(value = "file") MultipartFile file)
+    public ServiceResult<FsFileUploadResponse> uploadFile(@RequestParam(value = "file") MultipartFile file)
             throws IOException {
         var uploadResult = getMarkdownFileService().uploadFile(file.getInputStream(),
                 FileUtil.getSuffix(file.getOriginalFilename()));
-        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FdfsFileUploadResponse.class)
+        return BaseRemoteFileUploadController.toFileUploadResponseResult(uploadResult, FsFileUploadResponse.class)
                 .asResult();
     }
 

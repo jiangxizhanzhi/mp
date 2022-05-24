@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.base.service.impl;
 
 import cn.cyberpeace.mp.base.bo.DiffTargets;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
@@ -30,7 +30,7 @@ public class LocalFileMappingServiceImpl
     private void removeRemoteFiles(List<String> remoteFiles) {
         for (var remoteFile : remoteFiles) {
             try {
-                FdfsCommon.delete(remoteFile);
+                FsCommon.delete(remoteFile);
             } catch (Exception e) {
                 log.error("Remove remote file error: ", e);
             }
@@ -68,7 +68,7 @@ public class LocalFileMappingServiceImpl
 
             String remoteFile;
             try {
-                remoteFile = FdfsCommon.upload(mapping.getLocalFile());
+                remoteFile = FsCommon.upload(mapping.getLocalFile());
             } catch (Exception e) {
                 log.error("Upload local file({}) error: {}", mapping.getLocalFile(), e);
                 removeRemoteFiles(savedRemoteFiles);

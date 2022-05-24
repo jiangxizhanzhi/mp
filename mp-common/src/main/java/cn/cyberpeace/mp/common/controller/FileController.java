@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Author qiaokang
  * @Date：2021/6/21 15:01
  */
-@RestController
+// @RestController
 @Slf4j
 @Api(value = "文件操作管理接口", tags = "[废弃]COMMON-文件操作管理接口")
 @RequestMapping("/base")

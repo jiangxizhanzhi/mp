@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.common.service;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.service.impl.BaseRemoteFileServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
@@ -15,8 +15,8 @@ import java.io.InputStream;
 public class MarkdownFileService extends BaseRemoteFileServiceImpl {
 
     @Autowired
-    public MarkdownFileService(FdfsCommon fdfsCommon) {
-        setFileClient(FdfsCommon.fdfsClient);
+    public MarkdownFileService(FsCommon fsCommon) {
+        setFileClient(FsCommon.fileClient);
     }
 
     public ServiceResult<Boolean> validateUploadImageInput(InputStream is, String fileSuffix) {

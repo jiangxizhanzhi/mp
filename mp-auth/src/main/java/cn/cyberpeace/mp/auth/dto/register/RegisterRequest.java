@@ -32,12 +32,6 @@ public class RegisterRequest {
     @ApiModelProperty(value = "头像地址 http或者https开头", example = "")
     private String avatar;
 
-    @ApiModelProperty(value = "手机号", example = "")
-    private String mobile;
-
-    @ApiModelProperty(value = "注册短信码", example = "")
-    private String smsCode;
-
     @ApiModelProperty(value = "邮箱", example = "")
     private String email;
 

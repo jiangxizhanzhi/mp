@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -220,6 +221,19 @@ public class UrlACService {
 
         return dtos;
     }
+
+
+    @CacheEvict(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC, allEntries = true)
+    public void evictURLACCache() {
+        log.info("evict url ac cache...");
+    }
+
+
+    @CacheEvict(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC_PATTERN, allEntries = true)
+    public void evictURLACPatternCache() {
+        log.info("evict url ac pattern cache...");
+    }
+
 
 
 
