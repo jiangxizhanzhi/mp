@@ -54,6 +54,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionScene
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
@@ -121,6 +122,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
+
+    @Autowired
+    private HostStateService hostStateService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -437,7 +441,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 List<?> res;
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     //硬件信息
-                    res = sysCollectorService.getHardware(element.getEid());
+                    BaseSceneElementRequest request = new BaseSceneElementRequest();
+                    request.setSceneId(id);
+                    request.setElementIds(CollectionUtil.toList(element.getId()));
+                    res = hostStateService.getHostStates(request);
                 } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
                     //操作系统信息
                     BaseSceneElementRequest request = new BaseSceneElementRequest();
@@ -446,11 +453,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
                 } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
                     //网络连接信息
-                    WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
-                    request.setAgentNames(CollectionUtil.toList(element.getEid()));
-                    request.setStartTime(startTime);
-                    request.setEndTime(endTime);
-                    res = dataCollectionService.queryNetConnEventsWithTimeRange(request);
+                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setNodeIds(CollectionUtil.toList(nodeId));
+                    res = hostStateService.pageNetifaces(params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
                     CollectorBaseRequest request = new CollectorBaseRequest();
@@ -466,13 +472,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setRuleGroups(CollectionUtil.toList("syscheck_file"));
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).asResult().getData().getList();
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
                     //注册表变更信息
                     HostEventQueryParams params = new HostEventQueryParams();
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).asResult().getData().getList();
+                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
                         ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
                     //日志信息不支持查询
@@ -485,7 +491,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setEndTime(endTime);
                     res = dataCollectionService.getCustomProbeCollectData(request, probeId);
                 }
-                if (res == null) {
+                if (res == null || res.isEmpty()) {
                     continue;
                 }
                 res.forEach(r -> {
@@ -524,7 +530,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setAgentNames(CollectionUtil.toList(element.getEid()));
                 for (String customId : probeIds) {
                     res = dataCollectionService.getCustomProbeCollectData(request, customId);
-                    if (res == null) {
+                    if (res == null || res.isEmpty()) {
                         continue;
                     }
                     res.forEach(r -> {
