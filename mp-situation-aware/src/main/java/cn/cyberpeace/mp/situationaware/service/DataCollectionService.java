@@ -103,6 +103,10 @@ public class DataCollectionService {
 
     public static final String LAUNCH_ID_ENV_VAR = "32e9c4db9729440290e843bb6d80295b";
 
+    public static final String LAUNCH_ID_SYSTEM_USERS = "4894f48375ee4dd5b7a7bad7c1a78376";
+
+    public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
+
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
 
     public static final String CACHE_KEY_VULNERABILITY_INFO = "vulnerability_info";
@@ -116,6 +120,10 @@ public class DataCollectionService {
     public static final String CACHE_KEY_NET_CONN = "net_conn";
 
     public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
+
+    public static final String CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT = "sys_users_changed_count";
+
+    public static final String CACHE_KEY_PROCESS_CHANGED_COUNT = "processes_changed_count";
 
     public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
 
@@ -474,6 +482,11 @@ public class DataCollectionService {
         return list;
     }
 
+    /**
+     * 一段时间内的环境变量数变动
+     * @param wazuhMonitorEventsRequest
+     * @return
+     */
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -499,10 +512,39 @@ public class DataCollectionService {
 //            return changeCnt;
 //        }).sum();
 
-        log.info("{}", sum);
+        log.info("env var changed count: {}", sum);
         return sum;
     }
 
+
+    /**
+     * 一段时间内的用户数量变动
+     * @param wazuhMonitorEventsRequest
+     * @return
+     */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
+    public int sumSysUsersChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
+
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_SYSTEM_USERS);
+
+        log.info("system users changed count: {}", sum);
+        return sum;
+    }
+
+
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_PROCESS_CHANGED_COUNT)
+    public int sumProcessesChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
+
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_PROCESSES);
+        log.info("processes changed count: {}", sum);
+        return sum;
+    }
 
     public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         //根据日期构造索引

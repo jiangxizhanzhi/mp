@@ -167,17 +167,46 @@ public class SituationAwareTestController {
     }
 
 
-    @GetMapping("/query/envvar")
-    public ServiceResult queryEnvVar(@RequestParam String agentName) {
+    @GetMapping("/query/changecnt/envvar")
+    public ServiceResult queryEnvVar(@RequestParam List<String> agentNames) {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(Lists.newArrayList("8c58b4d4adc14e54971f5561ae106a3c", "2d6287991041457cbabbcce58479a87a"));
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-14 16:00:00", formatter));
+        wazuhRequest.setAgentNames(agentNames);
+        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        wazuhRequest.setStartTime(now.minusHours(10));
         wazuhRequest.setEndTime(LocalDateTime.now());
         wazuhRequest.setPageSize(1);
         dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
         return ServiceResult.successful();
     }
+
+    @GetMapping("/query/changecnt/processes")
+    public ServiceResult queryProcessesCnt(@RequestParam List<String> agentNames) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(agentNames);
+        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        wazuhRequest.setStartTime(now.minusHours(10));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
+        return ServiceResult.successful();
+    }
+
+
+    @GetMapping("/query/changecnt/users")
+    public ServiceResult queryUsersChangedCnt(@RequestParam List<String> agentNames) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(agentNames);
+        //DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        wazuhRequest.setStartTime(now.minusHours(10));
+        wazuhRequest.setEndTime(LocalDateTime.now());
+        wazuhRequest.setPageSize(1);
+        dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
+        return ServiceResult.successful();
+    }
+
 
     @GetMapping("/query/vulnerability_info")
     public ServiceResult queryVulnerabilityInfo(@RequestParam String agentName) {
