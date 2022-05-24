@@ -52,7 +52,7 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    //public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
+    public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
 
 
     /**
@@ -83,8 +83,8 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
+        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -152,8 +152,17 @@ public class LogFileService {
                 return uploadParam;
             }).collect(Collectors.toList());
 
-//        Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
-        return null;
+        Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
+
+        List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
+        resultMap.entrySet().forEach(entry -> {
+            log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
+            String downloadUrl = entry.getValue().getFileSrc();
+            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().downloadUrl(downloadUrl).agentName(agentName).osType(osType).build();
+            dtos.add(dto);
+        });
+
+        return dtos;
     }
 
 
