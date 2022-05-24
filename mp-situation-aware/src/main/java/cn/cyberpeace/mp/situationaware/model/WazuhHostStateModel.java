@@ -32,6 +32,10 @@ public class WazuhHostStateModel {
     @ApiModelProperty("CPU利用率")
     private double cpuTotalPercent;
 
+    @JSONField(name = "CPUFreq")
+    @ApiModelProperty("CPU主频")
+    private double cpuFreq;
+
     @JSONField(name = "CPUCount")
     @ApiModelProperty("CPU核数")
     private int cpuCount;

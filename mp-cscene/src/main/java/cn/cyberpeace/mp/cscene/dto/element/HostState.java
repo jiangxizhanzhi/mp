@@ -39,6 +39,9 @@ public class HostState {
     @ApiModelProperty("内存使用率")
     private Double memoryPercent;
 
+    @ApiModelProperty("cpu主频")
+    private Double cpuFreq;
+
     @ApiModelProperty("cpu使用率")
     private Double cpuPercent;
 

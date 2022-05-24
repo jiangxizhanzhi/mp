@@ -229,6 +229,7 @@ public class ScenePluginCollectionSceneService {
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostState = new CollectionHostStateBO();
             hostState.setSceneId(sceneId);
+            hostState.setCpuFreq(srcHostState.getCpuFreq());
             hostState.setCpuCount(srcHostState.getCpuCount());
             hostState.setCpuPercent(srcHostState.getCpuTotalPercent());
             // 内存统一使用单位M

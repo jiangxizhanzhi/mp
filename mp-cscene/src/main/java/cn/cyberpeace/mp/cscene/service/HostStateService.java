@@ -93,6 +93,7 @@ public class HostStateService {
 
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
             HostState hs = new HostState();
+            hs.setCpuFreq(hostStateBO.getCpuFreq());
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
 

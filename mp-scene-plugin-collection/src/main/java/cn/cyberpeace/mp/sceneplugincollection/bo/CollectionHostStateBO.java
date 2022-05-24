@@ -43,6 +43,9 @@ public class CollectionHostStateBO {
     @ApiModelProperty("内存使用率")
     private Double memoryPercent;
 
+    @ApiModelProperty("cpu主频MHZ")
+    private Double cpuFreq;
+
     @ApiModelProperty("cpu使用率")
     private Double cpuPercent;
 

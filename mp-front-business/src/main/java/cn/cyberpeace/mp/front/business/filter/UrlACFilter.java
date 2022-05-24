@@ -67,6 +67,7 @@ public class UrlACFilter extends OncePerRequestFilter {
         }
 
         if (!skip) {
+            // 是否是管理员或者超级用户
             if (opPermService.isLoginUserSuperUser() || opPermService.isLoginUserAdmin()) {
                 skip = true;
             }

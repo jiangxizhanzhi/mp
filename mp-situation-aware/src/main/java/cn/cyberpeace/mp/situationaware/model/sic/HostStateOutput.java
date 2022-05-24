@@ -17,6 +17,9 @@ public class HostStateOutput {
     @JSONField(name = "CPUCount")
     private String CPUCount;
 
+    @JSONField(name = "CPUFreq")
+    private String CPUFreq;
+
     @JSONField(name = "DiskTotal")
     private String diskTotal;
 

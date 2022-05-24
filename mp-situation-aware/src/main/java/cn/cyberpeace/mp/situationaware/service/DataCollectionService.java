@@ -1113,6 +1113,10 @@ public class DataCollectionService {
             wazuhHostStateModel.setCpuCount(Integer.parseInt(output.getCPUCount()));
         }
 
+        if (StringUtils.isNotBlank(output.getCPUFreq())) {
+            wazuhHostStateModel.setCpuFreq(Double.parseDouble(output.getCPUFreq()));
+        }
+
         if (StringUtils.isNotBlank(output.getCPUPercent())) {
             wazuhHostStateModel.setCpuTotalPercent(Double.parseDouble(output.getCPUPercent()));
         }
