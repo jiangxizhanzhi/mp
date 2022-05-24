@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.business.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class UrlACModel extends BaseModel implements Serializable {
 
     private String methods;
 
+    @DefaultStr
     private String desc;
 
 }

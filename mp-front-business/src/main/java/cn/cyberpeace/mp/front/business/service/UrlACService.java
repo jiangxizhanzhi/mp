@@ -89,11 +89,18 @@ public class UrlACService {
                 .build();
         urlACModel.setId(urlacId);
 
+        if (MATCHER.isPattern(addReq.getUrl())) {
+            urlACModel.setIsPattern(1);
+        }
+
         if (CollectionUtil.isNotEmpty(addReq.getMethods())) {
             urlACModel.setMethods(addReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
-        urlACMapper.create(urlACModel);
+        boolean success = urlACMapper.create(urlACModel);
+        if (!success) {
+            throw new MpRuntimeException("save urlac failed!");
+        }
 
         if (CollectionUtil.isNotEmpty(addReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
@@ -127,11 +134,18 @@ public class UrlACService {
                 .build();
         urlACModel.setId(urlacId);
 
+        if (MATCHER.isPattern(updateReq.getUrl())) {
+            urlACModel.setIsPattern(1);
+        }
+
         if (CollectionUtil.isNotEmpty(updateReq.getMethods())) {
             urlACModel.setMethods(updateReq.getMethods().stream().collect(Collectors.joining(",")));
         }
 
-        urlACMapper.update(urlACModel);
+        boolean success = urlACMapper.update(urlACModel);
+        if (!success) {
+            throw new MpRuntimeException("update urlac failed!");
+        }
 
         urlACTargetMapper.deleteByUrlACId(ArrayUtils.toArray(urlacId));
         if (CollectionUtil.isNotEmpty(updateReq.getTargetIds())) {
