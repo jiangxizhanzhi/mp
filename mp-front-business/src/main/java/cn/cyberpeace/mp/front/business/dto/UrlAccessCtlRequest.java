@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 
 /**
@@ -27,10 +28,10 @@ public class UrlAccessCtlRequest {
     @NotBlank(groups = AddGroup.class)
     private String url;
 
-    @NotBlank(groups = AddGroup.class)
+    @NotEmpty(groups = AddGroup.class)
     private List<String> methods;
 
-    @NotBlank(groups = AddGroup.class)
+    @NotEmpty(groups = AddGroup.class)
     private List<String> targetIds;
 
 }
