@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.login.GetTokenResponse;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
@@ -27,9 +28,11 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.http.JsonUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -891,7 +894,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public LoginResp getToken(String token) {
-//        HttpUtils.sendPost()
+//        try {
+//            Map<String,String> headerMap = new HashMap<>();
+//            headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
+//            String rsp = HttpUtils.sendGet("", headerMap);
+//
+//            GetTokenResponse getTokenResponse = JsonUtils.toSnakeObject(rsp, GetTokenResponse.class);
+//        } catch (IOException e) {
+//            log.error("get user info by token error", e);
+//            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+//        }
 
         UserModel user = this.getByUserName("admin");
         String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
