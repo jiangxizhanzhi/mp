@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.UserTokenRequest;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -10,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -22,16 +26,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 /**
@@ -136,6 +133,19 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = getModelService().modify(modifyRequest);
         return ServiceResult.success(userModel);
+    }
+
+    @ApiOperation(value = "获取token", notes = "解析传入token，返回中台token")
+    @PostMapping("/token")
+    public ServiceResult<LoginResp> getToken(@RequestBody UserTokenRequest request) {
+        String token = request.getToken();
+        if (StringUtils.isBlank(token)) {
+            log.error("request token is empty");
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+
+        LoginResp resp = getModelService().getToken(token);
+        return ServiceResult.success(resp);
     }
 
 }

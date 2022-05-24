@@ -125,6 +125,7 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
+    server-url: http://10.2.3.4:11002
     activation:
       enable: true
       licenseDir: /home/mp/config/license

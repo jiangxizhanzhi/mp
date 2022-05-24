@@ -7,30 +7,15 @@ import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
-import cn.cyberpeace.mp.auth.service.AvatarService;
-import cn.cyberpeace.mp.auth.service.DefaultImgService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
-import cn.cyberpeace.mp.auth.util.ParamCheck;
-import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.auth.util.*;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -39,6 +24,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -49,24 +35,16 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -117,6 +95,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private DefaultImgService defaultImgService;
+
+    @Value("${mp.auth.server-url}")
+    private String authServerUrl;
 
 
     @Autowired
@@ -908,5 +889,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    @Override
+    public LoginResp getToken(String token) {
+//        HttpUtils.sendPost()
 
+        UserModel user = this.getByUserName("admin");
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
+        ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
+        UserDto userDto = this.userModel2UserDto(userResult.getObj());
+        LoginResp loginResp = new LoginResp();
+        loginResp.setUser(userDto);
+        loginResp.setToken(jwt);
+        return loginResp;
+    }
 }

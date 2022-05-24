@@ -68,6 +68,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
 //                .antMatchers("/login", "/logout").permitAll()  // login logout
 //                .antMatchers("/doc.html", "/webjars/**").permitAll()  // swagger
+                .antMatchers("/auth/users/token").permitAll()
                 .antMatchers("/auth/**").authenticated()
                 .antMatchers("/sys/notice/**").authenticated()
                 .antMatchers("/systemOperation/**").authenticated()

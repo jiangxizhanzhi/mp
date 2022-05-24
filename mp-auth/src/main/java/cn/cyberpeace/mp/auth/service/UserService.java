@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -99,5 +100,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     boolean isAdmin(String userId);
 
     String getDefaultUserAvatar();
+
+    LoginResp getToken(String token);
 
 }
