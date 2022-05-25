@@ -70,4 +70,10 @@ public class WazuhEventRequest {
      */
     @ApiModelProperty(value = "wazuh events规则组集合")
     private List<String> ruleGroups;
+
+    /**
+     * 指定rule.id
+     */
+    @ApiModelProperty(value = "wazuh events规则id集合")
+    private List<String> ruleIds;
 }
