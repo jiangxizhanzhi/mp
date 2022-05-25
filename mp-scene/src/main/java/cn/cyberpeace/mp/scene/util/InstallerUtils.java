@@ -80,8 +80,8 @@ public class InstallerUtils {
      * linux创建基础目录
      */
     public static final String[] LINUX_BASE_DIR_CREATE = {
-            "mkdir %s",
-            "mkdir %s/custom_install",
+            "mkdir -p %s",
+            "mkdir -p %s/custom_install",
     };
 
     /**
@@ -96,7 +96,7 @@ public class InstallerUtils {
      * linux自定义解压安装
      */
     public static final String[] LINUX_CUSTOM_UNZIP_INSTALL = {
-            "mkdir %s/custom_install/%s",
+            "mkdir -p %s/custom_install/%s",
             "unzip -o %s -d %s/custom_install/%s",
             "cd %s/custom_install/%s",
             "chmod +x %s/custom_install/%s/*.sh",

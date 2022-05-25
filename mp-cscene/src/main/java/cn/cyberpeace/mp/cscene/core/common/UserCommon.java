@@ -48,7 +48,7 @@ public class UserCommon {
     public static UserDto getUserDetail(String userId) {
         UserDto user = null;
         try {
-            user = userService.getUserDto(userId);
+            user = userService.getUserDtoNoRestrict(userId);
         } catch (Exception e) {
             log.error("Get user[{}] failed: ", userId, e);
         }
