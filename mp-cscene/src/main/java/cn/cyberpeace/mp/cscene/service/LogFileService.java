@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
@@ -55,11 +56,17 @@ public class LogFileService {
 
     private WazuhControl wazuhControl = null;
 
-    @PostConstruct
-    public void init() {
-        wazuhControl = WazuhControlCommon.buildWazuhControl();
-    }
+    //@PostConstruct
+    //public void init() {
+    //    wazuhControl = WazuhControlCommon.buildWazuhControl();
+    //}
 
+
+
+    @Autowired
+    public LogFileService(CollectionAppConfig collectionAppConfig) {
+        this.wazuhControl = WazuhControlCommon.buildWazuhControl();;
+    }
 
     /**
      * 分页查询日志文件列表
