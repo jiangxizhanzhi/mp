@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +53,12 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    //public static WazuhControl wazuhControl = WazuhControlCommon.buildWazuhControl();
+    private WazuhControl wazuhControl = null;
+
+    @PostConstruct
+    public void init() {
+        wazuhControl = WazuhControlCommon.buildWazuhControl();
+    }
 
 
     /**
@@ -83,8 +89,7 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-        //List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = Collections.emptyList();
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -152,8 +157,7 @@ public class LogFileService {
                 return uploadParam;
             }).collect(Collectors.toList());
 
-        //Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
-        Map<String, WazuhControl.ControlFileResult> resultMap = null;
+        Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
         resultMap.entrySet().forEach(entry -> {
