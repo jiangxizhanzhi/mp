@@ -1008,6 +1008,10 @@ public class DataCollectionService {
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
+        if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
+            buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
+        }
+
 //        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
 //            //构造agentId
 //            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
@@ -1040,6 +1044,10 @@ public class DataCollectionService {
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
 
+    }
+
+    private void buildRuleIdsQuery(List<String> ruleIds, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
     }
 
     private void buildRuleGroupQuery(List<String> groups, BoolQueryBuilder boolQueryBuilder) {
