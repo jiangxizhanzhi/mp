@@ -54,20 +54,6 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
-    private WazuhControl wazuhControl = null;
-
-    //@PostConstruct
-    //public void init() {
-    //    wazuhControl = WazuhControlCommon.buildWazuhControl();
-    //}
-
-
-
-    @Autowired
-    public LogFileService(CollectionAppConfig collectionAppConfig) {
-        this.wazuhControl = WazuhControlCommon.buildWazuhControl();;
-    }
-
     /**
      * 分页查询日志文件列表
      * （假分页）
@@ -96,7 +82,7 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -164,7 +150,7 @@ public class LogFileService {
                 return uploadParam;
             }).collect(Collectors.toList());
 
-        Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
+        Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
         resultMap.entrySet().forEach(entry -> {
