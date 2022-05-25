@@ -423,9 +423,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeId2ProbeNameMap.put(e.getSrcElement().getId(), probeId2Name);
         });
         List<CollectionHostEventBO> result = new ArrayList<>();
-        if (queryParams.getPageSize() == null) {
-            queryParams.setPageSize(queryParams.getPerPage());
-        }
         LocalDateTime startTime;
         LocalDateTime endTime;
         if (queryParams.getStartTime() == null) {
@@ -499,9 +496,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
-                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
-                        ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
-                    //日志信息不支持查询
+                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
+                    //操作系统日志信息
+                    return new ListObjServiceResult<>();
+                } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
+                    //应用系统日志信息
+                    return new ListObjServiceResult<>();
+                } else if (ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId)) {
+                    //安全系统日志信息
+                    return new ListObjServiceResult<>();
+                } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+                    //原始日志信息
                     return new ListObjServiceResult<>();
                 } else {
                     //自定义探针信息
