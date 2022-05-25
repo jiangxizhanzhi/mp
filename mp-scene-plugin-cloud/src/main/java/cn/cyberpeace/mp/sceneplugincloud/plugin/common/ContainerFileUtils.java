@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.scene.util.CommandUtils;
@@ -46,7 +46,7 @@ public class ContainerFileUtils {
         var toPath = StringUtils.join(unzipDir, SceneFileUtils.ZIP_FILE_SUFFIX);
         containerClient.executeCommand(containerId, CommandUtils.linuxMkDir(unzipDir));
         var filename = FileUtil.getName(toPath);
-        var tmpZipFilepath = FdfsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
+        var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(fileUrl), filename);
         var toDir = toPath.substring(0, toPath.length() - filename.length());;
         try {
             containerClient.copyFile(containerId, tmpZipFilepath, toDir);
