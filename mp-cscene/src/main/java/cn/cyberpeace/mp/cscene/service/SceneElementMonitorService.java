@@ -223,10 +223,11 @@ public class SceneElementMonitorService {
                 resource = new HostState();
             }
 
-            BaseSceneElementRequest request = new BaseSceneElementRequest();
+            BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
             request.setSceneId(basicInfo.getSceneId());
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
-
+            request.setPage(1);
+            request.setPageSize(1);
             List<HostState> hostStates = hostStateService.getHostStates(request);
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);

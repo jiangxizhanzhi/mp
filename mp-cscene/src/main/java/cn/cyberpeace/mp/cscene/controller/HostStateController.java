@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementNetiface;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
@@ -74,8 +75,10 @@ public class HostStateController {
      */
     @ApiOperation(value = "节点主机状态")
     @GetMapping()
-    public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementRequest baseRequest) {
-        List<HostState> hostStates = hostStateService.getHostStates(baseRequest);
+    public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.setPage(1);
+        pageRequest.setPageSize(1);
+        List<HostState> hostStates = hostStateService.getHostStates(pageRequest);
         return ServiceResult.success(hostStates);
     }
 
