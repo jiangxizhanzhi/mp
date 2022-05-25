@@ -166,6 +166,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     private int startSceneEvent(int event) {
         var flag = getSceneEventHandler(event).startEvent();
+        this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
             // 推送场景最新的事件状态
             asyncAckSceneStatusChanged();
