@@ -80,6 +80,7 @@ public class HostStateService {
     // todo 老方法，待优化
     public List<HostState> getHostStates(BaseSceneElementPageRequest pageRequest) {
         log.info("{}", pageRequest);
+        pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
         String sceneId = pageRequest.getSceneId();
         List<String> elementIds = pageRequest.getElementIds();

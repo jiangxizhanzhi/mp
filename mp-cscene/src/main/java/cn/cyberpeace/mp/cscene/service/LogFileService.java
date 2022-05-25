@@ -144,12 +144,24 @@ public class LogFileService {
 
         Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
+        Map<String, LogFileDownloadUrlDto> paramId2DtoMap = new HashMap<>();
+        for (WazuhControl.ControlFileParam uploadParam : uploadParams) {
+            String paramId = uploadParam.getId();
+            String path = uploadParam.getFilepath();
+            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().path(path).agentName(agentName).osType(osType).build();
+            paramId2DtoMap.put(paramId, dto);
+        }
+
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
         resultMap.entrySet().forEach(entry -> {
             log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
+            String paramId = entry.getKey();
             String downloadUrl = entry.getValue().getFileSrc();
-            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().downloadUrl(downloadUrl).agentName(agentName).osType(osType).build();
-            dtos.add(dto);
+            LogFileDownloadUrlDto dto = paramId2DtoMap.get(paramId);
+            if (Objects.nonNull(dto)) {
+                dto.setDownloadUrl(downloadUrl);
+                dtos.add(dto);
+            }
         });
 
         return dtos;

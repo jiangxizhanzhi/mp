@@ -37,6 +37,7 @@ INSERT INTO mp_auth_url_ac (id, url, is_pattern, methods, `desc`) VALUES ('0031'
 INSERT INTO mp_auth_url_ac (id, url, is_pattern, methods, `desc`) VALUES ('0032', '/api/mp/auth/orgs/tree', 0, '*', '免认证的url');
 INSERT INTO mp_auth_url_ac (id, url, is_pattern, methods, `desc`) VALUES ('0033', '/api/mp/cscene/cscenes/**', 1, '*', '免认证的url');
 INSERT INTO mp_auth_url_ac (id, url, is_pattern, methods, `desc`) VALUES ('0034', '/api/mp/devops/cluster/images/snapshot/by-name/**', 1, '*', '免认证的url');
+INSERT INTO mp_auth_url_ac (id, url, is_pattern, methods, `desc`) VALUES ('0035', '/api/mp/agg/default-img/get-default-img/', 0, '*', '免认证的url');
 
 
 
@@ -79,6 +80,7 @@ INSERT INTO mp_auth_url_ac_target (id, urlac_id, target) VALUES ('t0035', '0033'
 INSERT INTO mp_auth_url_ac_target (id, urlac_id, target) VALUES ('t0036', '0034', 'ct-operation-list');
 INSERT INTO mp_auth_url_ac_target (id, urlac_id, target) VALUES ('t0037', '0034', 'ct-ad-list');
 INSERT INTO mp_auth_url_ac_target (id, urlac_id, target) VALUES ('t0038', '0034', 'ct-cfs-list');
+INSERT INTO mp_auth_url_ac_target (id, urlac_id, target) VALUES ('t0039', '0035', 'no_auth');
 
 
 
