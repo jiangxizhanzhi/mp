@@ -1,13 +1,15 @@
 package cn.cyberpeace.mp.scene.constant;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.scene.config.SceneAppConfig;
+import org.springframework.stereotype.Component;
 
+@Component
 public class SceneSingleton {
 
-    public static final SceneAppConfig sceneAppConfig = BeanCommon.getBean(SceneAppConfig.class);
+    public static SceneAppConfig sceneAppConfig;
 
-    private SceneSingleton() {}
+    private SceneSingleton(SceneAppConfig sceneAppConfig) {
+        SceneSingleton.sceneAppConfig = sceneAppConfig;
+    }
 
 }

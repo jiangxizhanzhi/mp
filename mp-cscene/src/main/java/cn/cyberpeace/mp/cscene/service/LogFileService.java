@@ -13,8 +13,6 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
-import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
-import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
@@ -27,13 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -53,20 +45,6 @@ public class LogFileService {
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
-
-    private WazuhControl wazuhControl = null;
-
-    //@PostConstruct
-    //public void init() {
-    //    wazuhControl = WazuhControlCommon.buildWazuhControl();
-    //}
-
-
-
-    //@Autowired
-    //public LogFileService(CollectionAppConfig collectionAppConfig) {
-    //    this.wazuhControl = WazuhControlCommon.buildWazuhControl();;
-    //}
 
     /**
      * 分页查询日志文件列表
@@ -96,7 +74,7 @@ public class LogFileService {
 
         String osType = getOsType(pageRequest.getSceneId(), elementId);
 
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = wazuhControl.queryLogCollectFiles(agentName, osType);
+        List<WazuhControl.QueryLogCollectFileData> allLogFiles = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
         if (CollectionUtil.isEmpty(allLogFiles)) {
             return ResultUtils.emptyListObjServiceResult();
         }
@@ -164,7 +142,7 @@ public class LogFileService {
                 return uploadParam;
             }).collect(Collectors.toList());
 
-        Map<String, WazuhControl.ControlFileResult> resultMap = wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
+        Map<String, WazuhControl.ControlFileResult> resultMap = WazuhControlCommon.wazuhControl.controlFile(agentName, osType, uploadParams, true, 10, 3000);
 
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
         resultMap.entrySet().forEach(entry -> {

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.init;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.localcall.LocalCallServerListener;
 import cn.cyberpeace.mp.base.websocket.BaseGroupServer;
@@ -33,7 +34,7 @@ public class BaseInit implements ApplicationRunner {
 
         BaseServer.initServerSessionMap();
         BaseGroupServer.initServerGroupSessionsListMap();
-        LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext());
+        TaskCommon.executeTask(() -> LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext()));
     }
 
 }
