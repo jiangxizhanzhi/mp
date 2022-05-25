@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.GetTokenRequest;
 import cn.cyberpeace.mp.auth.dto.UserTokenRequest;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
@@ -28,8 +29,11 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.Objects;
 
 /**
  * @Description: 用户管理接口
@@ -137,7 +141,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "获取token", notes = "解析传入token，返回中台token")
     @PostMapping("/token")
-    public ServiceResult<LoginResp> getToken(@RequestBody UserTokenRequest request) {
+    public ServiceResult<LoginResp> getToken(@RequestBody @Validated UserTokenRequest request) {
         log.info("get token request: {}", request);
         String token = request.getToken();
         if (StringUtils.isBlank(token)) {
@@ -148,6 +152,22 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         LoginResp resp = getModelService().getToken(token);
         log.info("get token response: {}", resp);
         return ServiceResult.success(resp);
+    }
+
+    @ApiOperation(value = "获取第三方token", notes = "获取第三方token")
+    @PostMapping("/third_token")
+    public ServiceResult<String> getThirdToken(@RequestBody @Validated GetTokenRequest request) {
+        log.info("get third token request: {}", request);
+        String thirdToken = StringUtils.EMPTY;
+        ObjServiceResult<UserModel> userModelResult = this.getModelService().get(request.getUserId());
+        if (Objects.nonNull(userModelResult.getSource())) {
+            thirdToken = userModelResult.getSource().getObj().getThirdToken();
+        } else {
+            log.error("get user info is empty");
+        }
+
+        log.info("get third token result: {}", thirdToken);
+        return ServiceResult.success(thirdToken);
     }
 
 }
