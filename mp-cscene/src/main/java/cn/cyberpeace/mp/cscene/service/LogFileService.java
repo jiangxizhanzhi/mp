@@ -63,10 +63,10 @@ public class LogFileService {
 
 
 
-    @Autowired
-    public LogFileService(CollectionAppConfig collectionAppConfig) {
-        this.wazuhControl = WazuhControlCommon.buildWazuhControl();;
-    }
+    //@Autowired
+    //public LogFileService(CollectionAppConfig collectionAppConfig) {
+    //    this.wazuhControl = WazuhControlCommon.buildWazuhControl();;
+    //}
 
     /**
      * 分页查询日志文件列表
