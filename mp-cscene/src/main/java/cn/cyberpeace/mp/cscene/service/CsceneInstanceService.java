@@ -423,6 +423,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeId2ProbeNameMap.put(e.getSrcElement().getId(), probeId2Name);
         });
         List<CollectionHostEventBO> result = new ArrayList<>();
+        if (queryParams.getPageSize() == null) {
+            queryParams.setPageSize(queryParams.getPerPage());
+        }
         LocalDateTime startTime;
         LocalDateTime endTime;
         if (queryParams.getStartTime() == null) {
@@ -447,7 +450,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setElementIds(CollectionUtil.toList(element.getId()));
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    request.setPerPage(queryParams.getPerPage());
                     res = hostStateService.getHostStates(request);
                 } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
                     //操作系统信息
@@ -462,7 +464,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
-                    params.setPerPage(queryParams.getPerPage());
                     res = hostStateService.pageNetifaces(params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
@@ -470,7 +471,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setAgentName(element.getEid());
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    request.setPerPage(queryParams.getPerPage());
                     res = sysCollectorService.pagePorts(request).getList();
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     //进程信息
@@ -478,7 +478,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setAgentName(element.getEid());
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    request.setPerPage(queryParams.getPerPage());
                     res = sysCollectorService.pageProcesses(request).getList();
                 } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     //文件变更信息
@@ -487,7 +486,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setRuleGroups(CollectionUtil.toList("syscheck_file"));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
-                    params.setPerPage(queryParams.getPerPage());
+                    params.setStartTime(queryParams.getStartTime());
+                    params.setEndTime(queryParams.getEndTime());
                     res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
                     //注册表变更信息
@@ -496,7 +496,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
-                    params.setPerPage(queryParams.getPerPage());
+                    params.setStartTime(queryParams.getStartTime());
+                    params.setEndTime(queryParams.getEndTime());
                     res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
                         ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
@@ -509,7 +510,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setStartTime(startTime);
                     request.setEndTime(endTime);
                     request.setPageNum(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize() == null ? queryParams.getPerPage() : queryParams.getPageSize());
+                    request.setPageSize(queryParams.getPageSize());
                     res = dataCollectionService.getCustomProbeCollectData(request, probeId);
                 }
                 if (res == null || res.isEmpty()) {
