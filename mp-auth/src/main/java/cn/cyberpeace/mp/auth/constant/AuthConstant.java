@@ -31,6 +31,12 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
+    public static final String THIRD_AUTH_URL_PREFIX = "/rest/public/v2.0/auth/token";
+
+    public static final String STR_STATUS = "status";
+
+    public static final String STR_DATA = "data";
+
     private AuthConstant() {
     }
 }

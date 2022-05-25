@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.login.GetTokenResponse;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.third.ThirdUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.enums.RoleNameEnum;
 import cn.cyberpeace.mp.auth.model.*;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -31,10 +33,13 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
-import cn.cyberpeace.mp.base.util.http.JsonUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,6 +103,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private DefaultImgService defaultImgService;
+
+    @Autowired
+    private OrgMapper orgMapper;
 
     @Value("${mp.auth.server-url}")
     private String authServerUrl;
@@ -893,25 +901,137 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    @Transactional
     public LoginResp getToken(String token) {
-//        try {
-//            Map<String,String> headerMap = new HashMap<>();
-//            headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
-//            String rsp = HttpUtils.sendGet("", headerMap);
-//
-//            GetTokenResponse getTokenResponse = JsonUtils.toSnakeObject(rsp, GetTokenResponse.class);
-//        } catch (IOException e) {
-//            log.error("get user info by token error", e);
-//            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
-//        }
+        ThirdUser thirdUser = new ThirdUser();
 
-        UserModel user = this.getByUserName("admin");
+        try {
+            Map<String,String> headerMap = new HashMap<>();
+            headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
+            String strUserRsp = HttpUtils.sendGet(authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/user", headerMap);
+            log.info("================get token detail rsp: {}", strUserRsp);
+
+            // 结果解析
+            JSONObject objRsp = JSONObject.parseObject(strUserRsp);
+            if (Objects.nonNull(objRsp.getInteger(AuthConstant.STR_STATUS)) && (0 == objRsp.getInteger(AuthConstant.STR_STATUS))) {
+                JSONObject userObj = objRsp.getJSONObject(AuthConstant.STR_DATA);
+                thirdUser = JSON.parseObject(JSON.toJSONString(userObj), ThirdUser.class);
+            } else {
+                log.error("get token detail error");
+                throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+            }
+
+        } catch (Exception e) {
+            log.error("get user info by token error", e);
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+
+        UserModel user = this.getByUserName(thirdUser.getUserName());
+        if (Objects.isNull(user)) {
+            // 新增用户、角色、组织信息
+            user = this.addUserRoleOrgInfo(thirdUser, token);
+        } else {
+            user.setThirdToken(token);
+            this.update(user);
+        }
+
+        // 封装返回结果
         String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
         ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
         UserDto userDto = this.userModel2UserDto(userResult.getObj());
         LoginResp loginResp = new LoginResp();
         loginResp.setUser(userDto);
         loginResp.setToken(jwt);
+
         return loginResp;
     }
+
+    /**
+     * 新增用户、角色、组织信息
+     * @param thirdUser
+     * @param token
+     */
+    private UserModel addUserRoleOrgInfo(ThirdUser thirdUser, String token) {
+        UserModel user = UserModel.builder()
+                .username(thirdUser.getUserName())
+                .password(PasswordUtils.encode(TextUtils.uuid().substring(26)))
+                .mobile(thirdUser.getPhone())
+                .nickname(thirdUser.getChineseName())
+                .name(thirdUser.getUserName())
+                .thirdToken(token)
+                .build();
+        user.initDefault("tokenSecret");
+        // 给新增用户分配默认头像
+        if (StringUtils.isEmpty(user.getAvatar())) {
+            user.setAvatar(this.getDefaultUserAvatar());
+        }
+        // 新增用户信息
+        this.create(user);
+
+        // 用户关联角色列表
+        List<UserRoleModel> roleModelList = new ArrayList<>();
+        try {
+            Map<String,String> headerMap = new HashMap<>();
+            headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
+            // 根据token查询用户角色信息
+            String strRoleRsp = HttpUtils.sendGet(authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/role/list", headerMap);
+            log.info("================get role list rsp: {}", strRoleRsp);
+
+            // 结果解析
+            JSONObject objRoleRsp = JSONObject.parseObject(strRoleRsp);
+            if (Objects.nonNull(objRoleRsp.getInteger(AuthConstant.STR_STATUS)) && (0 == objRoleRsp.getInteger(AuthConstant.STR_STATUS))) {
+                JSONArray roleArray = objRoleRsp.getJSONArray(AuthConstant.STR_DATA);
+                if (CollectionUtil.isNotEmpty(roleArray)) {
+                    for (int i = 0; i < roleArray.size(); i++) {
+                        JSONObject roleObj = roleArray.getJSONObject(i);
+                        String thirdRoleName = roleObj.getString("roleName");
+                        Arrays.stream(RoleNameEnum.values()).forEach(
+                            roleName -> {
+                                if (thirdRoleName.contains(roleName.toString())) {
+                                    RoleModel roleModel = roleService.getByName(roleName.toString());
+                                    UserRoleModel userRoleModel = new UserRoleModel();
+                                    userRoleModel.setUser(user.getId());
+                                    userRoleModel.setRole(roleModel.getId());
+                                    roleModelList.add(userRoleModel);
+                                }
+                            }
+                        );
+                    }
+                } else {
+                    log.error("get role list is empty");
+                }
+            } else {
+                log.error("get token detail error");
+                throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+            }
+        } catch (Exception e) {
+            log.error("get user info by token error", e);
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+
+        if (CollectionUtil.isEmpty(roleModelList)) {
+            log.info("");
+            // 默认作为学员角色
+            RoleModel roleModel = roleService.getByName(RoleNameEnum.STUDENT.toString());
+            UserRoleModel userRoleModel = new UserRoleModel();
+            userRoleModel.setUser(user.getId());
+            userRoleModel.setRole(roleModel.getId());
+            roleModelList.add(userRoleModel);
+        }
+        // 保存用户关联角色信息
+        userRoleService.bulkCreate(roleModelList);
+
+        // 保存用户关联组织信息
+        List<OrgModel> orgModelList = orgMapper.list(new HumanCondition().filterEqual("identifier", "default-org"));
+        if (CollectionUtil.isNotEmpty(orgModelList)) {
+            OrgModel orgModel = orgModelList.get(0);
+            OrgUserModel orgUserModel = new OrgUserModel();
+            orgUserModel.setUser(user.getId());
+            orgUserModel.setOrg(orgModel.getId());
+            orgUserService.create(orgUserModel);
+        }
+
+        return user;
+    }
+
 }

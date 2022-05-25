@@ -53,10 +53,10 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             throws IOException {
         UserModel user = JwtCommon.verifyToken(request);
         if (user != null) {
-            var updateUser = new UserModel();
-            updateUser.setId(user.getId());
-            updateUser.initDefault("tokenSecret");
-            userService.update(updateUser);
+//            var updateUser = new UserModel();
+//            updateUser.setId(user.getId());
+//            updateUser.initDefault("tokenSecret");
+//            userService.update(updateUser);
             recordLogoutLog(user, request);
         }
 

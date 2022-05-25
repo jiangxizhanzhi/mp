@@ -138,6 +138,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @ApiOperation(value = "获取token", notes = "解析传入token，返回中台token")
     @PostMapping("/token")
     public ServiceResult<LoginResp> getToken(@RequestBody UserTokenRequest request) {
+        log.info("get token request: {}", request);
         String token = request.getToken();
         if (StringUtils.isBlank(token)) {
             log.error("request token is empty");
@@ -145,6 +146,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         }
 
         LoginResp resp = getModelService().getToken(token);
+        log.info("get token response: {}", resp);
         return ServiceResult.success(resp);
     }
 
