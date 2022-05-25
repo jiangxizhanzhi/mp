@@ -564,7 +564,8 @@ public class DataCollectionService {
             if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > 10000) {
                 throw new MpRuntimeException("不支持深度分页查询！");
             }
-            sourceBuilder.from(wazuhMonitorEventsRequest.getPageNum() - 1 > 0 ? wazuhMonitorEventsRequest.getPageNum() - 1 : 0);
+            sourceBuilder.from(wazuhMonitorEventsRequest.getPageNum() - 1 > 0 ?
+                    (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize() : 0);
             sourceBuilder.size(wazuhMonitorEventsRequest.getPageSize());
         } else {
             sourceBuilder.size(ES_DOC_MAXCOUNT);
