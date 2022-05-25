@@ -141,7 +141,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @ApiOperation(value = "获取token", notes = "解析传入token，返回中台token")
     @PostMapping("/token")
-    public ServiceResult<LoginResp> getToken(@RequestBody @Validated UserTokenRequest request) {
+    public ServiceResult<LoginResp> getToken(@Validated @RequestBody UserTokenRequest request) {
         log.info("get token request: {}", request);
         String token = request.getToken();
         if (StringUtils.isBlank(token)) {

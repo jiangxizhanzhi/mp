@@ -9,7 +9,7 @@ import lombok.Data;
  * @Author qiaokang
  * @Date：2022/5/24 15:43
  */
-@ApiModel(value = "获取token请求")
+@ApiModel
 @Data
 public class UserTokenRequest {
 
