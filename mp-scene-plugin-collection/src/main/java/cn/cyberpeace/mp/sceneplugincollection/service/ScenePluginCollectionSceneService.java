@@ -1118,20 +1118,19 @@ public class ScenePluginCollectionSceneService {
 
 
     public int sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
-        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
-        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
-
-//        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
-//        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
-
-        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
-        LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
-        wazuhRequest.setEndTime(endTime);
-
+        WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
+        return changedCount;
+    }
 
+    public int sumProcessesChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+        WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
+        int changedCount = dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
+        return changedCount;
+    }
+    public int sumSysUserChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+        WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
+        int changedCount = dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
         return changedCount;
     }
 
@@ -1223,6 +1222,19 @@ public class ScenePluginCollectionSceneService {
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+    }
+
+
+    private WazuhMonitorEventsRequest buildWazuhMonitorEventsRequest(ListPageInfoQueryParams listPageInfoQueryParams) {
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(batchSceneHandler.getEarliestStartTime());
+        wazuhRequest.setEndTime(endTime);
+        return wazuhRequest;
     }
 
 }

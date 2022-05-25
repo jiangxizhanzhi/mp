@@ -44,7 +44,7 @@ import java.util.concurrent.ExecutionException;
  * @Author zhouxinghuai
  * @Date：2022/2/21 17:37
  */
-//@ApiIgnore
+@ApiIgnore
 @Api(value = "SITUATION-TEST", tags = "SITUATION-TEST")
 @Slf4j
 @RestController
