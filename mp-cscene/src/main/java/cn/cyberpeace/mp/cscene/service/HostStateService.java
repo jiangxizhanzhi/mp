@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementNetiface;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
@@ -77,15 +78,13 @@ public class HostStateService {
      * @return
      */
     // todo 老方法，待优化
-    public List<HostState> getHostStates(BaseSceneElementRequest baseRequest) {
-        log.info("{}", baseRequest);
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
-        String sceneId = baseRequest.getSceneId();
-        List<String> elementIds = baseRequest.getElementIds();
+    public List<HostState> getHostStates(BaseSceneElementPageRequest pageRequest) {
+        log.info("{}", pageRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+        String sceneId = pageRequest.getSceneId();
+        List<String> elementIds = pageRequest.getElementIds();
         HostStateQueryParams queryParams = new HostStateQueryParams();
         queryParams.setNodeIds(elementIds);
-        queryParams.setPage(1);
-        queryParams.setPageSize(1);
 //
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 

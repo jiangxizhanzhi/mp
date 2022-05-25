@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -441,9 +442,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 List<?> res;
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     //硬件信息
-                    BaseSceneElementRequest request = new BaseSceneElementRequest();
+                    BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
                     request.setSceneId(id);
                     request.setElementIds(CollectionUtil.toList(element.getId()));
+                    request.setPage(queryParams.getPage());
+                    request.setPageSize(queryParams.getPageSize());
                     res = hostStateService.getHostStates(request);
                 } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
                     //操作系统信息
