@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -22,9 +23,12 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeve
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeModel;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeRelationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
@@ -117,6 +121,12 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private ProbeService probeService ;
+
+    @Autowired
+    private CollectionPluginWazuhRuleTypeMapper collectionPluginWazuhRuleTypeMapper;
+
+    @Autowired
+    private CollectionPluginWazuhRuleTypeRelationMapper collectionPluginWazuhRuleTypeRelationMapper;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
@@ -1183,6 +1193,36 @@ public class ScenePluginCollectionSceneService {
             }
 
         });
+    }
+
+    /**
+     * 根据规则类型名称获取类型id
+     *
+     * @param types 类型集合
+     * @return 类型id集合
+     */
+    private List<String> getTypeIds(List<String> types) {
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeModel::getType, types.toArray());
+        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据规则类型获取规则id集合
+     *
+     * @param types 类型集合
+     * @return 规则id集合
+     */
+    public List<String> getRuleIdsByTypes(List<String> types) {
+        if (types == null || types.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> typeIds = getTypeIds(types);
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
+        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
     }
 
 }
