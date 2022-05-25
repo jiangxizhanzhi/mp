@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
-import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
@@ -44,7 +44,7 @@ public class ResourceCenterService {
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
             if (FileUtil.exist(sceneFilePath)) {
-                String fdfsPath = FdfsCommon.upload(sceneFilePath);
+                String fdfsPath = FsCommon.upload(sceneFilePath);
                 String fileName = FileUtil.getName(sceneFilePath);
                 fdfsSceneFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
             } else {
