@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -42,8 +45,19 @@ public class ProbeAbilityService {
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<ProbeAbilityDto> dtos = probeAbilityMapper.listProbeAbilityDtos(condition);
         dtos.forEach(dto -> processProbeDtoOsTypes(dto));
+        dtos.forEach(dto -> processAbilityEngine(dto));
         PageInfo<ProbeAbilityDto> pageInfo = new PageInfo(dtos);
         return pageInfo;
+    }
+
+    private void processAbilityEngine(ProbeAbilityDto dto) {
+        String msg = "";
+        if (Objects.equals(dto.getEngine(), "Y")) {
+            msg = MessageCommon.get(SituationBase18nCode.ABILITY_ENGINE_Y);
+        } else {
+            msg = MessageCommon.get(SituationBase18nCode.ABILITY_ENGINE_N);
+        }
+        dto.setEngine(msg);
     }
 
     private void processProbeDtoOsTypes(ProbeAbilityDto dto) {

@@ -40,6 +40,7 @@ create table mp_situation_probe_ability
     id varchar(64) not null,
     probe_id varchar(64) not null comment '探针id',
     name varchar(32) not null comment '功能名称',
+    engine varchar(40) null comment '分析引擎',
     OS_type varchar(20) null comment '比探针的os_type种类要多，0:Windows, 1:Unix, 2:Linux, 3:BSD, 5:cisco-ios, 6:HP, 7:junos, 8:openbsd',
     description varchar(400) null comment '描述',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

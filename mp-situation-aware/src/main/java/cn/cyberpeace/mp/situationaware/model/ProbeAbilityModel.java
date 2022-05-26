@@ -34,6 +34,13 @@ public class ProbeAbilityModel extends BaseModel {
 
 
     /**
+     * 分析引擎
+     */
+    @ApiModelProperty(value = "分析引擎 Y/N")
+    private String engine;
+
+
+    /**
      * 探针功能自己的操作系统，跟探针的不完全一样
      */
     @JsonIgnore
