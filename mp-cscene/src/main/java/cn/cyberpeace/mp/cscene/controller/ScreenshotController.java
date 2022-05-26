@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
 import cn.cyberpeace.mp.cscene.request.ScreenshotDeleteRequest;
@@ -16,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * @Description 截屏文件管理controller
  * @Author qiaokang
@@ -28,6 +32,9 @@ import org.springframework.web.bind.annotation.*;
 public class ScreenshotController extends BaseModelController<ScreenshotModel, ScreenshotQueryParams, ScreenshotService> {
 
     @Autowired
+    private FileService fileService;
+
+    @Autowired
     public ScreenshotController(ScreenshotService screenshotService) {
         setModelService(screenshotService);
     }
@@ -36,6 +43,18 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     @PostMapping("/upload")
     public ServiceResult<ScreenshotModel> screenshotUpload(@Validated ScreenshotUploadRequest request) {
         return getModelService().screenshotUpload(request);
+    }
+
+    /**
+     * 截屏文件下载
+     *
+     * @param filePath 文件地址
+     * @param response
+     */
+    @ApiOperation("截屏文件下载")
+    @PostMapping(value = "/download")
+    public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
+        fileService.downloadFile(filePath, response);
     }
 
     @ApiOperation("查询已用空间")
