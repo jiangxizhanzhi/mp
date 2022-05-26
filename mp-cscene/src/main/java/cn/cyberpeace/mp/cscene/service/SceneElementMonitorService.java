@@ -306,7 +306,7 @@ public class SceneElementMonitorService {
         return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
     }
 
-    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups) {
+    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -320,8 +320,10 @@ public class SceneElementMonitorService {
             return new ArrayList<>();
         }
         result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
-        //默认时间分成15段
-        int segmentCount = 15;
+        if (segmentCount == null) {
+            //默认时间分15段
+            segmentCount = 15;
+        }
         long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
         Map<String, Integer> time2Count = new HashMap<>();
