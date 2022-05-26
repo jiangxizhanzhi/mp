@@ -249,6 +249,8 @@ public class ScenePluginCollectionSceneService {
             // 磁盘统一使用单位G
             hostState.setDiskSpace(this.byte2GB(srcHostState.getDiskTotal()));
             hostState.setDiskPercent(srcHostState.getDiskPercent());
+            hostState.setDiskUsed(this.byte2GB(srcHostState.getDiskUsed()));
+            hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
             hostState.setTime(srcHostState.getTime());
             // todo 进程，端口，网络连接，磁盘使用率
             var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);

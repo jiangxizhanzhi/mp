@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
+import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
@@ -97,20 +98,6 @@ public class DataCollectionService {
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
-    // 主机状态
-    public static final String LAUNCH_ID_HOST_STATE = "eda72998ba654c8d8625f61eaa918eb3";
-
-    // 网络连接
-    public static final String LAUNCH_ID_NET_CONNS = "09ffcc4a67ef4accb407a1555629d0f8";
-
-    // 环境变量
-    public static final String LAUNCH_ID_ENV_VAR = "32e9c4db9729440290e843bb6d80295b";
-
-    // 系统用户
-    public static final String LAUNCH_ID_SYSTEM_USERS = "4894f48375ee4dd5b7a7bad7c1a78376";
-
-    // 进程
-    public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
 
@@ -400,7 +387,7 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_HOST_STATE);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_HOST_STATE);
         List<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<HostStateOutput, BaseInput>>>() {
@@ -457,7 +444,7 @@ public class DataCollectionService {
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
 
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_NET_CONNS);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
         List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
@@ -500,7 +487,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_ENV_VAR);
 
         log.info("env var changed count: {}", sum);
         return sum;
@@ -518,7 +505,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_SYSTEM_USERS);
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
 
         log.info("system users changed count: {}", sum);
         return sum;
@@ -531,7 +518,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_PROCESSES);
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
         log.info("processes changed count: {}", sum);
         return sum;
     }
@@ -542,7 +529,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_NET_CONNS);
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
         log.info("processes changed count: {}", sum);
         return sum;
     }
@@ -670,7 +657,7 @@ public class DataCollectionService {
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
 //        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-        boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", LAUNCH_ID_HOST_STATE));
+        boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", SicLaunchConfig.LAUNCH_ID_HOST_STATE));
         int agentSize = 0;
 
 //        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
@@ -1152,6 +1139,10 @@ public class DataCollectionService {
 
         if (StringUtils.isNotBlank(output.getDiskUsed())) {
             wazuhHostStateModel.setDiskUsed(string2Long(output.getDiskUsed()));
+        }
+
+        if (StringUtils.isNotBlank(output.getDiskUsed()) && StringUtils.isNotBlank(output.getDiskUsed())) {
+            wazuhHostStateModel.setDiskUnused(wazuhHostStateModel.getDiskTotal() - wazuhHostStateModel.getDiskUsed());
         }
 
         if (wazuhHostStateModel.getDiskTotal() > 0 && wazuhHostStateModel.getDiskUsed() > 0) {

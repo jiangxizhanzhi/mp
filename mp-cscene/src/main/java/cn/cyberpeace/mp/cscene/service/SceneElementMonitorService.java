@@ -239,6 +239,8 @@ public class SceneElementMonitorService {
                 resource.setCpuCount(hostState.getCpuCount());
                 resource.setMemoryTotal(hostState.getMemoryTotal());
                 resource.setDiskSpace(hostState.getDiskSpace());
+                //resource.setDiskUsed(hostState.getDiskUsed());
+                resource.setDiskUnused(hostState.getDiskUnused());
 
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
