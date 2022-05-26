@@ -9,9 +9,15 @@
             <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
                 AND id not in
                 (select distinct user from mp_auth_user_role where role in
-                <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-                    #{roleId}
-                </foreach>
+                <where>
+                    role in
+                    <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                        #{roleId}
+                    </foreach>
+                    <if test="selfUserId != null and selfUserId != ''">
+                        and user != #{selfUserId}
+                    </if>
+                </where>
                 )
             </if>
             order by mp_auth_user.username
@@ -41,10 +47,16 @@
             </if>
             <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
                 AND id not in
-                (select distinct user from mp_auth_user_role where role in
-                    <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-                         #{roleId}
-                    </foreach>
+                (select distinct user from mp_auth_user_role
+                    <where>
+                        role in
+                        <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                            #{roleId}
+                        </foreach>
+                        <if test="selfUserId != null and selfUserId != ''">
+                            and user != #{selfUserId}
+                        </if>
+                    </where>
                 )
             </if>
             <if test="userCondition.isEnabled != null">

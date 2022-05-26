@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -42,6 +44,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
 
+    @Value("${mp.auth.logout.reset-secret:true}")
+    private Boolean resetSecret;
+
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
@@ -53,11 +58,14 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             throws IOException {
         UserModel user = JwtCommon.verifyToken(request);
         if (user != null) {
-            var updateUser = new UserModel();
-            updateUser.setId(user.getId());
-            updateUser.initDefault("tokenSecret");
-            userService.update(updateUser);
-            recordLogoutLog(user, request);
+            if (Objects.nonNull(resetSecret) && resetSecret) {
+                // 退出是否重置秘钥
+                var updateUser = new UserModel();
+                updateUser.setId(user.getId());
+                updateUser.initDefault("tokenSecret");
+                userService.update(updateUser);
+                recordLogoutLog(user, request);
+            }
         }
 
         response.setContentType("application/json;charset=UTF-8");

@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image;
 
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description
@@ -31,6 +34,8 @@ public class ImageInfoParseResult {
     private String 备注;
     private String NAT到外网;
     private String 自定义命令;
+    private String 角色;
+    private String 虚拟类型;
     private List<AccessModeParseResult> 接入方式;
     private List<AccessModeParseResult> 管理接入;
 
@@ -52,5 +57,35 @@ public class ImageInfoParseResult {
         } else {
             return BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
         }
+    }
+
+    public Integer getRole() {
+        String role = this.角色;
+        if (StringUtils.isEmpty(role)) {
+            return null;
+        }
+        return ROLE_MAP.get(role);
+    }
+
+    public String getImageType() {
+        String imageType = this.虚拟类型;
+        if ("虚拟机".equals(imageType)) {
+            return "vm";
+        } else if ("容器".equals(imageType)) {
+            return "container";
+        } else {
+            return null;
+        }
+    }
+
+    private static Map<String, Integer> ROLE_MAP = new HashMap<>();
+
+    static {
+        ROLE_MAP.put("网关节点-路由器", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER);
+        ROLE_MAP.put("网关节点-交换机", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
+        ROLE_MAP.put("网关节点-防火墙", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL);
+        ROLE_MAP.put("终端节点", BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+        ROLE_MAP.put("外部网络", BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
+        ROLE_MAP.put("网关节点", BaseCloudPluginSceneElementModel.Role.VIRTUAL_GATEWAY);
     }
 }

@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -76,7 +77,12 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+        UserModel selfUser = UserUtils.getLoginUser();
+        String selfUserId = null;
+        if (Objects.nonNull(selfUser)) {
+            selfUserId = selfUser.getId();
+        }
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
 
         return users;
     }
@@ -84,7 +90,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null);
+
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null);
 
         return users;
     }
@@ -105,7 +112,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         UserDto userCondition = new UserDto();
         userCondition.setUsername(likeUname);
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+        UserModel selfUser = UserUtils.getLoginUser();
+        String selfUserId = null;
+        if (Objects.nonNull(selfUser)) {
+            selfUserId = selfUser.getId();
+        }
+
+        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         return users;
     }
 
@@ -215,8 +228,14 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         userCondition.setIsAudited(req.getIsAudited());
         userCondition.setIsExpired(req.getIsExpired());
 
+        UserModel selfUser = UserUtils.getLoginUser();
+        String selfUserId = null;
+        if (Objects.nonNull(selfUser)) {
+            selfUserId = selfUser.getId();
+        }
+
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

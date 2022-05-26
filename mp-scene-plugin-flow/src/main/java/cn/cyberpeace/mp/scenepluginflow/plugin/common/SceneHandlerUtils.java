@@ -43,7 +43,7 @@ public class SceneHandlerUtils {
     }
 
     private void errorFLow(Flow flow, String error) {
-        log.info("flow error,flowId is {},taskId is {}", flow.getId(), flow.getTaskId());
+        log.info("flow error,flowId is {},taskId is {},error is {}", flow.getId(), flow.getTaskId(), error);
         flow.setStatus(Flow.Status.ERROR);
         flow.setStatusText(error);
     }
@@ -348,6 +348,7 @@ public class SceneHandlerUtils {
                 flowTaskModels = flowExecutor.createFlows(requests);
                 log.info("flowExecutor createFlows success:[{}]", flowTaskModels);
             } catch (Exception e) {
+                log.error("flow executor error", e);
                 newFlows.forEach(flow -> {
                     errorFLow(flow.getFlow(), e.getMessage());
                 });

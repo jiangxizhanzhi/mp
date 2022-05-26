@@ -120,6 +120,14 @@ mp:
         id: 32e9c4db9729440290e843bb6d80295b
         interval: 300s
         outputFormat: json
+      - probe-name: get_processes.py
+        id: 38949dcf3829489d8dd9e0e63cc66541
+        interval: 180s
+        outputFormat: json
+      - probe-name: get_system_users.py
+        id: 4894f48375ee4dd5b7a7bad7c1a78376
+        interval: 180s
+        outputFormat: json
 
   log:
     es-nodes: ${ip.es}:9205
@@ -129,6 +137,8 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+    logout:
+      reset-secret: true
     url-ac-filter:
       enabled: true
       method-match: true

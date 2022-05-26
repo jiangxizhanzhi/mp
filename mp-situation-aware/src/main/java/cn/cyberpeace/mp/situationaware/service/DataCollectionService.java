@@ -97,14 +97,19 @@ public class DataCollectionService {
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
+    // 主机状态
     public static final String LAUNCH_ID_HOST_STATE = "eda72998ba654c8d8625f61eaa918eb3";
 
+    // 网络连接
     public static final String LAUNCH_ID_NET_CONNS = "09ffcc4a67ef4accb407a1555629d0f8";
 
+    // 环境变量
     public static final String LAUNCH_ID_ENV_VAR = "32e9c4db9729440290e843bb6d80295b";
 
+    // 系统用户
     public static final String LAUNCH_ID_SYSTEM_USERS = "4894f48375ee4dd5b7a7bad7c1a78376";
 
+    // 进程
     public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
@@ -124,6 +129,8 @@ public class DataCollectionService {
     public static final String CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT = "sys_users_changed_count";
 
     public static final String CACHE_KEY_PROCESS_CHANGED_COUNT = "processes_changed_count";
+
+    public static final String CACHE_KEY_NET_CONNS_CHANGED_COUNT = "net_conns_changed_count";
 
     public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
 
@@ -495,23 +502,6 @@ public class DataCollectionService {
 
         int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
 
-        // todo
-//        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_ENV_VAR);
-//        List<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-//                .getHits()).map(hit ->
-//                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<EnvVarOutput, BaseInput>>>() {
-//                })).collect(Collectors.toList());
-//
-//        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
-//            return 0;
-//        }
-//
-//        int sum = wazuhFileRootList.stream().mapToInt(r -> {
-//            String changedCount = r.getData().getOutput().getChangedCount();
-//            int changeCnt = Integer.parseInt(changedCount);
-//            return changeCnt;
-//        }).sum();
-
         log.info("env var changed count: {}", sum);
         return sum;
     }
@@ -546,6 +536,17 @@ public class DataCollectionService {
         return sum;
     }
 
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
+    public int sumNetConnsChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return 0;
+        }
+
+        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, LAUNCH_ID_NET_CONNS);
+        log.info("processes changed count: {}", sum);
+        return sum;
+    }
+
     public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
@@ -564,7 +565,8 @@ public class DataCollectionService {
             if (wazuhMonitorEventsRequest.getPageNum() * wazuhMonitorEventsRequest.getPageSize() > 10000) {
                 throw new MpRuntimeException("不支持深度分页查询！");
             }
-            sourceBuilder.from(wazuhMonitorEventsRequest.getPageNum() - 1 > 0 ? wazuhMonitorEventsRequest.getPageNum() - 1 : 0);
+            sourceBuilder.from(wazuhMonitorEventsRequest.getPageNum() - 1 > 0 ?
+                    (wazuhMonitorEventsRequest.getPageNum() - 1) * wazuhMonitorEventsRequest.getPageSize() : 0);
             sourceBuilder.size(wazuhMonitorEventsRequest.getPageSize());
         } else {
             sourceBuilder.size(ES_DOC_MAXCOUNT);
@@ -1006,6 +1008,10 @@ public class DataCollectionService {
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
+        if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
+            buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
+        }
+
 //        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {
 //            //构造agentId
 //            buildAgentIdQuery(wazuhEventRequest.getMacIds(), boolQueryBuilder, allAgentMacAddr);
@@ -1038,6 +1044,10 @@ public class DataCollectionService {
                     .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
         }
 
+    }
+
+    private void buildRuleIdsQuery(List<String> ruleIds, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.id", ruleIds));
     }
 
     private void buildRuleGroupQuery(List<String> groups, BoolQueryBuilder boolQueryBuilder) {

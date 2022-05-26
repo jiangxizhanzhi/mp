@@ -80,11 +80,14 @@ public class HostStateService {
     // todo 老方法，待优化
     public List<HostState> getHostStates(BaseSceneElementPageRequest pageRequest) {
         log.info("{}", pageRequest);
+        pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
         String sceneId = pageRequest.getSceneId();
         List<String> elementIds = pageRequest.getElementIds();
         HostStateQueryParams queryParams = new HostStateQueryParams();
         queryParams.setNodeIds(elementIds);
+        queryParams.setPage(pageRequest.getPage());
+        queryParams.setPageSize(pageRequest.getPageSize());
 //
         ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
 

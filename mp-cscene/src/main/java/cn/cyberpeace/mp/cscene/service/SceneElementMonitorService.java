@@ -151,16 +151,21 @@ public class SceneElementMonitorService {
 
 
     public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
-//        String sceneId = baseRequest.getSceneId();
-//        String elementId = baseRequest.getElementIds().get(0);
-
-        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
-//        listPageInfoQueryParams.setPage(pageRequest.getPage());
-//        listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
-        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
-        listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
         int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams);
+        return sum;
+    }
+
+    public int sumProcessesChangedCount(BaseSceneElementRequest baseRequest) {
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
+        int sum = scenePluginCollectionSceneService.sumProcessesChangedCount(listPageInfoQueryParams);
+        return sum;
+    }
+
+
+    public int sumSysUserChangedCount(BaseSceneElementRequest baseRequest) {
+        ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
+        int sum = scenePluginCollectionSceneService.sumSysUserChangedCount(listPageInfoQueryParams);
         return sum;
     }
 
@@ -546,6 +551,14 @@ public class SceneElementMonitorService {
         } else {
             return 0;
         }
+    }
+
+    private ListPageInfoQueryParams buildListPageInfoQueryParams(BaseSceneElementRequest baseRequest) {
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(baseRequest.getSceneId())));
+        listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
+        return listPageInfoQueryParams;
     }
 
 }

@@ -12,6 +12,8 @@ import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
@@ -24,6 +26,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -128,8 +132,12 @@ public class EventMonitorService {
             // 网络连接
             log.info("aggregate network connections");
             aggsMap = aggNetConnsCount(agentNames);
+        } else if (Objects.nonNull(request.getType()) && request.getType().equals(5)) {
+            // 网络连接
+            log.info("aggregate system user change count");
+            aggsMap = aggUserChangeCount(agentNames);
         } else {
-            // todo 其他，包括类型：所有，文件，用户
+            // todo 其他，包括类型：所有，文件
             aggsMap = dataCollectionService.aggsCountByAgentNamesBucket(wazuhEventRequest);
         }
 
@@ -177,10 +185,12 @@ public class EventMonitorService {
         Map<String, Long> aggsProcessesMap = aggProcessCount(agentNames);
         Map<String, Long> aggsPortsMap = aggPortCount(agentNames);
         Map<String, Long> aggsNetConnsMap = aggNetConnsCount(agentNames);
+        Map<String, Long> aggsUserChangeMap = aggUserChangeCount(agentNames);
 
         Long processSum = aggsProcessesMap.values().stream().mapToLong(Long::longValue).sum();
         Long portSum = aggsPortsMap.values().stream().mapToLong(Long::longValue).sum();
         Long netConnsSum = aggsNetConnsMap.values().stream().mapToLong(Long::longValue).sum();
+        Long netSysUserSum = aggsUserChangeMap.values().stream().mapToLong(Long::longValue).sum();
 
         Long sum = sumFromEs + processSum + portSum + netConnsSum;
 
@@ -190,7 +200,7 @@ public class EventMonitorService {
 
         // todo 文件和用户类型事件区分
         eventAggr.setFile(toRoundPercent(sumFromEs, sum));
-        eventAggr.setUser(0.0);
+        eventAggr.setUser(toRoundPercent(netSysUserSum, sum));
 
         return eventAggr;
     }
@@ -249,31 +259,7 @@ public class EventMonitorService {
 
 
     /**
-     * 查询各个节点端口总数
-     * @return
-     */
-    private Map<String, Long> aggPortCount(List<String> agentNames) {
-        Map<String, Long> map = new LinkedHashMap<>();
-        agentNames.forEach(a -> map.put(a, 0L));
-
-        agentNames.forEach(agentName -> {
-            CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-            collectorBaseRequest.setAgentName(agentName);
-            PageInfo pageInfo = sysCollectorService.pagePorts(collectorBaseRequest);
-            Long total = pageInfo.getTotal();
-            map.put(agentName, total);
-        });
-        return map;
-    }
-
-
-    /**
-     * 查询各个节点进程总数
-     * @param agentName
-     * @return
-     */
-    /**
-     * 查询各个节点端口总数
+     * 查询各个节点进程变化数量
      * @return
      */
     private Map<String, Long> aggProcessCount(List<String> agentNames) {
@@ -281,38 +267,82 @@ public class EventMonitorService {
         agentNames.forEach(a -> map.put(a, 0L));
 
         agentNames.forEach(agentName -> {
-            CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-            collectorBaseRequest.setAgentName(agentName);
-            PageInfo pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
-            Long total = pageInfo.getTotal();
-            map.put(agentName, total);
+            WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
+            int sum = dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
+            map.put(agentName, Long.valueOf(sum));
         });
         return map;
     }
 
 
 
+    /**
+     * 查询各个节点端口变化总数
+     *  网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
+     *  dataCollectionService.sumNetConnsChangedCountByTimeRange()
+     * @return
+     */
+    private Map<String, Long> aggPortCount(List<String> agentNames) {
+        Map<String, Long> map = new LinkedHashMap<>();
+        agentNames.forEach(a -> map.put(a, 0L));
+
+        agentNames.forEach(agentName -> {
+            if (StringUtils.isNotBlank(agentName)) {
+                WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
+                int sum = dataCollectionService.sumNetConnsChangedCountByTimeRange(wazuhRequest);
+                map.put(agentName, Long.valueOf(sum));
+            }
+        });
+        return map;
+    }
+
+    /**
+     * 查询各个节点网络连接变化总数
+     * 网络连接的变动数量和端口的变动数量实际上是一样的，所以底层都是用的
+     * dataCollectionService.sumNetConnsChangedCountByTimeRange()
+     * @param agentNames
+     * @return
+     */
     private Map<String, Long> aggNetConnsCount(List<String> agentNames) {
         Map<String, Long> map = new LinkedHashMap<>();
         agentNames.forEach(a -> map.put(a, 0L));
 
         agentNames.forEach(agentName -> {
-
             if (StringUtils.isNotBlank(agentName)) {
-                WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-                wazuhRequest.setAgentNames(CollectionUtil.toList(agentName));
-                wazuhRequest.setPageSize(1);
-                // 默认24小时
-                LocalDateTime endTime = LocalDateTime.now();
-                wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
-                wazuhRequest.setEndTime(endTime);
-
-                List<WazuhNetworkConnectionModel> totalList = dataCollectionService.queryNetConnEventsWithTimeRange(wazuhRequest);
-                map.put(agentName, Long.valueOf(totalList.size()));
+                WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
+                int sum = dataCollectionService.sumNetConnsChangedCountByTimeRange(wazuhRequest);
+                map.put(agentName, Long.valueOf(sum));
             }
-
         });
         return map;
+    }
+
+    /**
+     * 各个节点系统用户变化数量
+     * @param agentNames
+     * @return
+     */
+    private Map<String, Long> aggUserChangeCount(List<String> agentNames) {
+        Map<String, Long> map = new LinkedHashMap<>();
+        agentNames.forEach(a -> map.put(a, 0L));
+
+        agentNames.forEach(agentName -> {
+            WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(agentName);
+            int sum = dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
+            map.put(agentName, Long.valueOf(sum));
+        });
+        return map;
+    }
+
+    private WazuhMonitorEventsRequest buildWazuhMonitorEventsRequest(String agentName) {
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(CollectionUtil.toList(agentName));
+        wazuhRequest.setPageSize(1);
+        // 默认24小时
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
+        wazuhRequest.setEndTime(endTime);
+        return wazuhRequest;
     }
 
 
