@@ -13,7 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -23,7 +23,6 @@ import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,7 +61,7 @@ public class RealEquipmentConverter implements BaseConverter{
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageModel<Device> page = realEquipmentService.page(getParams);
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
+        return page.getTotal();
     }
 
     /**
@@ -90,9 +89,9 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
-        List<TargetModel> targetModels = imageMapper.page(dto);
+        List<TargetPO> targetPOS = imageMapper.page(dto);
 
-        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
@@ -106,13 +105,13 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
 
-        Map<String, TargetModel> map = targetModels.stream().collect(Collectors.toMap(TargetModel::getUuid, Function.identity()));
+        Map<String, TargetPO> map = targetPOS.stream().collect(Collectors.toMap(TargetPO::getUuid, Function.identity()));
         List<RealEquipment> modelList = model.getList().stream().map(device -> {
             RealEquipment realEquipment = convertDevice(device);
-            TargetModel targetModel = map.get(device.getUuid());
-            if (Objects.nonNull(targetModel)){
-                realEquipment.setReferenceStatus(targetModel.getReferenceStatus());
-                realEquipment.setUseStatus(targetModel.getUseStatus());
+            TargetPO targetPO = map.get(device.getUuid());
+            if (Objects.nonNull(targetPO)){
+                realEquipment.setReferenceStatus(targetPO.getReferenceStatus());
+                realEquipment.setUseStatus(targetPO.getUseStatus());
             }
             return realEquipment;
         }).collect(Collectors.toList());

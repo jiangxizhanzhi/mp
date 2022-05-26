@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,15 +17,15 @@ import java.util.Map;
  */
 @Mapper
 @Repository
-@ModelClass(TargetModel.class)
-public interface ImageMapper extends BaseModelMapper<TargetModel> {
+@ModelClass(TargetPO.class)
+public interface ImageMapper extends BaseModelMapper<TargetPO> {
 
     /**
      * 分页查询
      * @param dto
      * @return
      */
-    List<TargetModel> page(ImagePageDTO dto);
+    List<TargetPO> page(ImagePageDTO dto);
 
     /**
      * 获取总数
@@ -39,28 +39,28 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @param uuid
      * @return
      */
-    TargetModel findByUuid(String uuid);
+    TargetPO findByUuid(String uuid);
 
     /**
      * 根据UUID批量查询
      * @param uuids
      * @return
      */
-    List<TargetModel> findByUuids(@Param("uuids") List<String> uuids);
+    List<TargetPO> findByUuids(@Param("uuids") List<String> uuids);
 
     /**
      * 根据ID批量查询
      * @param ids
      * @return
      */
-    List<TargetModel> findByIds(@Param("ids") List<String> ids);
+    List<TargetPO> findByIds(@Param("ids") List<String> ids);
 
     /**
      * 根据ID更新信息
-     * @param targetModel
+     * @param targetPO
      * @return
      */
-    Integer updateById(TargetModel targetModel);
+    Integer updateById(TargetPO targetPO);
 
     /**
      * 删除
@@ -74,14 +74,14 @@ public interface ImageMapper extends BaseModelMapper<TargetModel> {
      * @param list
      * @return
      */
-    Integer updateBatch(@Param("list") List<TargetModel> list);
+    Integer updateBatch(@Param("list") List<TargetPO> list);
 
     /**
      * 新增
      * @param list
      * @return
      */
-    Integer batchInsert(@Param("list") List<TargetModel> list);
+    Integer batchInsert(@Param("list") List<TargetPO> list);
 
     /**
      * 靶标类型统计

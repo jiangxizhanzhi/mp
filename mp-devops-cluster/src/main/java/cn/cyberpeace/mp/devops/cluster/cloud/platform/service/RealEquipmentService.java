@@ -45,6 +45,7 @@ public class RealEquipmentService extends BaseOpenStackService {
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
         CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
         model.setList(list);
+        model.setTotal(pageResult.getTotal());
         return model;
     }
 

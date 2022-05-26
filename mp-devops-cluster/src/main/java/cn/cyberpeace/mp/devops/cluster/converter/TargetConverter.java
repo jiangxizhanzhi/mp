@@ -13,7 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
@@ -72,11 +72,11 @@ public class TargetConverter{
         TargetPageModel targetPageModel = new TargetPageModel();
         targetPageModel.setTotal(total);
         if (total == 0){
-            targetPageModel.setTargetModels(Lists.newArrayList());
+            targetPageModel.setTargetPOS(Lists.newArrayList());
             return targetPageModel;
         }
-        List<TargetModel> targetModels = imageMapper.page(dto);
-        targetPageModel.setTargetModels(targetModels);
+        List<TargetPO> targetPOS = imageMapper.page(dto);
+        targetPageModel.setTargetPOS(targetPOS);
         return targetPageModel;
     }
 
@@ -88,9 +88,9 @@ public class TargetConverter{
     public TargetSceneConvertModel allTarget(TargetSceneRequest request) {
        TargetPageModel targetPageModel = this.page(request);
 
-        List<TargetModel> targetModels = targetPageModel.getTargetModels();
+        List<TargetPO> targetPOS = targetPageModel.getTargetPOS();
 
-        List<Integer> ids = targetModels.stream().map(TargetModel::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
 
         TargetSceneConvertModel sceneConvertModel = new TargetSceneConvertModel();
         sceneConvertModel.setTotal(targetPageModel.getTotal());
@@ -123,8 +123,8 @@ public class TargetConverter{
      */
     public void validTargetCanDelete(List<String> uuids){
 
-        List<TargetModel> targetModels = imageMapper.findByUuids(uuids);
-        String[] imageNames = targetModels.stream().map(TargetModel::getName).toArray(String[]::new);
+        List<TargetPO> targetPOS = imageMapper.findByUuids(uuids);
+        String[] imageNames = targetPOS.stream().map(TargetPO::getName).toArray(String[]::new);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
@@ -151,12 +151,12 @@ public class TargetConverter{
             return Lists.newArrayList();
         }
         List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
-        List<TargetModel> targetModels = imageMapper.findByIds(ids);
+        List<TargetPO> targetPOS = imageMapper.findByIds(ids);
         List<Integer> diffList;
-        if (CollectionUtils.isEmpty(targetModels)){
+        if (CollectionUtils.isEmpty(targetPOS)){
             diffList = deviceIds;
         }else{
-            List<Integer> targetIds = targetModels.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
+            List<Integer> targetIds = targetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
             diffList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
         }
         return diffList;
