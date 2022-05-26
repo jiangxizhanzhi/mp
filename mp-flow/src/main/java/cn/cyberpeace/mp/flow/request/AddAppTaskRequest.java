@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -87,6 +88,9 @@ public class AddAppTaskRequest {
         AddAppTaskRequest.Specifics specifics = new AddAppTaskRequest.Specifics();
         int duration = flowTaskModel.getCount() * flowTaskModel.getIntervalTime();
         specifics.setDuration(duration);
+        if (StringUtils.isBlank(flowTaskModel.getOriginIps())) {
+            flowTaskModel.setOriginIps("127.0.0.1-127.0.0.1");
+        }
         String[] srcIps = flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH);
         String srcIpRange;
         if (srcIps.length < 2) {
