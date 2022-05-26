@@ -172,7 +172,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
-    public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType) {
+    public boolean startFlows(String nodeId, List<FlowIdWithSourceIp> flowId2Ips, boolean async, int runType, Boolean isAll) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
@@ -185,14 +185,24 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
         List<FlowWithSourceIp> flowWithSourceIps = new ArrayList<>();
-        flowId2Ips.forEach(flowId2Ip -> {
-            FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
-            flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
-            flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp());
-            flowWithSourceIps.add(flowWithSourceIp);
-        });
+        if ((flowId2Ips == null || flowId2Ips.isEmpty()) && isAll) {
+            flows.forEach(flow -> {
+                FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
+                flowWithSourceIp.setFlow(flow);
+                flowWithSourceIp.setSourceIp(flow.getSourceIp());
+                flowWithSourceIps.add(flowWithSourceIp);
+            });
+        } else {
+            var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+            flowId2Ips.forEach(flowId2Ip -> {
+                FlowWithSourceIp flowWithSourceIp = new FlowWithSourceIp();
+                flowWithSourceIp.setFlow(flowMap.getOrDefault(flowId2Ip.getFlowId(), null));
+                flowWithSourceIp.setSourceIp(flowId2Ip.getSourceIp() == null ? flowWithSourceIp.getFlow().getSourceIp() : flowId2Ip.getSourceIp());
+                flowWithSourceIps.add(flowWithSourceIp);
+            });
+        }
+
         if (flowWithSourceIps.isEmpty()) {
             return false;
         }
@@ -207,7 +217,7 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         return flag;
     }
 
-    public boolean stopFlows(String nodeId, List<String> flowIds) {
+    public boolean stopFlows(String nodeId, List<String> flowIds, Boolean isAll) {
         var flowElement = getElement(nodeId);
         if (flowElement == null) {
             return false;
@@ -219,11 +229,16 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
             return false;
         }
 
-        var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
         List<Flow> newFlows = new ArrayList<>();
-        flowIds.forEach(flowId -> {
-            newFlows.add(flowMap.getOrDefault(flowId, null));
-        });
+        if ((flowIds == null || flowIds.isEmpty()) && isAll) {
+            newFlows.addAll(flows);
+        } else {
+            var flowMap = flows.stream().collect(Collectors.toMap(Flow::getId, flow -> flow));
+            flowIds.forEach(flowId -> {
+                newFlows.add(flowMap.getOrDefault(flowId, null));
+            });
+        }
+
         if (newFlows.isEmpty()) {
             return false;
         }

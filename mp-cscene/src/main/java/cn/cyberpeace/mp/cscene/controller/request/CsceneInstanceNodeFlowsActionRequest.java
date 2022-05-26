@@ -12,4 +12,6 @@ public class CsceneInstanceNodeFlowsActionRequest extends CsceneInstanceNodeActi
     private List<FlowIdWithSourceIp> flows;
     @ApiModelProperty(value = "执行方式：0 串行，1 并行")
     private int runType;
+    @ApiModelProperty(value = "是否启动节点全部流量")
+    private Boolean isAll;
 }
