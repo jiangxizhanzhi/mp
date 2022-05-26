@@ -963,6 +963,9 @@ public class DataCollectionService {
         }
 
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
+        if ((offset + wazuhEventRequest.getPageSize()) > 10000) {
+            throw new MpRuntimeException(SituationalAwareErrorCode.ES_PAGING_QUERY_OVERRUN);
+        }
         sourceBuilder.from(offset);
         sourceBuilder.size(wazuhEventRequest.getPageSize());
         int total = queryTotalCount(indexArray, boolQueryBuilder);
