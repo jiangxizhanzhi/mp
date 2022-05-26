@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
@@ -80,6 +81,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowScriptParamServiceImpl flowScriptParamService;
+
+    @Autowired
+    private BaseAppConfig baseAppConfig;
 
     /**
      * 预制流量文件目录
@@ -253,8 +257,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(String id) {
         BackgroundFlowResponse response;
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -277,8 +280,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> queryAttackDetail(String id) {
         AttackFlowResponse response;
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -336,8 +338,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -428,8 +429,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
         response.setCode(addRequest.getCode());
@@ -472,8 +472,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -577,8 +576,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String prefixUrl = group.getInnerFileServerAddr() + File.separator;
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
         response.setCode(modifyRequest.getCode());

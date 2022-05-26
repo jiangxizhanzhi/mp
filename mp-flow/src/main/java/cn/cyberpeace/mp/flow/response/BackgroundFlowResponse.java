@@ -9,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.Objects;
 
 /**
@@ -53,7 +54,7 @@ public class BackgroundFlowResponse extends FlowInfoResponse {
         setFileName(flowInfoModel.getFileName());
         if (StringUtils.isNotEmpty(flowInfoModel.getPcapFile())) {
             setPcapFile(flowInfoModel.getPcapFile());
-            setPcapFilePath(prefixUrl + flowInfoModel.getPcapFile());
+            setPcapFilePath(prefixUrl + File.separator + flowInfoModel.getPcapFile());
         }
 
     }

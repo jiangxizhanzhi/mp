@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -31,7 +30,7 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         FlowScriptDemoFields, QueryParams> implements FlowScriptDemoService {
 
     @Autowired
-    private FastDfsConfig fastDfsConfig;
+    private BaseAppConfig baseAppConfig;
 
     public FlowScriptDemoServiceImpl(FlowScriptDemoMapper stuMapper, FlowScriptDemoFields stuFields) {
         setModelFields(stuFields);
@@ -57,9 +56,8 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         List<FlowScriptDemoModel> flowScriptDemoModels = getModelMapper().listAll();
 
         if (CollectionUtils.isNotEmpty(flowScriptDemoModels)) {
-            FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
             scriptDemoList = flowScriptDemoModels.stream().map(demo -> new QueryFlowScriptDemoResponse.ScriptDemo(demo.getUrl(),
-                    group.getInnerFileServerAddr() + File.separator + demo.getUrl(), demo.getScriptName())).collect(Collectors.toList());
+                    baseAppConfig.getFdfsOuterHttpServer() + File.separator + demo.getUrl(), demo.getScriptName())).collect(Collectors.toList());
         }
         response.setDemoList(scriptDemoList);
 
