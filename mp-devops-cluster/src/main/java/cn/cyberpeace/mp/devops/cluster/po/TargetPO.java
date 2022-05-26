@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_devops_target")
-public class TargetModel extends BaseModel {
+public class TargetPO extends BaseModel {
 
     /**
      * 镜像UUID

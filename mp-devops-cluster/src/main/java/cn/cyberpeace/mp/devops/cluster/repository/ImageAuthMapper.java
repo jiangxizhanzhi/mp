@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
 import cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel;
-import cn.cyberpeace.mp.devops.cluster.model.TargetModel;
+import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +14,7 @@ import java.util.List;
 
 @Mapper
 @Repository
-@PermissionModelClass(permissionClass = TargetAuthModel.class, targetClass = TargetModel.class)
+@PermissionModelClass(permissionClass = TargetAuthModel.class, targetClass = TargetPO.class)
 @ModelClass(TargetAuthModel.class)
 public interface ImageAuthMapper extends BasePermissionMapper {
 
