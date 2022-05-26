@@ -638,7 +638,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context == null ? null : context.toSceneContext(), runType);
     }
 
-    public ServiceResult<Boolean> stopFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps, CsceneContextBO context) {
+    public ServiceResult<Boolean> stopFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
+                                            CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
