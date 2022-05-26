@@ -279,14 +279,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping(value = "/start_flows")
     public ServiceResult<Boolean> startFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
         return modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
-                request.getContext(), request.getRunType()).asResult();
+                request.getContext(), request.getRunType(), request.getIsAll()).asResult();
     }
 
     @ApiOperation("场景实例批量停止节点流量")
     @PostMapping(value = "/stop_flows")
     public ServiceResult<Boolean> stopFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
         return modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
-                request.getContext()).asResult();
+                request.getContext(), request.getIsAll()).asResult();
     }
 
     @ApiOperation("场景实例查询节点流量执行记录")
