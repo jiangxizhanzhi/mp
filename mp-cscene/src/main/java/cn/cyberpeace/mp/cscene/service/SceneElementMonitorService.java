@@ -1,15 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
-import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
@@ -41,6 +37,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -396,6 +393,9 @@ public class SceneElementMonitorService {
         request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 false, "data.vulnerability.severity", "severity");
+        if (CollectionUtil.isEmpty(result)) {
+            return new ArrayList<>();
+        }
         long i = 0;
         for (WazuhVulnerabilityInfoCountModel countModel : result) {
             i = countModel.getCount() + i;
@@ -405,7 +405,7 @@ public class SceneElementMonitorService {
         result.forEach(r -> {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
-            pieChartInfo.setPercent((double) (r.getCount() / sum));
+            pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum)).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
         });
         return pieChartInfos;
