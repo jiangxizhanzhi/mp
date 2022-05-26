@@ -622,7 +622,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> startFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
-                                             CsceneContextBO context, int runType, Boolean isAll) {
+                                             CsceneContextBO context, int runType) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_START_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
@@ -635,11 +635,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginFlowSceneService.startFlows(sceneId, toNodeId, flowIdWithSourceIps,
-                context == null ? null : context.toSceneContext(), runType, isAll);
+                context == null ? null : context.toSceneContext(), runType);
     }
 
     public ServiceResult<Boolean> stopFlows(String id, String toNodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
-                                            CsceneContextBO context, Boolean isAll) {
+                                            CsceneContextBO context) {
         CsceneContextHolder.setCallAction(CsceneCallAction.NODE_STOP_FLOW);
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context != null) {
@@ -652,8 +652,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         List<String> flowIds = flowIdWithSourceIps.stream().map(f -> f.getFlowId()).collect(Collectors.toList());
-        return scenePluginFlowSceneService.stopFlows(sceneId, toNodeId, flowIds,
-                context == null ? null : context.toSceneContext(), isAll);
+        return scenePluginFlowSceneService.stopFlows(sceneId, toNodeId, flowIds, context == null ? null : context.toSceneContext());
     }
 
     public ServiceResult<SceneFlowRecordsResponse> queryFlowRecords(String id, String nodeId, String flowId,

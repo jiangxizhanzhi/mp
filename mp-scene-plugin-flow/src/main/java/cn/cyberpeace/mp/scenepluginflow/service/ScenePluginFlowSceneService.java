@@ -54,18 +54,17 @@ public class ScenePluginFlowSceneService {
     }
 
     public ServiceResult<Boolean> startFlows(String sceneId, String nodeId, List<FlowIdWithSourceIp> flowIdWithSourceIps,
-                                             SceneContextBO context, int runType, Boolean isAll) {
+                                             SceneContextBO context, int runType) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var result = pluginHandler.startFlows(nodeId, flowIdWithSourceIps, true, runType, isAll);
+        var result = pluginHandler.startFlows(nodeId, flowIdWithSourceIps, true, runType);
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> stopFlows(String sceneId, String nodeId, List<String> flowIds, SceneContextBO context,
-                                            Boolean isAll) {
+    public ServiceResult<Boolean> stopFlows(String sceneId, String nodeId, List<String> flowIds, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
         FlowScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        var result = pluginHandler.stopFlows(nodeId, flowIds, isAll);
+        var result = pluginHandler.stopFlows(nodeId, flowIds);
         return new ServiceResult<>(result);
     }
 
