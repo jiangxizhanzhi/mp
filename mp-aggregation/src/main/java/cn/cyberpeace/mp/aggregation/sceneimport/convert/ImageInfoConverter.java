@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -88,7 +87,14 @@ class ImageInfoConverter implements IConverter {
                     cloudPluginElement.setVirtualType(imageInfo.getVirtualType());
                 }
                 if (cloudPluginElement.getRole() == null) {
-                    cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+                    if (imageInfo.getRole() != null) {
+                        cloudPluginElement.setRole(imageInfo.getRole());
+                    } else {
+                        cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+                    }
+                }
+                if (cloudPluginElement.getImageType() == null && imageInfo.getImageType() != null) {
+                    cloudPluginElement.setImageType(imageInfo.getImageType());
                 }
                 if (CollectionUtils.isEmpty(element.getPorts())) {
                     SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
