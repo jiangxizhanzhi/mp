@@ -963,11 +963,12 @@ public class DataCollectionService {
         }
 
         int offset = (wazuhEventRequest.getPageNum() - 1) * (wazuhEventRequest.getPageSize());
+        sourceBuilder.from(Math.min(offset, 10000));
         if ((offset + wazuhEventRequest.getPageSize()) > 10000) {
-            throw new MpRuntimeException(SituationalAwareErrorCode.ES_PAGING_QUERY_OVERRUN);
+            sourceBuilder.size(Math.max(10000 - offset, 0));
+        } else {
+            sourceBuilder.size(wazuhEventRequest.getPageSize());
         }
-        sourceBuilder.from(offset);
-        sourceBuilder.size(wazuhEventRequest.getPageSize());
         int total = queryTotalCount(indexArray, boolQueryBuilder);
         if (10000 < total) {
             total = 10000;
