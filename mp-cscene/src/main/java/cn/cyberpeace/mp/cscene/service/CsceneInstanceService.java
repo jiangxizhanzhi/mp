@@ -435,6 +435,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } else {
             endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         }
+        int total = 0;
         if (probeId != null) {
             for (String nodeId : newNodeIds) {
                 var element = sceneHandler.getElement(nodeId);
@@ -448,12 +449,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
                     res = hostStateService.getHostStates(request);
+                    if (!CollectionUtil.isEmpty(res)) {
+                        total = res.size() + total;
+                    }
                 } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
                     //操作系统信息
                     BaseSceneElementRequest request = new BaseSceneElementRequest();
                     request.setSceneId(id);
                     request.setElementIds(CollectionUtil.toList(element.getId()));
                     res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
+                    if (!CollectionUtil.isEmpty(res)) {
+                        total = res.size() + total;
+                    }
                 } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
                     //网卡信息
                     ListPageInfoQueryParams params = new ListPageInfoQueryParams();
@@ -461,21 +468,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
-                    res = hostStateService.pageNetifaces(params).getSource().getObjs();
+                    var r = hostStateService.pageNetifaces(params);
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
                     CollectorBaseRequest request = new CollectorBaseRequest();
                     request.setAgentName(element.getEid());
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    res = sysCollectorService.pagePorts(request).getList();
+                    var r = sysCollectorService.pagePorts(request);
+                    res = r.getList();
+                    total = (int) (r.getTotal() + total);
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     //进程信息
                     CollectorBaseRequest request = new CollectorBaseRequest();
                     request.setAgentName(element.getEid());
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    res = sysCollectorService.pageProcesses(request).getList();
+                    var r = sysCollectorService.pageProcesses(request);
+                    res = r.getList();
+                    total = (int) (r.getTotal() + total);
                 } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     //文件变更信息
                     HostEventQueryParams params = new HostEventQueryParams();
@@ -485,7 +498,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
+                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
                     //注册表变更信息
                     HostEventQueryParams params = new HostEventQueryParams();
@@ -495,7 +510,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
-                    res = scenePluginCollectionSceneService.listHostEvents(sceneId, params).getSource().getObjs();
+                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
                     //操作系统日志信息
                     return new ListObjServiceResult<>();
@@ -517,8 +534,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setPageNum(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
                     res = dataCollectionService.getCustomProbeCollectData(request, probeId);
+                    if (!CollectionUtil.isEmpty(res)) {
+                        total = res.size() + total;
+                    }
                 }
-                if (res == null || res.isEmpty()) {
+                if (CollectionUtil.isEmpty(res)) {
                     continue;
                 }
                 res.forEach(r -> {
@@ -557,9 +577,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setAgentNames(CollectionUtil.toList(element.getEid()));
                 for (String customId : probeIds) {
                     res = dataCollectionService.getCustomProbeCollectData(request, customId);
-                    if (res == null || res.isEmpty()) {
+                    if (CollectionUtil.isEmpty(res)) {
                         continue;
                     }
+                    total = total + res.size();
                     res.forEach(r -> {
                         CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
                         hostEventBO.setSceneId(sceneId);
@@ -573,7 +594,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
             }
         }
-        return new ListObjServiceResult<>(new ListObjResult(result, result.size()));
+        return new ListObjServiceResult<>(new ListObjResult(result, total));
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {
