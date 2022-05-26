@@ -13,15 +13,16 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -101,12 +102,17 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
+    })
     @GetMapping("/file_modify_histogram")
-    public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(ElementMonitorRequest pageRequest) {
+    public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
+                                                                         ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_file"))).asResult();
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest,
+                CollectionUtil.toList("syscheck_file"), segmentCount)).asResult();
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -119,12 +125,17 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
+    })
     @GetMapping("/registry_modify_histogram")
-    public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(ElementMonitorRequest pageRequest) {
+    public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,
+                                                                             ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CollectionUtil.toList("syscheck_registry"))).asResult();
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest,
+                CollectionUtil.toList("syscheck_registry"), segmentCount)).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")

@@ -239,6 +239,8 @@ public class SceneElementMonitorService {
                 resource.setCpuCount(hostState.getCpuCount());
                 resource.setMemoryTotal(hostState.getMemoryTotal());
                 resource.setDiskSpace(hostState.getDiskSpace());
+                //resource.setDiskUsed(hostState.getDiskUsed());
+                resource.setDiskUnused(hostState.getDiskUnused());
 
                 resource.setCpuPercent(Objects.nonNull(hostState.getCpuPercent()) ? NumberUtil.round(hostState.getCpuPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
@@ -306,7 +308,7 @@ public class SceneElementMonitorService {
         return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
     }
 
-    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups) {
+    public List<ElementHistogramInfo> getModifyHistogram(ElementMonitorRequest pageRequest, List<String> ruleGroups, Integer segmentCount) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -316,14 +318,18 @@ public class SceneElementMonitorService {
         startTime = pageRequest.getStartTime();
         endTime = pageRequest.getEndTime();
         var result = getModifyData(pageRequest, ruleGroups);
-        if (result == null || result.getData() == null || CollectionUtil.isEmpty(result.getData().getList())) {
+        if (result == null || result.getSource() == null || CollectionUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
-        result.getData().getList().sort(Comparator.comparing(r -> r.getTime()));
-        long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, 15);
+        result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
+        if (segmentCount == null) {
+            //默认时间分15段
+            segmentCount = 15;
+        }
+        long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
         Map<String, Integer> time2Count = new HashMap<>();
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= segmentCount; i++) {
             String time = TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i));
             ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
             histogramInfo.setTime(time);
@@ -331,7 +337,7 @@ public class SceneElementMonitorService {
             histogramInfos.add(histogramInfo);
             time2Count.put(time, 0);
         }
-        for (CollectionHostEventBO collectionData : result.getData().getList()) {
+        for (CollectionHostEventBO collectionData : result.getSource().getObjs()) {
             LocalDateTime nextTime = startTime.plusSeconds(intervalSeconds);
             String nextTimeString = TimeUtils.localDateTimeToString(nextTime);
             if (collectionData.getTime().isAfter(startTime) && collectionData.getTime().isBefore(nextTime)) {

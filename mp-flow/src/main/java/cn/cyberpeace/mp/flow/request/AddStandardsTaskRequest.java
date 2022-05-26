@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
@@ -55,6 +56,9 @@ public class AddStandardsTaskRequest implements Serializable {
 		this.setName(flowTaskModel.getTitle() + System.currentTimeMillis());
 		this.setDescription(flowTaskModel.getTaskDesc());
 		this.setTargetIp(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0]);
+		if (StringUtils.isBlank(flowTaskModel.getOriginIps())) {
+			flowTaskModel.setOriginIps("127.0.0.1-127.0.0.1");
+		}
 		this.setSourceIp(flowTaskModel.getOriginIps().split(BaseConstants.SHORT_DASH)[0]);
 		this.setFileResourceUuid(flowTaskModel.getThirdFlowId());
 	}

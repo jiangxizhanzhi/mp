@@ -46,6 +46,9 @@ public class WazuhHostStateModel {
     @ApiModelProperty("磁盘已用空间")
     private long diskUsed;
 
+    @ApiModelProperty("磁盘剩余空间")
+    private long diskUnused;
+
     @ApiModelProperty("磁盘使用率")
     private double diskPercent;
 
@@ -61,4 +64,5 @@ public class WazuhHostStateModel {
     @JSONField(name = "timestamp")
     @ApiModelProperty("时间")
     private LocalDateTime time;
+
 }

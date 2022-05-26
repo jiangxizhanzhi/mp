@@ -105,6 +105,8 @@ public class HostStateService {
 
             hs.setDiskSpace(hostStateBO.getDiskSpace());
             hs.setDiskPercent(hostStateBO.getDiskPercent());
+            //hs.setDiskUsed(hostStateBO.getDiskUsed());
+            hs.setDiskUnused(hostStateBO.getDiskUnused());
 
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
@@ -128,6 +130,9 @@ public class HostStateService {
             // todo 节点内存利用率 统一为Double？
 //            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent() ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent()));
             hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setDiskPercent(hostStateBO.getDiskPercent());
+            //hs.setDiskUsed(hostStateBO.getDiskUsed());
+            hs.setDiskUnused(hostStateBO.getDiskUnused());
             hs.setSceneId(sceneId);
 //            hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());

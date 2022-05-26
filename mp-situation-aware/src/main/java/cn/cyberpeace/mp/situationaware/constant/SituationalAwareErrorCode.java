@@ -34,8 +34,7 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     COLLECTION_TEMPLATE_NOT_EXISTED("MP-110430", "collection_template_not_existed"),
     COLLECTION_TEMPLATE_EXISTED("MP-110431", "collection_template_existed"),
 
-    PROBE_NOT_EXISTED("MP-110431", "probe_not_existed");
-
+    PROBE_NOT_EXISTED("MP-110440", "probe_not_existed");
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, SituationalAwareConstant.ERROR_CODE_PREFIX + message);

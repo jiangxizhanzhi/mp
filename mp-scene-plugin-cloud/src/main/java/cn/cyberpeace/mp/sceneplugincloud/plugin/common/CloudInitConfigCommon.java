@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -111,10 +112,14 @@ public class CloudInitConfigCommon {
             list.add(SSH_PWAUTH);
             list.add(DISABLE_ROOT);
             if (!this.users.isEmpty()) {
-                list.add("groups: ");
-                list.addAll(this.getGroups());
-                list.add("users: ");
-                list.addAll(this.getUsers());
+                if (CollectionUtils.isNotEmpty(this.getGroups())) {
+                    list.add("groups: ");
+                    list.addAll(this.getGroups());
+                }
+                if (CollectionUtils.isNotEmpty(this.getUsers())) {
+                    list.add("users: ");
+                    list.addAll(this.getUsers());
+                }
             }
             if (!this.initCommands.isEmpty()) {
                 list.add("runcmd:");
