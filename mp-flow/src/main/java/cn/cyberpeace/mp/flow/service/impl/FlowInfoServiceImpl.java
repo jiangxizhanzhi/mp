@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -63,9 +62,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private FastDFSClient fastDFSClient;
