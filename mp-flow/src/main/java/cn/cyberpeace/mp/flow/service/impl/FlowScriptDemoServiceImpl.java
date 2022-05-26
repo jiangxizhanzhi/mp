@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -29,9 +28,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDemoModel, FlowScriptDemoMapper,
         FlowScriptDemoFields, QueryParams> implements FlowScriptDemoService {
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private BaseAppConfig baseAppConfig;
