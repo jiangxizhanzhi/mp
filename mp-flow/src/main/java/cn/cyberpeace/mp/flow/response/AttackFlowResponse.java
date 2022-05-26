@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
@@ -70,7 +71,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
 
         String filePath = flowInfoModel.getScriptFile();
         if (StringUtils.isNotBlank(filePath)) {
-            setFile(prefixUrl + filePath);
+            setFile(prefixUrl + File.separator + filePath);
             setSuffix(filePath.endsWith(".py") ? 0 : 1);
         }
         setRunCmd(flowInfoModel.getRunCmd());
