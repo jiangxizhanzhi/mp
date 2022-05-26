@@ -64,7 +64,17 @@ public class UrlACService {
         if (CollectionUtil.isEmpty(targetIds)) {
             return Collections.emptyList();
         }
-        return urlACMapper.listByTargetIds(targetIds);
+        List<UrlAccessCtlDto> dtos = urlACMapper.listByTargetIds(targetIds);
+        dtos.forEach(d -> {
+            if (StringUtils.isNotBlank(d.getTargetsStr())) {
+                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
+            }
+
+            if (StringUtils.isNotBlank(d.getMethodStr())) {
+                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
+            }
+        });
+        return dtos;
     }
 
     /**
@@ -76,7 +86,18 @@ public class UrlACService {
         if (CollectionUtil.isEmpty(urls)) {
             return Collections.emptyList();
         }
-        return urlACMapper.listByUrls(urls);
+        List<UrlAccessCtlDto> dtos = urlACMapper.listByUrls(urls);
+
+        dtos.forEach(d -> {
+            if (StringUtils.isNotBlank(d.getTargetsStr())) {
+                d.setTargetIds(Arrays.asList(d.getTargetsStr().split(",")));
+            }
+
+            if (StringUtils.isNotBlank(d.getMethodStr())) {
+                d.setMethods(Arrays.asList(d.getMethodStr().split(",")));
+            }
+        });
+        return dtos;
     }
 
 

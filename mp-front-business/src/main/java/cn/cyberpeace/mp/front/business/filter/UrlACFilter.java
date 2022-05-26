@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.front.business.service.UrlACWrapperService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -77,6 +78,13 @@ public class UrlACFilter extends OncePerRequestFilter {
 
         if (!skip) {
             String requestUrl = request.getRequestURI();
+            if (StringUtils.isNotBlank(requestUrl)) {
+                // 去除url中最后一个'/'
+                if (requestUrl.length() == requestUrl.lastIndexOf("/") + 1) {
+                    requestUrl = requestUrl.substring(0, requestUrl.length() - 1);
+                }
+            }
+
             String method = request.getMethod().toLowerCase();
 
             // 方法拦截是否开启

@@ -58,7 +58,7 @@
         <where>
             ua.url like
             <if test="urls != null and urls.size() > 0">
-                <foreach collection="urls" index="url" separator="OR" open="(" close=")" >
+                <foreach collection="urls" item="url" index="index" separator="OR" open="(" close=")" >
                     CONCAT(#{url}, '%')
                 </foreach>
             </if>
