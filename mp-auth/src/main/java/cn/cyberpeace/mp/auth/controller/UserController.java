@@ -92,6 +92,17 @@ public class UserController {
         return userService.delete(id);
     }
 
+    /**
+     * 批量删除
+     * @param ids 数据id集
+     * @return 成功数量
+     */
+    @ApiOperation("批量删除用户")
+    @DeleteMapping("/bulk_delete")
+    public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        return userService.bulkDelete(ids).asResult();
+    }
+
 
     @ApiOperation(value = "查询指定id数据 附带组织，角色信息", notes = "")
     @ApiImplicitParams({
