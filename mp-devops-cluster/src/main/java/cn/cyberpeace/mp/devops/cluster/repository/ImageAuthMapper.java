@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.base.repository.BasePermissionMapper;
 import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
-import cn.cyberpeace.mp.devops.cluster.model.TargetAuthModel;
+import cn.cyberpeace.mp.devops.cluster.po.TargetAuthPO;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -14,8 +14,8 @@ import java.util.List;
 
 @Mapper
 @Repository
-@PermissionModelClass(permissionClass = TargetAuthModel.class, targetClass = TargetPO.class)
-@ModelClass(TargetAuthModel.class)
+@PermissionModelClass(permissionClass = TargetAuthPO.class, targetClass = TargetPO.class)
+@ModelClass(TargetAuthPO.class)
 public interface ImageAuthMapper extends BasePermissionMapper {
 
     /**
@@ -30,7 +30,7 @@ public interface ImageAuthMapper extends BasePermissionMapper {
      * @param target
      * @return
      */
-    List<TargetAuthModel> findByTarget(String target);
+    List<TargetAuthPO> findByTarget(String target);
 
     /**
      * 根据镜像ID集合批量删除数据

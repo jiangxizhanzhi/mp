@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.UploadTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
+import cn.cyberpeace.mp.devops.cluster.po.TargetAuthPO;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
@@ -240,11 +241,11 @@ public class ImagesConverter implements BaseConverter{
         }
         if (PublicEnum.ALL_PUBLIC != isAllPublic && CollectionUtils.isNotEmpty(userIds)){
             imageIds.forEach(imageId -> {
-                List<TargetAuthModel> authModelList = userIds.stream().map(userId -> {
-                    TargetAuthModel targetAuthModel = new TargetAuthModel();
-                    targetAuthModel.setOwner(userId);
-                    targetAuthModel.setTarget(imageId);
-                    return targetAuthModel;
+                List<TargetAuthPO> authModelList = userIds.stream().map(userId -> {
+                    TargetAuthPO targetAuthPO = new TargetAuthPO();
+                    targetAuthPO.setOwner(userId);
+                    targetAuthPO.setTarget(imageId);
+                    return targetAuthPO;
                 }).collect(Collectors.toList());
                 imageAuthMapper.bulkCreate(authModelList);
             });
@@ -258,11 +259,11 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public List<UserDto> findUsersByUuid(String uuid){
-        List<TargetAuthModel> targetAuthModels = imageAuthMapper.findByTarget(uuid);
-        if (CollectionUtils.isEmpty(targetAuthModels)){
+        List<TargetAuthPO> targetAuthPOS = imageAuthMapper.findByTarget(uuid);
+        if (CollectionUtils.isEmpty(targetAuthPOS)){
             return Lists.newArrayList();
         }
-        List<String> userIds = targetAuthModels.stream().map(TargetAuthModel::getOwner).collect(Collectors.toList());
+        List<String> userIds = targetAuthPOS.stream().map(TargetAuthPO::getOwner).collect(Collectors.toList());
         return userService.listByUserIds(userIds.stream().toArray(String[]::new));
     }
 
