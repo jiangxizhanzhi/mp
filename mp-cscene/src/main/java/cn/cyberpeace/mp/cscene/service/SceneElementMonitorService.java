@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -370,7 +371,7 @@ public class SceneElementMonitorService {
         request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
         var result = dataCollectionService.queryVulnerabilityInfo(request);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
-        result.getList().forEach(r -> {
+        result.getObjs().forEach(r -> {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
@@ -408,7 +409,7 @@ public class SceneElementMonitorService {
         result.forEach(r -> {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
-            pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum)).multiply(BigDecimal.valueOf(100)).doubleValue());
+            pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
         });
         return pieChartInfos;
