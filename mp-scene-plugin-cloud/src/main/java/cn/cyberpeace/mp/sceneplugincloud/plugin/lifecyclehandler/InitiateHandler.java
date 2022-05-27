@@ -329,7 +329,8 @@ public class InitiateHandler extends HandlerCommon {
             if (StringUtils.isEmpty(network.getGateway())) {
                 String gatewayIp = null;
                 if (element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
-                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+                        || element.getVirtualType().equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)
+                        || ElementTypeUtils.isCoreRouter(element)) {
                     for (var p : connectedNetwork.getFromPorts()) {
                         if (StringUtils.isNotEmpty(p.getIp())) {
                             gatewayIp = p.getIp();
@@ -808,7 +809,17 @@ public class InitiateHandler extends HandlerCommon {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
         var cloudElements = new ArrayList<>(getPluginHandler().getElementMap().values());
+        // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
+        // 使初始化结果不受数据库数据顺序的影响
+        Collections.sort(cloudElements, (a, b) -> {
+            if (a.getSrcElement().getName() == null || b.getSrcElement().getName() == null) {
+                return 0;
+            }
+            return a.getSrcElement().getName().compareTo(b.getSrcElement().getName());
+        });
+
         cloudElements.forEach(cloudElement -> this.initCoreType(cloudElement));
+        // 根据节点的类型排序,这个顺序直接影响组网的结果
         Collections.sort(cloudElements, Comparator.comparing(CloudPluginSceneElementBO::getCoreType));
 
         // 初始化节点属性
