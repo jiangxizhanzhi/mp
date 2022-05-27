@@ -468,27 +468,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
+                    params.setFetchIfSceneInstanceShutdown(true);
                     var r = hostStateService.pageNetifaces(params);
                     res = r.getSource().getObjs();
                     total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
-                    CollectorBaseRequest request = new CollectorBaseRequest();
-                    request.setAgentName(element.getEid());
-                    request.setPage(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize());
-                    var r = sysCollectorService.pagePorts(request);
-                    res = r.getList();
-                    total = (int) (r.getTotal() + total);
+                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setNodeIds(CollectionUtil.toList(nodeId));
+                    params.setPage(queryParams.getPage());
+                    params.setPageSize(queryParams.getPageSize());
+                    params.setFetchIfSceneInstanceShutdown(true);
+                    var r = hostStateService.pagePorts(params);
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     //进程信息
-                    CollectorBaseRequest request = new CollectorBaseRequest();
-                    request.setAgentName(element.getEid());
-                    request.setPage(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize());
-                    var r = sysCollectorService.pageProcesses(request);
-                    res = r.getList();
-                    total = (int) (r.getTotal() + total);
+                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setNodeIds(CollectionUtil.toList(nodeId));
+                    params.setPage(queryParams.getPage());
+                    params.setPageSize(queryParams.getPageSize());
+                    params.setFetchIfSceneInstanceShutdown(true);
+                    var r = hostStateService.pageProcesses(params);
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
                 } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     //文件变更信息
                     HostEventQueryParams params = new HostEventQueryParams();
@@ -594,7 +599,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
             }
         }
-        return new ListObjServiceResult<>(new ListObjResult(result, total));
+        return new ListObjServiceResult<>(new ListObjResult(result, Math.min(total, 10000)));
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {
