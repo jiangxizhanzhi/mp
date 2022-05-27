@@ -999,6 +999,7 @@ public class DataCollectionService {
             buildRuleGroupQuery(wazuhEventRequest.getRuleGroups(), boolQueryBuilder);
         }
 
+        // ruleIds
         if (!CollectionUtil.isEmpty(wazuhEventRequest.getRuleIds())) {
             buildRuleIdsQuery(wazuhEventRequest.getRuleIds(), boolQueryBuilder);
         }
@@ -1025,6 +1026,11 @@ public class DataCollectionService {
         // levels
         if(!CollectionUtils.isEmpty(wazuhEventRequest.getLevels())) {
             buildLevelQuery(wazuhEventRequest.getLevels(), boolQueryBuilder);
+        }
+
+        // path
+        if (wazuhEventRequest.getPath() != null) {
+            buildPathQuery(wazuhEventRequest.getPath(), boolQueryBuilder);
         }
 
 
@@ -1059,6 +1065,10 @@ public class DataCollectionService {
                 boolQueryBuilder.must(QueryBuilders.wildcardQuery("rule.description", "*" + keyword + "*"));
             }
         }
+    }
+
+    private void buildPathQuery(String path, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + path + "*"));
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {

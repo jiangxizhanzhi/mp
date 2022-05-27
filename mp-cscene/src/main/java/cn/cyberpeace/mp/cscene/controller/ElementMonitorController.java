@@ -93,12 +93,15 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "查询节点文件变更事件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class),
+    })
     @GetMapping("/file_modify")
-    public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest) {
+    public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_file")).asResult();
+        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_file"), path).asResult();
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
@@ -116,12 +119,15 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class),
+    })
     @GetMapping("/registry_modify")
-    public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest) {
+    public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_registry")).asResult();
+        return sceneElementMonitorService.getModifyData(pageRequest, CollectionUtil.toList("syscheck_registry"), path).asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")

@@ -292,7 +292,8 @@ public class SceneElementMonitorService {
         basicInfo.setVirtualType(cpSceneElementBO.getVirtualType());
     }
 
-    public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups) {
+    public ListObjServiceResult<CollectionHostEventBO> getModifyData(ElementMonitorRequest pageRequest, List<String> ruleGroups,
+                                                                     String path) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
@@ -306,6 +307,7 @@ public class SceneElementMonitorService {
         hostEventQueryParams.setEndTime(TimeUtils.localDateTimeToString(pageRequest.getEndTime()));
         hostEventQueryParams.setLevels(pageRequest.getLevels());
         hostEventQueryParams.setRuleGroups(ruleGroups);
+        hostEventQueryParams.setPath(path);
         return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
     }
 
@@ -318,7 +320,7 @@ public class SceneElementMonitorService {
         processRequest(pageRequest, sceneHandler);
         startTime = pageRequest.getStartTime();
         endTime = pageRequest.getEndTime();
-        var result = getModifyData(pageRequest, ruleGroups);
+        var result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollectionUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
@@ -409,9 +411,19 @@ public class SceneElementMonitorService {
         result.forEach(r -> {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
+            if ("low".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(0);
+            } else if ("medium".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(1);
+            } else if ("high".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(2);
+            } else if ("critical".equals(pieChartInfo.getSeverity())) {
+                pieChartInfo.setSeverityLevel(3);
+            }
             pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
         });
+        pieChartInfos.sort(Comparator.comparing(ElementVulnerabilityPieChartInfo::getSeverityLevel));
         return pieChartInfos;
     }
 

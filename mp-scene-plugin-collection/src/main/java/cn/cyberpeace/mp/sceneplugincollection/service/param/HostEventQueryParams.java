@@ -42,4 +42,6 @@ public class HostEventQueryParams extends QueryParams {
     @ApiModelProperty(value = "rule group集合")
     private List<String> ruleGroups;
 
+    @ApiModelProperty(value = "文件或注册表路径 模糊查询")
+    private String path;
 }

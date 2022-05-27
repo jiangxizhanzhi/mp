@@ -76,4 +76,10 @@ public class WazuhEventRequest {
      */
     @ApiModelProperty(value = "wazuh events规则id集合")
     private List<String> ruleIds;
+
+    /**
+     * 指定path 模糊查询
+     */
+    @ApiModelProperty(value = "文件或注册表路径")
+    private String path;
 }
