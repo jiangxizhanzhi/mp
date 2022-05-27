@@ -106,8 +106,11 @@ public class SceneElementMonitorService {
     public ListObjServiceResult<ConnectionState> pageNetworkConnections(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
-        if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
-            return new ListObjServiceResult(new ListObjResult()).asResult();
+
+        if (Objects.isNull(pageRequest.getFetchIfSceneInstanceShutdown()) || !pageRequest.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
         }
 
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
