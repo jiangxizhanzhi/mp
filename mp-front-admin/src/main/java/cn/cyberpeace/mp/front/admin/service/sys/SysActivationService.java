@@ -34,6 +34,7 @@ import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,12 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
+        SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
+        if (Objects.isNull(unusedActivCtlModel)) {
+            log.error("unused activctl not existed!");
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+        }
+
         String localSysUUID = querySysUUID();
         if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
             log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
@@ -170,7 +177,13 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        SysActivCtlModel sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
+        status();
+        SysActivCtlModel sysActivCtlModel = null;
+        if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(0, ACTIVATION_CONTENT.getIsActived())) {
+            sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
+        } else {
+            sysActivCtlModel = sysCtlService.getValidCtlModel();
+        }
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
@@ -182,6 +195,8 @@ public class SysActivationService {
             }
         }
 
+        // todo
+        //uuid = "aaaa-bbbb-cccc-dddd";
         uuid = uuid + "-" + suffix;
         return uuid;
     }
@@ -232,6 +247,10 @@ public class SysActivationService {
             boolean isExpired = !LocalDate.now().isBefore(expireDate);
 
             SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
+
+            if (Objects.isNull(sysActivCtlModel)) {
+                return;
+            }
 
             if (!isExpired) {
                 // 过期日期未到，继续判断运行时长
@@ -301,6 +320,9 @@ public class SysActivationService {
             log.error("activation file not exist!");
             return null;
         }
+
+        //// todo
+        //return mockActivationContent();
 
         List<String> lines = FileUtil.readUtf8Lines(activationFile);
         if (CollectionUtil.isEmpty(lines)) {
@@ -426,7 +448,91 @@ public class SysActivationService {
         updateSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
         updateSysActivCtlModel.setSysTimestamp(System.currentTimeMillis());
         updateSysActivCtlModel.setActiveCount(1);
+        updateSysActivCtlModel.setStatus(1);
         sysActivCtlService.update(updateSysActivCtlModel);
+    }
+
+
+
+
+    private ActivationResponse mockActivationContent() {
+        ActivationResponse content = new ActivationResponse();
+        content.setExpiredDate("2022-05-26");
+        content.setIsActived(1);
+        content.setEdition(1);
+
+
+        List<ActivationItem> list = new ArrayList<>();
+        ActivationItem item1 = new ActivationItem();
+        item1.setKey("LCS-FUNC-CR-SHIXUN");
+        item1.setValue("1");
+        item1.setType(1);
+        list.add(item1);
+
+        ActivationItem item2 = new ActivationItem();
+        item2.setKey("LCS-FUNC-CR-JINGSAI");
+        item2.setValue("1");
+        item2.setType(1);
+        list.add(item2);
+
+        ActivationItem item3 = new ActivationItem();
+        item3.setKey("LCS-FUNC-CR-HUOTILOUDONG");
+        item3.setValue("1");
+        item3.setType(1);
+        list.add(item3);
+
+        ActivationItem item4 = new ActivationItem();
+        item4.setKey("LCS-FUNC-CR-ZHISHIKU");
+        item4.setValue("1");
+        item4.setType(1);
+        list.add(item4);
+
+        ActivationItem item5 = new ActivationItem();
+        item5.setKey("LCS-FUNC-CR-ZONGHEXUNLIAN");
+        item5.setValue("1");
+        item5.setType(1);
+        list.add(item5);
+
+        ActivationItem item6 = new ActivationItem();
+        item6.setKey("LCS-FUNC-CR-HONGLANDUIKANG");
+        item6.setValue("1");
+        item6.setType(1);
+        list.add(item6);
+
+        ActivationItem item7 = new ActivationItem();
+        item7.setKey("LCS-FUNC-CR-SHENTOUSAI");
+        item7.setValue("1");
+        item7.setType(1);
+        list.add(item7);
+
+        ActivationItem item8 = new ActivationItem();
+        item8.setKey("LCS-FUNC-CR-YUNWEISAI");
+        item8.setValue("1");
+        item8.setType(1);
+        list.add(item8);
+
+        ActivationItem item9 = new ActivationItem();
+        item9.setKey("LCS-FUNC-CR-CEPING");
+        item9.setValue("1");
+        item9.setType(1);
+        list.add(item9);
+
+        ActivationItem item10 = new ActivationItem();
+        item10.setKey("LCS-RES-CR-ACTIVENODES");
+        item10.setValue("1000");
+        item10.setType(2);
+        list.add(item10);
+
+        ActivationItem item11 = new ActivationItem();
+        item11.setKey("LCS-RES-CR-EDITNODES");
+        item11.setValue("100");
+        item11.setType(2);
+        list.add(item11);
+
+        content.setItems(list);
+
+        return content;
+
     }
 
 
