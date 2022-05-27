@@ -72,7 +72,7 @@ public class CsceneFileController {
     @ApiOperation("上传节点秘钥")
     @PostMapping("/private_key_upload")
     public ServiceResult<SceneFileUploadResponse> privateKeyUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
-        String[] legalSuffix = new String[]{ "pub" };
+        String[] legalSuffix = new String[]{ "pub", "txt" };
         var fileName = file.getOriginalFilename();
         var inputStream = file.getInputStream();
         var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
