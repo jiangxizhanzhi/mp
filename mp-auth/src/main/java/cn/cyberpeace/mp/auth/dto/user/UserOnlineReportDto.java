@@ -30,7 +30,7 @@ public class UserOnlineReportDto {
     private String subject;
 
     @ApiModelProperty(value = "累计在线时长（小时）")
-    private Double totalOnlineHours;
+    private String totalOnlineHours;
 
     @ApiModelProperty(value = "是否在线 0:不在线 1:在线")
     private Integer isOnline;
