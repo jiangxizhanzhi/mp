@@ -5,7 +5,7 @@ ip:
   moloch: ${MOLOCH_IP:10.100.0.101}        # moloch的IP地址
   wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
   trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
-  rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
+  rabbitmq: ${RABBITMQ_IP:10.100.1.34}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
 server:
   servlet:
@@ -124,6 +124,7 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
+    server-url: http://${AUTH_SERVER_URL:10.2.3.4}:${AUTH_SERVER_PORT:11002}
     activation:
       enable: true
       licenseDir: /home/mp/config/license
