@@ -41,7 +41,7 @@ public class SysCtlService {
 //        }
 
         // update system timestamp
-        SysActivCtlModel oldActivCtlModel = generateOrGetDefaultActivCtlModel();
+        SysActivCtlModel oldActivCtlModel = getValidCtlModel();
         // 判断系统是否已经注册，未激活不统计运行时长
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
             // not null, to update  example: oldTs 1644778431000
@@ -84,21 +84,25 @@ public class SysCtlService {
     }
 
 
-    public SysActivCtlModel getDefaultSysActivCtl() {
-        return generateOrGetDefaultActivCtlModel();
-    }
+    //public SysActivCtlModel getDefaultSysActivCtl() {
+    //    return generateOrGetUnusedActivCtlModel();
+    //}
 
     public boolean isSystemTimestampRollback() {
         return isSystemTimestampRollback;
     }
 
+    public SysActivCtlModel getUnusedActivCtlModel() {
+        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
+        return sysActivCtlModel;
+    }
 
     /**
      * generate a default with current timestamp as system_ts and activ_ts;
      * @return
      */
-    synchronized public SysActivCtlModel generateOrGetDefaultActivCtlModel() {
-        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
+    synchronized public SysActivCtlModel generateOrGetUnusedActivCtlModel() {
+        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectUnused();
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             // 只有在一个新的license第一次激活的时候才会写入系统时间戳
@@ -106,6 +110,7 @@ public class SysCtlService {
 //            sysActivCtlModel.setSysTimestamp(currTs);
             String suffix = RandomUtil.randomString(6);
             sysActivCtlModel.setSuffix(suffix);
+            sysActivCtlModel.setStatus(2);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
             if (Objects.nonNull(objResult.getSource())) {
@@ -119,5 +124,32 @@ public class SysCtlService {
         return sysActivCtlModel;
     }
 
+
+    /**
+     * generate a default with current timestamp as system_ts and activ_ts;
+     * @return
+     */
+    public SysActivCtlModel getValidCtlModel() {
+        SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
+//        if (Objects.isNull(sysActivCtlModel)) {
+//            sysActivCtlModel = new SysActivCtlModel();
+//            // 只有在一个新的license第一次激活的时候才会写入系统时间戳
+////            Long currTs = System.currentTimeMillis();
+////            sysActivCtlModel.setSysTimestamp(currTs);
+//            String suffix = RandomUtil.randomString(6);
+//            sysActivCtlModel.setSuffix(suffix);
+//            sysActivCtlModel.setStatus(2);
+//
+//            ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
+//            if (Objects.nonNull(objResult.getSource())) {
+//                log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
+//                sysActivCtlModel = objResult.getSource().getObj();
+//            }
+//        } else {
+//            log.info("Default activCtlModel has already generated! {}", sysActivCtlModel);
+//        }
+
+        return sysActivCtlModel;
+    }
 
 }

@@ -62,7 +62,7 @@ public class SysActivCtlModel extends BaseModel {
     @DefaultLong(0)
     private Long sysRunSeconds;
 
-    @ApiModelProperty(value = "状态 1:有效 0:无效")
+    @ApiModelProperty(value = "状态 2:生成的随机码，未使用，1:有效，0:无效")
     @DefaultInt(1)
     private Integer status;
 

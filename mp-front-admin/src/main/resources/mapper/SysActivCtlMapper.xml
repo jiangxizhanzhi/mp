@@ -10,6 +10,10 @@
         select * from mp_front_admin_activ_ctl where status = 1
     </select>
 
+    <select id="selectUnused" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
+        select * from mp_front_admin_activ_ctl where status = 2
+    </select>
+
     <update id="invalidOtherExceptOne">
         update mp_front_admin_activ_ctl set status = 0 where id != #{exceptedId}
     </update>

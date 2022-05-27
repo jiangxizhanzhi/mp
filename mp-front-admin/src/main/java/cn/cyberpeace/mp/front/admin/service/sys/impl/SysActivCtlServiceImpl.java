@@ -27,6 +27,11 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
     }
 
     @Override
+    public SysActivCtlModel selectUnused() {
+        return getModelMapper().selectUnused();
+    }
+
+    @Override
     public SysActivCtlModel selectValid() {
         return getModelMapper().selectValid();
     }

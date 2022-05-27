@@ -107,7 +107,7 @@ public class SysActivationService {
             log.info("encrypted file generated success!");
 
             // 更新数据库激活限制配置
-            processActivCtl(activationRequest);
+            processActivCtlAfterActivationSuccess(activationRequest);
 
             ACTIVATION_CONTENT = status();
             log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
@@ -170,7 +170,7 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        SysActivCtlModel sysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
+        SysActivCtlModel sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
@@ -231,7 +231,7 @@ public class SysActivationService {
             // 过期日期到期
             boolean isExpired = !LocalDate.now().isBefore(expireDate);
 
-            SysActivCtlModel sysActivCtlModel = sysCtlService.generateOrGetDefaultActivCtlModel();
+            SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
 
             if (!isExpired) {
                 // 过期日期未到，继续判断运行时长
@@ -339,9 +339,9 @@ public class SysActivationService {
      * 激活成功，变更数据库激活限制相关配置信息
      * @param activationRequest
      */
-    private void processActivCtl(ActivationRequest activationRequest) {
+    private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
         log.info("update activ ctl config info");
-        SysActivCtlModel oldSysActivCtlModel = sysCtlService.getDefaultSysActivCtl();
+        SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
@@ -349,6 +349,7 @@ public class SysActivationService {
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
+        // todo 这条分支不会再进入
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
             // 不是首次激活
             String oldLicenseCode = EncryptUtils.desDecrypt(oldSysActivCtlModel.getLicenseCode());
