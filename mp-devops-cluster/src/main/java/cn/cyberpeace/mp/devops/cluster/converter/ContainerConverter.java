@@ -51,7 +51,7 @@ public class ContainerConverter implements BaseConverter {
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageModel page = containerService.page(getParams);
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
+        return page.getTotal();
     }
 
     /**

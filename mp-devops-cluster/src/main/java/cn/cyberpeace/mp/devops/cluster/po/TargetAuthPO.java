@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.po;
 
 import cn.cyberpeace.mp.auth.base.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table("mp_devops_target_auth")
-public class TargetAuthModel extends BasePermissionModel {
+public class TargetAuthPO extends BasePermissionModel {
 
 }
