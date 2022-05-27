@@ -8,11 +8,9 @@ import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * 网络管理
@@ -47,6 +45,6 @@ public class NpcConverter implements BaseConverter{
     public Integer getTotalNpcs(NpcPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageModel<NpcModel> page = npcService.page(getParams);
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
+        return page.getTotal();
     }
 }

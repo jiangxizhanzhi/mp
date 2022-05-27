@@ -8,12 +8,10 @@ import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +48,6 @@ public class RouterConverter implements BaseConverter{
     public Integer getTotalRouters(RouterPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageModel page = routerService.page(getParams);
-        return Objects.isNull(page) || Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal();
+        return page.getTotal();
     }
 }
