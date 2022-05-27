@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -83,10 +84,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Autowired
     private FlowCollectionRelServiceImpl flowCollectionRelService;
 
+    @Autowired
+    public BaseAppConfig baseAppConfig;
+
     /**
      * 预制流量文件目录
      */
     private static final String PRE_PATH = "/root/.mp/resources/flows";
+
 
     /**
      * 补充list查询条件
@@ -277,7 +282,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(String id) {
         BackgroundFlowResponse response;
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -300,7 +305,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<AttackFlowResponse> queryAttackDetail(String id) {
         AttackFlowResponse response;
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
 
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
@@ -364,7 +369,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 保存流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
 
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -454,7 +459,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
         response.setCode(addRequest.getCode());
@@ -508,7 +513,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         // 更新流量信息
         ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
 
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
         return ServiceResult.success(response);
@@ -610,7 +615,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowScriptParamService.bulkCreate(scriptParamModels);
         }
 
-        String prefixUrl = FsCommon.genInnerHttpUrl("");
+        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
         response.setCode(modifyRequest.getCode());

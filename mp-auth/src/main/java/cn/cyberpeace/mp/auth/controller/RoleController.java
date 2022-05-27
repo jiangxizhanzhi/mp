@@ -65,6 +65,17 @@ public class RoleController {
         return roleService.delete(id);
     }
 
+    /**
+     * 批量删除
+     * @param ids 数据id集
+     * @return 成功数量
+     */
+    @ApiOperation("批量删除角色")
+    @DeleteMapping("/bulk_delete")
+    public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
+        return roleService.bulkDelete(ids).asResult();
+    }
+
     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
     public ObjServiceResult get(@PathVariable String id) {
