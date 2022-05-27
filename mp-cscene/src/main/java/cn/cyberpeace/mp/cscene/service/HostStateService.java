@@ -299,8 +299,10 @@ public class HostStateService {
     public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
-        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
-            return new ListObjServiceResult(new ListObjResult()).asResult();
+        if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
@@ -310,8 +312,10 @@ public class HostStateService {
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
-        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
-            return new ListObjServiceResult(new ListObjResult()).asResult();
+        if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
@@ -341,8 +345,10 @@ public class HostStateService {
     public ListObjServiceResult<ElementNetiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
-        if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
-            return new ListObjServiceResult(new ListObjResult()).asResult();
+        if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
         }
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));

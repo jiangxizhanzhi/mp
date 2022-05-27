@@ -58,8 +58,10 @@ public class LogFileService {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.SCENE_ID)));
         }
 
-        if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
-            return new ListObjServiceResult(new ListObjResult()).asResult();
+        if (Objects.isNull(pageRequest.getFetchIfSceneInstanceShutdown()) || !pageRequest.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId())) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
         }
 
         List<String> subElementIds = pageRequest.getElementIds().subList(0, 1);

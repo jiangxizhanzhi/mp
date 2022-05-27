@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +55,6 @@ public class VmConverter implements BaseConverter{
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
         CloudPlatformPageModel<InstanceModel> page = vmService.page(getParams);
-        return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
+        return page.getTotal() ;
     }
 }
