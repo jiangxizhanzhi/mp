@@ -172,7 +172,7 @@ public class DataCollectionService {
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_VULNERABILITY_INFO)
-    public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest) {
+    public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -185,8 +185,13 @@ public class DataCollectionService {
 
         //构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        if (desc) {
+            // 按时间降序
+            sourceBuilder.sort("timestamp", SortOrder.DESC);
+        } else {
+            // 按时间顺序
+            sourceBuilder.sort("timestamp", SortOrder.ASC);
+        }
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
