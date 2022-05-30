@@ -415,7 +415,7 @@ public class SceneElementMonitorService {
         }
         var firstTime = first.getObjs().get(0).getTime();
         var lastTime = last.getObjs().get(0).getTime();
-        if (firstTime.plusHours(5).isBefore(lastTime)) {
+        if (firstTime.plusHours(3).isBefore(lastTime)) {
             pageRequest.setStartTime(lastTime.plusHours(-3));
         } else if (firstTime.plusSeconds(1).isAfter(lastTime)) {
             pageRequest.setStartTime(firstTime.plusHours(-3));
