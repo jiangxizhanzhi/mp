@@ -18,7 +18,7 @@ import java.util.Map;
 @Mapper
 @Repository
 @ModelClass(TargetPO.class)
-public interface ImageMapper extends BaseModelMapper<TargetPO> {
+public interface DeviceTargetMapper extends BaseModelMapper<TargetPO> {
 
     /**
      * 分页查询

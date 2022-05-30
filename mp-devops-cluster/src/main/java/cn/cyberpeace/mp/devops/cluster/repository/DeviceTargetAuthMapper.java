@@ -16,7 +16,7 @@ import java.util.List;
 @Repository
 @PermissionModelClass(permissionClass = TargetAuthPO.class, targetClass = TargetPO.class)
 @ModelClass(TargetAuthPO.class)
-public interface ImageAuthMapper extends BasePermissionMapper {
+public interface DeviceTargetAuthMapper extends BasePermissionMapper {
 
     /**
      * 分组查询镜像授权用户数

@@ -14,7 +14,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TargetConverter{
 
-    private final ImageMapper imageMapper;
+    private final DeviceTargetMapper deviceTargetMapper;
 
     private final DeviceService deviceService;
 
@@ -86,7 +86,7 @@ public class TargetConverter{
             targetPageModel.setTargetPOS(Lists.newArrayList());
             return targetPageModel;
         }
-        List<TargetPO> targetPOS = imageMapper.page(dto);
+        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
         targetPageModel.setTargetPOS(targetPOS);
         return targetPageModel;
     }
@@ -134,7 +134,7 @@ public class TargetConverter{
      */
     public void validTargetCanDelete(List<String> uuids){
 
-        List<TargetPO> targetPOS = imageMapper.findByUuids(uuids);
+        List<TargetPO> targetPOS = deviceTargetMapper.findByUuids(uuids);
         String[] imageNames = targetPOS.stream().map(TargetPO::getName).toArray(String[]::new);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
@@ -162,7 +162,7 @@ public class TargetConverter{
             return Lists.newArrayList();
         }
         List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
-        List<TargetPO> targetPOS = imageMapper.findByIds(ids);
+        List<TargetPO> targetPOS = deviceTargetMapper.findByIds(ids);
         List<Integer> diffList;
         if (CollectionUtils.isEmpty(targetPOS)){
             diffList = deviceIds;
