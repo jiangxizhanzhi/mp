@@ -77,6 +77,7 @@ public class CollectionHostEventBO {
     @ApiModelProperty("变更后m5值")
     private String md5After;
 
-
+    @ApiModelProperty("滚动分页的scroll_id")
+    private String scrollId;
 
 }

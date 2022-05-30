@@ -34,16 +34,19 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.script.Script;
+import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
@@ -148,6 +151,11 @@ public class DataCollectionService {
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+
+        if (wazuhEventRequest.isScroll()) {
+            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+            searchRequest.scroll(scroll);
+        }
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         //处理分页
@@ -158,11 +166,42 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
             List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+
+            String responseScrollId = response.getScrollId();
+            if (wazuhEventRequest.isScroll()) {
+                fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
+            }
+
             return new ListObjResult<>(fileEventModelList, total);
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
+    }
+
+
+    /**
+     * 滚动分页查询文件事件
+     *
+     * @return ListObjResult<FileEventModel>
+     */
+    public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
+        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+        SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+        scrollRequest.scroll(scroll);
+        try {
+            SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
+            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
+            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
+
+            String responseScrollId = response.getScrollId();
+            fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
+            return new ListObjResult(fileEventModelList, Long.valueOf(response.getHits().getTotalHits().value).intValue());
+        } catch (IOException e) {
+            log.error("es queryFileEvents error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+
     }
 
     /**
