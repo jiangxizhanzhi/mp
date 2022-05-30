@@ -14,8 +14,9 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,11 +36,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TargetConverter{
 
-    private final ImageMapper imageMapper;
+    private final DeviceTargetMapper deviceTargetMapper;
 
     private final DeviceService deviceService;
 
     private final CsceneSpecialService csceneSpecialService;
+
+    private final DevopsTargetService devopsTargetService;
 
     /**
      * 分页查询
@@ -51,10 +54,15 @@ public class TargetConverter{
         dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
+        dto.setThirdCategory(request.getThirdCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
         dto.setSearchPublicEnum(1);
+        dto.setRole(request.getRole());
         dto.setIsHide(request.getIsHide());
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
             dto.setOffset((request.getPage() - 1) * request.getPerPage());
             dto.setLimit(request.getPerPage());
@@ -68,14 +76,17 @@ public class TargetConverter{
         if (request.getLikeName() != null) {
             dto.setLikeName(request.getLikeName());
         }
-        Integer total = imageMapper.totalCount(dto);
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
+        Integer total = devopsTargetService.totalCount(dto);
         TargetPageModel targetPageModel = new TargetPageModel();
         targetPageModel.setTotal(total);
         if (total == 0){
             targetPageModel.setTargetPOS(Lists.newArrayList());
             return targetPageModel;
         }
-        List<TargetPO> targetPOS = imageMapper.page(dto);
+        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
         targetPageModel.setTargetPOS(targetPOS);
         return targetPageModel;
     }
@@ -123,7 +134,7 @@ public class TargetConverter{
      */
     public void validTargetCanDelete(List<String> uuids){
 
-        List<TargetPO> targetPOS = imageMapper.findByUuids(uuids);
+        List<TargetPO> targetPOS = deviceTargetMapper.findByUuids(uuids);
         String[] imageNames = targetPOS.stream().map(TargetPO::getName).toArray(String[]::new);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
@@ -151,7 +162,7 @@ public class TargetConverter{
             return Lists.newArrayList();
         }
         List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
-        List<TargetPO> targetPOS = imageMapper.findByIds(ids);
+        List<TargetPO> targetPOS = deviceTargetMapper.findByIds(ids);
         List<Integer> diffList;
         if (CollectionUtils.isEmpty(targetPOS)){
             diffList = deviceIds;

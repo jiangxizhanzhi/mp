@@ -217,9 +217,10 @@ public class SituationAwareTestController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         wazuhRequest.setStartTime(LocalDateTime.parse("2022-04-14 16:00:00", formatter));
         wazuhRequest.setEndTime(LocalDateTime.now());
-        wazuhRequest.setPageSize(10000);
+        wazuhRequest.setPageSize(1);
         wazuhRequest.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
-        dataCollectionService.queryVulnerabilityInfo(wazuhRequest);
+        dataCollectionService.queryVulnerabilityInfo(wazuhRequest, true);
+        dataCollectionService.queryVulnerabilityInfo(wazuhRequest, false);
         return ServiceResult.successful();
     }
 

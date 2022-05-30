@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,14 +29,14 @@ public class TargetAggregationService {
 
     private TargetConverter targetConverter;
 
-    private ImageMapper imageMapper;
+    private DeviceTargetMapper deviceTargetMapper;
 
     @Autowired
     public TargetAggregationService(CsceneSpecialService csceneSpecialService, TargetConverter targetConverter,
-                                    ImageMapper imageMapper) {
+                                    DeviceTargetMapper deviceTargetMapper) {
         this.csceneSpecialService = csceneSpecialService;
         this.targetConverter = targetConverter;
-        this.imageMapper = imageMapper;
+        this.deviceTargetMapper = deviceTargetMapper;
     }
 
     /**
@@ -89,6 +89,6 @@ public class TargetAggregationService {
         if (CollectionUtils.isEmpty(modelList)){
             return;
         }
-        imageMapper.updateBatch(modelList);
+        deviceTargetMapper.updateBatch(modelList);
     }
 }
