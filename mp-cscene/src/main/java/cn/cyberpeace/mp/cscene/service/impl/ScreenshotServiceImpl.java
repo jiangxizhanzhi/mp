@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -28,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -51,6 +53,9 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
 
     @Autowired
     private AsyncScreenshotModelService asyncScreenshotModelService;
+
+    @Autowired
+    private BaseAppConfig baseAppConfig;
 
     @Override
     public void loadListFilterCondition(HumanCondition humanCondition, ScreenshotQueryParams queryParams) {
@@ -105,7 +110,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 新增截屏文件
         this.create(model);
         // 返回前端地址加上 /fdfs 前缀
-        model.setFile("/fdfs/" + filePath);
+        model.setFile(baseAppConfig.getFdfsOuterHttpServer() + File.separator + filePath);
 
         return ServiceResult.success(model);
     }

@@ -1,12 +1,17 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,6 +42,17 @@ public class OperateUserPermissionService extends OperatePermissionService {
         if (CollectionUtil.isEmpty(targetUserIds)) {
             return;
         }
+
+        // 自己可以查自己
+        // 去重
+        List<String> distinctUIds = targetUserIds.stream().distinct().collect(Collectors.toList());
+        if (distinctUIds.size() == 1) {
+            UserModel currentLoginUser = UserUtils.getLoginUser();
+            if (Objects.equals(currentLoginUser.getId(), targetUserIds.get(0))) {
+                return;
+            }
+        }
+
         List<RoleModel> roleModels = userRoleService.listByUserIds(targetUserIds);
         List<String> targetRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
         super.checkByTargetRoleIds(targetRoleIds);

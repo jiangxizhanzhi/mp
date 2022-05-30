@@ -86,12 +86,11 @@ class ImageInfoConverter implements IConverter {
                 if (cloudPluginElement.getVirtualType() == null) {
                     cloudPluginElement.setVirtualType(imageInfo.getVirtualType());
                 }
+                if (imageInfo.getRole() != null) {
+                    cloudPluginElement.setRole(imageInfo.getRole());
+                }
                 if (cloudPluginElement.getRole() == null) {
-                    if (imageInfo.getRole() != null) {
-                        cloudPluginElement.setRole(imageInfo.getRole());
-                    } else {
-                        cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
-                    }
+                    cloudPluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
                 }
                 if (cloudPluginElement.getImageType() == null && imageInfo.getImageType() != null) {
                     cloudPluginElement.setImageType(imageInfo.getImageType());

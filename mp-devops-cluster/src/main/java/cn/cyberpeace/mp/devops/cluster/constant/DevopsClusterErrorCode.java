@@ -14,7 +14,8 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     IMAGE_REFERENCED_SCENE("MP-110604", "image_referenced_scene"),
     IMAGE_USED_SCENE("MP-110605", "image_used_scene"),
     REQUEST_CLOUD_INTERFACE_ERROR("MP-110606", "request_cloud_interface_error"),
-    CUSTOM_UPLOAD_TYPE_ERROR("MP-110607", "custom_upload_type_error");
+    CUSTOM_UPLOAD_TYPE_ERROR("MP-110607", "custom_upload_type_error"),
+    SCREEN_RECORD_ERROR("MP-110606", "screen_record_error");
 
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);
