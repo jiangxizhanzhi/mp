@@ -46,6 +46,9 @@ public class LogFileService {
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
 
+    @Autowired
+    private SceneMonitorService sceneMonitorService;
+
     /**
      * 分页查询日志文件列表
      * （假分页）
@@ -64,35 +67,50 @@ public class LogFileService {
             }
         }
 
-        List<String> subElementIds = pageRequest.getElementIds().subList(0, 1);
-        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), subElementIds);
-
-        if (CollectionUtil.isEmpty(agentNames)) {
-            return ResultUtils.emptyListObjServiceResult();
+        List<String> elementIds = pageRequest.getElementIds();
+        if (CollectionUtil.isEmpty(elementIds)) {
+            List<ElementMonitorBasicInfo> elements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
+            elementIds = elements.stream().map(ElementMonitorBasicInfo::getId).collect(Collectors.toList());
         }
 
-        String agentName = agentNames.get(0);
-        String elementId = subElementIds.get(0);
+        List<LogFileVO> allLogFileVOs = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(elementIds)) {
+            for (String eid : elementIds) {
+                List<WazuhControl.QueryLogCollectFileData> fileList = new ArrayList<>();;
+                List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), Arrays.asList(eid));
 
-        String osType = getOsType(pageRequest.getSceneId(), elementId);
+                if (CollectionUtil.isEmpty(agentNames)) {
+                    fileList = Collections.emptyList();
+                }
 
-        List<WazuhControl.QueryLogCollectFileData> allLogFiles = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
-        if (CollectionUtil.isEmpty(allLogFiles)) {
+                String agentName = agentNames.get(0);
+
+                String osType = getOsType(pageRequest.getSceneId(), eid);
+
+                fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
+
+                if (CollectionUtil.isNotEmpty(fileList)) {
+                    List<LogFileVO> logFileVOS = convertLogFiles(fileList, eid, agentName, osType);
+                    allLogFileVOs.addAll(logFileVOS);
+                }
+            }
+        }
+
+
+        if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
         }
 
         // 假分页处理
         int skip = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
-        List<WazuhControl.QueryLogCollectFileData> pagedLogFiles = allLogFiles.stream()
+        List<LogFileVO> pagedLogFileVOs = allLogFileVOs.stream()
                 .skip(skip)
                 .limit(pageRequest.getPageSize())
                 .collect(Collectors.toList());
 
-        List<LogFileVO> logFileVOS = convertLogFiles(pagedLogFiles, elementId, agentName, osType);
-
         PageInfo<LogFileVO> pageInfo = new PageInfo();
-        pageInfo.setList(logFileVOS);
-        pageInfo.setTotal(allLogFiles.size());
+        pageInfo.setList(pagedLogFileVOs);
+        pageInfo.setTotal(allLogFileVOs.size());
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
