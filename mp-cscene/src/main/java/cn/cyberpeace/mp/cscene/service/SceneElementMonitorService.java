@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -13,6 +14,8 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -74,6 +77,9 @@ public class SceneElementMonitorService {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private SceneMapper sceneMapper;
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -363,10 +369,16 @@ public class SceneElementMonitorService {
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        processRequest(pageRequest, sceneHandler);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+        }
         WazuhEventRequest request = new WazuhEventRequest();
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
@@ -374,7 +386,7 @@ public class SceneElementMonitorService {
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
         request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
-        var result = dataCollectionService.queryVulnerabilityInfo(request);
+        var result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         result.getObjs().forEach(r -> {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
@@ -388,6 +400,28 @@ public class SceneElementMonitorService {
         return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
     }
 
+    private void processTimeRangeForVulnerabilityInfo(ElementMonitorRequest pageRequest, List<String> agentNames) {
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(pageRequest.getStartTime());
+        request.setEndTime(pageRequest.getEndTime());
+        request.setPageNum(1);
+        request.setPageSize(1);
+        request.setAgentNames(agentNames);
+        request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        var first = dataCollectionService.queryVulnerabilityInfo(request, false);
+        var last = dataCollectionService.queryVulnerabilityInfo(request, true);
+        if (CollectionUtil.isEmpty(first.getObjs()) || CollectionUtil.isEmpty(last.getObjs())) {
+            return;
+        }
+        var firstTime = first.getObjs().get(0).getTime();
+        var lastTime = last.getObjs().get(0).getTime();
+        if (firstTime.plusHours(5).isBefore(lastTime)) {
+            pageRequest.setStartTime(lastTime.plusHours(-3));
+        } else if (firstTime.plusSeconds(1).isAfter(lastTime)) {
+            pageRequest.setStartTime(firstTime.plusHours(-3));
+        }
+    }
+
     public List<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChartInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
@@ -395,9 +429,15 @@ public class SceneElementMonitorService {
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        processRequest(pageRequest, sceneHandler);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+        }
         WazuhEventRequest request = new WazuhEventRequest();
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
@@ -440,9 +480,15 @@ public class SceneElementMonitorService {
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
-        processRequest(pageRequest, sceneHandler);
+        HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getId, sceneId);
+        var sceneModel = sceneMapper.list(humanCondition);
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
+            processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
+        }
         WazuhEventRequest request = new WazuhEventRequest();
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
@@ -466,6 +512,21 @@ public class SceneElementMonitorService {
         }
         if (pageRequest.getEndTime() == null) {
             pageRequest.setEndTime(LocalDateTime.now());
+        }
+    }
+
+    private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel) {
+        if (pageRequest.getStartTime() == null) {
+            //场景存在时间不足6小时，取全部漏洞数据
+            if (sceneModel.getUpdateTime().plusHours(-6).isBefore(sceneModel.getCreateTime())) {
+                pageRequest.setStartTime(sceneModel.getCreateTime());
+            } else {
+                //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
+                pageRequest.setStartTime(sceneModel.getUpdateTime().plusHours(-6));
+            }
+        }
+        if (pageRequest.getEndTime() == null) {
+            pageRequest.setEndTime(sceneModel.getUpdateTime());
         }
     }
 
