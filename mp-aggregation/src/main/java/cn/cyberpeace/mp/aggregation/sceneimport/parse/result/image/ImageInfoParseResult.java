@@ -86,6 +86,5 @@ public class ImageInfoParseResult {
         ROLE_MAP.put("网关节点-防火墙", BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL);
         ROLE_MAP.put("终端节点", BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
         ROLE_MAP.put("外部网络", BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
-        ROLE_MAP.put("网关节点", BaseCloudPluginSceneElementModel.Role.VIRTUAL_GATEWAY);
     }
 }
