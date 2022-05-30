@@ -22,8 +22,8 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.po.TargetAuthPO;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
@@ -43,9 +43,9 @@ public class ImagesConverter implements BaseConverter{
 
     private final ImagesService imagesService;
 
-    private final ImageMapper imageMapper;
+    private final DeviceTargetMapper deviceTargetMapper;
 
-    private final ImageAuthMapper imageAuthMapper;
+    private final DeviceTargetAuthMapper deviceTargetAuthMapper;
 
     private final DeviceService deviceService;
 
@@ -77,7 +77,7 @@ public class ImagesConverter implements BaseConverter{
             imageConvertPageModel.setModelList(Lists.newArrayList());
             return imageConvertPageModel;
         }
-        List<TargetPO> targetPOS = imageMapper.page(dto);
+        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
 
         List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -95,7 +95,7 @@ public class ImagesConverter implements BaseConverter{
 
         List<String> targetUuids = targetPOS.stream().map(TargetPO::getUuid).collect(Collectors.toList());
 
-        List<ImageAuthTotalCount> imageAuthTotalCounts = imageAuthMapper.totalCount(targetUuids);
+        List<ImageAuthTotalCount> imageAuthTotalCounts = deviceTargetAuthMapper.totalCount(targetUuids);
 
         Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
 
@@ -149,7 +149,7 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public List<ImageTargetConvertModel> findByUuids(List<String> uuids) {
-        List<TargetPO> targetPOList = imageMapper.findByUuids(uuids);
+        List<TargetPO> targetPOList = deviceTargetMapper.findByUuids(uuids);
         return targetPOList.stream().map(v -> {
             ImageTargetConvertModel model = new ImageTargetConvertModel();
             model.setUuid(v.getUuid());
@@ -207,8 +207,8 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
-            imageMapper.delete(dto);
-            imageAuthMapper.deleteByTargets(request.getImageIds());
+            deviceTargetMapper.delete(dto);
+            deviceTargetAuthMapper.deleteByTargets(request.getImageIds());
         }
         return result;
     }
@@ -222,14 +222,14 @@ public class ImagesConverter implements BaseConverter{
         //镜像ID
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
-        imageAuthMapper.deleteByTargets(imageIds);
+        deviceTargetAuthMapper.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
             TargetPO targetPO = new TargetPO();
             targetPO.setIsPublic(isAllPublic);
             targetPO.setUuid(imageId);
-            imageMapper.updateById(targetPO);
+            deviceTargetMapper.updateById(targetPO);
         });
         //再新增权限数据
         List<String> userIds = request.getUserIds();
@@ -247,7 +247,7 @@ public class ImagesConverter implements BaseConverter{
                     targetAuthPO.setTarget(imageId);
                     return targetAuthPO;
                 }).collect(Collectors.toList());
-                imageAuthMapper.bulkCreate(authModelList);
+                deviceTargetAuthMapper.bulkCreate(authModelList);
             });
         }
 
@@ -259,7 +259,7 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public List<UserDto> findUsersByUuid(String uuid){
-        List<TargetAuthPO> targetAuthPOS = imageAuthMapper.findByTarget(uuid);
+        List<TargetAuthPO> targetAuthPOS = deviceTargetAuthMapper.findByTarget(uuid);
         if (CollectionUtils.isEmpty(targetAuthPOS)){
             return Lists.newArrayList();
         }

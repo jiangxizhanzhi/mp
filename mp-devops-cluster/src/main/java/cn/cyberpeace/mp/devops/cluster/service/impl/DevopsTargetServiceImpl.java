@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,22 +31,22 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
 
     private static final String CONTAINER = "container";
 
-    private final ImageMapper imageMapper;
+    private final DeviceTargetMapper deviceTargetMapper;
 
     @Override
     public Integer totalCount(ImagePageDTO dto) {
-        return imageMapper.totalCount(dto);
+        return deviceTargetMapper.totalCount(dto);
     }
 
     @Transactional
     @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetPO oldTargetPO = imageMapper.findByUuid(device.getUuid());
+            TargetPO oldTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
             if (Objects.nonNull(oldTargetPO)) {
                 TargetPO targetPO = convertDevice(device);
                 targetPO.setIsPublic(oldTargetPO.getIsPublic());
-                return imageMapper.updateById(targetPO);
+                return deviceTargetMapper.updateById(targetPO);
             }
         }
         return 0;
@@ -60,28 +60,28 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         }
         List<TargetPO> targetPOS = deviceList.stream().map(this::convertToTargetModel)
                 .collect(Collectors.toList());
-        return imageMapper.batchInsert(targetPOS);
+        return deviceTargetMapper.batchInsert(targetPOS);
     }
 
     @Override
     public Map<String,Object> countTarget() {
-        return imageMapper.countTarget();
+        return deviceTargetMapper.countTarget();
     }
 
     @Override
     public Map<String,Object> countVmTarget() {
-        return imageMapper.countVmTarget();
+        return deviceTargetMapper.countVmTarget();
     }
 
     @Override
     public Map<String,Object> countEntityTarget() {
-        return imageMapper.countEntityTarget();
+        return deviceTargetMapper.countEntityTarget();
     }
 
     @Transactional
     @Override
     public int deleteAllTarget() {
-        return imageMapper.deleteAllTarget();
+        return deviceTargetMapper.deleteAllTarget();
     }
 
     protected TargetPO convertToTargetModel(Device device){

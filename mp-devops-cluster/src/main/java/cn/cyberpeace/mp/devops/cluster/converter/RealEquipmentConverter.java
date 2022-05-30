@@ -14,8 +14,8 @@ import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageAuthMapper;
-import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
@@ -47,9 +47,9 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private final DevopsTargetService devopsTargetService;
 
-    private final ImageMapper imageMapper;
+    private final DeviceTargetMapper deviceTargetMapper;
 
-    private final ImageAuthMapper imageAuthMapper;
+    private final DeviceTargetAuthMapper deviceTargetAuthMapper;
 
     private final TargetConverter targetConverter;
 
@@ -81,7 +81,7 @@ public class RealEquipmentConverter implements BaseConverter{
         dto.setOffset((request.getPage() - 1) * request.getPerPage());
         dto.setLimit(request.getPerPage());
         dto.setIsHide(Boolean.FALSE);
-        Integer total = imageMapper.totalCount(dto);
+        Integer total = deviceTargetMapper.totalCount(dto);
 
         RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
         if (total == 0){
@@ -89,7 +89,7 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
-        List<TargetPO> targetPOS = imageMapper.page(dto);
+        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
 
         List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -176,8 +176,8 @@ public class RealEquipmentConverter implements BaseConverter{
         if (result.isSuccess()) {
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getUuids());
-            imageMapper.delete(dto);
-            request.getUuids().forEach(id -> imageAuthMapper.deleteByTarget(id));
+            deviceTargetMapper.delete(dto);
+            request.getUuids().forEach(id -> deviceTargetAuthMapper.deleteByTarget(id));
         }
         return result;
     }
