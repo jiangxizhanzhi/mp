@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.ImageMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,6 +42,8 @@ public class TargetConverter{
 
     private final CsceneSpecialService csceneSpecialService;
 
+    private final DevopsTargetService devopsTargetService;
+
     /**
      * 分页查询
      * @param request
@@ -51,10 +54,15 @@ public class TargetConverter{
         dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
+        dto.setThirdCategory(request.getThirdCategory());
         dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         dto.setName(request.getName());
         dto.setSearchPublicEnum(1);
+        dto.setRole(request.getRole());
         dto.setIsHide(request.getIsHide());
+        dto.setSystemType(request.getSystemType());
+        dto.setSystemArchitecure(request.getSystemArchitecure());
+        dto.setQuickCreateSupport(request.getQuickCreateSupport());
         if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
             dto.setOffset((request.getPage() - 1) * request.getPerPage());
             dto.setLimit(request.getPerPage());
@@ -68,7 +76,10 @@ public class TargetConverter{
         if (request.getLikeName() != null) {
             dto.setLikeName(request.getLikeName());
         }
-        Integer total = imageMapper.totalCount(dto);
+        dto.setLanguage(request.getLanguage());
+        dto.setImageStatus(request.getImageStatus());
+        dto.setBaseImageSupport(request.getBaseImageSupport());
+        Integer total = devopsTargetService.totalCount(dto);
         TargetPageModel targetPageModel = new TargetPageModel();
         targetPageModel.setTotal(total);
         if (total == 0){

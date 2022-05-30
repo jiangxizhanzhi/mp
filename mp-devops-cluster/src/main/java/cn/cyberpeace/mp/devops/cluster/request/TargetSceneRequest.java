@@ -33,6 +33,18 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     private String name;
 
     /**
+     * 角色
+     */
+    @ApiModelProperty(value = "角色")
+    private Integer role;
+
+    /**
+     * 三级分类
+     */
+    @ApiModelProperty(value = "三级分类")
+    private Integer thirdCategory;
+
+    /**
      * 镜像类型
      */
     @ApiModelProperty("镜像类型")
@@ -43,6 +55,42 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
 
     @ApiModelProperty("靶标分类，1：内置靶标，2：实体靶标，3：自定义靶标")
     private Integer targetCategory;
+
+    /**
+     * 快速创建
+     */
+    @ApiModelProperty(value = "快速构建")
+    private Boolean quickCreateSupport;
+
+    /**
+     * 系统类型
+     */
+    @ApiModelProperty(value = "系统类型")
+    private Integer systemType;
+
+    /**
+     * 系统架构
+     */
+    @ApiModelProperty(value = "系统架构")
+    private String systemArchitecure;
+
+    /**
+     * 语言
+     */
+    @ApiModelProperty(value = "语言")
+    private String language;
+
+    /**
+     * 镜像状态
+     */
+    @ApiModelProperty(value = "镜像状态")
+    private Integer imageStatus;
+
+    /**
+     * 是否支持基础镜像
+     */
+    @ApiModelProperty(value = "是否支持基础镜像")
+    private Boolean baseImageSupport;
 
     @ApiModelProperty("是否模糊查询")
     private Boolean likeName = Boolean.TRUE;
