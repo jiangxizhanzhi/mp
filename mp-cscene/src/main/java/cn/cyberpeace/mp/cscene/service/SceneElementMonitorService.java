@@ -358,6 +358,9 @@ public class SceneElementMonitorService {
 
     public ListObjResult<ElementVulnerabilityInfo> getVulnerabilityInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ListObjResult<>();
+        }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         processRequest(pageRequest, sceneHandler);
@@ -387,6 +390,9 @@ public class SceneElementMonitorService {
 
     public List<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChartInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ArrayList<>();
+        }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         processRequest(pageRequest, sceneHandler);
@@ -429,6 +435,9 @@ public class SceneElementMonitorService {
 
     public List<ElementVulnerabilityCountInfo> getVulnerabilityCountInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
+        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+            return new ArrayList<>();
+        }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         processRequest(pageRequest, sceneHandler);
