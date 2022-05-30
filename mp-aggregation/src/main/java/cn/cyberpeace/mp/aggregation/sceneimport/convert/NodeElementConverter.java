@@ -68,27 +68,23 @@ class NodeElementConverter implements IConverter {
 
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
-        pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
         pluginElement.setImage(node.getImage());
         // 初步加载role imageType (部分简单靶标不会导入), 这里不一定准确
         if (node.getId().toLowerCase().startsWith("router")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.ROUTER);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER);
-            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
             if (StringUtils.isEmpty(node.getImage()) || node.getImage().equals("默认路由")) {
                 pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_ROUTER);
             }
         } else if (node.getId().toLowerCase().startsWith("firewall")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.FIREWALL);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL);
-            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
             if (StringUtils.isEmpty(node.getImage()) || node.getImage().equals("默认防火墙")) {
                 pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_FIREWALL);
             }
         } else if (node.getId().toLowerCase().startsWith("server")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.SERVER);
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
-            pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 

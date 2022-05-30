@@ -93,9 +93,9 @@ class DeviceInfoConverter implements IConverter {
         // 云平台数据库大小写不敏感,这里名字不能覆盖
 //        pluginElement.setImage(device.getName());
         // 默认交换机使用默认角色
-        if (!Boolean.TRUE.equals(device.getIsInternal()) || !TargetConstant.DefaultTargetName.DEFAULT_NETWORK.equals(device.getName())) {
-            pluginElement.setRole(device.getRole());
-        }
+//        if (!Boolean.TRUE.equals(device.getIsInternal()) || !TargetConstant.DefaultTargetName.DEFAULT_NETWORK.equals(device.getName())) {
+//            pluginElement.setRole(device.getRole());
+//        }
 
         if (device.getExtSystemInfo() != null) {
             this.loadExtSystemInfo(params.element, device.getExtSystemInfo());
