@@ -52,7 +52,7 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
      * @param response
      */
     @ApiOperation("截屏文件下载")
-    @PostMapping(value = "/download")
+    @GetMapping(value = "/download")
     public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
         fileService.downloadFile(filePath, response);
     }
