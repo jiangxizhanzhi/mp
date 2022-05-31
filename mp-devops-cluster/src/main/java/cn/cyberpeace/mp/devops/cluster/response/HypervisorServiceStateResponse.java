@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "服务状态信息")
-public class HypervisorServiceStateResponse extends BaseCloudPlatformResponse {
+public class HypervisorServiceStateResponse extends BaseResponse {
 
     /**
      * 服务

@@ -21,7 +21,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "资源统计返回信息")
-public class HypervisorStatisticsResponse extends BaseCloudPlatformResponse {
+public class HypervisorStatisticsResponse extends BaseResponse {
 
     /**
      * CPU核数

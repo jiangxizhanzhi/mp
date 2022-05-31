@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "实装分页返回信息")
-public class RealEquipmentPageResponse  extends BaseCloudPlatformResponse{
+public class RealEquipmentPageResponse  extends BaseResponse {
 
     /**
      * ID

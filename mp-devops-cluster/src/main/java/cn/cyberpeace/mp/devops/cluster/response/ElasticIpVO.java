@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "弹性IP分页返回信息")
-public class ElasticIpVO extends BaseCloudPlatformResponse {
+public class ElasticIpVO extends BaseResponse {
 
     /**
      * 固定IP

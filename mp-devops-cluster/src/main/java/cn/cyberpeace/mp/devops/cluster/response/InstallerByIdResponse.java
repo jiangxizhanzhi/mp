@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "单个服务返回信息")
-public class InstallerByIdResponse extends BaseCloudPlatformResponse{
+public class InstallerByIdResponse extends BaseResponse {
 
     /**
      * UUID

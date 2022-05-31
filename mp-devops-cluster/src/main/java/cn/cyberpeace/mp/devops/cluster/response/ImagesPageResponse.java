@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "镜像分页返回信息")
-public class ImagesPageResponse  extends BaseCloudPlatformResponse  {
+public class ImagesPageResponse  extends BaseResponse {
 
     /**
      * UUID

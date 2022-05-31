@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "容器分页返回信息")
-public class ContainerPageVO extends BaseCloudPlatformResponse {
+public class ContainerPageVO extends BaseResponse {
 
     /**
      * 容器名称

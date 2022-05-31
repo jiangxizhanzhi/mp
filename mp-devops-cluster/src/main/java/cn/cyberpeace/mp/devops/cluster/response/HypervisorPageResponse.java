@@ -17,7 +17,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "节点管理分页返回信息")
-public class HypervisorPageResponse extends BaseCloudPlatformResponse {
+public class HypervisorPageResponse extends BaseResponse {
 
     /**
      * 节点名称
