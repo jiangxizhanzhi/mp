@@ -1289,13 +1289,26 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 根据类型id获取类型名称
+     *
+     * @param typeIds
+     * @return 类型名称集合
+     */
+    private List<String> getTypes(List<String> typeIds) {
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
+        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
+    }
+
+    /**
      * 根据规则类型获取规则id集合
      *
      * @param types 类型集合
      * @return 规则id集合
      */
     public List<String> getRuleIdsByTypes(List<String> types) {
-        if (types == null || types.isEmpty()) {
+        if (CollectionUtil.isEmpty(types)) {
             return new ArrayList<>();
         }
         List<String> typeIds = getTypeIds(types);
@@ -1303,6 +1316,23 @@ public class ScenePluginCollectionSceneService {
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据规则id集合获取类型集合
+     *
+     * @param ruleIds
+     * @return 类型集合
+     */
+    public List<String> getTypesByRuleIds(List<String> ruleIds) {
+        if (CollectionUtil.isEmpty(ruleIds)) {
+            return new ArrayList<>();
+        }
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getRuleId, ruleIds.toArray());
+        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        List<String> typeIds = relationModels.stream().map(r -> r.getTypeId()).collect(Collectors.toList());
+        return getTypes(typeIds);
     }
 
 
