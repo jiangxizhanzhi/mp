@@ -31,4 +31,7 @@ public class WazuhProbeCommonModel {
 
     @ApiModelProperty("输出数据")
     private String rawOutPut;
+
+    @ApiModelProperty("探针id")
+    private String probeId;
 }

@@ -110,8 +110,6 @@ public class DataCollectionService {
 
     public static final String CACHE_KEY_HOST_STATE = "host_states";
 
-    public static final String CACHE_KEY_CUSTOM_PROBE = "custom_probe";
-
     public static final String CACHE_KEY_NET_CONN = "net_conn";
 
     public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
@@ -202,6 +200,63 @@ public class DataCollectionService {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
 
+    }
+
+    /**
+     * 查询自定义探针采集数据分页
+     *
+     * @param wazuhEventRequest
+     * @return ListObjResult<WazuhProbeCommonModel>
+     */
+    public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
+        log.info("{}", wazuhEventRequest);
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return new ListObjResult<>(Collections.emptyList(), 0);
+        }
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+
+//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        if (!CollectionUtil.isEmpty(probeIds)) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("data.sic_launch_id", probeIds));
+        }
+        // 按时间降序
+        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        //处理分页
+        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+
+        log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
+            for (var hit : response.getHits().getHits()) {
+                WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> WazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
+                        new TypeReference<>() {
+                        });
+                if (Objects.nonNull(WazuhMonitorRoot.getData()) && Objects.nonNull(WazuhMonitorRoot.getData().getOutput())) {
+                    String output = WazuhMonitorRoot.getData().getOutput().getRawOutput();
+                    WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
+                    wazuhProbeCommonModel.setRawOutPut(output);
+                    wazuhProbeCommonModel.setAgentId(WazuhMonitorRoot.getAgent().getId());
+                    wazuhProbeCommonModel.setAgentName(WazuhMonitorRoot.getAgent().getName());
+                    wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(WazuhMonitorRoot.getTimestamp()));
+                    wazuhProbeCommonModel.setProbeId(WazuhMonitorRoot.getData().getId());
+                    wazuhModelList.add(wazuhProbeCommonModel);
+                }
+            }
+            return new ListObjResult<>(wazuhModelList, total);
+        } catch (IOException e) {
+            log.error("es queryCustomProbeData error", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
     }
 
     /**
@@ -446,33 +501,6 @@ public class DataCollectionService {
 //                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                 wazuhHostStateModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                 return wazuhHostStateModel;
-            }
-            return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        return wazuhModelList;
-    }
-
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_CUSTOM_PROBE)
-    public List<WazuhProbeCommonModel> getCustomProbeCollectData(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String probeId) {
-        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
-            return Collections.emptyList();
-        }
-        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, probeId);
-        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
-
-        var wazuhModelList = wazuhFileRootList.stream().map(model -> {
-            if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
-                String output = model.getData().getOutput().getRawOutput();
-                WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
-                wazuhProbeCommonModel.setRawOutPut(output);
-                wazuhProbeCommonModel.setAgentId(model.getAgent().getId());
-                wazuhProbeCommonModel.setAgentName(model.getAgent().getName());
-                wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
-                return wazuhProbeCommonModel;
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
