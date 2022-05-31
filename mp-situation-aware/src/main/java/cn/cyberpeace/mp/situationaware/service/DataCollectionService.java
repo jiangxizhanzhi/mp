@@ -247,11 +247,11 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
             for (var hit : response.getHits().getHits()) {
-                WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> WazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
+                WazuhMonitorRoot<Launch<Object, BaseInput>> WazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
                 if (Objects.nonNull(WazuhMonitorRoot.getData()) && Objects.nonNull(WazuhMonitorRoot.getData().getOutput())) {
-                    String output = WazuhMonitorRoot.getData().getOutput().getRawOutput();
+                    String output = JsonCommon.stringify(WazuhMonitorRoot.getData().getOutput());
                     WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
                     wazuhProbeCommonModel.setRawOutPut(output);
                     wazuhProbeCommonModel.setAgentId(WazuhMonitorRoot.getAgent().getId());
