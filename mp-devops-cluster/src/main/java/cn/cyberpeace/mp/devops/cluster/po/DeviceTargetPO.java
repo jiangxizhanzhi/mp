@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_devops_target")
-public class TargetPO extends BaseModel {
+public class DeviceTargetPO extends BaseModel {
 
     /**
      * 镜像UUID

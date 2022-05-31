@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table("mp_devops_target_auth")
-public class TargetAuthPO extends BasePermissionModel {
+public class DeviceTargetAuthPO extends BasePermissionModel {
 
 }

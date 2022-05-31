@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import lombok.RequiredArgsConstructor;
@@ -42,11 +42,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     @Override
     public Integer updateById(Device device) {
         if (Objects.nonNull(device) && device.isSuccess()) {
-            TargetPO oldTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
-            if (Objects.nonNull(oldTargetPO)) {
-                TargetPO targetPO = convertDevice(device);
-                targetPO.setIsPublic(oldTargetPO.getIsPublic());
-                return deviceTargetMapper.updateById(targetPO);
+            DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+            if (Objects.nonNull(oldDeviceTargetPO)) {
+                DeviceTargetPO deviceTargetPO = convertDevice(device);
+                deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+                return deviceTargetMapper.updateById(deviceTargetPO);
             }
         }
         return 0;
@@ -58,9 +58,9 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         if (CollectionUtils.isEmpty(deviceList)){
             return 0;
         }
-        List<TargetPO> targetPOS = deviceList.stream().map(this::convertToTargetModel)
+        List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
                 .collect(Collectors.toList());
-        return deviceTargetMapper.batchInsert(targetPOS);
+        return deviceTargetMapper.batchInsert(deviceTargetPOS);
     }
 
     @Override
@@ -84,12 +84,12 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
         return deviceTargetMapper.deleteAllTarget();
     }
 
-    protected TargetPO convertToTargetModel(Device device){
-        TargetPO targetPO = convertDevice(device);
-        targetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
-        targetPO.setUseStatus(StatusEnum.NO);
-        targetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
-        return targetPO;
+    protected DeviceTargetPO convertToTargetModel(Device device){
+        DeviceTargetPO deviceTargetPO = convertDevice(device);
+        deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
+        deviceTargetPO.setUseStatus(StatusEnum.NO);
+        deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        return deviceTargetPO;
     }
 
     /**
@@ -97,56 +97,56 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
      * @param device
      * @return
      */
-    protected TargetPO convertDevice(Device device){
-        TargetPO targetPO = new TargetPO();
-        targetPO.setId(device.getId().toString());
-        targetPO.setUuid(device.getUuid());
-        targetPO.setName(device.getName());
-        targetPO.setLogo(device.getLogo());
-        targetPO.setRole(device.getRole());
-        targetPO.setMainCategory(device.getCategory());
-        targetPO.setSubCategory(device.getSecondCategory());
-        targetPO.setThirdCategory(device.getL3Category());
-        targetPO.setImageType(device.getImageType());
-        targetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
+    protected DeviceTargetPO convertDevice(Device device){
+        DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+        deviceTargetPO.setId(device.getId().toString());
+        deviceTargetPO.setUuid(device.getUuid());
+        deviceTargetPO.setName(device.getName());
+        deviceTargetPO.setLogo(device.getLogo());
+        deviceTargetPO.setRole(device.getRole());
+        deviceTargetPO.setMainCategory(device.getCategory());
+        deviceTargetPO.setSubCategory(device.getSecondCategory());
+        deviceTargetPO.setThirdCategory(device.getL3Category());
+        deviceTargetPO.setImageType(device.getImageType());
+        deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
         String imageType = device.getImageType();
-        targetPO.setIsImport(device.getIsImport());
+        deviceTargetPO.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();
         ExtDocker extDocker = device.getExtDocker();
         if (StringUtils.isNotBlank(imageType) && imageType.equals(VM) && Objects.nonNull(extVm)){
-            targetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
-            targetPO.setInitSupport(extVm.getInitSupport());
+            deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
+            deviceTargetPO.setInitSupport(extVm.getInitSupport());
         }
         else if (StringUtils.isNotBlank(imageType) && imageType.equals(CONTAINER) && Objects.nonNull(extDocker)){
-            targetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
-            targetPO.setInitSupport(extDocker.getInitSupport());
+            deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
+            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
         }else{
-            targetPO.setQuickCreateSupport(Boolean.FALSE);
-            targetPO.setInitSupport(Boolean.FALSE);
+            deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
+            deviceTargetPO.setInitSupport(Boolean.FALSE);
         }
 
-        targetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
-        targetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
+        deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
         ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)){
-            targetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+            deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
         }
 
         ExtImageInfo extImageInfo = device.getExtImageInfo();
         if (Objects.nonNull(extImageInfo)){
-            targetPO.setImageStatus(extImageInfo.getImageStatus());
-            targetPO.setImageSource(extImageInfo.getImageSource());
-            targetPO.setBaseImageSupport(extImageInfo.getBaseImageSupport());
+            deviceTargetPO.setImageStatus(extImageInfo.getImageStatus());
+            deviceTargetPO.setImageSource(extImageInfo.getImageSource());
+            deviceTargetPO.setBaseImageSupport(extImageInfo.getBaseImageSupport());
         }
 
         ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
         if (Objects.nonNull(extSystemInfo)){
-            targetPO.setParentSystemType(extSystemInfo.getParentSystemType());
-            targetPO.setSystemType(extSystemInfo.getSystemType());
-            targetPO.setLanguage(extSystemInfo.getLanguage());
-            targetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
+            deviceTargetPO.setParentSystemType(extSystemInfo.getParentSystemType());
+            deviceTargetPO.setSystemType(extSystemInfo.getSystemType());
+            deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
+            deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
         }
 
-        return targetPO;
+        return deviceTargetPO;
     }
 }

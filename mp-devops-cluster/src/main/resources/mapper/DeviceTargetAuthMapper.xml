@@ -19,7 +19,7 @@
         group by a.target
     </select>
 
-    <select id="findByTarget" parameterType="java.lang.String" resultType="cn.cyberpeace.mp.devops.cluster.po.TargetAuthPO">
+    <select id="findByTarget" parameterType="java.lang.String" resultType="cn.cyberpeace.mp.devops.cluster.po.DeviceTargetAuthPO">
         select
             a.pk as pk,
             a.id as id,

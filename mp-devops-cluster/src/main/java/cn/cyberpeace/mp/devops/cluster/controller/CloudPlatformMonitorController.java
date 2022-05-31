@@ -10,12 +10,12 @@ import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.response.HypervisorPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.HypervisorServiceStateResponse;
-import cn.cyberpeace.mp.devops.cluster.response.HypervisorStatisticsResponse;
-import cn.cyberpeace.mp.devops.cluster.response.VirtualRealSwitchStatusResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
+import cn.cyberpeace.mp.devops.cluster.vo.VirtualRealSwitchStatusVO;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -65,7 +65,7 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("资源统计")
     @GetMapping("/resources/statistics")
-    public Result<HypervisorStatisticsResponse> statistics(){
+    public Result<HypervisorStatisticsVO> statistics(){
 
         //虚拟机个数
         InstancePageRequest instancePageRequest = new InstancePageRequest();
@@ -94,7 +94,7 @@ public class CloudPlatformMonitorController {
 
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
-        HypervisorStatisticsResponse response = HypervisorStatisticsResponse.builder().diskIo(BigDecimal.ZERO)
+        HypervisorStatisticsVO response = HypervisorStatisticsVO.builder().diskIo(BigDecimal.ZERO)
                 .netIo(BigDecimal.ZERO)
                 .totalNpc(totalNpcs).totalInstances(totalInstances)
                 .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
@@ -104,7 +104,7 @@ public class CloudPlatformMonitorController {
 
         HypervisorStatisticsConvertModel hypervisorStatistics = hypervisorStatisticsConvertModel;
 
-        response = response.HypervisorStatisticsResponse(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
+        response = response.build(hypervisorStatistics.getCpus(), hypervisorStatistics.getMemoryMb()
                 ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getCpusUsed(),hypervisorStatistics.getMemoryMbUsed()
                 ,hypervisorStatistics.getLocalGbUsed(),hypervisorStatistics.getFreeRamMb(),hypervisorStatistics.getFreeDiskGb());
         return new Result<>(response);
@@ -116,13 +116,13 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
-    public PageResult<HypervisorPageResponse> page(HypervisorPageRequest request){
+    public PageResult<HypervisorPageVO> page(HypervisorPageRequest request){
         HypervisorPageConvertModel model = hypervisorConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<HypervisorPageResponse> hypervisorPageResponses =  model.getModelList().stream().map(hypervisor ->
-                HypervisorPageResponse.builder().name(hypervisor.getName())
+        List<HypervisorPageVO> hypervisorPageRespons =  model.getModelList().stream().map(hypervisor ->
+                HypervisorPageVO.builder().name(hypervisor.getName())
                         .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
                         .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getTotalInstances())
@@ -132,7 +132,7 @@ public class CloudPlatformMonitorController {
         // 获取所有物理主机服务状态
         CloudPlatformPageModel<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
-        hypervisorPageResponses.forEach(v -> {
+        hypervisorPageRespons.forEach(v -> {
             String name = v.getName();
             Optional<ServiceStatus> serviceStatus =
                     serviceStatusModel.getList().stream().filter(statusModel -> name.equals(statusModel.getHost())).findFirst();
@@ -148,7 +148,7 @@ public class CloudPlatformMonitorController {
             }
         });
 
-        return new PageResult<>(hypervisorPageResponses, model.getTotal());
+        return new PageResult<>(hypervisorPageRespons, model.getTotal());
     }
 
     /**
@@ -175,10 +175,10 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("服务状态监控")
     @GetMapping("/service-state")
-    public Result<List<HypervisorServiceStateResponse>> serviceState(){
+    public Result<List<HypervisorServiceStateVO>> serviceState(){
         List<HypervisorServiceStateConvertModel> modelList = hypervisorConverter.serviceState();
-        List<HypervisorServiceStateResponse> result = modelList.stream().map(m ->
-                new HypervisorServiceStateResponse(m.getName(),m.getAlive(),m.getState())).collect(Collectors.toList());
+        List<HypervisorServiceStateVO> result = modelList.stream().map(m ->
+                new HypervisorServiceStateVO(m.getName(),m.getAlive(),m.getState())).collect(Collectors.toList());
         return new Result<>(result);
     }
 
@@ -188,13 +188,13 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
-    public Result<List<VirtualRealSwitchStatusResponse>> virtualRealSwitchStatus(){
+    public Result<List<VirtualRealSwitchStatusVO>> virtualRealSwitchStatus(){
         VirtualRealSwitchConvertModel model = hypervisorConverter.listVirtualRealSwitch();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new Result<>();
         }
-        List<VirtualRealSwitchStatusResponse> list = model.getModelList().stream().map(v ->
-                VirtualRealSwitchStatusResponse.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
+        List<VirtualRealSwitchStatusVO> list = model.getModelList().stream().map(v ->
+                VirtualRealSwitchStatusVO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
                         .usedPorts(v.getUsedPorts()).ports(v.getPorts()).build()
         ).collect(Collectors.toList());
         return new Result<>(list);

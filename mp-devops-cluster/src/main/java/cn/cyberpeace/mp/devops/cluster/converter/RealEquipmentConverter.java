@@ -13,7 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -89,9 +89,9 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
-        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
 
-        List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             convertModel.setTotal(0);
             convertModel.setModelList(Lists.newArrayList());
@@ -105,13 +105,13 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
 
-        Map<String, TargetPO> map = targetPOS.stream().collect(Collectors.toMap(TargetPO::getUuid, Function.identity()));
+        Map<String, DeviceTargetPO> map = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, Function.identity()));
         List<RealEquipment> modelList = model.getList().stream().map(device -> {
             RealEquipment realEquipment = convertDevice(device);
-            TargetPO targetPO = map.get(device.getUuid());
-            if (Objects.nonNull(targetPO)){
-                realEquipment.setReferenceStatus(targetPO.getReferenceStatus());
-                realEquipment.setUseStatus(targetPO.getUseStatus());
+            DeviceTargetPO deviceTargetPO = map.get(device.getUuid());
+            if (Objects.nonNull(deviceTargetPO)){
+                realEquipment.setReferenceStatus(deviceTargetPO.getReferenceStatus());
+                realEquipment.setUseStatus(deviceTargetPO.getUseStatus());
             }
             return realEquipment;
         }).collect(Collectors.toList());
