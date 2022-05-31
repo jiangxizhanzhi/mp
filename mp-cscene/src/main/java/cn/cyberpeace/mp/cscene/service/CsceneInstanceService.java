@@ -378,6 +378,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
     }
 
+    /**
+     * 事件分页列表
+     * @param id
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String id, HostEventQueryParams queryParams) {
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
@@ -385,6 +391,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
+    }
+
+    /**
+     * 滚动分页列表
+     * @param scrollId
+     * @return
+     */
+    public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
+        if (StringUtils.isEmpty(scrollId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        return scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, queryParams);
     }
 
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String id, String probeId, HostEventQueryParams queryParams) {

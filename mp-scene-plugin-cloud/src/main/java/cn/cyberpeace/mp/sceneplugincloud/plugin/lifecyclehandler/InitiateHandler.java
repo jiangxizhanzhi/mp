@@ -240,7 +240,13 @@ public class InitiateHandler extends HandlerCommon {
     private void initiateAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         var networks = cloudElement.getDeriveNetworks().stream().map(n -> n.network).collect(Collectors.toList());
         for (var network : networks) {
+            Integer role = cloudElement.getRole();
             if (Boolean.TRUE.equals(network.getExternal())) {
+                // 外网不处理
+                continue;
+            } else if (Boolean.TRUE.equals(cloudElement.getExternal()) && role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
+                // 外部已存在的网络设置网络id
+                network.setResourceId(cloudElement.getResourceId());
                 continue;
             }
             network.setResourceId(StringUtils.EMPTY);
@@ -642,6 +648,19 @@ public class InitiateHandler extends HandlerCommon {
                 connectNetwork.addPort(port, connectPort, true);
             }
             cloudElement.getDeriveNetworks().add(connectNetwork);
+        } else if (Boolean.TRUE.equals(cloudElement.getExternal()) && role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
+            CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+            network.setExternal(true);
+            network.setResourceId(cloudElement.getResourceId());
+            var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());
+            var ports = Optional
+                    .ofNullable(cloudElement.getSrcElement().getPorts())
+                    .orElse(new ArrayList<>());
+            for (var port : ports) {
+                var connectPort = getHandlerUtils().getPortConnectedOpaqueSrcPort(port.getId());
+                connectNetwork.addPort(port, connectPort, true);
+            }
+            cloudElement.getDeriveNetworks().add(connectNetwork);
         }
 
         if (Boolean.TRUE.equals(cloudElement.getExternal())) {
@@ -675,8 +694,10 @@ public class InitiateHandler extends HandlerCommon {
             }
         }
 
-        // 重置资源id
-        cloudElement.setResourceId(StringUtils.EMPTY);
+        // 非外部资源 重置资源id
+        if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
+            cloudElement.setResourceId(StringUtils.EMPTY);
+        }
         // defaultConnectedNetwork
         var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
         this.loadProperties2Network(network, cloudElement);

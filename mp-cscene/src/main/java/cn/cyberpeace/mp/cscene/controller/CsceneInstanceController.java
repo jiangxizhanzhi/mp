@@ -426,7 +426,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         return modelService.listHostStates(id, queryParams).asResult();
     }
 
-    @ApiOperation("场景实例获取分页主机采集事件列表")
+    @ApiOperation("查询场景实例事件列表（分页列表）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
     })
@@ -435,6 +435,21 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                       HostEventQueryParams queryParams) {
         handleQueryParams("listHostEvents", queryParams);
         return modelService.listHostEvents(id, queryParams).asResult();
+    }
+
+
+
+    @ApiOperation("查询场景实例事件列表（滚动分页）")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "scrollId", value = "scrollId", dataTypeClass = String.class),
+    })
+    @GetMapping(value = "/scroll_host_events")
+    public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(@RequestParam String id,
+                                                                        @RequestParam String scrollId,
+                                                                        HostEventQueryParams queryParams) {
+        log.info("scrollId:{}", scrollId);
+        return modelService.scrollHostEvents(id, scrollId, queryParams).asResult();
     }
 
     @ApiOperation("场景实例获取探针采集数据")
