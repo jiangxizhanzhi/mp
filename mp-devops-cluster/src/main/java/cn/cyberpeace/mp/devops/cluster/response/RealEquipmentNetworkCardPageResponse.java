@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "系统运维-实装管理接口资源返回信息")
-public class RealEquipmentNetworkCardPageResponse extends BaseCloudPlatformResponse{
+public class RealEquipmentNetworkCardPageResponse extends BaseResponse {
 
     /**
      * 名称
