@@ -48,7 +48,7 @@ public class OperateUserPermissionService extends OperatePermissionService {
         List<String> distinctUIds = targetUserIds.stream().distinct().collect(Collectors.toList());
         if (distinctUIds.size() == 1) {
             UserModel currentLoginUser = UserUtils.getLoginUser();
-            if (Objects.equals(currentLoginUser.getId(), targetUserIds.get(0))) {
+            if (Objects.nonNull(currentLoginUser) && Objects.equals(currentLoginUser.getId(), targetUserIds.get(0))) {
                 return;
             }
         }
