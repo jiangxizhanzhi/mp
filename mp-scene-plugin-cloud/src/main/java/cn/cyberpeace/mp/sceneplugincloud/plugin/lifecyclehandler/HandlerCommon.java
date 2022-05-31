@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -117,4 +120,33 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
         }
     }
 
+    @Override
+    protected <E extends BasePluginSceneElementBO> MpRuntimeException handlerSpecialException(E element, Exception e) {
+        if (element == null || e == null || StringUtils.isEmpty(e.getMessage())) {
+            return null;
+        }
+        if (!(e instanceof MpRuntimeException)) {
+            return null;
+        }
+        MpRuntimeException mpe = (MpRuntimeException) e;
+        String message = mpe.getMessage();
+        String nodeName = element.getSrcElement().getName();
+        CloudPluginSceneElementBO cloudElement = (CloudPluginSceneElementBO) element;
+        if (message.contains("Instance") && message.contains("could not be found")) {
+            // 实例不存在
+            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
+            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.instance_not_found", nodeName));
+            return resultException;
+        } else if (message.contains("object vm") && message.contains("status error") && message.contains("build of instance")) {
+            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
+            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.vm_create_error", nodeName));
+            return resultException;
+        } else if (message.equals("Parameters image or volumes must be supplied.")) {
+            log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
+            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.image_not_found", nodeName, cloudElement.getImage()));
+            return resultException;
+        } else {
+            return null;
+        }
+    }
 }
