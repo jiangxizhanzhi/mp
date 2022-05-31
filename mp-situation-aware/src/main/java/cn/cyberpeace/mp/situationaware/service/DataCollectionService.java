@@ -104,8 +104,6 @@ public class DataCollectionService {
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
 
-    public static final String CACHE_KEY_VULNERABILITY_INFO = "vulnerability_info";
-
     public static final String CACHE_KEY_MONITOR_EVENTS = "monitor_events";
 
     public static final String CACHE_KEY_HOST_STATE = "host_states";
@@ -265,7 +263,6 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_VULNERABILITY_INFO)
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
@@ -317,7 +314,6 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return List<WazuhVulnerabilityInfoCountModel>
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_VULNERABILITY_INFO)
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
                                                                               boolean isTop, String fieldPath, String fieldName) {
         log.info("{}", wazuhEventRequest);
