@@ -73,6 +73,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.collect_interval:180s}")
     private String collectInterval;
 
+    @Value("${mp.sceneplugincollection.syscheck_frequency:60}")
+    private String syscheckFrequency;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
