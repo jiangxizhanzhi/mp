@@ -70,10 +70,4 @@ public class AccessProtocol implements Serializable {
     @ApiModelProperty("描述")
     private String description;
 
-    /**d
-     * 是否启用
-     */
-    @ApiModelProperty("是否启用，默认开启:True")
-    private Boolean isEnable = Boolean.TRUE;
-
 }
