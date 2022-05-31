@@ -263,6 +263,12 @@ public class ScenePluginCollectionSceneService {
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
     }
 
+    /**
+     * 事件列表
+     * @param sceneId
+     * @param queryParams
+     * @return
+     */
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
@@ -336,6 +342,69 @@ public class ScenePluginCollectionSceneService {
         }
 
         var result = dataCollectionService.queryFileEvents(request);
+
+        CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+        List<CollectionHostEventBO> hostEvents = new ArrayList<>();
+        result.getObjs().forEach(srcHostEvent -> {
+            var hostEvent = new CollectionHostEventBO();
+            hostEvent.setSceneId(sceneId);
+            hostEvent.setType(srcHostEvent.getFileEventType().name());
+            hostEvent.setEventDesc(srcHostEvent.getAction());
+            hostEvent.setTime(srcHostEvent.getUpdateTime());
+            hostEvent.setDescription(srcHostEvent.getDescription());
+            hostEvent.setLevel(srcHostEvent.getLevel());
+            hostEvent.setCatagory(srcHostEvent.getCatagory());
+            hostEvent.setContent(srcHostEvent.getContent());
+            hostEvent.setPath(srcHostEvent.getFilePath());
+            hostEvent.setFileSize(srcHostEvent.getSize());
+            hostEvent.setMd5Before(srcHostEvent.getMd5Before());
+            hostEvent.setMd5After(srcHostEvent.getMd5After());
+            hostEvent.setScrollId(srcHostEvent.getScrollId());
+            var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
+            if (srcElement != null) {
+                hostEvent.setNodeId(srcElement.getId());
+                hostEvent.setNodeName(srcElement.getName());
+                hostEvent.setSystemType(srcElement.getSystemType());
+                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+                if (cloudScenePluginHandler != null) {
+                    var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
+                    if (cloudElement != null) {
+                        hostEvent.setVirtualType(cloudElement.getVirtualType());
+                    }
+                }
+            }
+            hostEvents.add(hostEvent);
+        });
+
+        return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
+    }
+
+
+    /**
+     * 滚动分页列表
+     * @param scrollId
+     * @return
+     */
+    public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
+        CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (pluginHandler == null) {
+            return new ListObjServiceResult(new ListObjResult(Collections.emptyList(), 0)).asResult();
+        }
+        Map<String, SceneElementBO> agentNameElementMap = new HashMap<>();
+        srcElements.forEach(srcElement -> {
+            var collectionElement = pluginHandler.getElement(srcElement.getId());
+            if (collectionElement == null || CollectionUtils.isEmpty(collectionElement.getProbes())) {
+                return;
+            }
+            if (collectionElement.getEnableProbeCollect() == null || !collectionElement.getEnableProbeCollect()) {
+                return;
+            }
+            agentNameElementMap.put(srcElement.getEid(), srcElement);
+        });
+
+        var result = dataCollectionService.scrollFileEvents(scrollId);
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();

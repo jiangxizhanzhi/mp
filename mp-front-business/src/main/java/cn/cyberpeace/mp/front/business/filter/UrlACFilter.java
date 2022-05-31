@@ -60,7 +60,6 @@ public class UrlACFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info("UrlAuthFilter...");
         boolean skip = false;
         // 拦截器总开关是否开启
         if (Objects.nonNull(urlACFilterConfig) && !urlACFilterConfig.getEnabled()) {
@@ -92,7 +91,7 @@ public class UrlACFilter extends OncePerRequestFilter {
                 boolean isMethodMatch = isMethodMatch(requestUrl, method);
                 if (!isMethodMatch) {
                     // 请求方法不匹配
-                    log.error("URLACFILTER -> url:{} method:{} not match!", requestUrl, method);
+                    log.warn("###URLACFILTER -> referer:{}, url:{}, method:{} not match!", request.getHeaders("referer"), requestUrl, method);
                     //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
                     //result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
                 }
@@ -104,7 +103,7 @@ public class UrlACFilter extends OncePerRequestFilter {
 
                 if (!isAuthoritiesMatch) {
                     // 权限不匹配
-                    log.error("URLACFILTER -> url:{} access denied!", requestUrl);
+                    log.error("###URLACFILTER -> referer:{}, url:{} access denied!", request.getHeaders("referer"), requestUrl);
                     //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
                     result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl, method));
                 }
