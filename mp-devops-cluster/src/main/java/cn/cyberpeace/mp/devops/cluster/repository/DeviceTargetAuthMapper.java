@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.auth.base.repository.BasePermissionMapper;
 import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount;
-import cn.cyberpeace.mp.devops.cluster.po.TargetAuthPO;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetAuthPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -14,8 +14,8 @@ import java.util.List;
 
 @Mapper
 @Repository
-@PermissionModelClass(permissionClass = TargetAuthPO.class, targetClass = TargetPO.class)
-@ModelClass(TargetAuthPO.class)
+@PermissionModelClass(permissionClass = DeviceTargetAuthPO.class, targetClass = DeviceTargetPO.class)
+@ModelClass(DeviceTargetAuthPO.class)
 public interface DeviceTargetAuthMapper extends BasePermissionMapper {
 
     /**
@@ -30,7 +30,7 @@ public interface DeviceTargetAuthMapper extends BasePermissionMapper {
      * @param target
      * @return
      */
-    List<TargetAuthPO> findByTarget(String target);
+    List<DeviceTargetAuthPO> findByTarget(String target);
 
     /**
      * 根据镜像ID集合批量删除数据

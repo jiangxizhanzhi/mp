@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.devops.cluster.response;
+package cn.cyberpeace.mp.devops.cluster.vo;
 
+import cn.cyberpeace.mp.devops.cluster.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -21,7 +22,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "资源统计返回信息")
-public class HypervisorStatisticsResponse extends BaseResponse {
+public class HypervisorStatisticsVO extends BaseResponse {
 
     /**
      * CPU核数
@@ -170,9 +171,9 @@ public class HypervisorStatisticsResponse extends BaseResponse {
     @Builder.Default
     private Integer totalFireWall = NumberUtils.INTEGER_ZERO;
 
-    public HypervisorStatisticsResponse HypervisorStatisticsResponse(Integer cpus, Long memoryMb, Long localGb,
-                                        Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
-                                        Long freeRamMb, Long freeDiskGb) {
+    public HypervisorStatisticsVO build(Integer cpus, Long memoryMb, Long localGb,
+                                                               Long cpusUsed, Long memoryMbUsed, Long localGbUsed,
+                                                               Long freeRamMb, Long freeDiskGb) {
         this.cpus = cpus;
         this.memoryMb = memoryMb;
         this.localGb = localGb;
