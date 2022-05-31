@@ -13,7 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.response.DeviceTargetByTypeVO;
@@ -163,12 +163,12 @@ public class DevopsTargetController {
                 request.setPage(null);
                 request.setPerPage(null);
                 TargetPageModel targetSceneConvertModel = targetConverter.page(request);
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getTargetPOS())){
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceTargetPOS())){
                     continue;
                 }
-                List<TargetPO> targetPOList = targetSceneConvertModel.getTargetPOS();
+                List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getDeviceTargetPOS();
 
-                List<DeviceTargetVO> deviceTargetVOList = targetPOList.stream().map(v -> {
+                List<DeviceTargetVO> deviceTargetVOList = deviceTargetPOList.stream().map(v -> {
                     DeviceTargetVO vo = new DeviceTargetVO();
                     vo.setUuid(v.getUuid());
                     vo.setName(v.getName());

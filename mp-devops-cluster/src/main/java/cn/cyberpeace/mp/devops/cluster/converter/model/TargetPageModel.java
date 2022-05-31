@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.converter.model;
 
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,5 +14,5 @@ import java.util.List;
 @AllArgsConstructor
 public class TargetPageModel extends BasePageConvertModel{
 
-    private List<TargetPO> targetPOS;
+    private List<DeviceTargetPO> deviceTargetPOS;
 }

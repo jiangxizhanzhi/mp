@@ -13,7 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
@@ -83,11 +83,11 @@ public class TargetConverter{
         TargetPageModel targetPageModel = new TargetPageModel();
         targetPageModel.setTotal(total);
         if (total == 0){
-            targetPageModel.setTargetPOS(Lists.newArrayList());
+            targetPageModel.setDeviceTargetPOS(Lists.newArrayList());
             return targetPageModel;
         }
-        List<TargetPO> targetPOS = deviceTargetMapper.page(dto);
-        targetPageModel.setTargetPOS(targetPOS);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        targetPageModel.setDeviceTargetPOS(deviceTargetPOS);
         return targetPageModel;
     }
 
@@ -99,9 +99,9 @@ public class TargetConverter{
     public TargetSceneConvertModel allTarget(TargetSceneRequest request) {
        TargetPageModel targetPageModel = this.page(request);
 
-        List<TargetPO> targetPOS = targetPageModel.getTargetPOS();
+        List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getDeviceTargetPOS();
 
-        List<Integer> ids = targetPOS.stream().map(TargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
+        List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
 
         TargetSceneConvertModel sceneConvertModel = new TargetSceneConvertModel();
         sceneConvertModel.setTotal(targetPageModel.getTotal());
@@ -134,8 +134,8 @@ public class TargetConverter{
      */
     public void validTargetCanDelete(List<String> uuids){
 
-        List<TargetPO> targetPOS = deviceTargetMapper.findByUuids(uuids);
-        String[] imageNames = targetPOS.stream().map(TargetPO::getName).toArray(String[]::new);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
+        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
@@ -162,12 +162,12 @@ public class TargetConverter{
             return Lists.newArrayList();
         }
         List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
-        List<TargetPO> targetPOS = deviceTargetMapper.findByIds(ids);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByIds(ids);
         List<Integer> diffList;
-        if (CollectionUtils.isEmpty(targetPOS)){
+        if (CollectionUtils.isEmpty(deviceTargetPOS)){
             diffList = deviceIds;
         }else{
-            List<Integer> targetIds = targetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
+            List<Integer> targetIds = deviceTargetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
             diffList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
         }
         return diffList;

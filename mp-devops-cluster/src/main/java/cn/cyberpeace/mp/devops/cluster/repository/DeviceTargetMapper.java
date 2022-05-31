@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -17,15 +17,15 @@ import java.util.Map;
  */
 @Mapper
 @Repository
-@ModelClass(TargetPO.class)
-public interface DeviceTargetMapper extends BaseModelMapper<TargetPO> {
+@ModelClass(DeviceTargetPO.class)
+public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
 
     /**
      * 分页查询
      * @param dto
      * @return
      */
-    List<TargetPO> page(ImagePageDTO dto);
+    List<DeviceTargetPO> page(ImagePageDTO dto);
 
     /**
      * 获取总数
@@ -39,28 +39,28 @@ public interface DeviceTargetMapper extends BaseModelMapper<TargetPO> {
      * @param uuid
      * @return
      */
-    TargetPO findByUuid(String uuid);
+    DeviceTargetPO findByUuid(String uuid);
 
     /**
      * 根据UUID批量查询
      * @param uuids
      * @return
      */
-    List<TargetPO> findByUuids(@Param("uuids") List<String> uuids);
+    List<DeviceTargetPO> findByUuids(@Param("uuids") List<String> uuids);
 
     /**
      * 根据ID批量查询
      * @param ids
      * @return
      */
-    List<TargetPO> findByIds(@Param("ids") List<String> ids);
+    List<DeviceTargetPO> findByIds(@Param("ids") List<String> ids);
 
     /**
      * 根据ID更新信息
-     * @param targetPO
+     * @param deviceTargetPO
      * @return
      */
-    Integer updateById(TargetPO targetPO);
+    Integer updateById(DeviceTargetPO deviceTargetPO);
 
     /**
      * 删除
@@ -74,14 +74,14 @@ public interface DeviceTargetMapper extends BaseModelMapper<TargetPO> {
      * @param list
      * @return
      */
-    Integer updateBatch(@Param("list") List<TargetPO> list);
+    Integer updateBatch(@Param("list") List<DeviceTargetPO> list);
 
     /**
      * 新增
      * @param list
      * @return
      */
-    Integer batchInsert(@Param("list") List<TargetPO> list);
+    Integer batchInsert(@Param("list") List<DeviceTargetPO> list);
 
     /**
      * 靶标类型统计

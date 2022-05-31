@@ -1,7 +1,8 @@
-package cn.cyberpeace.mp.devops.cluster.response;
+package cn.cyberpeace.mp.devops.cluster.vo;
 
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.FontColorEnum;
+import cn.cyberpeace.mp.devops.cluster.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
@@ -19,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "服务状态信息")
-public class HypervisorServiceStateResponse extends BaseResponse {
+public class HypervisorServiceStateVO extends BaseResponse {
 
     /**
      * 服务
@@ -46,17 +47,17 @@ public class HypervisorServiceStateResponse extends BaseResponse {
     @ApiModelProperty(value = "字体颜色")
     private FontColorEnum fontColor;
 
-    public HypervisorServiceStateResponse(String name, Boolean alive) {
+    public HypervisorServiceStateVO(String name, Boolean alive) {
         this.name = name;
         this.alive = alive;
     }
 
-    public HypervisorServiceStateResponse(String name, String state) {
+    public HypervisorServiceStateVO(String name, String state) {
         this.name = name;
         this.state = state;
     }
 
-    public HypervisorServiceStateResponse(String name, Boolean alive, String state) {
+    public HypervisorServiceStateVO(String name, Boolean alive, String state) {
         this.name = name;
         this.alive = alive;
         this.state = state;

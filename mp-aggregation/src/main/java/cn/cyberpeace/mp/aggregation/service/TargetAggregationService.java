@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import com.google.common.collect.Lists;
@@ -50,11 +50,11 @@ public class TargetAggregationService {
         request.setPage(null);
         request.setIsHide(Boolean.TRUE);
         TargetPageModel targetPageModel = targetConverter.page(request);
-        if (Objects.isNull(targetPageModel) || CollectionUtils.isEmpty(targetPageModel.getTargetPOS())){
+        if (Objects.isNull(targetPageModel) || CollectionUtils.isEmpty(targetPageModel.getDeviceTargetPOS())){
             return;
         }
-        List<TargetPO> targetPOS =  targetPageModel.getTargetPOS();
-        String[] imageNames = targetPOS.stream().map(TargetPO::getName).toArray(String[]::new);
+        List<DeviceTargetPO> deviceTargetPOS =  targetPageModel.getDeviceTargetPOS();
+        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
 
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
@@ -65,11 +65,11 @@ public class TargetAggregationService {
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         String name;
-        List<TargetPO> modelList = new ArrayList<>();
+        List<DeviceTargetPO> modelList = new ArrayList<>();
         List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
         List<DeviceReferCsceneInstanceStat> useStateList = new ArrayList<>();
-        for (TargetPO targetPO : targetPOS){
-            name = targetPO.getName();
+        for (DeviceTargetPO deviceTargetPO : deviceTargetPOS){
+            name = deviceTargetPO.getName();
             if (MapUtils.isNotEmpty(referStateMap)){
                 referStateList = referStateMap.get(name);
             }else{
@@ -80,8 +80,8 @@ public class TargetAggregationService {
             }else{
                 useStateList = Lists.newArrayList();
             }
-            TargetPO model = new TargetPO();
-            model.setUuid(targetPO.getUuid());
+            DeviceTargetPO model = new DeviceTargetPO();
+            model.setUuid(deviceTargetPO.getUuid());
             model.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
             model.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
             modelList.add(model);
