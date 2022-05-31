@@ -8,24 +8,26 @@ import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
+import cn.cyberpeace.mp.devops.cluster.po.TargetPO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
-import cn.cyberpeace.mp.devops.cluster.response.CommonTargetResponse;
-import cn.cyberpeace.mp.devops.cluster.response.TargetScene;
-import cn.cyberpeace.mp.devops.cluster.response.TargetSceneResponse;
+import cn.cyberpeace.mp.devops.cluster.response.DeviceTargetByTypeVO;
+import cn.cyberpeace.mp.devops.cluster.response.TargetSceneVO;
+import cn.cyberpeace.mp.devops.cluster.response.base.ListResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
+import cn.cyberpeace.mp.devops.cluster.vo.DeviceTargetVO;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
 import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
-import cn.hutool.core.date.StopWatch;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -83,12 +85,8 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
-    public ServiceResult<TargetSceneResponse> list(TargetSceneRequest request){
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+    public ServiceResult<TargetSceneVO> list(TargetSceneRequest request){
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
-        stopWatch.stop();
-        System.out.println("findL1AndL2AndL3Type花费时间："+ stopWatch.getTotalTimeSeconds());
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
 
@@ -101,9 +99,7 @@ public class DevopsTargetController {
             secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
         }
 
-        List<TargetScene> targetScenes = new ArrayList<>();
-        StopWatch stopWatch2 = new StopWatch();
-        stopWatch2.start();
+        List<TargetSceneVO> targetSceneVOS = new ArrayList<>();
         for (TypeConvertModel first : firstTypeList){
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
@@ -120,21 +116,84 @@ public class DevopsTargetController {
                 }
                 List<Device> secondDeviceList = targetSceneConvertModel.getDeviceList();
 
-                TargetScene targetScene = new TargetScene();
+                TargetSceneVO targetSceneVO = new TargetSceneVO();
 
+                targetSceneVO.setFirstTypeId(firstId);
+                targetSceneVO.setFirstTypeName(first.getName());
+                Integer secondId = second.getId();
+                targetSceneVO.setSecondTypeId(secondId);
+                targetSceneVO.setSecondTypeName(second.getName());
+                targetSceneVO.setDeviceList(secondDeviceList);
+                targetSceneVOS.add(targetSceneVO);
+            }
+        }
+        return new Result(new ListResult<>(targetSceneVOS));
+    }
+
+    /**
+     * 查询所有靶标信息
+     * @param request
+     * @return
+     */
+    @ApiOperation("查询所有靶标部分信息")
+    @GetMapping("/list-part-info")
+    public ServiceResult<DeviceTargetByTypeVO> listPartInfo(TargetSceneRequest request){
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
+        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+
+        Integer category = request.getCategory();
+        if (Objects.nonNull(category)) {
+            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+        }
+        Integer secondCategory = request.getSecondCategory();
+        if (Objects.nonNull(secondCategory)) {
+            secondTypeList = secondTypeList.stream().filter(v -> v.getId().equals(secondCategory)).collect(Collectors.toList());
+        }
+
+        List<DeviceTargetByTypeVO> targetScenes = new ArrayList<>();
+        for (TypeConvertModel first : firstTypeList){
+            Integer firstId = first.getId();
+            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
+                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+
+            for (TypeConvertModel second : typeConvertModels){
+                request.setCategory(firstId);
+                request.setSecondCategory(second.getId());
+                request.setPage(null);
+                request.setPerPage(null);
+                TargetPageModel targetSceneConvertModel = targetConverter.page(request);
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getTargetPOS())){
+                    continue;
+                }
+                List<TargetPO> targetPOList = targetSceneConvertModel.getTargetPOS();
+
+                List<DeviceTargetVO> deviceTargetVOList = targetPOList.stream().map(v -> {
+                    DeviceTargetVO vo = new DeviceTargetVO();
+                    vo.setUuid(v.getUuid());
+                    vo.setName(v.getName());
+                    vo.setLogo(v.getLogo());
+                    vo.setRole(v.getRole());
+                    vo.setCategory(v.getMainCategory());
+                    vo.setSecondCategory(v.getSubCategory());
+                    vo.setThirdCategory(v.getThirdCategory());
+                    vo.setImageType(v.getImageType());
+                    return vo;
+                }).collect(Collectors.toList());
+                DeviceTargetByTypeVO targetScene = new DeviceTargetByTypeVO();
                 targetScene.setFirstTypeId(firstId);
                 targetScene.setFirstTypeName(first.getName());
                 Integer secondId = second.getId();
                 targetScene.setSecondTypeId(secondId);
                 targetScene.setSecondTypeName(second.getName());
-                targetScene.setDeviceList(secondDeviceList);
+                targetScene.setDeviceList(deviceTargetVOList);
                 targetScenes.add(targetScene);
             }
         }
-        stopWatch2.stop();
-        System.out.println("allTarget花费时间："+ stopWatch2.getTotalTimeSeconds());
-        return new Result<>(new TargetSceneResponse(targetScenes));
+        return new Result(new ListResult<>(targetScenes));
     }
+
+
 
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
@@ -152,7 +211,7 @@ public class DevopsTargetController {
 
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
-    public ServiceResult<CommonTargetResponse> getCommonTargets(){
+    public ServiceResult<DeviceVO> getCommonTargets(){
         List<Device> deviceList = targetConverter.getCommonTargets("");
         List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
 
@@ -167,7 +226,7 @@ public class DevopsTargetController {
             });
         }
 
-        return new Result(new CommonTargetResponse(deviceVOList));
+        return new Result(new ListResult(deviceVOList));
     }
 
     @ApiOperation("批量同步靶标数据")

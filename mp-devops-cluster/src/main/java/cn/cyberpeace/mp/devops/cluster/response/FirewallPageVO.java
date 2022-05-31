@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "防火墙分页返回信息")
-public class FirewallPageResponse extends BaseCloudPlatformResponse {
+public class FirewallPageVO extends BaseCloudPlatformResponse {
 
     /**
      * 名称
