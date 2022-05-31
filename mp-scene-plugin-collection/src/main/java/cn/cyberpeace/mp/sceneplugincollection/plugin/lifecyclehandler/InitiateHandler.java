@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -234,6 +235,12 @@ public class InitiateHandler extends HandlerCommon {
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
                 logParams.addAll(convertLog.convertParams());
             }
+        }
+        if (SystemTypeCommandUtils.isWindows(systemType)) {
+            WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
+            syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
+            syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+            controlParam.setSyscheckParam(syscheckParam);
         }
         controlParam.setProbeParams(customProbeParams);
         controlParam.setRegistryModifyParams(registryParams);
