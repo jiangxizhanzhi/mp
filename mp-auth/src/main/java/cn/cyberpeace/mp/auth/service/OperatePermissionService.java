@@ -96,16 +96,20 @@ public class OperatePermissionService {
             // 管理员不可操作拥有管理员，超级用户角色的账号，但是可以操作普通用户
             // 管理员甚至无权修改自己的信息
             if (hasAdminRole(targetRoleIds)) {
-                log.error("permission denied! Cause target role is admin or superuser! " +
-                        "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
+                if (Objects.nonNull(currentUser)) {
+                    log.error("permission denied! Cause target role is admin or superuser! " +
+                            "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
+                }
                 throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
             }
             return;
         }
 
         // 普通用户不允许操作
-        log.error("permission denied for normal user! " +
-                "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
+        if (Objects.nonNull(currentUser)) {
+            log.error("permission denied for normal user! " +
+                    "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
+        }
         throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
 
     }

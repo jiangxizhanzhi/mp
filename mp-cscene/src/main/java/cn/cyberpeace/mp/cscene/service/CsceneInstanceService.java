@@ -615,7 +615,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 hostEventBO.setNodeName(element.getName());
                 hostEventBO.setProbeId(r.getProbeId());
                 hostEventBO.setProbeName(probeId2Name.get(r.getProbeId()));
-                hostEventBO.setContent(JsonCommon.beanToMap(r.getRawOutPut()));
+                var rawOutput = JsonCommon.beanToMap(r).get("rawOutPut");
+                if (rawOutput != null) {
+                    hostEventBO.setContent(JsonCommon.parseMap(rawOutput.toString()));
+                }
                 result.add(hostEventBO);
             });
         }
