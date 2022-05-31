@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.third.ThirdUser;
+import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.enums.RoleNameEnum;
@@ -356,6 +357,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserModel> listByUserName(List<String> userNames) {
         List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
         return userModels;
+    }
+
+    @Override
+    public List<ThirdUserInfoDto> batchGetThirdUserInfos() {
+        List<ThirdUserInfoDto> thirdUserInfoDtos = getModelMapper().batchGetThirdUserInfos();
+        return thirdUserInfoDtos;
     }
 
     @Override

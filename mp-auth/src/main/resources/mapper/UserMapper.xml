@@ -17,4 +17,12 @@
             #{userName}
         </foreach>
     </select>
+
+    <select id="batchGetThirdUserInfos" resultType="cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto">
+        select u.id as userId, u.third_token as thirdToken
+        from mp_auth_user u
+        where
+            u.third_token is not null
+          and u.third_token != ''
+    </select>
 </mapper>

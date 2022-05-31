@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.GetTokenRequest;
 import cn.cyberpeace.mp.auth.dto.UserTokenRequest;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -27,12 +28,15 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -168,6 +172,21 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
         log.info("get third token result: {}", thirdToken);
         return ServiceResult.success(thirdToken);
+    }
+
+    @ApiOperation(value = "获取第三方用户信息", notes = "获取第三方用户信息")
+    @GetMapping("/third_user_infos")
+    public ServiceResult<List<ThirdUserInfoDto>> batchGetThirdUserInfos() {
+        log.info("get third user infos");
+
+        List<ThirdUserInfoDto> thirdUserInfoDtos = this.getModelService().batchGetThirdUserInfos();
+        if (CollectionUtils.isEmpty(thirdUserInfoDtos)) {
+            log.info("get third user infos result is empty");
+            return ServiceResult.success(new ArrayList<>());
+        }
+
+        log.info("get third user infos result: {}", thirdUserInfoDtos);
+        return ServiceResult.success(thirdUserInfoDtos);
     }
 
 }

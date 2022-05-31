@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -32,6 +33,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     UserModel getByUserName(String userName);
 
     List<UserModel> listByUserName(List<String> userNames);
+
+    List<ThirdUserInfoDto> batchGetThirdUserInfos();
 
     UserModel getByIdent(String ident);
 

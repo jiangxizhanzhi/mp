@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -24,5 +25,7 @@ public interface UserMapper extends BaseModelMapper<UserModel> {
     int updateIdentToNull(@Param("id") String id);
 
     List<UserModel> listByUserNames(List<String> userNames);
+
+    List<ThirdUserInfoDto> batchGetThirdUserInfos();
 
 }
