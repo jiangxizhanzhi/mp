@@ -11,12 +11,23 @@ import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.EnvVarOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
@@ -513,9 +524,9 @@ public class DataCollectionService {
         wazuhMonitorEventsRequest.setPageSize(1);
 
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
-        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
                 })).collect(Collectors.toList());
 
         if (CollectionUtil.isEmpty(wazuhFileRootList)) {
@@ -523,16 +534,16 @@ public class DataCollectionService {
         }
 
         // 只取最近一条
-        WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
+        WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
         List<WazuhNetworkConnectionModel> list = new ArrayList<>();
         if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
-            BaseRawOutput rawOutput = launchModel.getData().getOutput();
-            if (StringUtils.isNotBlank(rawOutput.getRawOutput())) {
-                byte[] raw = TextUtils.rawDecodeBase64(rawOutput.getRawOutput().trim());
+            BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
+            if (StringUtils.isNotBlank(changedCntOutput.getData())) {
+                byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
 
-                JSONArray arr = jsonObject.getJSONArray("data");
+                JSONArray arr = jsonObject.getJSONArray("values");
                 for (int i = 0; i < arr.size(); i++) {
                     JSONObject data = arr.getJSONObject(i);
                     WazuhNetworkConnectionModel netConnModel = JSONObject.toJavaObject(data, WazuhNetworkConnectionModel.class);
@@ -1261,7 +1272,7 @@ public class DataCollectionService {
         return wazuhHostStateModel;
     }
 
-    private WazuhEnvVarEventModel convertEnvVarOutput2EnvVarModel(EnvVarOutput output) {
+    private WazuhEnvVarEventModel convertEnvVarOutput2EnvVarModel(BaseChangeCountOutput output) {
         WazuhEnvVarEventModel model = new WazuhEnvVarEventModel();
         BeanUtils.copyProperties(output, model);
         return model;

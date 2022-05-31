@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2022/04/11 10:41
  */
 @Data
-public class EnvVarOutput {
+public class BaseChangeCountOutput {
 
     // 是否有变动，综合
     @JSONField(name = "changed_count")
