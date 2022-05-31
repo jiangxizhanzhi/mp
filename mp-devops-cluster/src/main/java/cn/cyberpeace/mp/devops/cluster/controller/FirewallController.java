@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FirewallPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.FirewallPageRequest;
-import cn.cyberpeace.mp.devops.cluster.response.FirewallPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.FirewallPageVO;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,10 +37,10 @@ public class FirewallController {
      */
     @ApiOperation("分页查询防火墙")
     @GetMapping("/page")
-    public PageResult<FirewallPageResponse> page(FirewallPageRequest request){
+    public PageResult<FirewallPageVO> page(FirewallPageRequest request){
         FirewallPageConverterModel model = firewallConverter.page(request);
-        List<FirewallPageResponse> list = model.getModelList().stream().map(firewall ->
-            new FirewallPageResponse(firewall.getName(),
+        List<FirewallPageVO> list = model.getModelList().stream().map(firewall ->
+            new FirewallPageVO(firewall.getName(),
                     Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
                     Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
                     firewall.getDescription(),firewall.getStatus())

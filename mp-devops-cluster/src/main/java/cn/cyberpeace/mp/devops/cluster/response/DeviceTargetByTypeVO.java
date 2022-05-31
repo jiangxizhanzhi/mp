@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devops.cluster.vo.DeviceTargetVO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TargetScene implements Serializable {
+public class DeviceTargetByTypeVO implements Serializable {
 
     @ApiModelProperty("一级分类ID")
     private Integer firstTypeId;
@@ -27,5 +27,5 @@ public class TargetScene implements Serializable {
     private String secondTypeName;
 
     @ApiModelProperty("二级分类对应的靶标集合")
-    private List<Device> deviceList;
+    private List<DeviceTargetVO> deviceList;
 }

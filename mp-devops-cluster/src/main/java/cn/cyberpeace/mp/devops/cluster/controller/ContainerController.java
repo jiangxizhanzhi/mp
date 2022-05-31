@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
-import cn.cyberpeace.mp.devops.cluster.response.ContainerPageResponse;
+import cn.cyberpeace.mp.devops.cluster.response.ContainerPageVO;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,13 +44,13 @@ public class ContainerController {
      */
     @ApiOperation("分页查询容器列表")
     @GetMapping("/page")
-    public PageResult<ContainerPageResponse> page(ContainerPageRequest request){
+    public PageResult<ContainerPageVO> page(ContainerPageRequest request){
         ContainerConvertModel model = containerConverter.page(request);
         List<String> nameList = model.getModelList().stream().map(ContainerConvertModel.Model::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
-        List<ContainerPageResponse> list = model.getModelList().stream().map(containerModel ->
-                ContainerPageResponse.builder().name(containerModel.getName())
+        List<ContainerPageVO> list = model.getModelList().stream().map(containerModel ->
+                ContainerPageVO.builder().name(containerModel.getName())
                         .sceneName(Objects.isNull(source.get(containerModel.getName())) ? "" : source.get(containerModel.getName()).getCsceneName())
                 .image(containerModel.getImage()).node(containerModel.getNode())
                 .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
