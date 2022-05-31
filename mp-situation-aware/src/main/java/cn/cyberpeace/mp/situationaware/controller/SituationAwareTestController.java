@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -233,6 +235,14 @@ public class SituationAwareTestController {
         wazuhRequest.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
         dataCollectionService.queryVulnerabilityCountInfo(wazuhRequest, false, "data.vulnerability.package.name", "package_name");
         return ServiceResult.successful();
+    }
+
+
+    @GetMapping("/scrollFileEvents")
+    public ListObjResult<FileEventModel> scrollFileEvents(@RequestParam String scrollId) {
+        ListObjResult<FileEventModel> list = dataCollectionService.scrollFileEvents(scrollId);
+
+        return list.asResult();
     }
 
 }

@@ -82,4 +82,11 @@ public class WazuhEventRequest {
      */
     @ApiModelProperty(value = "文件或注册表路径")
     private String path;
+
+    /**
+     * 是否是滚动分页请求
+     */
+    @ApiModelProperty(value = "是否是滚动分页请求")
+    private boolean scroll = false;
+
 }

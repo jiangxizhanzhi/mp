@@ -323,6 +323,11 @@ public class ScenePluginCollectionSceneService {
             request.setPath(queryParams.getPath());
         }
 
+        if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
+            request.setScroll(true);
+        }
+
+
         // todo 查询事件类型，暂时只支持所有，文件两种类型。用户，进程，端口，网络连接事件暂不支持 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
         if (Objects.nonNull(queryParams.getType())) {
             if (queryParams.getType().equals(1) || queryParams.getType().equals(2) || queryParams.getType().equals(3) || queryParams.getType().equals(5)) {
@@ -348,6 +353,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setFileSize(srcHostEvent.getSize());
             hostEvent.setMd5Before(srcHostEvent.getMd5Before());
             hostEvent.setMd5After(srcHostEvent.getMd5After());
+            hostEvent.setScrollId(srcHostEvent.getScrollId());
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());

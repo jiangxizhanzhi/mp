@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
@@ -59,8 +60,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryPar
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
@@ -532,16 +532,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     return new ListObjServiceResult<>();
                 } else {
                     //自定义探针信息
-                    WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+                    WazuhEventRequest request = new WazuhEventRequest();
                     request.setAgentNames(CollectionUtil.toList(element.getEid()));
                     request.setStartTime(startTime);
                     request.setEndTime(endTime);
                     request.setPageNum(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    res = dataCollectionService.getCustomProbeCollectData(request, probeId);
-                    if (!CollectionUtil.isEmpty(res)) {
-                        total = res.size() + total;
-                    }
+                    var r = dataCollectionService.queryCustomProbeData(request, CollectionUtil.toList(probeId));
+                    res = r.getObjs();
+                    total = r.getTotal() + total;
                 }
                 if (CollectionUtil.isEmpty(res)) {
                     continue;
@@ -558,46 +557,48 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 });
             }
         } else {
+            var batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), null);
+            var eid2Element = batchSceneHandler.getAllEid2ElementMap();
             //获取节点所有自定义探针id
-            Map<String, List<String>> nodeId2ProbeId = new HashMap<>();
+            List<String> agentNames = new ArrayList<>();
+            List<String> probeIds = new ArrayList<>();
             pluginHandler.getElementMap().values().forEach(e -> {
-                List<String> probeIds = new ArrayList<>();
+                var element = e.getSrcElement();
+                if (newNodeIds.contains(element.getId())) {
+                    agentNames.add(element.getEid());
+                }
                 e.getProbes().forEach(probe -> {
                     if (!probe.getCommon()) {
                         probeIds.add(probe.getId());
                     }
                 });
-                nodeId2ProbeId.put(e.getSrcElement().getId(), probeIds);
             });
             //构造查询请求
-            WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+            WazuhEventRequest request = new WazuhEventRequest();
             request.setStartTime(startTime);
             request.setEndTime(endTime);
-            for (String nodeId : newNodeIds) {
-                var element = sceneHandler.getElement(nodeId);
-                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
-                List<String> probeIds = nodeId2ProbeId.get(nodeId);
-                List<?> res;
-                //分别查询不同id探针数据
-                request.setAgentNames(CollectionUtil.toList(element.getEid()));
-                for (String customId : probeIds) {
-                    res = dataCollectionService.getCustomProbeCollectData(request, customId);
-                    if (CollectionUtil.isEmpty(res)) {
-                        continue;
-                    }
-                    total = total + res.size();
-                    res.forEach(r -> {
-                        CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
-                        hostEventBO.setSceneId(sceneId);
-                        hostEventBO.setNodeId(nodeId);
-                        hostEventBO.setNodeName(element.getName());
-                        hostEventBO.setProbeId(customId);
-                        hostEventBO.setProbeName(probeId2Name.get(customId));
-                        hostEventBO.setContent(JsonCommon.beanToMap(r));
-                        result.add(hostEventBO);
-                    });
-                }
+            request.setPageNum(queryParams.getPage());
+            request.setPageSize(queryParams.getPageSize());
+            request.setAgentNames(agentNames);
+            //分页查询自定义探针数据
+            var listObjResult = dataCollectionService.queryCustomProbeData(request, probeIds);
+            var res = listObjResult.getObjs();
+            if (CollectionUtil.isEmpty(res)) {
+                return new ListObjServiceResult<>();
             }
+            total = listObjResult.getTotal();
+            res.forEach(r -> {
+                var element = eid2Element.get(r.getAgentName());
+                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(element.getId());
+                CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+                hostEventBO.setSceneId(sceneId);
+                hostEventBO.setNodeId(element.getId());
+                hostEventBO.setNodeName(element.getName());
+                hostEventBO.setProbeId(r.getProbeId());
+                hostEventBO.setProbeName(probeId2Name.get(r.getProbeId()));
+                hostEventBO.setContent(JsonCommon.beanToMap(r.getRawOutPut()));
+                result.add(hostEventBO);
+            });
         }
         return new ListObjServiceResult<>(new ListObjResult(result, Math.min(total, 10000)));
     }

@@ -71,4 +71,7 @@ public class FileEventModel {
     @ApiModelProperty("从_source里面抽取的信息，JSONObject")
     private JSONObject content;
 
+    @ApiModelProperty("滚动分页的scroll_id")
+    private String scrollId;
+
 }
