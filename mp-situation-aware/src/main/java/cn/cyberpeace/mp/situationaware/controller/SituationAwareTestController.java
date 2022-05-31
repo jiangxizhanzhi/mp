@@ -142,6 +142,17 @@ public class SituationAwareTestController {
         System.out.println(count);
     }
 
+    @GetMapping("/ruleIds/byAgentNames")
+    public void aggsRuleIdsByAgentNames() {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(Lists.newArrayList("bbfdcf9a17a140b3bbe02e6d08890921"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        wazuhEventRequest.setStartTime(LocalDateTime.parse("2022-05-31 00:00:00", formatter));
+        wazuhEventRequest.setEndTime(LocalDateTime.parse("2022-05-31 17:15:00", formatter));
+        Map<String, Long> countMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
+        System.out.println(countMap);
+    }
+
 
     @GetMapping("/query/hoststate")
     public ServiceResult queryHostState(@RequestParam String agentName) {

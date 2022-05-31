@@ -104,8 +104,8 @@ public class CollectionTypeService {
         CollectionType networkserver = CollectionType.builder().name("网络服务").code(code + "04").type(type).build();
         CollectionType app = CollectionType.builder().name("应用软件").code(code + "05").type(type).build();
         CollectionType cloud = CollectionType.builder().name("云").code(code + "06").type(type).build();
-        CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "06").type(type).build();
-        CollectionType appframework = CollectionType.builder().name("应用框架").code(code + "06").type(type).build();
+        CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "07").type(type).build();
+        CollectionType appframework = CollectionType.builder().name("应用框架").code(code + "08").type(type).build();
         List<CollectionType> appSubTypes = Arrays.asList(mailserver, webserver, database, networkserver, app, cloud, loadbalancer, appframework);
         appType.setChildren(appSubTypes);
 

@@ -21,16 +21,19 @@ CREATE TABLE mp_sceneplugincollection_wazuh_rule
     PRIMARY KEY (`pk`),
     UNIQUE (`id`)
 );
+
 CREATE TABLE mp_sceneplugincollection_wazuh_rule_type
 (
     `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
     `type`        varchar(64) NOT NULL COMMENT '类型名称',
     `id`          varchar(64) NOT NULL COMMENT '类型id',
+    `code`        varchar(64) NOT NULL COMMENT '编号',
     `create_time` datetime(6) default LOCALTIME COMMENT '创建时间',
     `update_time` datetime(6) default LOCALTIME COMMENT '更新时间',
     PRIMARY KEY (`pk`),
     UNIQUE (`id`)
 );
+
 CREATE TABLE mp_sceneplugincollection_wazuh_rule_type_relation
 (
     `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',

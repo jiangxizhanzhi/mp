@@ -309,8 +309,10 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
 
+        // todo catagories -> rule id set
         if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-            request.setCatagories(queryParams.getCatagories());
+            List<String> ruleIds = getRuleIdsByCodes(queryParams.getCatagories());
+            request.setRuleIds(ruleIds);
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
@@ -1289,6 +1291,19 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 根据规则类型code获取类型id
+     *
+     * @param types 类型集合
+     * @return 类型id集合
+     */
+    private List<String> getTypeIdsByCodes(List<String> codes) {
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeModel::getCode, codes.toArray());
+        var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
+        return typeModels.stream().map(t -> t.getId()).collect(Collectors.toList());
+    }
+
+    /**
      * 根据类型id获取类型名称
      *
      * @param typeIds
@@ -1299,6 +1314,23 @@ public class ScenePluginCollectionSceneService {
                 .filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
         var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
         return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
+    }
+
+    /**
+     * 根据规则类型code获取规则id集合
+     *
+     * @param codes 类型集合
+     * @return 规则id集合
+     */
+    public List<String> getRuleIdsByCodes(List<String> codes) {
+        if (CollectionUtil.isEmpty(codes)) {
+            return new ArrayList<>();
+        }
+        List<String> typeIds = getTypeIdsByCodes(codes);
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
+                .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
+        var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
     }
 
     /**
