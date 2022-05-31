@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "磁盘剩余空间返回对象")
-public class ImportDiskSpaceResponse extends BaseCloudPlatformResponse {
+public class ImportDiskSpaceResponse extends BaseResponse {
 
     /**
      * 虚拟机空间

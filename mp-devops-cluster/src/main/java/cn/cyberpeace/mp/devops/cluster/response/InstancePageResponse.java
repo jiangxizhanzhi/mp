@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "虚拟机分页返回信息")
-public class InstancePageResponse extends BaseCloudPlatformResponse {
+public class InstancePageResponse extends BaseResponse {
 
     /**
      * 实例名称

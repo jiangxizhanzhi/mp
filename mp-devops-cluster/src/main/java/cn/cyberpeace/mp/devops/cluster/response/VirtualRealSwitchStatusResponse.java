@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "虚实结合交换机状态")
-public class VirtualRealSwitchStatusResponse extends BaseCloudPlatformResponse {
+public class VirtualRealSwitchStatusResponse extends BaseResponse {
 
     /**
      * 名称

@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "根据ID查询返回信息")
-public class ImagesByIdResponse extends BaseCloudPlatformResponse  {
+public class ImagesByIdResponse extends BaseResponse {
 
     /**
      * UUID

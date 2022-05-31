@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "实装返回信息")
-public class RealEquipmentByIdResponse extends BaseCloudPlatformResponse{
+public class RealEquipmentByIdResponse extends BaseResponse {
 
     /**
      * UUID

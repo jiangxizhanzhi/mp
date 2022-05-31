@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description = "系统运维-实装管理详情返回信息")
-public class RealEquipmentDevopsDetailResponse extends BaseCloudPlatformResponse{
+public class RealEquipmentDevopsDetailResponse extends BaseResponse {
 
     /**
      * 名称

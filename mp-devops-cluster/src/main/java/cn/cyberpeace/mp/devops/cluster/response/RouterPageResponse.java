@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "路由分页返回信息")
-public class RouterPageResponse extends BaseCloudPlatformResponse {
+public class RouterPageResponse extends BaseResponse {
 
     /**
      * 网络名称
