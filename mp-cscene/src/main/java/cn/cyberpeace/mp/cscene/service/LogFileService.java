@@ -50,7 +50,7 @@ public class LogFileService {
     @Autowired
     private SceneMonitorService sceneMonitorService;
 
-    @Value("${mp.sceneplugincollection.wazuh-godfs-outer-http-server:/mpgodfs}")
+    @Value("${mp.sceneplugincollection.wazuh-godfs-outer-http-server:/mp_scene_collection_godfs}")
     private String godfsOuterHttpServer;
 
     /**
