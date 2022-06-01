@@ -134,7 +134,7 @@ public class LogFileService {
         ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
-        String osType = ProbeOSType.getByCode((Integer) osTypeCode);
+        String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
         if (Objects.nonNull(osType)) {
             osType = osType.trim().toLowerCase();
         }
