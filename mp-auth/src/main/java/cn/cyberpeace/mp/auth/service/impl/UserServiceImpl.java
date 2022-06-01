@@ -915,7 +915,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         try {
             Map<String,String> headerMap = new HashMap<>();
             headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
-            String strUserRsp = HttpUtils.sendGet(authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/user", headerMap);
+            String url = authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/user";
+            log.info("================get token detail url: {}", url);
+            String strUserRsp = HttpUtils.sendGet(url, headerMap);
             log.info("================get token detail rsp: {}", strUserRsp);
 
             // 结果解析
