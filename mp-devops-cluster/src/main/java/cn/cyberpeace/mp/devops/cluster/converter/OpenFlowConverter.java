@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.OpenFlowPageParams;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.OpenFlowService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.OpenFlowPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.request.OpenFlowPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowMatchConditionVO;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
@@ -38,7 +38,7 @@ public class OpenFlowConverter implements BaseConverter{
         params.setMethod(request.getMethod());
         params.setLimit(request.getLimit());
         params.setOffset(request.getOffset());
-        CloudPlatformPageModel<OpenFlow> model = openFlowService.page(params);
+        CloudPlatformPageResult<OpenFlow> model = openFlowService.page(params);
         List<OpenFlow> openFlows = model.getList();
         List<OpenFlowVO> openFlowVOS = openFlows.stream().map(v -> {
             OpenFlowVO openFlowVO = openFlowVoConverter.openFlowToOpenFlowVO(v);

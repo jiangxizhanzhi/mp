@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImportService;
-import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
@@ -39,7 +39,7 @@ public class ImportConverter implements BaseConverter{
      * @return
      */
     public ImportDiskSpaceResponse getDiskSpace() {
-        ImportDiskSpaceCloudPlatformModel diskSpaceModel = importService.getDiskSpace();
+        ImportDiskSpaceCloudPlatformResult diskSpaceModel = importService.getDiskSpace();
 
         try {
             // 获取最大并发启动场景节点数

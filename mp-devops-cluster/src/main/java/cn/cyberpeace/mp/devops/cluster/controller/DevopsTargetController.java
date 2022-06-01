@@ -232,7 +232,8 @@ public class DevopsTargetController {
     @ApiOperation("批量同步靶标数据")
     @GetMapping("/multi-async")
     public ServiceResult multiAsync(TargetMultiAsyncRequest request){
-        devopsTargetService.deleteAllTarget();
+        int deleteNum = devopsTargetService.deleteAllTarget();
+        log.info("删除靶标数量：{}",deleteNum);
         List<Device> deviceList = targetConverter.multiAsync(request.getOffset(), request.getLimit());
         MultiThreadUtils multiThreadUtils = MultiThreadUtils.newInstance(request.getThreadCount());
 

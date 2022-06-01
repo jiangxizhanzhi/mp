@@ -41,6 +41,12 @@ public class FileUtils {
         return fileList;
     }
 
+    /**
+     *
+     * @param multipartFiles
+     * @return
+     * @throws IOException
+     */
     public static Map<String,File> transferToFileMap(List<MultipartFile> multipartFiles) throws IOException {
         if (CollectionUtils.isEmpty(multipartFiles)){
             return new HashMap<>();

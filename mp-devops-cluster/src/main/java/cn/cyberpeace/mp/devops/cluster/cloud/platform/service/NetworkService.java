@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
@@ -29,7 +29,7 @@ public class NetworkService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<NetworkModel> page(String getParams){
+    public CloudPlatformPageResult<NetworkModel> page(String getParams){
         return super.page(URL_VERSION + NETWORKS + getParams, NetworkModel.class);
     }
 
@@ -38,7 +38,7 @@ public class NetworkService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<ElasticIpModel> pageElasticIp(String getParams){
+    public CloudPlatformPageResult<ElasticIpModel> pageElasticIp(String getParams){
         return super.page(URL_VERSION + NETWORKS + "/floatingips" + getParams, ElasticIpModel.class);
     }
 
@@ -46,7 +46,7 @@ public class NetworkService extends BaseOpenStackService {
      *
      * @return
      */
-    public CloudPlatformPageModel<NetworkAgentModel> agentsStateFromNetworks(){
+    public CloudPlatformPageResult<NetworkAgentModel> agentsStateFromNetworks(){
         return super.page(URL_VERSION + NETWORKS + "/agents", NetworkAgentModel.class);
     }
 }

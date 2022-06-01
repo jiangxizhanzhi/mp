@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Installer extends BaseCloudPlatformModel {
+public class Installer extends BaseCloudPlatformResult {
 
     /**
      * ID

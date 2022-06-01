@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class NpcConverter implements BaseConverter{
     public NpcPageConverterModel page(NpcPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        CloudPlatformPageModel<NpcModel> model = npcService.page(getParams);
+        CloudPlatformPageResult<NpcModel> model = npcService.page(getParams);
         NpcPageConverterModel convertModel = new NpcPageConverterModel();
         convertModel.setModelList(model.getList());
         convertModel.setTotal(model.getTotal());
@@ -44,7 +44,7 @@ public class NpcConverter implements BaseConverter{
      */
     public Integer getTotalNpcs(NpcPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageModel<NpcModel> page = npcService.page(getParams);
+        CloudPlatformPageResult<NpcModel> page = npcService.page(getParams);
         return page.getTotal();
     }
 }

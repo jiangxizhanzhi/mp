@@ -6,9 +6,9 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.SwitchesCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
@@ -48,7 +48,7 @@ public class HypervisorConverter implements BaseConverter {
      * @return
      */
     public HypervisorStatisticsConvertModel statistics() {
-        HypervisorStatisticsCloudPlatformModel statistics = hypervisorService.statistics();
+        HypervisorStatisticsCloudPlatformResult statistics = hypervisorService.statistics();
         HypervisorStatistics hypervisorStatistics = statistics.getHypervisorStatistics();
         return new HypervisorStatisticsConvertModel(hypervisorStatistics.getVcpus(),hypervisorStatistics.getMemoryMb()
                 ,hypervisorStatistics.getLocalGb(),hypervisorStatistics.getVcpusUsed(),hypervisorStatistics.getMemoryMbUsed()
@@ -64,7 +64,7 @@ public class HypervisorConverter implements BaseConverter {
     public HypervisorPageConvertModel page(HypervisorPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        final CloudPlatformPageModel<Hypervisor> model = hypervisorService.page(getParams);
+        final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
         List<HypervisorPageConvertModel.Model> list = model.getList().stream().map(hypervisor ->
                 HypervisorPageConvertModel.Model.builder().name(hypervisor.getHostname())
                         .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
@@ -85,7 +85,7 @@ public class HypervisorConverter implements BaseConverter {
      * @return
      */
     public HypervisorWeightAndMaxInstanceConvertModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request) {
-        HypervisorWeightAndMaxInstanceCloudPlatformModel model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(request));
+        HypervisorWeightAndMaxInstanceCloudPlatformResult model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(request));
         if (Objects.isNull(model)){
             return null;
         }
@@ -105,8 +105,8 @@ public class HypervisorConverter implements BaseConverter {
      * @return
      */
     public List<HypervisorServiceStateConvertModel> serviceState() {
-        CloudPlatformPageModel<InstanceOsServiceModel> osServiceOpenStackModel = vmService.osServicesStateFromInstances();
-        CloudPlatformPageModel<NetworkAgentModel> networkAgentOpenStackModel = networkService.agentsStateFromNetworks();
+        CloudPlatformPageResult<InstanceOsServiceModel> osServiceOpenStackModel = vmService.osServicesStateFromInstances();
+        CloudPlatformPageResult<NetworkAgentModel> networkAgentOpenStackModel = networkService.agentsStateFromNetworks();
 
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 

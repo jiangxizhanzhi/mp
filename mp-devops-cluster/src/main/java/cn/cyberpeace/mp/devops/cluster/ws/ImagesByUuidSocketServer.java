@@ -22,7 +22,7 @@ public class ImagesByUuidSocketServer {
     /**
      * KEY:Session，value:连接实例
      */
-    private static Map<Session, ImagesByUuidSocketServer> websocketMap = new ConcurrentHashMap<>();
+    private static final Map<Session, ImagesByUuidSocketServer> websocketMap = new ConcurrentHashMap<>();
 
     /**
      * 与客户端建立的连接session
@@ -57,7 +57,7 @@ public class ImagesByUuidSocketServer {
     @OnClose
     public void onClose() {
         // 删除
-        websocketMap.remove(this.uuid);
+        websocketMap.remove(this.session);
         log.info("close websocket : {}", this.uuid);
     }
 

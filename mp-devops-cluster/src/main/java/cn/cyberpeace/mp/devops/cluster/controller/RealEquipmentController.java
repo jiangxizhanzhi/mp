@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
@@ -194,7 +195,7 @@ public class RealEquipmentController {
     @ApiOperation("删除")
     @DeleteMapping("/delete")
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
-        BaseCloudPlatformModel result = realEquipmentConverter.delete(request);
+        BaseCloudPlatformResult result = realEquipmentConverter.delete(request);
         return new Result<>(result.isSuccess());
     }
 
@@ -281,7 +282,7 @@ public class RealEquipmentController {
                 }
             }
         }
-        CloudPlatformPageModel<TargetConnection> connection = realEquipmentService.connection(id);
+        CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(id);
         if (Objects.nonNull(connection)){
             response.setConnections(connection.getList());
         }
@@ -339,7 +340,7 @@ public class RealEquipmentController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        CloudPlatformPageModel<TargetConnection> connection = realEquipmentService.connection(uuid);
+        CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(uuid);
         if (Objects.isNull(connection)){
             return new Result<>();
         }
@@ -349,7 +350,7 @@ public class RealEquipmentController {
     @ApiOperation("根据交换机名称查询实体装备")
     @GetMapping("/by-switch-name")
     public Result<List<RealEquipmentByParams>> findBySwitchName(@RequestParam("switchName") String switchName){
-        CloudPlatformPageModel<RealEquipmentByParams> bySwitchName = realEquipmentService.findBySwitchName(switchName);
+        CloudPlatformPageResult<RealEquipmentByParams> bySwitchName = realEquipmentService.findBySwitchName(switchName);
         if (Objects.isNull(bySwitchName)){
             return new Result<>();
         }
@@ -359,7 +360,7 @@ public class RealEquipmentController {
     @ApiOperation("根据串口名称查询实体装备")
     @GetMapping("/by-serial-port")
     public Result<List<RealEquipmentByParams>> findBySerialPort(@RequestParam("serialPort") String serialPort){
-        CloudPlatformPageModel<RealEquipmentByParams>  bySerialPort = realEquipmentService.findBySerialPort(serialPort);
+        CloudPlatformPageResult<RealEquipmentByParams> bySerialPort = realEquipmentService.findBySerialPort(serialPort);
         if (Objects.isNull(bySerialPort)){
             return new Result<>();
         }

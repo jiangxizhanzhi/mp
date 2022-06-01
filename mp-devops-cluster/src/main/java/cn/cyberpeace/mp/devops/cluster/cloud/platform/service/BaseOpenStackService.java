@@ -2,13 +2,12 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -143,12 +142,12 @@ public class BaseOpenStackService extends BaseService {
      * @param <T>
      * @return
      */
-    protected <T> CloudPlatformPageModel<T> page(String url, Class<T> tClass) {
-        CloudPlatformPageResult pageResult = this.sendGet(url, CloudPlatformPageResult.class);
+    protected <T> CloudPlatformPageResult<T> page(String url, Class<T> tClass) {
+        cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult pageResult = this.sendGet(url, cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult.class);
         this.checkResult(pageResult);
         CloudPlatformPageData data = pageResult.getData();
         List<T> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()),tClass);
-        CloudPlatformPageModel<T> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<T> model = new CloudPlatformPageResult<>();
         model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(data.getTotal());
         model.setCode(pageResult.getCode());
@@ -160,7 +159,7 @@ public class BaseOpenStackService extends BaseService {
      * @param t
      * @param <T>
      */
-    protected <T extends BaseCloudPlatformModel> void checkResult(T t){
+    protected <T extends BaseCloudPlatformResult> void checkResult(T t){
         if (Objects.isNull(t) || (!BaseCloudPlatformConstant.CODE.equals(t.getCode()) && !t.isSuccess())){
             throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_ERROR);
         }

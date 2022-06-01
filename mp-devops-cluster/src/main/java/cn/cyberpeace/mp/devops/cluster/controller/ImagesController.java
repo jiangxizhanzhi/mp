@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
@@ -17,8 +18,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
@@ -208,7 +208,7 @@ public class ImagesController {
     @ApiOperation("删除")
     @DeleteMapping("/page")
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
-        BaseCloudPlatformModel model = imagesConverter.delete(request);
+        BaseCloudPlatformResult model = imagesConverter.delete(request);
         return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
     }
 
@@ -238,7 +238,7 @@ public class ImagesController {
     @ApiOperation("导出")
     @GetMapping("/export")
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
-        BaseCloudPlatformModel model = imagesConverter.export(uuid,imageName);
+        BaseCloudPlatformResult model = imagesConverter.export(uuid,imageName);
         return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
     }
 
@@ -248,7 +248,7 @@ public class ImagesController {
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     public ServiceResult create(@PathVariable("id") String uuid){
-        BaseCloudPlatformModel model = imagesConverter.create(uuid);
+        BaseCloudPlatformResult model = imagesConverter.create(uuid);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -261,7 +261,7 @@ public class ImagesController {
     @ApiOperation("释放镜像机器")
     @PostMapping("/delete-instance")
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
-        BaseCloudPlatformModel model = imagesConverter.delete(request);
+        BaseCloudPlatformResult model = imagesConverter.delete(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -274,7 +274,7 @@ public class ImagesController {
     @ApiOperation("重启镜像机器")
     @PostMapping("/reboot")
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
-        BaseCloudPlatformModel model = imagesConverter.reboot(request);
+        BaseCloudPlatformResult model = imagesConverter.reboot(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -311,7 +311,7 @@ public class ImagesController {
     @ApiOperation("合并快照历史")
     @PostMapping("/snapshot/merge")
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
-        BaseCloudPlatformModel model = snapshotConverter.merge(request);
+        BaseCloudPlatformResult model = snapshotConverter.merge(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -324,7 +324,7 @@ public class ImagesController {
     @ApiOperation("创建快照")
     @PostMapping("/snapshot/create")
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
-        BaseCloudPlatformModel model = snapshotConverter.create(request);
+        BaseCloudPlatformResult model = snapshotConverter.create(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -337,7 +337,7 @@ public class ImagesController {
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
-        BaseCloudPlatformModel model = scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+        BaseCloudPlatformResult model = scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
@@ -364,7 +364,7 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        BaseCloudPlatformModel model = injectFileConverter.delete(request);
+        BaseCloudPlatformResult model = injectFileConverter.delete(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }
@@ -381,7 +381,7 @@ public class ImagesController {
         BasePageRequest request = new BasePageRequest();
         request.setPerPage(1000);
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request);
-        CloudPlatformPageModel<Flavor> page = flavorService.page(getParams);
+        CloudPlatformPageResult<Flavor> page = flavorService.page(getParams);
         List<Flavor> flavorList = page.getList().stream().sorted(Comparator.comparing(Flavor::getDisk))
                 .sorted(Comparator.comparing(Flavor::getRam))
                 .sorted(Comparator.comparing(Flavor::getCpu)).collect(Collectors.toList());
@@ -391,7 +391,7 @@ public class ImagesController {
     @ApiOperation("根据设备ID获取登录链接信息")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
-        CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
+        CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         return new Result<>(connection.getList());
     }
 

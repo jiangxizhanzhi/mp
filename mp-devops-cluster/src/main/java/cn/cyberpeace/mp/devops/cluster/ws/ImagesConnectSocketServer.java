@@ -22,7 +22,7 @@ public class ImagesConnectSocketServer {
     /**
      * KEY:Session，value:连接实例
      */
-    private static Map<Session, ImagesConnectSocketServer> websocketMap = new ConcurrentHashMap<>();
+    private static final Map<Session, ImagesConnectSocketServer> websocketMap = new ConcurrentHashMap<>();
 
     /**
      * 与客户端建立的连接session
@@ -48,7 +48,7 @@ public class ImagesConnectSocketServer {
             websocketMap.put(session, this);
             log.info("查看机器websocket 新连接：{}", uuid);
         } catch (Exception e) {
-            log.error("查看机器websocket  新建连接 异常：{}",e);
+            log.error("查看机器websocket  新建连接 异常:{}",e.getMessage(),e);
         }
     }
 

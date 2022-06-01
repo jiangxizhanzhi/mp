@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
@@ -55,8 +55,8 @@ public class ImagesService extends BaseOpenStackService {
     /**
      * 导出
      */
-    public BaseCloudPlatformModel export(String uuid,String imageName){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName,BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult export(String uuid, String imageName){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName, BaseCloudPlatformResult.class);
     }
 
     /**
@@ -75,7 +75,7 @@ public class ImagesService extends BaseOpenStackService {
      * @param type :  image or installer
      * @return
      */
-    public BaseCloudPlatformModel upload(Map<String,File> fileMap, String type){
+    public BaseCloudPlatformResult upload(Map<String,File> fileMap, String type){
         if (MapUtils.isEmpty(fileMap)){
             return null;
         }
@@ -83,7 +83,7 @@ public class ImagesService extends BaseOpenStackService {
         fileMap.entrySet().stream().forEach(entry -> builder.addBinaryBody("file",  entry.getValue(),ContentType.DEFAULT_BINARY,entry.getKey()));
         builder.setMode(HttpMultipartMode.RFC6532);
         try {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformModel.class);
+            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformResult.class);
         } catch (IOException e) {
             log.error("upload file error",e);
         }
@@ -95,11 +95,11 @@ public class ImagesService extends BaseOpenStackService {
      * @param deviceUuid
      * @return
      */
-    public CloudPlatformPageModel<TargetConnection> connection(String deviceUuid){
+    public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
-        CloudPlatformPageModel<TargetConnection> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
     }

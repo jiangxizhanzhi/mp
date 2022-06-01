@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import com.google.common.collect.Lists;
@@ -35,7 +35,7 @@ public class NetworkConverter implements BaseConverter{
     public NetworkPageConverterModel page(NetworkPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        CloudPlatformPageModel<NetworkModel> model = networkService.page(getParams);
+        CloudPlatformPageResult<NetworkModel> model = networkService.page(getParams);
         List<NetworkPageConverterModel.Model> list = model.getList().stream().map(networkModel -> {
             NetworkModel.Subnet subnet = networkModel.getSubnet();
             List<NetworkPageConverterModel.Model.Subnet> subnets = Lists.newArrayList();

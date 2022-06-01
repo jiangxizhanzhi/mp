@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model.common;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class InjectFile extends BaseCloudPlatformModel {
+public class InjectFile extends BaseCloudPlatformResult {
 
     private String uuid;
 

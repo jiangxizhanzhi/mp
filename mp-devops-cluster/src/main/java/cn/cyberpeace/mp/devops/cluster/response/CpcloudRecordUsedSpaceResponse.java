@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.Data;
 
 /**
@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2021/9/13 19:47
  */
 @Data
-public class CpcloudRecordUsedSpaceResponse extends BaseCloudPlatformModel {
+public class CpcloudRecordUsedSpaceResponse extends BaseCloudPlatformResult {
 
     /**
      * 总空间

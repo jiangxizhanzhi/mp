@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
@@ -31,7 +31,7 @@ public class VmService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<InstanceModel> page(String getParams){
+    public CloudPlatformPageResult<InstanceModel> page(String getParams){
         return super.page(URL_VERSION + INSTANCES + getParams, InstanceModel.class);
     }
 
@@ -41,15 +41,15 @@ public class VmService extends BaseOpenStackService {
      * @param uuid
      * @return
      */
-    public BaseCloudPlatformModel action(VmActionCloudPlatformModel model, String uuid){
-        return super.sendPost(URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model),BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult action(VmActionCloudPlatformModel model, String uuid){
+        return super.sendPost(URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
     }
 
     /**
      *
      * @return
      */
-    public CloudPlatformPageModel<InstanceOsServiceModel> osServicesStateFromInstances(){
+    public CloudPlatformPageResult<InstanceOsServiceModel> osServicesStateFromInstances(){
         return super.page(URL_VERSION + INSTANCES + "/os-services", InstanceOsServiceModel.class);
     }
 }

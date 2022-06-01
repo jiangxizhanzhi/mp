@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
@@ -34,11 +34,11 @@ public class DeviceService extends BaseOpenStackService {
      * @param params
      * @return
      */
-    public CloudPlatformPageModel<Device> page(String params){
+    public CloudPlatformPageResult<Device> page(String params){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/lists" + params, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
-        CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());
         return model;
@@ -58,11 +58,11 @@ public class DeviceService extends BaseOpenStackService {
      * @param ids
      * @return
      */
-    public CloudPlatformPageModel<Device> findByIds(List<Integer> ids){
+    public CloudPlatformPageResult<Device> findByIds(List<Integer> ids){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
-        CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
     }
@@ -71,9 +71,9 @@ public class DeviceService extends BaseOpenStackService {
      * 批量删除
      * @param uuids
      */
-    public BaseCloudPlatformModel deleteByIds(List<String> uuids) {
+    public BaseCloudPlatformResult deleteByIds(List<String> uuids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", uuids);
-        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformModel.class);
+        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + "/device/batch_delete",JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
     }
 }

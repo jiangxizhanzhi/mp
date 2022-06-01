@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ public class RouterConverter implements BaseConverter{
     public RouterPageConverterModel page(RouterPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        CloudPlatformPageModel<RouterModel> model = routerService.page(getParams);
+        CloudPlatformPageResult<RouterModel> model = routerService.page(getParams);
         List<RouterModel> routers = model.getList();
         List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
                 RouterPageConverterModel.Model.builder().name(routerModel.getName())
@@ -47,7 +47,7 @@ public class RouterConverter implements BaseConverter{
      */
     public Integer getTotalRouters(RouterPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageModel page = routerService.page(getParams);
+        CloudPlatformPageResult page = routerService.page(getParams);
         return page.getTotal();
     }
 }

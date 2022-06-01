@@ -4,11 +4,11 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
@@ -124,7 +124,7 @@ public class InstallerController {
     @ApiOperation("删除")
     @DeleteMapping
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
-        BaseCloudPlatformModel model = installerConverter.delete(request);
+        BaseCloudPlatformResult model = installerConverter.delete(request);
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.OpenFlowPageParams;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -35,11 +35,11 @@ public class OpenFlowService extends BaseOpenStackService {
      * @param request
      * @return
      */
-    public CloudPlatformPageModel<OpenFlow> page(OpenFlowPageParams request) {
+    public CloudPlatformPageResult<OpenFlow> page(OpenFlowPageParams request) {
         CloudPlatformResult<List<OpenFlow>> pageResult = super.sendPost(CPCLOUD_OPENFLOW + URL_VERSION + "/openflow/action", JsonUtils.toUnderlineJSONString(request), CloudPlatformResult.class);
         super.checkResult(pageResult);
         List<OpenFlow> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData()),OpenFlow.class);
-        CloudPlatformPageModel<OpenFlow> model = new CloudPlatformPageModel();
+        CloudPlatformPageResult<OpenFlow> model = new CloudPlatformPageResult();
         model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(pageResult.getTotal());
         model.setCode(pageResult.getCode());

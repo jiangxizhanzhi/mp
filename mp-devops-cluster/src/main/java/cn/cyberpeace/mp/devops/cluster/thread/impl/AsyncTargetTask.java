@@ -5,8 +5,8 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +18,12 @@ import java.util.stream.Collectors;
  * 同步靶标任务类
  */
 @Service
+@RequiredArgsConstructor
 public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Device>> {
 
-    private TargetConverter targetConverter;
+    private final TargetConverter targetConverter;
 
-    private DevopsTargetService devopsTargetService;
-
-    @Autowired
-    public AsyncTargetTask(TargetConverter targetConverter, DevopsTargetService devopsTargetService) {
-        this.targetConverter = targetConverter;
-        this.devopsTargetService = devopsTargetService;
-    }
+    private final DevopsTargetService devopsTargetService;
 
     @Transactional
     @Override
