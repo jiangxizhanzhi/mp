@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ImportConverter;
-import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.vo.ImportDiskSpaceVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +32,8 @@ public class ImportController {
      */
     @ApiOperation("获取磁盘剩余空间")
     @GetMapping("/disk_space")
-    public Result<ImportDiskSpaceResponse> getDiskSpace(){
-        ImportDiskSpaceResponse diskSpaceResponse = importConverter.getDiskSpace();
+    public Result<ImportDiskSpaceVO> getDiskSpace(){
+        ImportDiskSpaceVO diskSpaceResponse = importConverter.getDiskSpace();
         return new Result(diskSpaceResponse);
     }
 

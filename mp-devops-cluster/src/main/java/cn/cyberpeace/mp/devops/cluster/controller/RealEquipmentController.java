@@ -16,12 +16,12 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentDevopsDetailResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentNetworkCardPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.RealEquipmentPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
-import cn.cyberpeace.mp.devops.cluster.response.base.Result;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentByIdVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentDevopsDetailVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentNetworkCardPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
+import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -55,7 +55,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public PageResult<RealEquipmentPageResponse> page(RealEquipmentPageRequest request){
+    public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
         RealEquipmentConvertModel model = realEquipmentConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
@@ -65,9 +65,9 @@ public class RealEquipmentController {
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllConvertModel accessType = typeConverter.findAccessType();
 
-        List<RealEquipmentPageResponse> list = model.getModelList().stream().map(v -> {
+        List<RealEquipmentPageVO> list = model.getModelList().stream().map(v -> {
             ExtEntity extEntity = v.getExtEntity();
-            RealEquipmentPageResponse response = RealEquipmentPageResponse.builder().id(v.getUuid()).name(v.getName())
+            RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .description(v.getDescription()).useStatus(v.getUseStatus()).referenceStatus(v.getReferenceStatus())
                     .inPosition(v.getInPosition()).build();
@@ -138,7 +138,7 @@ public class RealEquipmentController {
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public Result<RealEquipmentByIdResponse> getById(@PathVariable String id){
+    public Result<RealEquipmentByIdVO> getById(@PathVariable String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         List<ExtEntityAccess> extEntityAccess = realEquipment.getExtEntityAccess();
         if (CollectionUtils.isNotEmpty(extEntityAccess)) {
@@ -152,7 +152,7 @@ public class RealEquipmentController {
             }).collect(Collectors.toList());
         }
 
-        RealEquipmentByIdResponse response = RealEquipmentByIdResponse.builder().uuid(realEquipment.getUuid())
+        RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipment.getUuid())
                 .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
                 .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory()).thirdCategory(realEquipment.getThirdCategory())
                 .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
@@ -201,12 +201,12 @@ public class RealEquipmentController {
 
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
-    public Result<RealEquipmentDevopsDetailResponse> findDevopsDetails(@RequestParam("uuid") String id){
+    public Result<RealEquipmentDevopsDetailVO> findDevopsDetails(@RequestParam("uuid") String id){
         RealEquipment realEquipment = realEquipmentConverter.findById(id);
         if (Objects.isNull(realEquipment)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        RealEquipmentDevopsDetailResponse response = RealEquipmentDevopsDetailResponse.builder()
+        RealEquipmentDevopsDetailVO response = RealEquipmentDevopsDetailVO.builder()
                 .name(realEquipment.getName()).logo(realEquipment.getLogo())
                 .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
         if (CollectionUtils.isNotEmpty(realEquipment.getExtEntityAccess())) {
@@ -292,7 +292,7 @@ public class RealEquipmentController {
 
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
-    public PageResult<RealEquipmentNetworkCardPageResponse> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
+    public PageResult<RealEquipmentNetworkCardPageVO> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
         RealEquipment realEquipment = realEquipmentConverter.findById(request.getUuid());
         if (Objects.isNull(realEquipment)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
@@ -331,8 +331,8 @@ public class RealEquipmentController {
         Integer perPage = request.getPerPage();
         Integer to = Math.min((page * perPage), model.getResult().size());
         List<SnmpInterfaceResourceCloudPlatform.Interfaces> interfaces = model.getResult().subList((page - 1) * perPage, to);
-        List<RealEquipmentNetworkCardPageResponse> list = interfaces.stream().map(v ->
-                RealEquipmentNetworkCardPageResponse.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
+        List<RealEquipmentNetworkCardPageVO> list = interfaces.stream().map(v ->
+                RealEquipmentNetworkCardPageVO.builder().name(v.getInterfaceName()).inflow(v.getInTraffic()).outflow(v.getOutTraffic()).build())
                 .collect(Collectors.toList());
         return new PageResult<>(list,model.getResult().size());
     }

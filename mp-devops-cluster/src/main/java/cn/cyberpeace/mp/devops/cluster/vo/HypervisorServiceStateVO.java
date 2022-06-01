@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.vo;
 
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.FontColorEnum;
-import cn.cyberpeace.mp.devops.cluster.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.ApiModel;
@@ -20,7 +19,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "服务状态信息")
-public class HypervisorServiceStateVO extends BaseResponse {
+public class HypervisorServiceStateVO extends BaseVO {
 
     /**
      * 服务

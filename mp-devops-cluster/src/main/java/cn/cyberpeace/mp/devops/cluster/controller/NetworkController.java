@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
-import cn.cyberpeace.mp.devops.cluster.response.NetworkPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.vo.NetworkPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,16 +38,16 @@ public class NetworkController {
      */
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
-    public PageResult<NetworkPageResponse> page(NetworkPageRequest request){
+    public PageResult<NetworkPageVO> page(NetworkPageRequest request){
         NetworkPageConverterModel model = networkConverter.page(request);
         List<NetworkPageConverterModel.Model> networks = model.getModelList();
-        List<NetworkPageResponse> list = networks.stream().map(networkModel -> {
+        List<NetworkPageVO> list = networks.stream().map(networkModel -> {
             List<NetworkPageConverterModel.Model.Subnet> subnetList = networkModel.getSubnets();
-            List<NetworkPageResponse.Subnet> subnets = Lists.newArrayList();
+            List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
             if (CollectionUtils.isNotEmpty(subnetList)) {
-                subnets = subnetList.stream().map(subnet -> new NetworkPageResponse.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp())).collect(Collectors.toList());
+                subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp())).collect(Collectors.toList());
             }
-            return  NetworkPageResponse.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
+            return  NetworkPageVO.builder().name(networkModel.getName()).networkType(networkModel.getNetworkType())
                     .status(networkModel.getStatus()).subnets(subnets).createdAt(networkModel.getCreatedAt()).build();
                 }
         ).collect(Collectors.toList());

@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
+import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,6 +53,6 @@ public class CustomImageUploadService extends BaseUploadService {
         if (Objects.isNull(model) || !model.isSuccess()){
             this.serviceResult = ServiceResult.fail("file upload error");
         }
-        this.serviceResult = new Result(new TargetUploadResponse(model.getTmpdirUuid(),model.getFileNames()));
+        this.serviceResult = new Result(new TargetUploadVO(model.getTmpdirUuid(),model.getFileNames()));
     }
 }

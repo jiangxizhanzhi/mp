@@ -7,8 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
-import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
+import cn.cyberpeace.mp.devops.cluster.vo.InstancePageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -45,14 +45,14 @@ public class VmController {
      */
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
-    public PageResult<InstancePageResponse> page(InstancePageRequest request){
+    public PageResult<InstancePageVO> page(InstancePageRequest request){
         InstanceConvertModel model = vmConverter.page(request);
         List<InstanceConvertModel.Model> instances = model.getModelList();
         List<String> instanceNames = instances.stream().map(InstanceConvertModel.Model::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
-        List<InstancePageResponse> list = instances.stream().map(instanceModel ->
-            InstancePageResponse.builder().name(instanceModel.getName())
+        List<InstancePageVO> list = instances.stream().map(instanceModel ->
+            InstancePageVO.builder().name(instanceModel.getName())
                     .sceneName(Objects.isNull(source.get(instanceModel.getName())) ? "" : source.get(instanceModel.getName()).getCsceneName())
                     .node(instanceModel.getNode())
                     .addressList(instanceModel.getAddressList())

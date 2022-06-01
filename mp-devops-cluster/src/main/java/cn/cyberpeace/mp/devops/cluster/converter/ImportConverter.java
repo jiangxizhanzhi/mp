@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImportService;
 import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformResult;
-import cn.cyberpeace.mp.devops.cluster.response.ImportDiskSpaceResponse;
+import cn.cyberpeace.mp.devops.cluster.vo.ImportDiskSpaceVO;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
@@ -38,7 +38,7 @@ public class ImportConverter implements BaseConverter{
      * 获取磁盘剩余空间
      * @return
      */
-    public ImportDiskSpaceResponse getDiskSpace() {
+    public ImportDiskSpaceVO getDiskSpace() {
         ImportDiskSpaceCloudPlatformResult diskSpaceModel = importService.getDiskSpace();
 
         try {
@@ -59,7 +59,7 @@ public class ImportConverter implements BaseConverter{
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
         }
 
-        return ImportDiskSpaceResponse.builder()
+        return ImportDiskSpaceVO.builder()
                 .vmSpace(diskSpaceModel.getData().getVmSpace())
                 .build();
     }
