@@ -23,10 +23,12 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeve
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeRelationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
@@ -50,7 +52,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
@@ -127,6 +128,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private CollectionPluginWazuhRuleTypeRelationMapper collectionPluginWazuhRuleTypeRelationMapper;
+
+    @Autowired
+    private CollectionPluginWazuhRuleMapper collectionPluginWazuhRuleMapper;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
@@ -311,7 +315,8 @@ public class ScenePluginCollectionSceneService {
 
         // todo catagories -> rule id set
         if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-            List<String> ruleIds = getRuleIdsByCodes(queryParams.getCatagories());
+            Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
+            List<String> ruleIds = new ArrayList<>(ruleId2File.keySet());
             request.setRuleIds(ruleIds);
         }
 
@@ -1293,7 +1298,7 @@ public class ScenePluginCollectionSceneService {
     /**
      * 根据规则类型code获取类型id
      *
-     * @param types 类型集合
+     * @param codes code集合
      * @return 类型id集合
      */
     private List<String> getTypeIdsByCodes(List<String> codes) {
@@ -1317,37 +1322,72 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
-     * 根据规则类型code获取规则id集合
+     * 根据规则id获取规则id2file map
+     *
+     * @param ruleIds 规则id集合
+     * @return 规则id2file map
+     */
+    private Map<String, String> getRuleId2FileByIds(List<String> ruleIds) {
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class)
+                .filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
+        var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
+    }
+
+    /**
+     * 根据规则文件名获取规则id2filemap
+     *
+     * @param files 文件名集合
+     * @return 规则id2file map
+     */
+    public Map<String, String> getRuleId2FileByFiles(List<String> files) {
+        if (CollectionUtil.isEmpty(files)) {
+            return new HashMap<>();
+        }
+        HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class);
+        var a = humanCondition.filterOrStart();
+        for (String f : files) {
+            a.orContains(CollectionPluginWazuhRuleModel::getFile, f);
+        }
+        a.filterOrEnd();
+        var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
+    }
+
+    /**
+     * 根据规则类型code获取规则id2file map
      *
      * @param codes 类型集合
-     * @return 规则id集合
+     * @return 规则id2file map
      */
-    public List<String> getRuleIdsByCodes(List<String> codes) {
+    public Map<String, String> getRuleId2FileByCodes(List<String> codes) {
         if (CollectionUtil.isEmpty(codes)) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        return getRuleId2FileByIds(ruleIds);
     }
 
     /**
-     * 根据规则类型获取规则id集合
+     * 根据规则类型获取规则id2file map
      *
      * @param types 类型集合
-     * @return 规则id集合
+     * @return 规则id2file Map
      */
-    public List<String> getRuleIdsByTypes(List<String> types) {
+    public Map<String, String> getRuleId2FileByTypes(List<String> types) {
         if (CollectionUtil.isEmpty(types)) {
-            return new ArrayList<>();
+            return new HashMap<>();
         }
         List<String> typeIds = getTypeIds(types);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        return relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        return getRuleId2FileByIds(ruleIds);
     }
 
     /**

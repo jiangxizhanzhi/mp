@@ -249,17 +249,17 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
             for (var hit : response.getHits().getHits()) {
-                WazuhMonitorRoot<Launch<Object, BaseInput>> WazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
+                WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
-                if (Objects.nonNull(WazuhMonitorRoot.getData()) && Objects.nonNull(WazuhMonitorRoot.getData().getOutput())) {
-                    String output = JsonCommon.stringify(WazuhMonitorRoot.getData().getOutput());
+                if (Objects.nonNull(wazuhMonitorRoot.getData()) && Objects.nonNull(wazuhMonitorRoot.getData().getOutput())) {
+                    String output = JsonCommon.stringify(wazuhMonitorRoot.getData().getOutput());
                     WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
                     wazuhProbeCommonModel.setRawOutPut(output);
-                    wazuhProbeCommonModel.setAgentId(WazuhMonitorRoot.getAgent().getId());
-                    wazuhProbeCommonModel.setAgentName(WazuhMonitorRoot.getAgent().getName());
-                    wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(WazuhMonitorRoot.getTimestamp()));
-                    wazuhProbeCommonModel.setProbeId(WazuhMonitorRoot.getData().getId());
+                    wazuhProbeCommonModel.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                    wazuhProbeCommonModel.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                    wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
+                    wazuhProbeCommonModel.setProbeId(wazuhMonitorRoot.getData().getId());
                     wazuhModelList.add(wazuhProbeCommonModel);
                 }
             }
