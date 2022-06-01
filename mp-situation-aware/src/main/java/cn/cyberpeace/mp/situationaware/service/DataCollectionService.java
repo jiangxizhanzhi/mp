@@ -27,7 +27,6 @@ import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
@@ -249,17 +248,17 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
             for (var hit : response.getHits().getHits()) {
-                WazuhMonitorRoot<Launch<Object, BaseInput>> WazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
+                WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
-                if (Objects.nonNull(WazuhMonitorRoot.getData()) && Objects.nonNull(WazuhMonitorRoot.getData().getOutput())) {
-                    String output = JsonCommon.stringify(WazuhMonitorRoot.getData().getOutput());
+                if (Objects.nonNull(wazuhMonitorRoot.getData()) && Objects.nonNull(wazuhMonitorRoot.getData().getOutput())) {
+                    String output = JsonCommon.stringify(wazuhMonitorRoot.getData().getOutput());
                     WazuhProbeCommonModel wazuhProbeCommonModel = new WazuhProbeCommonModel();
                     wazuhProbeCommonModel.setRawOutPut(output);
-                    wazuhProbeCommonModel.setAgentId(WazuhMonitorRoot.getAgent().getId());
-                    wazuhProbeCommonModel.setAgentName(WazuhMonitorRoot.getAgent().getName());
-                    wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(WazuhMonitorRoot.getTimestamp()));
-                    wazuhProbeCommonModel.setProbeId(WazuhMonitorRoot.getData().getId());
+                    wazuhProbeCommonModel.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                    wazuhProbeCommonModel.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                    wazuhProbeCommonModel.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
+                    wazuhProbeCommonModel.setProbeId(wazuhMonitorRoot.getData().getId());
                     wazuhModelList.add(wazuhProbeCommonModel);
                 }
             }
@@ -568,7 +567,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_ENV_VAR);
+        int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_ENV_VAR);
 
         log.info("env var changed count: {}", sum);
         return sum;
@@ -586,7 +585,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
+        int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
 
         log.info("system users changed count: {}", sum);
         return sum;
@@ -599,7 +598,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
+        int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
         log.info("processes changed count: {}", sum);
         return sum;
     }
@@ -610,7 +609,7 @@ public class DataCollectionService {
             return 0;
         }
 
-        int sum = aggsEnvVarCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
+        int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
         log.info("processes changed count: {}", sum);
         return sum;
     }
@@ -658,7 +657,7 @@ public class DataCollectionService {
     }
 
 
-    public int aggsEnvVarCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
+    public int aggsChangedCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
         }

@@ -372,7 +372,8 @@ public class SceneElementMonitorService {
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
         var sceneModel = sceneMapper.list(humanCondition);
-        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
@@ -432,7 +433,8 @@ public class SceneElementMonitorService {
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
         var sceneModel = sceneMapper.list(humanCondition);
-        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
         if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
@@ -483,7 +485,8 @@ public class SceneElementMonitorService {
         HumanCondition humanCondition = new HumanCondition().currentLink(SceneModel.class)
                 .filterEqual(SceneModel::getId, sceneId);
         var sceneModel = sceneMapper.list(humanCondition);
-        processVulnerabilityRequest(pageRequest, sceneModel.get(0));
+        boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
+        processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
         CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
         if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
@@ -515,18 +518,34 @@ public class SceneElementMonitorService {
         }
     }
 
-    private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel) {
-        if (pageRequest.getStartTime() == null) {
-            //场景存在时间不足6小时，取全部漏洞数据
-            if (sceneModel.getUpdateTime().plusHours(-6).isBefore(sceneModel.getCreateTime())) {
-                pageRequest.setStartTime(sceneModel.getCreateTime());
-            } else {
-                //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
-                pageRequest.setStartTime(sceneModel.getUpdateTime().plusHours(-6));
+    private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel, boolean isRunning) {
+        if (isRunning) {
+            var now = LocalDateTime.now();
+            if (pageRequest.getStartTime() == null) {
+                //场景存在时间不足6小时，取全部漏洞数据
+                if (now.plusHours(-6).isBefore(sceneModel.getCreateTime())) {
+                    pageRequest.setStartTime(sceneModel.getCreateTime());
+                } else {
+                    //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
+                    pageRequest.setStartTime(now.plusHours(-6));
+                }
             }
-        }
-        if (pageRequest.getEndTime() == null) {
-            pageRequest.setEndTime(sceneModel.getUpdateTime());
+            if (pageRequest.getEndTime() == null) {
+                pageRequest.setEndTime(now);
+            }
+        } else {
+            if (pageRequest.getStartTime() == null) {
+                //场景存在时间不足6小时，取全部漏洞数据
+                if (sceneModel.getUpdateTime().plusHours(-6).isBefore(sceneModel.getCreateTime())) {
+                    pageRequest.setStartTime(sceneModel.getCreateTime());
+                } else {
+                    //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
+                    pageRequest.setStartTime(sceneModel.getUpdateTime().plusHours(-6));
+                }
+            }
+            if (pageRequest.getEndTime() == null) {
+                pageRequest.setEndTime(sceneModel.getUpdateTime());
+            }
         }
     }
 
