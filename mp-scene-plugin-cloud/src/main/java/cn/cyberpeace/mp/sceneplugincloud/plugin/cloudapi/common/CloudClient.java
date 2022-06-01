@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpClient;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -9,6 +11,7 @@ import cn.cyberpeace.mp.sceneplugincloud.util.http.HttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 @Slf4j
 @Data
@@ -54,6 +57,18 @@ public abstract class CloudClient {
     public <T> CloudResponse<T> cloudDelete(String url, HttpData data, HttpParam param,
                                             TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudDelete(url, data, param, valueTypeRef), throwException);
+    }
+
+    protected boolean excludeDeleteException(Exception runtimeException) {
+        Boolean ignoreDeleteException = BeanCommon.getBean(CloudAppConfig.class).getIgnoreDeleteException();
+        if (Boolean.TRUE.equals(ignoreDeleteException)) {
+            return true;
+        }
+        if (StringUtils.isNotEmpty(runtimeException.getMessage()) && runtimeException.getMessage().contains("could not be found")) {
+            // 删除时已不存在的错误可以视为删除成功
+            return true;
+        }
+        return false;
     }
 
 }

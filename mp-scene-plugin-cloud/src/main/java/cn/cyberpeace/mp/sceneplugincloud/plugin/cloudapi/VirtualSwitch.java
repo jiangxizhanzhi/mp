@@ -20,8 +20,15 @@ public class VirtualSwitch extends CloudClient {
     public boolean delete(VirtualSwitchDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_SWITCH_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_SWITCH_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {}, true);
+        } catch (Exception e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
         return true;
     }
 }

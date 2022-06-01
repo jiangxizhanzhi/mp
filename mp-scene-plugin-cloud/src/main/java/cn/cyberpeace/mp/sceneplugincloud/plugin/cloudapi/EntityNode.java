@@ -20,8 +20,15 @@ public class EntityNode extends CloudClient {
     public boolean delete(EntityNodeDeleteData deleteData) {
         heavyConcurrentWait();
 
-        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
-                new TypeReference<CloudResponse<Object>>() {}, true);
+        try {
+            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.ENTITY_NODE_DELETE_URL, deleteData, null,
+                    new TypeReference<CloudResponse<Object>>() {}, true);
+        } catch (Exception e) {
+            if (super.excludeDeleteException(e)) {
+                return true;
+            }
+            throw e;
+        }
         return true;
     }
 }
