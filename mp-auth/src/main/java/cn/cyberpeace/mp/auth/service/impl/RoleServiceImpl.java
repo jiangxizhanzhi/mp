@@ -55,6 +55,9 @@ import java.util.stream.Collectors;
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
         implements RoleService {
 
+    public static final String CACHE_VAL_ROLE_GETBY_NAME = "ROLES_GET_BY_NAME";
+    public static final String CACHE_VAL_ROLE_LISTBY_NAMES = "ROLES_LISTBY_NAMES";
+
 
     @Autowired
     private RolePermissionModelService rolePermissionService;
@@ -133,7 +136,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLE_GETBY_NAME)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
 
@@ -143,7 +146,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLE_LISTBY_NAMES)
     public List<RoleModel> listByNames(List<String> names) {
         ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
         List<RoleModel> roleModels = getModelMapper().listByNames(names);
