@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.vo;
 
-import cn.cyberpeace.mp.devops.cluster.response.BaseResponse;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -16,7 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "虚实结合交换机状态")
-public class VirtualRealSwitchStatusVO extends BaseResponse {
+public class VirtualRealSwitchStatusVO extends BaseVO {
 
     /**
      * 名称

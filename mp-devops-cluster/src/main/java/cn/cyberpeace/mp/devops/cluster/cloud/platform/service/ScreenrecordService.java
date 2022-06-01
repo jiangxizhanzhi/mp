@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordBatchDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenrecordQueryParams;
-import cn.cyberpeace.mp.devops.cluster.response.*;
+import cn.cyberpeace.mp.devops.cluster.vo.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -51,7 +51,7 @@ public class ScreenrecordService extends BaseOpenStackService {
      * @param queryParams
      * @return
      */
-    public ListObjServiceResult<ScreenrecordResponse> pageScreenrecord(ScreenrecordQueryParams queryParams) {
+    public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         queryParams.ensure();
         StringBuffer getParams = new StringBuffer("?");
         getParams.append("limit=").append(Objects.nonNull(queryParams.getPageSize()) ? queryParams.getPageSize() : queryParams.getPerPage())
@@ -82,17 +82,17 @@ public class ScreenrecordService extends BaseOpenStackService {
             }
         }
 
-        ScreenrecordPageResponse pageResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
-                "/recordfile_list" + getParams, ScreenrecordPageResponse.class);
+        ScreenrecordPageVO pageResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
+                "/recordfile_list" + getParams, ScreenrecordPageVO.class);
         log.info("page screenrecord response: {}", pageResponse);
 
-        List<ScreenrecordResponse> responseList = new ArrayList<>();
+        List<ScreenrecordVO> responseList = new ArrayList<>();
         Integer count = 0;
         if (Objects.nonNull(pageResponse) && CollectionUtils.isNotEmpty(pageResponse.getRecord())) {
             count = pageResponse.getTotalnum();
             pageResponse.getRecord().forEach(record -> {
                 // 结果转换
-                ScreenrecordResponse response = new ScreenrecordResponse();
+                ScreenrecordVO response = new ScreenrecordVO();
                 response.parseResult(record);
                 responseList.add(response);
             });
@@ -109,8 +109,8 @@ public class ScreenrecordService extends BaseOpenStackService {
     public ServiceResult<Boolean> removeRecordfile(ScreenrecordDeleteRequest request) {
         JSONObject delObj = new JSONObject();
         delObj.put("recordtime", request.getRecordTime());
-        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
-                "/remove_file", delObj.toJSONString(), ScreenrecordDelResponse.class);
+        ScreenrecordDelVO delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
+                "/remove_file", delObj.toJSONString(), ScreenrecordDelVO.class);
 
         log.info("remove record file response: {}", delResponse);
         if (Objects.nonNull(delResponse)) {
@@ -126,11 +126,11 @@ public class ScreenrecordService extends BaseOpenStackService {
      * 查询已用空间
      * @return
      */
-    public ServiceResult<ScreenRecordUsedSpaceResponse> queryUsedSpace() {
-        CpcloudRecordUsedSpaceResponse cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
-                "/storage_info", CpcloudRecordUsedSpaceResponse.class);
+    public ServiceResult<ScreenRecordUsedSpaceVO> queryUsedSpace() {
+        CpcloudRecordUsedSpaceVO cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
+                "/storage_info", CpcloudRecordUsedSpaceVO.class);
         log.info("query screen record used space response: {}", cpResponse);
-        ScreenRecordUsedSpaceResponse response = new ScreenRecordUsedSpaceResponse();
+        ScreenRecordUsedSpaceVO response = new ScreenRecordUsedSpaceVO();
         if (Objects.nonNull(cpResponse)) {
             response.setUsedSpace(cpResponse.getRecordDirSize());
             response.setTotalSpace(cpResponse.getDiskTotal());
@@ -150,8 +150,8 @@ public class ScreenrecordService extends BaseOpenStackService {
         request.getRecordNames().forEach(name -> delArray.add(name));
         delObj.put("recording_file", delArray);
 
-        ScreenrecordDelResponse delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
-                "/filemanager", delObj.toJSONString(), ScreenrecordDelResponse.class);
+        ScreenrecordDelVO delResponse = super.sendDelete(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
+                "/filemanager", delObj.toJSONString(), ScreenrecordDelVO.class);
 
         log.info("batch delete record file response: {}", delResponse);
         if (Objects.nonNull(delResponse)) {

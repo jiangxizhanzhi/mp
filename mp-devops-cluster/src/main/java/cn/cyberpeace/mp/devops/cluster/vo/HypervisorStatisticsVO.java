@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.vo;
 
-import cn.cyberpeace.mp.devops.cluster.response.BaseResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +21,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 @ApiModel(value = "资源统计返回信息")
-public class HypervisorStatisticsVO extends BaseResponse {
+public class HypervisorStatisticsVO extends BaseVO {
 
     /**
      * CPU核数

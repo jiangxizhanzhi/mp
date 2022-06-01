@@ -13,12 +13,12 @@ import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
-import cn.cyberpeace.mp.devops.cluster.response.InstallerByIdResponse;
-import cn.cyberpeace.mp.devops.cluster.response.InstallerPageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
-import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.service.impl.InstallerDockerUploadService;
+import cn.cyberpeace.mp.devops.cluster.vo.InstallerByIdVO;
+import cn.cyberpeace.mp.devops.cluster.vo.InstallerPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
+import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -54,11 +54,11 @@ public class InstallerController {
      */
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public PageResult<InstallerPageResponse> page(InstallerPageRequest request){
+    public PageResult<InstallerPageVO> page(InstallerPageRequest request){
         InstallerConvertPageModel model = installerConverter.page(request);
 
-        List<InstallerPageResponse> list = model.getModelList().stream().map(installer ->
-                InstallerPageResponse.builder().uuid(installer.getUuid()).name(installer.getName())
+        List<InstallerPageVO> list = model.getModelList().stream().map(installer ->
+                InstallerPageVO.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
                         .categories(installer.getCategories()).deployType(installer.getDeployType())
                         .startUpParameterList(installer.getStartUpParameterList())
@@ -71,13 +71,13 @@ public class InstallerController {
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public Result<InstallerByIdResponse> getById(@PathVariable String id){
+    public Result<InstallerByIdVO> getById(@PathVariable String id){
         InstallerConvertModel model = installerConverter.findById(id);
         if (Objects.isNull(model)){
             return new Result<>();
         }
         ExtDocker extDocker = model.getExtDocker();
-        InstallerByIdResponse response = InstallerByIdResponse.builder().uuid(model.getUuid())
+        InstallerByIdVO response = InstallerByIdVO.builder().uuid(model.getUuid())
                 .name(model.getName()).description(model.getDescription()).logo(model.getLogo())
                 .categories(model.getCategories())
                 .deployType(model.getDeployType())
@@ -141,7 +141,7 @@ public class InstallerController {
     @ApiOperation("自定义上传Docker文件方法")
     @PostMapping(value = "/upload/docker")
     @ResponseBody
-    public ServiceResult<TargetUploadResponse> customUpload(MultipartFile file, HttpServletRequest request) {
+    public ServiceResult<TargetUploadVO> customUpload(MultipartFile file, HttpServletRequest request) {
         installerDockerUploadService = installerDockerUploadService.build(file);
         return installerDockerUploadService.upload();
     }
