@@ -316,10 +316,7 @@ public class ScenePluginCollectionSceneService {
         // todo catagories -> rule id set
         if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
             Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
-            List<String> ruleIds = new ArrayList<>();
-            ruleId2File.keySet().forEach(id -> {
-                ruleIds.add(id);
-            });
+            List<String> ruleIds = new ArrayList<>(ruleId2File.keySet());
             request.setRuleIds(ruleIds);
         }
 
