@@ -83,19 +83,14 @@ public class LogFileService {
                 List<WazuhControl.QueryLogCollectFileData> fileList = new ArrayList<>();;
                 List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), Arrays.asList(eid));
 
-                if (CollectionUtil.isEmpty(agentNames)) {
-                    fileList = Collections.emptyList();
-                }
-
-                String agentName = agentNames.get(0);
-
-                String osType = getOsType(pageRequest.getSceneId(), eid);
-
-                fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
-
-                if (CollectionUtil.isNotEmpty(fileList)) {
-                    List<LogFileVO> logFileVOS = convertLogFiles(fileList, eid, agentName, osType);
-                    allLogFileVOs.addAll(logFileVOS);
+                if (CollectionUtil.isNotEmpty(agentNames)) {
+                    String agentName = agentNames.get(0);
+                    String osType = getOsType(pageRequest.getSceneId(), eid);
+                    fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
+                    if (CollectionUtil.isNotEmpty(fileList)) {
+                        List<LogFileVO> logFileVOS = convertLogFiles(fileList, eid, agentName, osType);
+                        allLogFileVOs.addAll(logFileVOS);
+                    }
                 }
             }
         }
