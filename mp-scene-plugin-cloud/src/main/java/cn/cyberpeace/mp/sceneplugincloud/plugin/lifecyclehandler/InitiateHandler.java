@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.InitiateTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
+import cn.hutool.core.net.Ipv4Util;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -748,6 +749,8 @@ public class InitiateHandler extends HandlerCommon {
                 if (cidr.equals(defaultConnectedNetwork.getNetwork().getCidr())) {
                     // 和默认网段相同,则也加入默认网络
                     defaultConnectedNetwork.addPort(port, connectPort, true);
+                } else if (this.isInCidr(defaultConnectedNetwork.getNetwork().getCidr(), cidrDivideIp)) {
+                    defaultConnectedNetwork.addPort(port, connectPort, true);
                 } else {
                     // 和默认网段不同,构建网络
                     ConnectedNetworkBO connectedNetwork = cidr2ConnectedNetwork.get(cidr);
@@ -1050,5 +1053,15 @@ public class InitiateHandler extends HandlerCommon {
         }
         possibleDhcpIps.add(IpUtils.nextIp(gateway));
         return new ArrayList<>(possibleDhcpIps);
+    }
+
+    private boolean isInCidr(String cidr, String ip) {
+        if (StringUtils.isEmpty(cidr) || StringUtils.isEmpty(ip)) {
+            return false;
+        }
+        if (!cidr.contains(Ipv4Util.IP_MASK_SPLIT_MARK) && !cidr.contains(Ipv4Util.IP_SPLIT_MARK)) {
+            return false;
+        }
+        return IpUtils.newIsInCidr(ip, cidr);
     }
 }
