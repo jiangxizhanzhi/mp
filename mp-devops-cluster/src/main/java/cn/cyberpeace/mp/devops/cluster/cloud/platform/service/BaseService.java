@@ -35,17 +35,17 @@ public class BaseService {
 
     private static final String GET_LOG_ERROR = "=====GET url：{},result：{},error message：{}";
 
-    private static final String POST_LOG_INFO = "=====POST url：{},params：{},result：{}";
+    private static final String POST_LOG_INFO = "=====POST url：{},params：{},>>>>>result：{}";
 
-    private static final String POST_LOG_ERROR = "=====POST url：{},params：{},result：{},error message：{}";
+    private static final String POST_LOG_ERROR = "=====POST url：{},params：{},>>>>>>result：{},error message：{}";
 
-    private static final String PUT_LOG_INFO = "=====PUT url：{},params：{},result：{}";
+    private static final String PUT_LOG_INFO = "=====PUT url：{},params：{},>>>>>>>result：{}";
 
-    private static final String PUT_LOG_ERROR = "=====PUT url：{},params：{},result：{},error message：{}";
+    private static final String PUT_LOG_ERROR = "=====PUT url：{},params：{},>>>>>>>result：{},error message：{}";
 
-    private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},result：{}";
+    private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},>>>>>>>result：{}";
 
-    private static final String DELETE_LOG_ERROR = "=====DELETE url：{},params：{},result：{},error message：{}";
+    private static final String DELETE_LOG_ERROR = "=====DELETE url：{},params：{},>>>>>>>result：{},error message：{}";
 
 
     /**
