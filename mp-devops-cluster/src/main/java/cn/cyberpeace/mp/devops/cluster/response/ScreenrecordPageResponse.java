@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.response;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScreenrecordPageResponse extends BaseCloudPlatformModel {
+public class ScreenrecordPageResponse extends BaseCloudPlatformResult {
 
     private List<Record> record;
 

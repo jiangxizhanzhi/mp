@@ -2,11 +2,11 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InstallerService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
@@ -46,7 +46,7 @@ public class InstallerConverter implements BaseConverter{
     public InstallerConvertPageModel page(InstallerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
-        CloudPlatformPageModel<Installer> model = installerService.page(getParams);
+        CloudPlatformPageResult<Installer> model = installerService.page(getParams);
         InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
         List<InstallerConvertModel> modelList = model.getList().stream()
                 .map(this::convertInstaller).collect(Collectors.toList());
@@ -94,7 +94,7 @@ public class InstallerConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public BaseCloudPlatformModel delete(InstallerDeleteRequest request) {
+    public BaseCloudPlatformResult delete(InstallerDeleteRequest request) {
         return installerService.deleteByIds(request.getUuids());
     }
 

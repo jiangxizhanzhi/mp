@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
@@ -38,7 +38,7 @@ public class WebSocketNoticeController {
     @ApiOperation("根据镜像UUID获取登录链接信息")
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
-        CloudPlatformPageModel<TargetConnection> connection = imagesService.connection(uuid);
+        CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         imagesConnectSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(connection.getList(),"MP-image-connection")), Arrays.asList(uuid));
         return ServiceResult.successful();
     }

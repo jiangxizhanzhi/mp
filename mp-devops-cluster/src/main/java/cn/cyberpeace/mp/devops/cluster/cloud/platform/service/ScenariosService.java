@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
@@ -26,8 +27,8 @@ public class ScenariosService extends BaseOpenStackService {
     /**
      * 创建快照
      */
-    public BaseCloudPlatformModel create(ScenariosSnapshot snapshotCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult create(ScenariosSnapshot snapshotCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
     }
 
     /**
@@ -35,8 +36,8 @@ public class ScenariosService extends BaseOpenStackService {
      * @param injectFileCreate
      * @return
      */
-    public BaseCloudPlatformModel injectFile(DeviceInjectFileCreate injectFileCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult injectFile(DeviceInjectFileCreate injectFileCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformResult.class);
     }
 
     /**
@@ -44,8 +45,8 @@ public class ScenariosService extends BaseOpenStackService {
      * @param delete
      * @return
      */
-    public BaseCloudPlatformModel deleteInjectFile(DeviceInjectFileDelete delete){
-        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult deleteInjectFile(DeviceInjectFileDelete delete){
+        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformResult.class);
     }
 
     /**
@@ -53,8 +54,8 @@ public class ScenariosService extends BaseOpenStackService {
      * @param snapshotCreate
      * @return
      */
-    public BaseCloudPlatformModel create(ImagesCreateInstanceCloudPlatform snapshotCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult create(ImagesCreateInstanceCloudPlatform snapshotCreate){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
     }
 
     /**
@@ -62,8 +63,8 @@ public class ScenariosService extends BaseOpenStackService {
      * @param mergeCloudPlatform
      * @return
      */
-    public BaseCloudPlatformModel mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform){
+        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformResult.class);
     }
 
     /**
@@ -71,15 +72,15 @@ public class ScenariosService extends BaseOpenStackService {
      * @param cloudPlatform
      * @return
      */
-    public BaseCloudPlatformModel delete(ImagesDeleteInstanceCloudPlatform cloudPlatform){
-        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult delete(ImagesDeleteInstanceCloudPlatform cloudPlatform){
+        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformResult.class);
     }
 
     /**
      * 获取物理主机服务状态
      * @return
      */
-    public CloudPlatformPageModel<ServiceStatus> listServiceStatus() {
+    public CloudPlatformPageResult<ServiceStatus> listServiceStatus() {
         return super.page(URL_VERSION + SCENARIOS + "/service_status", ServiceStatus.class);
     }
 

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
@@ -200,9 +201,9 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public BaseCloudPlatformModel delete(ImagesDeleteRequest request) {
+    public BaseCloudPlatformResult delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
-        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getImageIds());
+        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
 
         if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
             ImageDeleteDTO dto = new ImageDeleteDTO();
@@ -272,11 +273,11 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public BaseCloudPlatformModel reboot(ImagesRebootInstanceRequest request) {
+    public BaseCloudPlatformResult reboot(ImagesRebootInstanceRequest request) {
         if (StringUtils.isBlank(request.getInstanceId()) || StringUtils.isBlank(request.getImageType())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        BaseCloudPlatformModel platformModel = null;
+        BaseCloudPlatformResult platformModel = null;
         if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
             VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
             model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
@@ -297,7 +298,7 @@ public class ImagesConverter implements BaseConverter{
      * @param imageName
      * @return
      */
-    public BaseCloudPlatformModel export(String uuid, String imageName) {
+    public BaseCloudPlatformResult export(String uuid, String imageName) {
         return imagesService.export(uuid,imageName);
     }
 
@@ -306,7 +307,7 @@ public class ImagesConverter implements BaseConverter{
      * @param uuid
      * @return
      */
-    public BaseCloudPlatformModel create(String uuid) {
+    public BaseCloudPlatformResult create(String uuid) {
         if (StringUtils.isBlank(uuid)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -319,7 +320,7 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public BaseCloudPlatformModel delete(ImagesDeleteInstanceRequest request) {
+    public BaseCloudPlatformResult delete(ImagesDeleteInstanceRequest request) {
         if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -331,7 +332,7 @@ public class ImagesConverter implements BaseConverter{
      * @param ids
      */
     public List<Device> findByIds(List<Integer> ids){
-        CloudPlatformPageModel<Device>  model = deviceService.findByIds(ids);
+        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
         return model.getList();
     }
 
@@ -348,7 +349,7 @@ public class ImagesConverter implements BaseConverter{
         if (CollectionUtils.isEmpty(diffList)){
             return requestIds.size();
         }
-        CloudPlatformPageModel<Device>  model = deviceService.findByIds(diffList);
+        CloudPlatformPageResult<Device> model = deviceService.findByIds(diffList);
         List<Device> deviceList = model.getList();
         if (CollectionUtils.isEmpty(deviceList)){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
@@ -476,12 +477,12 @@ public class ImagesConverter implements BaseConverter{
      * 获取物理主机服务状态列表
      * @return
      */
-    public CloudPlatformPageModel<ServiceStatus> listServiceStatus() {
-        CloudPlatformPageModel<ServiceStatus> serviceStatusModel = scenariosService.listServiceStatus();
+    public CloudPlatformPageResult<ServiceStatus> listServiceStatus() {
+        CloudPlatformPageResult<ServiceStatus> serviceStatusModel = scenariosService.listServiceStatus();
         if (Objects.nonNull(serviceStatusModel) && CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
             return serviceStatusModel;
         } else {
-            return new CloudPlatformPageModel<>(new ArrayList<>());
+            return new CloudPlatformPageResult<>(new ArrayList<>());
         }
     }
 

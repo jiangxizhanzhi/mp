@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
@@ -109,7 +109,7 @@ public class TargetConverter{
             sceneConvertModel.setDeviceList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        CloudPlatformPageModel<Device>  model = deviceService.findByIds(ids);
+        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             sceneConvertModel.setDeviceList(Lists.newArrayList());
@@ -124,7 +124,7 @@ public class TargetConverter{
      * @return
      */
     public List<Device> getCommonTargets(String name) {
-        CloudPlatformPageModel<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
+        CloudPlatformPageResult<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
         return model.getList();
     }
 
@@ -180,7 +180,7 @@ public class TargetConverter{
      * @return
      */
     public List<Device> multiAsync(Integer offset,Integer limit){
-        CloudPlatformPageModel<Device> model = deviceService.page("?offset=" + offset + "&limit=" + limit);
+        CloudPlatformPageResult<Device> model = deviceService.page("?offset=" + offset + "&limit=" + limit);
         return model.getList();
     }
 

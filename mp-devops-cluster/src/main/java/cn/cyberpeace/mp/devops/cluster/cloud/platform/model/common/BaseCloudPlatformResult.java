@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaseCloudPlatformModel extends BaseModel {
+public class BaseCloudPlatformResult extends BaseModel {
 
     /**
      * 是否成功

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.*;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class ImportDiskSpaceCloudPlatformModel extends BaseCloudPlatformModel implements Serializable {
+public class ImportDiskSpaceCloudPlatformResult extends BaseCloudPlatformResult implements Serializable {
 
     /**
      * 磁盘剩余空间

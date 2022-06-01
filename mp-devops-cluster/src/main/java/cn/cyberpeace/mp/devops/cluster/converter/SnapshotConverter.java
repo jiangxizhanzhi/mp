@@ -2,12 +2,16 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.model.DeviceSnapshotMergeCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +37,7 @@ public class SnapshotConverter {
      * @return
      */
     public SnapshotListConvertModel list(String deviceUuid) {
-        CloudPlatformPageModel<Snapshot>  model = snapshotService.list(deviceUuid);
+        CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
         List<SnapshotConvertModel> list = model.getList().stream().map(item ->
                 new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                         item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
@@ -50,7 +54,7 @@ public class SnapshotConverter {
      * @return
      */
     public DeviceAndSnapshotConvertModel deviceAndSnapshotByName(String name) {
-        DeviceAndSnapshotCloudPlatformModel model = snapshotService.deviceAndSnapshotByName(name);
+        DeviceAndSnapshotCloudPlatformResult model = snapshotService.deviceAndSnapshotByName(name);
         if (Objects.isNull(model)){
             return null;
         }
@@ -82,7 +86,7 @@ public class SnapshotConverter {
      * @param request
      * @return
      */
-    public BaseCloudPlatformModel create(SnapshotRequest request) {
+    public BaseCloudPlatformResult create(SnapshotRequest request) {
         ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
         snapshotCreate.setDeviceUuid(request.getUuid());
         snapshotCreate.setImageType(request.getImageType());
@@ -96,7 +100,7 @@ public class SnapshotConverter {
      * @param request
      * @return
      */
-    public BaseCloudPlatformModel merge(SnapshotMergeRequest request) {
+    public BaseCloudPlatformResult merge(SnapshotMergeRequest request) {
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
         mergeCloudPlatform.setSnapshotName(request.getSnapshotName());
         mergeCloudPlatform.setNewName(request.getNewName());

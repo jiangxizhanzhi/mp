@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
@@ -11,8 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
@@ -60,7 +60,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     public Integer getTotalRealEquipment(RealEquipmentPageRequest request) {
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageModel<Device> page = realEquipmentService.page(getParams);
+        CloudPlatformPageResult<Device> page = realEquipmentService.page(getParams);
         return page.getTotal();
     }
 
@@ -97,7 +97,7 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setModelList(Lists.newArrayList());
             return convertModel;
         }
-        CloudPlatformPageModel<Device> model = deviceService.findByIds(ids);
+        CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             convertModel.setTotal(0);
@@ -170,9 +170,9 @@ public class RealEquipmentConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public BaseCloudPlatformModel delete(RealEquipmentDeleteRequest request) {
+    public BaseCloudPlatformResult delete(RealEquipmentDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getUuids());
-        BaseCloudPlatformModel result = deviceService.deleteByIds(request.getUuids());
+        BaseCloudPlatformResult result = deviceService.deleteByIds(request.getUuids());
         if (result.isSuccess()) {
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getUuids());

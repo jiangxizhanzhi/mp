@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import com.alibaba.fastjson.JSONObject;
@@ -32,11 +32,11 @@ public class HypervisorService extends BaseOpenStackService {
      * 资源统计
      * @return
      */
-    public HypervisorStatisticsCloudPlatformModel statistics(){
+    public HypervisorStatisticsCloudPlatformResult statistics(){
         CloudPlatformResult result = super.sendGet(URL_VERSION + HYPERVISORS + "/statistics", CloudPlatformResult.class);
         super.checkResult(result);
         HypervisorStatistics data = JSONObject.parseObject(JSONObject.toJSONString(result.getData()), HypervisorStatistics.class);
-        HypervisorStatisticsCloudPlatformModel model = new HypervisorStatisticsCloudPlatformModel();
+        HypervisorStatisticsCloudPlatformResult model = new HypervisorStatisticsCloudPlatformResult();
         model.setHypervisorStatistics(data);
         model.setCode(result.getCode());
         return model;
@@ -47,7 +47,7 @@ public class HypervisorService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<Hypervisor> page(String getParams){
+    public CloudPlatformPageResult<Hypervisor> page(String getParams){
         return super.page(URL_VERSION + HYPERVISORS + getParams, Hypervisor.class);
     }
 
@@ -55,8 +55,8 @@ public class HypervisorService extends BaseOpenStackService {
      * 获取虚拟机数量限制
      * @return
      */
-    public HypervisorWeightAndMaxInstanceCloudPlatformModel getWeightAndMaxInstances(String getParams){
-        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/vm_status" + getParams, HypervisorWeightAndMaxInstanceCloudPlatformModel.class);
+    public HypervisorWeightAndMaxInstanceCloudPlatformResult getWeightAndMaxInstances(String getParams){
+        return super.sendGet(CPCLOUD_INFO_URL + URL_VERSION + "/vm_status" + getParams, HypervisorWeightAndMaxInstanceCloudPlatformResult.class);
     }
 
     /**

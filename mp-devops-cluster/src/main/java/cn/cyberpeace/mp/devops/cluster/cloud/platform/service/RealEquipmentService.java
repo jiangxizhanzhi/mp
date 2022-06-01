@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentByParams;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpInterfaceResourceCloudPlatform;
@@ -39,11 +39,11 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<Device> page(String getParams){
+    public CloudPlatformPageResult<Device> page(String getParams){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
-        CloudPlatformPageModel<Device> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());
         return model;
@@ -114,11 +114,11 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param switchName
      * @return
      */
-    public CloudPlatformPageModel<RealEquipmentByParams> findBySwitchName(String switchName){
+    public CloudPlatformPageResult<RealEquipmentByParams> findBySwitchName(String switchName){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
-        CloudPlatformPageModel<RealEquipmentByParams> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
     }
@@ -128,11 +128,11 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param serialPort
      * @return
      */
-    public CloudPlatformPageModel<RealEquipmentByParams> findBySerialPort(String serialPort){
+    public CloudPlatformPageResult<RealEquipmentByParams> findBySerialPort(String serialPort){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
-        CloudPlatformPageModel<RealEquipmentByParams> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
     }
@@ -142,11 +142,11 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @param deviceUuid
      * @return
      */
-    public CloudPlatformPageModel<TargetConnection> connection(String deviceUuid){
+    public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
-        CloudPlatformPageModel<TargetConnection> model = new CloudPlatformPageModel<>();
+        CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
     }

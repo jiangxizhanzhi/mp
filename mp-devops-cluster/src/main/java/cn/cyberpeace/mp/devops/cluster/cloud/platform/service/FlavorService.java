@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Flavor;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +25,7 @@ public class FlavorService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<Flavor> page(String getParams) {
+    public CloudPlatformPageResult<Flavor> page(String getParams) {
         return super.page(URL_VERSION + "/flavors" + getParams, Flavor.class);
     }
 }

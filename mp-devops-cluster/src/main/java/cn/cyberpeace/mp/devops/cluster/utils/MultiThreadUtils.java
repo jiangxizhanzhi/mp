@@ -14,20 +14,14 @@ import java.util.concurrent.*;
 /**
  * 多线程工具类
  *
- * @param <T>
  */
 @Slf4j
-public class MultiThreadUtils<T> {
+public class MultiThreadUtils {
 
     /**
      * 线程数量，默认5
      */
     private int threadCount = 5;
-
-    /**
-     * 具体任务
-     */
-    private ITask<ServiceResult, T> task;
 
     /**
      * 线程池管理器
@@ -54,7 +48,7 @@ public class MultiThreadUtils<T> {
      * @param task   具体任务
      * @return
      */
-    public ServiceResult execute(List<T> data, Map<String, Object> params, ITask<ServiceResult, T> task) {
+    public <T> ServiceResult execute(List<T> data, Map<String, Object> params, ITask<ServiceResult, T> task) {
 
         if (CollectionUtils.isEmpty(data)){
             return new ServiceResult();
@@ -108,9 +102,9 @@ public class MultiThreadUtils<T> {
                 serviceResult = pool.take().get();
                 result.add(serviceResult);
             } catch (InterruptedException e) {
-                log.error("error message ： {}",e);
+                log.error("error message ： {}",e.getMessage(),e);
             } catch (ExecutionException e) {
-                log.error("error message ： {}",e);
+                log.error("error message ： {}",e.getMessage(),e);
             }
 
         }

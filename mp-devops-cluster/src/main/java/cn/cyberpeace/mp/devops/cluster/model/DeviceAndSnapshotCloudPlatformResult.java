@@ -2,12 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.QuickCreateParam;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
-public class DeviceAndSnapshotCloudPlatformModel extends BaseCloudPlatformModel{
+public class DeviceAndSnapshotCloudPlatformResult extends BaseCloudPlatformResult {
 
     /**
      * 设备ID

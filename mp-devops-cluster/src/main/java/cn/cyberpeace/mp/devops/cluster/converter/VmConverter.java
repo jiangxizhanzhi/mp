@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class VmConverter implements BaseConverter{
     public InstanceConvertModel page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        CloudPlatformPageModel<InstanceModel> model = vmService.page(getParams);
+        CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
         List<InstanceConvertModel.Model> list = model.getList().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
@@ -54,7 +54,7 @@ public class VmConverter implements BaseConverter{
     public Integer getTotalInstances(InstancePageRequest request) {
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageModel<InstanceModel> page = vmService.page(getParams);
+        CloudPlatformPageResult<InstanceModel> page = vmService.page(getParams);
         return page.getTotal() ;
     }
 }

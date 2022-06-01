@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
@@ -33,7 +33,7 @@ public class ContainerService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<ContainerModel> page(String getParams) {
+    public CloudPlatformPageResult<ContainerModel> page(String getParams) {
         return super.page(URL_VERSION + CONTAINERS + getParams,ContainerModel.class);
     }
 
@@ -43,7 +43,7 @@ public class ContainerService extends BaseOpenStackService {
      * @param uuid
      * @return
      */
-    public BaseCloudPlatformModel action(ContainerActionCloudPlatformModel model,String uuid) {
-        return super.sendPost(URL_VERSION + CONTAINERS + "/" + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformModel.class);
+    public BaseCloudPlatformResult action(ContainerActionCloudPlatformModel model, String uuid) {
+        return super.sendPost(URL_VERSION + CONTAINERS + "/" + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
     }
 }

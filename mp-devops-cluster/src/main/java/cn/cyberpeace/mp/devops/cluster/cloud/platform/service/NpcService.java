@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -32,11 +32,11 @@ public class NpcService extends BaseOpenStackService {
      * @param getParams
      * @return
      */
-    public CloudPlatformPageModel<NpcModel> page(String getParams) {
+    public CloudPlatformPageResult<NpcModel> page(String getParams) {
         CloudPlatformResult<List<NpcModel>> pageResult = super.sendGet(CPCLOUD_URL + "/npc_node" + URL_VERSION + "/node" + getParams, CloudPlatformResult.class);
         super.checkResult(pageResult);
         List<NpcModel> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getData()),NpcModel.class);
-        CloudPlatformPageModel<NpcModel> model = new CloudPlatformPageModel();
+        CloudPlatformPageResult<NpcModel> model = new CloudPlatformPageResult();
         model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
         model.setTotal(pageResult.getTotal());
         model.setCode(pageResult.getCode());

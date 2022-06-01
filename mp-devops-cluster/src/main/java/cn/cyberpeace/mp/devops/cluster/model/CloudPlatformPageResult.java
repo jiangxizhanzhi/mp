@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import io.swagger.annotations.ApiModel;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode(callSuper = true)
 @ApiModel
-public class CloudPlatformPageModel<T> extends BaseCloudPlatformModel {
+public class CloudPlatformPageResult<T> extends BaseCloudPlatformResult {
 
     /**
      * 数据列表

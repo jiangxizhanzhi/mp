@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.request.*;
 import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
@@ -130,7 +130,7 @@ public class CloudPlatformMonitorController {
         ).collect(Collectors.toList());
 
         // 获取所有物理主机服务状态
-        CloudPlatformPageModel<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
+        CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
 
         hypervisorPageRespons.forEach(v -> {
             String name = v.getName();

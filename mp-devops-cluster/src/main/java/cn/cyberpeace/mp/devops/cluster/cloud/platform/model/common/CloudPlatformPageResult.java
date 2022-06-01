@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common;
 
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -14,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CloudPlatformPageResult extends BaseCloudPlatformModel {
+public class CloudPlatformPageResult extends BaseCloudPlatformResult {
 
     private CloudPlatformPageData data;
 }

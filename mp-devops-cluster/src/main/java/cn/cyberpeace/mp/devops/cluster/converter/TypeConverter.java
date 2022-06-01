@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
-import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetType;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemNameModel;
@@ -29,7 +29,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type() {
-        CloudPlatformPageModel<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
+        CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(Boolean.FALSE);
         return convertTypeTreeItemModel(l1AndL2AndL3Type);
     }
 
@@ -38,7 +38,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findL1AndL2AndL3Type(Boolean isAll) {
-        CloudPlatformPageModel<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(isAll);
+        CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type = typeService.findL1AndL2AndL3Type(isAll);
         return convertTypeTreeItemModel(l1AndL2AndL3Type);
     }
 
@@ -47,7 +47,7 @@ public class TypeConverter {
      * @return
      */
     public TypeL2AllConvertModel findL1AndL2Type() {
-        CloudPlatformPageModel<TargetType> l1AndL2Type = typeService.findL1AndL2Type();
+        CloudPlatformPageResult<TargetType> l1AndL2Type = typeService.findL1AndL2Type();
         return new TypeL2AllConvertModel(l1AndL2Type.getList());
     }
 
@@ -57,7 +57,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdIntegerByType(String type) {
-        CloudPlatformPageModel<TypeItemModel> list = typeService.findIdIntegerByType(type,Boolean.FALSE);
+        CloudPlatformPageResult<TypeItemModel> list = typeService.findIdIntegerByType(type,Boolean.FALSE);
         return convertModel(list);
     }
 
@@ -67,7 +67,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdIntegerByType(String type,Boolean isAll) {
-        CloudPlatformPageModel<TypeItemModel> list = typeService.findIdIntegerByType(type,isAll);
+        CloudPlatformPageResult<TypeItemModel> list = typeService.findIdIntegerByType(type,isAll);
         return convertModel(list);
     }
 
@@ -77,7 +77,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdStringByType(String type) {
-        CloudPlatformPageModel<TypeItemNameModel> list = typeService.findIdStringByType(type,Boolean.FALSE);
+        CloudPlatformPageResult<TypeItemNameModel> list = typeService.findIdStringByType(type,Boolean.FALSE);
         return convertTypeItemNameModel(list);
     }
 
@@ -87,7 +87,7 @@ public class TypeConverter {
      * @return
      */
     public TypeAllConvertModel findIdStringByType(String type,Boolean isAll) {
-        CloudPlatformPageModel<TypeItemNameModel> list = typeService.findIdStringByType(type,isAll);
+        CloudPlatformPageResult<TypeItemNameModel> list = typeService.findIdStringByType(type,isAll);
         return convertTypeItemNameModel(list);
     }
 
@@ -209,7 +209,7 @@ public class TypeConverter {
      * @return
      */
     public List<String> findItemsByType(String type){
-        CloudPlatformPageModel<String> itemsByType = typeService.findItemsByType(type);
+        CloudPlatformPageResult<String> itemsByType = typeService.findItemsByType(type);
         return itemsByType.getList();
     }
 
@@ -242,7 +242,7 @@ public class TypeConverter {
      * @param list
      * @return
      */
-    private TypeAllConvertModel convertTypeItemNameModel(CloudPlatformPageModel<TypeItemNameModel> list){
+    private TypeAllConvertModel convertTypeItemNameModel(CloudPlatformPageResult<TypeItemNameModel> list){
         List<TypeIdStringConvertModel> modelList = list.getList().stream()
                 .map(item -> new TypeIdStringConvertModel(item.getId(),item.getName())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
@@ -255,7 +255,7 @@ public class TypeConverter {
      * @param list
      * @return
      */
-    private TypeAllConvertModel convertModel(CloudPlatformPageModel<TypeItemModel> list){
+    private TypeAllConvertModel convertModel(CloudPlatformPageResult<TypeItemModel> list){
         List<TypeIdIntegerConvertModel> modelList = list.getList().stream()
                 .map(item -> new TypeIdIntegerConvertModel(item.getId(),item.getName(), item.getParentId(), item.getChild())).collect(Collectors.toList());
         TypeAllConvertModel model =  new TypeAllConvertModel();
@@ -268,7 +268,7 @@ public class TypeConverter {
      * @param l1AndL2AndL3Type
      * @return
      */
-    private TypeAllConvertModel convertTypeTreeItemModel(CloudPlatformPageModel<TypeTreeItemModel> l1AndL2AndL3Type){
+    private TypeAllConvertModel convertTypeTreeItemModel(CloudPlatformPageResult<TypeTreeItemModel> l1AndL2AndL3Type){
         List<TypeConvertModel> firstTypeList = new ArrayList<>();
         List<TypeConvertModel> secondTypeList = new ArrayList<>();
         List<TypeConvertModel> thirdTypeList = new ArrayList<>();

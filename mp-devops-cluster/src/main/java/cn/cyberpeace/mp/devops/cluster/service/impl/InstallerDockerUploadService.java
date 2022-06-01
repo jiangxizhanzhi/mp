@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.response.TargetUploadResponse;
 import cn.cyberpeace.mp.devops.cluster.response.base.Result;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
@@ -49,7 +49,7 @@ public class InstallerDockerUploadService extends BaseUploadService {
         } catch (IOException e) {
             log.error("file transfer error",e);
         }
-        BaseCloudPlatformModel model = imagesService.upload(fileList,"installer");
+        BaseCloudPlatformResult model = imagesService.upload(fileList,"installer");
         if (Objects.isNull(model) || !model.isSuccess()){
             this.serviceResult = ServiceResult.fail("file upload error");
         }

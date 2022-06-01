@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devops.cluster.model.BaseCloudPlatformModel;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -30,10 +30,10 @@ public class InitRegisterService extends BaseOpenStackService {
      * @return
      */
     @Async
-    public BaseCloudPlatformModel register(String url) {
+    public BaseCloudPlatformResult register(String url) {
         Map<String,Object> map = new HashMap<>();
         map.put("ip_port", url);
-        BaseCloudPlatformModel pageResult = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/register_mp",JSONObject.toJSONString(map),BaseCloudPlatformModel.class);
+        BaseCloudPlatformResult pageResult = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/register_mp",JSONObject.toJSONString(map), BaseCloudPlatformResult.class);
         super.checkResult(pageResult);
         return pageResult;
     }
