@@ -21,7 +21,7 @@ public class SituationCacheConfig {
     @Bean(name = CACHE_MANAGER)
     public CacheManager situationCacheManager() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.SECONDS).recordStats();
+        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(20, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }

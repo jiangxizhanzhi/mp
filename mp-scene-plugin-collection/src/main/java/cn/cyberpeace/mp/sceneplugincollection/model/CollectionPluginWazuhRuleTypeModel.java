@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @Table("mp_sceneplugincollection_wazuh_rule_type")
 public class CollectionPluginWazuhRuleTypeModel extends BaseModel {
     private String type;
+    private String code;
 }

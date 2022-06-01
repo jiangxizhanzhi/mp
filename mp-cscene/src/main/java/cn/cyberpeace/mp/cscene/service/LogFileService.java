@@ -23,6 +23,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -48,6 +49,9 @@ public class LogFileService {
 
     @Autowired
     private SceneMonitorService sceneMonitorService;
+
+    @Value("${mp.sceneplugincollection.wazuh-godfs-outer-http-server:/mp_scene_collection_godfs}")
+    private String godfsOuterHttpServer;
 
     /**
      * 分页查询日志文件列表
@@ -134,7 +138,7 @@ public class LogFileService {
         ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
-        String osType = ProbeOSType.getByCode((Integer) osTypeCode);
+        String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
         if (Objects.nonNull(osType)) {
             osType = osType.trim().toLowerCase();
         }
@@ -177,6 +181,7 @@ public class LogFileService {
             log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
             String paramId = entry.getKey();
             String downloadUrl = entry.getValue().getFileSrc();
+            downloadUrl = godfsOuterHttpServer + "/" + downloadUrl;
             LogFileDownloadUrlDto dto = paramId2DtoMap.get(paramId);
             if (Objects.nonNull(dto)) {
                 dto.setDownloadUrl(downloadUrl);

@@ -131,6 +131,8 @@ public class DataCollectionService {
 
     public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
 
+    public static final String CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME = "aggs_ruleids_by_agentname";
+
     public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
 
 
@@ -887,6 +889,61 @@ public class DataCollectionService {
                 });
             }
 
+            return map;
+
+        } catch (IOException e) {
+            log.error("es query error: {} ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+
+    /**
+     * 查询一个节点所有的rule id
+     * @param wazuhEventRequest
+     * @return
+     */
+    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
+    public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
+        log.info("{}", wazuhEventRequest);
+        Map<String, Long> map = new LinkedHashMap<>();
+        if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
+            return map;
+        }
+        String aggregationName = "aggs_ruleids_by_agent_name";
+        //wazuhEventRequest.getAgentNames().forEach(a -> map.put(a, 0L));
+
+        //根据日期构造索引
+        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+        sourceBuilder.size(0);
+
+        // build the aggregation
+        TermsAggregationBuilder aggregation = AggregationBuilders.terms(aggregationName)
+                .field("rule.id").size(100);
+
+        sourceBuilder.aggregation(aggregation);
+
+        //构造查询条件
+        buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
+        // 按时间降序
+        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+        //配置索引为空
+        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+
+        log.info("elasticsearch aggs request query... index:{}, JSON query:\n{}", indexArray, searchRequest.source().toString());
+
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            if (Objects.nonNull(response.getAggregations())) {
+                Terms terms = response.getAggregations().get(aggregationName);
+                terms.getBuckets().forEach(b -> {
+                    map.put(b.getKeyAsString(), Long.valueOf(b.getDocCount()));
+                });
+            }
             return map;
 
         } catch (IOException e) {

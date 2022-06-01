@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
+import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -57,8 +58,14 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         try {
             runner.run();
         } catch (Exception e) {
-            getPluginHandler().errorElement(nodeId, event, e.getMessage());
-            throw e;
+            MpRuntimeException mpe = this.handlerSpecialException(getPluginHandler().getElement(nodeId), e);
+            if (mpe != null) {
+                getPluginHandler().errorElement(nodeId, event, mpe.getMessage());
+                throw mpe;
+            } else {
+                getPluginHandler().errorElement(nodeId, event, e.getMessage());
+                throw e;
+            }
         }
         getPluginHandler().overElementProcess(nodeId, event);
     }
@@ -68,10 +75,24 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         try {
             runner.run();
         } catch (Exception e) {
-            getPluginHandler().errorElement(nodeId, event, e.getMessage());
-            throw e;
+            MpRuntimeException mpe = this.handlerSpecialException(getPluginHandler().getElement(nodeId), e);
+            if (mpe != null) {
+                getPluginHandler().errorElement(nodeId, event, mpe.getMessage());
+                throw mpe;
+            } else {
+                getPluginHandler().errorElement(nodeId, event, e.getMessage());
+                throw e;
+            }
         }
         getPluginHandler().overElementProcess(nodeId, event);
     }
 
+    /**
+     * 处理一些特定的异常
+     * @param e
+     * @return 返回值为处理后的异常 , null表示未处理
+     */
+    protected <E extends BasePluginSceneElementBO> MpRuntimeException handlerSpecialException(E element, Exception e) {
+        return null;
+    }
 }

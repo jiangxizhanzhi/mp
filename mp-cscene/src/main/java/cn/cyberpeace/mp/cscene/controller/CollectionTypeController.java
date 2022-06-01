@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
+import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,15 @@ public class CollectionTypeController {
     @ApiOperation(value = "查询采集类型")
     public ServiceResult<CollectionType> typesTree(BaseSceneElementRequest baseRequest) {
 
+        List<CollectionType> list = collectionTypeService.typeTrees(baseRequest);
+        return ServiceResult.success(list);
+    }
+
+
+
+    @GetMapping("/appname/list")
+    @ApiOperation(value = "查询节点应用列表")
+    public ServiceResult<CollectionType> appNameTree(BaseSceneElementRequest baseRequest) {
         List<CollectionType> list = collectionTypeService.typeTrees(baseRequest);
         return ServiceResult.success(list);
     }

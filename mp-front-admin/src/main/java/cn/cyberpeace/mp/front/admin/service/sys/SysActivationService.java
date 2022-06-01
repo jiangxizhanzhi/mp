@@ -236,7 +236,7 @@ public class SysActivationService {
     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
             //默认状态为未激活
-            ACTIVATION_CONTENT.setIsActived(0);
+            //ACTIVATION_CONTENT.setIsActived(0);
 
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
@@ -249,6 +249,7 @@ public class SysActivationService {
             SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
 
             if (Objects.isNull(sysActivCtlModel)) {
+                ACTIVATION_CONTENT.setIsActived(0);
                 return;
             }
 
@@ -277,9 +278,9 @@ public class SysActivationService {
                 updateActivCtlModel.setId(sysActivCtlModel.getId());
                 updateActivCtlModel.setStatus(0);
                 sysActivCtlService.update(updateActivCtlModel);
-            } else {
-                ACTIVATION_CONTENT.setIsActived(1);
             }
+
+            ACTIVATION_CONTENT.setIsActived(1);
         }
     }
 
