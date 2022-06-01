@@ -649,9 +649,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     }
                 });
             });
-//            if (CollectionUtil.isEmpty(probeIds)) {
-//                return new ListObjServiceResult<>();
-//            }
+            if (CollectionUtil.isEmpty(probeIds)) {
+                return new ListObjServiceResult<>();
+            }
             //构造查询请求
             WazuhEventRequest request = new WazuhEventRequest();
             request.setStartTime(startTime);
