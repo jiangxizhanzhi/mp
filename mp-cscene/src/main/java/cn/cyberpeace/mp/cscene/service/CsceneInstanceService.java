@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
@@ -558,7 +559,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CollectionUtil.toList("020101", "020102", "020103", "020104", "020105", "020106"));
+                    params.setCatagories(CsceneBizConstant.OS_CATEGORY);
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -572,7 +573,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CollectionUtil.toList("020201", "020202", "020203", "020204", "020205", "020206", "020207", "020208"));
+                    params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -586,7 +587,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CollectionUtil.toList("020301", "020302", "020303", "020304", "020305"));
+                    params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
