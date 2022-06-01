@@ -1351,6 +1351,9 @@ public class ScenePluginCollectionSceneService {
         }
         a.filterOrEnd();
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(ruleModels)) {
+            return new HashMap<>();
+        }
         return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
     }
 
@@ -1368,6 +1371,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new HashMap<>();
+        }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
     }
@@ -1386,6 +1392,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new HashMap<>();
+        }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
     }
@@ -1403,6 +1412,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getRuleId, ruleIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new ArrayList<>();
+        }
         List<String> typeIds = relationModels.stream().map(r -> r.getTypeId()).collect(Collectors.toList());
         return getTypes(typeIds);
     }
