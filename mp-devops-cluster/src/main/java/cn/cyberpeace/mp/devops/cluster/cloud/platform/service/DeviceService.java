@@ -45,12 +45,12 @@ public class DeviceService extends BaseOpenStackService {
     }
 
     /**
-     * 根据ID查询
-     * @param id
+     * 根据UUID查询
+     * @param uuid
      * @return
      */
-    public Device findById(String id){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + id, Device.class);
+    public Device findById(String uuid){
+        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + uuid, Device.class);
     }
 
     /**

@@ -193,8 +193,6 @@ public class DevopsTargetController {
         return new Result(new ListResult<>(targetScenes));
     }
 
-
-
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
@@ -38,10 +39,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
@@ -69,6 +72,9 @@ public class ImagesController {
     private final InjectFileConverter injectFileConverter;
 
     private final ImagesService imagesService;
+
+    @Autowired
+    private FileService fileService;
 
     @NonNull
     private InjectFileUploadService injectFileUploadService;
@@ -434,6 +440,18 @@ public class ImagesController {
     public ServiceResult<FileResponseData> uploadSshFile(MultipartFile file, HttpServletRequest request) {
         sshPrivateKeyUploadService = sshPrivateKeyUploadService.build(file);
         return sshPrivateKeyUploadService.upload();
+    }
+
+    /**
+     * SSH文件下载方法
+     *
+     * @param filePath 文件地址
+     * @param response
+     */
+    @ApiOperation("SSH文件下载方法")
+    @GetMapping(value = "/file/download/ssh")
+    public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
+        fileService.downloadFile(filePath, response);
     }
 
     /**
