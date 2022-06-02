@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.situationaware.model.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
+import cn.cyberpeace.mp.situationaware.utils.JsonUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -159,6 +161,10 @@ public class NetworkTrafficGroupService {
         try {
             log.info("create arkime Image instance param {}",paramObject.toJSONString());
             var result = HttpUtils.sendPost(url, paramObject.toJSONString());
+            BaseCloudPlatformResult  model = JsonUtils.toSnakeObject(result, BaseCloudPlatformResult.class);
+            if (Objects.isNull(model) || !model.getCode().equals("0")){
+                throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR,model.getMessage());
+            }
             log.info("create arkime Image instance res {}", result);
         } catch (Exception e) {
             log.error("create arkime Image instance error {}", ExceptionUtils.getStackTrace(e));
