@@ -216,6 +216,7 @@ public class DataCollectionService {
      * 查询自定义探针采集数据分页
      *
      * @param wazuhEventRequest
+     * @param probeIds 自定义探针id集合
      * @return ListObjResult<WazuhProbeCommonModel>
      */
     public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
@@ -273,6 +274,7 @@ public class DataCollectionService {
      * 查询漏洞信息分页
      *
      * @param wazuhEventRequest
+     * @param desc 是否按时间降序
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
@@ -324,6 +326,9 @@ public class DataCollectionService {
      * 查询漏洞信息数量
      *
      * @param wazuhEventRequest
+     * @param isTop 是否获取前十条数据
+     * @param fieldPath 字段所在路径
+     * @param fieldName 字段名称
      * @return List<WazuhVulnerabilityInfoCountModel>
      */
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
