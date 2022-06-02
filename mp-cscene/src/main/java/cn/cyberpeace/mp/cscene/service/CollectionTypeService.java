@@ -34,7 +34,7 @@ public class CollectionTypeService {
 
     public List<CollectionApp> getAppNames(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         CollectionApp appName1 = new CollectionApp();
         appName1.setName("ssh");
