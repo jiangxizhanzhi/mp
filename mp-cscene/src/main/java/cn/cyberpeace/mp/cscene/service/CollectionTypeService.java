@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.util.ParamCheck;
-import cn.cyberpeace.mp.cscene.dto.common.CollectionAppName;
+import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,13 +32,17 @@ public class CollectionTypeService {
     }
 
 
-    public List<CollectionAppName> getAppNames(BaseSceneElementRequest baseRequest) {
+    public List<CollectionApp> getAppNames(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(baseRequest);
 
+        CollectionApp appName1 = new CollectionApp();
+        appName1.setName("ssh");
 
+        CollectionApp appName2 = new CollectionApp();
+        appName2.setName("macfee");
 
-        return Collections.emptyList();
+        return Arrays.asList(appName1, appName2);
     }
 
     /**

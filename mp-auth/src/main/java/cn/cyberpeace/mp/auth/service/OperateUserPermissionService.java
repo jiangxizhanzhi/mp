@@ -34,6 +34,20 @@ public class OperateUserPermissionService extends OperatePermissionService {
 
 
     /**
+     * targetUserId是否是登录用户自身
+     * @param targetUserId
+     * @return
+     */
+    public boolean isOperateSelf(String targetUserId) {
+        UserModel currentLoginUser = UserUtils.getLoginUser();
+        if (Objects.nonNull(currentLoginUser) && Objects.equals(currentLoginUser.getId(), targetUserId)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * 根据操作用户id集合进行权限校验
      * 如：批量删除用户，批量更新用户等
      * @param targetUserIds

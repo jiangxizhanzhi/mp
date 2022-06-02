@@ -81,6 +81,8 @@ public class SceneElementMonitorService {
     @Autowired
     private SceneMapper sceneMapper;
 
+    public static List<String> VULNERABILITY_GROUP = CollectionUtil.toList("vulnerability-detector");
+
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
      *
@@ -303,6 +305,7 @@ public class SceneElementMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        // 不传节点id默认查询全部节点
         if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
             pageRequest.setElementIds(sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList()));
         }
@@ -347,6 +350,7 @@ public class SceneElementMonitorService {
             time2Count.put(time, 0);
         }
         for (CollectionHostEventBO collectionData : result.getSource().getObjs()) {
+            // 计算每段时间的事件数
             LocalDateTime nextTime = startTime.plusSeconds(intervalSeconds);
             String nextTimeString = TimeUtils.localDateTimeToString(nextTime);
             if (collectionData.getTime().isAfter(startTime) && collectionData.getTime().isBefore(nextTime)) {
@@ -374,9 +378,8 @@ public class SceneElementMonitorService {
         var sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
-        List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
         }
@@ -386,13 +389,14 @@ public class SceneElementMonitorService {
         request.setPageNum(pageRequest.getPage());
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        request.setRuleGroups(VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         result.getObjs().forEach(r -> {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
+            //等级转化为小写，便于前端转化
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
@@ -408,10 +412,12 @@ public class SceneElementMonitorService {
         request.setPageNum(1);
         request.setPageSize(1);
         request.setAgentNames(agentNames);
-        request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        request.setRuleGroups(VULNERABILITY_GROUP);
         var first = dataCollectionService.queryVulnerabilityInfo(request, false);
         var last = dataCollectionService.queryVulnerabilityInfo(request, true);
         if (CollectionUtil.isEmpty(first.getObjs()) || CollectionUtil.isEmpty(last.getObjs())) {
+            // 未查询到漏洞数据时将开始时间往前推三个小时查询
+            pageRequest.setStartTime(pageRequest.getStartTime().plusHours(-3));
             return;
         }
         var firstTime = first.getObjs().get(0).getTime();
@@ -435,8 +441,7 @@ public class SceneElementMonitorService {
         var sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
         }
@@ -444,7 +449,7 @@ public class SceneElementMonitorService {
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        request.setRuleGroups(VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 false, "data.vulnerability.severity", "severity");
         if (CollectionUtil.isEmpty(result)) {
@@ -458,7 +463,9 @@ public class SceneElementMonitorService {
         List<ElementVulnerabilityPieChartInfo> pieChartInfos = new ArrayList<>();
         result.forEach(r -> {
             ElementVulnerabilityPieChartInfo pieChartInfo = new ElementVulnerabilityPieChartInfo();
+            // 漏洞等级转化为小写，便于前端转化
             pieChartInfo.setSeverity(r.getFieldName().toLowerCase());
+            // 设置等级，便于排序
             if ("low".equals(pieChartInfo.getSeverity())) {
                 pieChartInfo.setSeverityLevel(0);
             } else if ("medium".equals(pieChartInfo.getSeverity())) {
@@ -468,6 +475,7 @@ public class SceneElementMonitorService {
             } else if ("critical".equals(pieChartInfo.getSeverity())) {
                 pieChartInfo.setSeverityLevel(3);
             }
+            // 计算百分比 单位：%
             pieChartInfo.setPercent(BigDecimal.valueOf(r.getCount()).divide(BigDecimal.valueOf(sum), 4, RoundingMode.HALF_DOWN).multiply(BigDecimal.valueOf(100)).doubleValue());
             pieChartInfos.add(pieChartInfo);
         });
@@ -487,8 +495,7 @@ public class SceneElementMonitorService {
         var sceneModel = sceneMapper.list(humanCondition);
         boolean isRunning = csceneCommonService.isCsceneInstanceRunning(pageRequest.getSceneId());
         processVulnerabilityRequest(pageRequest, sceneModel.get(0), isRunning);
-        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        List<String> agentNames = getAgentNames(pageRequest, sceneHandler, cloudPlugin);
+        List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         if (pageRequest.getStartTime().plusHours(6).isEqual(pageRequest.getEndTime())) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
         }
@@ -496,7 +503,7 @@ public class SceneElementMonitorService {
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(CollectionUtil.toList("vulnerability-detector"));
+        request.setRuleGroups(VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 true, "data.vulnerability.package.name", "package_name");
         List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();
@@ -519,50 +526,32 @@ public class SceneElementMonitorService {
     }
 
     private void processVulnerabilityRequest(ElementMonitorRequest pageRequest, SceneModel sceneModel, boolean isRunning) {
+        LocalDateTime endTime;
         if (isRunning) {
-            var now = LocalDateTime.now();
-            if (pageRequest.getStartTime() == null) {
-                //场景存在时间不足6小时，取全部漏洞数据
-                if (now.plusHours(-6).isBefore(sceneModel.getCreateTime())) {
-                    pageRequest.setStartTime(sceneModel.getCreateTime());
-                } else {
-                    //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
-                    pageRequest.setStartTime(now.plusHours(-6));
-                }
-            }
-            if (pageRequest.getEndTime() == null) {
-                pageRequest.setEndTime(now);
-            }
+            endTime = LocalDateTime.now();
         } else {
-            if (pageRequest.getStartTime() == null) {
-                //场景存在时间不足6小时，取全部漏洞数据
-                if (sceneModel.getUpdateTime().plusHours(-6).isBefore(sceneModel.getCreateTime())) {
-                    pageRequest.setStartTime(sceneModel.getCreateTime());
-                } else {
-                    //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
-                    pageRequest.setStartTime(sceneModel.getUpdateTime().plusHours(-6));
-                }
+            endTime = sceneModel.getUpdateTime();
+        }
+        if (pageRequest.getStartTime() == null) {
+            //场景存在时间不足6小时，取全部漏洞数据
+            if (endTime.plusHours(-6).isBefore(sceneModel.getCreateTime())) {
+                pageRequest.setStartTime(sceneModel.getCreateTime());
+            } else {
+                //场景存在时间超过6小时，取最近6小时漏洞数据
+                pageRequest.setStartTime(endTime.plusHours(-6));
             }
-            if (pageRequest.getEndTime() == null) {
-                pageRequest.setEndTime(sceneModel.getUpdateTime());
-            }
+        }
+        if (pageRequest.getEndTime() == null) {
+            pageRequest.setEndTime(endTime);
         }
     }
 
-    private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler, CloudScenePluginHandler cloudPlugin) {
+    private List<String> getAgentNames(ElementMonitorRequest pageRequest, SceneHandler sceneHandler) {
         List<String> agentNames;
-        if (pageRequest.getElementIds() == null || pageRequest.getElementIds().isEmpty()) {
-            agentNames = cloudPlugin.getElementMap().values().stream()
-                    .filter(e -> e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
-                            e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
-                    .map(e -> e.getSrcElement().getEid())
-                    .collect(Collectors.toList());
-        } else {
-            agentNames = sceneHandler.getElementMap().values().stream()
-                    .filter(e -> pageRequest.getElementIds().contains(e.getId()))
-                    .map(e -> e.getEid())
-                    .collect(Collectors.toList());
-        }
+        agentNames = sceneHandler.getElementMap().values().stream()
+                .filter(e -> pageRequest.getElementIds().contains(e.getId()))
+                .map(e -> e.getEid())
+                .collect(Collectors.toList());
         return agentNames;
     }
 

@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
@@ -50,8 +51,8 @@ public class LogFileService {
     @Autowired
     private SceneMonitorService sceneMonitorService;
 
-    @Value("${mp.sceneplugincollection.wazuh-godfs-outer-http-server:/mp_scene_collection_godfs}")
-    private String godfsOuterHttpServer;
+    @Autowired
+    private CollectionAppConfig collectionAppConfig;
 
     /**
      * 分页查询日志文件列表
@@ -176,7 +177,7 @@ public class LogFileService {
             log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
             String paramId = entry.getKey();
             String downloadUrl = entry.getValue().getFileSrc();
-            downloadUrl = godfsOuterHttpServer + "/" + downloadUrl;
+            downloadUrl = collectionAppConfig.getWazuhGodfsOuterHttpServer() + "/" + downloadUrl;
             LogFileDownloadUrlDto dto = paramId2DtoMap.get(paramId);
             if (Objects.nonNull(dto)) {
                 dto.setDownloadUrl(downloadUrl);

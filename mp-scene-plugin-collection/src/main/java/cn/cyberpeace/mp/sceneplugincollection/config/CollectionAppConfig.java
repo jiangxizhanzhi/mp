@@ -61,6 +61,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_godfs_server:http://127.0.0.1:1888}")
     private String wazuhGodfsServer;
 
+    @Value("${mp.sceneplugincollection.wazuh-godfs-outer-http-server:/mp_scene_collection_godfs}")
+    private String wazuhGodfsOuterHttpServer;
+
     @Value("${mp.sceneplugincollection.wazuh_run_command_http_callback_url:}")
     private String wazuhRunCommandHttpCallbackUrl;
 
