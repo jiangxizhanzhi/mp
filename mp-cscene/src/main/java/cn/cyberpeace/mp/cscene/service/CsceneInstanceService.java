@@ -566,7 +566,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         }
                         r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
                     }
 
                     if (r.getSource() != null) {
@@ -591,7 +591,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         }
                         r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
                     }
 
                     if (r.getSource() != null) {
@@ -617,7 +617,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         }
                         r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
                     }
 
                     if (r.getSource() != null) {
@@ -642,7 +642,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         }
                         r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
                     }
 
                     if (r.getSource() != null) {
@@ -667,7 +667,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         }
                         r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
                     }
 
                     if (r.getSource() != null) {
