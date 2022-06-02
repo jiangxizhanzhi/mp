@@ -20,10 +20,12 @@ import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.util.List;
 
+@Slf4j
 public class Container extends CloudClient {
 
     public ContainerCreateData create(ContainerCreateData createData) {
@@ -68,9 +70,14 @@ public class Container extends CloudClient {
         data.setInteractive(false);
         data.setRun(true);
         var requestUrl = String.format(CloudUrlConstant.CONTAINER_EXECUTE_COMMAND_URL, containerId);
-        CloudResponse<ContainerExecuteResult> result = cloudPost(requestUrl, data, null,
-                new TypeReference<CloudResponse<ContainerExecuteResult>>() {
-                }, true);
+        var result = new CloudResponse<ContainerExecuteResult>();
+        try {
+            result = cloudPost(requestUrl, data, null,
+                    new TypeReference<>() {
+                    }, true);
+        } catch (Exception e) {
+            log.error("container execute command error containerId:{} command:{}", containerId, command, e);
+        }
         return result.getData();
     }
 
