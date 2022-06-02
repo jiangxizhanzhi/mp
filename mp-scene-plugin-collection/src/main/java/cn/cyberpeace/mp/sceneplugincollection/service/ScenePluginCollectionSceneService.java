@@ -276,6 +276,7 @@ public class ScenePluginCollectionSceneService {
      * @return
      */
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(String sceneId, HostEventQueryParams queryParams) {
+        log.info("sceneId:{}, scroll:{}", sceneId, queryParams.getScroll());
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
@@ -395,6 +396,7 @@ public class ScenePluginCollectionSceneService {
      * @return
      */
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
+        log.info("sceneId:{}, scrollId:{}", sceneId, scrollId);
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         List<SceneElementBO> srcElements = getSrcElements(sceneHandler, queryParams.getNodeIds());
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
