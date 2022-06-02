@@ -518,6 +518,31 @@ public class InitiateHandler extends HandlerCommon {
         }
     }
 
+    private void initiateVirtualToPort(CloudPluginSceneElementBO cloudElement) {
+        var connectedNetworks = cloudElement.getDeriveNetworks();
+        for (ConnectedNetworkBO connectedNetwork : connectedNetworks) {
+            List<String> ipPool = connectedNetwork.network.getIpPool();
+            // 先处理连接的端口
+            List<SceneElementPortBO> toPorts = connectedNetwork.getToPorts();
+            for (var port : toPorts) {
+                if (StringUtils.isNotEmpty(port.getIp())) {
+                    continue;
+                }
+                var pluginElement = getPluginHandler().getElement(port.getElement().getId());
+                Integer toVirtualType = pluginElement.getVirtualType();
+                if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                    synchronized (ipPool) {
+                        port.setIp(ipPool.remove(ipPool.size() - 1));
+                    }
+                } else {
+                    synchronized (ipPool) {
+                        port.setIp(ipPool.remove(0));
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 获取需要重新分配的端口
      */
@@ -617,6 +642,9 @@ public class InitiateHandler extends HandlerCommon {
 
         if (isVirtualElement) {
             initiateVirtualPort(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
+            // 实体节点的网络需要初始化对端端口
+            initiateVirtualToPort(cloudElement);
         }
     }
 

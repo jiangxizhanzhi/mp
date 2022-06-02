@@ -44,6 +44,7 @@ import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregat
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
@@ -61,6 +62,7 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -411,7 +413,12 @@ public class ScenePluginCollectionSceneService {
             agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
-        var result = dataCollectionService.scrollFileEvents(scrollId);
+        ListObjResult<FileEventModel> result = null;
+        try {
+            result = dataCollectionService.scrollFileEvents(scrollId);
+        } catch (Exception e) {
+            log.error(ExceptionUtil.stacktraceToString(e));
+        }
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
@@ -1351,6 +1358,9 @@ public class ScenePluginCollectionSceneService {
         }
         a.filterOrEnd();
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(ruleModels)) {
+            return new HashMap<>();
+        }
         return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
     }
 
@@ -1368,6 +1378,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new HashMap<>();
+        }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
     }
@@ -1386,6 +1399,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new HashMap<>();
+        }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
     }
@@ -1403,6 +1419,9 @@ public class ScenePluginCollectionSceneService {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getRuleId, ruleIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
+        if (CollectionUtil.isEmpty(relationModels)) {
+            return new ArrayList<>();
+        }
         List<String> typeIds = relationModels.stream().map(r -> r.getTypeId()).collect(Collectors.toList());
         return getTypes(typeIds);
     }
