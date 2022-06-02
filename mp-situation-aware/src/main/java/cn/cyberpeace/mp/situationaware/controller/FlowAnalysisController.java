@@ -8,15 +8,14 @@ import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
-import cn.cyberpeace.mp.situationaware.service.FlowPortProtocolService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
 import cn.cyberpeace.mp.situationaware.vo.AttackWayAggregationVO;
 import cn.cyberpeace.mp.situationaware.vo.FlowLogVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,20 +34,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/flow/analysis")
 @Validated
 @Api(tags = "流量分析")
+@RequiredArgsConstructor
 public class FlowAnalysisController {
 
-    private static final String INDICES = "mp*sessions3*";
-
-    private FlowAnalysisService flowAnalysisService;
-
-    @Autowired
-    private FlowPortProtocolService flowPortProtocolService;
-
-
-    @Autowired
-    public FlowAnalysisController(FlowAnalysisService flowAnalysisService) {
-        this.flowAnalysisService = flowAnalysisService;
-    }
+    private final FlowAnalysisService flowAnalysisService;
 
     @ApiOperation("初始化攻击分类")
     @GetMapping("/init-classification")
