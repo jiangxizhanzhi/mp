@@ -39,6 +39,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.init.SceneInit;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -402,11 +403,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
      * @param scrollId
      * @return
      */
-    public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String sceneId, String scrollId, HostEventQueryParams queryParams) {
+    public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(String id, String scrollId, HostEventQueryParams queryParams) {
         if (StringUtils.isEmpty(scrollId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
         return scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, queryParams);
     }
 
@@ -459,6 +463,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         }
         int total = 0;
+        String scrollId = null;
         if (probeId != null) {
             for (String nodeId : newNodeIds) {
                 var element = sceneHandler.getElement(nodeId);
@@ -532,6 +537,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
+                    params.setScroll(queryParams.getScroll());
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -546,6 +552,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setPageSize(queryParams.getPageSize());
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
+                    params.setScroll(queryParams.getScroll());
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -560,6 +567,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.OS_CATEGORY);
+                    params.setScroll(queryParams.getScroll());
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -574,6 +582,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
+                    params.setScroll(queryParams.getScroll());
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -588,6 +597,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
+                    params.setScroll(queryParams.getScroll());
                     var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
@@ -621,6 +631,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (CollectionUtil.isEmpty(res)) {
                     continue;
                 }
+
+                if (CollectionUtil.isNotEmpty(res)) {
+                    if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
+                        CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);
+                        if (Objects.nonNull(event)) {
+                            scrollId = event.getScrollId();
+                        }
+                    }
+                }
+
+                String finalScrollId = scrollId;
                 res.forEach(r -> {
                     CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
                     hostEventBO.setSceneId(sceneId);
@@ -628,7 +649,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     hostEventBO.setNodeName(element.getName());
                     hostEventBO.setProbeId(probeId);
                     hostEventBO.setProbeName(probeId2Name.get(probeId));
-                    hostEventBO.setContent(JsonCommon.beanToMap(r));
+                    hostEventBO.setScrollId(finalScrollId);
+                    Map<String, Object> map = JsonCommon.beanToMap(r);
+                    map.put("scrollId", null);
+                    hostEventBO.setContent(map);
                     result.add(hostEventBO);
                 });
             }
