@@ -425,9 +425,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId, String probeId, HostEventQueryParams queryParams) {
 
         String scrollId = null;
+        String redisKey = null;
         queryParams.setScroll(false);
-        String redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
         if (StringUtils.isNotEmpty(requestId)) {
+            redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
             String redisValue = redisTemplate.opsForValue().get(redisKey);
             if (StringUtils.isNotEmpty(redisValue)) {
                scrollId = redisValue;
@@ -713,7 +714,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     }
                 }
 
-                if (StringUtils.isNotBlank(scrollId)) {
+                if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(redisKey)) {
                     redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
                 }
 

@@ -459,7 +459,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     })
     @GetMapping(value = "/get_probe_collection_data", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(@RequestParam String id,
-                                                                              @RequestParam String requestId,
+                                                                              @RequestParam(required = false) String requestId,
                                                                               @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
         handleQueryParams("getProbeCollectionData", queryParams);
