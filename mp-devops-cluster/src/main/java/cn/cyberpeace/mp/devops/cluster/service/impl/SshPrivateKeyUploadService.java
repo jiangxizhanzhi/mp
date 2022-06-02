@@ -15,6 +15,6 @@ public class SshPrivateKeyUploadService extends BaseUploadService {
 
     @Override
     protected List<String> supportUploadType() {
-        return List.of("pub");
+        return List.of("txt");
     }
 }
