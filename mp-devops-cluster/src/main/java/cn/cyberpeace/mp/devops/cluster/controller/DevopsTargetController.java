@@ -193,6 +193,14 @@ public class DevopsTargetController {
         return new Result(new ListResult<>(targetScenes));
     }
 
+    @ApiOperation("根据UUID查询靶标信息")
+    @GetMapping("/get-by-uuid")
+    public Result<DeviceVO> findByUuid(@RequestParam String uuid){
+        Device device = targetConverter.findByUuid(uuid);
+        DeviceVO deviceVO = deviceVoConverter.deviceToDeviceVO(device);
+        return new Result<>(deviceVO);
+    }
+
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){

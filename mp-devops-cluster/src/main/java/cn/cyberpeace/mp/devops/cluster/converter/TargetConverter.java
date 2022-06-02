@@ -184,4 +184,12 @@ public class TargetConverter{
         return model.getList();
     }
 
+    /**
+     * 根据UUID查询靶标信息
+     * @param uuid
+     * @return
+     */
+    public Device findByUuid(String uuid){
+        return deviceService.findById(uuid);
+    }
 }
