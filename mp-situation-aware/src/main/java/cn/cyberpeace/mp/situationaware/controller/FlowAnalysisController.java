@@ -5,28 +5,23 @@ import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
-import cn.cyberpeace.mp.situationaware.service.FlowPortProtocolService;
 import cn.cyberpeace.mp.situationaware.vo.AttackDateHistogramNetworkBytesVO;
 import cn.cyberpeace.mp.situationaware.vo.AttackWayAggregationVO;
 import cn.cyberpeace.mp.situationaware.vo.FlowLogVO;
-import cn.cyberpeace.mp.situationaware.vo.TeamAttackVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,20 +34,10 @@ import java.util.stream.Collectors;
 @RequestMapping("/flow/analysis")
 @Validated
 @Api(tags = "流量分析")
+@RequiredArgsConstructor
 public class FlowAnalysisController {
 
-    private static final String INDICES = "mp*sessions3*";
-
-    private FlowAnalysisService flowAnalysisService;
-
-    @Autowired
-    private FlowPortProtocolService flowPortProtocolService;
-
-
-    @Autowired
-    public FlowAnalysisController(FlowAnalysisService flowAnalysisService) {
-        this.flowAnalysisService = flowAnalysisService;
-    }
+    private final FlowAnalysisService flowAnalysisService;
 
     @ApiOperation("初始化攻击分类")
     @GetMapping("/init-classification")
@@ -120,66 +105,5 @@ public class FlowAnalysisController {
             return vo;
         }).collect(Collectors.toList());
         return new ServiceResult(vos).asResult();
-    }
-
-    @ApiOperation(value = "查询所有战队流量聚合数据, 战队名次按照攻击次数排名")
-    @GetMapping("/team_traffic_sum")
-    @Deprecated
-    public void queryAllTeamAttackList(FlowAnalysisRequest request){
-        TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(request);
-
-//        List<TeamBO> teamBOList = request.getTeamBOS();
-//        FlowAnalysisRequest flowAnalysisRequest = this.buildFlowAnalysisRequest(request);
-//
-//        List<TeamAttackVO> teamAttackResultVOS = teamBOList.stream().map(teamBo -> {
-//            flowAnalysisRequest.setSourceIps(teamBo.getIps());
-//            TeamAttackBO bo = flowAnalysisService.queryOneTeamAttackSumList(flowAnalysisRequest);
-//
-//            TeamAttackVO teamAttackVO = new TeamAttackVO();
-//            teamAttackVO.setAttackTrafficPercent(bo.getAttackTrafficPercent());
-//            teamAttackVO.setAttackNumberPercent(bo.getAttackNumberPercent());
-//            teamAttackVO.setTeamName(teamBo.getName());
-//            teamAttackVO.setAttackWayList(bo.getAttackWayList());
-//            teamAttackVO.setAttackNumber(bo.getAttackNumber());
-//            teamAttackVO.setTrafficSize(bo.getTrafficSize());
-//
-//            return teamAttackVO;
-//        }).collect(Collectors.toList());
-//
-//        //计算百分比
-//        teamAttackResultVOS = buildPercent(teamAttackResultVOS);
-//        teamAttackResultVOS = teamAttackResultVOS.stream().sorted(Comparator.comparingLong(TeamAttackVO::getAttackNumber).reversed()).collect(Collectors.toList());
-//        return new ServiceResult<>(teamAttackResultVOS).asResult();
-    }
-
-    @ApiOperation(value = "测试")
-    @GetMapping("/test")
-    public void groupByDestinationPort(FlowAnalysisRequest request){
-        flowPortProtocolService.findAll();
-    }
-
-    /**
-     * 攻击手法百分比
-     */
-    private List<TeamAttackVO> buildPercent(List<TeamAttackVO> attackResultVOList) {
-        Long totalNumber = attackResultVOList.stream().mapToLong(TeamAttackVO::getAttackNumber).sum();
-        Double totalTraffic = attackResultVOList.stream().mapToDouble(TeamAttackVO::getTrafficSize).sum();
-        if(Long.valueOf(0).equals(totalNumber) || Double.valueOf(0).equals(totalTraffic)){
-            return attackResultVOList;
-        }
-
-        for (int i = 0; i < attackResultVOList.size(); i++) {
-            var attack = attackResultVOList.get(i);
-            if (i> 1 &&  i == attackResultVOList.size() - 1) {
-                BigDecimal beforeSumNumber = attackResultVOList.subList(0, i).stream().map(TeamAttackVO::getAttackNumberPercent).reduce((a, b) -> a.add(b)).get();
-                BigDecimal beforeSumTraffic = attackResultVOList.subList(0, i).stream().map(TeamAttackVO::getAttackTrafficPercent).reduce((a, b) -> a.add(b)).get();
-                attack.setAttackNumberPercent(BigDecimal.valueOf(100).subtract(beforeSumNumber));
-                attack.setAttackTrafficPercent(BigDecimal.valueOf(100).subtract(beforeSumTraffic));
-            }else{
-                attack.setAttackNumberPercent((BigDecimal.valueOf(attack.getAttackNumber()).divide(BigDecimal.valueOf(totalNumber), 2, RoundingMode.HALF_UP)).multiply(BigDecimal.valueOf(100)));
-                attack.setAttackTrafficPercent((BigDecimal.valueOf(attack.getTrafficSize()).divide(BigDecimal.valueOf(totalTraffic), 2, RoundingMode.HALF_UP)).multiply(BigDecimal.valueOf(100)));
-            }
-        }
-        return attackResultVOList;
     }
 }
