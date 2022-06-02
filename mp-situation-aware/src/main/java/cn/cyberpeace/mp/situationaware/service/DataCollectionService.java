@@ -161,7 +161,7 @@ public class DataCollectionService {
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         if (wazuhEventRequest.isScroll()) {
-            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+            final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
             searchRequest.scroll(scroll);
         }
         //配置索引为空
@@ -194,7 +194,7 @@ public class DataCollectionService {
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
-        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(2L));
+        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
         try {

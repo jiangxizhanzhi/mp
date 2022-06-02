@@ -39,7 +39,6 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.init.SceneInit;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -74,8 +73,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,6 +96,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         BaseModelFields, QueryParams> {
 
     private CsceneInstanceRoleMapper csceneInstanceRoleMapper;
+
+    public static final String PROBE_COLLECTION_DATA_REQUEST_ID = "mp:probe:collection:request_id:";
 
     @Autowired
     private RabbitmqCsceneReporter csceneReporter;
@@ -131,6 +134,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private LogFileService logFileService;
+
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
+
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -414,8 +422,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, queryParams);
     }
 
-    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String id, String probeId, HostEventQueryParams queryParams) {
-        var sceneId = getSceneId(id);
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId, String probeId, HostEventQueryParams queryParams) {
+
+        String scrollId = null;
+        queryParams.setScroll(false);
+        String redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
+        if (StringUtils.isNotEmpty(requestId)) {
+            String redisValue = redisTemplate.opsForValue().get(redisKey);
+            if (StringUtils.isNotEmpty(redisValue)) {
+               scrollId = redisValue;
+            }
+        }
+
+
+        var sceneId = getSceneId(sceneInstanceId);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
@@ -463,7 +483,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
         }
         int total = 0;
-        String scrollId = null;
+        //String scrollId = null;
         if (probeId != null) {
             for (String nodeId : newNodeIds) {
                 var element = sceneHandler.getElement(nodeId);
@@ -472,7 +492,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     //硬件信息
                     BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
-                    request.setSceneId(id);
+                    request.setSceneId(sceneInstanceId);
                     request.setElementIds(CollectionUtil.toList(element.getId()));
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
@@ -483,7 +503,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
                     //操作系统信息
                     BaseSceneElementRequest request = new BaseSceneElementRequest();
-                    request.setSceneId(id);
+                    request.setSceneId(sceneInstanceId);
                     request.setElementIds(CollectionUtil.toList(element.getId()));
                     res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
                     if (!CollectionUtil.isEmpty(res)) {
@@ -492,7 +512,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
                     //网卡信息
                     ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
@@ -505,7 +525,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
                     //端口信息
                     ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
@@ -518,7 +538,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     //进程信息
                     ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(id));
+                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
                     params.setNodeIds(CollectionUtil.toList(nodeId));
                     params.setPage(queryParams.getPage());
                     params.setPageSize(queryParams.getPageSize());
@@ -538,7 +558,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     params.setScroll(queryParams.getScroll());
-                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    ListObjServiceResult<CollectionHostEventBO> r = null;
+                    if (StringUtils.isEmpty(scrollId)) {
+                        if (StringUtils.isNotBlank(requestId)) {
+                            queryParams.setScroll(true);
+                        }
+                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    } else {
+                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                    }
+
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -553,11 +582,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setStartTime(queryParams.getStartTime());
                     params.setEndTime(queryParams.getEndTime());
                     params.setScroll(queryParams.getScroll());
-                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+
+                    ListObjServiceResult<CollectionHostEventBO> r = null;
+                    if (StringUtils.isEmpty(scrollId)) {
+                        if (StringUtils.isNotBlank(requestId)) {
+                            queryParams.setScroll(true);
+                        }
+                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    } else {
+                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                    }
+
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
                     }
+
                 } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
                     //操作系统日志信息
                     HostEventQueryParams params = new HostEventQueryParams();
@@ -568,7 +608,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.OS_CATEGORY);
                     params.setScroll(queryParams.getScroll());
-                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+
+                    ListObjServiceResult<CollectionHostEventBO> r = null;
+                    if (StringUtils.isEmpty(scrollId)) {
+                        if (StringUtils.isNotBlank(requestId)) {
+                            queryParams.setScroll(true);
+                        }
+                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    } else {
+                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                    }
+
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -583,7 +633,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
                     params.setScroll(queryParams.getScroll());
-                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+
+                    ListObjServiceResult<CollectionHostEventBO> r = null;
+                    if (StringUtils.isEmpty(scrollId)) {
+                        if (StringUtils.isNotBlank(requestId)) {
+                            queryParams.setScroll(true);
+                        }
+                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    } else {
+                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                    }
+
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -598,7 +658,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setEndTime(queryParams.getEndTime());
                     params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
                     params.setScroll(queryParams.getScroll());
-                    var r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+
+                    ListObjServiceResult<CollectionHostEventBO> r = null;
+                    if (StringUtils.isEmpty(scrollId)) {
+                        if (StringUtils.isNotBlank(requestId)) {
+                            queryParams.setScroll(true);
+                        }
+                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                    } else {
+                        r = scenePluginCollectionSceneService.scrollHostEvents(scrollId, scrollId, params);
+                    }
+
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -609,7 +679,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     request.setElementIds(CollectionUtil.toList(nodeId));
                     request.setPage(queryParams.getPage());
                     request.setPageSize(queryParams.getPageSize());
-                    request.setSceneId(id);
+                    request.setSceneId(sceneInstanceId);
                     request.setFetchIfSceneInstanceShutdown(true);
                     var r = logFileService.pageByElementId(request);
                     if (r.getSource() != null) {
@@ -632,16 +702,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     continue;
                 }
 
-                if (CollectionUtil.isNotEmpty(res)) {
-                    if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
-                        CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);
-                        if (Objects.nonNull(event)) {
-                            scrollId = event.getScrollId();
+                if (StringUtils.isBlank(scrollId) && queryParams.getScroll()) {
+                    if (CollectionUtil.isNotEmpty(res)) {
+                        if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
+                            CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);
+                            if (Objects.nonNull(event)) {
+                                scrollId = event.getScrollId();
+                            }
                         }
                     }
                 }
 
-                String finalScrollId = scrollId;
+                if (StringUtils.isNotBlank(scrollId)) {
+                    redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
+                }
+
                 res.forEach(r -> {
                     CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
                     hostEventBO.setSceneId(sceneId);
@@ -649,7 +724,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     hostEventBO.setNodeName(element.getName());
                     hostEventBO.setProbeId(probeId);
                     hostEventBO.setProbeName(probeId2Name.get(probeId));
-                    hostEventBO.setScrollId(finalScrollId);
                     Map<String, Object> map = JsonCommon.beanToMap(r);
                     map.put("scrollId", null);
                     hostEventBO.setContent(map);
