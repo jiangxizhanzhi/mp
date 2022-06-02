@@ -311,7 +311,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public UserModel modify(UserRequest modifyRequest) {
-        opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+
+        if (!opUserPermCheckService.isOperateSelf(modifyRequest.getId())) {
+            // 如果操作的对象不是自己，则进行权限校验
+            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+        }
 
         // 保存用户
         UserModel userModel = new UserModel();
