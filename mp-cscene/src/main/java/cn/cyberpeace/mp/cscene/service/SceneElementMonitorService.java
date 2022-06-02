@@ -537,7 +537,7 @@ public class SceneElementMonitorService {
             if (endTime.plusHours(-6).isBefore(sceneModel.getCreateTime())) {
                 pageRequest.setStartTime(sceneModel.getCreateTime());
             } else {
-                //场景存在时间超过6小时，取场景结束时间前6小时漏洞数据
+                //场景存在时间超过6小时，取最近6小时漏洞数据
                 pageRequest.setStartTime(endTime.plusHours(-6));
             }
         }
