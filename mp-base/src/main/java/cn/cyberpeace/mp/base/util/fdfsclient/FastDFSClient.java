@@ -383,7 +383,7 @@ public class FastDFSClient {
                 if (StringUtils.isNotBlank(contentType)) {
                     // 文件编码 处理文件名中的 '+'、' ' 特殊字符
                     String encoderName = URLEncoder.encode(filename, "UTF-8").replace("+", "%20").replace("%2B", "+");
-                    response.setHeader("Content-Disposition", "attachment;filename=\"" + encoderName + "\"");
+                    response.setHeader("Content-Disposition", "attachment;filename=" + encoderName);
                     response.setContentType(contentType + ";charset=UTF-8");
                     response.setHeader("Accept-Ranges", "bytes");
                 }
