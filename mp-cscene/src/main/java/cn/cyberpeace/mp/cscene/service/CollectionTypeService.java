@@ -38,11 +38,9 @@ public class CollectionTypeService {
 
         CollectionApp appName1 = new CollectionApp();
         appName1.setName("ssh");
-        appName1.setCode("001");
 
         CollectionApp appName2 = new CollectionApp();
         appName2.setName("macfee");
-        appName2.setCode("002");
 
         return Arrays.asList(appName1, appName2);
     }

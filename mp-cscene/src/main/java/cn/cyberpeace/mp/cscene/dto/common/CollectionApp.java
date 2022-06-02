@@ -24,7 +24,4 @@ public class CollectionApp {
     @ApiModelProperty(value = "名称")
     private String name;
 
-    @ApiModelProperty(value = "编码")
-    private String code;
-
 }
