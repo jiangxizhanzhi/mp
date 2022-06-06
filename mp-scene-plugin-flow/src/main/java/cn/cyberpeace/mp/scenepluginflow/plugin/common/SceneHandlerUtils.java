@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin.common;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
@@ -103,6 +104,12 @@ public class SceneHandlerUtils {
                 }
             };
             flowExecutor.startFlows(taskIds, callbackConsumer, runType);
+        } catch (MpRuntimeException e) {
+            log.error("start flows for taskIds:[{}] error", taskIds, e);
+            flows.forEach(flow -> {
+                errorFLow(flow, e.getMessage());
+            });
+            throw e;
         } catch (Exception e) {
             log.error("start flows for taskIds:[{}] error", taskIds, e);
             flows.forEach(flow -> {

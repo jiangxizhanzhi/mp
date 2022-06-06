@@ -153,14 +153,14 @@ public class FlowExecutor {
     public void startFlow(String taskId, Runnable stopCallback, Runnable errorCallback) {
         var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
         if (!result.isSuccess()) {
-            throw new MpRuntimeException(result.getCode());
+            throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
         var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
         if (!result.isSuccess()) {
-            throw new MpRuntimeException(result.getCode());
+            throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
@@ -172,7 +172,7 @@ public class FlowExecutor {
         request.setCallbackConsumer(callbackConsumer);
         var result = flowService3.batchActuator(request);
         if (!result.isSuccess()) {
-            throw new MpRuntimeException(result.getCode());
+            throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
@@ -182,14 +182,14 @@ public class FlowExecutor {
         request.setTaskIds(taskIds);
         var result = flowService3.batchActuator(request);
         if (!result.isSuccess()) {
-            throw new MpRuntimeException(result.getCode());
+            throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void deleteFlow(String taskId) {
         var result = flowService3.deleteFlowTask(taskId);
         if (!result.isSuccess()) {
-            throw new MpRuntimeException(result.getCode());
+            throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
