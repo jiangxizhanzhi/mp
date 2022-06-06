@@ -23,9 +23,9 @@ import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetAuthPO;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +46,7 @@ public class ImagesConverter implements BaseConverter{
 
     private final DeviceTargetMapper deviceTargetMapper;
 
-    private final DeviceTargetAuthMapper deviceTargetAuthMapper;
+    private final DevopsTargetAuthService devopsTargetAuthService;
 
     private final DeviceService deviceService;
 
@@ -96,7 +96,7 @@ public class ImagesConverter implements BaseConverter{
 
         List<String> targetUuids = deviceTargetPOS.stream().map(DeviceTargetPO::getUuid).collect(Collectors.toList());
 
-        List<ImageAuthTotalCount> imageAuthTotalCounts = deviceTargetAuthMapper.totalCount(targetUuids);
+        List<ImageAuthTotalCount> imageAuthTotalCounts = devopsTargetAuthService.totalCount(targetUuids);
 
         Map<String, Integer> imageAuthTotalCountsMap = imageAuthTotalCounts.stream().collect(Collectors.toMap(ImageAuthTotalCount::getTarget, ImageAuthTotalCount::getTotal));
 
@@ -141,6 +141,7 @@ public class ImagesConverter implements BaseConverter{
      */
     public ImageConvertModel findById(String id) {
         Device device = deviceService.findById(id);
+        ImageConvertModel imageConvertModel = wrapperImageConvertModel(device);
         return wrapperImageConvertModel(device);
     }
 
@@ -209,7 +210,7 @@ public class ImagesConverter implements BaseConverter{
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getImageIds());
             deviceTargetMapper.delete(dto);
-            deviceTargetAuthMapper.deleteByTargets(request.getImageIds());
+            devopsTargetAuthService.deleteByTargets(request.getImageIds());
         }
         return result;
     }
@@ -223,7 +224,7 @@ public class ImagesConverter implements BaseConverter{
         //镜像ID
         List<String> imageIds = request.getUuids();
         //先删除上次的权限数据
-        deviceTargetAuthMapper.deleteByTargets(imageIds);
+        devopsTargetAuthService.deleteByTargets(imageIds);
 
         PublicEnum isAllPublic = request.getIsAllPublic();
         imageIds.forEach(imageId -> {
@@ -248,7 +249,7 @@ public class ImagesConverter implements BaseConverter{
                     deviceTargetAuthPO.setTarget(imageId);
                     return deviceTargetAuthPO;
                 }).collect(Collectors.toList());
-                deviceTargetAuthMapper.bulkCreate(authModelList);
+                devopsTargetAuthService.bulkCreate(authModelList);
             });
         }
 
@@ -260,7 +261,7 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     public List<UserDto> findUsersByUuid(String uuid){
-        List<DeviceTargetAuthPO> deviceTargetAuthPOS = deviceTargetAuthMapper.findByTarget(uuid);
+        List<DeviceTargetAuthPO> deviceTargetAuthPOS = devopsTargetAuthService.findByTarget(uuid);
         if (CollectionUtils.isEmpty(deviceTargetAuthPOS)){
             return Lists.newArrayList();
         }
