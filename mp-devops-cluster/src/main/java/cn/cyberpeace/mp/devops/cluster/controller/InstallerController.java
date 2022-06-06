@@ -7,8 +7,8 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
@@ -55,9 +55,9 @@ public class InstallerController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<InstallerPageVO> page(InstallerPageRequest request){
-        InstallerConvertPageModel model = installerConverter.page(request);
+        BasePageBO<InstallerConvertModel> model = installerConverter.page(request);
 
-        List<InstallerPageVO> list = model.getModelList().stream().map(installer ->
+        List<InstallerPageVO> list = model.getList().stream().map(installer ->
                 InstallerPageVO.builder().uuid(installer.getUuid()).name(installer.getName())
                         .logo(installer.getLogo()).description(installer.getDescription())
                         .categories(installer.getCategories()).deployType(installer.getDeployType())

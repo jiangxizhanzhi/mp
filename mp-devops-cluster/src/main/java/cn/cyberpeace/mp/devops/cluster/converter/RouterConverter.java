@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.RouterPageConverterModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.RouterBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
@@ -26,17 +27,17 @@ public class RouterConverter implements BaseConverter{
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public RouterPageConverterModel page(RouterPageRequest request, String... ignoreFields) {
+    public BasePageBO<RouterBO> page(RouterPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         CloudPlatformPageResult<RouterModel> model = routerService.page(getParams);
         List<RouterModel> routers = model.getList();
-        List<RouterPageConverterModel.Model> list = routers.stream().map(routerModel ->
-                RouterPageConverterModel.Model.builder().name(routerModel.getName())
+        List<RouterBO> list = routers.stream().map(routerModel ->
+                RouterBO.builder().name(routerModel.getName())
                         .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
-        RouterPageConverterModel convertModel = new RouterPageConverterModel();
-        convertModel.setModelList(list);
+        BasePageBO<RouterBO> convertModel = new BasePageBO<>();
+        convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

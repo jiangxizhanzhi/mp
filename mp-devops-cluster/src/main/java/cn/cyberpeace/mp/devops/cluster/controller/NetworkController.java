@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.NetworkPageConverterModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkSubnetBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.NetworkPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -39,10 +41,10 @@ public class NetworkController {
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
-        NetworkPageConverterModel model = networkConverter.page(request);
-        List<NetworkPageConverterModel.Model> networks = model.getModelList();
+        BasePageBO<NetworkBO> model = networkConverter.page(request);
+        List<NetworkBO> networks = model.getList();
         List<NetworkPageVO> list = networks.stream().map(networkModel -> {
-            List<NetworkPageConverterModel.Model.Subnet> subnetList = networkModel.getSubnets();
+            List<NetworkSubnetBO> subnetList = networkModel.getSubnets();
             List<NetworkPageVO.Subnet> subnets = Lists.newArrayList();
             if (CollectionUtils.isNotEmpty(subnetList)) {
                 subnets = subnetList.stream().map(subnet -> new NetworkPageVO.Subnet(subnet.getId(), subnet.getCidr(), subnet.getGatewayIp())).collect(Collectors.toList());

@@ -5,7 +5,12 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.HypervisorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.VirtualRealSwitchBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
@@ -17,6 +22,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
+import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,20 +67,20 @@ public class HypervisorConverter implements BaseConverter {
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public HypervisorPageConvertModel page(HypervisorPageRequest request, String... ignoreFields) {
+    public BasePageBO<HypervisorBO> page(HypervisorPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
-        List<HypervisorPageConvertModel.Model> list = model.getList().stream().map(hypervisor ->
-                HypervisorPageConvertModel.Model.builder().name(hypervisor.getHostname())
+        List<HypervisorBO> list = model.getList().stream().map(hypervisor ->
+                HypervisorBO.builder().name(hypervisor.getHostname())
                         .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
                         .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
-        HypervisorPageConvertModel convertModel = new HypervisorPageConvertModel();
-        convertModel.setModelList(list);
+        BasePageBO<HypervisorBO> convertModel = new BasePageBO<>();
+        convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }
@@ -128,18 +134,18 @@ public class HypervisorConverter implements BaseConverter {
      * 查询虚拟结合交换机状态列表
      * @return
      */
-    public VirtualRealSwitchConvertModel listVirtualRealSwitch() {
+    public ListResult<VirtualRealSwitchBO> listVirtualRealSwitch() {
         SwitchesCloudPlatform model = switchService.list();
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getSwitchs())){
             return null;
         }
-        List<VirtualRealSwitchConvertModel.Model> list = model.getSwitchs().stream().map(v ->
-                VirtualRealSwitchConvertModel.Model.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
+        List<VirtualRealSwitchBO> list = model.getSwitchs().stream().map(v ->
+                VirtualRealSwitchBO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getStatus())
                         .usedPorts(v.getInterfaceUpNums()).ports(v.getInterfaceNums()).build()
         ).collect(Collectors.toList());
 
-        VirtualRealSwitchConvertModel convertModel = new VirtualRealSwitchConvertModel();
-        convertModel.setModelList(list);
+        ListResult<VirtualRealSwitchBO> convertModel = new ListResult<>();
+        convertModel.setList(list);
         return convertModel;
     }
 }

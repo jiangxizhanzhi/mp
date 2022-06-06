@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ElasticIpConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.ElasticIpBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
@@ -30,19 +31,19 @@ public class ElasticIpConverter implements BaseConverter {
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public ElasticIpConvertModel page(ElasticIpPageRequest request, String... ignoreFields) {
+    public BasePageBO<ElasticIpBO> page(ElasticIpPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         CloudPlatformPageResult<ElasticIpModel> model = networkService.pageElasticIp(getParams);
-        List<ElasticIpConvertModel.Model> list = model.getList().stream().map(elasticIpModel ->
-                ElasticIpConvertModel.Model.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
+        List<ElasticIpBO> list = model.getList().stream().map(elasticIpModel ->
+                ElasticIpBO.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())
                         .fixedIpAddress(elasticIpModel.getFixedIpAddress())
                         .status(elasticIpModel.getStatus())
                         .createdAt(elasticIpModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
 
-        ElasticIpConvertModel convertModel = new ElasticIpConvertModel();
-        convertModel.setModelList(list);
+        BasePageBO<ElasticIpBO> convertModel = new BasePageBO();
+        convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

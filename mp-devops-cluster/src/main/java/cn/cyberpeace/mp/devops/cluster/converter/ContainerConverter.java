@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ContainerConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.ContainerBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
 import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
@@ -32,12 +33,12 @@ public class ContainerConverter implements BaseConverter {
      * @param ignoreFields
      * @return
      */
-    public ContainerConvertModel page(ContainerPageRequest request, String... ignoreFields) {
+    public BasePageBO<ContainerBO> page(ContainerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         CloudPlatformPageResult<ContainerModel> model = containerService.page(getParams);
-        ContainerConvertModel convertModel = new ContainerConvertModel();
-        convertModel.setModelList(this.convertContainerModelList(model.getList()));
+        BasePageBO<ContainerBO> convertModel = new BasePageBO();
+        convertModel.setList(this.convertContainerModelList(model.getList()));
         convertModel.setTotal(Objects.isNull(model.getTotal()) ? NumberUtils.INTEGER_ZERO : model.getTotal());
         return convertModel;
     }
@@ -59,12 +60,12 @@ public class ContainerConverter implements BaseConverter {
      * @param containers
      * @return
      */
-    private List<ContainerConvertModel.Model> convertContainerModelList(List<ContainerModel> containers){
+    private List<ContainerBO> convertContainerModelList(List<ContainerModel> containers){
         if (CollectionUtils.isEmpty(containers)){
             return Lists.newArrayList();
         }
         return containers.stream().map(containerModel -> {
-                ContainerConvertModel.Model response = ContainerConvertModel.Model.builder()
+            ContainerBO response = ContainerBO.builder()
                         .name(containerModel.getName()).image(containerModel.getImage())
                         .node(containerModel.getHost())
                         .status(containerModel.getStatus())

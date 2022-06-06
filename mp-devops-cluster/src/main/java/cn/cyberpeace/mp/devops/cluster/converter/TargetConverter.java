@@ -9,8 +9,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
@@ -49,7 +48,7 @@ public class TargetConverter{
      * @param request
      * @return
      */
-    public TargetPageModel page(TargetSceneRequest request) {
+    public BasePageBO<DeviceTargetPO> page(TargetSceneRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setTargetCategory(request.getTargetCategory());
         dto.setMainCategory(request.getCategory());
@@ -80,14 +79,14 @@ public class TargetConverter{
         dto.setImageStatus(request.getImageStatus());
         dto.setBaseImageSupport(request.getBaseImageSupport());
         Integer total = devopsTargetService.totalCount(dto);
-        TargetPageModel targetPageModel = new TargetPageModel();
+        BasePageBO<DeviceTargetPO> targetPageModel = new BasePageBO<>();
         targetPageModel.setTotal(total);
         if (total == 0){
-            targetPageModel.setDeviceTargetPOS(Lists.newArrayList());
+            targetPageModel.setList(Lists.newArrayList());
             return targetPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-        targetPageModel.setDeviceTargetPOS(deviceTargetPOS);
+        targetPageModel.setList(deviceTargetPOS);
         return targetPageModel;
     }
 
@@ -96,26 +95,26 @@ public class TargetConverter{
      * @param request
      * @return
      */
-    public TargetSceneConvertModel allTarget(TargetSceneRequest request) {
-       TargetPageModel targetPageModel = this.page(request);
+    public BasePageBO<Device> allTarget(TargetSceneRequest request) {
+        BasePageBO<DeviceTargetPO> targetPageModel = this.page(request);
 
-        List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getDeviceTargetPOS();
+        List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
 
-        TargetSceneConvertModel sceneConvertModel = new TargetSceneConvertModel();
+        BasePageBO<Device> sceneConvertModel = new BasePageBO<>();
         sceneConvertModel.setTotal(targetPageModel.getTotal());
         if (CollectionUtils.isEmpty(ids)){
-            sceneConvertModel.setDeviceList(Lists.newArrayList());
+            sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
         CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
-            sceneConvertModel.setDeviceList(Lists.newArrayList());
+            sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        sceneConvertModel.setDeviceList(model.getList());
+        sceneConvertModel.setList(model.getList());
         return sceneConvertModel;
     }
 

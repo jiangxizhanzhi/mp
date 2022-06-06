@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NpcService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.NpcPageConverterModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devops.cluster.request.NpcPageRequest;
@@ -28,12 +28,12 @@ public class NpcConverter implements BaseConverter{
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public NpcPageConverterModel page(NpcPageRequest request, String... ignoreFields) {
+    public BasePageBO<NpcModel> page(NpcPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         CloudPlatformPageResult<NpcModel> model = npcService.page(getParams);
-        NpcPageConverterModel convertModel = new NpcPageConverterModel();
-        convertModel.setModelList(model.getList());
+        BasePageBO<NpcModel> convertModel = new BasePageBO<>();
+        convertModel.setList(model.getList());
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

@@ -8,8 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TargetPageModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
@@ -110,11 +109,11 @@ public class DevopsTargetController {
                 request.setSecondCategory(second.getId());
                 request.setPage(null);
                 request.setPerPage(null);
-                TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(request);
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
                     continue;
                 }
-                List<Device> secondDeviceList = targetSceneConvertModel.getDeviceList();
+                List<Device> secondDeviceList = targetSceneConvertModel.getList();
 
                 TargetSceneVO targetSceneVO = new TargetSceneVO();
 
@@ -162,11 +161,11 @@ public class DevopsTargetController {
                 request.setSecondCategory(second.getId());
                 request.setPage(null);
                 request.setPerPage(null);
-                TargetPageModel targetSceneConvertModel = targetConverter.page(request);
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceTargetPOS())){
+                BasePageBO<DeviceTargetPO> targetSceneConvertModel = targetConverter.page(request);
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
                     continue;
                 }
-                List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getDeviceTargetPOS();
+                List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getList();
 
                 List<DeviceTargetVO> deviceTargetVOList = deviceTargetPOList.stream().map(v -> {
                     DeviceTargetVO vo = new DeviceTargetVO();
@@ -204,11 +203,11 @@ public class DevopsTargetController {
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){
-        TargetSceneConvertModel targetSceneConvertModel = targetConverter.allTarget(request);
-        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())){
+        BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(request);
+        if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<Device> deviceList = targetSceneConvertModel.getDeviceList();
+        List<Device> deviceList = targetSceneConvertModel.getList();
 
         List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
 
