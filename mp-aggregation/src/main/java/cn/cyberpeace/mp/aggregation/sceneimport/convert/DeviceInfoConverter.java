@@ -1,10 +1,9 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
-import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TargetSceneConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -54,8 +53,8 @@ class DeviceInfoConverter implements IConverter {
             request.setLikeName(false);
             //不过滤隐藏靶标
             request.setIsHide(Boolean.TRUE);
-            TargetSceneConvertModel targetSceneConvertModel = this.targetConverter.allTarget(request);
-            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getDeviceList())) {
+            BasePageBO<Device> targetSceneConvertModel = this.targetConverter.allTarget(request);
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
                 List<Device> devices = this.targetConverter.getCommonTargets(request.getName());
                 if (CollectionUtils.isEmpty(devices)) {
                     log.info("import scene ,no device find , image is {}", request.getName());
@@ -65,7 +64,7 @@ class DeviceInfoConverter implements IConverter {
                     this.loadDeviceInfo(params, devices.get(0));
                 }
             } else {
-                List<Device> devices = targetSceneConvertModel.getDeviceList();
+                List<Device> devices = targetSceneConvertModel.getList();
                 Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
                 this.loadDeviceInfo(params, devices.get(0));
             }

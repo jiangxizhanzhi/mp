@@ -6,8 +6,8 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipment;
-import cn.cyberpeace.mp.devops.cluster.converter.model.RealEquipmentConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.RealEquipmentBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
@@ -69,7 +69,7 @@ public class RealEquipmentConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public RealEquipmentConvertModel page(RealEquipmentPageRequest request) {
+    public BasePageBO<RealEquipmentBO> page(RealEquipmentPageRequest request) {
         ImagePageDTO dto = new ImagePageDTO();
         dto.setMainCategory(request.getCategory());
         dto.setSubCategory(request.getSecondCategory());
@@ -83,10 +83,10 @@ public class RealEquipmentConverter implements BaseConverter{
         dto.setIsHide(Boolean.FALSE);
         Integer total = deviceTargetMapper.totalCount(dto);
 
-        RealEquipmentConvertModel convertModel = new RealEquipmentConvertModel();
+        BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
         if (total == 0){
             convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
+            convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
@@ -94,29 +94,29 @@ public class RealEquipmentConverter implements BaseConverter{
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
+            convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
         CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             convertModel.setTotal(0);
-            convertModel.setModelList(Lists.newArrayList());
+            convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
 
         Map<String, DeviceTargetPO> map = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, Function.identity()));
-        List<RealEquipment> modelList = model.getList().stream().map(device -> {
-            RealEquipment realEquipment = convertDevice(device);
+        List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
+            RealEquipmentBO realEquipmentBO = convertDevice(device);
             DeviceTargetPO deviceTargetPO = map.get(device.getUuid());
             if (Objects.nonNull(deviceTargetPO)){
-                realEquipment.setReferenceStatus(deviceTargetPO.getReferenceStatus());
-                realEquipment.setUseStatus(deviceTargetPO.getUseStatus());
+                realEquipmentBO.setReferenceStatus(deviceTargetPO.getReferenceStatus());
+                realEquipmentBO.setUseStatus(deviceTargetPO.getUseStatus());
             }
-            return realEquipment;
+            return realEquipmentBO;
         }).collect(Collectors.toList());
 
-        convertModel.setModelList(modelList);
+        convertModel.setList(modelList);
         convertModel.setTotal(total);
         return convertModel;
     }
@@ -127,7 +127,7 @@ public class RealEquipmentConverter implements BaseConverter{
      * @param id
      * @return
      */
-    public RealEquipment findById(String id) {
+    public RealEquipmentBO findById(String id) {
         Device device = deviceService.findById(id);
         return convertDevice(device);
     }
@@ -187,12 +187,12 @@ public class RealEquipmentConverter implements BaseConverter{
      * @param device
      * @return RealEquipment
      */
-    protected RealEquipment convertDevice(Device device){
+    protected RealEquipmentBO convertDevice(Device device){
         if (Objects.isNull(device)){
-            return new RealEquipment();
+            return new RealEquipmentBO();
         }
 
-        RealEquipment convertModel = RealEquipment.builder().uuid(device.getUuid())
+        RealEquipmentBO convertModel = RealEquipmentBO.builder().uuid(device.getUuid())
                 .name(device.getName()).role(device.getRole()).logo(device.getLogo())
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
                 .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();

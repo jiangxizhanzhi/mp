@@ -44,6 +44,7 @@ public class FlowSceneSimulationRequest {
     private Integer networkBytes;
 
     @ApiModelProperty("随机生成攻击手法，默认: false")
+    @Builder.Default
     private Boolean shuffleCategory = Boolean.FALSE;
 
     @ApiModelProperty("时间")

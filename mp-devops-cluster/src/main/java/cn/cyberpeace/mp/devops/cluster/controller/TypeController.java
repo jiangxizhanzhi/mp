@@ -9,10 +9,11 @@ import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SerialPortConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SwitchConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.TypeL2AllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.TargetType;
 import cn.cyberpeace.mp.devops.cluster.vo.SerialPortVO;
 import cn.cyberpeace.mp.devops.cluster.vo.TypeAllVO;
 import cn.cyberpeace.mp.devops.cluster.vo.TypeL2AllVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -130,11 +131,11 @@ public class TypeController {
     @ApiOperation("查询所有二级分类")
     @GetMapping("/l2-categories")
     public Result<TypeL2AllVO> l2List(){
-        TypeL2AllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
+        ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
         if (Objects.isNull(l1AndL2AndL3Type)){
             return new Result<>();
         }
-        return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getItems()));
+        return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));
     }
 
 

@@ -1,9 +1,10 @@
-package cn.cyberpeace.mp.devops.cluster.converter.model;
+package cn.cyberpeace.mp.devops.cluster.converter.bo;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntityAccess;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtGateway;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.converter.model.BasePageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Data
-public class RealEquipment extends BasePageConvertModel{
+public class RealEquipmentBO extends BasePageConvertModel {
 
     /**
      * UUID

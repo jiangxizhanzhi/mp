@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentServi
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
-import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.RealEquipmentBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -56,8 +60,8 @@ public class RealEquipmentController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
-        RealEquipmentConvertModel model = realEquipmentConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+        BasePageBO<RealEquipmentBO> model = realEquipmentConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
@@ -65,7 +69,7 @@ public class RealEquipmentController {
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
         TypeAllConvertModel accessType = typeConverter.findAccessType();
 
-        List<RealEquipmentPageVO> list = model.getModelList().stream().map(v -> {
+        List<RealEquipmentPageVO> list = model.getList().stream().map(v -> {
             ExtEntity extEntity = v.getExtEntity();
             RealEquipmentPageVO response = RealEquipmentPageVO.builder().id(v.getUuid()).name(v.getName())
                     .category(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
@@ -139,8 +143,8 @@ public class RealEquipmentController {
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
     public Result<RealEquipmentByIdVO> getById(@PathVariable String id){
-        RealEquipment realEquipment = realEquipmentConverter.findById(id);
-        List<ExtEntityAccess> extEntityAccess = realEquipment.getExtEntityAccess();
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(id);
+        List<ExtEntityAccess> extEntityAccess = realEquipmentBO.getExtEntityAccess();
         if (CollectionUtils.isNotEmpty(extEntityAccess)) {
             extEntityAccess = extEntityAccess.stream().map(v -> {
                 List<AccessProtocol> accessProtocols = v.getAccessProtocols();
@@ -152,11 +156,11 @@ public class RealEquipmentController {
             }).collect(Collectors.toList());
         }
 
-        RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipment.getUuid())
-                .name(realEquipment.getName()).logo(realEquipment.getLogo()).role(realEquipment.getRole())
-                .mainCategory(realEquipment.getMainCategory()).subCategory(realEquipment.getSubCategory()).thirdCategory(realEquipment.getThirdCategory())
-                .systemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity())
-                .description(realEquipment.getDescription()).extEntityAccess(extEntityAccess).build();
+        RealEquipmentByIdVO response = RealEquipmentByIdVO.builder().uuid(realEquipmentBO.getUuid())
+                .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo()).role(realEquipmentBO.getRole())
+                .mainCategory(realEquipmentBO.getMainCategory()).subCategory(realEquipmentBO.getSubCategory()).thirdCategory(realEquipmentBO.getThirdCategory())
+                .systemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity())
+                .description(realEquipmentBO.getDescription()).extEntityAccess(extEntityAccess).build();
         return new Result(response);
     }
 
@@ -202,21 +206,21 @@ public class RealEquipmentController {
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailVO> findDevopsDetails(@RequestParam("uuid") String id){
-        RealEquipment realEquipment = realEquipmentConverter.findById(id);
-        if (Objects.isNull(realEquipment)){
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(id);
+        if (Objects.isNull(realEquipmentBO)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         RealEquipmentDevopsDetailVO response = RealEquipmentDevopsDetailVO.builder()
-                .name(realEquipment.getName()).logo(realEquipment.getLogo())
-                .extSystemInfo(realEquipment.getExtSystemInfo()).extEntity(realEquipment.getExtEntity()).build();
-        if (CollectionUtils.isNotEmpty(realEquipment.getExtEntityAccess())) {
-            response.setAddress(realEquipment.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
+                .name(realEquipmentBO.getName()).logo(realEquipmentBO.getLogo())
+                .extSystemInfo(realEquipmentBO.getExtSystemInfo()).extEntity(realEquipmentBO.getExtEntity()).build();
+        if (CollectionUtils.isNotEmpty(realEquipmentBO.getExtEntityAccess())) {
+            response.setAddress(realEquipmentBO.getExtEntityAccess().stream().map(ExtEntityAccess::getIp).collect(Collectors.toList()));
         }
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();
         TypeAllConvertModel systemArchitecure = typeConverter.findSystemArchitecure();
 
-        ExtSystemInfo extSystemInfo = realEquipment.getExtSystemInfo();
+        ExtSystemInfo extSystemInfo = realEquipmentBO.getExtSystemInfo();
         if (Objects.nonNull(extSystemInfo)){
             if (Objects.nonNull(l1AndL2AndL3Type) && CollectionUtils.isNotEmpty(l1AndL2AndL3Type.getThirdTypeList())) {
                 List<String> systemTypeList = l1AndL2AndL3Type.getThirdTypeList().stream()
@@ -240,8 +244,8 @@ public class RealEquipmentController {
             response.setExtSystemInfo(extSystemInfo);
         }
 
-        if (Objects.nonNull(realEquipment.getExtEntity())){
-            ExtEntity extEntity = realEquipment.getExtEntity();
+        if (Objects.nonNull(realEquipmentBO.getExtEntity())){
+            ExtEntity extEntity = realEquipmentBO.getExtEntity();
             response.setModel(extEntity.getStyle());
             response.setParams(extEntity.getParams());
             if (Objects.nonNull(extEntity.getSnmpConfig()) && StringUtils.isNotBlank(extEntity.getSnmpVersion())) {
@@ -293,11 +297,11 @@ public class RealEquipmentController {
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
     public PageResult<RealEquipmentNetworkCardPageVO> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
-        RealEquipment realEquipment = realEquipmentConverter.findById(request.getUuid());
-        if (Objects.isNull(realEquipment)){
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(request.getUuid());
+        if (Objects.isNull(realEquipmentBO)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-        ExtEntity extEntity = realEquipment.getExtEntity();
+        ExtEntity extEntity = realEquipmentBO.getExtEntity();
         if (Objects.isNull(extEntity) || StringUtils.isBlank(extEntity.getSnmpVersion()) || Objects.isNull(extEntity.getSnmpConfig())){
             return new PageResult<>(Lists.newArrayList(),0);
         }

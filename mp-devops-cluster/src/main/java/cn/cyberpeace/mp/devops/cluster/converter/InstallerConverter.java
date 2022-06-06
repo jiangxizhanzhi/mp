@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InstallerService;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.InstallerConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.InstallerFormDataCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
@@ -43,14 +43,14 @@ public class InstallerConverter implements BaseConverter{
      * @param ignoreFields
      * @return
      */
-    public InstallerConvertPageModel page(InstallerPageRequest request, String... ignoreFields) {
+    public BasePageBO<InstallerConvertModel> page(InstallerPageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(Boolean.TRUE,request,ignoreFields);
         CloudPlatformPageResult<Installer> model = installerService.page(getParams);
-        InstallerConvertPageModel convertModel = new InstallerConvertPageModel();
+        BasePageBO<InstallerConvertModel> convertModel = new BasePageBO<>();
         List<InstallerConvertModel> modelList = model.getList().stream()
                 .map(this::convertInstaller).collect(Collectors.toList());
-        convertModel.setModelList(modelList);
+        convertModel.setList(modelList);
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

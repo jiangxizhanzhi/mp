@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
@@ -93,8 +94,8 @@ public class ImagesController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
-        ImageConvertPageModel model = imagesConverter.page(request);
-        List<ImagesPageVO> list = model.getModelList().stream().map(v -> {
+        BasePageBO<ImageConvertModel> model = imagesConverter.page(request);
+        List<ImagesPageVO> list = model.getList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
@@ -295,11 +296,11 @@ public class ImagesController {
     @ApiOperation("查询快照历史")
     @GetMapping("/{id}/snapshot/list")
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
-        SnapshotListConvertModel convertModel = snapshotConverter.list(uuid);
+        BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
         if (Objects.isNull(convertModel)){
             return new Result();
         }
-        return new Result(convertModel.getModelList());
+        return new Result(convertModel.getList());
     }
 
 
@@ -359,11 +360,11 @@ public class ImagesController {
     @ApiOperation("查看文件注入列表")
     @GetMapping("/inject-file")
     public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
-        InjectFileListConvertModel list = injectFileConverter.list(request.getDeviceUuid());
+        BasePageBO<InjectFileConvertModel> list = injectFileConverter.list(request.getDeviceUuid());
         if (Objects.isNull(list)){
             return new Result();
         }
-        return new Result(list.getModelList());
+        return new Result(list.getList());
     }
 
     /**

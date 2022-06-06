@@ -2,7 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.InstanceBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
@@ -30,18 +31,18 @@ public class VmConverter implements BaseConverter{
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public InstanceConvertModel page(InstancePageRequest request, String... ignoreFields) {
+    public BasePageBO<InstanceBO> page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
         CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
-        List<InstanceConvertModel.Model> list = model.getList().stream().map(instanceModel ->
-                InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
+        List<InstanceBO> list = model.getList().stream().map(instanceModel ->
+                InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
                         .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
-        InstanceConvertModel convertModel = new InstanceConvertModel();
-        convertModel.setModelList(list);
+        BasePageBO<InstanceBO> convertModel = new BasePageBO<>();
+        convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
     }

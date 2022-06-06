@@ -5,9 +5,9 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotListConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceSnapshotMergeCloudPlatform;
@@ -36,14 +36,14 @@ public class SnapshotConverter {
      * @param deviceUuid
      * @return
      */
-    public SnapshotListConvertModel list(String deviceUuid) {
+    public BasePageBO<SnapshotConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
         List<SnapshotConvertModel> list = model.getList().stream().map(item ->
                 new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                         item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
                 .collect(Collectors.toList());
-        SnapshotListConvertModel convertModel = new SnapshotListConvertModel();
-        convertModel.setModelList(list);
+        BasePageBO<SnapshotConvertModel> convertModel = new BasePageBO<>();
+        convertModel.setList(list);
         convertModel.setSuccess(model.isSuccess());
         return convertModel;
     }

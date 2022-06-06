@@ -5,7 +5,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
-import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.VirtualRealSwitchBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
@@ -14,6 +19,7 @@ import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
 import cn.cyberpeace.mp.devops.cluster.vo.VirtualRealSwitchStatusVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import com.google.common.collect.Lists;
@@ -117,11 +123,11 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(HypervisorPageRequest request){
-        HypervisorPageConvertModel model = hypervisorConverter.page(request);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+        BasePageBO<HypervisorBO> model = hypervisorConverter.page(request);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
-        List<HypervisorPageVO> hypervisorPageRespons =  model.getModelList().stream().map(hypervisor ->
+        List<HypervisorPageVO> hypervisorPageRespons =  model.getList().stream().map(hypervisor ->
                 HypervisorPageVO.builder().name(hypervisor.getName())
                         .ip(hypervisor.getIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
@@ -189,11 +195,11 @@ public class CloudPlatformMonitorController {
     @ApiOperation("虚实结合交换机状态")
     @GetMapping("/virtual-real-switch-state")
     public Result<List<VirtualRealSwitchStatusVO>> virtualRealSwitchStatus(){
-        VirtualRealSwitchConvertModel model = hypervisorConverter.listVirtualRealSwitch();
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
+        ListResult<VirtualRealSwitchBO> model = hypervisorConverter.listVirtualRealSwitch();
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new Result<>();
         }
-        List<VirtualRealSwitchStatusVO> list = model.getModelList().stream().map(v ->
+        List<VirtualRealSwitchStatusVO> list = model.getList().stream().map(v ->
                 VirtualRealSwitchStatusVO.builder().name(v.getName()).managementIp(v.getManagementIp()).state(v.getState())
                         .usedPorts(v.getUsedPorts()).ports(v.getPorts()).build()
         ).collect(Collectors.toList());

@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.TypeService;
-import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdIntegerConvertModel;
+import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetType;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeItemNameModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TypeTreeItemModel;
+import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -46,9 +50,9 @@ public class TypeConverter {
      * 查询类型数据，仅返回L1和L2级类型数据
      * @return
      */
-    public TypeL2AllConvertModel findL1AndL2Type() {
+    public ListResult<TargetType> findL1AndL2Type() {
         CloudPlatformPageResult<TargetType> l1AndL2Type = typeService.findL1AndL2Type();
-        return new TypeL2AllConvertModel(l1AndL2Type.getList());
+        return new ListResult<>(l1AndL2Type.getList());
     }
 
     /**

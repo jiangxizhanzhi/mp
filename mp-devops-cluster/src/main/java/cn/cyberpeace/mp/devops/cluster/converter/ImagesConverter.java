@@ -9,8 +9,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
-import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertPageModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
@@ -67,15 +67,15 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public ImageConvertPageModel page(ImagePageRequest request) {
+    public BasePageBO<ImageConvertModel> page(ImagePageRequest request) {
         ImagePageDTO dto = convertImagePageRequest(request);
         dto.setIsHide(Boolean.FALSE);
         Integer total = devopsTargetService.totalCount(dto);
 
-        ImageConvertPageModel imageConvertPageModel = new ImageConvertPageModel();
+        BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
         if (total == 0){
             imageConvertPageModel.setTotal(0);
-            imageConvertPageModel.setModelList(Lists.newArrayList());
+            imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
@@ -83,14 +83,14 @@ public class ImagesConverter implements BaseConverter{
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
             imageConvertPageModel.setTotal(0);
-            imageConvertPageModel.setModelList(Lists.newArrayList());
+            imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
 
         if (CollectionUtils.isEmpty(deviceList)){
             imageConvertPageModel.setTotal(0);
-            imageConvertPageModel.setModelList(Lists.newArrayList());
+            imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
 
@@ -113,7 +113,7 @@ public class ImagesConverter implements BaseConverter{
             }
         }
 
-        imageConvertPageModel.setModelList(modelList);
+        imageConvertPageModel.setList(modelList);
         imageConvertPageModel.setTotal(total);
         return imageConvertPageModel;
     }
