@@ -4,9 +4,9 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ContainerService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.ContainerBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.ContainerPageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ContainerModel;
-import cn.cyberpeace.mp.devops.cluster.request.ContainerPageRequest;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +29,13 @@ public class ContainerConverter implements BaseConverter {
 
     /**
      * 分页查询容器列表
-     * @param request
+     * @param dto
      * @param ignoreFields
      * @return
      */
-    public BasePageBO<ContainerBO> page(ContainerPageRequest request, String... ignoreFields) {
+    public BasePageBO<ContainerBO> page(ContainerPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<ContainerModel> model = containerService.page(getParams);
         BasePageBO<ContainerBO> convertModel = new BasePageBO();
         convertModel.setList(this.convertContainerModelList(model.getList()));
@@ -45,13 +45,12 @@ public class ContainerConverter implements BaseConverter {
 
     /**
      * 获取容器总数量
-     * @param request
+     * @param dto
      * @return
      */
-    public Integer getTotalContainers(ContainerPageRequest request) {
-        request.setPerPage(NumberUtils.INTEGER_ONE);
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageResult page = containerService.page(getParams);
+    public Integer getTotalContainers(ContainerPageDTO dto) {
+        dto.setLimit(NumberUtils.INTEGER_ONE);
+        BasePageBO<ContainerBO> page = this.page(dto,this.getTotalPageIgnoreField());
         return page.getTotal();
     }
 

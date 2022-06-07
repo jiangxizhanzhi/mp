@@ -4,9 +4,9 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.ElasticIpBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.ElasticIpPageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ElasticIpModel;
-import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -27,13 +27,13 @@ public class ElasticIpConverter implements BaseConverter {
 
     /**
      * 分页查询弹性IP信息
-     * @param request
+     * @param dto
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public BasePageBO<ElasticIpBO> page(ElasticIpPageRequest request, String... ignoreFields) {
+    public BasePageBO<ElasticIpBO> page(ElasticIpPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<ElasticIpModel> model = networkService.pageElasticIp(getParams);
         List<ElasticIpBO> list = model.getList().stream().map(elasticIpModel ->
                 ElasticIpBO.builder().floatIpAddress(elasticIpModel.getFloatingIpAddress())

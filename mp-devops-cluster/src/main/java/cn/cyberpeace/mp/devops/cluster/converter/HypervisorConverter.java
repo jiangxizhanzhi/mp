@@ -11,6 +11,9 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.HypervisorActionDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.HypervisorWeightAndMaxInstanceDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorStatisticsCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
@@ -19,9 +22,6 @@ import cn.cyberpeace.mp.devops.cluster.model.common.Hypervisor;
 import cn.cyberpeace.mp.devops.cluster.model.common.HypervisorStatistics;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceOsServiceModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkAgentModel;
-import cn.cyberpeace.mp.devops.cluster.request.HypervisorPageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
-import cn.cyberpeace.mp.devops.cluster.request.HypervisorWeightAndMaxInstanceRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
@@ -63,13 +63,13 @@ public class HypervisorConverter implements BaseConverter {
 
     /**
      * 分页查询节点管理信息
-     * @param request
+     * @param dto
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public BasePageBO<HypervisorBO> page(HypervisorPageRequest request, String... ignoreFields) {
+    public BasePageBO<HypervisorBO> page(BasePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         final CloudPlatformPageResult<Hypervisor> model = hypervisorService.page(getParams);
         List<HypervisorBO> list = model.getList().stream().map(hypervisor ->
                 HypervisorBO.builder().name(hypervisor.getHostname())
@@ -87,11 +87,11 @@ public class HypervisorConverter implements BaseConverter {
 
     /**
      * 获取虚拟机数量限制与权重
-     * @param request
+     * @param dto
      * @return
      */
-    public HypervisorWeightAndMaxInstanceConvertModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceRequest request) {
-        HypervisorWeightAndMaxInstanceCloudPlatformResult model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(request));
+    public HypervisorWeightAndMaxInstanceConvertModel getWeightAndMaxInstances(HypervisorWeightAndMaxInstanceDTO dto) {
+        HypervisorWeightAndMaxInstanceCloudPlatformResult model = hypervisorService.getWeightAndMaxInstances(ParamUtils.wrapperGetParamsByObject(dto));
         if (Objects.isNull(model)){
             return null;
         }
@@ -100,10 +100,10 @@ public class HypervisorConverter implements BaseConverter {
 
     /**
      * 节点管理-重启/关机
-     * @param request
+     * @param dto
      */
-    public void rebootOrPowerOff(HypervisorRequest request) {
-        hypervisorService.rebootOrPowerOff(JSONObject.toJSONString(request));
+    public void rebootOrPowerOff(HypervisorActionDTO dto) {
+        hypervisorService.rebootOrPowerOff(JSONObject.toJSONString(dto));
     }
 
     /**
