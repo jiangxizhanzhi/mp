@@ -10,15 +10,13 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.RealEquipmentBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
-import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper;
-import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -47,9 +45,7 @@ public class RealEquipmentConverter implements BaseConverter{
 
     private final DevopsTargetService devopsTargetService;
 
-    private final DeviceTargetMapper deviceTargetMapper;
-
-    private final DeviceTargetAuthMapper deviceTargetAuthMapper;
+    private final DevopsTargetAuthService devopsTargetAuthService;
 
     private final TargetConverter targetConverter;
 
@@ -66,22 +62,11 @@ public class RealEquipmentConverter implements BaseConverter{
 
     /**
      * 分页查询实装列表
-     * @param request
+     * @param dto
      * @return
      */
-    public BasePageBO<RealEquipmentBO> page(RealEquipmentPageRequest request) {
-        ImagePageDTO dto = new ImagePageDTO();
-        dto.setMainCategory(request.getCategory());
-        dto.setSubCategory(request.getSecondCategory());
-        dto.setThirdCategory(request.getThirdCategory());
-        dto.setImageType(ImageTypeEnum.ENTITY.toValue());
-        dto.setUseStatus(request.getUseStatus());
-        dto.setName(request.getName());
-        dto.setInPosition(request.getInPosition());
-        dto.setOffset((request.getPage() - 1) * request.getPerPage());
-        dto.setLimit(request.getPerPage());
-        dto.setIsHide(Boolean.FALSE);
-        Integer total = deviceTargetMapper.totalCount(dto);
+    public BasePageBO<RealEquipmentBO> page(ImagePageDTO dto) {
+        Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
         if (total == 0){
@@ -89,7 +74,7 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(dto);
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -176,8 +161,8 @@ public class RealEquipmentConverter implements BaseConverter{
         if (result.isSuccess()) {
             ImageDeleteDTO dto = new ImageDeleteDTO();
             dto.setIds(request.getUuids());
-            deviceTargetMapper.delete(dto);
-            request.getUuids().forEach(id -> deviceTargetAuthMapper.deleteByTarget(id));
+            devopsTargetService.delete(dto);
+            devopsTargetAuthService.deleteByTargets(request.getUuids());
         }
         return result;
     }

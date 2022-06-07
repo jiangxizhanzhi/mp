@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
-import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
@@ -45,39 +44,10 @@ public class TargetConverter{
 
     /**
      * 分页查询
-     * @param request
+     * @param dto
      * @return
      */
-    public BasePageBO<DeviceTargetPO> page(TargetSceneRequest request) {
-        ImagePageDTO dto = new ImagePageDTO();
-        dto.setTargetCategory(request.getTargetCategory());
-        dto.setMainCategory(request.getCategory());
-        dto.setSubCategory(request.getSecondCategory());
-        dto.setThirdCategory(request.getThirdCategory());
-        dto.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
-        dto.setName(request.getName());
-        dto.setSearchPublicEnum(1);
-        dto.setRole(request.getRole());
-        dto.setIsHide(request.getIsHide());
-        dto.setSystemType(request.getSystemType());
-        dto.setSystemArchitecure(request.getSystemArchitecure());
-        dto.setQuickCreateSupport(request.getQuickCreateSupport());
-        if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
-            dto.setOffset((request.getPage() - 1) * request.getPerPage());
-            dto.setLimit(request.getPerPage());
-        }
-        if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
-            dto.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
-        }
-        if (Objects.isNull(request.getImageType())){
-            dto.setSearchType(0);
-        }
-        if (request.getLikeName() != null) {
-            dto.setLikeName(request.getLikeName());
-        }
-        dto.setLanguage(request.getLanguage());
-        dto.setImageStatus(request.getImageStatus());
-        dto.setBaseImageSupport(request.getBaseImageSupport());
+    public BasePageBO<DeviceTargetPO> page(ImagePageDTO dto) {
         Integer total = devopsTargetService.totalCount(dto);
         BasePageBO<DeviceTargetPO> targetPageModel = new BasePageBO<>();
         targetPageModel.setTotal(total);
@@ -96,7 +66,7 @@ public class TargetConverter{
      * @return
      */
     public BasePageBO<Device> allTarget(TargetSceneRequest request) {
-        BasePageBO<DeviceTargetPO> targetPageModel = this.page(request);
+        BasePageBO<DeviceTargetPO> targetPageModel = this.page(new ImagePageDTO(request));
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
 
