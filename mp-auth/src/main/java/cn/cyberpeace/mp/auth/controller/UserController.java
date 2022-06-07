@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -160,11 +161,11 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             String response = "";
             String hldCheckUrl = hldLoginUrl + "/xinan-server/login/logincheck?sessionId=";
             try {
-                log.info("hldCheckUrl:{}", hldCheckUrl);
+                log.info("hldCheckUrl:{},sessionId:{}", hldCheckUrl, hldUserRequest.getSessionId());
                 response = HttpUtils.sendGet(hldCheckUrl + hldUserRequest.getSessionId());
                 log.info("response:{}", response);
             } catch (Exception e) {
-                log.error("get hldLoginCheck response error", e);
+                log.error("get hldLoginCheck response error,msg:{},e:{}", e.getMessage(), ExceptionUtil.stacktraceToString(e), e);
             }
             HLDLoginCheckResponse hldLoginCheckResponse = JsonCommon.parse(response, HLDLoginCheckResponse.class);
             if (hldLoginCheckResponse.getCode() != null && hldLoginCheckResponse.getCode() != 200) {
