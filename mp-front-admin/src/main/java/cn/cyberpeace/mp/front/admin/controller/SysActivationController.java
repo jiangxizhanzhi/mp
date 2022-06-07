@@ -37,7 +37,7 @@ public class SysActivationController {
     @ApiOperation("激活")
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
-        log.info("{}", activationRequest);
+        log.info("activateRequest:{}", activationRequest);
         activationService.activate(activationRequest);
         return ServiceResult.successful();
     }
@@ -68,10 +68,12 @@ public class SysActivationController {
     @ApiOperation("查询激活状态")
     @GetMapping("/status")
     public ServiceResult<ActivationResponse> status() {
+        log.info("query activation status...");
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {
             return ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_NONE);
         }
+        log.info("status response:{}", content);
         return ServiceResult.success(content);
     }
 
@@ -89,6 +91,7 @@ public class SysActivationController {
     @GetMapping("/machinecode")
     public ServiceResult getMachineCode() {
         String code = activationService.querySysUUID();
+        log.info("code:{}", code);
         return ServiceResult.success(code);
     }
 
