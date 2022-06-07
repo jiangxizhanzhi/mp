@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -328,6 +330,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
+        if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
+            this.correctEnableRecording(csceneInstance);
+        }
         if (createContext.getSceneAttr() != null) {
             csceneInstance.setSceneAttr(createContext.getSceneAttr());
         }
@@ -374,6 +379,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
         }
+        if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
+            this.correctEnableRecording(csceneInstance);
+        }
         if (createContext.getSceneAttr() != null) {
             csceneInstance.setSceneAttr(createContext.getSceneAttr());
         }
@@ -398,6 +406,38 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             return new ArrayList<>();
         } else {
             return models.stream().map(m -> m.getScene()).collect(Collectors.toList());
+        }
+    }
+
+    private boolean need2UseSystemEnableRecording(int testType, Integer referenceType) {
+        // 使用数据库模板配置的, 根据其他字段判断是否需要使用系统的录屏开关
+        if (CsceneInstanceModel.Type.TEST == testType) {
+            // 后台测试启动,全部都需要用系统的录屏开关
+            return true;
+        } else {
+            // 前台启动
+            if (referenceType == null) {
+                return false;
+            } else {
+                // 没有独立开关配置的,需要使用系统的录屏开关
+                return !csceneAppConfig.getHasOwnRecordingSet().contains(referenceType);
+            }
+        }
+    }
+
+    private void correctEnableRecording(CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return;
+        }
+        if (csceneInstance.getScene() != null && csceneInstance.getScene().getPlugins() != null) {
+            ScenePluginDataBO scenePluginDataBO = csceneInstance.getScene().getPlugins().get("cpcloud");
+            if (scenePluginDataBO != null) {
+                var cpcloudPluginScene = Optional
+                        .ofNullable(scenePluginDataBO.getScene())
+                        .orElse(new HashMap<>());
+                cpcloudPluginScene.put("enable_recording", csceneAppConfig.getSceneEnableRecording());
+                scenePluginDataBO.setScene(cpcloudPluginScene);
+            }
         }
     }
 }
