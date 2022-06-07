@@ -49,7 +49,7 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
                 }
             });
         }
-        //参数用空格分开
+        // 参数用空格分开
         if (!CollectionUtil.isEmpty(params)) {
             scriptProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
         }

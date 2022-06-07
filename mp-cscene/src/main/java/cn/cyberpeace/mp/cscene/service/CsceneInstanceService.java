@@ -65,7 +65,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -177,6 +177,235 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ArrayList<>();
         }
         return csceneInstancesResult.getObjs();
+    }
+
+    private ListObjServiceResult<CollectionHostEventBO> getProbeCollectData(String sceneInstanceId, String sceneId, String requestId,
+                                                                            List<String> nodeIds, SceneHandler sceneHandler,
+                                                                            Map<String, Map<String, String>> nodeId2ProbeNameMap,
+                                                                            String probeId, HostEventQueryParams queryParams) {
+        String scrollId = null;
+        String redisKey = null;
+        queryParams.setScroll(false);
+        if (StringUtils.isNotEmpty(requestId)) {
+            redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
+            String redisValue = redisTemplate.opsForValue().get(redisKey);
+            if (StringUtils.isNotEmpty(redisValue)) {
+                scrollId = redisValue;
+            }
+        }
+
+        var startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
+        var endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
+        int total = 0;
+        List<CollectionHostEventBO> result = new ArrayList<>();
+        for (String nodeId : nodeIds) {
+            var element = sceneHandler.getElement(nodeId);
+            Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
+            List<?> res = null;
+            if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+                BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
+                request.setSceneId(sceneInstanceId);
+                request.setElementIds(CollUtil.toList(element.getId()));
+                request.setPage(queryParams.getPage());
+                request.setPageSize(queryParams.getPageSize());
+                if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
+                    // 硬件信息
+                    res = hostStateService.getHostStates(request);
+                    if (!CollUtil.isEmpty(res)) {
+                        total = res.size() + total;
+                    }
+                } else {
+                    // 原始日志信息
+                    request.setFetchIfSceneInstanceShutdown(true);
+                    var r = logFileService.pageByElementId(request);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                }
+            } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
+                // 操作系统信息
+                BaseSceneElementRequest request = new BaseSceneElementRequest();
+                request.setSceneId(sceneInstanceId);
+                request.setElementIds(CollUtil.toList(element.getId()));
+                res = CollUtil.toList(sceneElementMonitorService.getOSInfo(request));
+                if (!CollUtil.isEmpty(res)) {
+                    total = res.size() + total;
+                }
+            } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId) || ProbeConstant.ProbeId.PORT_INFO.equals(probeId) ||
+                    ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
+                ListPageInfoQueryParams params = new ListPageInfoQueryParams();
+                params.setSceneIds(CollUtil.toList(sceneInstanceId));
+                params.setNodeIds(CollUtil.toList(nodeId));
+                params.setPage(queryParams.getPage());
+                params.setPageSize(queryParams.getPageSize());
+                params.setFetchIfSceneInstanceShutdown(true);
+                if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
+                    // 网卡信息
+                    var r = hostStateService.pageNetifaces(params);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
+                    // 端口信息
+                    var r = hostStateService.pagePorts(params);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                } else {
+                    // 进程信息
+                    var r = hostStateService.pageProcesses(params);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                }
+            } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId) || ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId) ||
+                    ProbeConstant.ProbeId.OS_LOG.equals(probeId) || ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId) ||
+                    ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId)) {
+                HostEventQueryParams params = new HostEventQueryParams();
+                params.setNodeIds(CollUtil.toList(nodeId));
+                params.setPage(queryParams.getPage());
+                params.setPageSize(queryParams.getPageSize());
+                params.setStartTime(queryParams.getStartTime());
+                params.setEndTime(queryParams.getEndTime());
+                params.setScroll(queryParams.getScroll());
+                ListObjServiceResult<CollectionHostEventBO> r;
+                if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
+                    // 文件变更信息
+                    params.setRuleGroups(CsceneBizConstant.FILE_MODIFY_GROUP);
+                } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
+                    // 注册表变更信息
+                    params.setRuleGroups(CsceneBizConstant.REGISTRY_MODIFY_GROUP);
+                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
+                    // 操作系统日志信息
+                    params.setCatagories(CsceneBizConstant.OS_CATEGORY);
+                } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
+                    // 应用系统日志信息
+                    params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
+                } else {
+                    // 安全系统日志信息
+                    params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
+                }
+                if (StringUtils.isEmpty(scrollId)) {
+                    if (StringUtils.isNotBlank(requestId)) {
+                        queryParams.setScroll(true);
+                    }
+                    r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
+                } else {
+                    r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
+                }
+
+                if (r.getSource() != null) {
+                    res = r.getSource().getObjs();
+                    total = r.getSource().getTotal() + total;
+                }
+            } else {
+                // 自定义探针信息
+                WazuhEventRequest request = new WazuhEventRequest();
+                request.setAgentNames(CollUtil.toList(element.getEid()));
+                request.setStartTime(startTime);
+                request.setEndTime(endTime);
+                request.setPageNum(queryParams.getPage());
+                request.setPageSize(queryParams.getPageSize());
+                var r = dataCollectionService.queryCustomProbeData(request, CollUtil.toList(probeId));
+                res = r.getObjs();
+                total = r.getTotal() + total;
+            }
+            if (CollUtil.isEmpty(res)) {
+                continue;
+            }
+
+            if (StringUtils.isBlank(scrollId) && Boolean.TRUE.equals(queryParams.getScroll())) {
+                if (CollUtil.isNotEmpty(res)) {
+                    if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
+                        CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);
+                        if (Objects.nonNull(event)) {
+                            scrollId = event.getScrollId();
+                        }
+                    }
+                }
+            }
+
+            if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(redisKey)) {
+                redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
+            }
+
+            res.forEach(r -> {
+                CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+                hostEventBO.setSceneId(sceneInstanceId);
+                hostEventBO.setNodeId(nodeId);
+                hostEventBO.setNodeName(element.getName());
+                hostEventBO.setProbeId(probeId);
+                hostEventBO.setProbeName(probeId2Name.get(probeId));
+                Map<String, Object> map = JsonCommon.beanToMap(r);
+                map.put("scrollId", null);
+                hostEventBO.setContent(map);
+                result.add(hostEventBO);
+            });
+        }
+        return new ListObjServiceResult<>(new ListObjResult<>(result, total));
+    }
+
+    private ListObjServiceResult<CollectionHostEventBO> getCustomProbeCollectData(String sceneInstanceId, String sceneId,
+                                                                                  List<String> nodeIds, CollectionScenePluginHandler pluginHandler,
+                                                                                  Map<String, Map<String, String>> nodeId2ProbeNameMap,
+                                                                                  HostEventQueryParams queryParams) {
+        var startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
+        var endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
+        List<CollectionHostEventBO> result = new ArrayList<>();
+        var batchSceneHandler = new BatchSceneHandler(CollUtil.toList(sceneId), null);
+        var eid2Element = batchSceneHandler.getAllEid2ElementMap();
+        // 获取节点所有自定义探针id
+        List<String> agentNames = new ArrayList<>();
+        List<String> probeIds = new ArrayList<>();
+        pluginHandler.getElementMap().values().forEach(e -> {
+            var element = e.getSrcElement();
+            if (nodeIds.contains(element.getId())) {
+                agentNames.add(element.getEid());
+            }
+            e.getProbes().forEach(probe -> {
+                if (Boolean.FALSE.equals(probe.getCommon())) {
+                    probeIds.add(probe.getId());
+                }
+            });
+        });
+        if (CollUtil.isEmpty(probeIds)) {
+            return new ListObjServiceResult<>();
+        }
+        // 构造查询请求
+        WazuhEventRequest request = new WazuhEventRequest();
+        request.setStartTime(startTime);
+        request.setEndTime(endTime);
+        request.setPageNum(queryParams.getPage());
+        request.setPageSize(queryParams.getPageSize());
+        request.setAgentNames(agentNames);
+        // 分页查询自定义探针数据
+        var listObjResult = dataCollectionService.queryCustomProbeData(request, probeIds);
+        var res = listObjResult.getObjs();
+        if (CollUtil.isEmpty(res)) {
+            return new ListObjServiceResult<>();
+        }
+        var total = listObjResult.getTotal();
+        res.forEach(r -> {
+            var element = eid2Element.get(r.getAgentName());
+            Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(element.getId());
+            CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
+            hostEventBO.setSceneId(sceneInstanceId);
+            hostEventBO.setNodeId(element.getId());
+            hostEventBO.setNodeName(element.getName());
+            hostEventBO.setProbeId(r.getProbeId());
+            hostEventBO.setProbeName(probeId2Name.get(r.getProbeId()));
+            hostEventBO.setTime(r.getTime());
+            var rawOutput = JsonCommon.beanToMap(r).get("rawOutPut");
+            if (rawOutput != null) {
+                hostEventBO.setContent(JsonCommon.parseMap(rawOutput.toString()));
+            }
+            result.add(hostEventBO);
+        });
+        return new ListObjServiceResult<>(new ListObjResult<>(result, total));
     }
 
     @Autowired
@@ -423,19 +652,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId, String probeId, HostEventQueryParams queryParams) {
-
-        String scrollId = null;
-        String redisKey = null;
-        queryParams.setScroll(false);
-        if (StringUtils.isNotEmpty(requestId)) {
-            redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
-            String redisValue = redisTemplate.opsForValue().get(redisKey);
-            if (StringUtils.isNotEmpty(redisValue)) {
-               scrollId = redisValue;
-            }
-        }
-
-
         var sceneId = getSceneId(sceneInstanceId);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -446,7 +662,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             nodeIds = sceneHandler.getElementMap().values().stream().map(e -> e.getId()).collect(Collectors.toList());
         }
         CloudScenePluginHandler cloudPluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
-        //非虚拟机和容器节点不支持探针采集
+        // 非虚拟机和容器节点不支持探针采集
         List<String> newNodeIds = new ArrayList<>();
         for (String nodeId : nodeIds) {
             var cloudElement = cloudPluginHandler.getElement(nodeId);
@@ -470,319 +686,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             });
             nodeId2ProbeNameMap.put(e.getSrcElement().getId(), probeId2Name);
         });
-        List<CollectionHostEventBO> result = new ArrayList<>();
-        LocalDateTime startTime;
-        LocalDateTime endTime;
         if (queryParams.getStartTime() == null) {
-            startTime = sceneHandler.getScene().getCreateTime();
-        } else {
-            startTime = TimeUtils.stringToLocalDateTime(queryParams.getStartTime());
+            queryParams.setStartTime(TimeUtils.localDateTimeToString(sceneHandler.getScene().getCreateTime()));
         }
         if (queryParams.getEndTime() == null) {
-            endTime = LocalDateTime.now();
-        } else {
-            endTime = TimeUtils.stringToLocalDateTime(queryParams.getEndTime());
+            queryParams.setEndTime(TimeUtils.localDateTimeToString(LocalDateTime.now()));
         }
-        int total = 0;
-        //String scrollId = null;
         if (probeId != null) {
-            for (String nodeId : newNodeIds) {
-                var element = sceneHandler.getElement(nodeId);
-                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
-                List<?> res = null;
-                if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
-                    //硬件信息
-                    BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
-                    request.setSceneId(sceneInstanceId);
-                    request.setElementIds(CollectionUtil.toList(element.getId()));
-                    request.setPage(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize());
-                    res = hostStateService.getHostStates(request);
-                    if (!CollectionUtil.isEmpty(res)) {
-                        total = res.size() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
-                    //操作系统信息
-                    BaseSceneElementRequest request = new BaseSceneElementRequest();
-                    request.setSceneId(sceneInstanceId);
-                    request.setElementIds(CollectionUtil.toList(element.getId()));
-                    res = CollectionUtil.toList(sceneElementMonitorService.getOSInfo(request));
-                    if (!CollectionUtil.isEmpty(res)) {
-                        total = res.size() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId)) {
-                    //网卡信息
-                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setFetchIfSceneInstanceShutdown(true);
-                    var r = hostStateService.pageNetifaces(params);
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.PORT_INFO.equals(probeId)) {
-                    //端口信息
-                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setFetchIfSceneInstanceShutdown(true);
-                    var r = hostStateService.pagePorts(params);
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
-                    //进程信息
-                    ListPageInfoQueryParams params = new ListPageInfoQueryParams();
-                    params.setSceneIds(CollectionUtil.toList(sceneInstanceId));
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setFetchIfSceneInstanceShutdown(true);
-                    var r = hostStateService.pageProcesses(params);
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
-                    //文件变更信息
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setRuleGroups(CollectionUtil.toList("syscheck_file"));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setStartTime(queryParams.getStartTime());
-                    params.setEndTime(queryParams.getEndTime());
-                    params.setScroll(queryParams.getScroll());
-                    ListObjServiceResult<CollectionHostEventBO> r = null;
-                    if (StringUtils.isEmpty(scrollId)) {
-                        if (StringUtils.isNotBlank(requestId)) {
-                            queryParams.setScroll(true);
-                        }
-                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
-                    } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
-                    }
-
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.REGISTRY_MODIFY.equals(probeId)) {
-                    //注册表变更信息
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setRuleGroups(CollectionUtil.toList("syscheck_registry"));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setStartTime(queryParams.getStartTime());
-                    params.setEndTime(queryParams.getEndTime());
-                    params.setScroll(queryParams.getScroll());
-
-                    ListObjServiceResult<CollectionHostEventBO> r = null;
-                    if (StringUtils.isEmpty(scrollId)) {
-                        if (StringUtils.isNotBlank(requestId)) {
-                            queryParams.setScroll(true);
-                        }
-                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
-                    } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
-                    }
-
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-
-                } else if (ProbeConstant.ProbeId.OS_LOG.equals(probeId)) {
-                    //操作系统日志信息
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setStartTime(queryParams.getStartTime());
-                    params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CsceneBizConstant.OS_CATEGORY);
-                    params.setScroll(queryParams.getScroll());
-
-                    ListObjServiceResult<CollectionHostEventBO> r = null;
-                    if (StringUtils.isEmpty(scrollId)) {
-                        if (StringUtils.isNotBlank(requestId)) {
-                            queryParams.setScroll(true);
-                        }
-                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
-                    } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
-                    }
-
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.APPLICATION_LOG.equals(probeId)) {
-                    //应用系统日志信息
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setStartTime(queryParams.getStartTime());
-                    params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CsceneBizConstant.APPLICATION_CATEGORY);
-                    params.setScroll(queryParams.getScroll());
-
-                    ListObjServiceResult<CollectionHostEventBO> r = null;
-                    if (StringUtils.isEmpty(scrollId)) {
-                        if (StringUtils.isNotBlank(requestId)) {
-                            queryParams.setScroll(true);
-                        }
-                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
-                    } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
-                    }
-
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.SECURITY_LOG.equals(probeId)) {
-                    //安全系统日志信息
-                    HostEventQueryParams params = new HostEventQueryParams();
-                    params.setNodeIds(CollectionUtil.toList(nodeId));
-                    params.setPage(queryParams.getPage());
-                    params.setPageSize(queryParams.getPageSize());
-                    params.setStartTime(queryParams.getStartTime());
-                    params.setEndTime(queryParams.getEndTime());
-                    params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
-                    params.setScroll(queryParams.getScroll());
-
-                    ListObjServiceResult<CollectionHostEventBO> r = null;
-                    if (StringUtils.isEmpty(scrollId)) {
-                        if (StringUtils.isNotBlank(requestId)) {
-                            queryParams.setScroll(true);
-                        }
-                        r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
-                    } else {
-                        r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
-                    }
-
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
-                    //原始日志信息
-                    BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
-                    request.setElementIds(CollectionUtil.toList(nodeId));
-                    request.setPage(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize());
-                    request.setSceneId(sceneInstanceId);
-                    request.setFetchIfSceneInstanceShutdown(true);
-                    var r = logFileService.pageByElementId(request);
-                    if (r.getSource() != null) {
-                        res = r.getSource().getObjs();
-                        total = r.getSource().getTotal() + total;
-                    }
-                } else {
-                    //自定义探针信息
-                    WazuhEventRequest request = new WazuhEventRequest();
-                    request.setAgentNames(CollectionUtil.toList(element.getEid()));
-                    request.setStartTime(startTime);
-                    request.setEndTime(endTime);
-                    request.setPageNum(queryParams.getPage());
-                    request.setPageSize(queryParams.getPageSize());
-                    var r = dataCollectionService.queryCustomProbeData(request, CollectionUtil.toList(probeId));
-                    res = r.getObjs();
-                    total = r.getTotal() + total;
-                }
-                if (CollectionUtil.isEmpty(res)) {
-                    continue;
-                }
-
-                if (StringUtils.isBlank(scrollId) && queryParams.getScroll()) {
-                    if (CollectionUtil.isNotEmpty(res)) {
-                        if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
-                            CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);
-                            if (Objects.nonNull(event)) {
-                                scrollId = event.getScrollId();
-                            }
-                        }
-                    }
-                }
-
-                if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(redisKey)) {
-                    redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
-                }
-
-                res.forEach(r -> {
-                    CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
-                    hostEventBO.setSceneId(sceneId);
-                    hostEventBO.setNodeId(nodeId);
-                    hostEventBO.setNodeName(element.getName());
-                    hostEventBO.setProbeId(probeId);
-                    hostEventBO.setProbeName(probeId2Name.get(probeId));
-                    Map<String, Object> map = JsonCommon.beanToMap(r);
-                    map.put("scrollId", null);
-                    hostEventBO.setContent(map);
-                    result.add(hostEventBO);
-                });
-            }
+            // 有探针id，查询指定探针采集数据
+            return getProbeCollectData(sceneInstanceId, sceneId, requestId, newNodeIds, sceneHandler, nodeId2ProbeNameMap,
+                    probeId, queryParams);
         } else {
-            var batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), null);
-            var eid2Element = batchSceneHandler.getAllEid2ElementMap();
-            //获取节点所有自定义探针id
-            List<String> agentNames = new ArrayList<>();
-            List<String> probeIds = new ArrayList<>();
-            pluginHandler.getElementMap().values().forEach(e -> {
-                var element = e.getSrcElement();
-                if (newNodeIds.contains(element.getId())) {
-                    agentNames.add(element.getEid());
-                }
-                e.getProbes().forEach(probe -> {
-                    if (!probe.getCommon()) {
-                        probeIds.add(probe.getId());
-                    }
-                });
-            });
-            if (CollectionUtil.isEmpty(probeIds)) {
-                return new ListObjServiceResult<>();
-            }
-            //构造查询请求
-            WazuhEventRequest request = new WazuhEventRequest();
-            request.setStartTime(startTime);
-            request.setEndTime(endTime);
-            request.setPageNum(queryParams.getPage());
-            request.setPageSize(queryParams.getPageSize());
-            request.setAgentNames(agentNames);
-            //分页查询自定义探针数据
-            var listObjResult = dataCollectionService.queryCustomProbeData(request, probeIds);
-            var res = listObjResult.getObjs();
-            if (CollectionUtil.isEmpty(res)) {
-                return new ListObjServiceResult<>();
-            }
-            total = listObjResult.getTotal();
-            res.forEach(r -> {
-                var element = eid2Element.get(r.getAgentName());
-                Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(element.getId());
-                CollectionHostEventBO hostEventBO = new CollectionHostEventBO();
-                hostEventBO.setSceneId(sceneId);
-                hostEventBO.setNodeId(element.getId());
-                hostEventBO.setNodeName(element.getName());
-                hostEventBO.setProbeId(r.getProbeId());
-                hostEventBO.setProbeName(probeId2Name.get(r.getProbeId()));
-                hostEventBO.setTime(r.getTime());
-                var rawOutput = JsonCommon.beanToMap(r).get("rawOutPut");
-                if (rawOutput != null) {
-                    hostEventBO.setContent(JsonCommon.parseMap(rawOutput.toString()));
-                }
-                result.add(hostEventBO);
-            });
+            // 无探针id，查询所有自定义探针采集数据
+            return getCustomProbeCollectData(sceneInstanceId, sceneId, newNodeIds, pluginHandler, nodeId2ProbeNameMap, queryParams);
         }
-        return new ListObjServiceResult<>(new ListObjResult(result, Math.min(total, 10000)));
     }
 
     public ServiceResult<Boolean> startFlow(String id, String toNodeId, String flowId, String sourceIp, CsceneContextBO context) {

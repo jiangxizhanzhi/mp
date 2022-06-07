@@ -30,8 +30,10 @@ import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -110,6 +112,8 @@ public class DataCollectionService {
     private WazuhRepository wazuhRepository;
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
+
+    private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
@@ -224,24 +228,23 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        //根据日期构造索引
+        // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-//        MultiValueMap<String, String> multiValueMap = this.queryAllAgentMacAddr();
-        //构造查询条件
+        // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        if (!CollectionUtil.isEmpty(probeIds)) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("data.sic_launch_id", probeIds));
+        if (!CollUtil.isEmpty(probeIds)) {
+            boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
         }
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        //处理分页
+        // 处理分页
         int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -249,7 +252,7 @@ public class DataCollectionService {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
             List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
             for (var hit : response.getHits().getHits()) {
-                WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSONObject.parseObject(hit.getSourceAsString(),
+                WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
                         new TypeReference<>() {
                         });
                 if (Objects.nonNull(wazuhMonitorRoot.getData()) && Objects.nonNull(wazuhMonitorRoot.getData().getOutput())) {
@@ -282,13 +285,13 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        //根据日期构造索引
+        // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
+        // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         if (desc) {
             // 按时间降序
@@ -298,22 +301,28 @@ public class DataCollectionService {
             sourceBuilder.sort("timestamp", SortOrder.ASC);
         }
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-        //配置索引为空
+        // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        //处理分页
+        // 处理分页
         int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<WazuhMonitorRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhMonitorRoot.class)).collect(Collectors.toList());
-            var wazuhModelList = wazuhFileRootList.stream().map(root -> {
-                var result = JsonCommon.snakeParse(root.getData().toString(), WazuhVulnerabilityInfoModel.class);
-                result.setAgentId(root.getAgent().getId());
-                result.setAgentName(root.getAgent().getName());
-                result.setTime(TimeUtils.dateToLocalDateTime(root.getTimestamp()));
-                return result;
-            }).collect(Collectors.toList());
+            List<WazuhVulnerabilityInfoModel> wazuhModelList = new ArrayList<>();
+            for (var hit : response.getHits().getHits()) {
+                WazuhMonitorRoot<WazuhVulnerabilityInfoModel> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
+                        new TypeReference<>() {
+                        });
+                if (Objects.nonNull(wazuhMonitorRoot.getData())) {
+                    WazuhVulnerabilityInfoModel vulnerability = new WazuhVulnerabilityInfoModel();
+                    vulnerability.setVulnerability(wazuhMonitorRoot.getData().getVulnerability());
+                    vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                    vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                    vulnerability.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
+                    wazuhModelList.add(vulnerability);
+                }
+            }
             return new ListObjResult<>(wazuhModelList, total);
         } catch (IOException e) {
             log.error("es queryVulnerabilityInfo error:", e);
@@ -337,21 +346,21 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ArrayList<>();
         }
-        //根据日期构造索引
+        // 根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
+        // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         sourceBuilder.aggregation(AggregationBuilders.terms(fieldName).field(fieldPath));
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
         if (isTop) {
-            //获取前十条的数据
+            // 获取前十条的数据
             sourceBuilder.from(0).size(10);
         }
-        //配置索引为空
+        // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
@@ -629,7 +638,7 @@ public class DataCollectionService {
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
 
         if (StringUtils.isNotBlank(launchId)) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", launchId));
+            boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
         }
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
@@ -675,7 +684,7 @@ public class DataCollectionService {
         buildMonitorEventsBuilderTimeRange(wazuhMonitorEventsRequest, boolQueryBuilder, null);
 
         if (StringUtils.isNotBlank(launchId)) {
-            boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", launchId));
+            boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
         }
 
 
@@ -742,7 +751,7 @@ public class DataCollectionService {
         BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
         //构造查询条件
 //        boolQueryBuilder.must(QueryBuilders.termQuery("rule.id", "900002"));
-        boolQueryBuilder.must(QueryBuilders.termQuery("data.sic_launch_id", SicLaunchConfig.LAUNCH_ID_HOST_STATE));
+        boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, SicLaunchConfig.LAUNCH_ID_HOST_STATE));
         int agentSize = 0;
 
 //        if (!CollectionUtils.isEmpty(wazuhEventRequest.getMacIds())) {

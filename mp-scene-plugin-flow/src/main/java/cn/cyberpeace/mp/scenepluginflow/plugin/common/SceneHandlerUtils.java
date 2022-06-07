@@ -317,7 +317,7 @@ public class SceneHandlerUtils {
             return false;
         }
 
-        //将流量id为空的流量状态置为错误
+        // 将流量id为空的流量状态置为错误
         var emptyIdFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() == null)
                 .collect(Collectors.toList());
@@ -327,7 +327,7 @@ public class SceneHandlerUtils {
             });
         }
 
-        //流量id不为空的流量创建流量任务
+        // 流量id不为空的流量创建流量任务
         var newFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() != null)
                 .collect(Collectors.toList());
@@ -343,7 +343,7 @@ public class SceneHandlerUtils {
         String nodeEid = flowElement.getSrcElement().getEid();
         Callable<Boolean> start = () -> {
             List<FlowTaskModel> flowTaskModels;
-            //构建批量创建流量任务参数
+            // 构建批量创建流量任务参数
             List<AddFlowTaskRequest> requests = new ArrayList<>();
             newFlows.forEach(flow -> {
                 AddFlowTaskRequest request = flowExecutor.buildFlowTaskRequest(executorId, flowNetworkId, flow.getFlow().getId(),
@@ -362,7 +362,7 @@ public class SceneHandlerUtils {
                 return false;
             }
 
-            //流量任务id与流量绑定
+            // 流量任务id与流量绑定
             Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
                     .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
             var executorFlows = newFlows.stream().map(f -> f.getFlow()).collect(Collectors.toList());
