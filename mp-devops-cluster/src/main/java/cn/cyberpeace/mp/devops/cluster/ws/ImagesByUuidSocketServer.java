@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.ws;
 
+import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-@ServerEndpoint("/ws/images-page")
+@ServerEndpoint(ControllerConstant.BASE_API_PATH + "/ws/images-page")
 public class ImagesByUuidSocketServer {
 
     /**

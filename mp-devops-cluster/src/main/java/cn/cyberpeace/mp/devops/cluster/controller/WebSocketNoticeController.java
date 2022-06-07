@@ -72,7 +72,7 @@ public class WebSocketNoticeController {
                 .authTotal(convertModel.getAuthTotal()).isPublic(convertModel.getIsPublic()).extSystemInfo(convertModel.getExtSystemInfo())
                 .extGateway(convertModel.getExtGateway()).extVm(convertModel.getExtVm()).extImageInfo(convertModel.getExtImageInfo())
                 .extDocker(convertModel.getExtDocker()).build();
-        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO)));
+        imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
         return ServiceResult.successful();
     }
 
