@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -53,7 +54,7 @@ class DeviceInfoConverter implements IConverter {
             request.setLikeName(false);
             //不过滤隐藏靶标
             request.setIsHide(Boolean.TRUE);
-            BasePageBO<Device> targetSceneConvertModel = this.targetConverter.allTarget(request);
+            BasePageBO<Device> targetSceneConvertModel = this.targetConverter.allTarget(new ImagePageDTO(request));
             if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
                 List<Device> devices = this.targetConverter.getCommonTargets(request.getName());
                 if (CollectionUtils.isEmpty(devices)) {

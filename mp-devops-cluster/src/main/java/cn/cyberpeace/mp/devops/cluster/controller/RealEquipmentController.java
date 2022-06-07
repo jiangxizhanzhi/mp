@@ -143,8 +143,8 @@ public class RealEquipmentController {
 
     @ApiOperation("根据ID查询")
     @GetMapping("/{id}")
-    public Result<RealEquipmentByIdVO> getById(@PathVariable String id){
-        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(id);
+    public Result<RealEquipmentByIdVO> findByUuid(@PathVariable String id){
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
         List<ExtEntityAccess> extEntityAccess = realEquipmentBO.getExtEntityAccess();
         if (CollectionUtils.isNotEmpty(extEntityAccess)) {
             extEntityAccess = extEntityAccess.stream().map(v -> {
@@ -207,7 +207,7 @@ public class RealEquipmentController {
     @ApiOperation("查询详情")
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailVO> findDevopsDetails(@RequestParam("uuid") String id){
-        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(id);
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
         if (Objects.isNull(realEquipmentBO)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
@@ -298,7 +298,7 @@ public class RealEquipmentController {
     @ApiOperation("接口资源")
     @GetMapping("/network-card")
     public PageResult<RealEquipmentNetworkCardPageVO> pageNetworkCard(RealEquipmentNetworkCardPageRequest request){
-        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findById(request.getUuid());
+        RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(request.getUuid());
         if (Objects.isNull(realEquipmentBO)){
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }

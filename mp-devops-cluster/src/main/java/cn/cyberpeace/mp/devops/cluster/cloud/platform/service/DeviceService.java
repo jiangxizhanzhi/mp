@@ -49,7 +49,7 @@ public class DeviceService extends BaseOpenStackService {
      * @param uuid
      * @return
      */
-    public Device findById(String uuid){
+    public Device findByUuid(String uuid){
         return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/" + uuid, Device.class);
     }
 
