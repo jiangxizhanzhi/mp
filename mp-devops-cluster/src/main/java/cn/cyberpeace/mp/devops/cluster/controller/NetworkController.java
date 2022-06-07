@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.NetworkConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkSubnetBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.NetworkPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -41,7 +42,7 @@ public class NetworkController {
     @ApiOperation("分页查询网络信息")
     @GetMapping("/page")
     public PageResult<NetworkPageVO> page(NetworkPageRequest request){
-        BasePageBO<NetworkBO> model = networkConverter.page(request);
+        BasePageBO<NetworkBO> model = networkConverter.page(new NetworkPageDTO(request));
         List<NetworkBO> networks = model.getList();
         List<NetworkPageVO> list = networks.stream().map(networkModel -> {
             List<NetworkSubnetBO> subnetList = networkModel.getSubnets();

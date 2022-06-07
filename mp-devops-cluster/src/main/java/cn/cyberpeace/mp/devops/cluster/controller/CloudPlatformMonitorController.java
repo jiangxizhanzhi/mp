@@ -15,7 +15,9 @@ import cn.cyberpeace.mp.devops.cluster.dto.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
@@ -86,14 +88,10 @@ public class CloudPlatformMonitorController {
         Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
 
         //路由个数
-        RouterPageRequest routerPageRequest = new RouterPageRequest();
-        routerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalRouters = routerConverter.getTotalRouters(routerPageRequest);
+        Integer totalRouters = routerConverter.getTotalRouters(new RouterPageDTO());
 
         //NPC个数
-        NpcPageRequest npcPageRequest = new NpcPageRequest();
-        npcPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalNpcs = npcConverter.getTotalNpcs(npcPageRequest);
+        Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
 
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 

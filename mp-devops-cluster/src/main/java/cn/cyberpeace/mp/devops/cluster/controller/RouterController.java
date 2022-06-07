@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.RouterBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.RouterPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -38,7 +39,7 @@ public class RouterController {
     @ApiOperation("分页查询路由信息")
     @GetMapping("/page")
     public PageResult<RouterPageVO> page(RouterPageRequest request){
-        BasePageBO<RouterBO> model = routerConverter.page(request);
+        BasePageBO<RouterBO> model = routerConverter.page(new RouterPageDTO(request));
         List<RouterPageVO> list =  model.getList().stream().map(routerModel ->
                 RouterPageVO.builder().name(routerModel.getName())
                         .status(routerModel.getStatus()).createdAt(routerModel.getCreatedAt()).build()
