@@ -161,8 +161,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             String hldCheckUrl = hldLoginUrl + "/xinan-server/login/logincheck?sessionId=";
             try {
                 response = HttpUtils.sendGet(hldCheckUrl + hldUserRequest.getSessionId());
-            } catch (IOException e) {
-                log.error("get hldLoginCheck response error,msg : {}", e);
+            } catch (Exception e) {
+                log.error("get hldLoginCheck response error", e);
             }
             HLDLoginCheckResponse hldLoginCheckResponse = JsonCommon.parse(response, HLDLoginCheckResponse.class);
             if (hldLoginCheckResponse.getCode() != null && hldLoginCheckResponse.getCode() != 200) {
