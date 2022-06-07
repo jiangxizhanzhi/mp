@@ -134,13 +134,12 @@ public class SysActivationService {
 
         if (Objects.isNull(ACTIVATION_CONTENT)) {
             ActivationResponse activationResponse = parseContentFromDecrpytedFile();
-            log.info("{}", activationResponse);
+            log.info("activationResponse from file: {}", activationResponse);
             ACTIVATION_CONTENT = activationResponse;
         }
 
         processActivedStatus();
 
-        log.info("{}", ACTIVATION_CONTENT);
         return ACTIVATION_CONTENT;
     }
 

@@ -384,6 +384,45 @@ public class CsceneSpecialService {
     }
 
     /**
+     * 统计靶标快照 对应 引用了靶标的场景模板
+     * @param snapUuid 靶标名称
+     * @return 靶标名称 对应 引用了靶标的场景模板
+     */
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByPrefix(String snapUuid) {
+        var deviceReferCondition = new HumanCondition()
+                .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
+                        SceneConfigModel.class, SceneConfigModel::getId)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(CsceneModel.class)
+                .filterEqual(CsceneModel::getDeleted, false)
+                .selectAs(CsceneModel::getId, DeviceReferCsceneStat::getCsceneId)
+                .selectAs(CsceneModel::getCreateUser, DeviceReferCsceneStat::getCreateUser)
+                .selectAs(CsceneModel::getCreateUsername, DeviceReferCsceneStat::getCreateUsername)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterStartsWith(CloudPluginSceneConfigElementModel::getImage, snapUuid)
+                .selectAs(CloudPluginSceneConfigElementModel::getImage, DeviceReferCsceneStat::getReferenceImage)
+                .distinct();
+
+        List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneMapper.list(deviceReferCondition,
+                DeviceReferCsceneStat.class);
+
+        Map<String, List<DeviceReferCsceneStat>> result = new HashMap<>();
+        deviceReferCsceneStats.forEach(stat -> {
+            var image = stat.getReferenceImage();
+            var referList = result.getOrDefault(image, new ArrayList<>());
+            referList.add(stat);
+            result.put(image, referList);
+        });
+
+        return new ServiceResult<>(result);
+    }
+
+    /**
      * 统计靶标名称 对应 引用了靶标的场景实例
      * @param imageNames 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
@@ -408,6 +447,48 @@ public class CsceneSpecialService {
                 .selectAs(SceneModel::getEventStatus, DeviceReferCsceneInstanceStat::getEventStatus)
                 .currentLink(CloudPluginSceneElementModel.class)
                 .filterIn(CloudPluginSceneElementModel::getImage, imageNames)
+                .selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)
+                .distinct();
+
+        List<DeviceReferCsceneInstanceStat> deviceReferCsceneStats = csceneInstanceMapper.list(deviceReferCondition,
+                DeviceReferCsceneInstanceStat.class);
+
+        Map<String, List<DeviceReferCsceneInstanceStat>> result = new HashMap<>();
+        deviceReferCsceneStats.forEach(stat -> {
+            var image = stat.getReferenceImage();
+            var referList = result.getOrDefault(image, new ArrayList<>());
+            referList.add(stat);
+            result.put(image, referList);
+        });
+
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 统计靶标快照 对应 引用了靶标的场景实例
+     * @param snapUuid 靶标名称
+     * @return 靶标名称 对应 引用了靶标的场景实例
+     */
+    public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstancesByPrefix(
+            String snapUuid) {
+        var deviceReferCondition = new HumanCondition()
+                .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
+                        SceneModel.class, SceneModel::getId)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getDeleted, false)
+                .selectAs(CsceneInstanceModel::getId, DeviceReferCsceneInstanceStat::getCsceneId)
+                .selectAs(CsceneInstanceModel::getCreateUser, DeviceReferCsceneInstanceStat::getCreateUser)
+                .selectAs(CsceneInstanceModel::getCreateUsername, DeviceReferCsceneInstanceStat::getCreateUsername)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .selectAs(SceneModel::getName, DeviceReferCsceneInstanceStat::getName)
+                .selectAs(SceneModel::getEvent, DeviceReferCsceneInstanceStat::getEvent)
+                .selectAs(SceneModel::getEventStatus, DeviceReferCsceneInstanceStat::getEventStatus)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterStartsWith(CloudPluginSceneElementModel::getImage, snapUuid)
                 .selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)
                 .distinct();
 
