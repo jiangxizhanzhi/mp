@@ -135,7 +135,7 @@ mp:
         interval: 180s
         outputFormat: json
   cscene:
-    has-own-recording-set: 213,214,236
+    has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 
   log:
     es-nodes: ${ip.es}:9205
