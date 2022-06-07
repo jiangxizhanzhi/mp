@@ -109,11 +109,11 @@ public class RealEquipmentConverter implements BaseConverter{
 
     /**
      * 根据ID查询实装信息
-     * @param id
+     * @param uuid
      * @return
      */
-    public RealEquipmentBO findById(String id) {
-        Device device = deviceService.findById(id);
+    public RealEquipmentBO findByUuid(String uuid) {
+        Device device = deviceService.findByUuid(uuid);
         return convertDevice(device);
     }
 

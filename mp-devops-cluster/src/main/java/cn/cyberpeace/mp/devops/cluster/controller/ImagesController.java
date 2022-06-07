@@ -152,8 +152,8 @@ public class ImagesController {
      */
     @ApiOperation("根据UUID查询")
     @GetMapping("/search/{uuid}")
-    public Result<ImagesByIdVO> findById(@PathVariable("uuid") String uuid){
-        ImageConvertModel model = imagesConverter.findById(uuid);
+    public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid){
+        ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setUuid(model.getUuid());
         imagesByIdVO.setName(model.getName());

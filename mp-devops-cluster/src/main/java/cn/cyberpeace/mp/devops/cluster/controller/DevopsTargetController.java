@@ -110,7 +110,7 @@ public class DevopsTargetController {
                 request.setSecondCategory(second.getId());
                 request.setPage(null);
                 request.setPerPage(null);
-                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(request);
+                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
                 if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
                     continue;
                 }
@@ -204,7 +204,7 @@ public class DevopsTargetController {
     @ApiOperation("分页查询靶标信息")
     @GetMapping("/page")
     public PageResult<DeviceVO> page(TargetSceneRequest request){
-        BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(request);
+        BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
         if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }

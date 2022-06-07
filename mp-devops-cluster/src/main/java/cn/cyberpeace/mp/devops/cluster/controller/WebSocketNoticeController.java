@@ -58,7 +58,7 @@ public class WebSocketNoticeController {
     @ApiOperation("根据镜像UUID获取靶标信息")
     @GetMapping("/device/get-by-uuid")
     public ServiceResult getByUuid(@RequestParam String uuid){
-        ImageConvertModel convertModel = imagesConverter.findById(uuid);
+        ImageConvertModel convertModel = imagesConverter.findByUuid(uuid);
         ExtSystemInfo extSystemInfo = convertModel.getExtSystemInfo();
         ExtVm extVm = convertModel.getExtVm();
         ExtImageInfo extImageInfo = convertModel.getExtImageInfo();

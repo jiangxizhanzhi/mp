@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
-import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -62,11 +61,11 @@ public class TargetConverter{
 
     /**
      * 查询所有靶标数据
-     * @param request
+     * @param dto
      * @return
      */
-    public BasePageBO<Device> allTarget(TargetSceneRequest request) {
-        BasePageBO<DeviceTargetPO> targetPageModel = this.page(new ImagePageDTO(request));
+    public BasePageBO<Device> allTarget(ImagePageDTO dto) {
+        BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
 
         List<DeviceTargetPO> deviceTargetPOS = targetPageModel.getList();
 
@@ -159,6 +158,6 @@ public class TargetConverter{
      * @return
      */
     public Device findByUuid(String uuid){
-        return deviceService.findById(uuid);
+        return deviceService.findByUuid(uuid);
     }
 }
