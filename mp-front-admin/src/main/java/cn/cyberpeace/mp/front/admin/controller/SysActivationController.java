@@ -73,7 +73,7 @@ public class SysActivationController {
         if (Objects.isNull(content)) {
             return ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_NONE);
         }
-        log.info("status response:{}", content);
+        log.info("final status response:{}", content);
         return ServiceResult.success(content);
     }
 
