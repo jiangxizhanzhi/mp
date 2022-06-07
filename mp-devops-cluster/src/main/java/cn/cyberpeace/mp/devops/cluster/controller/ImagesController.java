@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
@@ -94,7 +95,7 @@ public class ImagesController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
-        BasePageBO<ImageConvertModel> model = imagesConverter.page(request);
+        BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
         List<ImagesPageVO> list = model.getList().stream().map(v -> {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();

@@ -1,10 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.converter.bo;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntityAccess;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtGateway;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.converter.model.BasePageConvertModel;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import lombok.*;
 
@@ -53,6 +51,26 @@ public class RealEquipmentBO extends BasePageConvertModel {
     private Integer thirdCategory;
 
     /**
+     * 镜像类型
+     */
+    private String imageType;
+
+    /**
+     * 描述
+     */
+    private String description;
+
+    /**
+     * 是否导入
+     */
+    private Boolean isImport;
+
+    /**
+     * 是否默认靶标
+     */
+    private Boolean isInternal;
+
+    /**
      * 系统信息
      */
     private ExtSystemInfo extSystemInfo;
@@ -62,20 +80,41 @@ public class RealEquipmentBO extends BasePageConvertModel {
      */
     private ExtEntity extEntity;
 
+
+    /**
+     * 镜像信息
+     */
+    private ExtImageInfo extImageInfo;
+
     /**
      * 交换机
      */
     private List<ExtEntityAccess> extEntityAccess;
 
     /**
-     * 描述
+     * 虚拟机信息
      */
-    private String description;
+    private ExtVm extVm;
 
     /**
      * 网关信息
      */
     private ExtGateway extGateway;
+
+    /**
+     * Docker容器信息
+     */
+    private ExtDocker extDocker;
+
+    /**
+     * 是否公开
+     */
+    private PublicEnum isPublic;
+
+    /**
+     * 授权人数
+     */
+    private Integer authTotal;
 
     /**
      * 在位状态

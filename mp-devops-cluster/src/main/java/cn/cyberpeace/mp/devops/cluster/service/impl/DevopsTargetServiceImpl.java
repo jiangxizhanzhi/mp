@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
@@ -32,6 +33,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     private static final String CONTAINER = "container";
 
     private final DeviceTargetMapper deviceTargetMapper;
+
+    @Override
+    public List<DeviceTargetPO> page(ImagePageDTO dto) {
+        return deviceTargetMapper.page(dto);
+    }
 
     @Override
     public Integer totalCount(ImagePageDTO dto) {
@@ -82,6 +88,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     @Override
     public int deleteAllTarget() {
         return deviceTargetMapper.deleteAllTarget();
+    }
+
+    @Override
+    public Integer delete(ImageDeleteDTO dto) {
+        return deviceTargetMapper.delete(dto);
     }
 
     protected DeviceTargetPO convertToTargetModel(Device device){
