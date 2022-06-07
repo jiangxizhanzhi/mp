@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,13 @@ import java.util.Map;
  * @author wanggang
  */
 public interface DevopsTargetService {
+
+    /**
+     * 分页查询
+     * @param dto
+     * @return
+     */
+    List<DeviceTargetPO> page(ImagePageDTO dto);
 
     /**
      * 获取总数
@@ -56,4 +65,11 @@ public interface DevopsTargetService {
      * @return
      */
     int deleteAllTarget();
+
+    /**
+     * 删除
+     * @param dto
+     * @return
+     */
+    Integer delete(ImageDeleteDTO dto);
 }

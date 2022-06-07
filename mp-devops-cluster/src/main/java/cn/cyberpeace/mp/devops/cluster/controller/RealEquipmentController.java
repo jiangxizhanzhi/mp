@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
@@ -60,7 +61,7 @@ public class RealEquipmentController {
     @ApiOperation("分页查询")
     @GetMapping("/page")
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
-        BasePageBO<RealEquipmentBO> model = realEquipmentConverter.page(request);
+        BasePageBO<RealEquipmentBO> model = realEquipmentConverter.page(new ImagePageDTO(request));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }

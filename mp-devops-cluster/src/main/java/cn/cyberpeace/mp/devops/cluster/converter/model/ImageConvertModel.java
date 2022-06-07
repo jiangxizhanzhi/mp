@@ -2,10 +2,13 @@ package cn.cyberpeace.mp.devops.cluster.converter.model;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,6 +32,11 @@ public class ImageConvertModel extends BasePageConvertModel{
     private String logo;
 
     /**
+     * 角色
+     */
+    private Integer role;
+
+    /**
      * 分类
      */
     private Integer mainCategory;
@@ -39,6 +47,11 @@ public class ImageConvertModel extends BasePageConvertModel{
     private Integer subCategory;
 
     /**
+     * 三级分类
+     */
+    private Integer thirdCategory;
+
+    /**
      * 镜像类型
      */
     private String imageType;
@@ -47,16 +60,6 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 描述
      */
     private String description;
-
-    /**
-     * 角色
-     */
-    private Integer role;
-
-    /**
-     * 三级分类
-     */
-    private Integer thirdCategory;
 
     /**
      * 是否导入
@@ -74,9 +77,19 @@ public class ImageConvertModel extends BasePageConvertModel{
     private ExtSystemInfo extSystemInfo;
 
     /**
+     * 实体信息
+     */
+    private ExtEntity extEntity;
+
+    /**
      * 镜像信息
      */
     private ExtImageInfo extImageInfo;
+
+    /**
+     * 交换机
+     */
+    private List<ExtEntityAccess> extEntityAccess;
 
     /**
      * 虚拟机信息
@@ -88,6 +101,9 @@ public class ImageConvertModel extends BasePageConvertModel{
      */
     private ExtGateway extGateway;
 
+    /**
+     * Docker容器信息
+     */
     private ExtDocker extDocker;
 
     /**
@@ -99,5 +115,20 @@ public class ImageConvertModel extends BasePageConvertModel{
      * 授权人数
      */
     private Integer authTotal;
+
+    /**
+     * 在位状态
+     */
+    private StatusEnum inPosition;
+
+    /**
+     * 使用状态
+     */
+    private StatusEnum useStatus;
+
+    /**
+     * 引用状态
+     */
+    private Integer referenceStatus;
 
 }

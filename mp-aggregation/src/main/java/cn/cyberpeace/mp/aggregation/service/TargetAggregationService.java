@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
@@ -49,7 +50,7 @@ public class TargetAggregationService {
         request.setPerPage(null);
         request.setPage(null);
         request.setIsHide(Boolean.TRUE);
-        BasePageBO<DeviceTargetPO> targetPageModel = targetConverter.page(request);
+        BasePageBO<DeviceTargetPO> targetPageModel = targetConverter.page(new ImagePageDTO(request));
         if (Objects.isNull(targetPageModel) || CollectionUtils.isEmpty(targetPageModel.getList())){
             return;
         }

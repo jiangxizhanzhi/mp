@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.CommonTargetNameEnum;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
@@ -161,7 +162,7 @@ public class DevopsTargetController {
                 request.setSecondCategory(second.getId());
                 request.setPage(null);
                 request.setPerPage(null);
-                BasePageBO<DeviceTargetPO> targetSceneConvertModel = targetConverter.page(request);
+                BasePageBO<DeviceTargetPO> targetSceneConvertModel = targetConverter.page(new ImagePageDTO(request));
                 if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
                     continue;
                 }

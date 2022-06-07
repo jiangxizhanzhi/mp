@@ -1,6 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.dto;
 
+import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.request.ImagePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -118,5 +123,83 @@ public class ImagePageDTO extends BasePageDTO{
 
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
+    }
+
+
+    /**
+     * 转换ImagePageRequest
+     * @param request
+     */
+    public ImagePageDTO(ImagePageRequest request){
+        this.setRole(request.getRole());
+        this.setMainCategory(request.getMainCategory());
+        this.setSubCategory(request.getSubCategory());
+        this.setThirdCategory(request.getThirdCategory());
+        this.setQuickCreateSupport(request.getQuickCreateSupport());
+        if (Objects.isNull(request.getImageType())){
+            this.setSearchType(1);
+        }else {
+            this.setImageType(request.getImageType());
+        }
+        this.setName(request.getName());
+        this.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        this.setSearchPublicEnum(1);
+        this.setOffset((request.getPage() - 1) * request.getPerPage());
+        this.setLimit(request.getPerPage());
+        this.setSystemType(request.getSystemType());
+        this.setSystemArchitecure(request.getSystemArchitecure());
+        this.setLanguage(request.getLanguage());
+        this.setImageStatus(request.getImageStatus());
+        this.setBaseImageSupport(request.getBaseImageSupport());
+        this.setLikeName(request.getLikeName());
+        this.setIsHide(Boolean.FALSE);
+    }
+
+    /**
+     * 转换RealEquipmentPageRequest对象
+     * @param request
+     */
+    public ImagePageDTO(RealEquipmentPageRequest request){
+        this.setMainCategory(request.getCategory());
+        this.setSubCategory(request.getSecondCategory());
+        this.setThirdCategory(request.getThirdCategory());
+        this.setImageType(ImageTypeEnum.ENTITY.toValue());
+        this.setUseStatus(request.getUseStatus());
+        this.setName(request.getName());
+        this.setInPosition(request.getInPosition());
+        this.setOffset((request.getPage() - 1) * request.getPerPage());
+        this.setLimit(request.getPerPage());
+        this.setIsHide(Boolean.FALSE);
+    }
+
+    public ImagePageDTO(TargetSceneRequest request){
+        this.setTargetCategory(request.getTargetCategory());
+        this.setMainCategory(request.getCategory());
+        this.setSubCategory(request.getSecondCategory());
+        this.setThirdCategory(request.getThirdCategory());
+        this.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
+        this.setName(request.getName());
+        this.setSearchPublicEnum(1);
+        this.setRole(request.getRole());
+        this.setIsHide(request.getIsHide());
+        this.setSystemType(request.getSystemType());
+        this.setSystemArchitecure(request.getSystemArchitecure());
+        this.setQuickCreateSupport(request.getQuickCreateSupport());
+        if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
+            this.setOffset((request.getPage() - 1) * request.getPerPage());
+            this.setLimit(request.getPerPage());
+        }
+        if (Objects.isNull(request.getIgnoreUser()) || !request.getIgnoreUser()) {
+            this.setOwner(Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : null);
+        }
+        if (Objects.isNull(request.getImageType())){
+            this.setSearchType(0);
+        }
+        if (request.getLikeName() != null) {
+            this.setLikeName(request.getLikeName());
+        }
+        this.setLanguage(request.getLanguage());
+        this.setImageStatus(request.getImageStatus());
+        this.setBaseImageSupport(request.getBaseImageSupport());
     }
 }
