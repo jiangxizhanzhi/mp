@@ -5,9 +5,9 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.NetworkSubnetBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.NetworkPageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
-import cn.cyberpeace.mp.devops.cluster.request.NetworkPageRequest;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,13 +30,13 @@ public class NetworkConverter implements BaseConverter{
 
     /**
      * 分页查询网络信息
-     * @param request
+     * @param dto
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public BasePageBO<NetworkBO> page(NetworkPageRequest request, String... ignoreFields) {
+    public BasePageBO<NetworkBO> page(NetworkPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<NetworkModel> model = networkService.page(getParams);
         List<NetworkBO> list = model.getList().stream().map(networkModel -> {
             NetworkModel.Subnet subnet = networkModel.getSubnet();

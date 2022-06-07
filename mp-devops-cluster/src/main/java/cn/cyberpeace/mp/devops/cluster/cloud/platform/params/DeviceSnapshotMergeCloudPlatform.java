@@ -1,5 +1,6 @@
-package cn.cyberpeace.mp.devops.cluster.model;
+package cn.cyberpeace.mp.devops.cluster.cloud.platform.params;
 
+import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DeviceSnapshotMergeCloudPlatform extends BaseModel{
+public class DeviceSnapshotMergeCloudPlatform extends BaseModel {
 
     /**
      * 镜像ID

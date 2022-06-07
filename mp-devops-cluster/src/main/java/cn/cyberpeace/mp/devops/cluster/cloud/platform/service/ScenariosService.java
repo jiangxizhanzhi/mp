@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;

@@ -3,7 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.OpenFlowConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.OpenFlowPageConverterModel;
-import cn.cyberpeace.mp.devops.cluster.request.OpenFlowPageRequest;
+import cn.cyberpeace.mp.devops.cluster.dto.OpenFlowPageDTO;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.OpenFlowVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import io.swagger.annotations.Api;
@@ -28,11 +29,11 @@ public class OpenFlowController {
 
     @ApiOperation("分页查询")
     @GetMapping("/page")
-    public PageResult<OpenFlowVO> page(OpenFlowPageRequest request) {
-        OpenFlowPageRequest openFlowPageRequest = new OpenFlowPageRequest();
-        openFlowPageRequest.setPage(request.getPage());
-        openFlowPageRequest.setPerPage(request.getPerPage());
-        OpenFlowPageConverterModel openFlowPageConverterModel = openFlowConverter.page(openFlowPageRequest);
+    public PageResult<OpenFlowVO> page(BasePageRequest request) {
+        OpenFlowPageDTO dto = new OpenFlowPageDTO();
+        dto.setOffset(request.getPage());
+        dto.setLimit(request.getPerPage());
+        OpenFlowPageConverterModel openFlowPageConverterModel = openFlowConverter.page(dto);
         return new PageResult<>(openFlowPageConverterModel.getOpenFlowVOS(), openFlowPageConverterModel.getTotal());
     }
 
