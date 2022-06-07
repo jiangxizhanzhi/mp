@@ -89,7 +89,7 @@ public class ScenePluginFlowSceneService {
             return new ServiceResult<>();
         }
         ServiceResult<FlowRecordsResponse> result;
-        if (isBatch) {
+        if (Boolean.TRUE.equals(isBatch)) {
             result = flowService3.queryFlowRecords(flowElement.getSrcElement().getEid());
         } else {
             result = flowService3.queryFlowRecords(flow.getTaskId());

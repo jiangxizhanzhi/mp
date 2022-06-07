@@ -218,25 +218,26 @@ public class InitiateHandler extends HandlerCommon {
         List<WazuhControl.ControlLogCollectParam> logParams = new ArrayList<>();
         WazuhControl.ControlConfigParam controlParam = new WazuhControl.ControlConfigParam();
         for (Probe probe : probes) {
-            //脚本驱动类型，新增脚本参数
+            // 脚本驱动类型，新增脚本参数
             if (probe.getExecType() == Probe.ExecType.SCRIPT_PROBE) {
                 ConvertScriptParams convertScript = new ConvertScriptParams(probe, agentName);
                 customProbeParams.addAll(convertScript.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.REGISTRY_PROBE) {
-                //注册表变更类型，新增注册表参数
+                // 注册表变更类型，新增注册表参数
                 ConvertRegistryParams convertRegistry = new ConvertRegistryParams(probe);
                 registryParams.addAll(convertRegistry.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.FILE_PROBE) {
-                //文件变更类型，新增文件参数
+                // 文件变更类型，新增文件参数
                 ConvertFileParams convertFile = new ConvertFileParams(probe);
                 fileParams.addAll(convertFile.convertParams());
             } else if (probe.getExecType() == Probe.ExecType.LOG_PROBE) {
-                //日志采集类型，新增日志参数
+                // 日志采集类型，新增日志参数
                 ConvertLogParams convertLog = new ConvertLogParams(probe, systemType, locationMap);
                 logParams.addAll(convertLog.convertParams());
             }
         }
-        if (SystemTypeCommandUtils.isWindows(systemType)) {
+        if (SystemTypeCommandUtils.isWindows(systemType) && !registryParams.isEmpty()) {
+            // Windows注册表变更采集需要设置采集间隔
             WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
             syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
             syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
@@ -261,7 +262,7 @@ public class InitiateHandler extends HandlerCommon {
             return new HashMap<>();
         }
         Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = new HashMap<>();
-        //探针id和系统类型为key，探针参数为value
+        // 探针id和系统类型为key，探针参数为value
         locationModels.forEach(locationModel -> {
             String key = locationModel.getProbeId() + "_" + locationModel.getOsType();
             if (!locationMap.containsKey(key)) {

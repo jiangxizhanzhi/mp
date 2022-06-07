@@ -27,7 +27,7 @@ public class ConvertFileParams implements WazuhParamsConvert<WazuhControl.Contro
             return new ArrayList<>();
         }
         int i = 1;
-        //每有一个路径添加一个参数
+        // 每有一个路径添加一个参数
         for (String path : probe.getCollectPath()) {
             WazuhControl.ControlFileModifyParam fileParam = new WazuhControl.ControlFileModifyParam();
             fileParam.setId(probe.getId() + "_" + i++);

@@ -41,9 +41,9 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
             return new ArrayList<>();
         }
         int i = 1;
-        //日志文件或日志路径探针单独处理
+        // 日志文件或日志路径探针单独处理
         if (ProbeConstant.ProbeId.LOG_FILE.equals(probe.getId())) {
-            //每有一个路径添加一个参数
+            // 每有一个路径添加一个参数
             for (String path : probe.getCollectPath()) {
                 WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
                 logParam.setId(probe.getId() + "_" + i++);
@@ -53,7 +53,7 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
                 logParams.add(logParam);
             }
         } else {
-            //探针id和系统类型组成key取日志探针参数
+            // 探针id和系统类型组成key取日志探针参数
             String key = probe.getId() + "_" + systemType;
             List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMap.get(key);
             if (locationModels == null || locationModels.isEmpty()) {
