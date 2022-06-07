@@ -11,10 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
-import cn.cyberpeace.mp.devops.cluster.dto.ContainerPageDTO;
-import cn.cyberpeace.mp.devops.cluster.dto.HypervisorActionDTO;
-import cn.cyberpeace.mp.devops.cluster.dto.HypervisorWeightAndMaxInstanceDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
@@ -78,9 +75,7 @@ public class CloudPlatformMonitorController {
     public Result<HypervisorStatisticsVO> statistics(){
 
         //虚拟机个数
-        InstancePageRequest instancePageRequest = new InstancePageRequest();
-        instancePageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalInstances = vmConverter.getTotalInstances(instancePageRequest);
+        Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
 
         //容器个数
         Integer totalContainers =  containerConverter.getTotalContainers(new ContainerPageDTO());
