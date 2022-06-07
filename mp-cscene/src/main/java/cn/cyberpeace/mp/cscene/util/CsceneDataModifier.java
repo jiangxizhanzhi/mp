@@ -463,14 +463,14 @@ public class CsceneDataModifier {
     }
 
     public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene) {
-        if (StringUtils.isEmpty(referenceMetaData)) {
+        if (StringUtils.isEmpty(referenceMetaData) || csceneInstance == null) {
             return;
         }
         try {
             // 兼容name
             if (String.valueOf(csceneInstance.getReferenceType()).startsWith("3")) {
                 // 竞赛
-                if (cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
+                if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
                     csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
                 }
             } else {
