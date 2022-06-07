@@ -14,6 +14,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Slf4j
 @Configuration
@@ -50,6 +53,9 @@ public class CsceneAppConfig {
 
     @Value("${mp.cscene.scene-message-timeout:3600000}")
     private Long sceneMessageTimeout;
+
+    @Value("${mp.cscene.has_own_recording_set:213,214,236}")
+    private String hasOwnRecordingSet;
 
     @Autowired
     private MessageSource messageSource;
@@ -104,5 +110,12 @@ public class CsceneAppConfig {
 
         var value = config.getValue();
         return BooleanUtils.toBoolean(value);
+    }
+
+    public Set<Integer> getHasOwnRecordingSet() {
+        String[] values = this.hasOwnRecordingSet.split(",");
+        Set<Integer> set = new HashSet<>();
+        Arrays.stream(values).forEach(v -> set.add(Integer.parseInt(v)));
+        return set;
     }
 }

@@ -52,6 +52,7 @@ public class BaseCsceneModel extends BaseModel {
         public static final int COMPREHENSIVE_ASSESSMENT = 233;
         public static final int TACTICAL_TRAINING = 234;
         public static final int COMPREHENSIVE_TRAINING = 235;
+        public static final int RANGE_TEST = 236;
 
         private ReferenceType() {}
     }
