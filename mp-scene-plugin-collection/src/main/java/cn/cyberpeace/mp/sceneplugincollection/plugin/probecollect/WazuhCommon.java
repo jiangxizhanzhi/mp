@@ -126,20 +126,20 @@ public class WazuhCommon {
         if (SystemTypeCommandUtils.isLinux(systemType)) {
             String addCommand;
             if (isContainer) {
-                //容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
+                // 容器不支持curl命令，需要添加一条复制wazuh-agent安装包文件的命令
                 addCommand = String.format("%s %s %s", ContainerFileUtils.CONTAINER_COPY_FILE_PREFIX,
                         getAgentLinuxLocalFilepath(), linuxInstallDir);
             } else {
-                //Linux虚拟机增加按需下载agent安装包的命令
+                // Linux虚拟机增加按需下载agent安装包的命令
                 String downloadUrl = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
                         nameFileMap.getOrDefault(LINUX_DOWNLOAD_AGENT_FILE, StringUtils.EMPTY));
                 String downloadPath = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, linuxInstallDir,
                         LINUX_DOWNLOAD_AGENT_FILE);
-                //下载按需安装脚本并执行
+                // 下载按需安装脚本并执行
                 addCommand = StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
                         String.format(InstallerUtils.LINUX_FILE_DOWNLOAD, downloadPath, downloadUrl),
                         String.format("sh %s/%s ", linuxInstallDir, LINUX_DOWNLOAD_AGENT_FILE));
-                //给下载安装包的脚本添加参数
+                // 给下载安装包的脚本添加参数
                 String filePathParam = String.format("filepath=%s/%s", linuxInstallDir,
                         WAZUH_AGENT_LINUX_FILE_NAME);
                 List<String> params = new ArrayList<>(CollectionUtil.toList(filePathParam));
@@ -152,7 +152,7 @@ public class WazuhCommon {
                 });
                 addCommand = addCommand.concat(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
             }
-            //将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
+            // 将容器或Linux虚拟机新增的获取agent安装包命令放在创建目录之后
             int addCommandIndex = 0;
             for (int i = 0; i < result.size(); i++) {
                 if (result.get(i).contains("mkdir") && result.get(i).contains(linuxInstallDir)) {

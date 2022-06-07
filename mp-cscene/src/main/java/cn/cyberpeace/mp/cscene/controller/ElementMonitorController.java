@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -11,7 +12,6 @@ import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
-import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -45,10 +45,6 @@ public class ElementMonitorController {
 
     @Autowired
     private HostStateService hostStateService;
-
-    public static List<String> FILE_MODIFY_GROUP = CollectionUtil.toList("syscheck_file");
-
-    public static List<String> REGISTRY_MODIFY_GROUP = CollectionUtil.toList("syscheck_registry");
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -105,7 +101,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, FILE_MODIFY_GROUP, path).asResult();
+        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
     }
 
     @ApiOperation(value = "节点文件变更事件柱状图")
@@ -118,7 +114,8 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, FILE_MODIFY_GROUP, segmentCount)).asResult();
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
+                segmentCount)).asResult();
     }
 
     @ApiOperation(value = "查询节点注册表变更事件")
@@ -130,7 +127,7 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return sceneElementMonitorService.getModifyData(pageRequest, REGISTRY_MODIFY_GROUP, path).asResult();
+        return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
     }
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
@@ -143,7 +140,8 @@ public class ElementMonitorController {
         log.info("{}", pageRequest);
         pageRequest.ensure();
 
-        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, REGISTRY_MODIFY_GROUP, segmentCount)).asResult();
+        return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
+                segmentCount)).asResult();
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")

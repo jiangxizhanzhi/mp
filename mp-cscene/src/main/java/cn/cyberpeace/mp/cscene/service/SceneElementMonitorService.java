@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.*;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
@@ -17,9 +18,6 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
-import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
@@ -33,6 +31,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -81,8 +80,6 @@ public class SceneElementMonitorService {
     @Autowired
     private SceneMapper sceneMapper;
 
-    public static List<String> VULNERABILITY_GROUP = CollectionUtil.toList("vulnerability-detector");
-
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
      *
@@ -125,12 +122,12 @@ public class SceneElementMonitorService {
         ListPageInfoQueryParams listPageInfoQueryParams = new ListPageInfoQueryParams();
         listPageInfoQueryParams.setPage(pageRequest.getPage());
         listPageInfoQueryParams.setPageSize(pageRequest.getPageSize());
-        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollectionUtil.toList(pageRequest.getSceneId())));
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(CollUtil.toList(pageRequest.getSceneId())));
         listPageInfoQueryParams.setNodeIds(pageRequest.getElementIds());
         ListObjServiceResult<WazuhNetworkConnectionModel> netConns = scenePluginCollectionSceneService.listNetworkConnections(listPageInfoQueryParams).asResult();
 
         List<ConnectionState> connectionStates = new ArrayList<>();
-        if (Objects.nonNull(netConns.getSource()) && CollectionUtil.isNotEmpty(netConns.getSource().getList())) {
+        if (Objects.nonNull(netConns.getSource()) && CollUtil.isNotEmpty(netConns.getSource().getList())) {
             List<WazuhNetworkConnectionModel> list = netConns.getSource().getList();
             connectionStates = list.stream().map(model -> convertWazuhNetConn2ConnState(model)).collect(Collectors.toList());
         }
@@ -330,12 +327,12 @@ public class SceneElementMonitorService {
         startTime = pageRequest.getStartTime();
         endTime = pageRequest.getEndTime();
         var result = getModifyData(pageRequest, ruleGroups, null);
-        if (result == null || result.getSource() == null || CollectionUtil.isEmpty(result.getSource().getObjs())) {
+        if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
         result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
         if (segmentCount == null) {
-            //默认时间分15段
+            // 默认时间分15段
             segmentCount = 15;
         }
         long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
@@ -368,7 +365,7 @@ public class SceneElementMonitorService {
 
     public ListObjResult<ElementVulnerabilityInfo> getVulnerabilityInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ListObjResult<>();
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
@@ -389,14 +386,14 @@ public class SceneElementMonitorService {
         request.setPageNum(pageRequest.getPage());
         request.setPageSize(pageRequest.getPageSize());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(VULNERABILITY_GROUP);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityInfo(request, true);
         List<ElementVulnerabilityInfo> vulnerabilityInfos = new ArrayList<>();
         result.getObjs().forEach(r -> {
             ElementVulnerabilityInfo vulnerabilityInfo = new ElementVulnerabilityInfo();
             vulnerabilityInfo.setNodeName(elementEid2Name.get(r.getAgentName()));
             vulnerabilityInfo.setCve(r.getVulnerability().getCve());
-            //等级转化为小写，便于前端转化
+            // 等级转化为小写，便于前端转化
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
@@ -412,10 +409,10 @@ public class SceneElementMonitorService {
         request.setPageNum(1);
         request.setPageSize(1);
         request.setAgentNames(agentNames);
-        request.setRuleGroups(VULNERABILITY_GROUP);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         var first = dataCollectionService.queryVulnerabilityInfo(request, false);
         var last = dataCollectionService.queryVulnerabilityInfo(request, true);
-        if (CollectionUtil.isEmpty(first.getObjs()) || CollectionUtil.isEmpty(last.getObjs())) {
+        if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
             // 未查询到漏洞数据时将开始时间往前推三个小时查询
             pageRequest.setStartTime(pageRequest.getStartTime().plusHours(-3));
             return;
@@ -431,7 +428,7 @@ public class SceneElementMonitorService {
 
     public List<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChartInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
@@ -449,10 +446,10 @@ public class SceneElementMonitorService {
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(VULNERABILITY_GROUP);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 false, "data.vulnerability.severity", "severity");
-        if (CollectionUtil.isEmpty(result)) {
+        if (CollUtil.isEmpty(result)) {
             return new ArrayList<>();
         }
         long i = 0;
@@ -485,7 +482,7 @@ public class SceneElementMonitorService {
 
     public List<ElementVulnerabilityCountInfo> getVulnerabilityCountInfo(ElementMonitorRequest pageRequest) {
         BaseRequestUtil.checkBaseRequestWithSceneId(pageRequest);
-        if (CollectionUtil.isEmpty(pageRequest.getElementIds())) {
+        if (CollUtil.isEmpty(pageRequest.getElementIds())) {
             return new ArrayList<>();
         }
         var sceneId = csceneInstanceService.getSceneId(pageRequest.getSceneId());
@@ -503,7 +500,7 @@ public class SceneElementMonitorService {
         request.setStartTime(pageRequest.getStartTime());
         request.setEndTime(pageRequest.getEndTime());
         request.setAgentNames(agentNames);
-        request.setRuleGroups(VULNERABILITY_GROUP);
+        request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
         var result = dataCollectionService.queryVulnerabilityCountInfo(request,
                 true, "data.vulnerability.package.name", "package_name");
         List<ElementVulnerabilityCountInfo> countInfos = new ArrayList<>();

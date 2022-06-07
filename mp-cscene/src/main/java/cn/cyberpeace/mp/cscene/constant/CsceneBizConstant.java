@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.cscene.constant;
 
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,14 +19,18 @@ public final class CsceneBizConstant {
     }
 
     //操作系统日志 code集合 mp_sceneplugincollection_wazuh_rule_type.code
-    public static List<String> OS_CATEGORY = new ArrayList<>(CollectionUtil.toList("020101", "020102", "020103",
-            "020104", "020105", "020106"));
+    public static List<String> OS_CATEGORY = CollUtil.toList("020101", "020102", "020103", "020104", "020105", "020106");
 
     //应用系统日志 code集合 mp_sceneplugincollection_wazuh_rule_type.code
-    public static List<String> APPLICATION_CATEGORY = new ArrayList<>(CollectionUtil.toList("020201", "020202",
-            "020203", "020204", "020205", "020206", "020207", "020208"));
+    public static List<String> APPLICATION_CATEGORY = CollUtil.toList("020201", "020202", "020203", "020204",
+            "020205", "020206", "020207", "020208");
 
     //安全系统日志 code集合 mp_sceneplugincollection_wazuh_rule_type.code
-    public static List<String> SECURITY_CATEGORY = new ArrayList<>(CollectionUtil.toList("020301", "020302",
-            "020303", "020304", "020305"));
+    public static List<String> SECURITY_CATEGORY = CollUtil.toList("020301", "020302", "020303", "020304", "020305");
+
+    public static List<String> FILE_MODIFY_GROUP = CollUtil.toList("syscheck_file");
+
+    public static List<String> REGISTRY_MODIFY_GROUP = CollUtil.toList("syscheck_registry");
+
+    public static List<String> VULNERABILITY_GROUP = CollUtil.toList("vulnerability-detector");
 }

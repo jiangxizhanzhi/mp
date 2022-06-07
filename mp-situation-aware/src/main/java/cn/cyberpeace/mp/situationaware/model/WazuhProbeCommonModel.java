@@ -22,9 +22,6 @@ public class WazuhProbeCommonModel {
     @ApiModelProperty("agentName")
     private String agentName;
 
-    @ApiModelProperty("macId")
-    private List<String> macIds;
-
     @JSONField(name = "timestamp")
     @ApiModelProperty("时间")
     private LocalDateTime time;

@@ -27,7 +27,7 @@ public class ConvertRegistryParams implements WazuhParamsConvert<WazuhControl.Co
         }
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
         int i = 1;
-        //每有一个路径添加一个参数
+        // 每有一个路径添加一个参数
         for (String path : probe.getCollectPath()) {
             WazuhControl.ControlRegistryModifyParam registryParam = new WazuhControl.ControlRegistryModifyParam();
             registryParam.setId(probe.getId() + "_" + i++);
