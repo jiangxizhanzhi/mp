@@ -185,8 +185,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                                                             String probeId, HostEventQueryParams queryParams) {
         String scrollId = null;
         String redisKey = null;
-        queryParams.setScroll(false);
-        if (StringUtils.isNotEmpty(requestId)) {
+        boolean isScrollRequest = false;
+        if (StringUtils.isNotBlank(requestId)) {
+            isScrollRequest = true;
             redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
             String redisValue = redisTemplate.opsForValue().get(redisKey);
             if (StringUtils.isNotEmpty(redisValue)) {
@@ -271,7 +272,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 params.setPageSize(queryParams.getPageSize());
                 params.setStartTime(queryParams.getStartTime());
                 params.setEndTime(queryParams.getEndTime());
-                params.setScroll(queryParams.getScroll());
                 ListObjServiceResult<CollectionHostEventBO> r;
                 if (ProbeConstant.ProbeId.FILE_MODIFY.equals(probeId)) {
                     // 文件变更信息
@@ -290,9 +290,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     params.setCatagories(CsceneBizConstant.SECURITY_CATEGORY);
                 }
                 if (StringUtils.isEmpty(scrollId)) {
-                    if (StringUtils.isNotBlank(requestId)) {
-                        queryParams.setScroll(true);
-                    }
+                    params.setScroll(isScrollRequest);
                     r = scenePluginCollectionSceneService.listHostEvents(sceneId, params);
                 } else {
                     r = scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, params);
@@ -318,7 +316,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 continue;
             }
 
-            if (StringUtils.isBlank(scrollId) && Boolean.TRUE.equals(queryParams.getScroll())) {
+            if (StringUtils.isBlank(scrollId) && isScrollRequest) {
                 if (CollUtil.isNotEmpty(res)) {
                     if (Objects.nonNull(res.get(0)) && res.get(0) instanceof CollectionHostEventBO) {
                         CollectionHostEventBO event = (CollectionHostEventBO) res.get(0);

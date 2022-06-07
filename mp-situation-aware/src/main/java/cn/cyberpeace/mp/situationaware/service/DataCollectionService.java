@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -181,6 +182,7 @@ public class DataCollectionService {
 
             String responseScrollId = response.getScrollId();
             if (wazuhEventRequest.isScroll()) {
+                log.info("response scrollId:{}", responseScrollId);
                 fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             }
 
@@ -201,6 +203,7 @@ public class DataCollectionService {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
+        log.info("elasticsearch scroll query, scrollId:\n{}", scrollId);
         try {
             SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
@@ -210,7 +213,7 @@ public class DataCollectionService {
             fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             return new ListObjResult(fileEventModelList, Long.valueOf(response.getHits().getTotalHits().value).intValue());
         } catch (IOException e) {
-            log.error("es queryFileEvents error: {} ", e);
+            log.error("es scrollFileEvents error: {} ", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
 

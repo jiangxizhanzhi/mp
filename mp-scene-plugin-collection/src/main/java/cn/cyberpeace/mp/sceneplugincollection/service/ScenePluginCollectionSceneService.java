@@ -62,7 +62,6 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -415,45 +414,43 @@ public class ScenePluginCollectionSceneService {
             agentNameElementMap.put(srcElement.getEid(), srcElement);
         });
 
-        ListObjResult<FileEventModel> result = null;
-        try {
-            result = dataCollectionService.scrollFileEvents(scrollId);
-        } catch (Exception e) {
-            log.error(ExceptionUtil.stacktraceToString(e));
-        }
+        ListObjResult<FileEventModel> result = dataCollectionService.scrollFileEvents(scrollId);
 
         CloudScenePluginHandler cloudScenePluginHandler = sceneHandler.getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
         List<CollectionHostEventBO> hostEvents = new ArrayList<>();
-        result.getObjs().forEach(srcHostEvent -> {
-            var hostEvent = new CollectionHostEventBO();
-            hostEvent.setSceneId(sceneId);
-            hostEvent.setType(srcHostEvent.getFileEventType().name());
-            hostEvent.setEventDesc(srcHostEvent.getAction());
-            hostEvent.setTime(srcHostEvent.getUpdateTime());
-            hostEvent.setDescription(srcHostEvent.getDescription());
-            hostEvent.setLevel(srcHostEvent.getLevel());
-            hostEvent.setCatagory(srcHostEvent.getCatagory());
-            hostEvent.setContent(srcHostEvent.getContent());
-            hostEvent.setPath(srcHostEvent.getFilePath());
-            hostEvent.setFileSize(srcHostEvent.getSize());
-            hostEvent.setMd5Before(srcHostEvent.getMd5Before());
-            hostEvent.setMd5After(srcHostEvent.getMd5After());
-            hostEvent.setScrollId(srcHostEvent.getScrollId());
-            var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
-            if (srcElement != null) {
-                hostEvent.setNodeId(srcElement.getId());
-                hostEvent.setNodeName(srcElement.getName());
-                hostEvent.setSystemType(srcElement.getSystemType());
-                hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
-                if (cloudScenePluginHandler != null) {
-                    var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
-                    if (cloudElement != null) {
-                        hostEvent.setVirtualType(cloudElement.getVirtualType());
+
+        if (CollectionUtils.isNotEmpty(result.getObjs())) {
+            result.getObjs().forEach(srcHostEvent -> {
+                var hostEvent = new CollectionHostEventBO();
+                hostEvent.setSceneId(sceneId);
+                hostEvent.setType(srcHostEvent.getFileEventType().name());
+                hostEvent.setEventDesc(srcHostEvent.getAction());
+                hostEvent.setTime(srcHostEvent.getUpdateTime());
+                hostEvent.setDescription(srcHostEvent.getDescription());
+                hostEvent.setLevel(srcHostEvent.getLevel());
+                hostEvent.setCatagory(srcHostEvent.getCatagory());
+                hostEvent.setContent(srcHostEvent.getContent());
+                hostEvent.setPath(srcHostEvent.getFilePath());
+                hostEvent.setFileSize(srcHostEvent.getSize());
+                hostEvent.setMd5Before(srcHostEvent.getMd5Before());
+                hostEvent.setMd5After(srcHostEvent.getMd5After());
+                hostEvent.setScrollId(srcHostEvent.getScrollId());
+                var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
+                if (srcElement != null) {
+                    hostEvent.setNodeId(srcElement.getId());
+                    hostEvent.setNodeName(srcElement.getName());
+                    hostEvent.setSystemType(srcElement.getSystemType());
+                    hostEvent.setSystemTypeName(SystemTypeUtils.getStandardSystemType(srcElement.getSystemType()));
+                    if (cloudScenePluginHandler != null) {
+                        var cloudElement = cloudScenePluginHandler.getElement(srcElement.getId());
+                        if (cloudElement != null) {
+                            hostEvent.setVirtualType(cloudElement.getVirtualType());
+                        }
                     }
                 }
-            }
-            hostEvents.add(hostEvent);
-        });
+                hostEvents.add(hostEvent);
+            });
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(hostEvents, result.getTotal()));
     }
