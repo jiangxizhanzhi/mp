@@ -181,6 +181,8 @@ mp:
     wazuh-godfs-server: http://${ip.wazuh}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${ip.self}:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
+  cscene:
+    has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 
 management:
   endpoints:

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.request;
+package cn.cyberpeace.mp.devops.cluster.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OpenFlowPageRequest extends BasePageRequest{
+public class OpenFlowPageDTO extends BasePageDTO {
 
     @ApiModelProperty(value = "执行动作", hidden = true)
     @NotNull(message = "执行动作不能为空")

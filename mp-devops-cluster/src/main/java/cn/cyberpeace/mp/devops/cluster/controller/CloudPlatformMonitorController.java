@@ -11,10 +11,13 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
@@ -74,14 +77,10 @@ public class CloudPlatformMonitorController {
     public Result<HypervisorStatisticsVO> statistics(){
 
         //虚拟机个数
-        InstancePageRequest instancePageRequest = new InstancePageRequest();
-        instancePageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalInstances = vmConverter.getTotalInstances(instancePageRequest);
+        Integer totalInstances = vmConverter.getTotalInstances(new InstancePageDTO());
 
         //容器个数
-        ContainerPageRequest containerPageRequest = new ContainerPageRequest();
-        containerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalContainers =  containerConverter.getTotalContainers(containerPageRequest);
+        Integer totalContainers =  containerConverter.getTotalContainers(new ContainerPageDTO());
 
         //实装设备个数
         RealEquipmentPageRequest realEquipmentPageRequest = new RealEquipmentPageRequest();
@@ -89,14 +88,10 @@ public class CloudPlatformMonitorController {
         Integer totalRealEquipments = realEquipmentConverter.getTotalRealEquipment(realEquipmentPageRequest);
 
         //路由个数
-        RouterPageRequest routerPageRequest = new RouterPageRequest();
-        routerPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalRouters = routerConverter.getTotalRouters(routerPageRequest);
+        Integer totalRouters = routerConverter.getTotalRouters(new RouterPageDTO());
 
         //NPC个数
-        NpcPageRequest npcPageRequest = new NpcPageRequest();
-        npcPageRequest.setPerPage(NumberUtils.INTEGER_ONE);
-        Integer totalNpcs = npcConverter.getTotalNpcs(npcPageRequest);
+        Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
 
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
@@ -122,8 +117,8 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
-    public PageResult<HypervisorPageVO> page(HypervisorPageRequest request){
-        BasePageBO<HypervisorBO> model = hypervisorConverter.page(request);
+    public PageResult<HypervisorPageVO> page(BasePageRequest request){
+        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
@@ -145,8 +140,8 @@ public class CloudPlatformMonitorController {
             // 设置物理主机服务状态
             v.setServiceStatus(serviceStatus.isPresent() && serviceStatus.get().isStatus());
 
-            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceRequest(name));
-            Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageRequest(name));
+            HypervisorWeightAndMaxInstanceConvertModel weightAndMaxInstances = hypervisorConverter.getWeightAndMaxInstances(new HypervisorWeightAndMaxInstanceDTO(name));
+            Integer totalContainers = containerConverter.getTotalContainers(new ContainerPageDTO(name));
             v.setTotalContainers(totalContainers);
             if (Objects.nonNull(weightAndMaxInstances)) {
                 v.setWeight(weightAndMaxInstances.getWeight());
@@ -170,7 +165,7 @@ public class CloudPlatformMonitorController {
         }
         if(request.getAction().equals(HypervisorActionEnum.REBOOT.getAction())
                 || request.getAction().equals(HypervisorActionEnum.POWEROFF.getAction())) {
-            hypervisorConverter.rebootOrPowerOff(request);
+            hypervisorConverter.rebootOrPowerOff(new HypervisorActionDTO(request));
         }
         return ServiceResult.successful();
     }

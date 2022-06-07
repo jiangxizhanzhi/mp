@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.*;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageInjectFileDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
@@ -374,7 +375,7 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        BaseCloudPlatformResult model = injectFileConverter.delete(request);
+        BaseCloudPlatformResult model = injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
         if (Objects.isNull(model)){
             return ServiceResult.fail("");
         }

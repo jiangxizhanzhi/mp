@@ -5,10 +5,10 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InjectFileService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InjectFileConvertModel;
+import cn.cyberpeace.mp.devops.cluster.dto.ImageInjectFileDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileDelete;
 import cn.cyberpeace.mp.devops.cluster.model.common.InjectFile;
-import cn.cyberpeace.mp.devops.cluster.request.ImageInjectFileDeleteRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,10 +41,10 @@ public class InjectFileConverter {
 
     /**
      * 删除注入文件
-     * @param request
+     * @param dto
      * @return
      */
-    public BaseCloudPlatformResult delete(ImageInjectFileDeleteRequest request) {
-        return scenariosService.deleteInjectFile(new DeviceInjectFileDelete(request.getDeviceUuid(),request.getInjectUuid()));
+    public BaseCloudPlatformResult delete(ImageInjectFileDeleteDTO dto) {
+        return scenariosService.deleteInjectFile(new DeviceInjectFileDelete(dto.getDeviceUuid(),dto.getInjectUuid()));
     }
 }

@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.devops.cluster.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class BasePageDTO extends BaseDTO{
 
@@ -15,7 +13,12 @@ public class BasePageDTO extends BaseDTO{
     private Integer limit;
 
     /**
-     * 偏移量
+     * 页码
      */
     private Integer offset;
+
+    public BasePageDTO(Integer limit, Integer offset) {
+        this.limit = limit;
+        this.offset = offset;
+    }
 }

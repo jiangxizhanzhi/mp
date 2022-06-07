@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.converter;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
@@ -10,8 +12,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertM
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformResult;
-import cn.cyberpeace.mp.devops.cluster.model.DeviceSnapshotMergeCloudPlatform;
-import cn.cyberpeace.mp.devops.cluster.model.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 import lombok.RequiredArgsConstructor;

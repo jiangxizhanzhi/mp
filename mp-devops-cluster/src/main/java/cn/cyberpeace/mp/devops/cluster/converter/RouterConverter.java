@@ -4,11 +4,12 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RouterService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.RouterBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.RouterModel;
-import cn.cyberpeace.mp.devops.cluster.request.RouterPageRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -23,13 +24,13 @@ public class RouterConverter implements BaseConverter{
 
     /**
      * 分页查询路由信息
-     * @param request
+     * @param dto
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public BasePageBO<RouterBO> page(RouterPageRequest request, String... ignoreFields) {
+    public BasePageBO<RouterBO> page(RouterPageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<RouterModel> model = routerService.page(getParams);
         List<RouterModel> routers = model.getList();
         List<RouterBO> list = routers.stream().map(routerModel ->
@@ -46,9 +47,9 @@ public class RouterConverter implements BaseConverter{
      * 获取路由总数
      * @return
      */
-    public Integer getTotalRouters(RouterPageRequest request) {
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageResult page = routerService.page(getParams);
+    public Integer getTotalRouters(RouterPageDTO dto) {
+        dto.setLimit(NumberUtils.INTEGER_ONE);
+        BasePageBO<RouterBO> page = this.page(dto,this.getTotalPageIgnoreField());
         return page.getTotal();
     }
 }

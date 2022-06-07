@@ -381,7 +381,7 @@
             sum(case when t.image_type = 'entity' then 1 else 0 end ) as entity,
             sum(case when t.image_type = 'vm' or t.image_type = 'simple'  then 1 else 0 end ) as vm,
             0 as tgm
-        from mp_devops_target t
+        from mp_devops_target t where t.is_hide = 0
     </select>
 
     <!-- 虚拟靶标统计 -->
@@ -393,7 +393,7 @@
             sum( CASE WHEN t.main_category = 4 THEN 1 ELSE 0 END ) AS '4'
         FROM
             mp_devops_target t
-        WHERE
+        WHERE t.is_hide = 0 and
             t.image_type IN ( 'vm', 'simple' )
            OR (t.sub_category = 53 AND t.image_type != 'entity')
     </select>
@@ -405,6 +405,6 @@
             sum(case when t.image_type = 'entity' and t.main_category = 2 then 1 else 0 end ) as '2',
             sum(case when t.image_type = 'entity' and t.main_category = 3 then 1 else 0 end ) as '3',
             sum(case when t.image_type = 'entity' and t.main_category = 4 then 1 else 0 end ) as '4'
-        from mp_devops_target t
+        from mp_devops_target t where t.is_hide = 0
     </select>
 </mapper>
