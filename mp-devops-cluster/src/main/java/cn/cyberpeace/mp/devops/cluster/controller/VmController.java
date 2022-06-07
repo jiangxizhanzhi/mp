@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -47,7 +48,7 @@ public class VmController {
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(InstancePageRequest request){
-        BasePageBO<InstanceBO> model = vmConverter.page(request);
+        BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);

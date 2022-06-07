@@ -4,9 +4,9 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
-import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -25,15 +25,16 @@ import java.util.stream.Collectors;
 public class VmConverter implements BaseConverter{
 
     private final VmService vmService;
+
     /**
      * 分页查询虚拟机信息
-     * @param request
+     * @param dto
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
-    public BasePageBO<InstanceBO> page(InstancePageRequest request, String... ignoreFields) {
+    public BasePageBO<InstanceBO> page(InstancePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
         CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
         List<InstanceBO> list = model.getList().stream().map(instanceModel ->
                 InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
@@ -49,13 +50,12 @@ public class VmConverter implements BaseConverter{
 
     /**
      * 获取虚拟机总数
-     * @param request
+     * @param dto
      * @return
      */
-    public Integer getTotalInstances(InstancePageRequest request) {
-        request.setPerPage(NumberUtils.INTEGER_ONE);
-        String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        CloudPlatformPageResult<InstanceModel> page = vmService.page(getParams);
+    public Integer getTotalInstances(InstancePageDTO dto) {
+        dto.setLimit(NumberUtils.INTEGER_ONE);
+        BasePageBO<InstanceBO> page = this.page(dto,this.getTotalPageIgnoreField());
         return page.getTotal() ;
     }
 }
