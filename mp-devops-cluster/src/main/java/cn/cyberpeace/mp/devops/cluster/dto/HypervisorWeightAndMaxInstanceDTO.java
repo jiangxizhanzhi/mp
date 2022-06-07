@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.request;
+package cn.cyberpeace.mp.devops.cluster.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
@@ -8,11 +8,11 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(callSuper = true)
-public class HypervisorWeightAndMaxInstanceRequest extends BaseRequest {
+public class HypervisorWeightAndMaxInstanceDTO extends BaseDTO {
 
     /**
      * 主机名/节点名称
      */
     @ApiModelProperty(value = "主机名/节点名称")
-   private String hostname;
+    private String hostname;
 }

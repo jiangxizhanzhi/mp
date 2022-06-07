@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Firewall;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.FirewallConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
-import cn.cyberpeace.mp.devops.cluster.request.FirewallPageRequest;
+import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.FirewallPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import io.swagger.annotations.Api;
@@ -38,8 +39,8 @@ public class FirewallController {
      */
     @ApiOperation("分页查询防火墙")
     @GetMapping("/page")
-    public PageResult<FirewallPageVO> page(FirewallPageRequest request){
-        BasePageBO<Firewall> model = firewallConverter.page(request);
+    public PageResult<FirewallPageVO> page(BasePageRequest request){
+        BasePageBO<Firewall> model = firewallConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
         List<FirewallPageVO> list = model.getList().stream().map(firewall ->
             new FirewallPageVO(firewall.getName(),
                     Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,

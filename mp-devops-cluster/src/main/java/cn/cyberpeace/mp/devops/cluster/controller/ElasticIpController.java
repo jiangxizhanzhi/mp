@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.ElasticIpConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.ElasticIpBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.ElasticIpPageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.ElasticIpPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.ElasticIpVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -38,7 +39,7 @@ public class ElasticIpController {
     @ApiOperation("分页查询弹性IP信息")
     @GetMapping("/page")
     public PageResult<ElasticIpVO> page(ElasticIpPageRequest request){
-        BasePageBO<ElasticIpBO> model = elasticIpConverter.page(request);
+        BasePageBO<ElasticIpBO> model = elasticIpConverter.page(new ElasticIpPageDTO(request));
         List<ElasticIpVO> list = model.getList().stream().map(elasticIpModel ->
               ElasticIpVO.builder().floatIpAddress(elasticIpModel.getFloatIpAddress())
                       .fixedIpAddress(elasticIpModel.getFixedIpAddress())
