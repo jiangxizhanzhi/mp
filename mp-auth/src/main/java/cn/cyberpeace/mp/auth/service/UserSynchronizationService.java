@@ -70,8 +70,9 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         HLDUserResponse response = new HLDUserResponse();
         try {
             hldUsers = HttpUtils.sendPost(hldUsersUrl + "/xinan-server/mhUser/getAllUserNopage", "null");
-        } catch (IOException e) {
-            log.error("get HLDUsers error,msg:{}", e);
+            log.info("hldUsers:{}", hldUsers);
+        } catch (Exception e) {
+            log.error("get HLDUsers error", e);
         }
 //        hldUsers = hld;
         if (hldUsers == null) {
