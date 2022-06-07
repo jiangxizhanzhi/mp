@@ -327,11 +327,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
             csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
-            if (this.need2UseSystemEnableRecording(false, CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
-                this.correctEnableRecording(csceneInstance);
-            }
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
+        }
+        if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
+            this.correctEnableRecording(csceneInstance);
         }
         if (createContext.getSceneAttr() != null) {
             csceneInstance.setSceneAttr(createContext.getSceneAttr());
@@ -376,11 +376,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         CsceneInstanceBO csceneInstance;
         if (cscene == null) {
             csceneInstance = csceneHandler.getCscene().exportToCsceneInstance();
-            if (this.need2UseSystemEnableRecording(false, CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
-                this.correctEnableRecording(csceneInstance);
-            }
         } else {
             csceneInstance = cscene.exportToCsceneInstance();
+        }
+        if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
+            this.correctEnableRecording(csceneInstance);
         }
         if (createContext.getSceneAttr() != null) {
             csceneInstance.setSceneAttr(createContext.getSceneAttr());
@@ -409,23 +409,18 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    private boolean need2UseSystemEnableRecording(boolean startByInputTopo, int testType, Integer referenceType) {
-        if (startByInputTopo) {
-            // 自带模板启动的,不需要读取系统的录屏开关
-            return false;
+    private boolean need2UseSystemEnableRecording(int testType, Integer referenceType) {
+        // 使用数据库模板配置的, 根据其他字段判断是否需要使用系统的录屏开关
+        if (CsceneInstanceModel.Type.TEST == testType) {
+            // 后台测试启动,全部都需要用系统的录屏开关
+            return true;
         } else {
-            // 使用数据库模板配置的, 根据其他字段判断是否需要使用系统的录屏开关
-            if (CsceneInstanceModel.Type.TEST == testType) {
-                // 后台测试启动,全部都需要用系统的录屏开关
-                return true;
+            // 前台启动
+            if (referenceType == null) {
+                return false;
             } else {
-                // 前台启动
-                if (referenceType == null) {
-                    return false;
-                } else {
-                    // 没有独立开关配置的,需要使用系统的录屏开关
-                    return !csceneAppConfig.getHasOwnRecordingSet().contains(referenceType);
-                }
+                // 没有独立开关配置的,需要使用系统的录屏开关
+                return !csceneAppConfig.getHasOwnRecordingSet().contains(referenceType);
             }
         }
     }
