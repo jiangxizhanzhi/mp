@@ -208,6 +208,7 @@ public class DeleteHandler extends HandlerCommon {
         }
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
+            vmClient.deleteByName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
             return true;
         }
 
@@ -226,6 +227,7 @@ public class DeleteHandler extends HandlerCommon {
     protected boolean deleteContainer(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
+            containerClient.deleteByName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
             return true;
         }
 
