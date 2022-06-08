@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -44,7 +45,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
 
-    @Value("${mp.auth.logout.reset-secret:true}")
+    @Value("${mp.auth.logout.reset-secret:false}")
     private Boolean resetSecret;
 
     @Autowired
@@ -57,15 +58,21 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
         UserModel user = JwtCommon.verifyToken(request);
-        if (user != null) {
+        String userName = null;
+        if (Objects.nonNull(user)) {
             if (Objects.nonNull(resetSecret) && resetSecret) {
                 // 退出是否重置秘钥
                 var updateUser = new UserModel();
                 updateUser.setId(user.getId());
                 updateUser.initDefault("tokenSecret");
                 userService.update(updateUser);
-                recordLogoutLog(user, request);
             }
+            userName = user.getName();
+            recordLogoutLog(user, request);
+        }
+
+        if (StringUtils.isNotBlank(userName)) {
+            log.info("user:{} has logout!", userName);
         }
 
         response.setContentType("application/json;charset=UTF-8");
