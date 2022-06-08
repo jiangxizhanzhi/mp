@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-@ServerEndpoint(ControllerConstant.BASE_API_PATH + "/ws/images-page")
+@ServerEndpoint("/ws" + ControllerConstant.BASE_API_PATH + "/images-page")
 public class ImagesByUuidSocketServer {
 
     /**
