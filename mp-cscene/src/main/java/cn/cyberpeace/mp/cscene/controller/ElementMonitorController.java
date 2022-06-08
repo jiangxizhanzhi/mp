@@ -111,9 +111,6 @@ public class ElementMonitorController {
     @GetMapping("/file_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
                                                                          ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
-        pageRequest.ensure();
-
         return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
                 segmentCount)).asResult();
     }
@@ -137,9 +134,6 @@ public class ElementMonitorController {
     @GetMapping("/registry_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,
                                                                              ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
-        pageRequest.ensure();
-
         return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
                 segmentCount)).asResult();
     }

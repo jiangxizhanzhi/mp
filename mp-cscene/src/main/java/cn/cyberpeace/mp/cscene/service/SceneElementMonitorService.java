@@ -314,6 +314,8 @@ public class SceneElementMonitorService {
         hostEventQueryParams.setLevels(pageRequest.getLevels());
         hostEventQueryParams.setRuleGroups(ruleGroups);
         hostEventQueryParams.setPath(path);
+        hostEventQueryParams.setPage(pageRequest.getPage());
+        hostEventQueryParams.setPageSize(pageRequest.getPageSize());
         return csceneInstanceService.listHostEvents(pageRequest.getSceneId(), hostEventQueryParams);
     }
 
@@ -330,36 +332,32 @@ public class SceneElementMonitorService {
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
         }
-        result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
         if (segmentCount == null) {
             // 默认时间分15段
             segmentCount = 15;
         }
         long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
         List<ElementHistogramInfo> histogramInfos = new ArrayList<>();
-        Map<String, Integer> time2Count = new HashMap<>();
         for (int i = 1; i <= segmentCount; i++) {
-            String time = TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i));
             ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
-            histogramInfo.setTime(time);
+            histogramInfo.setLocalDateTime(startTime.plusSeconds(intervalSeconds * i));
+            histogramInfo.setTime(TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i)));
             histogramInfo.setCount(0);
             histogramInfos.add(histogramInfo);
-            time2Count.put(time, 0);
         }
-        for (CollectionHostEventBO collectionData : result.getSource().getObjs()) {
-            // 计算每段时间的事件数
-            LocalDateTime nextTime = startTime.plusSeconds(intervalSeconds);
-            String nextTimeString = TimeUtils.localDateTimeToString(nextTime);
-            if (collectionData.getTime().isAfter(startTime) && collectionData.getTime().isBefore(nextTime)) {
-                time2Count.put(nextTimeString, time2Count.get(nextTimeString) + 1);
+        result.getSource().getObjs().sort(Comparator.comparing(r -> r.getTime()));
+        int currentHistogramInfo = 0;
+        for (int i = 0; i < result.getSource().getObjs().size(); ) {
+            var collectionData = result.getSource().getObjs().get(i);
+            var histogramInfo = histogramInfos.get(currentHistogramInfo);
+            // 超出时间区间的事件放到最后一个区间
+            if ((currentHistogramInfo == histogramInfos.size() - 1) || collectionData.getTime().isBefore(histogramInfo.getLocalDateTime())) {
+                histogramInfo.setCount(histogramInfo.getCount() + 1);
+                i++;
             } else {
-                time2Count.put(nextTimeString, time2Count.get(nextTimeString) + 1);
-                startTime = startTime.plusSeconds(intervalSeconds);
+                currentHistogramInfo = Math.min(currentHistogramInfo + 1, histogramInfos.size() - 1);
             }
         }
-        histogramInfos.forEach(h -> {
-            h.setCount(time2Count.get(h.getTime()));
-        });
         return histogramInfos;
     }
 
