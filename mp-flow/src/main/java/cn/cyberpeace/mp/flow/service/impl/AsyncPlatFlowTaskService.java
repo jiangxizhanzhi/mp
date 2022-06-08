@@ -167,7 +167,7 @@ public class AsyncPlatFlowTaskService {
                     flowPortModel = attackFlowPorts.get(0);
                 } else {
                     // 新增攻击流量网口
-                    flowPortModel = this.createPort(flowActuatorModel, flowInfoModel.getResourceType());
+                    flowPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0], flowActuatorModel, flowInfoModel.getResourceType());
                     if (Objects.isNull(flowPortModel)) {
                         log.error("create attack flow port info error");
                         return;
@@ -364,7 +364,7 @@ public class AsyncPlatFlowTaskService {
                         attackPortModel = attackFlowPorts.get(0);
                     } else {
                         // 攻击网口不存在时新增一个
-                        attackPortModel = this.createPort(flowActuatorModel, flowInfoModel.getResourceType());
+                        attackPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0], flowActuatorModel, flowInfoModel.getResourceType());
                         if (Objects.isNull(attackPortModel)) {
                             log.error("batch create attack flow port info error");
                             throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
@@ -592,11 +592,12 @@ public class AsyncPlatFlowTaskService {
 
     /**
      * 新增网口
-     *
+     * @param targetIp
      * @param flowActuatorModel
+     * @param resourceType
      * @return
      */
-    private FlowPortModel createPort(FlowActuatorModel flowActuatorModel, int resourceType) {
+    private FlowPortModel createPort(String targetIp, FlowActuatorModel flowActuatorModel, int resourceType) {
         FlowPortModel flowPortModel = null;
         try {
             JSONObject addPortReq = new JSONObject();
@@ -656,9 +657,11 @@ public class AsyncPlatFlowTaskService {
                     .serverIp(serverIp)
                     .serverMac(serverMac)
                     .serverPortId(serverPortId)
+                    .serverGateway(targetIp) // 目标ip作为网关地址
                     .clientIp(clientIp)
                     .clientMac(clientMac)
                     .clientPortId(clientPortId)
+                    .clientGateway(targetIp) // 目标ip作为网关地址
                     .networkId(flowActuatorModel.getNetworkId())
                     .actuatorId(flowActuatorModel.getId())
                     .portType(portType)
