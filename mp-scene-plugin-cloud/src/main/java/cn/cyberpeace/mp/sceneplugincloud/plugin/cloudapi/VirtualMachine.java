@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
@@ -158,5 +160,25 @@ public class VirtualMachine extends CloudClient {
 
         cloudDelete(CloudUrlConstant.DELETE_INSTANCE_URL.replace("{instance_id}", instanceId), null, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+    }
+
+    public VirtualMachineAddPortResult addPort(String instanceId, VirtualMachineAddPortData port) {
+        var response = cloudPost(CloudUrlConstant.ADD_VM_PORTS.replace("{instance_id}", instanceId), port, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
+        }, true);
+        return response.getData();
+    }
+
+    public void deletePort(String instanceId, String portId) {
+        String url = CloudUrlConstant.DELETE_VM_PORTS.replace("{instance_id}", instanceId);
+        url = url.replace("{port_id}", portId);
+        try {
+            cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
+            }, true);
+        } catch (Exception e) {
+            if (super.excludeDeleteException(e)) {
+                return;
+            }
+            throw e;
+        }
     }
 }

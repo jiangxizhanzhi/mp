@@ -632,6 +632,12 @@ public class CsceneDataModifier {
                     if (e.get("vlan_id") == null || e.get("vlan_id").equals(StringUtils.EMPTY)) {
                         e.put("vlan_id", 0);
                     }
+                    Object vlanId = e.get("vlan_id");
+                    if (Integer.parseInt(vlanId.toString()) > 0) {
+                        e.put("vlan", true);
+                    } else {
+                        e.put("vlan", false);
+                    }
                 });
             }
         }

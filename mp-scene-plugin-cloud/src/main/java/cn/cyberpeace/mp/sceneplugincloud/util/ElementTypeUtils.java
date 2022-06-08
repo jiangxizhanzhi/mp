@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.util;
 
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 
 /**
  * @Description 用于节点类型的判断
@@ -27,5 +28,21 @@ public class ElementTypeUtils {
      */
     public static boolean isCoreRouter(CloudPluginSceneElementBO element) {
         return isCoreRouter(element.getImage());
+    }
+
+    public static boolean isExternal(CloudPluginSceneElementBO element) {
+        return Boolean.TRUE.equals(element.getExternal());
+    }
+
+    public static boolean isExternalTerminal(CloudPluginSceneElementBO cloudElement) {
+        if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
+            return false;
+        }
+        Integer role = cloudElement.getRole();
+        if (role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
