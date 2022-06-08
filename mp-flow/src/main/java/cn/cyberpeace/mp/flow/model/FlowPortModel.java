@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModelProperty;
@@ -90,5 +91,12 @@ public class FlowPortModel extends BaseModel {
     @ApiModelProperty(value = "流量执行器id")
     @DefaultStr
     private String actuatorId;
+
+    /**
+     * 网口类型：0 背景流量，1攻击流量
+     */
+    @ApiModelProperty(value = "网口类型：0 背景流量，1攻击流量")
+    @DefaultInt
+    private int portType;
 
 }
