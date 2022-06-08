@@ -692,7 +692,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.getDeriveNetworks().add(connectNetwork);
         }
 
-        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+        if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
             return;
         }
 
