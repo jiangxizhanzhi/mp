@@ -36,6 +36,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateD
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualNic;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterCreateData;
@@ -829,6 +830,26 @@ public class CreateHandler extends HandlerCommon {
     }
 
     protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        if (ElementTypeUtils.isExternal(cloudElement)) {
+            // 外部虚拟机 需要连接网络
+            var nics = CollectionUtils.emptyNull(genVirutalNics(cloudElement));
+            if (nics != null && nics.size() > 0) {
+                List<VirtualNic> created = new ArrayList<>();
+                nics.forEach(n -> {
+                    VirtualMachineAddPortData port = new VirtualMachineAddPortData();
+                    port.setFixedIp(n.getFixedIp());
+                    port.setNetworkId(n.getNetworkId());
+                    var result = vmClient.addPort(cloudElement.getResourceId(), port);
+                    VirtualNic virtualNic = new VirtualNic();
+                    virtualNic.setPortId(result.getPortId());
+                    virtualNic.setNetworkId(result.getNetworkId());
+                    virtualNic.setFixedIp(result.getFixedIp());
+                    created.add(virtualNic);
+                });
+                this.receiveVirtualPortInfo(cloudElement, created);
+            }
+            return;
+        }
         var srcElement = cloudElement.getSrcElement();
         var createData = new VirtualMachineCreateData();
         createData.setRequestUser(TextUtils.emptyNull(getHandlerUtils().getRequestUser()));
@@ -976,7 +997,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
-        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+        if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
             return;
         }
 

@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDele
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -194,6 +195,17 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     protected boolean deleteVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+        if (ElementTypeUtils.isExternal(cloudElement)) {
+            if (cloudElement.getSrcElement().getPorts() != null) {
+                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    if (pluginPort != null && StringUtils.isNotEmpty(pluginPort.getResourceId())) {
+                        vmClient.deletePort(cloudElement.getResourceId(), pluginPort.getResourceId());
+                    }
+                });
+            }
+            return true;
+        }
         var resourceId = cloudElement.getResourceId();
         if (StringUtils.isEmpty(resourceId)) {
             return true;
@@ -335,7 +347,7 @@ public class DeleteHandler extends HandlerCommon {
     }
 
     private void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
-        if (Boolean.TRUE.equals(cloudElement.getExternal())) {
+        if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
             return;
         }
         Integer virtualType = cloudElement.getVirtualType();
