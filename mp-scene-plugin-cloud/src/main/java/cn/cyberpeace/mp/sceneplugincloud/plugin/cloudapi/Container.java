@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
@@ -16,11 +17,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartD
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.util.List;
@@ -51,6 +54,29 @@ public class Container extends CloudClient {
             }
             throw e;
         }
+    }
+
+    public boolean deleteByName(String resourceName) {
+        heavyConcurrentWait();
+
+        NameQueryParam param = new NameQueryParam();
+        param.setName(resourceName);
+        param.setOffset(1);
+        param.setLimit(1);
+        CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param,
+                new TypeReference<>() {
+                }, true);
+        if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
+            if (result.getData().getList().size() == 1) {
+                String resourceId = result.getData().getList().get(0).getId();
+                if (StringUtils.isNotEmpty(resourceId)) {
+                    this.deleteContainerById(resourceId);
+                }
+            } else {
+                log.error("find more than one resource by name {} , resources is {}", resourceName, JsonCommon.stringify(result.getData().getList()));
+            }
+        }
+        return true;
     }
 
     public boolean copyFile(String containerId, String filepath, String dstPath) {
@@ -117,7 +143,7 @@ public class Container extends CloudClient {
         param.setOffset(offset);
         CloudResponse<CloudListData<ContainerGetData>> result = cloudGet(CloudUrlConstant.GET_ALL_CONTAINER_URL, param,
                 new TypeReference<CloudResponse<CloudListData<ContainerGetData>>>() {
-        }, true);
+                }, true);
         if (result != null && result.getData() != null && result.getData().getList() != null && !result.getData().getList().isEmpty()) {
             return result.getData().getList();
         }
