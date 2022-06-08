@@ -115,6 +115,8 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+    logout:
+      reset-secret: false
   flow:
     # 流量发生器资源地址
     actuator-resource-url: http://${ip.trex:10.100.7.102}:${TREX_PORT:80}/api/v1/resource
