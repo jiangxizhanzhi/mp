@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.ImagesPageVO;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devops.cluster.ws.ImagesConnectSocketServer;
+import cn.cyberpeace.mp.devops.cluster.ws.ImagesCreateSnapshotSocketServer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +48,8 @@ public class WebSocketNoticeController {
 
     private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
+    private final ImagesCreateSnapshotSocketServer imagesCreateSnapshotSocketServer;
+
     @ApiOperation("根据镜像UUID获取登录链接信息")
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
@@ -73,6 +76,7 @@ public class WebSocketNoticeController {
                 .extGateway(convertModel.getExtGateway()).extVm(convertModel.getExtVm()).extImageInfo(convertModel.getExtImageInfo())
                 .extDocker(convertModel.getExtDocker()).build();
         imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
+        imagesCreateSnapshotSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO,"MP-device-by-uuid")),Arrays.asList(uuid));
         return ServiceResult.successful();
     }
 
