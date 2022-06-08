@@ -341,7 +341,7 @@ public class SceneElementMonitorService {
         for (int i = 1; i <= segmentCount; i++) {
             ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
             histogramInfo.setLocalDateTime(startTime.plusSeconds(intervalSeconds * i));
-            histogramInfo.setTime(TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i)));
+            histogramInfo.setTime(TimeUtils.localDateTimeToString(histogramInfo.getLocalDateTime()));
             histogramInfo.setCount(0);
             histogramInfos.add(histogramInfo);
         }
