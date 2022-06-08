@@ -42,6 +42,7 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements OperateL
 
         SearchRequest searchRequest = new SearchRequest(INDEX_MP_OPERATE_LOG);
         searchRequest.source(request.buildSearchSourceBuilder());
+        log.info("query ES DSL:\n{}", searchRequest.source().toString());
         return super.search(searchRequest);
     }
 
