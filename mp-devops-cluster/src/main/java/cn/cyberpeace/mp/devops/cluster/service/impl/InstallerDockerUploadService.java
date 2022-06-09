@@ -38,7 +38,7 @@ public class InstallerDockerUploadService extends BaseUploadService {
 
     @Override
     protected List<String> supportUploadType() {
-        return List.of("zip");
+        return List.of("tar","zip");
     }
 
     @Override

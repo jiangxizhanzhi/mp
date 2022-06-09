@@ -56,13 +56,13 @@ public class BaseUploadService extends BaseAbstractUploadService{
         String originalFilename = file.getOriginalFilename();
         int index = StringUtils.isBlank(originalFilename) ? -1 : originalFilename.lastIndexOf(".");
         if (index < 0) {
-            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR.format(StringUtils.join(supportUploadTypeList,",")));
         }
 
         String suffix = originalFilename.substring(index + 1);
         boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
         if (!anyMatch) {
-            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR.format(StringUtils.join(supportUploadTypeList,",")));
         }
         return Boolean.TRUE;
     }
