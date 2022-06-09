@@ -34,7 +34,17 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     COLLECTION_TEMPLATE_NOT_EXISTED("MP-110430", "collection_template_not_existed"),
     COLLECTION_TEMPLATE_EXISTED("MP-110431", "collection_template_existed"),
 
-    PROBE_NOT_EXISTED("MP-110440", "probe_not_existed");
+    PROBE_NOT_EXISTED("MP-110440", "probe_not_existed"),
+    PROBE_NAME_LENGTH_INVALID("MP-110441", "probe_name_length_invalid"),
+    PROBE_DESC_LENGTH_INVALID("MP-110442", "probe_desc_length_invalid"),
+
+    PROBE_PARAM_NAME_LENGTH_INVALID("MP-110443", "probe_param_name_length_invalid"),
+    PROBE_PARAM_VALUE_LENGTH_INVALID("MP-110444", "probe_param_value_length_invalid"),
+    PROBE_PARAM_DESC_LENGTH_INVALID("MP-110445", "probe_param_desc_length_invalid"),
+
+    TEMPLATE_NAME_LENGTH_INVALID("MP-110446", "template_name_length_invalid"),
+    TEMPLATE_DESC_LENGTH_INVALID("MP-110447", "template_desc_length_invalid");
+
 
     SituationalAwareErrorCode(String code, String message) {
         setCode(code, SituationalAwareConstant.ERROR_CODE_PREFIX + message);

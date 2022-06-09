@@ -384,6 +384,7 @@ public class CollectionTemplateService {
      * @param addRequest
      */
     private void addTemplateCheck(CollectionTemplateRequest addRequest) {
+        check(addRequest);
         CollectionTemplateModel oldModel = getByName(addRequest.getName());
         if (Objects.nonNull(oldModel)) {
             log.error("template name:{} already existed!", addRequest.getName());
@@ -398,6 +399,7 @@ public class CollectionTemplateService {
      * @param modifyRequest
      */
     private void modifyTemplateCheck(CollectionTemplateRequest modifyRequest) {
+        check(modifyRequest);
         String templateId = modifyRequest.getId();
         CollectionTemplateModel templateModel = templateMapper.get(templateId);
         if (Objects.isNull(templateModel)) {
@@ -670,6 +672,23 @@ public class CollectionTemplateService {
             }
         }
         return Collections.emptyList();
+    }
+
+
+    private void check(CollectionTemplateRequest templateRequest) {
+        if (StringUtils.isNotBlank(templateRequest.getName())) {
+            int len = templateRequest.getName().length();
+            if (len < 1 || len > 40) {
+                throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_LENGTH_INVALID);
+            }
+        }
+
+        if (StringUtils.isNotBlank(templateRequest.getDescription())) {
+            int len = templateRequest.getDescription().length();
+            if (len > 500) {
+                throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_DESC_LENGTH_INVALID);
+            }
+        }
     }
 
 }

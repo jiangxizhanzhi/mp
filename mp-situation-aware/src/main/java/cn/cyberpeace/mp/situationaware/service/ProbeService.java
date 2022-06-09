@@ -66,6 +66,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class)
     public String addProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
+        check(probeRequest);
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         //新增探针，默认为自定义探针
@@ -144,6 +145,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
+        check(probeRequest);
         String probeId = probeRequest.getId();
         ProbeModel probeModel = probeMapper.get(probeId);
 
@@ -354,6 +356,22 @@ public class ProbeService {
     private void processProbeDtoParams(ProbeDto probeDto) {
         String paramStr = probeParamService.getProbeParamAsJsonStr(probeDto.getId(), null);
         probeDto.setParameter(paramStr);
+    }
+
+    private void check(ProbeRequest probeRequest) {
+        if (StringUtils.isNotBlank(probeRequest.getName())) {
+            int len = probeRequest.getName().length();
+            if (len < 1 || len > 40) {
+                throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_LENGTH_INVALID);
+            }
+        }
+
+        if (StringUtils.isNotBlank(probeRequest.getDescription())) {
+            int len = probeRequest.getDescription().length();
+            if (len > 500) {
+                throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_DESC_LENGTH_INVALID);
+            }
+        }
     }
 
 
