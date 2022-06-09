@@ -47,5 +47,6 @@ public class CsceneInstanceStatQueryParams extends QueryParams {
         public static final Integer RUNNING = 3;
         public static final Integer PAUSE = 4;
         public static final Integer ERROR = 5;
+        public static final Integer SUSPEND = 6;
     }
 }

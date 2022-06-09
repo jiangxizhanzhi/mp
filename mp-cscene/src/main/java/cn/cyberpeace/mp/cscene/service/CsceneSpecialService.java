@@ -294,6 +294,19 @@ public class CsceneSpecialService {
                         })
                         .orAndEnd()
                         .filterOrEnd();
+            } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.SUSPEND)) {
+                humanCondition.filterOrStart()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.SUSPEND)
+                        .andNotEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL)
+                        .orAndEnd()
+                        .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.RESUME)
+                        .andIn(SceneModel::getEventStatus, new Integer[]{
+                                EventStatus.START, EventStatus.IN_PROGRESS
+                        })
+                        .orAndEnd()
+                        .filterOrEnd();
             } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.ERROR)) {
                 humanCondition.filterEqual(SceneModel::getEventStatus, EventStatus.ABNORMAL);
             } else if (sceneStatus.equals(CsceneInstanceStatQueryParams.SceneStatus.DELETED)) {
