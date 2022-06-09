@@ -328,7 +328,7 @@ public class AsyncPlatFlowTaskService {
                 }
                 flowPortModel = backFlowPorts.get(0);
                 // 设置网口id
-                flowTaskModel.setFlowPortId(attackPortModel.getId());
+                flowTaskModel.setFlowPortId(flowPortModel.getId());
 
                 // 构建保存背景任务请求
                 AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
