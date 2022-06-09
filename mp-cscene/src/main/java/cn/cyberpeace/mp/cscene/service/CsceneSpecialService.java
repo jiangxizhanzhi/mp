@@ -643,7 +643,10 @@ public class CsceneSpecialService {
         if (CollectionUtils.isEmpty(infos)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        var result = infos.stream().collect(Collectors.toMap(CsceneNodeInfoBO::getResourceName, s -> s));
+        Map<String, CsceneNodeInfoBO> result = new HashMap<>();
+        infos.forEach(info -> {
+            result.put(info.getResourceName(), info);
+        });
         return new ServiceResult<>(result);
     }
 
