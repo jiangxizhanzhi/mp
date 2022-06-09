@@ -328,6 +328,8 @@ public class SceneElementMonitorService {
         processRequest(pageRequest, sceneHandler);
         startTime = pageRequest.getStartTime();
         endTime = pageRequest.getEndTime();
+        // 最大支持查询10000条数据
+        pageRequest.setPageSize(10000);
         var result = getModifyData(pageRequest, ruleGroups, null);
         if (result == null || result.getSource() == null || CollUtil.isEmpty(result.getSource().getObjs())) {
             return new ArrayList<>();
@@ -341,7 +343,7 @@ public class SceneElementMonitorService {
         for (int i = 1; i <= segmentCount; i++) {
             ElementHistogramInfo histogramInfo = new ElementHistogramInfo();
             histogramInfo.setLocalDateTime(startTime.plusSeconds(intervalSeconds * i));
-            histogramInfo.setTime(TimeUtils.localDateTimeToString(startTime.plusSeconds(intervalSeconds * i)));
+            histogramInfo.setTime(TimeUtils.localDateTimeToString(histogramInfo.getLocalDateTime()));
             histogramInfo.setCount(0);
             histogramInfos.add(histogramInfo);
         }
@@ -395,6 +397,8 @@ public class SceneElementMonitorService {
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
+            vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
             vulnerabilityInfos.add(vulnerabilityInfo);
         });
         return new ListObjResult<>(vulnerabilityInfos, result.getTotal());
