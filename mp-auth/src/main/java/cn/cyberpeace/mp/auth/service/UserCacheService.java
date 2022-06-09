@@ -1,11 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.service.impl.UserPermissionServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.UserRoleServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,11 +12,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserCacheService {
 
-    @CacheEvict(cacheNames = {AuthCacheConfig.CACHE_MANAGER_20S, AuthCacheConfig.CACHE_MANAGER_45S},
-            value = {UserServiceImpl.CACHE_VAL_USERMODEL, UserServiceImpl.CACHE_VAL_USERDTO,
-                    UserRoleServiceImpl.CACHE_VAL_ROLES,
-                    UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS},
-            allEntries = true)
+    //@CacheEvict(cacheNames = {AuthCacheConfig.CACHE_MANAGER_20S, AuthCacheConfig.CACHE_MANAGER_45S},
+    //        value = {UserServiceImpl.CACHE_VAL_USERMODEL, UserServiceImpl.CACHE_VAL_USERDTO,
+    //                UserRoleServiceImpl.CACHE_VAL_ROLES,
+    //                UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS},
+    //        allEntries = true)
     public void evictAllUserCache() {
         log.info("evict user releated cache...");
     }
