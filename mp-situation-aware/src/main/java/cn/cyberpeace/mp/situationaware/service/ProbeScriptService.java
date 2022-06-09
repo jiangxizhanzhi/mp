@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -49,13 +50,29 @@ public class ProbeScriptService {
      * @param scriptContent
      * @return
      */
-    public String uploadScriptContentToFDFS(String scriptContent) {
+    public String uploadScriptContentToFDFS(String scriptContent, Integer scriptType) {
         // 处理探针脚本
         // todo 语法校验
+        String suffix = ".sh";
+        //0:shell 1:python 2:bat
+        if (Objects.nonNull(scriptType)) {
+            if (scriptType == 0) {
+                suffix = ".sh";
+            }
+
+            if (scriptType == 0) {
+                suffix = ".py";
+            }
+
+            if (scriptType == 0) {
+                suffix = ".bat";
+            }
+        }
+
         InputStream is = new ByteArrayInputStream(scriptContent.getBytes(StandardCharsets.UTF_8));
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String filepath = fastDFSClient.upload(is, "script", null, FdfsGroupEnum.DEFAULT.toString());
-        String httpUrl = group.getFileServerAddr() + File.separator + filepath;
+        String filePath = FsCommon.upload(is, suffix);
+        String httpUrl = group.getFileServerAddr() + File.separator + filePath;
         return httpUrl;
     }
 

@@ -23,7 +23,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -95,7 +94,7 @@ public class ProbeManagerController {
     @ApiOperation(value = "新增自定义探针")
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
-            String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+            String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
             String md5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
             probeRequest.setScriptChecksum(md5);
             probeRequest.setScriptUrl(httpUrl);
@@ -115,7 +114,7 @@ public class ProbeManagerController {
             String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
 
             if (!Objects.equals(newMd5, oldMd5)) {
-                String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent());
+                String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
                 probeRequest.setScriptChecksum(newMd5);
                 probeRequest.setScriptUrl(httpUrl);
                 contentChanged = true;
