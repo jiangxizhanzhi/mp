@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @Api(tags = "流量执行器接口")
-@RestController
+//@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/actuator")
 public class FlowActuatorController extends BaseModelController<FlowActuatorModel, QueryParams, FlowActuatorService> {
 
