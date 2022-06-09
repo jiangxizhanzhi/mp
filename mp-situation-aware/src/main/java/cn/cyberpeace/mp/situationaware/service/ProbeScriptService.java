@@ -53,19 +53,19 @@ public class ProbeScriptService {
     public String uploadScriptContentToFDFS(String scriptContent, Integer scriptType) {
         // 处理探针脚本
         // todo 语法校验
-        String suffix = ".sh";
+        String suffix = "sh";
         //0:shell 1:python 2:bat
         if (Objects.nonNull(scriptType)) {
             if (scriptType == 0) {
-                suffix = ".sh";
+                suffix = "sh";
             }
 
             if (scriptType == 0) {
-                suffix = ".py";
+                suffix = "py";
             }
 
             if (scriptType == 0) {
-                suffix = ".bat";
+                suffix = "bat";
             }
         }
 
