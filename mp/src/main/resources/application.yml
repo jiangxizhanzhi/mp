@@ -146,7 +146,7 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
     logout:
-      reset-secret: true
+      reset-secret: false
     url-ac-filter:
       enabled: true
       method-match: true

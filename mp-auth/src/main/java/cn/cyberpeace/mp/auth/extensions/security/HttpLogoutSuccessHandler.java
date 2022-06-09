@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.config.AuthLogoutConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -15,8 +16,8 @@ import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -44,8 +45,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
 
-    @Value("${mp.auth.logout.reset-secret:true}")
-    private Boolean resetSecret;
+    @Autowired
+    private AuthLogoutConfig logoutConfig;
 
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
@@ -57,15 +58,21 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
         UserModel user = JwtCommon.verifyToken(request);
-        if (user != null) {
-            if (Objects.nonNull(resetSecret) && resetSecret) {
+        String userName = null;
+        if (Objects.nonNull(user)) {
+            if (Objects.nonNull(logoutConfig.getResetSecret()) && logoutConfig.getResetSecret()) {
                 // 退出是否重置秘钥
                 var updateUser = new UserModel();
                 updateUser.setId(user.getId());
                 updateUser.initDefault("tokenSecret");
                 userService.update(updateUser);
-                recordLogoutLog(user, request);
             }
+            userName = user.getName();
+            recordLogoutLog(user, request);
+        }
+
+        if (StringUtils.isNotBlank(userName)) {
+            log.info("user:{} has logout!", userName);
         }
 
         response.setContentType("application/json;charset=UTF-8");
