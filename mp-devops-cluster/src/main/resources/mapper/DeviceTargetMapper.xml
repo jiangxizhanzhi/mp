@@ -43,7 +43,7 @@
                 and i.image_type = #{imageType}
             </if>
             <if test=" searchType != null and searchType == 1 ">
-                and i.image_type != 'entity'
+                and i.image_type in ('vm','container','simple')
             </if>
             <if test=" searchType != null and searchType == 2 ">
                 and i.image_type = 'entity'
@@ -69,7 +69,10 @@
             <if test="language != null">
                 and i.language = #{language}
             </if>
-            <if test="imageStatus != null">
+            <if test="imageStatus != null and searchType == 0">
+                and ((i.image_status = #{imageStatus} and i.image_type in ('vm','container','simple') ) or i.image_type = 'entity')
+            </if>
+            <if test="imageStatus != null and searchType != 0">
                 and i.image_status = #{imageStatus}
             </if>
             <if test="baseImageSupport != null and baseImageSupport == true">
@@ -144,7 +147,10 @@
             <if test="language != null">
                 and i.language = #{language}
             </if>
-            <if test="imageStatus != null">
+            <if test="imageStatus != null and searchType == 0">
+                and ((i.image_status = #{imageStatus} and i.image_type in ('vm','container','simple') ) or i.image_type = 'entity')
+            </if>
+            <if test="imageStatus != null and searchType != 0">
                 and i.image_status = #{imageStatus}
             </if>
             <if test="baseImageSupport != null and baseImageSupport == true">
