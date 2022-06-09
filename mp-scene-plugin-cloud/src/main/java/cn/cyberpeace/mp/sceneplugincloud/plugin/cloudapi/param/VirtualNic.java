@@ -11,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class VirtualNic {
     private String networkId;
+    private String vlanMode;
     private String fixedIp;
     private String macAddress;
     private List<QosRule> qosRules;

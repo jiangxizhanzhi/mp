@@ -364,6 +364,7 @@ public class CreateHandler extends HandlerCommon {
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(network.getResourceId());
+        virtualNic.setVlanMode(sampleCloudPort.getVlanMode());
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();

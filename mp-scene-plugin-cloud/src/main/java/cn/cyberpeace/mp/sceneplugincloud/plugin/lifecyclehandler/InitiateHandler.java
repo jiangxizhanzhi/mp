@@ -674,6 +674,23 @@ public class InitiateHandler extends HandlerCommon {
                     ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, false);
                     cloudElement.getAccessNetworks().add(connectedNetwork);
+
+                    var connectElement = getPluginHandler().getElement(connectPort.getElement().getId());
+                    if (connectElement != null) {
+                        // todo
+                        if (
+                                ("vios-adventerprisek9-m.vmdk.SPA.157-3.M3".equals(cloudElement.getImage()) && "viosl2".equals(connectElement.getImage()))
+                                        || ("viosl2".equals(connectElement.getImage()) && "vios-adventerprisek9-m.vmdk.SPA.157-3.M3".equals(cloudElement.getImage()))
+                        ) {
+                            var from = getPluginHandler().getPort(port.getId());
+                            var to = getPluginHandler().getPort(connectPort.getId());
+                            if (from != null && to != null) {
+                                from.setVlanMode("dot1q-tunnel");
+                                to.setVlanMode("dot1q-tunnel");
+                            }
+                        }
+                    }
+
                     continue;
                 }
             }
@@ -765,9 +782,14 @@ public class InitiateHandler extends HandlerCommon {
         if (role != null) {
             if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
                     || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
-                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)
             ) {
                 coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
                 coreType = CoreType.ROUTER;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {

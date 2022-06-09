@@ -6,5 +6,5 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
  * @Date 2022/3/10
  */
 public enum CoreType {
-    NETWORK, ROUTER, FIREWALL, TERMINAL
+    NETWORK, NETWORK_L2, ROUTER, FIREWALL, TERMINAL
 }

@@ -11,6 +11,8 @@ public class CloudPluginSceneElementPortBO extends BaseCloudPluginSceneElementPo
 
     private String logicNetworkId;
 
+    private String vlanMode;
+
     @Override
     public CloudPluginSceneElementPortModel createModel() {
         return new CloudPluginSceneElementPortModel();
