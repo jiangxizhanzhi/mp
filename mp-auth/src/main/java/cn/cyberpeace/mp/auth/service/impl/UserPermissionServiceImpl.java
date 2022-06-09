@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -81,7 +80,7 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_USER_TARGETS)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listTargetsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
