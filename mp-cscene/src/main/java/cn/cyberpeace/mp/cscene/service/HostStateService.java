@@ -8,9 +8,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
-import cn.cyberpeace.mp.cscene.dto.element.ElementNetiface;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
@@ -28,7 +26,6 @@ import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -71,6 +68,7 @@ public class HostStateService {
 
     @Autowired
     private CsceneSpecialService csceneSpecialService;
+
 
     /**
      * 查询单个节点机器当前状态
@@ -342,7 +340,7 @@ public class HostStateService {
      * @param listPageInfoQueryParams
      * @return
      */
-    public ListObjServiceResult<ElementNetiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ListObjServiceResult<Netiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
         listPageInfoQueryParams.ensure();
         checkListPageParams(listPageInfoQueryParams);
         if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
@@ -353,19 +351,18 @@ public class HostStateService {
 
         listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
         ListObjServiceResult<Netiface> netifacesResult = scenePluginCollectionSceneService.listNetifaces(listPageInfoQueryParams).asResult();
-        List<ElementNetiface> elementNetifaces = new ArrayList<>();
-        if (Objects.nonNull(netifacesResult.getSource())) {
-            List<Netiface> netifaceList = netifacesResult.getSource().getList();
-            netifaceList.forEach(n -> {
-                ElementNetiface eNetiface = new ElementNetiface();
-                BeanUtils.copyProperties(n, eNetiface);
-                // todo 网卡IP地址
-                eNetiface.setIp("127.0.0.1");
-                elementNetifaces.add(eNetiface);
-            });
-        }
+        //List<ElementNetiface> elementNetifaces = new ArrayList<>();
+        //if (Objects.nonNull(netifacesResult.getSource())) {
+        //    List<Netiface> netifaceList = netifacesResult.getSource().getList();
+        //    netifaceList.forEach(n -> {
+        //        ElementNetiface eNetiface = new ElementNetiface();
+        //        BeanUtils.copyProperties(n, eNetiface);
+        //        elementNetifaces.add(eNetiface);
+        //    });
+        //}
 
-        return new ListObjServiceResult<>(new ListObjResult<>(elementNetifaces, netifacesResult.getSource().getTotal()).asResult()).asResult();
+        //return new ListObjServiceResult<>(new ListObjResult<>(elementNetifaces, netifacesResult.getSource().getTotal()).asResult()).asResult();
+        return netifacesResult;
     }
 
 

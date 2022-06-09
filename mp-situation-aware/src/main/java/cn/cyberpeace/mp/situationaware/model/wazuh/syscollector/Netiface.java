@@ -41,6 +41,8 @@ public class Netiface {
     @JSONField(name = "agent_id")
     private String agentId;
 
+    @ApiModelProperty(value = "IP地址")
+    private String ip;
 
     /**
      * 接收或者发送的包

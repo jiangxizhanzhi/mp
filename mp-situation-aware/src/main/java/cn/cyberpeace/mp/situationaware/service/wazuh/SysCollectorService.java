@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.NetAddr;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -26,9 +28,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -128,10 +132,54 @@ public class SysCollectorService extends RequestProcessor {
         });
         log.info("{}", result);
         List<Netiface> netifaces = result.getData().getAffectedItems();
+
+        netifaces.forEach(n -> {
+            List<NetAddr> netAddrs = listNetAddrs(agentId, n.getName(), "ipv4");
+            if (CollectionUtil.isNotEmpty(netAddrs)) {
+                n.setIp(netAddrs.get(0).getAddress());
+            }
+        });
+
         PageInfo pageInfo = new PageInfo(netifaces);
         pageInfo.setTotal(result.getData().getTotalAffectedItems());
 
         return pageInfo;
+    }
+
+    /**
+     * 查询网卡列表
+     *
+     * @return 进程集合
+     */
+    public List<NetAddr> listNetAddrs(String agentId, String iface, String proto) {
+        if (StringUtils.isBlank(agentId)) {
+            log.error("agentId is null");
+            return Collections.emptyList();
+        }
+        var requestUri = "/syscollector/" + agentId + "/netaddr";
+        var requestUrl = wazuhUrl + requestUri;
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(requestUrl);
+
+        if (StringUtils.isNotBlank(iface)) {
+            builder.queryParam("iface", iface);
+        }
+
+        if (StringUtils.isNotBlank(proto)) {
+            builder.queryParam("proto", proto);
+        }
+
+        requestUri = builder.build().toString();
+        log.info("requestUrl:{}", requestUrl);
+
+        List<NameValuePair> params = processRequestParams(new BaseRequest());
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUri, params);
+        BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
+        });
+        log.info("{}", result);
+        List<NetAddr> netAddrs = result.getData().getAffectedItems();
+
+        return netAddrs;
     }
 
 
