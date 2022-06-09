@@ -428,9 +428,9 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
         // 判断是否有文件名，没有则根据脚本语言默认生成一个
         String fileName;
-        String suffix = addRequest.getSuffix() == 1 ? ".sh" : ".py";
+        String suffix = addRequest.getSuffix() == 1 ? "sh" : "py";
         if (StringUtils.isBlank(addRequest.getFileName())) {
-            fileName = TextUtils.uuid() + suffix;
+            fileName = TextUtils.uuid() + "." + suffix;
             addRequest.setFileName(fileName);
         }
 
@@ -578,14 +578,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             String fileName;
             String suffix = null;
             if (Objects.nonNull(modifyRequest.getSuffix())) {
-                suffix = modifyRequest.getSuffix() == 1 ? ".sh" : ".py";
+                suffix = modifyRequest.getSuffix() == 1 ? "sh" : "py";
             } else {
                 // 没变更suffix时，根据文件名后缀判断之前类型
-                suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? ".sh" : ".py";
+                suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? "sh" : "py";
             }
 
             if (StringUtils.isBlank(modifyRequest.getFileName())) {
-                fileName = TextUtils.uuid() + suffix;
+                fileName = TextUtils.uuid() + "." + suffix;
                 modifyRequest.setFileName(fileName);
             }
 
