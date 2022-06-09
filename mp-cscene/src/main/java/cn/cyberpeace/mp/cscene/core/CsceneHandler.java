@@ -129,6 +129,7 @@ public class CsceneHandler extends BaseCsceneHandler<
         if (csceneInstance == null) {
             return null;
         }
+        CsceneDataModifier.checkVlanMode(csceneInstance);
         csceneInstance.setCscene(getCsceneId());
         csceneInstance.setType(type);
         if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {

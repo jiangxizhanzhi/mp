@@ -476,6 +476,52 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkVlanMode(CsceneInstanceBO instance) {
+        if (instance.getScene() == null || instance.getScene().getPlugins() == null || instance.getScene().getTopology() == null) {
+            return;
+        }
+        if (instance.getScene().getTopology().getElements() == null) {
+            return;
+        }
+        var cpcloud = instance.getScene().getPlugins().get("cpcloud");
+        if (cpcloud == null || cpcloud.getElementPorts() == null || cpcloud.getElements() == null) {
+            return;
+        }
+        Map<String, String> portId2nodeId = new HashMap<>();
+        instance.getScene().getTopology().getElements().forEach(e -> {
+            if (e.getPorts() != null) {
+                e.getPorts().forEach(p -> {
+                    portId2nodeId.put(p.getId(), e.getId());
+                });
+            }
+        });
+        var ports = cpcloud.getElementPorts();
+        ports.values().forEach(p -> p.remove("vlan_mode"));
+        instance.getScene().getTopology().getConnections().forEach(c -> {
+            var sourceNodeId = portId2nodeId.get(c.getSource());
+            var targetNodeId = portId2nodeId.get(c.getTarget());
+            if (sourceNodeId != null && targetNodeId != null) {
+                var sourceNode = cpcloud.getElements().get(sourceNodeId);
+                var targetNode = cpcloud.getElements().get(targetNodeId);
+                if (sourceNode != null && targetNode != null) {
+                    String danbiRouter = "vios-adventerprisek9-m.vmdk.SPA.157-3.M3";
+                    String danbiSwitch = "viosl2";
+                    if (
+                            (danbiRouter.equals(sourceNode.get("image")) && danbiSwitch.equals(targetNode.get("image"))) ||
+                                    (danbiSwitch.equals(targetNode.get("image")) && danbiRouter.equals(sourceNode.get("image")))
+                    ) {
+                        var sourcePort = cpcloud.getElementPorts().get(c.getSource());
+                        var targetPort = cpcloud.getElementPorts().get(c.getTarget());
+                        if (sourcePort != null && targetPort != null) {
+                            sourcePort.put("vlan_mode", "dot1q-tunnel");
+                            targetPort.put("vlan_mode", "dot1q-tunnel");
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     static private class CpcloudPortData {
         private List<AccessMode> accessModes;
 
