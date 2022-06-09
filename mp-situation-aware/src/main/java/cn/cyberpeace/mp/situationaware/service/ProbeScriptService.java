@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -52,7 +52,7 @@ public class ProbeScriptService {
     public String uploadScriptContentToFDFS(String scriptContent) {
         // 处理探针脚本
         // todo 语法校验
-        InputStream is = new ByteArrayInputStream(Base64.decodeBase64(scriptContent));
+        InputStream is = new ByteArrayInputStream(scriptContent.getBytes(StandardCharsets.UTF_8));
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
         String filepath = fastDFSClient.upload(is, "script", null, FdfsGroupEnum.DEFAULT.toString());
         String httpUrl = group.getFileServerAddr() + File.separator + filepath;
