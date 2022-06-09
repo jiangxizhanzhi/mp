@@ -41,7 +41,7 @@ public class OpenFlowConverter implements BaseConverter{
         CloudPlatformPageResult<OpenFlow> model = openFlowService.page(params);
         List<OpenFlow> openFlows = model.getList();
         List<OpenFlowVO> openFlowVOS = openFlows.stream().map(v -> {
-            OpenFlowVO openFlowVO = openFlowVoConverter.openFlowToOpenFlowVO(v);
+            OpenFlowVO openFlowVO = openFlowVoConverter.sourceToTarget(v);
             Map<String, Object> matchConditionMap = convertMatchCondition(v.getMatchCondition());
             JSONObject object = JSONUtil.parseObj(matchConditionMap);
             OpenFlowMatchConditionVO openFlowMatchConditionVO =  JSONUtil.toBean(object, OpenFlowMatchConditionVO.class);
