@@ -4,19 +4,12 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring")
-public interface DeviceVoConverter {
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, unmappedSourcePolicy = ReportingPolicy.IGNORE)
+public interface DeviceVoConverter extends IConverter<Device, DeviceVO> {
 
     @Mapping(source = "l3Category",target = "thirdCategory")
-    DeviceVO deviceToDeviceVO(Device device);
-
-    /**
-     * Device集合对象转换为DeviceVO集合对象
-     * @param deviceList
-     * @return
-     */
-    List<DeviceVO> devicesToDeviceVOs(List<Device> deviceList);
+    @Override
+    DeviceVO sourceToTarget(Device device);
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.service.FileService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 基础的上传方法
@@ -53,16 +55,20 @@ public class BaseUploadService extends BaseAbstractUploadService{
             return Boolean.TRUE;
         }
 
+        if (Objects.isNull(file)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
         String originalFilename = file.getOriginalFilename();
         int index = StringUtils.isBlank(originalFilename) ? -1 : originalFilename.lastIndexOf(".");
         if (index < 0) {
-            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR.format(StringUtils.join(supportUploadTypeList,",")));
         }
 
         String suffix = originalFilename.substring(index + 1);
         boolean anyMatch = supportUploadTypeList.stream().anyMatch(suffix::equals);
         if (!anyMatch) {
-            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.CUSTOM_UPLOAD_TYPE_ERROR.format(StringUtils.join(supportUploadTypeList,",")));
         }
         return Boolean.TRUE;
     }

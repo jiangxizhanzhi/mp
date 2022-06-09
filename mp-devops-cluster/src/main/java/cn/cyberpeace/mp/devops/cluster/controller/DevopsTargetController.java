@@ -197,7 +197,7 @@ public class DevopsTargetController {
     @GetMapping("/get-by-uuid")
     public Result<DeviceVO> findByUuid(@RequestParam String uuid){
         Device device = targetConverter.findByUuid(uuid);
-        DeviceVO deviceVO = deviceVoConverter.deviceToDeviceVO(device);
+        DeviceVO deviceVO = deviceVoConverter.sourceToTarget(device);
         return new Result<>(deviceVO);
     }
 
@@ -210,7 +210,7 @@ public class DevopsTargetController {
         }
         List<Device> deviceList = targetSceneConvertModel.getList();
 
-        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+        List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
 
         return new PageResult<>(deviceVOList,targetSceneConvertModel.getTotal());
     }
@@ -219,7 +219,7 @@ public class DevopsTargetController {
     @GetMapping("/common-targets")
     public ServiceResult<DeviceVO> getCommonTargets(){
         List<Device> deviceList = targetConverter.getCommonTargets("");
-        List<DeviceVO> deviceVOList = deviceVoConverter.devicesToDeviceVOs(deviceList);
+        List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
 
         Locale locale = LocaleContextHolder.getLocale();
         if (Objects.equals(locale, Locale.CHINA)) {
