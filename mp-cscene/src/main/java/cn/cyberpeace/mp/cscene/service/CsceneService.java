@@ -346,6 +346,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
         }
+        if (createContext.getReferenceType() != null) {
+            csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
 
@@ -394,6 +397,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getReferenceMetaData() != null) {
             csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
+        }
+        if (createContext.getReferenceType() != null) {
+            csceneInstance.setReferenceType(createContext.getReferenceType());
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
