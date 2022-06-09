@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -55,6 +56,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Autowired
     private OrgUserService orgUserService;
+
+    @Autowired
+    private UserCacheService userCacheService;
 
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
@@ -145,6 +149,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             updateChildOrgPathOperation.doExecute(orgDto);
         }
 
+        userCacheService.evictAllUserCache();
         return result;
     }
 
@@ -165,7 +170,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         deleteReleated(orgId);
 
-        return super.delete(orgId);
+        var ret = super.delete(orgId);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
@@ -179,7 +186,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
             deleteReleated(id);
         }
-        return super.bulkDelete(ids);
+        var ret = super.bulkDelete(ids);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override

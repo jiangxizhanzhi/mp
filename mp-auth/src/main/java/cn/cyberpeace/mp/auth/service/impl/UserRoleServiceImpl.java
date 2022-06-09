@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
@@ -24,6 +25,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -40,6 +42,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/8/31 11:13
  */
+@Slf4j
 @Service
 @CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S)
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields, QueryParams>
@@ -56,6 +59,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
     @Autowired
     private OperateUserPermissionService opUserPermService;
+
+    @Autowired
+    private UserCacheService userCacheService;
 
     @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
@@ -153,6 +159,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             create(userRole);
         });
 
+        userCacheService.evictAllUserCache();
         return true;
     }
 
@@ -181,6 +188,8 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             create(userRole);
         });
 
+        userCacheService.evictAllUserCache();
+
         return true;
     }
 
@@ -194,7 +203,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 //        }
 
         getModelMapper().deleteByUserId(userId);
-
+        userCacheService.evictAllUserCache();
         return true;
     }
 
@@ -208,7 +217,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 //        }
 
         getModelMapper().deleteByRoleId(roleId);
-
+        userCacheService.evictAllUserCache();
         return true;
     }
 
@@ -235,6 +244,8 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
         // 删除用户角色
         getModelMapper().deleteByRoleIdAndUserIds(roleId, userIds);
+
+        userCacheService.evictAllUserCache();
         return true;
     }
 

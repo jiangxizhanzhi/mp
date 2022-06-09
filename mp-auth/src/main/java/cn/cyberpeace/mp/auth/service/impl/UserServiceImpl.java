@@ -16,14 +16,13 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
-import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.auth.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -52,7 +51,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -121,17 +119,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserUpdateCheckService updateCheckService;
 
-    @Autowired
-    private UserHeartbeatService userHeartbeatService;
-
-    @Autowired
-    private AvatarService avatarService;
 
     @Autowired
     private DefaultImgService defaultImgService;
 
     @Autowired
     private OperateUserPermissionService opUserPermCheckService;
+
+    @Autowired
+    private UserCacheService userCacheService;
 
 
     @Autowired
@@ -212,42 +208,48 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
         obj.setUpdateTime(LocalDateTime.now());
-        return super.update(obj, fields);
+        var ret = super.update(obj, fields);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkCreate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
 
-        return super.bulkCreate(objs);
+        var ret = super.bulkCreate(objs);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
     public ServiceResult<Integer> bulkUpdate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
-        return super.bulkUpdate(objs);
+        var ret = super.bulkUpdate(objs);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Boolean>  delete(String userId) {
         deleteReleated(userId);
 
-        return super.delete(userId);
-
+        var ret = super.delete(userId);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERMODEL, CACHE_VAL_USERDTO}, allEntries = true)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
-
         for (String userId : userIds) {
             deleteReleated(userId);
         }
 
-        return super.bulkDelete(userIds);
+        var ret = super.bulkDelete(userIds);
+        userCacheService.evictAllUserCache();
+        return ret;
     }
 
     @Override
@@ -304,14 +306,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             });
         }
 
+        userCacheService.evictAllUserCache();
         return userModel;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public UserModel modify(UserRequest modifyRequest) {
-
         if (!opUserPermCheckService.isOperateSelf(modifyRequest.getId())) {
             // 如果操作的对象不是自己，则进行权限校验
             opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
@@ -377,6 +378,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             });
         }
 
+        userCacheService.evictAllUserCache();
         return userModel;
     }
 
@@ -410,7 +412,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetSelfPwd(String oldPwd, String newPwd) {
         var currentUser = UserUtils.getLoginUser();
         if (Objects.isNull(currentUser)) {
@@ -431,11 +432,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel userUpdate = UserModel.builder().id(currentUser.getId()).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
+        userCacheService.evictAllUserCache();
         return true;
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean resetPwd(String userId, String newPwd) {
         // 密码是否合法
         if (PasswordUtils.isPasswordStrengthLowLevel(newPwd)) {
@@ -452,11 +453,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel userUpdate = UserModel.builder().id(userId).password(newPwd).initCheck(UserModel.INT_CHECK_NO).build();
         update(userUpdate);
+        userCacheService.evictAllUserCache();
         return true;
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -473,14 +474,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         } else {
             log.error("user id:{} not existed!", userId);
         }
-
+        userCacheService.evictAllUserCache();
         return false;
     }
 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchDisable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -493,12 +493,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 errMsg.append(e.getMessage());
             }
         }
-
+        userCacheService.evictAllUserCache();
         return errMsg.toString();
     }
 
     @Override
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
@@ -514,14 +513,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         } else {
             log.error("user id:{} not existed!", userId);
         }
-
+        userCacheService.evictAllUserCache();
         return false;
     }
 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchEnable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -534,13 +532,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 errMsg.append(e.getMessage());
             }
         }
-
+        userCacheService.evictAllUserCache();
         return errMsg.toString();
     }
 
 
     @Override
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public boolean approve(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
@@ -555,14 +552,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         } else {
             log.error("user id:{} not existed!", userId);
         }
-
+        userCacheService.evictAllUserCache();
         return false;
     }
 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public String batchApprove(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
         opUserPermCheckService.checkByTargetUserIds(userIds);
@@ -575,7 +571,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 errMsg.append(e.getMessage());
             }
         }
-
+        userCacheService.evictAllUserCache();
         return errMsg.toString();
     }
 
@@ -642,7 +638,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {CACHE_VAL_USERDTO, CACHE_VAL_USERMODEL}, allEntries = true)
     public void importExcel(List<ImportUser> list) {
         log.info("Now import users from excel...");
         // 初始化默认头像信息
@@ -687,6 +682,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             log.info("import success...");
         }
+
+        userCacheService.evictAllUserCache();
     }
 
     @Override
@@ -724,7 +721,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 String httpUrl = group.getFileServerAddr() + File.separator + filepath;
 
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
-                return getModelMapper().update(updateUser);
+                var ret = getModelMapper().update(updateUser);
+                userCacheService.evictAllUserCache();
+                return ret;
             } else {
                 log.error("upload failed! userId:{}", userId);
                 throw new MpRuntimeException(AuthErrorCode.OP_ERROR);

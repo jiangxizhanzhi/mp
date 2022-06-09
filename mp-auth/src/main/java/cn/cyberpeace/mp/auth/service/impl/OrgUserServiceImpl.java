@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.OrgUserFields;
@@ -64,6 +65,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Autowired
     private OperateUserPermissionService opUserPermService;
+
+    @Autowired
+    private UserCacheService userCacheService;
 
 //    @Autowired
 //    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
@@ -173,6 +177,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             orguser.setTenant(AuthConstant.DEFAULT_TENANT);
         });
 
+        userCacheService.evictAllUserCache();
         return true;
 
     }
@@ -257,7 +262,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 //        }
 
         getModelMapper().deleteByUserId(userId);
-
+        userCacheService.evictAllUserCache();
         return true;
     }
 
@@ -271,7 +276,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 //        }
 
         getModelMapper().deleteByOrgId(orgId);
-
+        userCacheService.evictAllUserCache();
         return true;
     }
 

@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.auth.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +19,7 @@ public class AuthCacheConfig {
     public static final String CACHE_MANAGER_20S = "authCacheManager_20S";
     //public static final String CACHE_MANAGER_30S = "authCacheManager_30S";
     public static final String CACHE_MANAGER_45S = "authCacheManager_45S";
-    public static final String CACHE_MANAGER_1M = "authCacheManager_1M";
+    //public static final String CACHE_MANAGER_1M = "authCacheManager_1M";
     //public static final String CACHE_MANAGER_5M = "authCacheManager_5M";
     public static final String CACHE_MANAGER_10M = "authCacheManager_10M";
 
@@ -49,13 +48,13 @@ public class AuthCacheConfig {
         return caffeineCacheManager;
     }
 
-    @Bean(name = CACHE_MANAGER_1M)
+    /*@Bean(name = CACHE_MANAGER_1M)
     public CacheManager authCacheManager1M() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
-    }
+    }*/
 
 
     /*@Bean(name = CACHE_MANAGER_5M)

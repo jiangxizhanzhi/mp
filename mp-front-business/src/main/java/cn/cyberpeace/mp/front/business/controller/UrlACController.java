@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.front.business.controller;
 
-import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
 import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -9,8 +8,6 @@ import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.front.business.service.UrlACService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -59,7 +56,6 @@ public class UrlACController {
     public ServiceResult add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
         String urlACId = urlACService.add(addRequest);
         urlACService.evictURLACCache();
-        urlACService.evictURLACPatternCache();
         return ServiceResult.success(urlACId);
     }
 
@@ -69,7 +65,6 @@ public class UrlACController {
     public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
         String urlACId = urlACService.modify(updateRequest);
         urlACService.evictURLACCache();
-        urlACService.evictURLACPatternCache();
         return ServiceResult.success(urlACId);
     }
 
@@ -79,7 +74,6 @@ public class UrlACController {
     public ServiceResult delete(@RequestParam String[] ids) {
         int cnt = urlACService.delete(ids);
         urlACService.evictURLACCache();
-        urlACService.evictURLACPatternCache();
         return ServiceResult.success(cnt);
     }
 
@@ -89,7 +83,6 @@ public class UrlACController {
     @PostMapping("/evict_cache")
     public ServiceResult evictCache() {
         urlACService.evictURLACCache();
-        urlACService.evictURLACPatternCache();
         return ServiceResult.successful();
     }
 

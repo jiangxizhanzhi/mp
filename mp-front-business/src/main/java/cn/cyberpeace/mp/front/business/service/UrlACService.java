@@ -256,18 +256,10 @@ public class UrlACService {
     }
 
 
-    @CacheEvict(value = CACHE_VAL_ALL_URLAC, allEntries = true)
+    @CacheEvict(value = {CACHE_VAL_ALL_URLAC, CACHE_VAL_ALL_URLAC_PATTERN}, allEntries = true)
     public void evictURLACCache() {
         log.info("evict url ac cache...");
     }
-
-
-    @CacheEvict(value = CACHE_VAL_ALL_URLAC_PATTERN, allEntries = true)
-    public void evictURLACPatternCache() {
-        log.info("evict url ac pattern cache...");
-    }
-
-
 
 
     @Transactional(rollbackFor = Exception.class)
