@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
         implements RoleService {
 
@@ -136,7 +138,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLE_GETBY_NAME)
+    @Cacheable(value = CACHE_VAL_ROLE_GETBY_NAME)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
 
@@ -146,7 +148,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_ROLE_LISTBY_NAMES)
+    @Cacheable(value = CACHE_VAL_ROLE_LISTBY_NAMES)
     public List<RoleModel> listByNames(List<String> names) {
         ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
         List<RoleModel> roleModels = getModelMapper().listByNames(names);

@@ -28,7 +28,7 @@ public class RegisterService {
     private AdminConfigService adminConfigService;
 
     @Autowired
-    private AvatarService avatarService;
+    private UserCacheService userCacheService;
 
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
@@ -54,6 +54,7 @@ public class RegisterService {
         createCheckService.check(user);
 
         ObjServiceResult<UserModel> result = userService.create(user);
+        userCacheService.evictAllUserCache();
         return result;
     }
 

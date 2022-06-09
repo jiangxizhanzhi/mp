@@ -46,4 +46,5 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
      * @return
      */
     List<UserRoleStatistic> getUserRoleStatistics();
+
 }

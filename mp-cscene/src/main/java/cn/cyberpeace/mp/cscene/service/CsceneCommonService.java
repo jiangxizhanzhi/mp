@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
 public class CsceneCommonService {
 
     @Autowired
@@ -34,7 +36,7 @@ public class CsceneCommonService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "translate_sceneids")
+    @Cacheable(value = "translate_sceneids")
     public List<String> translateSceneIds(List<String> sceneIds) {
         log.info("before translate: {}", sceneIds);
         List<String> translatedScendIds = new ArrayList<>();
@@ -53,7 +55,7 @@ public class CsceneCommonService {
      * @param elementIds
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "query_agentnames_by_elementids")
+    @Cacheable(value = "query_agentnames_by_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
         log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
@@ -75,7 +77,7 @@ public class CsceneCommonService {
      * 查询场景是否是开启状态
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = "is_cscene_running")
+    @Cacheable(value = "is_cscene_running")
     public boolean isCsceneInstanceRunning(String csceneId) {
         ServiceResult<SceneStateInfo> result = csceneSpecialService.getSceneStateInfo(csceneId);
         SceneStateInfo sceneStateInfo = result.getSource();
