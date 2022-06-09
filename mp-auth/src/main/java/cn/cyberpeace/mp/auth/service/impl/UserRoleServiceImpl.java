@@ -25,6 +25,7 @@ import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import java.util.List;
  * @Date：2021/8/31 11:13
  */
 @Service
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S)
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields, QueryParams>
         implements UserRoleService {
 
@@ -62,7 +64,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_ROLES)
+    @Cacheable(value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<RoleModel> roles = getModelMapper().listRolesByUserId(userId);
@@ -71,7 +73,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S, value = CACHE_VAL_ROLES)
+    @Cacheable(value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
         List<RoleModel> roles = getModelMapper().listRolesByUserIds(userIds);

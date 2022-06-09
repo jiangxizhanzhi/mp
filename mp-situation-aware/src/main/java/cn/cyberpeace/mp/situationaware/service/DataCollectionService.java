@@ -71,6 +71,7 @@ import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -104,6 +105,7 @@ import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.
  */
 @Service
 @Slf4j
+@CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
 public class DataCollectionService {
 
     @Resource(name = "wazuhRestHighLevelClient")
@@ -146,7 +148,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return ListObjResult<FileEventModel>
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_FILE_EVENTS)
+    @Cacheable(value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
@@ -395,7 +397,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_MONITOR_EVENTS)
+    @Cacheable(value = CACHE_KEY_MONITOR_EVENTS)
     public ListObjResult<WazuhHostStateModel> queryMonitorEvents(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -506,7 +508,7 @@ public class DataCollectionService {
      *
      * @param wazuhMonitorEventsRequest wazuhMonitorEventsRequest
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_HOST_STATE)
+    @Cacheable(value = CACHE_KEY_HOST_STATE)
     public List<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -533,7 +535,7 @@ public class DataCollectionService {
         return wazuhModelList;
     }
 
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_NET_CONN)
+    @Cacheable(value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -578,7 +580,7 @@ public class DataCollectionService {
      * @param wazuhMonitorEventsRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
+    @Cacheable(value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -596,7 +598,7 @@ public class DataCollectionService {
      * @param wazuhMonitorEventsRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
+    @Cacheable(value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
     public int sumSysUsersChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -609,7 +611,7 @@ public class DataCollectionService {
     }
 
 
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_PROCESS_CHANGED_COUNT)
+    @Cacheable(value = CACHE_KEY_PROCESS_CHANGED_COUNT)
     public int sumProcessesChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -620,7 +622,7 @@ public class DataCollectionService {
         return sum;
     }
 
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
+    @Cacheable(value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
     public int sumNetConnsChangedCountByTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return 0;
@@ -863,7 +865,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGGS_BY_AGENTNAME)
+    @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
@@ -919,7 +921,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
+    @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
     public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
@@ -974,7 +976,7 @@ public class DataCollectionService {
      * @param wazuhEventRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_COUNT_BY_AGENTNAME)
+    @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
         log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {

@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -50,9 +49,9 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -83,6 +82,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
 
@@ -141,13 +141,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
+    @Cacheable(value = CACHE_VAL_USERMODEL)
     public ObjServiceResult<UserModel> get(String id) {
         return super.get(id);
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERDTO)
+    @Cacheable(value = CACHE_VAL_USERDTO)
     public UserDto getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
@@ -381,7 +381,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USERMODEL)
+    @Cacheable(value = CACHE_VAL_USERMODEL)
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));

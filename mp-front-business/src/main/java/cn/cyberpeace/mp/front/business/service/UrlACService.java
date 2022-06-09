@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.front.business.service;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.front.business.controller.UrlACController;
 import cn.cyberpeace.mp.front.business.dto.ImportUrlAuth;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlRequest;
@@ -16,20 +15,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
-import org.yaml.snakeyaml.nodes.CollectionNode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M)
 public class UrlACService {
 
     public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";
@@ -197,7 +195,7 @@ public class UrlACService {
      * 查询所有的urlac不包括pattern
      * @return
      */
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
+    @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> listAllUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
         dtos.forEach(d -> {
@@ -218,7 +216,7 @@ public class UrlACService {
      * 查询所有的pattern
      * @return
      */
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC_PATTERN)
+    @Cacheable(value = CACHE_VAL_ALL_URLAC_PATTERN)
     public List<UrlAccessCtlDto> listAllUrlACPatternDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlPatternDtos();
         dtos.forEach(d -> {
@@ -239,7 +237,7 @@ public class UrlACService {
      * 查询所有的
      * @return
      */
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC)
+    @Cacheable(value = CACHE_VAL_ALL_URLAC)
     public List<UrlAccessCtlDto> pageUrlAccessCtlDtos() {
         List<UrlAccessCtlDto> dtos = urlACMapper.listAllUrlAccessCtlDtos();
         //Map<String, List<UrlAccessCtlDto>> urlAcDtoMap = new HashMap<>();
@@ -258,13 +256,13 @@ public class UrlACService {
     }
 
 
-    @CacheEvict(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC, allEntries = true)
+    @CacheEvict(value = CACHE_VAL_ALL_URLAC, allEntries = true)
     public void evictURLACCache() {
         log.info("evict url ac cache...");
     }
 
 
-    @CacheEvict(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_ALL_URLAC_PATTERN, allEntries = true)
+    @CacheEvict(value = CACHE_VAL_ALL_URLAC_PATTERN, allEntries = true)
     public void evictURLACPatternCache() {
         log.info("evict url ac pattern cache...");
     }
