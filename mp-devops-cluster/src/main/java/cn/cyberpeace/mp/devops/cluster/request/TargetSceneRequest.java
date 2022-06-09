@@ -83,7 +83,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     /**
      * 镜像状态
      */
-    @ApiModelProperty(value = "镜像状态")
+    @ApiModelProperty(value = "镜像状态,2:已保存")
     private Integer imageStatus;
 
     /**
