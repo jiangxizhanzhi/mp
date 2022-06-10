@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -24,11 +25,11 @@ import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -159,20 +160,17 @@ public class SysCollectorService extends RequestProcessor {
         var uri = "/syscollector/" + agentId + "/netaddr";
         var requestUrl = wazuhUrl + uri;
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(requestUrl);
-
-        if (StringUtils.isNotBlank(iface)) {
-            builder.queryParam("iface", iface).encode();
-        }
-
-        if (StringUtils.isNotBlank(proto)) {
-            builder.queryParam("proto", proto).encode();
-        }
-
-        requestUrl = builder.build().toString();
         log.info("requestUrl:{}", requestUrl);
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
+        if (StringUtils.isNotBlank(iface)) {
+            params.add(new BasicNameValuePair("iface", URLUtil.encode(iface)));
+        }
+
+        if (StringUtils.isNotBlank(proto)) {
+            params.add(new BasicNameValuePair("proto", URLUtil.encode(proto)));
+        }
+
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
