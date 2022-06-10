@@ -3,14 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.situationaware.bo.AttackClassificationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
-import cn.cyberpeace.mp.situationaware.bo.FlowTemplateBO;
-import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
+import cn.cyberpeace.mp.situationaware.bo.*;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.FlowClassificationModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
@@ -73,14 +66,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -826,6 +812,20 @@ public class FlowAnalysisService extends AbstractBaseService {
             List<Integer> severityList = request.getSeverityEnum() == SeverityEnum.ALL ? allSeverityList :
                     allSeverityList.stream().filter(v -> v <= request.getSeverityEnum().ordinal()).collect(Collectors.toList());
             boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severityList));
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getHosts())){
+            BoolQueryBuilder bq = QueryBuilders.boolQuery();
+            bq.should(QueryBuilders.termsQuery("source.ip", request.getHosts()));
+            bq.should(QueryBuilders.termsQuery("destination.ip", request.getHosts()));
+            boolQueryBuilder.must(bq);
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getHostMacs())){
+            BoolQueryBuilder bq = QueryBuilders.boolQuery();
+            bq.should(QueryBuilders.termsQuery("source.mac", request.getHostMacs()));
+            bq.should(QueryBuilders.termsQuery("destination.mac", request.getHostMacs()));
+            boolQueryBuilder.must(bq);
         }
 
         if (CollectionUtils.isNotEmpty(request.getSourceIps())) {
