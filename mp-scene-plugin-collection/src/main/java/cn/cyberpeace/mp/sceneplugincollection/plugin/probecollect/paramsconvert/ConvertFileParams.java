@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert;
 
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,10 @@ import java.util.List;
 public class ConvertFileParams implements WazuhParamsConvert<WazuhControl.ControlFileModifyParam> {
 
     private Probe probe;
+
+    private Integer getFileRecursionLevel() {
+        return CollectionSingleton.collectionAppConfig.getFileRecursionLevel();
+    }
 
     public ConvertFileParams(Probe probe) {
         this.probe = probe;
@@ -32,7 +37,8 @@ public class ConvertFileParams implements WazuhParamsConvert<WazuhControl.Contro
             WazuhControl.ControlFileModifyParam fileParam = new WazuhControl.ControlFileModifyParam();
             fileParam.setId(probe.getId() + "_" + i++);
             fileParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-            fileParam.setRealtimeTargets(CollectionUtil.toList(path));
+            fileParam.setRealtimeTargets(CollUtil.toList(path));
+            fileParam.setRecursionLevel(getFileRecursionLevel());
             fileParams.add(fileParam);
         }
         return fileParams;
