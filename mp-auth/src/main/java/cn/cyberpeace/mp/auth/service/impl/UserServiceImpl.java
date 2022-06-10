@@ -802,6 +802,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return getModelMapper().getUserCnt();
     }
 
+    @Override
+    public void chooseDefaultAvatar(UserModel userModel) {
+        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
+            return;
+        }
+        List<AvatarModel> avatarModels = avatarService.listAll();
+        if (CollectionUtil.isNotEmpty(avatarModels)) {
+            userModel.setAvatar(avatarModels.get(0).getUrl());
+        }
+    }
+
     private UserModel importUser2UserModel(ImportUser importUser) {
         if (Objects.isNull(importUser)) {
             return null;
@@ -815,6 +826,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         return userModel;
     }
+
 
 
     private ExportUser user2ExportUser(UserModel user) {
@@ -877,15 +889,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
-    private void chooseDefaultAvatar(UserModel userModel) {
-        if (Objects.isNull(userModel) || StringUtils.isNotBlank(userModel.getAvatar())) {
-            return;
-        }
-        List<AvatarModel> avatarModels = avatarService.listAll();
-        if (CollectionUtil.isNotEmpty(avatarModels)) {
-            userModel.setAvatar(avatarModels.get(0).getUrl());
-        }
-    }
 
 
 }

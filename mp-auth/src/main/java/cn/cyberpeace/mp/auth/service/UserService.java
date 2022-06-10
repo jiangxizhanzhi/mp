@@ -89,4 +89,6 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     int totalUserCnt();
 
+    void chooseDefaultAvatar(UserModel userModel);
+
 }

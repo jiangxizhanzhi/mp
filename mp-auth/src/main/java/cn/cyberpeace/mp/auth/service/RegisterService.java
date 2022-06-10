@@ -1,13 +1,21 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
+import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -24,6 +32,9 @@ public class RegisterService {
 
     @Autowired
     private SysConfigService sysConfigService;
+
+    @Autowired
+    private OrgUserService orgUserService;
 
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
 
@@ -44,7 +55,23 @@ public class RegisterService {
 
         createCheckService.check(user);
 
+        userService.chooseDefaultAvatar(user);
+
         ObjServiceResult<UserModel> result = userService.create(user);
+
+        String userId = "";
+        if (Objects.nonNull(result.getSource().getObj())) {
+            UserModel userModel = result.getSource().getObj();
+            userId = userModel.getId();
+        } else {
+            log.error("create user error!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+
+        OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(AuthConstant.ROOT_ORG_ID).build();
+        var re = orgUserService.create(orgUserModel);
+        ResultUtils.throwExceptionIfError(re, "create org user error!");
+
         return result;
     }
 

@@ -4,6 +4,8 @@ public class AuthConstant {
 
     public static final String ROOT_USER_ID = "3f655d87112f4ae094bbaf70830e20aa";
 
+    public static final String ROOT_ORG_ID = "a13262d600fe40c799d63dce5c1485af";
+
     public static final String ROLE_SUPERUSER_ID = "e12bb08a9bc545bbba46a2fb3c92533a";
 
     public static final String ROLE_ADMIN_ID = "5827ff7847504ffd806e0a85c417228d";
