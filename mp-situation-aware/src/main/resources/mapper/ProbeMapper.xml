@@ -208,6 +208,13 @@
   </select>
 
 
+  <select id="getByName" resultMap="BaseResultMap">
+    select
+      *
+    from mp_situation_probe
+    where name = #{name} and p.is_deleted = 0
+  </select>
+
   <select id="listProbeDtos" resultType="cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto">
     select
       p.*, ps.script_type, ps.script_url
