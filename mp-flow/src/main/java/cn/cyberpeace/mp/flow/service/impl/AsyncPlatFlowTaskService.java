@@ -159,8 +159,7 @@ public class AsyncPlatFlowTaskService {
                 // 新增时，攻击流量需要判断是否已有网口
                 List<FlowPortModel> attackFlowPorts =
                         flowPortMapper.list(new HumanCondition()
-                                .filterEqual(FlowPortModel::getClientGateway,
-                                        flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
+                                .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
                                 .filterEqual(FlowPortModel::getActuatorId, actuatorId)
                                 .filterEqual(FlowPortModel::getPortType, PortTypeEnum.ATTACK.toValue()));
                 if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
@@ -356,8 +355,7 @@ public class AsyncPlatFlowTaskService {
                     // 新增时，攻击流量需要判断是否已有网口
                     List<FlowPortModel> attackFlowPorts =
                             flowPortMapper.list(new HumanCondition()
-                                    .filterEqual(FlowPortModel::getClientGateway,
-                                            flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
+                                    .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
                                     .filterEqual(FlowPortModel::getActuatorId, actuatorId)
                                     .filterEqual(FlowPortModel::getPortType, PortTypeEnum.ATTACK.toValue()));
                     if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
