@@ -388,7 +388,7 @@ public class ProbeService {
         ProbeModel oldModel = getByName(addRequest.getName());
         if (Objects.nonNull(oldModel)) {
             log.error("probe name:{} already existed!", addRequest.getName());
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_EXISTED);
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXISTED);
         }
     }
 
@@ -411,7 +411,7 @@ public class ProbeService {
         // 名称已被占用，且不是被修改的这个探针
         if (Objects.nonNull(oldModel) && !Objects.equals(oldModel.getId(), probeId)) {
             log.error("probe name:{} already existed!", modifyRequest.getName());
-            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_EXISTED);
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXISTED);
         }
     }
 

@@ -33,8 +33,10 @@ public enum SituationalAwareErrorCode implements ErrorCode {
 
     COLLECTION_TEMPLATE_NOT_EXISTED("MP-110430", "collection_template_not_existed"),
     COLLECTION_TEMPLATE_EXISTED("MP-110431", "collection_template_existed"),
+    COLLECTION_TEMPLATE_NAME_EXISTED("MP-110432", "collection_template_name_existed"),
 
     PROBE_EXISTED("MP-110435", "probe_existed"),
+    PROBE_NAME_EXISTED("MP-110436", "probe_name_existed"),
     PROBE_NOT_EXISTED("MP-110440", "probe_not_existed"),
     PROBE_NAME_LENGTH_INVALID("MP-110441", "probe_name_length_invalid"),
     PROBE_DESC_LENGTH_INVALID("MP-110442", "probe_desc_length_invalid"),

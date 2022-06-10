@@ -388,7 +388,7 @@ public class CollectionTemplateService {
         CollectionTemplateModel oldModel = getByName(addRequest.getName());
         if (Objects.nonNull(oldModel)) {
             log.error("template name:{} already existed!", addRequest.getName());
-            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_EXISTED);
+            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_NAME_EXISTED);
         }
     }
 
@@ -411,7 +411,7 @@ public class CollectionTemplateService {
         // 名称已被占用，且不是被修改的这个模板
         if (Objects.nonNull(oldModel) && !Objects.equals(oldModel.getId(), templateId)) {
             log.error("template name:{} already existed!", modifyRequest.getName());
-            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_EXISTED);
+            throw new MpRuntimeException(SituationalAwareErrorCode.COLLECTION_TEMPLATE_NAME_EXISTED);
         }
     }
 
