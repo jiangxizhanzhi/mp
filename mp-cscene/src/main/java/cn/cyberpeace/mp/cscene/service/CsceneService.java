@@ -124,6 +124,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var elementCount = 0;
         try {
             elementCount = csceneBO.getSceneConfig().getTopology().getElements().size();
+        } catch (NullPointerException e) {
+            // do nothing
         } catch (Exception e) {
             log.error("Get element count error: ", e);
         }
@@ -148,6 +150,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             // TODO 获取需要虚拟化的节点数量
             try {
                 elementCount = cscene.getSceneConfig().getTopology().getElements().size();
+            } catch (NullPointerException e) {
+                // do nothing
             } catch (Exception e) {
                 log.error("Get element count error: ", e);
             }
