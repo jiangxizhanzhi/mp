@@ -120,6 +120,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.quick_create_docker_resource_metaserver:http://169.254.169.254/installer_upload}")
     private String quickCreateDockerResourceMetaServer;
 
+    @Value("${mp.sceneplugincloud.delete_retry_times:1}")
+    private Integer deleteRetryTimes;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

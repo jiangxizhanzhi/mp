@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.EntityNode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Npc;
@@ -46,13 +47,13 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DeleteHandler extends HandlerCommon {
 
-    private final VirtualSwitch vsClient = new VirtualSwitch();
-    private final VirtualRouter vrClient = new VirtualRouter();
-    private final VirtualFirewall vfClient = new VirtualFirewall();
-    private final VirtualMachine vmClient = new VirtualMachine();
-    protected final Container containerClient = new Container();
+    private final VirtualSwitch vsClient = CloudApiProxyBuilder.build(new VirtualSwitch(), VirtualSwitch.class);
+    private final VirtualRouter vrClient = CloudApiProxyBuilder.build(new VirtualRouter(), VirtualRouter.class);
+    private final VirtualFirewall vfClient = CloudApiProxyBuilder.build(new VirtualFirewall(), VirtualFirewall.class);
+    private final VirtualMachine vmClient = CloudApiProxyBuilder.build(new VirtualMachine(), VirtualMachine.class);
+    protected final Container containerClient = CloudApiProxyBuilder.build(new Container(), Container.class);
     private final EntityNode enClient = new EntityNode();
-    private final Npc npcClient = new Npc();
+    private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
 
     private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 

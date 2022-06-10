@@ -43,17 +43,10 @@ public class Container extends CloudClient {
     public boolean delete(ContainerDeleteData deleteData) {
         heavyConcurrentWait();
 
-        try {
-            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
-                    new TypeReference<CloudResponse<Object>>() {
-                    }, true);
-            return true;
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return true;
-            }
-            throw e;
-        }
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
     }
 
     public boolean deleteByName(String resourceName) {

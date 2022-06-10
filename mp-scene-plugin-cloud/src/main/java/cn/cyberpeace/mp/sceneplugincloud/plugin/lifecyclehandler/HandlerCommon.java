@@ -129,10 +129,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             return null;
         }
         MpRuntimeException mpe = (MpRuntimeException) e;
-        String message = mpe.getMessage();
+        String message = mpe.getMessage().toLowerCase();
         String nodeName = element.getSrcElement().getName();
         CloudPluginSceneElementBO cloudElement = (CloudPluginSceneElementBO) element;
-        if (message.contains("Instance") && message.contains("could not be found")) {
+        if (message.contains("instance") && message.contains("could not be found")) {
             // 实例不存在
             log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
             MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.instance_not_found", nodeName));
@@ -141,7 +141,7 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
             MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.vm_create_error", nodeName));
             return resultException;
-        } else if (message.equals("Parameters image or volumes must be supplied.")) {
+        } else if (message.equals("parameters image or volumes must be supplied.")) {
             log.error("element {} real error info {}", element.getSrcElement().getEid(), message);
             MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get("sceneplugincloud.error.image_not_found", nodeName, cloudElement.getImage()));
             return resultException;

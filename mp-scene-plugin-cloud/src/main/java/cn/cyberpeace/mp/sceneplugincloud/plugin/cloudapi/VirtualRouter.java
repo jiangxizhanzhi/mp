@@ -39,17 +39,10 @@ public class VirtualRouter extends CloudClient {
     public boolean delete(VirtualRouterDeleteData deleteData) {
         heavyConcurrentWait();
 
-        try {
-            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
-                    new TypeReference<CloudResponse<Object>>() {
-                    }, true);
-            return true;
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return true;
-            }
-            throw e;
-        }
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_ROUTER_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
     }
 
     public List<VirtualRouterGetData> getAllRouters(Integer limit, Integer offset) {
