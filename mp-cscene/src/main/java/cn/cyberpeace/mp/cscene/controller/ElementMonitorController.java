@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
@@ -45,6 +46,15 @@ public class ElementMonitorController {
 
     @Autowired
     private HostStateService hostStateService;
+
+    private void processElementMonitorRequest(ElementMonitorRequest request) {
+        if (request.getStartTime() != null) {
+            request.setLocalStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+        }
+        if (request.getEndTime() != null) {
+            request.setLocalEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+        }
+    }
 
     /**
      * elementIds不能为空，如果为多个值，默认只取第一个
@@ -100,6 +110,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
+        processElementMonitorRequest(pageRequest);
 
         return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
     }
@@ -111,6 +122,7 @@ public class ElementMonitorController {
     @GetMapping("/file_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
                                                                          ElementMonitorRequest pageRequest) {
+        processElementMonitorRequest(pageRequest);
         return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP,
                 segmentCount)).asResult();
     }
@@ -123,6 +135,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
+        processElementMonitorRequest(pageRequest);
 
         return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
     }
@@ -134,6 +147,7 @@ public class ElementMonitorController {
     @GetMapping("/registry_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,
                                                                              ElementMonitorRequest pageRequest) {
+        processElementMonitorRequest(pageRequest);
         return new ServiceResult<>(sceneElementMonitorService.getModifyHistogram(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP,
                 segmentCount)).asResult();
     }
@@ -143,6 +157,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
+        processElementMonitorRequest(pageRequest);
 
         var result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
@@ -153,6 +168,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
+        processElementMonitorRequest(pageRequest);
 
         var result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
         return new ListObjServiceResult<>(new ListObjResult<>(result, result.size())).asResult();
@@ -163,6 +179,7 @@ public class ElementMonitorController {
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
+        processElementMonitorRequest(pageRequest);
 
         var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);
         return new ListObjServiceResult<>(result).asResult();

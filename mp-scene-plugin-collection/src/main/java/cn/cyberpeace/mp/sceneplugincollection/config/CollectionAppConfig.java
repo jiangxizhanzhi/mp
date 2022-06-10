@@ -79,6 +79,12 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.syscheck_frequency:60}")
     private String syscheckFrequency;
 
+    @Value("${mp.sceneplugincollection.recursion_level:3}")
+    private Integer fileRecursionLevel;
+
+    @Value("${mp.sceneplugincollection.recursion_level:5}")
+    private Integer registryRecursionLevel;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
