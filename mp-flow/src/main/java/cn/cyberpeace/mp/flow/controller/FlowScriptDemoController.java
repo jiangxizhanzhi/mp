@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -37,8 +38,8 @@ public class FlowScriptDemoController extends BaseModelController<FlowScriptDemo
 
     @ApiOperation("查询脚本模板信息")
     @GetMapping("/list")
-    public ServiceResult<QueryFlowScriptDemoResponse> listFlowScriptDemos() {
-        return flowScriptDemoService.listFlowScriptDemos();
+    public ServiceResult<QueryFlowScriptDemoResponse> listFlowScriptDemos(@RequestParam(required = false) Integer type) {
+        return flowScriptDemoService.listScriptDemos(type);
     }
 
 }

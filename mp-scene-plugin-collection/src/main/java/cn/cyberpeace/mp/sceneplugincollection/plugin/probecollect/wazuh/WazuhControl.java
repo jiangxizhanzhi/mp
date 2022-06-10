@@ -389,6 +389,7 @@ public class WazuhControl {
         private final String type = CONTROL_ACTION_TYPE_FILE_MODIFY;
         private List<String> targets;
         private List<String> realtimeTargets;
+        private Integer recursionLevel;
         private List<String> ignores;
         private List<String> sregexIgnores;
         private List<String> nodiffs;
@@ -401,6 +402,7 @@ public class WazuhControl {
         private String action;
         private final String type = CONTROL_ACTION_TYPE_REGISTRY_MODIFY;
         private List<String> targets;
+        private Integer recursionLevel;
         private List<String> ignores;
         private List<String> sregexIgnores;
     }
@@ -440,6 +442,7 @@ public class WazuhControl {
         private String key;
         private List<String> targets;
         private List<String> realtimeTargets;
+        private Integer recursionLevel;
         private List<String> ignores;
         private List<String> sregexIgnores;
         private List<String> nodiffs;
@@ -450,6 +453,7 @@ public class WazuhControl {
     public static class QueryRegistryModifyInfo {
         private String key;
         private List<String> targets;
+        private Integer recursionLevel;
         private List<String> ignores;
         private List<String> sregexIgnores;
     }

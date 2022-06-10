@@ -66,7 +66,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class)
     public String addProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
-        check(probeRequest);
+        addProbeCheck(probeRequest);
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
         //新增探针，默认为自定义探针
@@ -145,7 +145,7 @@ public class ProbeService {
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbe(ProbeRequest probeRequest) {
         log.info("probeRequest:{}", probeRequest);
-        check(probeRequest);
+        modifyProbeCheck(probeRequest);
         String probeId = probeRequest.getId();
         ProbeModel probeModel = probeMapper.get(probeId);
 
@@ -342,6 +342,10 @@ public class ProbeService {
         // 4. 表数据？
     }
 
+    public ProbeModel getByName(String name) {
+        return probeMapper.getByName(name);
+    }
+
 
     private void processProbeDtoOsTypes(ProbeDto probeDto) {
         if (StringUtils.isNotBlank(probeDto.getOsType())) {
@@ -371,6 +375,43 @@ public class ProbeService {
             if (len > 500) {
                 throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_DESC_LENGTH_INVALID);
             }
+        }
+    }
+
+    /**
+     * 创建探针检查
+     *
+     * @param addRequest
+     */
+    private void addProbeCheck(ProbeRequest addRequest) {
+        check(addRequest);
+        ProbeModel oldModel = getByName(addRequest.getName());
+        if (Objects.nonNull(oldModel)) {
+            log.error("probe name:{} already existed!", addRequest.getName());
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXISTED);
+        }
+    }
+
+
+    /**
+     * 修改探针检查
+     *
+     * @param modifyRequest
+     */
+    private void modifyProbeCheck(ProbeRequest modifyRequest) {
+        check(modifyRequest);
+        String probeId = modifyRequest.getId();
+        ProbeModel probe = probeMapper.get(probeId);
+        if (Objects.isNull(probe)) {
+            log.error("probe not existed! id:{}", probeId);
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NOT_EXISTED);
+        }
+
+        ProbeModel oldModel = getByName(modifyRequest.getName());
+        // 名称已被占用，且不是被修改的这个探针
+        if (Objects.nonNull(oldModel) && !Objects.equals(oldModel.getId(), probeId)) {
+            log.error("probe name:{} already existed!", modifyRequest.getName());
+            throw new MpRuntimeException(SituationalAwareErrorCode.PROBE_NAME_EXISTED);
         }
     }
 

@@ -35,6 +35,7 @@ public interface ProbeMapper extends BaseModelMapper<ProbeModel> {
 
     List<ProbeDto> listProbeDtos(@Param("condition") ProbeSearchCondition condition);
 
+    ProbeModel getByName(String name);
 
 }
 
