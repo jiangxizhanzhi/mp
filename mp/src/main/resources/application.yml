@@ -61,6 +61,12 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+springfox:
+  documentation:
+    enabled: ${SWAGGER_DOC_ENABLED:true}
+    auto-startup: ${SWAGGER_DOC_STARTUP:true}
+    swagger-ui:
+      enabled: ${SWAGGER_DOC_UI:true}
 
 # 请求云平台组信息的url配置，必需填写
 mp:
