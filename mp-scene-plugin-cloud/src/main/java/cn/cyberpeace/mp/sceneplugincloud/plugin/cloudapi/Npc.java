@@ -31,17 +31,10 @@ public class Npc extends CloudClient {
     public boolean delete(NpcDeleteData deleteData) {
         heavyConcurrentWait();
 
-        try {
-            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.DELETE_NPC_URL, deleteData, null,
-                    new TypeReference<CloudResponse<Object>>() {
-                    }, true);
-            return true;
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return true;
-            }
-            throw e;
-        }
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.DELETE_NPC_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
     }
 
     public List<NpcGetData> getAllNpc(Integer limit, Integer offset) {

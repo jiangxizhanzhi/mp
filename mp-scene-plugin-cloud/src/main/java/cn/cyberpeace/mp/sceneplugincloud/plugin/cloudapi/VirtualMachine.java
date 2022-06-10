@@ -53,17 +53,10 @@ public class VirtualMachine extends CloudClient {
     public boolean delete(VirtualMachineDeleteData deleteData) {
         heavyConcurrentWait();
 
-        try {
-            CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
-                    new TypeReference<CloudResponse<Object>>() {
-                    }, true);
-            return true;
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return true;
-            }
-            throw e;
-        }
+        CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        return true;
     }
 
     public boolean deleteByName(String resourceName) {
@@ -195,17 +188,11 @@ public class VirtualMachine extends CloudClient {
         return response.getData();
     }
 
-    public void deletePort(String instanceId, String portId) {
+    public boolean deletePort(String instanceId, String portId) {
         String url = CloudUrlConstant.DELETE_VM_PORTS.replace("{instance_id}", instanceId);
         url = url.replace("{port_id}", portId);
-        try {
-            cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
-            }, true);
-        } catch (Exception e) {
-            if (super.excludeDeleteException(e)) {
-                return;
-            }
-            throw e;
-        }
+        cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
+        }, true);
+        return true;
     }
 }
