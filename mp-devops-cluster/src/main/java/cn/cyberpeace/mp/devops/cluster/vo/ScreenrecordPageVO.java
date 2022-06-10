@@ -63,6 +63,11 @@ public class ScreenrecordPageVO extends BaseCloudPlatformResult {
          * 录屏时长
          */
         private Double recortime;
+
+        /**
+         * 节点名称
+         */
+        private String host;
     }
 
 }
