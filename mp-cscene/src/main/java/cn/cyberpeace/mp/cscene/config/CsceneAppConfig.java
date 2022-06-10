@@ -54,7 +54,7 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.scene-message-timeout:3600000}")
     private Long sceneMessageTimeout;
 
-    @Value("${mp.cscene.has_own_recording_set:213,214,236}")
+    @Value("${mp.cscene.has-own-recording-set:213,214,236}")
     private String hasOwnRecordingSet;
 
     @Autowired
