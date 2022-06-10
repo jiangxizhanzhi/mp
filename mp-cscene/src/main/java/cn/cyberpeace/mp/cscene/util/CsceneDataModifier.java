@@ -624,6 +624,22 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkFirewallRules(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
+            var ports = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElementPorts();
+            if (ports != null && ports.size() > 0) {
+                ports.values().forEach(p -> {
+                    if (p.containsKey("firewall_rules")) {
+                        Object flows = p.get("firewall_rules");
+                        if (flows != null && flows instanceof List && ((List) flows).size() > 99) {
+                            throw new MpRuntimeException(CsceneErrorCode.PARAMS_FIRE_RULES_OUT_OF_LIMIT);
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     public static void checkVlanId(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getPlugins() != null && csceneBO.getSceneConfig().getPlugins().get("cpcloud") != null) {
             var elements = csceneBO.getSceneConfig().getPlugins().get("cpcloud").getElements();
