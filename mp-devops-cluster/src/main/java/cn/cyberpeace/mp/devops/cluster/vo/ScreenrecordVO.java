@@ -86,6 +86,12 @@ public class ScreenrecordVO extends BaseModel {
     private Double recortime;
 
     /**
+     * 节点名称
+     */
+    @ApiModelProperty(value = "节点名称")
+    private String host;
+
+    /**
      * 结果转换
      * @param record
      */
@@ -108,6 +114,7 @@ public class ScreenrecordVO extends BaseModel {
         }
         this.setRecortime(record.getRecortime());
         this.setCreateTime(TimeUtils.utcToLocalDateTime(record.getRecordate()));
+        this.setHost(record.getHost());
     }
 
 }
