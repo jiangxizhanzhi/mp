@@ -62,8 +62,8 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new PageInfo<>(new ArrayList<>());
         }
-        var requestUri = "/syscollector/" + agentId + "/ports";
-        var requestUrl = wazuhUrl + requestUri;
+        var uri = "/syscollector/" + agentId + "/ports";
+        var requestUrl = wazuhUrl + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -92,8 +92,8 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new PageInfo<>(new ArrayList<>());
         }
-        var requestUri = "/syscollector/" + agentId + "/processes";
-        var requestUrl = wazuhUrl + requestUri;
+        var uri = "/syscollector/" + agentId + "/processes";
+        var requestUrl = wazuhUrl + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -121,8 +121,8 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
             return new PageInfo<>(new ArrayList<>());
         }
-        var requestUri = "/syscollector/" + agentId + "/netiface";
-        var requestUrl = wazuhUrl + requestUri;
+        var uri = "/syscollector/" + agentId + "/netiface";
+        var requestUrl = wazuhUrl + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -156,8 +156,8 @@ public class SysCollectorService extends RequestProcessor {
             log.error("agentId is null");
             return Collections.emptyList();
         }
-        var requestUri = "/syscollector/" + agentId + "/netaddr";
-        var requestUrl = wazuhUrl + requestUri;
+        var uri = "/syscollector/" + agentId + "/netaddr";
+        var requestUrl = wazuhUrl + uri;
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(requestUrl);
 
@@ -169,11 +169,11 @@ public class SysCollectorService extends RequestProcessor {
             builder.queryParam("proto", proto).encode();
         }
 
-        requestUri = builder.build().toString();
+        requestUrl = builder.build().toString();
         log.info("requestUrl:{}", requestUrl);
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUri, params);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
@@ -242,8 +242,8 @@ public class SysCollectorService extends RequestProcessor {
             return agentPortsModels;
         }
         List<String> agentIds = agentService.listAgentIds(agents);
-        var requestUri = "/experimental/syscollector/ports";
-        var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
+        var uri = "/experimental/syscollector/ports";
+        var requestUrl = wazuhUrl + uri + "?agents_list=" + String.join(",", agentIds);
 
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
@@ -258,8 +258,8 @@ public class SysCollectorService extends RequestProcessor {
             return wazuhAgentProcessModels;
         }
         List<String> agentIds = agentService.listAgentIds(agents);
-        var requestUri = "/experimental/syscollector/processes";
-        var requestUrl = wazuhUrl + requestUri + "?agents_list=" + String.join(",", agentIds);
+        var uri = "/experimental/syscollector/processes";
+        var requestUrl = wazuhUrl + uri + "?agents_list=" + String.join(",", agentIds);
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
         wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
