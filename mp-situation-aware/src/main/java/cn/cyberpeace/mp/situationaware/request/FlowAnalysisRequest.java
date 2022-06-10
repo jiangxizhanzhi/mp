@@ -82,6 +82,18 @@ public class FlowAnalysisRequest {
     private List<String> destinationIps;
 
     /**
+     * 主机IP集合
+     */
+    @ApiModelProperty("主机IP集合")
+    private List<String> hosts;
+
+    /**
+     * 主机Mac集合
+     */
+    @ApiModelProperty("主机Mac集合")
+    private List<String> hostMacs;
+
+    /**
      * 强制过滤的目标IP集合
      */
     @ApiModelProperty("强制过滤的目标IP集合")
