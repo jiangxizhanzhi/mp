@@ -42,6 +42,10 @@ public class BatchSceneHandler {
 
     private Map<String, SceneElementBO> allEid2ElementMap = new HashMap<>();
 
+    private Map<String, SceneElementBO> allMac2ElementMapForScene = new HashMap<>();
+
+    private Map<String, SceneElementBO> allIp2ElementMapForScene = new HashMap<>();
+
     private Map<String, List<String>> nodeId2Ips = new HashMap<>();
 
     private Map<String, String> allMac2SceneIdMap = new HashMap<>();
@@ -76,12 +80,36 @@ public class BatchSceneHandler {
         return this.allMac2ElementMap.get(macAddr);
     }
 
-    public Map<String, SceneElementBO> getAllMac2ElementMap() {
+    /**
+     * 根据构造时指定的节点创建的数据
+     * @return
+     */
+    public Map<String, SceneElementBO> getAllMac2ElementMapForNodes() {
         return allMac2ElementMap;
     }
 
-    public Map<String, SceneElementBO> getAllIp2ElementMap() {
+    /**
+     * 根据构造时指定的节点创建的数据
+     * @return
+     */
+    public Map<String, SceneElementBO> getAllIp2ElementMapForNodes() {
         return allIp2ElementMap;
+    }
+
+    /**
+     * 根据场景中所有节点创建的数据
+     * @return
+     */
+    public Map<String, SceneElementBO> getAllMac2ElementMapForScene() {
+        return allMac2ElementMapForScene;
+    }
+
+    /**
+     * 根据场景中所有节点创建的数据
+     * @return
+     */
+    public Map<String, SceneElementBO> getAllIp2ElementMapForScene() {
+        return allIp2ElementMapForScene;
     }
 
     public Map<String, String> getAllIp2SceneIdMap() {
@@ -166,6 +194,24 @@ public class BatchSceneHandler {
             }
             List<SceneElementBO> srcElements = getSrcElements(sceneHandler, nodeIds);
             this.handlerElement(sceneId, srcElements, pluginHandler, cloudPlugin);
+            if (sceneHandler.getElementMap() != null) {
+                sceneHandler.getElementMap().values().forEach(srcElement -> {
+                    var srcPorts = srcElement.getPorts();
+                    if (srcPorts == null) {
+                        return;
+                    }
+                    srcPorts.forEach(srcPort -> {
+                        String macAddr = srcPort.getMacAddr();
+                        String ipAddr = srcPort.getIp();
+                        if (StringUtils.isNotEmpty(macAddr)) {
+                            this.allMac2ElementMapForScene.put(macAddr, srcElement);
+                        }
+                        if (StringUtils.isNotEmpty(ipAddr)) {
+                            this.allIp2ElementMapForScene.put(ipAddr, srcElement);
+                        }
+                    });
+                });
+            }
         }
     }
 
