@@ -162,11 +162,11 @@ public class SysCollectorService extends RequestProcessor {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(requestUrl);
 
         if (StringUtils.isNotBlank(iface)) {
-            builder.queryParam("iface", iface);
+            builder.queryParam("iface", iface).encode();
         }
 
         if (StringUtils.isNotBlank(proto)) {
-            builder.queryParam("proto", proto);
+            builder.queryParam("proto", proto).encode();
         }
 
         requestUri = builder.build().toString();
@@ -286,4 +286,5 @@ public class SysCollectorService extends RequestProcessor {
     public List<NameValuePair> processRequestParams(BaseRequest baseRequest) {
         return super.processRequestParams(baseRequest);
     }
+
 }
