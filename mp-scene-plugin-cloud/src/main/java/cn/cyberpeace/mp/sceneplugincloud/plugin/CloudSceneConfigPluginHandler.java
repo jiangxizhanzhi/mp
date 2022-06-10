@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
@@ -169,6 +170,13 @@ public class CloudSceneConfigPluginHandler extends SceneConfigPluginHandler<Clou
                     }
                 }
             }
+        }
+        if (getElementPortMap() != null) {
+            getElementPortMap().values().forEach(p -> {
+                if (p.getFirewallRules() != null && JsonCommon.stringify(p.getFirewallRules()).length() >= 65535) {
+                    throw new MpRuntimeException(CloudErrorCode.FIRE_RULES_DATA_TOO_LONG);
+                }
+            });
         }
     }
 

@@ -78,6 +78,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.checkVlanId(csceneBO);
         CsceneDataModifier.checkIngressAndEgress(csceneBO);
         CsceneDataModifier.correctQuickCreateSupport(csceneBO);
+        CsceneDataModifier.checkFirewallRules(csceneBO);
     }
 
     private void correctRequestCsceneParamsForAppInstance(CsceneBO csceneBO) {
