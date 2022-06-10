@@ -41,19 +41,19 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
      * 查询所有脚本模板
      * @return
      */
-    public List<FlowScriptDemoModel> listAll() {
-        return getModelMapper().listAll();
+    public List<FlowScriptDemoModel> listAll(Integer type) {
+        return getModelMapper().listAll(type);
     }
 
     /**
      * 查询脚本模板信息
      * @return
      */
-    public ServiceResult<QueryFlowScriptDemoResponse> listFlowScriptDemos() {
+    public ServiceResult<QueryFlowScriptDemoResponse> listScriptDemos(Integer type) {
         QueryFlowScriptDemoResponse response = new QueryFlowScriptDemoResponse();
         List<QueryFlowScriptDemoResponse.ScriptDemo> scriptDemoList = new ArrayList<>();
 
-        List<FlowScriptDemoModel> flowScriptDemoModels = getModelMapper().listAll();
+        List<FlowScriptDemoModel> flowScriptDemoModels = getModelMapper().listAll(type);
 
         if (CollectionUtils.isNotEmpty(flowScriptDemoModels)) {
             scriptDemoList = flowScriptDemoModels.stream().map(demo -> new QueryFlowScriptDemoResponse.ScriptDemo(demo.getUrl(),

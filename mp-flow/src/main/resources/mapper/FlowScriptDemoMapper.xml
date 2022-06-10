@@ -3,5 +3,10 @@
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowScriptDemoMapper">
     <select id="listAll" resultType="cn.cyberpeace.mp.flow.model.FlowScriptDemoModel">
         select * from mp_flow_script_demo
+        <where>
+            <if test="type != null">
+                type = #{type}
+            </if>
+        </where>
     </select>
 </mapper>

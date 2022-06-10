@@ -13,6 +13,6 @@ import java.util.List;
 @ModelClass(FlowScriptDemoModel.class)
 public interface FlowScriptDemoMapper extends BaseModelMapper<FlowScriptDemoModel> {
 
-    List<FlowScriptDemoModel> listAll();
+    List<FlowScriptDemoModel> listAll(Integer type);
 
 }
