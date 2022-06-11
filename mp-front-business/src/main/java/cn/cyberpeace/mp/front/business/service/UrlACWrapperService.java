@@ -3,12 +3,10 @@ package cn.cyberpeace.mp.front.business.service;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +36,11 @@ public class UrlACWrapperService {
                 urlTargetsMap.put(d.getUrl(), targetIds);
             }
 
-            urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
+            if (CollectionUtil.isNotEmpty(d.getTargetIds())) {
+                urlTargetsMap.get(d.getUrl()).addAll(d.getTargetIds());
+            } else {
+                log.warn("No targets url detected! {}", d.getUrl());
+            }
         });
 
         return urlTargetsMap;
