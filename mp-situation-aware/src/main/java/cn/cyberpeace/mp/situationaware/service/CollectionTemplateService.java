@@ -586,6 +586,8 @@ public class CollectionTemplateService {
             // 从探针里面查询scriptUrl，采集模板需要单独保存一份。 防止保存采集模板之后，修改了探针脚本对采集模板产生影响
             probeIds = customProbes.stream().map(ColTempCustomProbeRequest::getId).collect(Collectors.toList());
         } else if (Objects.equals("update", operate)) {
+            log.info("process custom probe scripts... operate:{}", operate);
+            log.info("customProbes:{}", customProbes);
             probeIds = customProbes.stream().filter(p -> Objects.equals(1, p.getReload())).map(ColTempCustomProbeRequest::getId).collect(Collectors.toList());
         }
         List<ProbeDto> probeDtos = probeService.listByIds(probeIds);
