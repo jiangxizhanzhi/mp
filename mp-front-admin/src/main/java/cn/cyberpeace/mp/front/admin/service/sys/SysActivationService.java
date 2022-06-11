@@ -147,7 +147,7 @@ public class SysActivationService {
     public String getValueByKey(String key) {
         log.info(key);
         ActivationResponse activationResponse = status();
-        if (!Objects.equals(1, activationResponse.getIsActived())) {
+        if (Objects.isNull(activationResponse) || !Objects.equals(1, activationResponse.getIsActived())) {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
         }
 
