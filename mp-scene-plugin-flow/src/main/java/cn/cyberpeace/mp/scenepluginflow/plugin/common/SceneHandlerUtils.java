@@ -254,8 +254,14 @@ public class SceneHandlerUtils {
 
     public boolean startFlows(FlowPluginSceneElementBO flowElement, List<FlowWithSourceIp> flowWithSourceIps, Runnable stopCallback,
                               boolean async, Runnable asyncCallback, int runType) {
+        // 需要创建流量任务的流量
         var needCreateTaskFlows = flowWithSourceIps.stream()
                 .filter(f -> f.getFlow().getTaskId() == null)
+                .collect(Collectors.toList());
+        // 已有流量任务的流量
+        var haveTaskFlows = flowWithSourceIps.stream()
+                .filter(f -> f.getFlow().getTaskId() != null)
+                .map(f -> f.getFlow())
                 .collect(Collectors.toList());
         var flows = flowWithSourceIps.stream()
                 .map(f -> f.getFlow())
@@ -369,6 +375,8 @@ public class SceneHandlerUtils {
             executorFlows.forEach(flow -> {
                 flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
             });
+            // 已有流量任务id的流量直接执行
+            executorFlows.addAll(haveTaskFlows);
             return startFlows(executorFlows, stopCallback, runType);
         };
         if (async) {
