@@ -1,12 +1,9 @@
 package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
-import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
+import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @Description:
@@ -14,7 +11,7 @@ import java.util.Map;
  * @Date：2022/4/25 09:41
  */
 @Data
-public class CollectionTemplateProbeDto {
+public class CollectionTemplateProbeDto extends CollectionTemplateProbeModel {
 
     /**
      * 探针ID

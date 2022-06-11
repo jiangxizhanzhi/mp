@@ -34,6 +34,8 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 
     List<CollectionTemplateProbeDto> listCollectionTemplateProbeDtos(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
 
+    List<CollectionTemplateProbeModel> listCollectionTemplateProbeModels(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
+
     /**
      *
      * @param templateId
