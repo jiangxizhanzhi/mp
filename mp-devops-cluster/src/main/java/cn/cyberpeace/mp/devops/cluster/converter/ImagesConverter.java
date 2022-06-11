@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.*;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -343,17 +345,30 @@ public class ImagesConverter implements BaseConverter{
     public Integer async(ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
         Boolean isHide = request.getIsHide();
-        List<Integer> diffList = targetConverter.getAsyncDeviceIds(requestIds);
-        if (CollectionUtils.isEmpty(diffList)){
+        DeviceAsyncBO bo = targetConverter.getAsyncDeviceIds(requestIds);
+        List<Integer> notExistedList = bo.getNotExistedList();
+        List<Integer> existedList = bo.getExistedList();
+        if (CollectionUtils.isEmpty(notExistedList) && CollectionUtils.isEmpty(existedList)){
             return requestIds.size();
         }
-        CloudPlatformPageResult<Device> model = deviceService.findByIds(diffList);
-        List<Device> deviceList = model.getList();
-        if (CollectionUtils.isEmpty(deviceList)){
-            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        Integer result = NumberUtils.INTEGER_ZERO;
+        if (CollectionUtils.isNotEmpty(notExistedList)) {
+            CloudPlatformPageResult<Device> model = deviceService.findByIds(notExistedList);
+            List<Device> deviceList = model.getList();
+            if (CollectionUtils.isNotEmpty(deviceList)) {
+                deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
+                result += devopsTargetService.insert(deviceList);
+            }
         }
-        deviceList.stream().forEach(device -> device.setIsHide(Objects.nonNull(isHide) ? isHide : Boolean.FALSE));
-        return devopsTargetService.insert(deviceList);
+        if (CollectionUtils.isNotEmpty(existedList)){
+            CloudPlatformPageResult<Device> model = deviceService.findByIds(existedList);
+            List<Device> deviceList = model.getList();
+            if (CollectionUtils.isNotEmpty(deviceList)) {
+                deviceList.forEach(device -> devopsTargetService.updateById(device));
+                result+= existedList.size();
+            }
+        }
+        return result;
     }
 
 
