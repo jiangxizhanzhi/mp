@@ -39,5 +39,6 @@ public class GuacamoleRecordingData implements CloudHttpData {
         private String fileSize;
         private String recordate;
         private String recortime;
+        private String host;
     }
 }
