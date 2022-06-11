@@ -84,7 +84,7 @@ public class WazuhCommon {
             resource.setFile(nameFileMap.getOrDefault(WAZUH_AGENT_WINDOWS_FILE_NAME, StringUtils.EMPTY));
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.WINDOWS_LINE_BREAK,
-                            String.format("unzip %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
+                            String.format("unzip -q %s -d %s\\agent-installer", InstallerUtils.INSTALLER_REPLACEMENT,
                                     windowsInstallDir),
                             String.format("cd %s\\agent-installer\\agent-windows", windowsInstallDir),
                             "call install.bat",
@@ -105,7 +105,7 @@ public class WazuhCommon {
             resource.setFile(StringUtils.EMPTY);
             resource.setInstallCommand(
                     StringUtils.joinWith(CommandUtils.LINUX_LINE_BREAK,
-                            String.format("unzip %s/%s -d %s/agent-installer", linuxInstallDir,
+                            String.format("unzip -q %s/%s -d %s/agent-installer", linuxInstallDir,
                                     WAZUH_AGENT_LINUX_FILE_NAME, linuxInstallDir),
                             String.format("cd %s/agent-installer/agent-linux", linuxInstallDir),
                             "sh install.sh",

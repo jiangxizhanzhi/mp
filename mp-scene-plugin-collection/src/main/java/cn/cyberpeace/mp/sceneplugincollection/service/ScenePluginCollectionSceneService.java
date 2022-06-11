@@ -328,7 +328,11 @@ public class ScenePluginCollectionSceneService {
             var hostEvent = new CollectionHostEventBO();
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
-            hostEvent.setEventDesc(srcHostEvent.getAction());
+            if (StringUtils.isEmpty(srcHostEvent.getAction())) {
+                hostEvent.setEventDesc(srcHostEvent.getTitle());
+            } else {
+                hostEvent.setEventDesc(srcHostEvent.getAction());
+            }
             hostEvent.setTime(srcHostEvent.getUpdateTime());
             hostEvent.setDescription(srcHostEvent.getDescription());
             hostEvent.setLevel(srcHostEvent.getLevel());
