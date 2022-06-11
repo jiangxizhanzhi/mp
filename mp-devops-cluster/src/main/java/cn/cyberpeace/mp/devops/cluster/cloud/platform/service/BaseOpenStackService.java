@@ -3,13 +3,15 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageData;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,6 +20,7 @@ import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -143,9 +146,9 @@ public class BaseOpenStackService extends BaseService {
      * @return
      */
     protected <T> CloudPlatformPageResult<T> page(String url, Class<T> tClass) {
-        cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult pageResult = this.sendGet(url, cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformPageResult.class);
+        CloudPlatformCommonPageResult pageResult = this.sendGet(url, CloudPlatformCommonPageResult.class);
         this.checkResult(pageResult);
-        CloudPlatformPageData data = pageResult.getData();
+        CloudPlatformCommonPageResult.CloudPlatformPageData data = pageResult.getData();
         List<T> list = JSONObject.parseArray(JSONObject.toJSONString(data.getList()),tClass);
         CloudPlatformPageResult<T> model = new CloudPlatformPageResult<>();
         model.setList(CollectionUtils.isEmpty(list) ? Lists.newArrayList() : list);
@@ -162,6 +165,23 @@ public class BaseOpenStackService extends BaseService {
     protected <T extends BaseCloudPlatformResult> void checkResult(T t){
         if (Objects.isNull(t) || (!BaseCloudPlatformConstant.CODE.equals(t.getCode()) && !t.isSuccess())){
             throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_ERROR);
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    private static class CloudPlatformCommonPageResult extends BaseCloudPlatformResult {
+
+        private CloudPlatformPageData data;
+
+        @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        public static class CloudPlatformPageData {
+
+            private List<?> list = new ArrayList<>();
+
+            private Integer total = 0;
         }
     }
 }
