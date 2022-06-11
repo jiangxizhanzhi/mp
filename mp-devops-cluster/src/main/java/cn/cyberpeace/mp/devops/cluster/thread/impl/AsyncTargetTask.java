@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.thread.impl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,8 @@ public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Devic
 
         List<Integer> deviceIds = deviceList.stream().map(Device::getId).collect(Collectors.toList());
 
-        List<Integer> diffList = targetConverter.getAsyncDeviceIds(deviceIds);
+        DeviceAsyncBO bo = targetConverter.getAsyncDeviceIds(deviceIds);
+        List<Integer> diffList =  bo.getNotExistedList();
 
         if (CollectionUtils.isEmpty(diffList)){
             return ServiceResult.successful();

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.DeviceAsyncBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
@@ -123,22 +124,28 @@ public class TargetConverter{
     /**
      * 获取需同步的靶标ID集合
      * @param deviceIds
-     * @return
+     * @return DeviceAsyncBO
      */
-    public List<Integer> getAsyncDeviceIds(List<Integer> deviceIds){
+    public DeviceAsyncBO getAsyncDeviceIds(List<Integer> deviceIds){
+        DeviceAsyncBO bo = new DeviceAsyncBO();
         if (CollectionUtils.isEmpty(deviceIds)){
-            return Lists.newArrayList();
+            return new DeviceAsyncBO();
         }
         List<String> ids = deviceIds.stream().map(String::valueOf).collect(Collectors.toList());
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByIds(ids);
-        List<Integer> diffList;
+        List<Integer> notExistedList;
+        List<Integer> existedList;
         if (CollectionUtils.isEmpty(deviceTargetPOS)){
-            diffList = deviceIds;
+            notExistedList = deviceIds;
+            existedList = Lists.newArrayList();
         }else{
             List<Integer> targetIds = deviceTargetPOS.stream().map(v -> Integer.parseInt(v.getId())).collect(Collectors.toList());
-            diffList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
+            notExistedList = deviceIds.stream().filter(v -> !targetIds.contains(v)).collect(Collectors.toList());
+            existedList = deviceIds.stream().filter(v -> targetIds.contains(v)).collect(Collectors.toList());
         }
-        return diffList;
+        bo.setNotExistedList(notExistedList);
+        bo.setExistedList(existedList);
+        return bo;
     }
 
     /**
