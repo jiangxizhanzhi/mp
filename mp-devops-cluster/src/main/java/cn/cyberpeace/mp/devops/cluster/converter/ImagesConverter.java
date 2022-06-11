@@ -191,6 +191,9 @@ public class ImagesConverter implements BaseConverter{
         }).collect(Collectors.toList());
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
+        if (Objects.isNull(device) || !device.isSuccess()){
+            return device;
+        }
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
