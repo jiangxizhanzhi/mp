@@ -47,13 +47,11 @@ public class DevopsTargetServiceImpl implements DevopsTargetService {
     @Transactional
     @Override
     public Integer updateById(Device device) {
-        if (Objects.nonNull(device) && device.isSuccess()) {
-            DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
-            if (Objects.nonNull(oldDeviceTargetPO)) {
-                DeviceTargetPO deviceTargetPO = convertDevice(device);
-                deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
-                return deviceTargetMapper.updateById(deviceTargetPO);
-            }
+        DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+        if (Objects.nonNull(oldDeviceTargetPO)) {
+            DeviceTargetPO deviceTargetPO = convertDevice(device);
+            deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            return deviceTargetMapper.updateById(deviceTargetPO);
         }
         return 0;
     }
