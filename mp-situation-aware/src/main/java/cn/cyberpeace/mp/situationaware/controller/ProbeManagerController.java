@@ -110,7 +110,7 @@ public class ProbeManagerController {
         String oldMd5 = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
         boolean contentChanged = false;
-        if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
+        if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
 
             if (!Objects.equals(newMd5, oldMd5)) {
