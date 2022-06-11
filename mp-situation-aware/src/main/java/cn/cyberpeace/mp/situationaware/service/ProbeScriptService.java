@@ -60,11 +60,11 @@ public class ProbeScriptService {
                 suffix = "sh";
             }
 
-            if (scriptType == 0) {
+            if (scriptType == 1) {
                 suffix = "py";
             }
 
-            if (scriptType == 0) {
+            if (scriptType == 2) {
                 suffix = "bat";
             }
         }
