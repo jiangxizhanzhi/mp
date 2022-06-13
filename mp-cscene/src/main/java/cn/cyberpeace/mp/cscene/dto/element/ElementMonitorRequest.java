@@ -13,11 +13,6 @@ import java.util.List;
  */
 @Data
 public class ElementMonitorRequest extends BaseSceneElementPageRequest {
-
-    private LocalDateTime localStartTime;
-
-    private LocalDateTime localEndTime;
-
     @ApiModelProperty(value = "rule级别集合 范围 0 ~ 15")
     private List<Integer> levels;
 
