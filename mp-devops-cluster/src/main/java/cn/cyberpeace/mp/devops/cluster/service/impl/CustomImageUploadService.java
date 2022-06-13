@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.service.impl;
 
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.utils.FileUtils;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 自定义上传镜像
@@ -50,9 +48,6 @@ public class CustomImageUploadService extends BaseUploadService {
             log.error("file transfer error",e);
         }
         BaseCloudPlatformResult model = imagesService.upload(fileList,"image");
-        if (Objects.isNull(model) || !model.isSuccess()){
-            this.serviceResult = ServiceResult.fail("file upload error");
-        }
         this.serviceResult = new Result(new TargetUploadVO(model.getTmpdirUuid(),model.getFileNames()));
     }
 }

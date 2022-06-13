@@ -126,9 +126,6 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
-        if (Objects.isNull(device) || !device.isSuccess()){
-            return device;
-        }
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Arrays.asList(device));
         return device;
@@ -167,9 +164,6 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
-        if (Objects.isNull(device) || !device.isSuccess()){
-            return device;
-        }
         devopsTargetService.updateById(device);
         return device;
     }
@@ -191,9 +185,6 @@ public class ImagesConverter implements BaseConverter{
         }).collect(Collectors.toList());
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
-        if (Objects.isNull(device) || !device.isSuccess()){
-            return device;
-        }
         devopsTargetService.insert(Arrays.asList(device));
         return device;
     }
