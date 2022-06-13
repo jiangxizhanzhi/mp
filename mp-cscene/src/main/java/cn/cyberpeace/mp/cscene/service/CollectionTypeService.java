@@ -79,7 +79,7 @@ public class CollectionTypeService {
 
         Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
-
+        log.info("ruleFiles:{}", ruleFiles);
         List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
             String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
             CollectionApp app = null;
@@ -90,6 +90,7 @@ public class CollectionTypeService {
             return app;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
+        log.info("apps:{}", apps);
         return apps;
     }
 

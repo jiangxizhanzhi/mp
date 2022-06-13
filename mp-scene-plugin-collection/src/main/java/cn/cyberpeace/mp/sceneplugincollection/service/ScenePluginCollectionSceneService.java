@@ -1336,14 +1336,12 @@ public class ScenePluginCollectionSceneService {
      * @return
      */
     public String ruleFile2AppName(String ruleFileName) {
-        log.info("ruleFileName:{}", ruleFileName);
         if (StringUtils.isBlank(ruleFileName)) {
             return null;
         }
         int firstIndex = StringUtils.indexOf(ruleFileName, "-");
         ruleFileName = StringUtils.substring(ruleFileName, firstIndex + 1);
         ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
-        log.info("appName:{}", ruleFileName);
         return ruleFileName;
     }
 
