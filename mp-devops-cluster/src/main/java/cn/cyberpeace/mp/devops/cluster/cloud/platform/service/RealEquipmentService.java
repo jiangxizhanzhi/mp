@@ -55,7 +55,9 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @return
      */
     public Device add(Device device){
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
+        Device result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists", JsonUtils.toUnderlineJSONString(device),Device.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -65,7 +67,9 @@ public class RealEquipmentService extends BaseOpenStackService {
      * @return
      */
     public Device update(String uuid,Device device){
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
