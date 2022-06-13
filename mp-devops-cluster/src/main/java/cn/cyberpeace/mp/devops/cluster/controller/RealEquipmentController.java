@@ -171,11 +171,8 @@ public class RealEquipmentController {
     @ApiOperation("新增")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
-        Device realEquipment = realEquipmentConverter.add(request);
-        if (Objects.isNull(realEquipment)){
-            return ServiceResult.fail("");
-        }
-        return realEquipment.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(realEquipment.getMessage());
+        realEquipmentConverter.add(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -187,11 +184,8 @@ public class RealEquipmentController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Device realEquipment = realEquipmentConverter.update(request);
-        if (Objects.isNull(realEquipment)){
-            return ServiceResult.fail("");
-        }
-        return realEquipment.isSuccess() ? ServiceResult.successful() :ServiceResult.fail(realEquipment.getMessage());
+        realEquipmentConverter.update(request);
+        return ServiceResult.successful();
     }
 
     /**
