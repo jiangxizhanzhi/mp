@@ -1059,10 +1059,6 @@ public class DataCollectionService {
                     .md5After(wazuhFileRoot.getSyscheck().getMd5After());
         }
 
-        if (Objects.nonNull(wazuhFileRoot.getData())) {
-            builder.title(wazuhFileRoot.getData().getTitle());
-        }
-
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
 //            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
 //                    .agentName(wazuhFileRoot.getAgent().getName())

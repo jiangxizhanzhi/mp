@@ -329,7 +329,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
-                hostEvent.setEventDesc(srcHostEvent.getTitle());
+                hostEvent.setEventDesc(srcHostEvent.getDescription());
             } else {
                 hostEvent.setEventDesc(srcHostEvent.getAction());
             }
