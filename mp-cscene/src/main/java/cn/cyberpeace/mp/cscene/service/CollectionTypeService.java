@@ -17,10 +17,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -76,8 +78,9 @@ public class CollectionTypeService {
         List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
 
         Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
-        List<String> ruleFiles = new ArrayList<>(ruleId2FileMap.values());
-        List<CollectionApp> apps = ruleFiles.stream().map(r -> {
+        Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
+
+        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
             String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
             CollectionApp app = null;
             if (StringUtils.isNotBlank(appName)) {
