@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
@@ -124,11 +123,8 @@ public class ImagesController {
     @PostMapping("/add")
     public ServiceResult add(@RequestBody ImageRequest request){
         validImageRequest(request);
-        Device device = imagesConverter.add(request);
-        if (Objects.isNull(device)){
-            return new Result();
-        }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        imagesConverter.add(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -141,11 +137,8 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        Device device = imagesConverter.update(request);
-        if (Objects.isNull(device)){
-            return new Result();
-        }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        imagesConverter.update(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -205,11 +198,8 @@ public class ImagesController {
     @ApiOperation("快速构建")
     @PostMapping("/build")
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
-        Device device = imagesConverter.build(request);
-        if (Objects.isNull(device)){
-            return new Result();
-        }
-        return device.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(device.getMessage());
+        imagesConverter.build(request);
+        return ServiceResult.successful();
     }
 
 
@@ -250,7 +240,7 @@ public class ImagesController {
     @GetMapping("/export")
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
         BaseCloudPlatformResult model = imagesConverter.export(uuid,imageName);
-        return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
+        return new Result<>(model.getUrl());
     }
 
     /**
@@ -259,11 +249,8 @@ public class ImagesController {
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     public ServiceResult create(@PathVariable("id") String uuid){
-        BaseCloudPlatformResult model = imagesConverter.create(uuid);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        imagesConverter.create(uuid);
+        return ServiceResult.successful();
     }
 
     /**
@@ -272,11 +259,8 @@ public class ImagesController {
     @ApiOperation("释放镜像机器")
     @PostMapping("/delete-instance")
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
-        BaseCloudPlatformResult model = imagesConverter.delete(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        imagesConverter.delete(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -285,11 +269,8 @@ public class ImagesController {
     @ApiOperation("重启镜像机器")
     @PostMapping("/reboot")
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
-        BaseCloudPlatformResult model = imagesConverter.reboot(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        imagesConverter.reboot(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -299,9 +280,6 @@ public class ImagesController {
     @GetMapping("/{id}/snapshot/list")
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
-        if (Objects.isNull(convertModel)){
-            return new Result();
-        }
         return new Result(convertModel.getList());
     }
 
@@ -322,11 +300,8 @@ public class ImagesController {
     @ApiOperation("合并快照历史")
     @PostMapping("/snapshot/merge")
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
-        BaseCloudPlatformResult model = snapshotConverter.merge(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        snapshotConverter.merge(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -335,11 +310,8 @@ public class ImagesController {
     @ApiOperation("创建快照")
     @PostMapping("/snapshot/create")
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
-        BaseCloudPlatformResult model = snapshotConverter.create(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        snapshotConverter.create(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -348,12 +320,9 @@ public class ImagesController {
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
-        BaseCloudPlatformResult model = scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
+        scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        return ServiceResult.successful();
     }
 
     /**
@@ -363,9 +332,6 @@ public class ImagesController {
     @GetMapping("/inject-file")
     public Result<InjectFileConvertModel> findInjectFileList(ImageInjectFilePageRequest request){
         BasePageBO<InjectFileConvertModel> list = injectFileConverter.list(request.getDeviceUuid());
-        if (Objects.isNull(list)){
-            return new Result();
-        }
         return new Result(list.getList());
     }
 
@@ -375,11 +341,8 @@ public class ImagesController {
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
-        BaseCloudPlatformResult model = injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return BaseCloudPlatformConstant.CODE.equals(model.getCode()) ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
+        return ServiceResult.successful();
     }
 
 

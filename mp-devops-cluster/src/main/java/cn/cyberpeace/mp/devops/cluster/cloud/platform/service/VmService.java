@@ -42,7 +42,9 @@ public class VmService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult action(VmActionCloudPlatformModel model, String uuid){
-        return super.sendPost(URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
