@@ -48,5 +48,7 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
      */
     @DefaultStr
     private String firewallResourceId;
+    @DefaultStr
+    private String connectMode;
 
 }

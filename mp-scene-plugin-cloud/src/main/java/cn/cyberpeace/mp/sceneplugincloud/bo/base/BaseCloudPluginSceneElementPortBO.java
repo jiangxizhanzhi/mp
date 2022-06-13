@@ -54,6 +54,8 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String floatingIpId;
     @ApiModelProperty(value = "云平台三层防火墙资源id")
     private String firewallResourceId;
+    @ApiModelProperty(value = "连接模式: dot1q-tunnel(单臂路由)")
+    private String connectMode;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {

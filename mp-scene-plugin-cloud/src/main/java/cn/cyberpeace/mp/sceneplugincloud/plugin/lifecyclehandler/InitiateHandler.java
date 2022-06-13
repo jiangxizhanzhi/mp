@@ -674,23 +674,6 @@ public class InitiateHandler extends HandlerCommon {
                     ConnectedNetworkBO connectedNetwork = new ConnectedNetworkBO(connectNetwork, getHandlerUtils());
                     connectedNetwork.addPort(port, connectPort, false);
                     cloudElement.getAccessNetworks().add(connectedNetwork);
-
-                    var connectElement = getPluginHandler().getElement(connectPort.getElement().getId());
-                    if (connectElement != null) {
-                        // todo
-                        if (
-                                ("vios-adventerprisek9-m.vmdk.SPA.157-3.M3".equals(cloudElement.getImage()) && "viosl2".equals(connectElement.getImage()))
-                                        || ("viosl2".equals(connectElement.getImage()) && "vios-adventerprisek9-m.vmdk.SPA.157-3.M3".equals(cloudElement.getImage()))
-                        ) {
-                            var from = getPluginHandler().getPort(port.getId());
-                            var to = getPluginHandler().getPort(connectPort.getId());
-                            if (from != null && to != null) {
-                                from.setVlanMode("dot1q-tunnel");
-                                to.setVlanMode("dot1q-tunnel");
-                            }
-                        }
-                    }
-
                     continue;
                 }
             }

@@ -361,10 +361,17 @@ public class CreateHandler extends HandlerCommon {
         var network = connectedNetwork.network;
         List<SceneElementPortBO> fromPorts = connectedNetwork.getFromPorts();
         SceneElementPortBO samplePort = fromPorts.get(0);
+        for (SceneElementPortBO sceneElementPortBO : fromPorts) {
+            if (StringUtils.isNotEmpty(sceneElementPortBO.getIp())) {
+                samplePort = sceneElementPortBO;
+            }
+        }
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(network.getResourceId());
-        virtualNic.setVlanMode(sampleCloudPort.getVlanMode());
+        if (StringUtils.isNotEmpty(sampleCloudPort.getConnectMode())) {
+            virtualNic.setVlanMode(sampleCloudPort.getConnectMode());
+        }
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
