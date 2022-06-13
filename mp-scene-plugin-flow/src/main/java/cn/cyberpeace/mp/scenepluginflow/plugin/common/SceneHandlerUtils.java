@@ -343,6 +343,11 @@ public class SceneHandlerUtils {
         newFlows.forEach(flow -> {
             preparingFLow(flow.getFlow());
         });
+        if (!haveTaskFlows.isEmpty()) {
+            haveTaskFlows.forEach(flow -> {
+                preparingFLow(flow);
+            });
+        }
         final String flowNetworkId = networkId;
         final String flowIp = ip;
         String finalIp = ip;
