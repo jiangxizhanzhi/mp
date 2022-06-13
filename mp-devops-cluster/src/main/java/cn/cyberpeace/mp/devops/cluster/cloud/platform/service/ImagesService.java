@@ -42,21 +42,27 @@ public class ImagesService extends BaseOpenStackService {
      * 新增
      */
     public Device add(Device device){
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
+        Device result = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/lists", JsonUtils.toUnderlineJSONString(device), Device.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
      * 更新
      */
     public Device update(String uuid,Device device){
-        return super.sendPut(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
      * 导出
      */
     public BaseCloudPlatformResult export(String uuid, String imageName){
-        return super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName, BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName, BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -65,7 +71,9 @@ public class ImagesService extends BaseOpenStackService {
      * @return
      */
     public Device quickCreate(DeviceQuickCreateCloudPlatformModel model){
-        return super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/quick_create", JsonUtils.toUnderlineJSONString(model), Device.class);
+        Device device = super.sendPost(CPCLOUD_DEVICE + URL_VERSION + "/quick_create", JsonUtils.toUnderlineJSONString(model), Device.class);
+        super.checkResult(device);
+        return device;
     }
 
 
@@ -83,7 +91,9 @@ public class ImagesService extends BaseOpenStackService {
         fileMap.entrySet().stream().forEach(entry -> builder.addBinaryBody("file",  entry.getValue(),ContentType.DEFAULT_BINARY,entry.getKey()));
         builder.setMode(HttpMultipartMode.RFC6532);
         try {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformResult.class);
+            BaseCloudPlatformResult result = super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformResult.class);
+            super.checkResult(result);
+            return result;
         } catch (IOException e) {
             log.error("upload file error",e);
         }
