@@ -14,11 +14,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -59,7 +61,6 @@ public class CollectionTypeService {
 
         List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
 
-
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
         if (Objects.nonNull(baseRequest.getStartTime())) {
@@ -69,7 +70,7 @@ public class CollectionTypeService {
             var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
             wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
         }
-        wazuhEventRequest.setEndTime(baseRequest.getEndTime());
+        wazuhEventRequest.setEndTime(Optional.ofNullable(baseRequest.getEndTime()).orElse(LocalDateTime.now()));
         // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
         Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
         List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
