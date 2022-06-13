@@ -1,16 +1,25 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -25,6 +34,12 @@ public class CollectionTypeService {
     @Autowired
     private CsceneCommonService csceneCommonService;
 
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
     public List<CollectionType> typeTrees(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
@@ -38,19 +53,40 @@ public class CollectionTypeService {
     }
 
 
-    public List<CollectionApp> getAppNames(BaseSceneElementRequest baseRequest) {
+    public List<CollectionApp> getAppNames(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
-        //csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId());
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
 
-        CollectionApp appName1 = new CollectionApp();
-        appName1.setName("ssh");
 
-        CollectionApp appName2 = new CollectionApp();
-        appName2.setName("macfee");
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(agentNames);
+        if (Objects.nonNull(baseRequest.getStartTime())) {
+            wazuhEventRequest.setStartTime(baseRequest.getStartTime());
+        } else {
+            String translateSceneId = csceneCommonService.translateSceneId(baseRequest.getSceneId());
+            var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
+            wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
+        }
+        wazuhEventRequest.setEndTime(baseRequest.getEndTime());
+        // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
+        Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
+        List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
 
-        return Arrays.asList(appName1, appName2);
+        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
+        List<String> ruleFiles = new ArrayList<>(ruleId2FileMap.values());
+        List<CollectionApp> apps = ruleFiles.stream().map(r -> {
+            String appName = ruleFile2AppName(r);
+            CollectionApp app = null;
+            if (StringUtils.isNotBlank(appName)) {
+                app = new CollectionApp();
+                app.setName(appName);
+            }
+            return app;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return apps;
     }
 
     /**
@@ -163,5 +199,21 @@ public class CollectionTypeService {
         return secSysType;
     }
 
+    /**
+     * 规则文件名称转化成appName
+     * @param ruleFileName
+     * @return
+     */
+    private String ruleFile2AppName(String ruleFileName) {
+        log.info("ruleFileName:{}", ruleFileName);
+        if (StringUtils.isBlank(ruleFileName)) {
+            return null;
+        }
+        int firstIndex = StringUtils.indexOf(ruleFileName, "-");
+        ruleFileName = StringUtils.substringAfter(ruleFileName, firstIndex);
+        ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
+        log.info("appName:{}", ruleFileName);
+        return ruleFileName;
+    }
 
 }

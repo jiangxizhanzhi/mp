@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
@@ -41,7 +42,7 @@ public class CollectionTypeController {
 
     @GetMapping("/apps")
     @ApiOperation(value = "查询节点应用列表")
-    public ServiceResult<CollectionApp> getApps(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<CollectionApp> getApps(BaseTimeRangeRequest baseRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(baseRequest);
         return ServiceResult.success(appNames);
     }
