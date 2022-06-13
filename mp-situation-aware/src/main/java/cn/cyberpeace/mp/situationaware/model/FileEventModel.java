@@ -74,7 +74,6 @@ public class FileEventModel {
     @ApiModelProperty("滚动分页的scroll_id")
     private String scrollId;
 
-    @ApiModelProperty("事件描述")
-    private String title;
-
+    @ApiModelProperty("规则id")
+    private String ruleId;
 }

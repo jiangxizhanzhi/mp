@@ -1068,9 +1068,10 @@ public class DataCollectionService {
 
         if (Objects.nonNull(wazuhFileRoot.getRule())) {
             //区分文件还是注册表
-                builder.description(wazuhFileRoot.getRule().getDescription())
+            builder.description(wazuhFileRoot.getRule().getDescription())
                     //  .catagory()
-                    .level(wazuhFileRoot.getRule().getLevel());
+                    .level(wazuhFileRoot.getRule().getLevel())
+                    .ruleId(wazuhFileRoot.getRule().getId());
             if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups())) {
                 builder.fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE);
             }

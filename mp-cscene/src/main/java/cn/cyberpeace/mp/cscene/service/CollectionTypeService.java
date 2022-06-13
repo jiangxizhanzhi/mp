@@ -77,7 +77,7 @@ public class CollectionTypeService {
         Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
         List<String> ruleFiles = new ArrayList<>(ruleId2FileMap.values());
         List<CollectionApp> apps = ruleFiles.stream().map(r -> {
-            String appName = ruleFile2AppName(r);
+            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
             CollectionApp app = null;
             if (StringUtils.isNotBlank(appName)) {
                 app = new CollectionApp();
@@ -198,22 +198,4 @@ public class CollectionTypeService {
 
         return secSysType;
     }
-
-    /**
-     * 规则文件名称转化成appName
-     * @param ruleFileName
-     * @return
-     */
-    private String ruleFile2AppName(String ruleFileName) {
-        log.info("ruleFileName:{}", ruleFileName);
-        if (StringUtils.isBlank(ruleFileName)) {
-            return null;
-        }
-        int firstIndex = StringUtils.indexOf(ruleFileName, "-");
-        ruleFileName = StringUtils.substringAfter(ruleFileName, firstIndex);
-        ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
-        log.info("appName:{}", ruleFileName);
-        return ruleFileName;
-    }
-
 }
