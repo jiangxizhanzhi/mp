@@ -315,11 +315,33 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
 
-        // todo catagories -> rule id set
+        // catagories -> rule id set
+        List<String> ruleIdsByCatagories = new ArrayList<>();
         Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
-        if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-            List<String> ruleIds = new ArrayList<>(ruleId2File.keySet());
-            request.setRuleIds(ruleIds);
+        if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
+            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByCatagories.addAll(ruleIds);
+        }
+
+        // appNames -> rule id set
+        List<String> ruleIdsByAppNames = new ArrayList<>();
+        Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
+        if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
+            List<String> ruleIds = ruleId2AppNames.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByAppNames.addAll(ruleIds);
+        }
+
+        if (CollectionUtil.isNotEmpty(ruleIdsByCatagories) && CollectionUtil.isNotEmpty(ruleIdsByAppNames)) {
+            // 取交集
+            List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
+            request.setRuleIds(intersectionRuleIds);
+        } else {
+            List<String> ruleIds = new ArrayList<>();
+            ruleIds.addAll(ruleIdsByCatagories);
+            ruleIds.addAll(ruleIdsByAppNames);
+            if (CollectionUtil.isNotEmpty(ruleIds)) {
+                request.setRuleIds(ruleIds);
+            }
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
