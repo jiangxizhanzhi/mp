@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,11 +21,16 @@ import java.util.List;
 @Service
 public class CollectionTypeService {
 
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
+
     public List<CollectionType> typeTrees(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
         List<CollectionType> types = new ArrayList<>();
-        types.add(changeEvent("01", null));
+        types.add(changeEvent("00", null));
+        types.add(sourceLogFile("01", CollectionType.TYPE_LOG_FILE));
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
@@ -35,6 +41,8 @@ public class CollectionTypeService {
     public List<CollectionApp> getAppNames(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+
+        //csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId());
 
         CollectionApp appName1 = new CollectionApp();
         appName1.setName("ssh");
@@ -54,10 +62,20 @@ public class CollectionTypeService {
 
         CollectionType fileChangeEvent = CollectionType.builder().name("文件变更事件").code(code + "01").type(CollectionType.TYPE_CHANGE_EVENT_FILE).build();
         CollectionType registryChangeEvent = CollectionType.builder().name("注册表变更事件").code(code + "02").type(CollectionType.TYPE_CHANGE_EVENT_REGISTRY).build();
-        CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code(code + "03").type(CollectionType.TYPE_LOG_FILE).build();
+        //CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code(code + "03").type(CollectionType.TYPE_LOG_FILE).build();
 
-        changeEvent.setChildren(Arrays.asList(fileChangeEvent, registryChangeEvent, sourceLogEvent));
+        changeEvent.setChildren(Arrays.asList(fileChangeEvent, registryChangeEvent));
         return changeEvent;
+    }
+
+    /**
+     * 原始日志
+     * @return
+     */
+    private CollectionType sourceLogFile(String code, Integer type) {
+        CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code("01").type(CollectionType.TYPE_LOG_FILE).build();
+
+        return sourceLogEvent;
     }
 
     /**

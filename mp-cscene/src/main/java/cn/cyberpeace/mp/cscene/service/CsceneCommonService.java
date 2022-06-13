@@ -52,7 +52,7 @@ public class CsceneCommonService {
     /**
      * 根据sceneId和elementIds查询agentNames
      * @param sceneId
-     * @param elementIds
+     * @param elementIds 为空表示获取场景中所有的节点
      * @return
      */
     @Cacheable(value = "query_agentnames_by_elementids")
