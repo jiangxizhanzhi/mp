@@ -81,11 +81,14 @@ public class InstallerService extends BaseOpenStackService {
                 count++;
             }
         }
+        Installer result;
         if (StringUtils.isNotBlank(installer.getUuid())){
-            return super.sendFormDataPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER, builder.build(), Installer.class);
+            result = super.sendFormDataPut(CPCLOUD_DEVICE + URL_VERSION + INSTALLER, builder.build(), Installer.class);
         }else {
-            return super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS, builder.build(), Installer.class);
+            result = super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS, builder.build(), Installer.class);
         }
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -104,6 +107,8 @@ public class InstallerService extends BaseOpenStackService {
     public BaseCloudPlatformResult deleteByIds(List<String> ids) {
         var jsonObject = new JSONObject();
         jsonObject.put("uuids", ids);
-        return super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + INSTALLER + LISTS,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 }

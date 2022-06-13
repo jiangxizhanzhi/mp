@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.InstallerConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
@@ -94,11 +93,8 @@ public class InstallerController {
     @ApiOperation("新增")
     @PostMapping
     public ServiceResult add(@RequestBody InstallerRequest request){
-        InstallerConvertModel model = installerConverter.add(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        installerConverter.add(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -111,11 +107,8 @@ public class InstallerController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        InstallerConvertModel model = installerConverter.add(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        installerConverter.add(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -124,11 +117,8 @@ public class InstallerController {
     @ApiOperation("删除")
     @DeleteMapping
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
-        BaseCloudPlatformResult model = installerConverter.delete(request);
-        if (Objects.isNull(model)){
-            return ServiceResult.fail("");
-        }
-        return model.isSuccess() ? ServiceResult.successful() : ServiceResult.fail(model.getMessage());
+        installerConverter.delete(request);
+        return ServiceResult.successful();
     }
 
     /**
