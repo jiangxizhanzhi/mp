@@ -1,15 +1,17 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
+import cn.cyberpeace.mp.cscene.dto.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,27 +60,46 @@ public class CollectionTypeService {
     }
 
 
-    public List<CollectionApp> getAppNames(BaseTimeRangeRequest baseRequest) {
-        log.info("baseRequest:{}", baseRequest);
-        BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
+    public List<CollectionApp> getAppNames(CollectionAppRequest appRequest) {
+        log.info("baseRequest:{}", appRequest);
+        BaseRequestUtil.checkBaseRequestWithSceneId(appRequest);
 
-        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(appRequest.getSceneId(), appRequest.getElementIds());
+
+        // catagories -> rule id set
+        List<String> ruleIdsByCatagories = new ArrayList<>();
+        Map<String, String> ruleId2File = scenePluginCollectionSceneService.getRuleId2FileByCodes(appRequest.getCatagories());
+        if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
+            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByCatagories.addAll(ruleIds);
+        }
 
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         wazuhEventRequest.setAgentNames(agentNames);
-        if (Objects.nonNull(baseRequest.getStartTime())) {
-            wazuhEventRequest.setStartTime(baseRequest.getStartTime());
+        if (Objects.nonNull(appRequest.getStartTime())) {
+            wazuhEventRequest.setStartTime(appRequest.getStartTime());
         } else {
-            String translateSceneId = csceneCommonService.translateSceneId(baseRequest.getSceneId());
+            String translateSceneId = csceneCommonService.translateSceneId(appRequest.getSceneId());
             var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
             wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
         }
-        wazuhEventRequest.setEndTime(Optional.ofNullable(baseRequest.getEndTime()).orElse(LocalDateTime.now()));
+        wazuhEventRequest.setEndTime(Optional.ofNullable(appRequest.getEndTime()).orElse(LocalDateTime.now()));
         // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
         Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
-        List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
+        List<String> ruleIdsByAgentName = new ArrayList<>(ruleIdCntMap.keySet());
+        if (CollectionUtil.isEmpty(ruleIdsByAgentName)) {
+            return Collections.emptyList();
+        }
 
-        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
+        // 根据ruleIdsByCatagories筛选一道
+        List<String> filteredRuleIds = null;
+        if (CollectionUtil.isNotEmpty(ruleIdsByCatagories)) {
+            filteredRuleIds = ruleIdsByAgentName.stream().filter(rid -> ruleIdsByCatagories.contains(rid)).collect(Collectors.toList());
+        } else {
+            filteredRuleIds = ruleIdsByAgentName;
+        }
+
+        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(filteredRuleIds);
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
         log.info("ruleFiles:{}", ruleFiles);
         List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {

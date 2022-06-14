@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
+import cn.cyberpeace.mp.cscene.dto.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
 import io.swagger.annotations.Api;
@@ -42,8 +42,8 @@ public class CollectionTypeController {
 
     @GetMapping("/apps")
     @ApiOperation(value = "查询节点应用列表")
-    public ServiceResult<CollectionApp> getApps(BaseTimeRangeRequest baseRequest) {
-        List<CollectionApp> appNames = collectionTypeService.getAppNames(baseRequest);
+    public ServiceResult<CollectionApp> getApps(CollectionAppRequest appRequest) {
+        List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
         return ServiceResult.success(appNames);
     }
 

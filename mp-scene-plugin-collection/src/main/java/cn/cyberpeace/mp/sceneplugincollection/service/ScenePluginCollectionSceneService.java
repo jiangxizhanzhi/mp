@@ -1374,6 +1374,9 @@ public class ScenePluginCollectionSceneService {
      * @return 规则id2file map
      */
     public Map<String, String> getRuleId2FileByIds(List<String> ruleIds) {
+        if (CollectionUtil.isEmpty(ruleIds)) {
+            return new HashMap<>();
+        }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class)
                 .filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
