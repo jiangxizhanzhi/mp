@@ -17,10 +17,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -76,9 +78,10 @@ public class CollectionTypeService {
         List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
 
         Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
-        List<String> ruleFiles = new ArrayList<>(ruleId2FileMap.values());
-        List<CollectionApp> apps = ruleFiles.stream().map(r -> {
-            String appName = ruleFile2AppName(r);
+        Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
+        log.info("ruleFiles:{}", ruleFiles);
+        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
+            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
             CollectionApp app = null;
             if (StringUtils.isNotBlank(appName)) {
                 app = new CollectionApp();
@@ -87,6 +90,7 @@ public class CollectionTypeService {
             return app;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
+        log.info("apps:{}", apps);
         return apps;
     }
 
@@ -199,22 +203,4 @@ public class CollectionTypeService {
 
         return secSysType;
     }
-
-    /**
-     * 规则文件名称转化成appName
-     * @param ruleFileName
-     * @return
-     */
-    private String ruleFile2AppName(String ruleFileName) {
-        log.info("ruleFileName:{}", ruleFileName);
-        if (StringUtils.isBlank(ruleFileName)) {
-            return null;
-        }
-        int firstIndex = StringUtils.indexOf(ruleFileName, "-");
-        ruleFileName = StringUtils.substringAfter(ruleFileName, firstIndex);
-        ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
-        log.info("appName:{}", ruleFileName);
-        return ruleFileName;
-    }
-
 }

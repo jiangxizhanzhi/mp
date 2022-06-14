@@ -39,6 +39,13 @@ public class ColTempCommonProbeDto {
     //@ApiModelProperty(value = "采集模板ID")
     //private String templateId;
 
+
+    @ApiModelProperty(value = "0:信息类 1:事件类 2:日志类")
+    private Integer probeCategory;
+
+    @ApiModelProperty(value = "0:通用探针 1:自定义探针")
+    private Integer type;
+
     /**
      * 0:启用，1:禁用
      */

@@ -315,11 +315,33 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
 
-        // todo catagories -> rule id set
-        if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-            Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
-            List<String> ruleIds = new ArrayList<>(ruleId2File.keySet());
-            request.setRuleIds(ruleIds);
+        // catagories -> rule id set
+        List<String> ruleIdsByCatagories = new ArrayList<>();
+        Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
+        if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
+            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByCatagories.addAll(ruleIds);
+        }
+
+        // appNames -> rule id set
+        List<String> ruleIdsByAppNames = new ArrayList<>();
+        Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
+        if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
+            List<String> ruleIds = ruleId2AppNames.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByAppNames.addAll(ruleIds);
+        }
+
+        if (CollectionUtil.isNotEmpty(ruleIdsByCatagories) && CollectionUtil.isNotEmpty(ruleIdsByAppNames)) {
+            // 取交集
+            List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
+            request.setRuleIds(intersectionRuleIds);
+        } else {
+            List<String> ruleIds = new ArrayList<>();
+            ruleIds.addAll(ruleIdsByCatagories);
+            ruleIds.addAll(ruleIdsByAppNames);
+            if (CollectionUtil.isNotEmpty(ruleIds)) {
+                request.setRuleIds(ruleIds);
+            }
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
@@ -373,6 +395,9 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setMd5Before(srcHostEvent.getMd5Before());
             hostEvent.setMd5After(srcHostEvent.getMd5After());
             hostEvent.setScrollId(srcHostEvent.getScrollId());
+            if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
+                hostEvent.setAppName(ruleFile2AppName(ruleId2File.getOrDefault(srcHostEvent.getRuleId(), null)));
+            }
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
@@ -1324,6 +1349,22 @@ public class ScenePluginCollectionSceneService {
                 .filterIn(CollectionPluginWazuhRuleTypeModel::getId, typeIds.toArray());
         var typeModels = collectionPluginWazuhRuleTypeMapper.list(humanCondition);
         return typeModels.stream().map(t -> t.getType()).collect(Collectors.toList());
+    }
+
+    /**
+     * 规则文件名称转化成appName
+     *
+     * @param ruleFileName
+     * @return
+     */
+    public String ruleFile2AppName(String ruleFileName) {
+        if (StringUtils.isBlank(ruleFileName)) {
+            return null;
+        }
+        int firstIndex = StringUtils.indexOf(ruleFileName, "-");
+        ruleFileName = StringUtils.substring(ruleFileName, firstIndex + 1);
+        ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
+        return ruleFileName;
     }
 
     /**

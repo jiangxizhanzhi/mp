@@ -14,6 +14,7 @@ import java.util.List;
  * @Date：2022/4/25 09:41
  */
 @Data
+@Deprecated
 public class ColTempCustomProbeDto extends ColTempCommonProbeDto {
 
     /**
