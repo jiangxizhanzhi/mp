@@ -326,7 +326,7 @@ public class DataCollectionService {
                         vulnerability.setVulnerability(vul);
                         vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
                         vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
-                        vulnerability.setTime(vul.getUpdated().atStartOfDay());
+                        vulnerability.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
                         wazuhModelList.add(vulnerability);
                     }
                 }
