@@ -14,18 +14,16 @@ class DefaultValueConverter implements IConverter {
         var cloudElementMap = container.getCloudPluginElements();
         if (cloudElementMap != null) {
             cloudElementMap.forEach((id, e) -> {
-                if (e.getImageType() == null) {
+                if (e.getImageType() == null && id != null) {
                     // 处理下 imageType
-                    if (CollectionUtils.isNotEmpty(container.getAllElements())) {
-                        if (id.toLowerCase().startsWith("router")) {
-                            e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
-                        } else if (id.toLowerCase().startsWith("firewall")) {
-                            e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
-                        } else if (id.toLowerCase().startsWith("server")) {
-                            e.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
-                        } else {
-                            e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
-                        }
+                    if (id.toLowerCase().startsWith("router")) {
+                        e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+                    } else if (id.toLowerCase().startsWith("firewall")) {
+                        e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
+                    } else if (id.toLowerCase().startsWith("server")) {
+                        e.setImageType(BaseCloudPluginSceneElementModel.ImageType.VM);
+                    } else {
+                        e.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
                     }
                 }
             });
