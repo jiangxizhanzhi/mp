@@ -102,6 +102,12 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
     private Integer disabled;
 
     /**
+     * 0:shell 1:python 2:bat
+     */
+    @ApiModelProperty(value = "0:shell 1:python 2:bat")
+    @DefaultInt(0)
+    private Integer scriptType;
+    /**
      * 探针脚本内容fdfs地址（采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板）
      */
     @ApiModelProperty(value = "探针脚本内容fdfs地址(采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板)")

@@ -14,6 +14,7 @@
     <result column="engine" jdbcType="VARCHAR" property="engine" />
     <result column="OS_type" jdbcType="VARCHAR" property="osType" />
     <result column="disabled" jdbcType="INTEGER" property="disabled" />
+    <result column="script_type" jdbcType="INTEGER" property="scriptType" />
     <result column="script_url" jdbcType="VARCHAR" property="scriptUrl" />
     <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
     <result column="config" jdbcType="VARCHAR" property="config" />
