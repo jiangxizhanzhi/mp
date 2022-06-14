@@ -130,14 +130,14 @@ public class SnapshotConverter {
     public void validSnapshot(List<String> uuids){
 
         //引用
-        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids.get(0));
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(referStateMap)){
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE);
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids.get(0));
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
         if (MapUtils.isNotEmpty(useStateMap)){
