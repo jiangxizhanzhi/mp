@@ -331,7 +331,10 @@ public class ScenePluginCollectionSceneService {
             ruleIdsByAppNames.addAll(ruleIds);
         }
 
-        if (CollectionUtil.isNotEmpty(ruleIdsByCatagories) && CollectionUtil.isNotEmpty(ruleIdsByAppNames)) {
+        Map<String, String> ruleId2Files = new HashMap<>(ruleId2File);
+        ruleId2Files.putAll(ruleId2AppNames);
+
+        if (CollectionUtils.isNotEmpty(ruleIdsByCatagories) && CollectionUtils.isNotEmpty(ruleIdsByAppNames)) {
             // 取交集
             List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
             request.setRuleIds(intersectionRuleIds);
@@ -339,7 +342,7 @@ public class ScenePluginCollectionSceneService {
             List<String> ruleIds = new ArrayList<>();
             ruleIds.addAll(ruleIdsByCatagories);
             ruleIds.addAll(ruleIdsByAppNames);
-            if (CollectionUtil.isNotEmpty(ruleIds)) {
+            if (CollectionUtils.isNotEmpty(ruleIds)) {
                 request.setRuleIds(ruleIds);
             }
         }
@@ -396,7 +399,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setMd5After(srcHostEvent.getMd5After());
             hostEvent.setScrollId(srcHostEvent.getScrollId());
             if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-                hostEvent.setAppName(ruleFile2AppName(ruleId2File.getOrDefault(srcHostEvent.getRuleId(), null)));
+                hostEvent.setAppName(ruleFile2AppName(ruleId2Files.getOrDefault(srcHostEvent.getRuleId(), null)).getSource());
             }
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
@@ -1234,22 +1237,22 @@ public class ScenePluginCollectionSceneService {
     }
 
 
-
-    public int sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ServiceResult<Integer> sumEnvVarChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumEnvVarChangedCountByTimeRange(wazuhRequest);
-        return changedCount;
+        return new ServiceResult<>(changedCount);
     }
 
-    public int sumProcessesChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+    public ServiceResult<Integer> sumProcessesChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumProcessesChangedCountByTimeRange(wazuhRequest);
-        return changedCount;
+        return new ServiceResult<>(changedCount);
     }
-    public int sumSysUserChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
+
+    public ServiceResult<Integer> sumSysUserChangedCount(ListPageInfoQueryParams listPageInfoQueryParams) {
         WazuhMonitorEventsRequest wazuhRequest = buildWazuhMonitorEventsRequest(listPageInfoQueryParams);
         int changedCount = dataCollectionService.sumSysUsersChangedCountByTimeRange(wazuhRequest);
-        return changedCount;
+        return new ServiceResult<>(changedCount);
     }
 
     /**
@@ -1257,7 +1260,7 @@ public class ScenePluginCollectionSceneService {
      * @param sceneId
      * @return
      */
-    public List<SceneElementBO> listProbeEnabledElementBOs(String sceneId) {
+    public ServiceResult<List<SceneElementBO>> listProbeEnabledElementBOs(String sceneId) {
         log.info("sceneId:{}", sceneId);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), null);
         // 查询场景中所有开启探针的agentNames集合
@@ -1265,17 +1268,17 @@ public class ScenePluginCollectionSceneService {
 
         // 根据每一个有效的eid(agentName)查询ElementBO
         List<SceneElementBO> elementBOS = nodeId2Eidmap.values().stream().map(eid -> batchSceneHandler.getNodeByEid(eid)).collect(Collectors.toList());
-        return elementBOS;
+        return new ServiceResult<>(elementBOS);
     }
 
 
-    public List<String> listIPs(String sceneId, List<String> nodeIds) {
+    public ServiceResult<List<String>> listIPs(String sceneId, List<String> nodeIds) {
         log.info("sceneId:{}, nodeIds:{}", sceneId, nodeIds);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(sceneId), nodeIds);
-        return batchSceneHandler.getAllIps();
+        return new ServiceResult<>(batchSceneHandler.getAllIps());
     }
 
-    public List<SceneAssetsBO> listSceneAssets(List<String> sceneIds) {
+    public ServiceResult<List<SceneAssetsBO>> listSceneAssets(List<String> sceneIds) {
         List<SceneAssetsBO> sceneAssets = new ArrayList<>();
         sceneIds.forEach(s -> {
             BatchSceneHandler batchSceneHandler = new BatchSceneHandler(CollectionUtil.toList(s), null);
@@ -1286,7 +1289,7 @@ public class ScenePluginCollectionSceneService {
             asset.setCategoryGroups(new ArrayList<>(batchSceneHandler.getCategory2CountInfo().values()));
             sceneAssets.add(asset);
         });
-        return sceneAssets;
+        return new ServiceResult<>(sceneAssets);
     }
 
     /**
@@ -1357,14 +1360,14 @@ public class ScenePluginCollectionSceneService {
      * @param ruleFileName
      * @return
      */
-    public String ruleFile2AppName(String ruleFileName) {
+    public ServiceResult<String> ruleFile2AppName(String ruleFileName) {
         if (StringUtils.isBlank(ruleFileName)) {
             return null;
         }
         int firstIndex = StringUtils.indexOf(ruleFileName, "-");
         ruleFileName = StringUtils.substring(ruleFileName, firstIndex + 1);
         ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
-        return ruleFileName;
+        return new ServiceResult<>(ruleFileName);
     }
 
     /**
@@ -1373,14 +1376,11 @@ public class ScenePluginCollectionSceneService {
      * @param ruleIds 规则id集合
      * @return 规则id2file map
      */
-    public Map<String, String> getRuleId2FileByIds(List<String> ruleIds) {
-        if (CollectionUtil.isEmpty(ruleIds)) {
-            return new HashMap<>();
-        }
+    public ServiceResult<Map<String, String>> getRuleId2FileByIds(List<String> ruleIds) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class)
                 .filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
-        return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
+        return new ServiceResult<>(ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile())));
     }
 
     /**
@@ -1389,8 +1389,8 @@ public class ScenePluginCollectionSceneService {
      * @param files 文件名集合
      * @return 规则id2file map
      */
-    public Map<String, String> getRuleId2FileByFiles(List<String> files) {
-        if (CollectionUtil.isEmpty(files)) {
+    private Map<String, String> getRuleId2FileByFiles(List<String> files) {
+        if (CollectionUtils.isEmpty(files)) {
             return new HashMap<>();
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class);
@@ -1400,7 +1400,7 @@ public class ScenePluginCollectionSceneService {
         }
         a.filterOrEnd();
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);
-        if (CollectionUtil.isEmpty(ruleModels)) {
+        if (CollectionUtils.isEmpty(ruleModels)) {
             return new HashMap<>();
         }
         return ruleModels.stream().collect(Collectors.toMap(r -> r.getId(), r -> r.getFile()));
@@ -1412,19 +1412,19 @@ public class ScenePluginCollectionSceneService {
      * @param codes 类型集合
      * @return 规则id2file map
      */
-    public Map<String, String> getRuleId2FileByCodes(List<String> codes) {
-        if (CollectionUtil.isEmpty(codes)) {
+    private Map<String, String> getRuleId2FileByCodes(List<String> codes) {
+        if (CollectionUtils.isEmpty(codes)) {
             return new HashMap<>();
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        if (CollectionUtil.isEmpty(relationModels)) {
+        if (CollectionUtils.isEmpty(relationModels)) {
             return new HashMap<>();
         }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
-        return getRuleId2FileByIds(ruleIds);
+        return getRuleId2FileByIds(ruleIds).getSource();
     }
 
     /**
@@ -1433,19 +1433,19 @@ public class ScenePluginCollectionSceneService {
      * @param types 类型集合
      * @return 规则id2file Map
      */
-    public Map<String, String> getRuleId2FileByTypes(List<String> types) {
-        if (CollectionUtil.isEmpty(types)) {
+    private Map<String, String> getRuleId2FileByTypes(List<String> types) {
+        if (CollectionUtils.isEmpty(types)) {
             return new HashMap<>();
         }
         List<String> typeIds = getTypeIds(types);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        if (CollectionUtil.isEmpty(relationModels)) {
+        if (CollectionUtils.isEmpty(relationModels)) {
             return new HashMap<>();
         }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
-        return getRuleId2FileByIds(ruleIds);
+        return getRuleId2FileByIds(ruleIds).getSource();
     }
 
     /**
@@ -1454,14 +1454,14 @@ public class ScenePluginCollectionSceneService {
      * @param ruleIds
      * @return 类型集合
      */
-    public List<String> getTypesByRuleIds(List<String> ruleIds) {
-        if (CollectionUtil.isEmpty(ruleIds)) {
+    private List<String> getTypesByRuleIds(List<String> ruleIds) {
+        if (CollectionUtils.isEmpty(ruleIds)) {
             return new ArrayList<>();
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getRuleId, ruleIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
-        if (CollectionUtil.isEmpty(relationModels)) {
+        if (CollectionUtils.isEmpty(relationModels)) {
             return new ArrayList<>();
         }
         List<String> typeIds = relationModels.stream().map(r -> r.getTypeId()).collect(Collectors.toList());

@@ -11,6 +11,6 @@ public class VlanIdValidator implements ConstraintValidator<VlanId, Integer> {
         if (value == null) {
             return true;
         }
-        return value >= 0 && value <= 4096;
+        return value >= 0 && value <= 4094;
     }
 }
