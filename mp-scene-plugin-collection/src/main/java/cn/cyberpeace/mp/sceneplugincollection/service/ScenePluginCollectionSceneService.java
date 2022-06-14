@@ -1412,7 +1412,7 @@ public class ScenePluginCollectionSceneService {
      * @param codes 类型集合
      * @return 规则id2file map
      */
-    private Map<String, String> getRuleId2FileByCodes(List<String> codes) {
+    public Map<String, String> getRuleId2FileByCodes(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
             return new HashMap<>();
         }

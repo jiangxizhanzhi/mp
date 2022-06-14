@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionAppRequest;
@@ -99,11 +100,13 @@ public class CollectionTypeService {
             filteredRuleIds = ruleIdsByAgentName;
         }
 
-        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(filteredRuleIds);
+        ServiceResult<Map<String, String>> result = scenePluginCollectionSceneService.getRuleId2FileByIds(filteredRuleIds);
+        Map<String, String> ruleId2FileMap = result.getSource();
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
         log.info("ruleFiles:{}", ruleFiles);
         List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
-            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
+            ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
+            String appName = appNameResult.getSource();
             CollectionApp app = null;
             if (StringUtils.isNotBlank(appName)) {
                 app = new CollectionApp();
