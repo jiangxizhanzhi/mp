@@ -320,12 +320,15 @@ public class DataCollectionService {
                         new TypeReference<>() {
                         });
                 if (Objects.nonNull(wazuhMonitorRoot.getData())) {
-                    WazuhVulnerabilityInfoModel vulnerability = new WazuhVulnerabilityInfoModel();
-                    vulnerability.setVulnerability(wazuhMonitorRoot.getData().getVulnerability());
-                    vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
-                    vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
-                    vulnerability.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
-                    wazuhModelList.add(vulnerability);
+                    var vul = wazuhMonitorRoot.getData().getVulnerability();
+                    if (Objects.nonNull(vul)) {
+                        WazuhVulnerabilityInfoModel vulnerability = new WazuhVulnerabilityInfoModel();
+                        vulnerability.setVulnerability(vul);
+                        vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                        vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                        vulnerability.setTime(vul.getUpdated().atStartOfDay());
+                        wazuhModelList.add(vulnerability);
+                    }
                 }
             }
             return new ListObjResult<>(wazuhModelList, total);
