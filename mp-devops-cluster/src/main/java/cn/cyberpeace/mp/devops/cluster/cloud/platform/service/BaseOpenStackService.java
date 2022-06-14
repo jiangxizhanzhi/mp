@@ -164,7 +164,7 @@ public class BaseOpenStackService extends BaseService {
      */
     protected <T extends BaseCloudPlatformResult> void checkResult(T t){
         if (Objects.isNull(t) || (!BaseCloudPlatformConstant.CODE.equals(t.getCode()) && !t.isSuccess())){
-            throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_ERROR);
+            throw new MpRuntimeException(DevopsClusterErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(t.getMessage()));
         }
     }
 

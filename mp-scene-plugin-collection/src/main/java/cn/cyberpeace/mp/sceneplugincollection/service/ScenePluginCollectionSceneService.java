@@ -14,7 +14,14 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincollection.bo.*;
+import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
+import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeModel;
@@ -24,9 +31,24 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandle
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeMapper;
 import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginWazuhRuleTypeRelationMapper;
-import cn.cyberpeace.mp.sceneplugincollection.service.param.*;
-import cn.cyberpeace.mp.situationaware.bo.*;
-import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupByDestinationPortParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowGroupCountParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.AttackWayAggregationBO;
+import cn.cyberpeace.mp.situationaware.bo.FlowLogBO;
+import cn.cyberpeace.mp.situationaware.bo.TeamAttackBO;
+import cn.cyberpeace.mp.situationaware.model.FileEventModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -57,7 +79,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -285,11 +315,33 @@ public class ScenePluginCollectionSceneService {
             request.setEndTime(TimeUtils.stringToLocalDateTime(queryParams.getEndTime()));
         }
 
-        // todo catagories -> rule id set
-        if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-            Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
-            List<String> ruleIds = new ArrayList<>(ruleId2File.keySet());
-            request.setRuleIds(ruleIds);
+        // catagories -> rule id set
+        List<String> ruleIdsByCatagories = new ArrayList<>();
+        Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
+        if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
+            List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByCatagories.addAll(ruleIds);
+        }
+
+        // appNames -> rule id set
+        List<String> ruleIdsByAppNames = new ArrayList<>();
+        Map<String, String> ruleId2AppNames = getRuleId2FileByFiles(queryParams.getAppNames());
+        if (CollectionUtils.isNotEmpty(ruleId2AppNames.keySet())) {
+            List<String> ruleIds = ruleId2AppNames.keySet().stream().distinct().collect(Collectors.toList());
+            ruleIdsByAppNames.addAll(ruleIds);
+        }
+
+        if (CollectionUtil.isNotEmpty(ruleIdsByCatagories) && CollectionUtil.isNotEmpty(ruleIdsByAppNames)) {
+            // 取交集
+            List<String> intersectionRuleIds = ruleIdsByCatagories.stream().filter(item -> ruleIdsByAppNames.contains(item)).distinct().collect(Collectors.toList());
+            request.setRuleIds(intersectionRuleIds);
+        } else {
+            List<String> ruleIds = new ArrayList<>();
+            ruleIds.addAll(ruleIdsByCatagories);
+            ruleIds.addAll(ruleIdsByAppNames);
+            if (CollectionUtil.isNotEmpty(ruleIds)) {
+                request.setRuleIds(ruleIds);
+            }
         }
 
         if (CollectionUtils.isNotEmpty(queryParams.getLevels())) {
@@ -329,7 +381,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
-                hostEvent.setEventDesc(srcHostEvent.getTitle());
+                hostEvent.setEventDesc(srcHostEvent.getDescription());
             } else {
                 hostEvent.setEventDesc(srcHostEvent.getAction());
             }
@@ -343,6 +395,9 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setMd5Before(srcHostEvent.getMd5Before());
             hostEvent.setMd5After(srcHostEvent.getMd5After());
             hostEvent.setScrollId(srcHostEvent.getScrollId());
+            if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
+                hostEvent.setAppName(ruleFile2AppName(ruleId2File.getOrDefault(srcHostEvent.getRuleId(), null)));
+            }
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
                 hostEvent.setNodeId(srcElement.getId());
@@ -1297,12 +1352,28 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 规则文件名称转化成appName
+     *
+     * @param ruleFileName
+     * @return
+     */
+    public String ruleFile2AppName(String ruleFileName) {
+        if (StringUtils.isBlank(ruleFileName)) {
+            return null;
+        }
+        int firstIndex = StringUtils.indexOf(ruleFileName, "-");
+        ruleFileName = StringUtils.substring(ruleFileName, firstIndex + 1);
+        ruleFileName = StringUtils.substringBefore(ruleFileName, "_rules.xml");
+        return ruleFileName;
+    }
+
+    /**
      * 根据规则id获取规则id2file map
      *
      * @param ruleIds 规则id集合
      * @return 规则id2file map
      */
-    private Map<String, String> getRuleId2FileByIds(List<String> ruleIds) {
+    public Map<String, String> getRuleId2FileByIds(List<String> ruleIds) {
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class)
                 .filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
         var ruleModels = collectionPluginWazuhRuleMapper.list(humanCondition);

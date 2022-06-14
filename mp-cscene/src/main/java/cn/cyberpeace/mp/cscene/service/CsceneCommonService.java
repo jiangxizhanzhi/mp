@@ -49,10 +49,19 @@ public class CsceneCommonService {
     }
 
 
+    @Cacheable(value = "translate_sceneid")
+    public String translateSceneId(String sceneId) {
+        log.info("before translate: {}", sceneId);
+        String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
+        log.info("after translate: {}", translatedSceneId);
+        return translatedSceneId;
+    }
+
     /**
      * 根据sceneId和elementIds查询agentNames
+     *
      * @param sceneId
-     * @param elementIds
+     * @param elementIds 为空表示获取场景中所有的节点
      * @return
      */
     @Cacheable(value = "query_agentnames_by_elementids")
@@ -75,6 +84,7 @@ public class CsceneCommonService {
 
     /**
      * 查询场景是否是开启状态
+     *
      * @return
      */
     @Cacheable(value = "is_cscene_running")

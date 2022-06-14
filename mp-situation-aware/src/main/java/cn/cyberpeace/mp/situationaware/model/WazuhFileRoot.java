@@ -22,16 +22,6 @@ public class WazuhFileRoot {
     private String id;
     private Date timestamp;
 
-    private Data data;
-
-    public Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
-    }
-
     public Syscheck getSyscheck() {
         return syscheck;
     }
@@ -430,18 +420,6 @@ public class WazuhFileRoot {
         }
         public int getInodeAfter() {
             return this.inodeAfter;
-        }
-    }
-
-    public class Data {
-        private String title;
-
-        public String getTitle() {
-            return title;
-        }
-
-        public void setTitle(String title) {
-            this.title = title;
         }
     }
 }

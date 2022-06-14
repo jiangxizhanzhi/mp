@@ -1,15 +1,29 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
+import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -20,11 +34,22 @@ import java.util.List;
 @Service
 public class CollectionTypeService {
 
+
+    @Autowired
+    private CsceneCommonService csceneCommonService;
+
+    @Autowired
+    private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
+
     public List<CollectionType> typeTrees(BaseSceneElementRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
 
         List<CollectionType> types = new ArrayList<>();
-        types.add(changeEvent("01", null));
+        types.add(changeEvent("00", null));
+        types.add(sourceLogFile("01", CollectionType.TYPE_LOG_FILE));
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
@@ -32,17 +57,41 @@ public class CollectionTypeService {
     }
 
 
-    public List<CollectionApp> getAppNames(BaseSceneElementRequest baseRequest) {
+    public List<CollectionApp> getAppNames(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
-        CollectionApp appName1 = new CollectionApp();
-        appName1.setName("ssh");
+        List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(baseRequest.getSceneId(), baseRequest.getElementIds());
 
-        CollectionApp appName2 = new CollectionApp();
-        appName2.setName("macfee");
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        wazuhEventRequest.setAgentNames(agentNames);
+        if (Objects.nonNull(baseRequest.getStartTime())) {
+            wazuhEventRequest.setStartTime(baseRequest.getStartTime());
+        } else {
+            String translateSceneId = csceneCommonService.translateSceneId(baseRequest.getSceneId());
+            var sceneHandler = new SceneHandler(translateSceneId, null, false, null);
+            wazuhEventRequest.setStartTime(sceneHandler.getScene().getCreateTime());
+        }
+        wazuhEventRequest.setEndTime(Optional.ofNullable(baseRequest.getEndTime()).orElse(LocalDateTime.now()));
+        // es中的事件总数，暂不包括进程，端口等system_inventory中的数据
+        Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
+        List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
 
-        return Arrays.asList(appName1, appName2);
+        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
+        Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
+        log.info("ruleFiles:{}", ruleFiles);
+        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
+            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
+            CollectionApp app = null;
+            if (StringUtils.isNotBlank(appName)) {
+                app = new CollectionApp();
+                app.setName(appName);
+            }
+            return app;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        log.info("apps:{}", apps);
+        return apps;
     }
 
     /**
@@ -54,10 +103,20 @@ public class CollectionTypeService {
 
         CollectionType fileChangeEvent = CollectionType.builder().name("文件变更事件").code(code + "01").type(CollectionType.TYPE_CHANGE_EVENT_FILE).build();
         CollectionType registryChangeEvent = CollectionType.builder().name("注册表变更事件").code(code + "02").type(CollectionType.TYPE_CHANGE_EVENT_REGISTRY).build();
-        CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code(code + "03").type(CollectionType.TYPE_LOG_FILE).build();
+        //CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code(code + "03").type(CollectionType.TYPE_LOG_FILE).build();
 
-        changeEvent.setChildren(Arrays.asList(fileChangeEvent, registryChangeEvent, sourceLogEvent));
+        changeEvent.setChildren(Arrays.asList(fileChangeEvent, registryChangeEvent));
         return changeEvent;
+    }
+
+    /**
+     * 原始日志
+     * @return
+     */
+    private CollectionType sourceLogFile(String code, Integer type) {
+        CollectionType sourceLogEvent = CollectionType.builder().name("原始日志").code("01").type(CollectionType.TYPE_LOG_FILE).build();
+
+        return sourceLogEvent;
     }
 
     /**
@@ -144,6 +203,4 @@ public class CollectionTypeService {
 
         return secSysType;
     }
-
-
 }

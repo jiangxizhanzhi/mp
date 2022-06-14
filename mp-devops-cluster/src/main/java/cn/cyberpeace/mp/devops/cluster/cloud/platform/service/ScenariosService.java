@@ -30,7 +30,9 @@ public class ScenariosService extends BaseOpenStackService {
      * 创建快照
      */
     public BaseCloudPlatformResult create(ScenariosSnapshot snapshotCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -39,7 +41,9 @@ public class ScenariosService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult injectFile(DeviceInjectFileCreate injectFileCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(injectFileCreate), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -48,7 +52,9 @@ public class ScenariosService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult deleteInjectFile(DeviceInjectFileDelete delete){
-        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendDelete(  URL_VERSION + SCENARIOS + "/device_inject_file", JsonUtils.toUnderlineJSONString(delete), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -57,7 +63,9 @@ public class ScenariosService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult create(ImagesCreateInstanceCloudPlatform snapshotCreate){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(snapshotCreate), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -66,7 +74,9 @@ public class ScenariosService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult mergeSnapshot(DeviceSnapshotMergeCloudPlatform mergeCloudPlatform){
-        return super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendPost(  URL_VERSION + SCENARIOS + "/device_snapshot_merge", JsonUtils.toUnderlineJSONString(mergeCloudPlatform), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**
@@ -75,7 +85,9 @@ public class ScenariosService extends BaseOpenStackService {
      * @return
      */
     public BaseCloudPlatformResult delete(ImagesDeleteInstanceCloudPlatform cloudPlatform){
-        return super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult result = super.sendDelete(  URL_VERSION + SCENARIOS + "/device_scenario", JsonUtils.toUnderlineJSONString(cloudPlatform), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
     }
 
     /**

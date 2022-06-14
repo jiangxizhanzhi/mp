@@ -38,7 +38,7 @@ public class ProbeRequest {
     private Integer probeCategory;
 
 
-    @ApiModelProperty(value = "自定义探针输出格式: none, json, plain")
+    @ApiModelProperty(value = "自定义探针输出格式: none, json, plain, 默认为json")
     private String outputFormat;
 
 
