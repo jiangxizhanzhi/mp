@@ -69,7 +69,7 @@ public class CsceneCommonService {
         log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
         List<String> translatedSceneIds = translateSceneIds(sceneIds);
-        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
 
         List<String> agentNames = new ArrayList<>();
         if (CollectionUtil.isEmpty(elementIds)) {

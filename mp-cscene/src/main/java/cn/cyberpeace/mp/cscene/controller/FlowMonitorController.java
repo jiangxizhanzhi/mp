@@ -198,7 +198,7 @@ public class FlowMonitorController {
             log.error("translateSceneIds is null");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds);
+        List<SceneAssetsBO> sceneAssetsList = scenePluginCollectionSceneService.listSceneAssets(sceneIds).getSource();
 
         List<AssetsStatisticsResponse> responseList = new ArrayList<>();
         // 统计资产数量
