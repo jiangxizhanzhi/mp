@@ -32,6 +32,7 @@ public interface CollectionTemplateProbeMapper extends BaseModelMapper<Collectio
 
     int deleteByTemplateIds(@Param("templateIds") String[] templateIds);
 
+    @Deprecated
     List<CollectionTemplateProbeDto> listCollectionTemplateProbeDtos(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);
 
     List<CollectionTemplateProbeModel> listCollectionTemplateProbeModels(@Param("templateId") String templateId, @Param("probeCondition") ProbeSearchCondition probeCondition);

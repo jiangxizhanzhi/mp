@@ -40,18 +40,21 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * 探针名称
      */
     @ApiModelProperty(value = "探针名称")
+    @DefaultStr
     private String name;
 
     /**
      * 描述
      */
     @ApiModelProperty(value = "描述")
+    @DefaultStr
     private String description;
 
     /**
      * 0:信息类 1:事件类 2:日志类
      */
     @ApiModelProperty(value = "0:信息类 1:事件类 2:日志类")
+    @DefaultInt(0)
     private Integer probeCategory;
 
     /**
@@ -66,7 +69,7 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * 自定义探针输出格式: none, json, plain
      */
     @ApiModelProperty(value = "自定义探针输出格式: none, json, plain")
-    @DefaultStr("none")
+    @DefaultStr("json")
     private String outputFormat;
 
     /**
@@ -81,6 +84,7 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * (可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other
      */
     @ApiModelProperty(value = "(可多选)操作系统类型 0:Windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    @DefaultStr
     private String osType;
 
     /**
@@ -107,8 +111,9 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
     /**
      * 探针脚本内容
      */
-    @ApiModelProperty(value = "探针脚本内容，只有查询模板下单个自定义探针的接口才会加载这个字段")
-    private String scriptContent;
+    //@ApiModelProperty(value = "探针脚本内容，只有查询模板下单个自定义探针的接口才会加载这个字段")
+    //@DefaultStr
+    //private String scriptContent;
 
     /**
      * 探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec
@@ -129,6 +134,7 @@ public class CollectionTemplateProbeModel extends BaseModel implements Serializa
      * 脚本参数(JSON)
      */
     @ApiModelProperty(value = "脚本参数")
+    @DefaultStr
     private String parameter;
 
 }

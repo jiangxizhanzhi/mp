@@ -17,6 +17,7 @@
     <result column="script_url" jdbcType="VARCHAR" property="scriptUrl" />
     <result column="interval_sec" jdbcType="INTEGER" property="intervalSec" />
     <result column="config" jdbcType="VARCHAR" property="config" />
+    <result column="parameter" jdbcType="VARCHAR" property="parameter" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>

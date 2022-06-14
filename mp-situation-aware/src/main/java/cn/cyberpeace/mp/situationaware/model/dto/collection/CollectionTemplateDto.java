@@ -26,6 +26,6 @@ public class CollectionTemplateDto extends CollectionTemplatePageItemDto {
 
     // 返回参数比通用探针要多一些
     @ApiModelProperty(value = "自定义探针列表")
-    private List<ColTempCustomProbeDto> customProbes;
+    private List<CollectionTemplateProbeDto> customProbes;
 
 }

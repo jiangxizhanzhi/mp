@@ -19,6 +19,7 @@ create table mp_situation_collection_template_probe
     script_url varchar(400) null comment '探针脚本内容fdfs地址，采集模板单独存一份，防止自定义探针代码修改之后，影响到采集模板',
     interval_sec int default 180 not null comment '探针执行间隔，为大于1的数值，单位秒，采集模板该值可以覆盖探针的interval_sec',
     config varchar(4000) null comment '探针配置，json串，数组',
+    parameter varchar(2000) null comment '探针参数',
     create_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     update_time  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     constraint mp_sita_tel_probe_id unique (id)
