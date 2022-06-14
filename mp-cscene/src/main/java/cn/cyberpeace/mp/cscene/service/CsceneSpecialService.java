@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -398,10 +397,10 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景模板
-     * @param snapUuid 靶标名称
+     * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景模板
      */
-    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByPrefix(String snapUuid) {
+    public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenesByPrefix(List<String> snapUuids) {
         var deviceReferCondition = new HumanCondition()
                 .link(CsceneModel.class, SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
                 .filterLink(CsceneModel.class, CsceneModel::getSceneConfig,
@@ -416,9 +415,13 @@ public class CsceneSpecialService {
                 .currentLink(SceneConfigModel.class)
                 .filterEqual(SceneConfigModel::getDeleted, false)
                 .selectAs(SceneConfigModel::getName, DeviceReferCsceneStat::getName)
-                .currentLink(CloudPluginSceneConfigElementModel.class)
-                .filterStartsWith(CloudPluginSceneConfigElementModel::getImage, snapUuid)
-                .selectAs(CloudPluginSceneConfigElementModel::getImage, DeviceReferCsceneStat::getReferenceImage)
+                .currentLink(CloudPluginSceneConfigElementModel.class);
+        var orCondition = deviceReferCondition.filterOrStart();
+        for (String snapUuid : snapUuids) {
+            orCondition.orStartsWith(CloudPluginSceneConfigElementModel::getImage, snapUuid);
+        }
+        orCondition.filterOrEnd();
+        deviceReferCondition.selectAs(CloudPluginSceneConfigElementModel::getImage, DeviceReferCsceneStat::getReferenceImage)
                 .distinct();
 
         List<DeviceReferCsceneStat> deviceReferCsceneStats = csceneMapper.list(deviceReferCondition,
@@ -479,11 +482,11 @@ public class CsceneSpecialService {
 
     /**
      * 统计靶标快照 对应 引用了靶标的场景实例
-     * @param snapUuid 靶标名称
+     * @param snapUuids 靶标名称
      * @return 靶标名称 对应 引用了靶标的场景实例
      */
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstancesByPrefix(
-            String snapUuid) {
+            List<String> snapUuids) {
         var deviceReferCondition = new HumanCondition()
                 .link(CsceneInstanceModel.class, SceneModel.class, CloudPluginSceneElementModel.class)
                 .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getScene,
@@ -500,9 +503,13 @@ public class CsceneSpecialService {
                 .selectAs(SceneModel::getName, DeviceReferCsceneInstanceStat::getName)
                 .selectAs(SceneModel::getEvent, DeviceReferCsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, DeviceReferCsceneInstanceStat::getEventStatus)
-                .currentLink(CloudPluginSceneElementModel.class)
-                .filterStartsWith(CloudPluginSceneElementModel::getImage, snapUuid)
-                .selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)
+                .currentLink(CloudPluginSceneElementModel.class);
+        var orCondition = deviceReferCondition.filterOrStart();
+        for (String snapUuid : snapUuids) {
+            orCondition.orStartsWith(CloudPluginSceneElementModel::getImage, snapUuid);
+        }
+        orCondition.filterOrEnd();
+        deviceReferCondition.selectAs(CloudPluginSceneElementModel::getImage, DeviceReferCsceneInstanceStat::getReferenceImage)
                 .distinct();
 
         List<DeviceReferCsceneInstanceStat> deviceReferCsceneStats = csceneInstanceMapper.list(deviceReferCondition,

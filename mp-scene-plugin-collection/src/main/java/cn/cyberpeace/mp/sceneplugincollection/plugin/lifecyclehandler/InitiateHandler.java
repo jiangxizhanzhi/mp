@@ -236,13 +236,12 @@ public class InitiateHandler extends HandlerCommon {
                 logParams.addAll(convertLog.convertParams());
             }
         }
-        if (SystemTypeCommandUtils.isWindows(systemType) && !registryParams.isEmpty()) {
-            // Windows注册表变更采集需要设置采集间隔
-            WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
-            syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
-            syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-            controlParam.setSyscheckParam(syscheckParam);
-        }
+        // 设置agent扫描间隔，默认60s
+        WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
+        syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
+        syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+
+        controlParam.setSyscheckParam(syscheckParam);
         controlParam.setProbeParams(customProbeParams);
         controlParam.setRegistryModifyParams(registryParams);
         controlParam.setFileModifyParams(fileParams);
