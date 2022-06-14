@@ -1,26 +1,33 @@
 package cn.cyberpeace.mp.devops.cluster.converter;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.ScenariosSnapshot;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.DeviceAndSnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotMergeRequest;
 import cn.cyberpeace.mp.devops.cluster.request.SnapshotRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +37,12 @@ public class SnapshotConverter {
     private final SnapshotService snapshotService;
 
     private final ScenariosService scenariosService;
+
+    private final DeviceTargetMapper deviceTargetMapper;
+
+    private final DeviceService deviceService;
+
+    private final CsceneSpecialService csceneSpecialService;
 
     /**
      * 根据设备UUID查询快照列表
@@ -101,11 +114,34 @@ public class SnapshotConverter {
      * @return
      */
     public BaseCloudPlatformResult merge(SnapshotMergeRequest request) {
+        validSnapshot(Arrays.asList(request.getUuid()));
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
         mergeCloudPlatform.setSnapshotName(request.getSnapshotName());
         mergeCloudPlatform.setNewName(request.getNewName());
         mergeCloudPlatform.setDeviceUuid(request.getUuid());
         mergeCloudPlatform.setImageType(request.getImageType());
         return scenariosService.mergeSnapshot(mergeCloudPlatform);
+    }
+
+    /**
+     * 验证快照是否被引用或使用
+     * @param uuids
+     */
+    public void validSnapshot(List<String> uuids){
+
+        //引用
+        ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids.get(0));
+        Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
+
+        if (MapUtils.isNotEmpty(referStateMap)){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE);
+        }
+        //使用
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids.get(0));
+        Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
+
+        if (MapUtils.isNotEmpty(useStateMap)){
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_USED_SCENE);
+        }
     }
 }
