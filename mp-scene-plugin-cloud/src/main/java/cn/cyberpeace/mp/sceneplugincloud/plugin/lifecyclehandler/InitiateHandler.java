@@ -645,6 +645,9 @@ public class InitiateHandler extends HandlerCommon {
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
             // 实体节点的网络需要初始化对端端口
             initiateVirtualToPort(cloudElement);
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
+            // 二层网络节点的网络需要初始化对端端口
+            initiateVirtualToPort(cloudElement);
         }
     }
 
@@ -906,7 +909,8 @@ public class InitiateHandler extends HandlerCommon {
                     && (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER)
                     || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)
                     || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)
-                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE))) {
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)
+                    || virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH))) {
                 Runnable task = () -> initiateElementPortsProcess(cloudElement);
                 Integer type = cloudElement.getSrcElement().getType();
                 // 防火墙也看作路由

@@ -55,6 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,21 +108,40 @@ public class CreateHandler extends HandlerCommon {
             List<VirtualFirewallCreateData.Rule> egressRules = new ArrayList<>();
             if (srcRules != null) {
                 srcRules.forEach(srcRule -> {
-                    var direction = srcRule.getDirection();
-                    var rule = new VirtualFirewallCreateData.Rule();
-                    rule.setSourceIpAddress(srcRule.getSourceIpAddress());
-                    rule.setDestinationIpAddress(srcRule.getDestinationIpAddress());
-                    rule.setSourcePort(srcRule.getSourcePort());
-                    rule.setDestinationPort(srcRule.getDestinationPort());
-                    rule.setProtocol(srcRule.getProtocol());
-                    rule.setAction(srcRule.getAction());
-                    if (FirewallRuleDirection.INGRESS.equals(direction)) {
-                        ingressRules.add(rule);
-                    } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
-                        egressRules.add(rule);
-                    } else if (FirewallRuleDirection.BOTH.equals(direction)) {
-                        ingressRules.add(rule);
-                        egressRules.add(rule);
+                    // 如果未设置端口 则使用一个null的元素,使用统一的一个循环
+                    List<String> sourcePorts = Arrays.asList(new String[]{ null });
+                    List<String> desPorts = Arrays.asList(new String[]{ null });
+                    if (StringUtils.isNotEmpty(srcRule.getSourcePort())) {
+                        String[] portsArray = srcRule.getSourcePort().split(",");
+                        if (portsArray != null && portsArray.length > 0) {
+                            sourcePorts = Arrays.asList(portsArray);
+                        }
+                    }
+                    if (StringUtils.isNotEmpty(srcRule.getDestinationPort())) {
+                        String[] portsArray = srcRule.getDestinationPort().split(",");
+                        if (portsArray != null && portsArray.length > 0) {
+                            desPorts = Arrays.asList(portsArray);
+                        }
+                    }
+                    for (var sourcePort : sourcePorts) {
+                        for (var desPort : desPorts) {
+                            var direction = srcRule.getDirection();
+                            var rule = new VirtualFirewallCreateData.Rule();
+                            rule.setSourceIpAddress(srcRule.getSourceIpAddress());
+                            rule.setDestinationIpAddress(srcRule.getDestinationIpAddress());
+                            rule.setSourcePort(sourcePort);
+                            rule.setDestinationPort(desPort);
+                            rule.setProtocol(srcRule.getProtocol());
+                            rule.setAction(srcRule.getAction());
+                            if (FirewallRuleDirection.INGRESS.equals(direction)) {
+                                ingressRules.add(rule);
+                            } else if (FirewallRuleDirection.EGRESS.equals(direction)) {
+                                egressRules.add(rule);
+                            } else if (FirewallRuleDirection.BOTH.equals(direction)) {
+                                ingressRules.add(rule);
+                                egressRules.add(rule);
+                            }
+                        }
                     }
                 });
             }
