@@ -64,6 +64,8 @@ public class ImagesConverter implements BaseConverter{
 
     private final TargetConverter targetConverter;
 
+    private final SnapshotConverter snapshotConverter;
+
     /**
      * 分页查询镜像列表
      * @param dto
@@ -197,6 +199,7 @@ public class ImagesConverter implements BaseConverter{
     @Transactional
     public BaseCloudPlatformResult delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
+        snapshotConverter.validSnapshot(request.getImageIds());
         BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
 
         if (CollectionUtils.isNotEmpty(request.getImageIds()) && result.isSuccess()){
