@@ -107,7 +107,7 @@ public class EventMonitorService {
 
         List<String> sceneIds = CollectionUtil.toList(request.getSceneId());
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(sceneIds);
-        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0));
+        List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
 
         List<String> agentNames = elementBOs.stream().map(SceneElementBO::getEid).collect(Collectors.toList());
 

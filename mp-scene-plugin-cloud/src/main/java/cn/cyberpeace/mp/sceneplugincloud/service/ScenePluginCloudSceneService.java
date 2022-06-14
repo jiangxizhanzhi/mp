@@ -533,14 +533,14 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
-    public List<String> getRecordingUsers(String sceneId, List<String> nodeIds) {
+    public ServiceResult<List<String>> getRecordingUsers(String sceneId, List<String> nodeIds) {
         HumanCondition humanCondition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
         if (CollectionUtils.isNotEmpty(nodeIds)) {
             humanCondition.filterIn(CloudPluginSceneConnectionModel::getSceneElement, nodeIds.toArray(new String[]{}));
         }
         var list = cloudPluginSceneConnectionMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(list)) {
-            return new ArrayList<>();
+            return new ServiceResult<>();
         }
         Set<String> users = new HashSet<>();
         list.forEach(model -> {
@@ -548,7 +548,7 @@ public class ScenePluginCloudSceneService {
                 users.add(model.getAccessUser());
             }
         });
-        return new ArrayList<>(users);
+        return new ServiceResult<>(new ArrayList<>(users));
     }
 
     public void changeVlanRange(String vlanRange) {

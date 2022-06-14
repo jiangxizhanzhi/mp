@@ -174,20 +174,20 @@ public class SceneElementMonitorService {
 
     public int sumEnvVarChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
-        int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams);
+        int sum = scenePluginCollectionSceneService.sumEnvVarChangedCount(listPageInfoQueryParams).getSource();
         return sum;
     }
 
     public int sumProcessesChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
-        int sum = scenePluginCollectionSceneService.sumProcessesChangedCount(listPageInfoQueryParams);
+        int sum = scenePluginCollectionSceneService.sumProcessesChangedCount(listPageInfoQueryParams).getSource();
         return sum;
     }
 
 
     public int sumSysUserChangedCount(BaseSceneElementRequest baseRequest) {
         ListPageInfoQueryParams listPageInfoQueryParams = buildListPageInfoQueryParams(baseRequest);
-        int sum = scenePluginCollectionSceneService.sumSysUserChangedCount(listPageInfoQueryParams);
+        int sum = scenePluginCollectionSceneService.sumSysUserChangedCount(listPageInfoQueryParams).getSource();
         return sum;
     }
 

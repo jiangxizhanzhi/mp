@@ -77,11 +77,11 @@ public class CollectionTypeService {
         Map<String, Long> ruleIdCntMap = dataCollectionService.aggsRuleIdsByAgentName(wazuhEventRequest);
         List<String> ruleIds = new ArrayList<>(ruleIdCntMap.keySet());
 
-        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds);
+        Map<String, String> ruleId2FileMap = scenePluginCollectionSceneService.getRuleId2FileByIds(ruleIds).getSource();
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
         log.info("ruleFiles:{}", ruleFiles);
         List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
-            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r);
+            String appName = scenePluginCollectionSceneService.ruleFile2AppName(r).getSource();
             CollectionApp app = null;
             if (StringUtils.isNotBlank(appName)) {
                 app = new CollectionApp();
