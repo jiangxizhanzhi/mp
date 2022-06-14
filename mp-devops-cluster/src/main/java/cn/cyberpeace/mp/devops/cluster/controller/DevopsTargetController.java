@@ -217,7 +217,7 @@ public class DevopsTargetController {
 
     @ApiOperation("查询常用靶标信息")
     @GetMapping("/common-targets")
-    public ServiceResult<DeviceVO> getCommonTargets(){
+    public ServiceResult<DeviceVO> getCommonTargets(TargetSceneRequest request){
         List<Device> deviceList = targetConverter.getCommonTargets("");
         List<DeviceVO> deviceVOList = deviceVoConverter.sourceToTarget(deviceList);
 
@@ -232,6 +232,12 @@ public class DevopsTargetController {
             });
         }
 
+        if (Objects.nonNull(request.getImageType())) {
+            deviceVOList = deviceVOList.stream().filter(v -> v.getImageType().equals(request.getImageType().toValue())).collect(Collectors.toList());
+        }
+        if (Objects.nonNull(request.getRole())) {
+            deviceVOList = deviceVOList.stream().filter(deviceVO -> deviceVO.getRole().equals(request.getRole())).collect(Collectors.toList());
+        }
         return new Result(new ListResult(deviceVOList));
     }
 
