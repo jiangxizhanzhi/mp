@@ -527,6 +527,7 @@ public class CollectionTemplateService {
         for (CollectionTemplateProbeModel customProbeRequest : colTempCustomProbeReqs) {
             CollectionTemplateProbeModel colTempProbeModel = new CollectionTemplateProbeModel();
             BeanUtils.copyProperties(customProbeRequest, colTempProbeModel);
+            colTempProbeModel.setId(null);
             colTempProbeModel.setProbeId(customProbeRequest.getId());
             colTempProbeModel.setTemplateId(templateId);
             colTempProbeModel.setType(ProbeModel.TYPE_CUSTOM);
