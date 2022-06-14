@@ -399,7 +399,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setMd5After(srcHostEvent.getMd5After());
             hostEvent.setScrollId(srcHostEvent.getScrollId());
             if (CollectionUtils.isNotEmpty(queryParams.getCatagories())) {
-                hostEvent.setAppName(ruleFile2AppName(ruleId2Files.getOrDefault(srcHostEvent.getRuleId(), null)).getSource());
+                hostEvent.setAppName(ruleFile2AppName(ruleId2Files.getOrDefault(srcHostEvent.getRuleId(), "")).getSource());
             }
             var srcElement = agentNameElementMap.getOrDefault(srcHostEvent.getAgentName(), null);
             if (srcElement != null) {
@@ -1362,7 +1362,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<String> ruleFile2AppName(String ruleFileName) {
         if (StringUtils.isBlank(ruleFileName)) {
-            return null;
+            return new ServiceResult<>(null);
         }
         int firstIndex = StringUtils.indexOf(ruleFileName, "-");
         ruleFileName = StringUtils.substring(ruleFileName, firstIndex + 1);
