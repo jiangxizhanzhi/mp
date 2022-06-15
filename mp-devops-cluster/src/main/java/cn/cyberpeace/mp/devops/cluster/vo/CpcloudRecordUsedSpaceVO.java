@@ -19,12 +19,22 @@ public class CpcloudRecordUsedSpaceVO extends BaseCloudPlatformResult {
     /**
      * 使用率
      */
-    private double diskUsage;
+    private double recordDiskUsage;
 
     /**
      * 录屏使用空间
      */
     private long recordDirSize;
+
+    /**
+     * 其他占用空间大小
+     */
+    private long otherUseSize;
+
+    /**
+     * 其他空间占用率
+     */
+    private double otherUsePercent;
 
     /**
      * 查询结果是否成功

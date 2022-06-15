@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.request.ScreenrecordDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.queryparam.ScreenrecordQueryParams;
 import cn.cyberpeace.mp.devops.cluster.vo.ScreenRecordUsedSpaceVO;
 import cn.cyberpeace.mp.devops.cluster.vo.ScreenrecordVO;
+import cn.cyberpeace.mp.devops.cluster.vo.SpaceStaticsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +55,12 @@ public class ScreenrecordController {
     @GetMapping("/used_space")
     public ServiceResult<ScreenRecordUsedSpaceVO> queryUsedSpace() {
         return screenrecordService.queryUsedSpace();
+    }
+
+    @ApiOperation("查询资源用量情况")
+    @GetMapping("/space_statics")
+    public ServiceResult<SpaceStaticsVO> querySpaceStatics() {
+        return screenrecordService.querySpaceStatics();
     }
 
     @ApiOperation("下载录屏文件")
