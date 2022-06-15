@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
@@ -7,8 +8,6 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -21,17 +20,16 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,6 +57,7 @@ public class RoleController {
             @ApiImplicitParam(name="id", paramType="path", value="id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.DELETE, title = "删除角色", target = OpTargetEnums.ROLE)
     public ServiceResult<Boolean> delete(@PathVariable String id) {
         opRolePermService.checkByTargetRoleIds(Arrays.asList(id));
@@ -72,6 +71,7 @@ public class RoleController {
      */
     @ApiOperation("批量删除角色")
     @DeleteMapping("/bulk_delete")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         return roleService.bulkDelete(ids).asResult();
     }
@@ -94,6 +94,7 @@ public class RoleController {
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("/add")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = roleService.add(createRequest);
@@ -103,6 +104,7 @@ public class RoleController {
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
     @PostMapping("modify")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = roleService.modify(modifyRequest);

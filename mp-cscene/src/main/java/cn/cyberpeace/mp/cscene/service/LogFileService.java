@@ -218,7 +218,6 @@ public class LogFileService {
             if (CollectionUtil.isNotEmpty(relatedFiles)) {
 
                 List<LogFileVO> subDtos = relatedFiles.stream().map(f -> {
-                    log.error("date string format:{}", f.getModifyTime());
                     LogFileVO dto =
                             LogFileVO.builder()
                                     .path(f.getPath())

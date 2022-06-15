@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.business.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
@@ -24,6 +25,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -55,6 +57,7 @@ public class UserController {
 
     @ApiOperation(value = "修改密码", notes = "")
     @PostMapping("/resetpwd")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
@@ -75,6 +78,7 @@ public class UserController {
 
     @ApiOperation(value = "禁用用户", notes = "")
     @PostMapping("/disable")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = OpTargetEnums.USER)
     public ServiceResult<String> disable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchDisable(userIds);
@@ -87,6 +91,7 @@ public class UserController {
 
     @ApiOperation(value = "启用用户", notes = "")
     @PostMapping("/enable")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = OpTargetEnums.USER)
     public ServiceResult<String> enable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchEnable(userIds);
@@ -98,6 +103,7 @@ public class UserController {
 
     @ApiOperation(value = "审核用户", notes = "")
     @PostMapping("/approve")
+    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = OpTargetEnums.USER)
     public ServiceResult<String> approve(@RequestBody List<String> userIds) {
         String errMsg = userService.batchApprove(userIds);
