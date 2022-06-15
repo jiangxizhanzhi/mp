@@ -69,7 +69,7 @@ public class CollectionTypeService {
 
         // catagories -> rule id set
         List<String> ruleIdsByCatagories = new ArrayList<>();
-        Map<String, String> ruleId2File = scenePluginCollectionSceneService.getRuleId2FileByCodes(appRequest.getCatagories());
+        Map<String, String> ruleId2File = scenePluginCollectionSceneService.getRuleId2FileByCodes(appRequest.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
             List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
             ruleIdsByCatagories.addAll(ruleIds);

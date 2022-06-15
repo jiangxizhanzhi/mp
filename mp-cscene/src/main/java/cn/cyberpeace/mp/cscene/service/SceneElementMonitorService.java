@@ -421,6 +421,9 @@ public class SceneElementMonitorService {
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
+            vulnerabilityInfo.setPublished(r.getVulnerability().getPublished());
+            vulnerabilityInfo.setUpdate(r.getVulnerability().getUpdated());
+            vulnerabilityInfo.setTime(r.getTime());
             vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
             vulnerabilityInfo.setRationale(r.getVulnerability().getRationale());
             vulnerabilityInfos.add(vulnerabilityInfo);

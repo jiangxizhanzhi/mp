@@ -524,7 +524,7 @@ public class CollectionTemplateService {
         if (CollectionUtil.isEmpty(colTempCustomProbeReqs)) {
             return;
         }
-        for (CollectionTemplateProbeModel customProbeRequest : colTempCustomProbeReqs) {
+        for (ColTempCustomProbeRequest customProbeRequest : colTempCustomProbeReqs) {
             CollectionTemplateProbeModel colTempProbeModel = new CollectionTemplateProbeModel();
             BeanUtils.copyProperties(customProbeRequest, colTempProbeModel);
             colTempProbeModel.setId(null);
