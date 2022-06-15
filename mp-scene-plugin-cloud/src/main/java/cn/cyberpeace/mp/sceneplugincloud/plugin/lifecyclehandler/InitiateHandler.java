@@ -851,11 +851,20 @@ public class InitiateHandler extends HandlerCommon {
         if (role != null) {
             if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
                     || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
-                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)
             ) {
                 coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                coreType = CoreType.ROUTER;
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 coreType = CoreType.FIREWALL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
