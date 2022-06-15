@@ -32,6 +32,7 @@ public class ScreenRecordUsedSpaceVO {
     /**
      * 其他占用空间大小
      */
-    private long otherUseSize;
+    @ApiModelProperty("其他占用空间大小")
+    private long otherUseSize = 0L;
 
 }

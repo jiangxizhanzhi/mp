@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
+import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
@@ -17,12 +19,15 @@ import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -45,6 +50,9 @@ public class ScreenrecordService extends BaseOpenStackService {
 
     @Value("${mp.devops.cp-url}")
     private String cpUrl;
+
+    @Autowired
+    private ScreenshotService screenshotService;
 
     /**
      * 分页查询录屏文件
@@ -138,6 +146,63 @@ public class ScreenrecordService extends BaseOpenStackService {
         }
 
         return ServiceResult.success(response);
+    }
+
+    /**
+     * 查询资源用量情况
+     * @return
+     */
+    public ServiceResult<SpaceStaticsVO> querySpaceStatics() {
+        // 系统总空间
+        long totalSpace = 0L;
+        // 剩余可用空间
+        long leftSpace = 0L;
+        // 截屏已用空间
+        long screenshotUsed = 0L;
+        // 录屏已用空间
+        long screenRecordUsed = 0L;
+        // 其他占用空间
+        long otherUsed = 0L;
+        // 资源总占用空间
+        long usedTotal = 0L;
+        // 资源已用空间占比
+        double usedPercent = 0;
+
+        // 录屏占用空间信息
+        CpcloudRecordUsedSpaceVO cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
+                "/storage_info", CpcloudRecordUsedSpaceVO.class);
+        log.info("query screen record used space response: {}", cpResponse);
+        if (Objects.nonNull(cpResponse)) {
+            totalSpace = cpResponse.getDiskTotal();
+            screenRecordUsed = cpResponse.getRecordDirSize();
+            otherUsed = cpResponse.getOtherUseSize();
+        }
+
+        ServiceResult<ScreenshotUsedSpaceResponse> screenshotUsedSpace = screenshotService.queryUsedSpace();
+        log.info("query screen shop used space response: {}", screenshotUsedSpace);
+        if (Objects.nonNull(screenshotUsedSpace.getData())) {
+            ScreenshotUsedSpaceResponse screenshotUsedSpaceResponse = screenshotUsedSpace.getData();
+            screenshotUsed = screenshotUsedSpaceResponse.getUsedSpace();
+        }
+        // 资源占用空间
+        usedTotal = screenRecordUsed + screenshotUsed;
+        // 剩余可用空间
+        leftSpace = totalSpace - usedTotal - otherUsed;
+        if (leftSpace < 0) {
+            leftSpace = 0L;
+        }
+        usedPercent = new BigDecimal(usedTotal).divide(new BigDecimal(totalSpace), 4, RoundingMode.HALF_UP).doubleValue();
+        SpaceStaticsVO spaceStaticsVO = SpaceStaticsVO.builder()
+                .leftSpace(leftSpace)
+                .usedTotal(usedTotal)
+                .screenRecordUsed(screenRecordUsed)
+                .screenshotUsed(screenshotUsed)
+                .otherUsed(otherUsed)
+                .usedPercent(usedPercent)
+                .totalSpace(totalSpace)
+                .build();
+
+        return ServiceResult.success(spaceStaticsVO);
     }
 
     /**
