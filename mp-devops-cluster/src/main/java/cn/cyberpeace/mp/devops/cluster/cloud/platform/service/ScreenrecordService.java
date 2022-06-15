@@ -134,6 +134,7 @@ public class ScreenrecordService extends BaseOpenStackService {
         if (Objects.nonNull(cpResponse)) {
             response.setUsedSpace(cpResponse.getRecordDirSize());
             response.setTotalSpace(cpResponse.getDiskTotal());
+            response.setOtherUseSize(cpResponse.getOtherUseSize());
         }
 
         return ServiceResult.success(response);
