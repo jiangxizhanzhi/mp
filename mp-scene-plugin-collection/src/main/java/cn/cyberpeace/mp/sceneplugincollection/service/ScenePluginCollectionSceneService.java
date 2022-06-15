@@ -317,7 +317,7 @@ public class ScenePluginCollectionSceneService {
 
         // catagories -> rule id set
         List<String> ruleIdsByCatagories = new ArrayList<>();
-        Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories());
+        Map<String, String> ruleId2File = getRuleId2FileByCodes(queryParams.getCatagories()).getSource();
         if (CollectionUtils.isNotEmpty(ruleId2File.keySet())) {
             List<String> ruleIds = ruleId2File.keySet().stream().distinct().collect(Collectors.toList());
             ruleIdsByCatagories.addAll(ruleIds);
@@ -1415,19 +1415,19 @@ public class ScenePluginCollectionSceneService {
      * @param codes 类型集合
      * @return 规则id2file map
      */
-    public Map<String, String> getRuleId2FileByCodes(List<String> codes) {
+    public ServiceResult<Map<String, String>> getRuleId2FileByCodes(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
-            return new HashMap<>();
+            return new ServiceResult<>();
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(relationModels)) {
-            return new HashMap<>();
+            return new ServiceResult<>();
         }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
-        return getRuleId2FileByIds(ruleIds).getSource();
+        return getRuleId2FileByIds(ruleIds);
     }
 
     /**
