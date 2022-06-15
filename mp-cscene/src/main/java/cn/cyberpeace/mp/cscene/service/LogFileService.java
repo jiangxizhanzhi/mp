@@ -24,10 +24,17 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +45,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class LogFileService {
+
+    private static final String DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     @Autowired
     private CsceneCommonService csceneCommonService;
@@ -79,6 +88,7 @@ public class LogFileService {
         }
 
         List<LogFileVO> allLogFileVOs = new ArrayList<>();
+        // todo 多节点并发优化
         if (CollectionUtil.isNotEmpty(elementIds)) {
             for (String eid : elementIds) {
                 List<WazuhControl.QueryLogCollectFileData> fileList = new ArrayList<>();;
@@ -213,6 +223,9 @@ public class LogFileService {
                             LogFileVO.builder()
                                     .path(f.getPath())
                                     .size(f.getSize())
+                                    .createTime(parseDateTime(f.getCreateTime()))
+                                    .modifyTime(parseDateTime(f.getModifyTime()))
+                                    .accessTime(parseDateTime(f.getAccessTime()))
                                     .elementId(elementId)
                                     .agentName(agentName)
                                     .osType(osType)
@@ -225,6 +238,15 @@ public class LogFileService {
         });
 
         return logFileVOS;
+    }
+
+
+    private LocalDateTime parseDateTime(String datetime) {
+        log.info("datetime:{}", datetime);
+        String date1 = StringUtils.substringBeforeLast(datetime, ".");
+        DateTimeFormatter df = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
+        LocalDateTime dateTime = LocalDateTime.parse(date1, df);
+        return dateTime;
     }
 
 }
