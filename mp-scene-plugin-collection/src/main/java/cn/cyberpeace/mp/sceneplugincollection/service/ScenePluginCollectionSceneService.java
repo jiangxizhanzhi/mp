@@ -1378,7 +1378,7 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<Map<String, String>> getRuleId2FileByIds(List<String> ruleIds) {
         if (CollectionUtils.isEmpty(ruleIds)) {
-            return new ServiceResult(new HashMap<>());
+            return new ServiceResult<>(new HashMap<>());
         }
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleModel.class)
                 .filterIn(CollectionPluginWazuhRuleModel::getId, ruleIds.toArray());
@@ -1417,14 +1417,14 @@ public class ScenePluginCollectionSceneService {
      */
     public ServiceResult<Map<String, String>> getRuleId2FileByCodes(List<String> codes) {
         if (CollectionUtils.isEmpty(codes)) {
-            return new ServiceResult<>();
+            return new ServiceResult<>(new HashMap<>());
         }
         List<String> typeIds = getTypeIdsByCodes(codes);
         HumanCondition humanCondition = new HumanCondition().currentLink(CollectionPluginWazuhRuleTypeRelationModel.class)
                 .filterIn(CollectionPluginWazuhRuleTypeRelationModel::getTypeId, typeIds.toArray());
         var relationModels = collectionPluginWazuhRuleTypeRelationMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(relationModels)) {
-            return new ServiceResult<>();
+            return new ServiceResult<>(new HashMap<>());
         }
         List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
