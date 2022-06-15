@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.common;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.StaticRoute;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -76,7 +78,7 @@ public class VyosNetworkCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             return List.of(
-                    String.format(SET_HOST_NAME, paramsWrapper.element.getSrcElement().getName())
+                    String.format(SET_HOST_NAME, BeanCommon.getBean(CloudAppConfig.class).getDefaultCoreRouteName())
             );
         }
     }

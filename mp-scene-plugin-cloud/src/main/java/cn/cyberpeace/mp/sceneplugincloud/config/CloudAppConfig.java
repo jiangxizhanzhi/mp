@@ -123,6 +123,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.delete_retry_times:1}")
     private Integer deleteRetryTimes;
 
+    @Value("${mp.sceneplugincloud.default_core_router_name:Router}")
+    private String defaultCoreRouteName;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
