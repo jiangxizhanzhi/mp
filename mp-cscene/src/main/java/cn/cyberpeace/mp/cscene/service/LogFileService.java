@@ -187,7 +187,7 @@ public class LogFileService {
             log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
             String paramId = entry.getKey();
             String downloadUrl = entry.getValue().getFileSrc();
-            downloadUrl = collectionAppConfig.getWazuhGodfsOuterHttpServer() + "/" + downloadUrl;
+            downloadUrl = collectionAppConfig.getWazuhGodfsOuterHttpServer() + downloadUrl;
             LogFileDownloadUrlDto dto = paramId2DtoMap.get(paramId);
             if (Objects.nonNull(dto)) {
                 dto.setDownloadUrl(downloadUrl);
@@ -195,6 +195,7 @@ public class LogFileService {
             }
         });
 
+        log.info("downloadUrlDtos:{}", dtos);
         return dtos;
     }
 
