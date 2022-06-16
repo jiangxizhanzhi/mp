@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
@@ -73,6 +74,7 @@ public class CloudSceneConnectionCommon {
         }
 
         var isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
+        var isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
         if (!isConsole && StringUtils.isEmpty(cloudAccessMode.getAccessIp())) {
             log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access ip",
                     sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
@@ -105,6 +107,27 @@ public class CloudSceneConnectionCommon {
             if (consoleInfo != null) {
                 var latestConsoleIp = consoleInfo.getIpAddress();
                 var latestConsolePort = IntUtils.fromStr(consoleInfo.getPort());
+                if (latestConsoleIp != null
+                        && (!latestConsoleIp.equals(accessIp) || !latestConsolePort.equals(accessPort))) {
+                    sceneConnection = null;
+                    accessIp = latestConsoleIp;
+                    accessPort = latestConsolePort;
+                }
+            } else {
+                log.error("Get instance({}, {}) console empty info", resourceHost, resourceId);
+            }
+        }else if (isCom && !StringUtils.isEmpty(resourceId) && !StringUtils.isEmpty(resourceHost)) {
+            var vmClient = new VirtualMachine();
+            ComInfoGetResult comInfoGetResult = null;
+            try {
+                comInfoGetResult = vmClient.getComInfo(resourceId, resourceHost);
+            } catch (Exception e) {
+                log.error("Get instance({}, {}) console info error:", resourceHost, resourceId, e);
+            }
+            // com信息不同，需要创建新的连接
+            if (comInfoGetResult != null) {
+                var latestConsoleIp = comInfoGetResult.getIpAddress();
+                var latestConsolePort = IntUtils.fromStr(comInfoGetResult.getPort());
                 if (latestConsoleIp != null
                         && (!latestConsoleIp.equals(accessIp) || !latestConsolePort.equals(accessPort))) {
                     sceneConnection = null;

@@ -43,6 +43,7 @@ public class AccessMode {
         public static final String HTTP = "http";
         public static final String HTTPS = "https";
         public static final String SERIAL = "serial";
+        public static final String COM = "com";
 
         public static final Map<String, Integer> DEFAULT_PORT_MAP = Map.of(
                 SSH, 22,

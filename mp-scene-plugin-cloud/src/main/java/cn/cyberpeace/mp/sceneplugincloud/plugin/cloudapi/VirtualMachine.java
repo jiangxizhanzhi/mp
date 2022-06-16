@@ -67,6 +67,14 @@ public class VirtualMachine extends CloudClient {
                 ConsoleInfoGetResult.class);
     }
 
+    public ComInfoGetResult getComInfo(String instanceId, String hostname) {
+        var param = new ComInfoGetParam();
+        param.setInstanceUuid(instanceId);
+        param.setHostname(hostname);
+        return getHttpClient().get(CloudUrlConstant.COM_INFO_GET_URL, param,
+                ComInfoGetResult.class);
+    }
+
     private boolean doAction(String instanceId, CloudHttpData httpData) {
         try {
             cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_LIFE_CONTROL_URL.replace("{instance_id}", instanceId), httpData, null, new TypeReference<CloudResponse<Object>>() {
