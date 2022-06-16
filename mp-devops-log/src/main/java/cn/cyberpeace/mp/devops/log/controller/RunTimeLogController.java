@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.log.request.RunTimeLogDownloadRequest;
 import cn.cyberpeace.mp.devops.log.service.LogFileServiceFactory;
@@ -67,8 +68,9 @@ public class RunTimeLogController {
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
                                                      RunTimeLogDownloadRequest request) {
         InputStreamResource resource = null;
+        String fileName = request.getFileName();
         try {
-            resource = new InputStreamResource(logFileServiceFactory.downLoad(request.getType(),Arrays.asList(request.getFileName())));
+            resource = new InputStreamResource(logFileServiceFactory.downLoad(request.getType(),Arrays.asList(fileName)));
         } catch (Exception e) {
             throw new MpRuntimeException("获取文件流失败");
         }
@@ -76,7 +78,7 @@ public class RunTimeLogController {
         var httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=" + request.getFileName());
+        response.setHeader("Content-Disposition", "attachment; filename=" + (LogReportTypeEnum.MP.toValue().equals(request.getType()) && !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName));
         response.setHeader("Content-Type", "application/zip");
         return ResponseEntity.ok().headers(httpHeaders).body(resource);
     }
