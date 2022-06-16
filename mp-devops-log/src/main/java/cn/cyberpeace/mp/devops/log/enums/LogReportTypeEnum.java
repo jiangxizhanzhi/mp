@@ -16,7 +16,9 @@ public enum LogReportTypeEnum {
 
     MP,
 
-    BC;
+    BC,
+
+    CP;
 
 
     LogReportTypeEnum() {

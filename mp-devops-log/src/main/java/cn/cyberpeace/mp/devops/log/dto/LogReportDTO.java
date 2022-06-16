@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.devops.log.dto;
 
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -11,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class LogReportDTO {
 
     /**
@@ -30,6 +33,12 @@ public class LogReportDTO {
      */
     @ApiModelProperty(value = "下载地址")
     private String downloadUrl;
+
+    /**
+     * 日志类型
+     */
+    @ApiModelProperty(value = "日志类型")
+    private LogReportTypeEnum logReportTypeEnum;
 
     @ApiModelProperty(value = "更新时间")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
