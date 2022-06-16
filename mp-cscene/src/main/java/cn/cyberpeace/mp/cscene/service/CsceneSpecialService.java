@@ -273,6 +273,10 @@ public class CsceneSpecialService {
                         .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
                         .orAndEnd()
                         .orAndStart()
+                        .andEqual(SceneModel::getEvent, SceneModel.Event.RESUME)
+                        .andEqual(SceneModel::getEventStatus, EventStatus.OVER)
+                        .orAndEnd()
+                        .orAndStart()
                         .andIn(SceneModel::getEvent, new Integer[]{
                                 SceneModel.Event.START, SceneModel.Event.STOP, SceneModel.Event.RESTART,
                                 SceneModel.Event.SNAPSHOT, SceneModel.Event.MODIFY

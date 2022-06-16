@@ -39,4 +39,10 @@ public class LogReportServiceImpl implements LogReportService {
         logReportPOS.forEach(v -> v.setType(logReportTypeEnum.toValue()));
         return logReportMapper.bulkCreate(logReportPOS);
     }
+
+    @Override
+    public List<LogReportDTO> list(){
+        List<LogReportPO> list = logReportMapper.list(new HumanCondition());
+        return logReportDTOConverter.targetToSource(list);
+    }
 }

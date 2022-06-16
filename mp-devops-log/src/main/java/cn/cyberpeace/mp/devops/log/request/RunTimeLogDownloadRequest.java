@@ -1,0 +1,21 @@
+package cn.cyberpeace.mp.devops.log.request;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * @description:
+ * @author：Geek Wang
+ * @date: 2022/6/15
+ */
+@Data
+@NoArgsConstructor
+public class RunTimeLogDownloadRequest {
+
+    @ApiModelProperty(value = "日志上报类型")
+    private String type;
+
+    @ApiModelProperty(value = "文件名称")
+    private String fileName;
+}

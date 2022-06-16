@@ -2,20 +2,18 @@ package cn.cyberpeace.mp.devops.log.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.log.response.RunTimeLogResponse;
+import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.service.LogFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -37,23 +35,28 @@ public class MpLogFileServiceImpl implements LogFileService {
     private String logPath;
 
     @Override
-    public ServiceResult list() {
+    public String logReportType() {
+        return LogReportTypeEnum.MP.toValue();
+    }
+
+    @Override
+    public List<LogReportDTO>  list() {
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
-        List<RunTimeLogResponse> logResponseList = new ArrayList<>();
-
-        fileList.forEach(f -> {
+        List<LogReportDTO> logReportDTOList = fileList.stream().map(f -> {
+            LogReportDTO dto = new LogReportDTO();
+            dto.setFileName(f.getName());
+            dto.setFileSize(f.length());
+            dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
+            dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
             try {
-                logResponseList.add(RunTimeLogResponse.builder()
-                        .logName(f.getName())
-                        .lastModifyTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-                        .size(f.length()).build());
-            } catch (Exception e) {
-                log.error("file read path fail");
-                throw new MpRuntimeException(BaseErrorCode.ERROR);
+                dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+            } catch (IOException e) {
+                dto.setUpdateTime(LocalDateTime.now());
             }
-        });
-        return ServiceResult.successful();
+            return dto;
+        }).collect(Collectors.toList());
+        return logReportDTOList;
     }
 
     @Override

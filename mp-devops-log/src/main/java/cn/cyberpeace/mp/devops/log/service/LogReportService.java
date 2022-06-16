@@ -19,4 +19,10 @@ public interface LogReportService {
      * @return
      */
     int report(LogReportTypeEnum logReportTypeEnum, List<LogReportDTO> list);
+
+    /**
+     * 查询全部日志上报数据
+     * @return
+     */
+    List<LogReportDTO> list();
 }

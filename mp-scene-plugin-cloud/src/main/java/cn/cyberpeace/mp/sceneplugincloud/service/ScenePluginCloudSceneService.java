@@ -533,6 +533,20 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> expireAllRemoteConnect(String userId) {
+        Remote remote = new Remote();
+        for (int i = 0; i < 2; i++) {
+            try {
+                remote.expireAllConnect(userId);
+                break;
+            } catch (Exception e) {
+                log.error("failed to expire remote connect , userId is {}", userId, e);
+                continue;
+            }
+        }
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<List<String>> getRecordingUsers(String sceneId, List<String> nodeIds) {
         HumanCondition humanCondition = new HumanCondition().filterEqual(CloudPluginSceneConnectionModel::getScene, sceneId);
         if (CollectionUtils.isNotEmpty(nodeIds)) {
