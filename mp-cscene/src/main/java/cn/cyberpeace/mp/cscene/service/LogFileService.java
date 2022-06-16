@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhCon
 import cn.cyberpeace.mp.situationaware.model.enums.ProbeOSType;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.FileUtil;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -178,7 +179,7 @@ public class LogFileService {
         for (WazuhControl.ControlFileParam uploadParam : uploadParams) {
             String paramId = uploadParam.getId();
             String path = uploadParam.getFilepath();
-            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().path(path).agentName(agentName).osType(osType).build();
+            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().path(path).name(FileUtil.getName(path)).agentName(agentName).osType(osType).build();
             paramId2DtoMap.put(paramId, dto);
         }
 
@@ -222,6 +223,7 @@ public class LogFileService {
                     LogFileVO dto =
                             LogFileVO.builder()
                                     .path(f.getPath())
+                                    .name(FileUtil.getName(f.getPath()))
                                     .size(f.getSize())
                                     .createTime(parseDateTime(f.getCreateTime()))
                                     .modifyTime(parseDateTime(f.getModifyTime()))

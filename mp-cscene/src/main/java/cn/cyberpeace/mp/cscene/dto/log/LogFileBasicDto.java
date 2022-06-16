@@ -29,4 +29,7 @@ public class LogFileBasicDto {
     @ApiModelProperty("路径")
     private String path;
 
+    @ApiModelProperty("文件名")
+    private String name;
+
 }
