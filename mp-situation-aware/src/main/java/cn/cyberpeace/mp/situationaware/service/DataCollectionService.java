@@ -1062,6 +1062,11 @@ public class DataCollectionService {
                     .md5After(wazuhFileRoot.getSyscheck().getMd5After());
         }
 
+        if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getWin()) &&
+                Objects.nonNull(wazuhFileRoot.getData().getWin().getSystem())) {
+            builder.message(wazuhFileRoot.getData().getWin().getSystem().getMessage());
+        }
+
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
 //            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
 //                    .agentName(wazuhFileRoot.getAgent().getName())

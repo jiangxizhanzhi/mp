@@ -384,7 +384,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
-                hostEvent.setEventDesc(srcHostEvent.getDescription());
+                hostEvent.setEventDesc(srcHostEvent.getMessage());
             } else {
                 hostEvent.setEventDesc(srcHostEvent.getAction());
             }
