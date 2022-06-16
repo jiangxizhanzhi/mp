@@ -110,7 +110,7 @@ public class DeviceTargetPO extends BaseModel {
     private Integer imageStatus;
 
     /**
-     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
+     * 系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传
      */
     private Integer imageSource;
 

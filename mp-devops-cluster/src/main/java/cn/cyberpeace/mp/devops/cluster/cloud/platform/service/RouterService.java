@@ -14,7 +14,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class RouterService extends BaseOpenStackService {
+public class RouterService extends BaseCpService {
 
     public RouterService(DevopsConfig devopsConfig) {
         super(devopsConfig);

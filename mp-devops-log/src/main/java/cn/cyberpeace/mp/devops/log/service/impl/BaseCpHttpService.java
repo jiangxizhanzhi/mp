@@ -18,7 +18,7 @@ import java.io.IOException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BaseOpenStackHttpService extends BaseHttpService {
+public class BaseCpHttpService extends BaseHttpService {
 
     @Value("${mp.devops.cp-url}")
     private String cpUrl;

@@ -19,7 +19,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class InitRegisterService extends BaseOpenStackService {
+public class InitRegisterService extends BaseCpService {
 
     public InitRegisterService(DevopsConfig devopsConfig) {
         super(devopsConfig);

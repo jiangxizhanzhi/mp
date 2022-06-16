@@ -24,7 +24,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class RealEquipmentService extends BaseOpenStackService {
+public class RealEquipmentService extends BaseCpService {
 
     private static final String ENTITY = "/entity";
 

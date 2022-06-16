@@ -21,7 +21,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class DeviceService extends BaseOpenStackService {
+public class DeviceService extends BaseCpService {
 
     private static final String DEVICE = "/device";
 

@@ -31,7 +31,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BaseOpenStackService extends BaseService {
+public class BaseCpService extends BaseService {
 
     private final DevopsConfig devopsConfig;
 
