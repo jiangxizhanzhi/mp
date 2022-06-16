@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.log.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,5 +31,5 @@ public class LogReportPO extends BaseModel {
     /**
      * 日志类型（mp/cr）
      */
-    private String type;
+    private LogReportTypeEnum type;
 }

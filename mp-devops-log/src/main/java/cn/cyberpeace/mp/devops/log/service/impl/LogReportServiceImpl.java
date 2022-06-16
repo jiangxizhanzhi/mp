@@ -36,7 +36,7 @@ public class LogReportServiceImpl implements LogReportService {
         int delete = logReportMapper.filterDelete(condition);
         log.info("delete history log report type:{}, num：{}",logReportTypeEnum,delete);
         List<LogReportPO> logReportPOS = logReportDTOConverter.sourceToTarget(list);
-        logReportPOS.forEach(v -> v.setType(logReportTypeEnum.toValue()));
+        logReportPOS.forEach(v -> v.setType(logReportTypeEnum));
         return logReportMapper.bulkCreate(logReportPOS);
     }
 
