@@ -24,6 +24,8 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     private String entitySwitchName;
     @DefaultStr
     private String entitySwitchPort;
+    @DefaultStr
+    private String entityPort;
     @DefaultInt
     private Integer gatewayPortType;
     @DefaultStr
