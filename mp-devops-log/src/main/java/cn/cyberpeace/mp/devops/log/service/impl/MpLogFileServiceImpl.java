@@ -50,6 +50,7 @@ public class MpLogFileServiceImpl implements LogFileService {
             LogReportDTO dto = new LogReportDTO();
             dto.setFileName(f.getName());
             dto.setFileSize(f.length());
+            dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
             dto.setDownloadUrl(contextPath + ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
             try {
                 dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());

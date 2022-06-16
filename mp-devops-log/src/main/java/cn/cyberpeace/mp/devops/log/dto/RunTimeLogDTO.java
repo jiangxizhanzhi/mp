@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.log.dto;
 
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,12 @@ public class RunTimeLogDTO {
      */
     @ApiModelProperty(value = "下载地址")
     private String downloadUrl;
+
+    /**
+     * 日志类型
+     */
+    @ApiModelProperty(value = "日志类型")
+    private LogReportTypeEnum logReportTypeEnum;
 
     @ApiModelProperty(value = "日志文件最新时间-yyyy-MM-dd HH:mm:ss", required = true)
     private LocalDateTime lastModifyTime;
