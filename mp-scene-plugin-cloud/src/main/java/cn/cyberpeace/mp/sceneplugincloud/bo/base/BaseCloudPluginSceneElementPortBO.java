@@ -35,6 +35,8 @@ public abstract class BaseCloudPluginSceneElementPortBO<M extends BaseCloudPlugi
     private String entitySwitchName;
     @ApiModelProperty(value = "实体设备端口链接的交换机端口")
     private String entitySwitchPort;
+    @ApiModelProperty(value = "实体设备端口号")
+    private String entityPort;
     @ApiModelProperty(value = "网关设备端口类型")
     private Integer gatewayPortType;
     @ApiModelProperty(value = "网关设备端口地址段")
