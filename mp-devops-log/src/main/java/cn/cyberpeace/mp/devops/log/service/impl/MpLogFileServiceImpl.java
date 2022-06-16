@@ -34,9 +34,6 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Value("${logging.file.path}")
     private String logPath;
 
-    @Value("${server.servlet.context-path}")
-    private String contextPath;
-
     @Override
     public String logReportType() {
         return LogReportTypeEnum.MP.toValue();
@@ -51,7 +48,7 @@ public class MpLogFileServiceImpl implements LogFileService {
             dto.setFileName(f.getName());
             dto.setFileSize(f.length());
             dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
-            dto.setDownloadUrl(contextPath + ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
+            dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
             try {
                 dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
             } catch (IOException e) {
