@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.situationaware.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import lombok.Data;
+
 import java.util.Date;
 import java.util.List;
 
 /**
  * 文件json解析
  */
+@Data
 public class WazuhFileRoot {
     private Syscheck syscheck;
     private Agent agent;
@@ -21,6 +24,8 @@ public class WazuhFileRoot {
     private String location;
     private String id;
     private Date timestamp;
+
+    private WindowsData data;
 
     public Syscheck getSyscheck() {
         return syscheck;
@@ -420,6 +425,60 @@ public class WazuhFileRoot {
         }
         public int getInodeAfter() {
             return this.inodeAfter;
+        }
+    }
+
+    @Data
+    public static class WindowsData {
+        private Win win;
+
+        @Data
+        public static class Win {
+            private Eventdata eventdata;
+            private System system;
+
+            @Data
+            public static class Eventdata {
+                private String subjectLogonId;
+                private String subjectDomainName;
+                private String targetLinkedLogonId;
+                private String impersonationLevel;
+                private String authenticationPackageName;
+                private String targetLogonId;
+                private String logonProcessName;
+                private String logonGuid;
+                private String targetUserName;
+                private String keyLength;
+                private String elevatedToken;
+                private String subjectUserSid;
+                private String processId;
+                private String processName;
+                private String targetDomainName;
+                private String targetUserSid;
+                private String virtualAccount;
+                private String logonType;
+                private String subjectUserName;
+            }
+
+            @Data
+            public static class System {
+                private String eventID;
+                private String keywords;
+                private String providerGuid;
+                private String level;
+                private String channel;
+                private String opcode;
+                private String message;
+                private String version;
+                private String systemTime;
+                private String eventRecordID;
+                private String threadID;
+                private String computer;
+                private String task;
+                private String processID;
+                private String severityValue;
+                private String providerName;
+            }
         }
     }
 }

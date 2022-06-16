@@ -76,4 +76,7 @@ public class FileEventModel {
 
     @ApiModelProperty("规则id")
     private String ruleId;
+
+    @ApiModelProperty("事件描述")
+    private String message;
 }
