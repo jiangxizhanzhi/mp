@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devops.log.service;
 
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -13,10 +13,16 @@ import java.util.List;
 public interface LogFileService {
 
     /**
+     * 日志上报类型
+     * @return
+     */
+    String logReportType();
+
+    /**
      * 列表
      * @return
      */
-    ServiceResult list();
+    List<LogReportDTO>  list();
 
     /**
      * 下载
@@ -30,4 +36,5 @@ public interface LogFileService {
      * @return
      */
     ByteArrayInputStream download(List<String> logFileNames);
+
 }

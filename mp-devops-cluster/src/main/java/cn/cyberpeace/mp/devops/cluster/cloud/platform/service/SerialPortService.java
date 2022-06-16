@@ -25,6 +25,8 @@ public class SerialPortService extends BaseOpenStackService {
      * @return
      */
     public SerialPortCloudPlatform list() {
-        return super.sendGet(CPCLOUD_CCM + URL_VERSION + "/list" , SerialPortCloudPlatform.class);
+        SerialPortCloudPlatform result = super.sendGet(CPCLOUD_CCM + URL_VERSION + "/list" , SerialPortCloudPlatform.class);
+        super.checkResult(result);
+        return result;
     }
 }
