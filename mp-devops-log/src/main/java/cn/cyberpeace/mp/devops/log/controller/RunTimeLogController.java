@@ -76,7 +76,7 @@ public class RunTimeLogController {
         var httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=log.zip");
+        response.setHeader("Content-Disposition", "attachment; filename=" + request.getFileName());
         response.setHeader("Content-Type", "application/zip");
         return ResponseEntity.ok().headers(httpHeaders).body(resource);
     }
