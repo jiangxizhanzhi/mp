@@ -3,8 +3,11 @@ package cn.cyberpeace.mp.auth.extensions.security;
 import cn.cyberpeace.mp.auth.config.AuthLogoutConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
+import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
+import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
@@ -49,6 +52,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private AuthLogoutConfig logoutConfig;
 
     @Autowired
+    private UserEventPublisher userEventPublisher ;
+
+    @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
         this.userService = userService;
@@ -69,6 +75,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             }
             userName = user.getName();
             recordLogoutLog(user, request);
+            userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
         }
 
         if (StringUtils.isNotBlank(userName)) {
