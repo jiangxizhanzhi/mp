@@ -140,9 +140,6 @@ public class AsyncPlatFlowTaskService {
         FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
         if (Objects.isNull(flowActuatorModel)) {
             return;
-        } else {
-            // 传入任务所属网络id
-            flowActuatorModel.setNetworkId(request.getNetworkId());
         }
 
         // 获取网口信息
@@ -166,7 +163,8 @@ public class AsyncPlatFlowTaskService {
                     flowPortModel = attackFlowPorts.get(0);
                 } else {
                     // 新增攻击流量网口
-                    flowPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0], flowActuatorModel, flowInfoModel.getResourceType());
+                    flowPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0],
+                            flowActuatorModel, flowInfoModel.getResourceType(), request.getNetworkId());
                     if (Objects.isNull(flowPortModel)) {
                         log.error("create attack flow port info error");
                         return;
@@ -306,9 +304,6 @@ public class AsyncPlatFlowTaskService {
             if (Objects.isNull(flowActuatorModel)) {
                 log.error("flowActuatorModel is empty");
                 throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-            } else {
-                // 传入任务所属网络id
-                flowActuatorModel.setNetworkId(request.getNetworkId());
             }
 
             String thirdTaskId = "";
@@ -362,7 +357,8 @@ public class AsyncPlatFlowTaskService {
                         attackPortModel = attackFlowPorts.get(0);
                     } else {
                         // 攻击网口不存在时新增一个
-                        attackPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0], flowActuatorModel, flowInfoModel.getResourceType());
+                        attackPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0],
+                                flowActuatorModel, flowInfoModel.getResourceType(), request.getNetworkId());
                         if (Objects.isNull(attackPortModel)) {
                             log.error("batch create attack flow port info error");
                             throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
@@ -537,6 +533,15 @@ public class AsyncPlatFlowTaskService {
                 fixedIp = netWorkObj.getString("fixed_ip");
                 String ip = fixedIp + BaseConstants.COLON + "80";
 
+                String clientMac = netWorkObj.getString("mac_address");
+                String clientIp = fixedIp;
+                String clientPortId = netWorkObj.getString("port_id");
+
+                // pcap使用无状态模式，客户端和服务端共用一个网口
+                String serverMac = clientMac;
+                String serverIp = clientIp;
+                String serverPortId = clientPortId;
+
                 // 新增流量执行器信息
                 flowActuatorModel.setId(uuid);
                 flowActuatorModel.setTitle(addVmRequest.getName());
@@ -544,6 +549,22 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setIp(ip);
                 flowActuatorModel.setNetworkId(externalNetId);
                 flowActuatorMapper.create(flowActuatorModel);
+
+                // 添加外网网口信息
+                FlowPortModel flowPortModel = FlowPortModel.builder()
+                        .serverIp(serverIp)
+                        .serverMac(serverMac)
+                        .serverPortId(serverPortId)
+                        .serverGateway(fixedIp) // Trex的ip作为网关地址
+                        .clientIp(clientIp)
+                        .clientMac(clientMac)
+                        .clientPortId(clientPortId)
+                        .clientGateway(fixedIp) // Trex的ip作为网关地址
+                        .networkId(externalNetId)
+                        .actuatorId(flowActuatorModel.getId())
+                        .portType(PortTypeEnum.ATTACK.toValue())
+                        .build();
+                flowPortMapper.create(flowPortModel);
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
@@ -563,44 +584,19 @@ public class AsyncPlatFlowTaskService {
         log.info("================ Add vm instance end ==================");
     }
 
-//    /**
-//     * 获取任务接口状态
-//     * @param flowActuatorModel
-//     * @return
-//     */
-//    private boolean getTaskJobStatus(FlowActuatorModel flowActuatorModel) {
-//        boolean isActive = false;
-//        try {
-//            JSONObject getTaskObj = new JSONObject();
-//            JSONArray getTaskArray = new JSONArray();
-//            getTaskArray.add("test_standardTask");
-//            getTaskObj.put("uuids", getTaskArray);
-//            String getTaskRsp = HttpUtils.sendPostWithTimeOut(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards/many",
-//                    getTaskObj.toJSONString(), 10000);
-//            JSONObject taskResultObj = JSONObject.parseObject(getTaskRsp);
-//            log.info("get tasks info response:{}", taskResultObj.toJSONString());
-//            if ("1000".equalsIgnoreCase(taskResultObj.getString("code"))) {
-//                isActive = true;
-//            }
-//        } catch (Exception e) {
-//            log.error("get tasks info error", e);
-//        }
-//
-//        return isActive;
-//    }
-
     /**
      * 新增网口
      * @param targetIp
      * @param flowActuatorModel
      * @param resourceType
+     * @param networkId
      * @return
      */
-    private FlowPortModel createPort(String targetIp, FlowActuatorModel flowActuatorModel, int resourceType) {
+    private FlowPortModel createPort(String targetIp, FlowActuatorModel flowActuatorModel, int resourceType, String networkId) {
         FlowPortModel flowPortModel = null;
         try {
             JSONObject addPortReq = new JSONObject();
-            addPortReq.put("network_id", flowActuatorModel.getNetworkId());
+            addPortReq.put("network_id", networkId);
 
             String serverMac = "";
             String serverIp = "";
@@ -661,7 +657,7 @@ public class AsyncPlatFlowTaskService {
                     .clientMac(clientMac)
                     .clientPortId(clientPortId)
                     .clientGateway(targetIp) // 目标ip作为网关地址
-                    .networkId(flowActuatorModel.getNetworkId())
+                    .networkId(networkId)
                     .actuatorId(flowActuatorModel.getId())
                     .portType(portType)
                     .build();
