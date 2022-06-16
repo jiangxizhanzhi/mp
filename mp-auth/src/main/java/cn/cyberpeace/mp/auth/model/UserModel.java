@@ -54,11 +54,13 @@ public class UserModel extends BaseModel implements Serializable {
 
     @ApiModelProperty(value = "密码")
     // 该字段对读屏蔽，对写不屏蔽
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @ApiModelProperty(value = "token秘钥", hidden = true)
     @DefaultGen(UuidGenerator.class)
     // 该字段对读屏蔽，对写不屏蔽
+    @JsonIgnore
     private String tokenSecret;
 
     @ApiModelProperty(value = "用户姓名")
