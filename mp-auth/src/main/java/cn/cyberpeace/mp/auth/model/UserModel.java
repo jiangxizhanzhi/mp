@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,7 @@ public class UserModel extends BaseModel implements Serializable {
     @ApiModelProperty(value = "token秘钥")
     @DefaultGen(UuidGenerator.class)
     // todo 后续该字段对查询屏蔽
+    @JsonIgnore
     private String tokenSecret;
 
     @ApiModelProperty(value = "用户姓名")
