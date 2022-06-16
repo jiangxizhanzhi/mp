@@ -532,11 +532,18 @@ public class InitiateHandler extends HandlerCommon {
                 Integer toVirtualType = pluginElement.getVirtualType();
                 if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
                     synchronized (ipPool) {
-                        port.setIp(ipPool.remove(ipPool.size() - 1));
+                        if (ipPool.size() > 0) {
+                            port.setIp(ipPool.remove(ipPool.size() - 1));
+                        }
+                        log.error("failed to get ip from ip pool , port eid:{}", port.getEid());
                     }
                 } else {
                     synchronized (ipPool) {
-                        port.setIp(ipPool.remove(0));
+                        if (ipPool.size() > 0) {
+                            port.setIp(ipPool.remove(0));
+                        } else {
+                            log.error("failed to get ip from ip pool , port eid:{}", port.getEid());
+                        }
                     }
                 }
             }
@@ -646,8 +653,10 @@ public class InitiateHandler extends HandlerCommon {
             // 实体节点的网络需要初始化对端端口
             initiateVirtualToPort(cloudElement);
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH)) {
-            // 二层网络节点的网络需要初始化对端端口
-            initiateVirtualToPort(cloudElement);
+            // 二层网络节点的网络、而且非外部网络需要初始化对端端口
+            if (cloudElement.getRole() != null && cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                initiateVirtualToPort(cloudElement);
+            }
         }
     }
 
@@ -842,11 +851,20 @@ public class InitiateHandler extends HandlerCommon {
         if (role != null) {
             if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)
                     || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)
-                    || role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)
             ) {
                 coreType = CoreType.NETWORK;
+            } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.NETWORK;
+                } else {
+                    coreType = CoreType.NETWORK_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                coreType = CoreType.ROUTER;
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 coreType = CoreType.FIREWALL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {

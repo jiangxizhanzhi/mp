@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model.dto.collection;
 
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -21,6 +22,20 @@ public class ColTempCommonProbeRequest {
     @ApiModelProperty(value = "探针ID")
     @NotBlank
     private String id;
+
+    /**
+     * 探针名称
+     */
+    @ApiModelProperty(value = "探针名称")
+    @DefaultStr
+    private String name;
+
+    /**
+     * 描述
+     */
+    @ApiModelProperty(value = "描述")
+    @DefaultStr
+    private String description;
 
     /**
      * 0:启用，1:禁用

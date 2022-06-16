@@ -34,6 +34,10 @@ public enum AuthErrorCode implements ErrorCode {
     USER_DELETE_ERROR("MP-110022", "user_delete_error"),
     USER_MODIFY_ERROR("MP-110023", "user_modify_error"),
     USER_CANNOT_DELETE_ADMIN("MP-110024", "user_cannot_delete_admin"),
+    USER_CANNOT_DELETE_SELF("MP-110025", "user_cannot_delete_self"),
+    USER_CANNOT_DISABLE_SELF("MP-110026", "user_cannot_disable_self"),
+    USER_CANNOT_OPERATE_SELF("MP-110027", "user_cannot_operate_self"),
+
 
 
     ACCOUNT_MOBILE_EXISTED("MP-110041", "mobile_existed"),

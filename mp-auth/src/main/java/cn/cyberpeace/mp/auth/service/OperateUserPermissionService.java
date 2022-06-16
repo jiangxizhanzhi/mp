@@ -8,10 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -38,10 +36,11 @@ public class OperateUserPermissionService extends OperatePermissionService {
      * @param targetUserId
      * @return
      */
-    public boolean isOperateSelf(String targetUserId) {
+    public boolean isOperateSelf(List<String> targetUserIds) {
         UserModel currentLoginUser = UserUtils.getLoginUser();
-        if (Objects.nonNull(currentLoginUser) && Objects.equals(currentLoginUser.getId(), targetUserId)) {
-            return true;
+        if (Objects.nonNull(currentLoginUser) && CollectionUtil.isNotEmpty(targetUserIds)) {
+            String currentUserId = currentLoginUser.getId();
+            return targetUserIds.contains(currentUserId);
         }
 
         return false;

@@ -167,6 +167,14 @@ public class ScreenrecordService extends BaseOpenStackService {
         long usedTotal = 0L;
         // 资源已用空间占比
         double usedPercent = 0;
+        // 其他资源占比
+        double otherPercent = 0;
+        // 剩余占比
+        double leftPercent = 0;
+        // 录屏占比
+        double screenRecordPercent = 0;
+        // 截屏占比
+        double screenshotPercent = 0;
 
         // 录屏占用空间信息
         CpcloudRecordUsedSpaceVO cpResponse = super.sendGet(BaseCloudPlatformConstant.SCREENRECORD_METHOD +
@@ -191,7 +199,11 @@ public class ScreenrecordService extends BaseOpenStackService {
         if (leftSpace < 0) {
             leftSpace = 0L;
         }
-        usedPercent = new BigDecimal(usedTotal).divide(new BigDecimal(totalSpace), 4, RoundingMode.HALF_UP).doubleValue();
+        usedPercent = new BigDecimal(usedTotal * 100).divide(new BigDecimal(totalSpace), 2, RoundingMode.HALF_UP).doubleValue();
+        otherPercent = new BigDecimal(otherUsed * 100).divide(new BigDecimal(totalSpace), 2, RoundingMode.HALF_UP).doubleValue();
+        leftPercent = new BigDecimal(leftSpace * 100).divide(new BigDecimal(totalSpace), 2, RoundingMode.HALF_UP).doubleValue();
+        screenRecordPercent = new BigDecimal(screenRecordUsed * 100).divide(new BigDecimal(totalSpace), 2, RoundingMode.HALF_UP).doubleValue();
+        screenshotPercent = new BigDecimal(screenshotUsed * 100).divide(new BigDecimal(totalSpace), 2, RoundingMode.HALF_UP).doubleValue();
         SpaceStaticsVO spaceStaticsVO = SpaceStaticsVO.builder()
                 .leftSpace(leftSpace)
                 .usedTotal(usedTotal)
@@ -199,7 +211,11 @@ public class ScreenrecordService extends BaseOpenStackService {
                 .screenshotUsed(screenshotUsed)
                 .otherUsed(otherUsed)
                 .usedPercent(usedPercent)
+                .otherPercent(otherPercent)
+                .leftPercent(leftPercent)
                 .totalSpace(totalSpace)
+                .screenshotPercent(screenshotPercent)
+                .screenRecordPercent(screenRecordPercent)
                 .build();
 
         return ServiceResult.success(spaceStaticsVO);

@@ -66,6 +66,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -233,6 +234,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean>  delete(String userId) {
+        if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
+        }
         deleteReleated(userId);
 
         var ret = super.delete(userId);
@@ -243,6 +247,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] userIds) {
+        if (opUserPermCheckService.isOperateSelf(Arrays.asList(userIds))) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
+        }
         for (String userId : userIds) {
             deleteReleated(userId);
         }
@@ -313,7 +320,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
-        if (!opUserPermCheckService.isOperateSelf(modifyRequest.getId())) {
+        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
             // 如果操作的对象不是自己，则进行权限校验
             opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
         }
@@ -460,6 +467,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean disable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DISABLE_SELF);
+        }
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
 
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
@@ -483,6 +493,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchDisable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        if (opUserPermCheckService.isOperateSelf(userIds)) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DISABLE_SELF);
+        }
         opUserPermCheckService.checkByTargetUserIds(userIds);
 
         StringBuilder errMsg = new StringBuilder();
@@ -500,6 +513,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean enable(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        if (opUserPermCheckService.isOperateSelf(Arrays.asList(userId))) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_OPERATE_SELF);
+        }
         opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
@@ -522,6 +538,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchEnable(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        if (opUserPermCheckService.isOperateSelf(userIds)) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_OPERATE_SELF);
+        }
         opUserPermCheckService.checkByTargetUserIds(userIds);
 
         StringBuilder errMsg = new StringBuilder();
@@ -540,6 +559,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public boolean approve(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
+        if (opUserPermCheckService.isOperateSelf(Arrays.asList(userId))) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_OPERATE_SELF);
+        }
         Optional<UserModel> userOptional = Optional.ofNullable(getModelMapper().get(userId));
         if (userOptional.isPresent()) {
             UserModel userModel = userOptional.get();
@@ -561,6 +583,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public String batchApprove(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_LIST);
+        if (opUserPermCheckService.isOperateSelf(userIds)) {
+            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_OPERATE_SELF);
+        }
         opUserPermCheckService.checkByTargetUserIds(userIds);
 
         StringBuilder errMsg = new StringBuilder();

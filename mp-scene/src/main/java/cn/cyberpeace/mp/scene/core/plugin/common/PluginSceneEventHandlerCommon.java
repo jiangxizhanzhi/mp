@@ -7,11 +7,13 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Slf4j
 public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?, ?>> {
 
     private H pluginHandler;
@@ -75,6 +77,7 @@ public class PluginSceneEventHandlerCommon<H extends ScenePluginHandler<?, ?, ?,
         try {
             runner.run();
         } catch (Exception e) {
+            log.error("failed to run element progress ", e);
             MpRuntimeException mpe = this.handlerSpecialException(getPluginHandler().getElement(nodeId), e);
             if (mpe != null) {
                 getPluginHandler().errorElement(nodeId, event, mpe.getMessage());
