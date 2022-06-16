@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.auth.exception;
 
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.CustomAuthErrorCode;
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -8,12 +11,14 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.excel.exception.ExcelCommonException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AccountStatusException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.Objects;
 
 /**
  * Auth模块异常统一处理
@@ -79,6 +84,15 @@ public class AuthExceptionHandler {
         CustomAuthErrorCode customAuthErrorCode = new CustomAuthErrorCode();
         customAuthErrorCode.setCode(BaseErrorCode.PARAMS_INVALID.getCode(), errorMsg);
         return ServiceResult.<String>builder().serviceCode(customAuthErrorCode).build().asResult();
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public ServiceResult<String> accessDeniedExceptionHandle(AccessDeniedException ex) {
+        UserModel user = UserUtils.getLoginUser();
+        log.error("access denied! {}, user:{}", ex.getMessage(), Objects.nonNull(user) ? user.getUsername() : "");
+        return ServiceResult.<String>builder().serviceCode(AuthErrorCode.PERMISSION_DENIED).build().asResult();
     }
 
 }
