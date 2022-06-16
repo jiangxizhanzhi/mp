@@ -774,7 +774,11 @@ public class InitiateHandler extends HandlerCommon {
                     coreType = CoreType.NETWORK_L2;
                 }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
-                coreType = CoreType.ROUTER;
+                if (BaseCloudPluginSceneElementModel.ImageType.SIMPLE.equals(element.getImageType())) {
+                    coreType = CoreType.ROUTER;
+                } else {
+                    coreType = CoreType.ROUTER_L2;
+                }
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
                 coreType = CoreType.FIREWALL;
             } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
