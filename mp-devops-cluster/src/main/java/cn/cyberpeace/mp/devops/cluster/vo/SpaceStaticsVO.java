@@ -20,24 +20,36 @@ import lombok.NoArgsConstructor;
 public class SpaceStaticsVO {
 
     @ApiModelProperty("系统总空间")
-    long totalSpace = 0L;
+    private long totalSpace;
 
     @ApiModelProperty("剩余可用空间")
-    long leftSpace = 0L;
+    private long leftSpace;
 
     @ApiModelProperty("截屏已用空间")
-    long screenshotUsed = 0L;
+    private long screenshotUsed;
 
     @ApiModelProperty("录屏已用空间")
-    long screenRecordUsed = 0L;
+    private long screenRecordUsed;
 
     @ApiModelProperty("其他占用空间")
-    long otherUsed = 0L;
+    private long otherUsed;
 
     @ApiModelProperty("资源总占用空间")
-    long usedTotal = 0L;
+    private long usedTotal;
 
     @ApiModelProperty("资源已用空间占比")
-    double usedPercent = 0;
+    private double usedPercent;
+
+    @ApiModelProperty("录屏占比")
+    private double screenRecordPercent;
+
+    @ApiModelProperty("截屏占比")
+    private double screenshotPercent;
+
+    @ApiModelProperty("其他已用空间占比")
+    private double otherPercent;
+
+    @ApiModelProperty("剩余可用空间占比")
+    private double leftPercent;
 
 }

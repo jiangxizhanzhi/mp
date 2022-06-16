@@ -542,6 +542,7 @@ public class AsyncPlatFlowTaskService {
                 flowActuatorModel.setTitle(addVmRequest.getName());
                 flowActuatorModel.setInstanceId(instanceId);
                 flowActuatorModel.setIp(ip);
+                flowActuatorModel.setNetworkId(externalNetId);
                 flowActuatorMapper.create(flowActuatorModel);
 
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
