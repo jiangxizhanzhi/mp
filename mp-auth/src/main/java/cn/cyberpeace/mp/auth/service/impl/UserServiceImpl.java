@@ -271,6 +271,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
+        userModel.setTokenSecret(null);
 
         createCheckService.check(userModel);
 
@@ -335,6 +336,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         } else {
             userModel.setPassword(null);
         }
+        userModel.setTokenSecret(null);
 
         updateCheckService.check(userModel);
 
