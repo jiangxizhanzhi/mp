@@ -14,7 +14,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class FlavorService extends BaseOpenStackService {
+public class FlavorService extends BaseCpService {
 
     public FlavorService(DevopsConfig devopsConfig) {
         super(devopsConfig);

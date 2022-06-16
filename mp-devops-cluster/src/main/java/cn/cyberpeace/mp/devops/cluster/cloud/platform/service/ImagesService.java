@@ -30,7 +30,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class ImagesService extends BaseOpenStackService {
+public class ImagesService extends BaseCpService {
 
     private static final String NORMAL = "/normal";
 

@@ -14,7 +14,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class FirewallService extends BaseOpenStackService {
+public class FirewallService extends BaseCpService {
 
     public FirewallService(DevopsConfig devopsConfig) {
         super(devopsConfig);

@@ -42,7 +42,7 @@ import java.util.Objects;
  */
 @Service
 @Slf4j
-public class ScreenrecordService extends BaseOpenStackService {
+public class ScreenrecordService extends BaseCpService {
 
     public ScreenrecordService(DevopsConfig devopsConfig) {
         super(devopsConfig);

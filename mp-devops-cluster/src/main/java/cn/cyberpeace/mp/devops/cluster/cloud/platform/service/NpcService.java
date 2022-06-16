@@ -21,7 +21,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class NpcService extends BaseOpenStackService {
+public class NpcService extends BaseCpService {
 
     public NpcService(DevopsConfig devopsConfig) {
         super(devopsConfig);

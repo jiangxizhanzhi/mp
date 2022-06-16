@@ -23,7 +23,7 @@ import java.util.zip.ZipOutputStream;
  * @date: 2022/6/15
  */
 @Service
-public class CpCloudLogFileServiceImpl extends BaseOpenStackHttpService implements LogFileService {
+public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileService {
 
     @Override
     public String logReportType() {

@@ -111,19 +111,19 @@ public class HypervisorConverter implements BaseConverter {
      * @return
      */
     public List<HypervisorServiceStateConvertModel> serviceState() {
-        CloudPlatformPageResult<InstanceOsServiceModel> osServiceOpenStackModel = vmService.osServicesStateFromInstances();
-        CloudPlatformPageResult<NetworkAgentModel> networkAgentOpenStackModel = networkService.agentsStateFromNetworks();
+        CloudPlatformPageResult<InstanceOsServiceModel> modelCloudPlatformPageResult = vmService.osServicesStateFromInstances();
+        CloudPlatformPageResult<NetworkAgentModel> networks = networkService.agentsStateFromNetworks();
 
         List<HypervisorServiceStateConvertModel> resultList = new ArrayList<>();
 
-        if (Objects.nonNull(osServiceOpenStackModel) && CollectionUtils.isNotEmpty(osServiceOpenStackModel.getList())){
-            resultList.addAll(osServiceOpenStackModel.getList().stream().map(instanceOsServiceModel ->
+        if (Objects.nonNull(modelCloudPlatformPageResult) && CollectionUtils.isNotEmpty(modelCloudPlatformPageResult.getList())){
+            resultList.addAll(modelCloudPlatformPageResult.getList().stream().map(instanceOsServiceModel ->
                     new HypervisorServiceStateConvertModel(instanceOsServiceModel.getBinary(),instanceOsServiceModel.getState())
             ).collect(Collectors.toList()));
         }
 
-        if (Objects.nonNull(networkAgentOpenStackModel) && CollectionUtils.isNotEmpty(networkAgentOpenStackModel.getList())){
-            resultList.addAll(networkAgentOpenStackModel.getList().stream().map(networkAgentModel ->
+        if (Objects.nonNull(networks) && CollectionUtils.isNotEmpty(networks.getList())){
+            resultList.addAll(networks.getList().stream().map(networkAgentModel ->
                     new HypervisorServiceStateConvertModel(networkAgentModel.getBinary(),networkAgentModel.getAlive())).collect(Collectors.toList())
             );
         }

@@ -17,7 +17,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class ContainerService extends BaseOpenStackService {
+public class ContainerService extends BaseCpService {
 
     /**
      * 基础容器url

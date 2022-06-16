@@ -23,7 +23,7 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
  */
 @Service
 @Slf4j
-public class SnapshotService extends BaseOpenStackService {
+public class SnapshotService extends BaseCpService {
 
     private static final String SNAPSHOT = "/snapshot";
 

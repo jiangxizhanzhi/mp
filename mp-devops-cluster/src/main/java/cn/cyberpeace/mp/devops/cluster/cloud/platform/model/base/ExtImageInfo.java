@@ -46,9 +46,9 @@ public class ExtImageInfo implements Serializable {
     private String error;
 
     /**
-     * 系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传
+     * 系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传
      */
-    @ApiModelProperty("系统镜像类型，1：基础镜像，2：openstack已有镜像，3：自定义上传")
+    @ApiModelProperty("系统镜像类型，1：基础镜像，2：CP-CLOUD已有镜像，3：自定义上传")
     private Integer imageSource;
 
     /**
