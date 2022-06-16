@@ -486,13 +486,17 @@ public class CollectionTemplateService {
             return;
         }
         for (ColTempCommonProbeRequest colTempProbeReq : colTempCommonProbeReqs) {
+            String probeId = colTempProbeReq.getId();
+            ProbeModel probe = probeService.getById(probeId);
             CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
-                    .probeId(colTempProbeReq.getId())
+                    .probeId(probeId)
                     .templateId(templateId)
                     //.intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
                     .disabled(colTempProbeReq.getDisabled())
                     .type(ProbeModel.TYPE_COMMON)
                     .probeCategory(catagory)
+                    .name(probe.getName())
+                    .description(probe.getDescription())
                     .build();
 
             if (Objects.equals(0, colTempProbeReq.getDisabled())) {
@@ -625,8 +629,16 @@ public class CollectionTemplateService {
      */
     private void processDefaultColTempProbes(String templateId, List<CollectionTemplateProbeModel> allColTempProbeList) {
         for (String probeId : BASIC_INFO_PROBE_IDS) {
+            ProbeModel basicProbe = probeService.getById(probeId);
             CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
-                    .probeId(probeId).disabled(0).templateId(templateId).type(ProbeModel.TYPE_COMMON).probeCategory(ProbeModel.CATATORY_BASIC_INFO).build();
+                    .probeId(probeId).disabled(0)
+                    .templateId(templateId)
+                    .type(ProbeModel.TYPE_COMMON)
+                    .probeCategory(ProbeModel.CATATORY_BASIC_INFO)
+                    .name(basicProbe.getName())
+                    .description(basicProbe.getDescription())
+                    .build();
+
             allColTempProbeList.add(colTempProbeModel);
         }
     }
