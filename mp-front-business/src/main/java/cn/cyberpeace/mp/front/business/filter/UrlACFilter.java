@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.front.business.filter;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OperatePermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.business.config.UrlACFilterConfig;
 import cn.cyberpeace.mp.front.business.constant.FrontBizErrorCode;
@@ -13,7 +11,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -105,7 +102,7 @@ public class UrlACFilter extends OncePerRequestFilter {
                     // 权限不匹配
                     log.error("###URLACFILTER -> referer:{}, url:{} access denied!", request.getHeaders("referer"), requestUrl);
                     //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
-                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl, method));
+                    result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
                 }
             }
 
@@ -114,6 +111,7 @@ public class UrlACFilter extends OncePerRequestFilter {
         if (Objects.nonNull(result)) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
             PrintWriter writer = response.getWriter();
             mapper.writeValue(writer, result.asResult());
             writer.flush();
