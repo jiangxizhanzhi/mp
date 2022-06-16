@@ -179,7 +179,7 @@ public class LogFileService {
         for (WazuhControl.ControlFileParam uploadParam : uploadParams) {
             String paramId = uploadParam.getId();
             String path = uploadParam.getFilepath();
-            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().path(path).agentName(agentName).osType(osType).build();
+            LogFileDownloadUrlDto dto = LogFileDownloadUrlDto.builder().path(path).name(FileUtil.getName(path)).agentName(agentName).osType(osType).build();
             paramId2DtoMap.put(paramId, dto);
         }
 
