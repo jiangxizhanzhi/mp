@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
@@ -23,12 +23,13 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateCo
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleCreateConnectionResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleGetConnectionUrlResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleLogoutResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleMonitorData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VlanRangeResult;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
-import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class Remote extends CloudClient {
 
     public GuacamoleCreateConnectionResult createConnection(GuacamoleCreateConnectionData createConnectionData) {
@@ -168,5 +170,17 @@ public class Remote extends CloudClient {
         vlanRangeData.setVlans(vlanRange);
         VlanRangeResult result = getHttpClient().post(CloudUrlConstant.VLAN_RANGE, vlanRangeData, null, VlanRangeResult.class);
         return result.getStatus() == null ? false : result.getStatus();
+    }
+
+    public boolean expireAllConnect(String userId) {
+        GuacamoleLogoutData guacamoleLogoutData = new GuacamoleLogoutData();
+        guacamoleLogoutData.setUsername(userId);
+        GuacamoleLogoutResult result = getHttpClient().post(CloudUrlConstant.EXPIRE_ALL_CONNECT, guacamoleLogoutData, null, GuacamoleLogoutResult.class);
+        if (result != null && Boolean.TRUE.equals(result.getSuccess())) {
+            return true;
+        } else {
+            log.error("failed to exec guacamole logout , userId is {} , result is {}", userId, JsonCommon.stringify(result));
+            return false;
+        }
     }
 }
