@@ -22,8 +22,6 @@ public class RuntimeLogService {
 
     private final LogFileServiceFactory logFileServiceFactory;
 
-    private final LogReportService logReportService;
-
     private final RunTimeLogDTOConverter runTimeLogDTOConverter;
 
     /**
@@ -33,10 +31,10 @@ public class RuntimeLogService {
      */
     public ListObjResult<RunTimeLogDTO> page(BasePageRequest basePageRequest){
         List<LogReportDTO> allLogReportDTOList = Lists.newArrayList();
+
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll();
         allLogReportDTOList.addAll(mpAndCpLogList);
-        List<LogReportDTO> reportDTOList = logReportService.list();
-        allLogReportDTOList.addAll(reportDTOList);
+
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
         int offset = (basePageRequest.getPage() - 1) * basePageRequest.getPerPage();
         if (offset < runTimeLogDTOS.size()) {
