@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.base.context.LoginUserContext;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
@@ -45,6 +46,8 @@ import java.util.Set;
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final MD5 MD5_ = MD5.create();
 
     @Autowired
     private UserPermissionService userPermissionService;
@@ -92,10 +95,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
-        String md5 = MD5.create().digestHex(token);
+        String md5 = MD5_.digestHex(token);
         Cache tokenCache = cacheManager.getCache("_token");
         String jwt = tokenCache.get(md5, String.class);
         if (StringUtils.isBlank(jwt)) {
+            log.info("hit cache... md5:{}, jwt:{}", md5, jwt);
             Date date = JwtUtils.getTokenExpiredTime(token);
             if (Objects.isNull(date)) {
                 return;
@@ -110,27 +114,31 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (StringUtils.isNotBlank(jwt)) {
+            tokenCache.put(md5, jwt);
             // 后端种下一个新的token
             setCookie(response, "cr_jwttoken", jwt, "/", null, Integer.MAX_VALUE);
+
+            response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
+            response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
         }
     }
 
 
-        private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
-            Cookie cookie = new Cookie(name, null);
-            cookie.setPath(path);
-            if (StringUtils.isNotBlank(domain)) {
-                cookie.setDomain(domain);
-            }
-            cookie.setMaxAge(maxAge);
-            // httponly = false
-            cookie.setHttpOnly(false);
-            try {
-                cookie.setValue(URLEncoder.encode(value, "utf-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            response.addCookie(cookie);
+    private void setCookie(HttpServletResponse response, String name, String value, String path, String domain, int maxAge) {
+        Cookie cookie = new Cookie(name, null);
+        cookie.setPath(path);
+        if (StringUtils.isNotBlank(domain)) {
+            cookie.setDomain(domain);
         }
+        cookie.setMaxAge(maxAge);
+        // httponly = false
+        cookie.setHttpOnly(false);
+        try {
+            cookie.setValue(URLEncoder.encode(value, "utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        response.addCookie(cookie);
+    }
 
 }
