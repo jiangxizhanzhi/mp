@@ -14,11 +14,15 @@ import com.auth0.jwt.exceptions.TokenExpiredException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 /**
  * @Description: 认证接口
@@ -37,26 +41,36 @@ public class AuthenticateController {
     @ApiOperation(value = "检查是否是有效token", notes = "")
     @GetMapping
     public ServiceResult<UserModel> authenticate(@RequestParam String token) {
-
-        JwtUtils.UserInfo user;
-        try {
-            user = JwtUtils.validateToken(token);
-        } catch (TokenExpiredException e) {
-            log.info("token has expired!");
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-        }
-        if (user == null) {
-            log.warn("user from jwt token is null, token:{}", token);
-//            return new ServiceResult(AuthErrorCode.AUTHENTICATION_FAILED).asResult();
-            return ServiceResult.fail(AuthErrorCode.AUTHENTICATION_FAILED);
-        }
-
+        JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
-
         UserDto userDto = userService.userModel2UserDtoWithoutOrg(userModel);
-
         return ServiceResult.success(userDto);
+    }
 
+    @ApiOperation(value = "检查是否是有效token", notes = "")
+    @PostMapping("/refresh")
+    public ServiceResult<UserModel> refresh(@RequestParam String token) {
+        JwtUtils.UserInfo user = verifyToken(token);
+        return null;
+    }
+
+
+    private JwtUtils.UserInfo verifyToken(String token) {
+        JwtUtils.UserInfo user = null;
+        if (StringUtils.isNotBlank(token)) {
+            try {
+                user = JwtUtils.validateToken(token);
+            } catch (TokenExpiredException e) {
+                log.info("token has expired!");
+                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
+            }
+        }
+
+        if (Objects.isNull(user)) {
+            log.warn("user from jwt token is null, token:{}", token);
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        }
+        return user;
     }
 
 }

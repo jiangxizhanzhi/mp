@@ -23,6 +23,8 @@ public class AuthConstant {
 
     public static final String JWT_HEADER_KEY = "Authorization";
 
+    public static final String CP_TOKEN_REFRESHED_HEADER_KEY = "CP-TOKEN-REFRESHED";
+
     public static final String ERROR_CODE_PREFIX = "auth.error_code.";
 
     public static final String TENANT_COLUMN_ID = "tenant";

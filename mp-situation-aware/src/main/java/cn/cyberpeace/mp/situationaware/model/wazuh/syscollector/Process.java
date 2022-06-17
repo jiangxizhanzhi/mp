@@ -24,7 +24,7 @@ public class Process {
 
     @ApiModelProperty(value = "开始时间")
     @JSONField(name = "start_time")
-    private Long startTime;
+    private String startTime;
 
     @ApiModelProperty(value = "共享内存")
     private Integer share;

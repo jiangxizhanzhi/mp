@@ -38,6 +38,7 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.FlowSimulationParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
+import cn.cyberpeace.mp.sceneplugincollection.util.DatetimeUtil;
 import cn.cyberpeace.mp.situationaware.bo.AttackDateHistogramNetworkBytesBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackPortAggregationBO;
 import cn.cyberpeace.mp.situationaware.bo.AttackSeverityAndDestinationIpAggregationBO;
@@ -49,6 +50,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -62,6 +64,7 @@ import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DatePattern;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -384,7 +387,7 @@ public class ScenePluginCollectionSceneService {
             hostEvent.setSceneId(sceneId);
             hostEvent.setType(srcHostEvent.getFileEventType().name());
             if (StringUtils.isEmpty(srcHostEvent.getAction())) {
-                hostEvent.setEventDesc(srcHostEvent.getDescription());
+                hostEvent.setEventDesc(srcHostEvent.getMessage());
             } else {
                 hostEvent.setEventDesc(srcHostEvent.getAction());
             }
@@ -1175,19 +1178,47 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
+        //BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        //Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+        //CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
+        //PageInfo<Process> pageInfo = new PageInfo<>();
+        //collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
+        //collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
+        //collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
+        //collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
+        //if (Objects.isNull(collectorBaseRequest.getAgentName())) {
+        //    return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        //}
+        //pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
+        //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
-        CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-        PageInfo<Process> pageInfo = new PageInfo<>();
-        collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
-        collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
-        collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
-        collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
-        if (Objects.isNull(collectorBaseRequest.getAgentName())) {
+
+        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
+        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+        wazuhRequest.setPageSize(1);
+        // 默认24小时
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
+        wazuhRequest.setEndTime(endTime);
+
+        if (wazuhRequest.getAgentNames().contains(null)) {
             return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
         }
-        pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
+
+        List<WazuhProcessModel> totalList = dataCollectionService.queryProcessesWithTimeRange(wazuhRequest);
+
+        int skip = (page - 1) * pageSize;
+        log.info("skip:{}, limit:{}", skip, pageSize);
+        List<WazuhProcessModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+
+        List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
+
+        return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
     }
 
 
@@ -1483,5 +1514,33 @@ public class ScenePluginCollectionSceneService {
         wazuhRequest.setEndTime(endTime);
         return wazuhRequest;
     }
+
+
+    private Process convertWazuhProcess2Process(WazuhProcessModel wazuhProcess) {
+        if (Objects.isNull(wazuhProcess)) {
+            return null;
+        }
+        Process process = new Process();
+        process.setState(wazuhProcess.getStatus());
+        process.setPid(StringUtils.isNotBlank(wazuhProcess.getParentId()) ? Integer.valueOf(wazuhProcess.getParentId()) : null);
+        process.setStartTime(getProcessStartTime(wazuhProcess.getCreateTime()));
+        process.setVmSize(StringUtils.isBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setSize(StringUtils.isBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setPriority(wazuhProcess.getPriority());
+        process.setCmd(wazuhProcess.getCommand());
+        process.setRuser(wazuhProcess.getUsername());
+        process.setName(wazuhProcess.getName());
+        return process;
+    }
+
+    private String getProcessStartTime(String startTime) {
+        if (StringUtils.isBlank(startTime)) {
+            return null;
+        }
+        LocalDateTime localDateTime = DatetimeUtil.parseDateTimeFronLacunchOutput(startTime);
+        String dateTime = DatePattern.NORM_DATETIME_FORMAT.getDateTimeFormatter().format(localDateTime);
+        return dateTime;
+    }
+
 
 }
