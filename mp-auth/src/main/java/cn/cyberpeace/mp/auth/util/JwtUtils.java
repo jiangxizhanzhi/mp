@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
-import java.util.Objects;
 
 /**
  * @Description:
@@ -35,7 +34,8 @@ import java.util.Objects;
  */
 @Slf4j
 public class JwtUtils {
-    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
+    //private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
+    private static final long JWT_EXPIRATION = 6 * 3600 * 1000L * 1;
 
     private JwtUtils() {}
 
@@ -115,19 +115,21 @@ public class JwtUtils {
         return true;
     }
 
-    public static void addResponseHeaderWithRefreshedJWT(UserModel user) {
+    //@Deprecated
+    /*public static String addResponseHeaderWithRefreshedJWT(UserModel user) {
         if (Objects.nonNull(user)) {
             RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
             ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
             HttpServletResponse response = servletRequestAttributes.getResponse();
             String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
             if (StringUtils.isBlank(jwt)) {
-                return;
+                return null;
             }
             response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
             response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
+            return jwt;
         }
-    }
+    }*/
 
     public static UserInfo validateToken(String token) throws TokenExpiredException {
         var user = getUserInfo(token);
