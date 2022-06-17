@@ -1522,13 +1522,14 @@ public class ScenePluginCollectionSceneService {
         }
         Process process = new Process();
         process.setState(wazuhProcess.getStatus());
-        process.setPid(StringUtils.isNotBlank(wazuhProcess.getParentId()) ? Integer.valueOf(wazuhProcess.getParentId()) : null);
+        process.setPid(StringUtils.isNotBlank(wazuhProcess.getPid()) ? Integer.valueOf(wazuhProcess.getPid()) : null);
+        process.setPpid(StringUtils.isNotBlank(wazuhProcess.getParentId()) ? Integer.valueOf(wazuhProcess.getParentId()) : null);
         process.setStartTime(getProcessStartTime(wazuhProcess.getCreateTime()));
-        process.setVmSize(StringUtils.isBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
-        process.setSize(StringUtils.isBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setVmSize(StringUtils.isNotBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
+        process.setSize(StringUtils.isNotBlank(wazuhProcess.getVms()) ? Long.valueOf(wazuhProcess.getVms()) : 0);
         process.setPriority(wazuhProcess.getPriority());
         process.setCmd(wazuhProcess.getCommand());
-        process.setRuser(wazuhProcess.getUsername());
+        process.setEuser(wazuhProcess.getUsername());
         process.setName(wazuhProcess.getName());
         return process;
     }
