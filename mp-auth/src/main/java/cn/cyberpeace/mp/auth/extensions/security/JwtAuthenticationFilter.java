@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashSet;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Set;
 
@@ -67,12 +70,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     LoginUserContext loginUserContext = new LoginUserContext();
                     loginUserContext.setValue(user.getId());
+
+                    refreshToken(token, user);
                 }
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+
+    private void refreshToken(String token, UserModel userModel) {
+        Date date = JwtUtils.getTokenExpiredTime(token);
+        if (Objects.isNull(date)) {
+            return;
+        }
+        log.info("refreshToken, username:{}", userModel.getUsername());
+        LocalDateTime expiredTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now();
+        if (expiredTime.isAfter(now.minusHours(6)) && expiredTime.isBefore(now)) {
+            log.warn("token is expired in less than 6 hours, auto refresh token...");
+            JwtUtils.addResponseHeaderWithRefreshedJWT(userModel);
+        }
     }
 
 }
