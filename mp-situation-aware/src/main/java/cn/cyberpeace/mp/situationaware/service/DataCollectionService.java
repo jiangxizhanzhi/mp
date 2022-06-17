@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
@@ -126,6 +127,8 @@ public class DataCollectionService {
     public static final String CACHE_KEY_HOST_STATE = "host_states";
 
     public static final String CACHE_KEY_NET_CONN = "net_conn";
+
+    public static final String CACHE_KEY_PROCESS = "process";
 
     public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
 
@@ -538,6 +541,11 @@ public class DataCollectionService {
         return wazuhModelList;
     }
 
+    /**
+     * 查询网络连接
+     * @param
+     * @return
+     */
     @Cacheable(value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
@@ -545,38 +553,49 @@ public class DataCollectionService {
         }
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
-
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
-        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
-                .getHits()).map(hit ->
-                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
-                })).collect(Collectors.toList());
-
-        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+        JSONArray arr = processBaseChangeOutput(response);
+        if (Objects.isNull(arr)) {
             return Collections.emptyList();
         }
-
-        // 只取最近一条
-        WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
         List<WazuhNetworkConnectionModel> list = new ArrayList<>();
-        if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
-            BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
-            if (StringUtils.isNotBlank(changedCntOutput.getData())) {
-                byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
-                String output = TextUtils.decompress(raw);
-                JSONObject jsonObject = JSONObject.parseObject(output);
-
-                JSONArray arr = jsonObject.getJSONArray("values");
-                for (int i = 0; i < arr.size(); i++) {
-                    JSONObject data = arr.getJSONObject(i);
-                    WazuhNetworkConnectionModel netConnModel = JSONObject.toJavaObject(data, WazuhNetworkConnectionModel.class);
-                    list.add(netConnModel);
-                }
-            }
+        for (int i = 0; i < arr.size(); i++) {
+            JSONObject data = arr.getJSONObject(i);
+            WazuhNetworkConnectionModel netConnModel = JSONObject.toJavaObject(data, WazuhNetworkConnectionModel.class);
+            list.add(netConnModel);
         }
 
         return list;
     }
+
+
+    /**
+     * 查询进程
+     * @param
+     * @return
+     */
+    @Cacheable(value = CACHE_KEY_PROCESS)
+    public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
+        // 只取一条数据，做假分页处理
+        wazuhMonitorEventsRequest.setPageSize(1);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
+        JSONArray arr = processBaseChangeOutput(response);
+        if (Objects.isNull(arr)) {
+            return Collections.emptyList();
+        }
+        List<WazuhProcessModel> list = new ArrayList<>();
+        for (int i = 0; i < arr.size(); i++) {
+            JSONObject data = arr.getJSONObject(i);
+            WazuhProcessModel processModel = JSONObject.toJavaObject(data, WazuhProcessModel.class);
+            list.add(processModel);
+        }
+
+        return list;
+    }
+
 
     /**
      * 一段时间内的环境变量数变动
@@ -636,6 +655,13 @@ public class DataCollectionService {
         return sum;
     }
 
+
+    /**
+     * 查询LAUNCH_ID通用方法，返回SearchResponse
+     * @param wazuhMonitorEventsRequest
+     * @param launchId
+     * @return
+     */
     public SearchResponse querySICLaunchEventsWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
         //根据日期构造索引
         String[] indexArray = buildRequestIndex(wazuhMonitorEventsRequest.getStartTime(), wazuhMonitorEventsRequest.getEndTime());
@@ -677,6 +703,42 @@ public class DataCollectionService {
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
+
+
+
+    /**
+     * 处理BaseChangeOutput通用方法
+     * @param response
+     * @return
+     */
+    private JSONArray processBaseChangeOutput(SearchResponse response) {
+        List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+                .getHits()).map(hit ->
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
+                })).collect(Collectors.toList());
+
+        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+            return null;
+        }
+
+        // 只取最近一条
+        WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
+        List<WazuhProcessModel> list = new ArrayList<>();
+        if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
+            BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
+            if (StringUtils.isNotBlank(changedCntOutput.getData())) {
+                byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
+                String output = TextUtils.decompress(raw);
+                JSONObject jsonObject = JSONObject.parseObject(output);
+
+                JSONArray arr = jsonObject.getJSONArray("values");
+                return arr;
+            }
+        }
+
+        return null;
+    }
+
 
 
     public int aggsChangedCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
