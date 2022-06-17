@@ -23,6 +23,8 @@ public class AuthCacheConfig {
     //public static final String CACHE_MANAGER_5M = "authCacheManager_5M";
     public static final String CACHE_MANAGER_10M = "authCacheManager_10M";
 
+    public static final String CACHE_MANAGER_6H = "authCacheManager_6H";
+
 
     @Bean(name = CACHE_MANAGER_20S)
     public CacheManager authCacheManager20S() {
@@ -69,6 +71,16 @@ public class AuthCacheConfig {
     public CacheManager authCacheManager10M() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).recordStats();
+        caffeineCacheManager.setCaffeine(caffeine);
+        return caffeineCacheManager;
+    }
+
+
+
+    @Bean(name = CACHE_MANAGER_6H)
+    public CacheManager authCacheManager6H() {
+        CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
+        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(6, TimeUnit.HOURS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }
