@@ -298,7 +298,7 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     private boolean isRouter(CoreType coreType, Integer virtualType) {
-        return (coreType != null && coreType == CoreType.ROUTER) || (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER));
+        return (coreType != null && CoreType.isRouter(coreType)) || (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER));
     }
 
     /**
