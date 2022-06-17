@@ -1,9 +1,8 @@
 package cn.cyberpeace.mp.devops.log.service.impl;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.service.LogFileService;
@@ -61,33 +60,29 @@ public class MpLogFileServiceImpl implements LogFileService {
     }
 
     @Override
-    public LogFileDownloadBO download(String fileName) {
+    public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
+        String fileName = downloadDTO.getFileName();
         var bos = new ByteArrayOutputStream();
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<File> downloadFiles = fileList.stream().filter(file -> fileName.equals(file.getName())).collect(Collectors.toList());
 
         var zout = new ZipOutputStream(bos);
-        try {
-            for (File file : downloadFiles) {
-                FileInputStream fileInputStream = new FileInputStream(file);
-                ZipEntry zipFile = new ZipEntry(file.getName());
-                zout.putNextEntry(zipFile);
-                byte[] tmp = new byte[4 * 1024];
-                int size = 0;
-                while ((size = fileInputStream.read(tmp)) != -1) {
-                    zout.write(tmp, 0, size);
-                }
-                zout.flush();
-                zout.closeEntry();
-
-                fileInputStream.close();
+        for (File file : downloadFiles) {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ZipEntry zipFile = new ZipEntry(file.getName());
+            zout.putNextEntry(zipFile);
+            byte[] tmp = new byte[4 * 1024];
+            int size = 0;
+            while ((size = fileInputStream.read(tmp)) != -1) {
+                zout.write(tmp, 0, size);
             }
-            zout.finish();
-        } catch (Exception e) {
-            log.error("file read path fail");
-            throw new MpRuntimeException(BaseErrorCode.ERROR);
+            zout.flush();
+            zout.closeEntry();
+
+            fileInputStream.close();
         }
+        zout.finish();
         String downLoadFileName = !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName;
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }

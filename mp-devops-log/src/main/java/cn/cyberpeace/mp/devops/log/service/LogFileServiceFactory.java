@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.log.service;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
+import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -50,14 +52,14 @@ public class LogFileServiceFactory {
 
     /**
      * 下载日志
-     * @param logReportType
-     * @param fileName
+     * @param downloadDTO
      */
-    public LogFileDownloadBO downLoad(String logReportType, String fileName){
+    public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
+        String logReportType = downloadDTO.getType();
         LogFileService logFileService = logFileServiceMap.get(logReportType);
         if (Objects.isNull(logFileService)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        return logFileService.download(fileName);
+        return logFileService.download(downloadDTO);
     }
 }
