@@ -26,7 +26,6 @@ public class SerialPortService extends BaseCpService {
      */
     public SerialPortCloudPlatform list() {
         SerialPortCloudPlatform result = super.sendGet(CPCLOUD_CCM + URL_VERSION + "/list" , SerialPortCloudPlatform.class);
-        super.checkResult(result);
         return result;
     }
 }

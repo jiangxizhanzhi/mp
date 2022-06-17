@@ -100,6 +100,17 @@ public class BaseCpHttpService extends BaseHttpService {
     }
 
     /**
+     * 通过PUT方式查询信息
+     *
+     * @param api
+     * @return
+     */
+    @Override
+    protected HttpResponse downLoad(String api,String body) {
+        return super.downLoad(cpUrl.concat(api),body);
+    }
+
+    /**
      * 通过Delete方式删除数据
      *
      * @param api
