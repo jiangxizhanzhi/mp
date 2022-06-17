@@ -93,6 +93,11 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
+    @Override
+    public int getOrder() {
+        return 30;
+    }
+
     /**
      *
      */
