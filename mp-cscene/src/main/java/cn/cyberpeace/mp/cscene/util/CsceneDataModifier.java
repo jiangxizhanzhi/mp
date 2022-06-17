@@ -33,10 +33,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -414,6 +416,36 @@ public class CsceneDataModifier {
                     }
                 }
             }
+
+            // 隐藏连线
+            Set<String> auxiliaryPortIds = new HashSet<>();
+            for (var e : sceneDataBO.getTopology().getElements()) {
+                List<SceneElementPortBO> auxiliaryPorts = new ArrayList<>();
+                if (Boolean.TRUE.equals(e.getIsAuxiliary())) {
+                    // 辅助节点,所有端口都是辅助端口
+                    if (e.getPorts() != null) {
+                        e.getPorts().forEach(p -> auxiliaryPorts.add(p));
+                    }
+                } else if (e.getPorts() != null) {
+                    // 非辅助节点,需要判断字段
+                    e.getPorts().forEach(p -> {
+                        if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                            auxiliaryPorts.add(p);
+                        }
+                    });
+                }
+                auxiliaryPorts.forEach(p -> auxiliaryPortIds.add(p.getId()));
+            }
+            if (!auxiliaryPortIds.isEmpty() && sceneDataBO.getTopology().getConnections() != null) {
+                var connectIterator = sceneDataBO.getTopology().getConnections().iterator();
+                while (connectIterator.hasNext()) {
+                    var c = connectIterator.next();
+                    if (auxiliaryPortIds.contains(c.getSource()) || auxiliaryPortIds.contains(c.getTarget())) {
+                        connectIterator.remove();
+                    }
+                }
+            }
+
             var elementIterator = sceneDataBO.getTopology().getElements().iterator();
             while (elementIterator.hasNext()) {
                 var element = elementIterator.next();
