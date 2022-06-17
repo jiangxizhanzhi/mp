@@ -85,17 +85,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
@@ -118,6 +108,9 @@ public class DataCollectionService {
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
+    private LocalDateTime getUtcTime(LocalDateTime time) {
+        return TimeUtils.utcToLocalDateTime(TimeUtils.localDateTimeToUtcString(time));
+    }
 
     public static final String CACHE_KEY_FILE_EVENTS = "file_events";
 
@@ -290,8 +283,8 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
-        // 根据日期构造索引
-        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        // 根据日期构造索引,将本地时间转化为UTC时间后构建
+        String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -354,8 +347,8 @@ public class DataCollectionService {
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ArrayList<>();
         }
-        // 根据日期构造索引
-        String[] indexArray = buildRequestIndex(wazuhEventRequest.getStartTime(), wazuhEventRequest.getEndTime());
+        // 根据日期构造索引,将本地时间转化为UTC时间后构建
+        String[] indexArray = buildRequestIndex(getUtcTime(wazuhEventRequest.getStartTime()), getUtcTime(wazuhEventRequest.getEndTime()));
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();

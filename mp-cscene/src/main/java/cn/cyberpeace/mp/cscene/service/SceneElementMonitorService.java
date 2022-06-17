@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
+import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostEventQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
@@ -95,6 +96,10 @@ public class SceneElementMonitorService {
 
     @Autowired
     private SceneMapper sceneMapper;
+
+    private Integer getWazuhVulnerabilityScanInterval() {
+        return CollectionSingleton.collectionAppConfig.getWazuhVulnerabilityScanInterval();
+    }
 
     /**
      * CsceneInstanceBO转为ElementMonitorInfo
@@ -400,7 +405,7 @@ public class SceneElementMonitorService {
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
         Map<String, String> elementEid2Name = sceneHandler.getElementMap().values().stream().collect(Collectors.toMap(e -> e.getEid(), e -> e.getName()));
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
-        if (startTime.plusHours(6).isEqual(endTime)) {
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
             startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         }
@@ -441,19 +446,20 @@ public class SceneElementMonitorService {
         request.setPageSize(1);
         request.setAgentNames(agentNames);
         request.setRuleGroups(CsceneBizConstant.VULNERABILITY_GROUP);
+        int halfScanTime = getWazuhVulnerabilityScanInterval() / 2;
         var first = dataCollectionService.queryVulnerabilityInfo(request, false);
         var last = dataCollectionService.queryVulnerabilityInfo(request, true);
         if (CollUtil.isEmpty(first.getObjs()) || CollUtil.isEmpty(last.getObjs())) {
-            // 未查询到漏洞数据时将开始时间往前推三个小时查询
-            pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-3)));
+            // 两次上报漏洞信息的间隔超过扫描间隔且查不到数据时，将开始时间往前推扫描间隔的一半进行查询
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(startTime.plusHours(-halfScanTime)));
             return;
         }
         var firstTime = first.getObjs().get(0).getTime();
         var lastTime = last.getObjs().get(0).getTime();
-        if (firstTime.plusHours(3).isBefore(lastTime)) {
-            pageRequest.setStartTime(TimeUtils.localDateTimeToString(lastTime.plusHours(-3)));
-        } else if (firstTime.plusSeconds(1).isAfter(lastTime)) {
-            pageRequest.setStartTime(TimeUtils.localDateTimeToString(firstTime.plusHours(-3)));
+        if (firstTime.plusHours(halfScanTime).isBefore(lastTime)) {
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(lastTime.plusHours(-halfScanTime)));
+        } else if (firstTime.plusHours(halfScanTime).isAfter(lastTime)) {
+            pageRequest.setStartTime(TimeUtils.localDateTimeToString(firstTime.plusHours(-halfScanTime)));
         }
     }
 
@@ -472,7 +478,7 @@ public class SceneElementMonitorService {
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        if (startTime.plusHours(6).isEqual(endTime)) {
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
             startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         }
@@ -529,7 +535,7 @@ public class SceneElementMonitorService {
         List<String> agentNames = getAgentNames(pageRequest, sceneHandler);
         LocalDateTime startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         LocalDateTime endTime = TimeUtils.stringToLocalDateTime(pageRequest.getEndTime());
-        if (startTime.plusHours(6).isEqual(endTime)) {
+        if (startTime.plusHours(getWazuhVulnerabilityScanInterval()).isEqual(endTime)) {
             processTimeRangeForVulnerabilityInfo(pageRequest, agentNames);
             startTime = TimeUtils.stringToLocalDateTime(pageRequest.getStartTime());
         }
@@ -567,12 +573,12 @@ public class SceneElementMonitorService {
             endTime = sceneModel.getUpdateTime();
         }
         if (StringUtils.isEmpty(pageRequest.getStartTime())) {
-            //场景存在时间不足6小时，取全部漏洞数据
-            if (endTime.plusHours(-6).isBefore(sceneModel.getCreateTime())) {
+            //场景存在时间不足一个扫描周期，取全部漏洞数据
+            if (endTime.plusHours(-getWazuhVulnerabilityScanInterval()).isBefore(sceneModel.getCreateTime())) {
                 pageRequest.setStartTime(TimeUtils.localDateTimeToString(sceneModel.getCreateTime()));
             } else {
-                //场景存在时间超过6小时，取最近6小时漏洞数据
-                pageRequest.setStartTime(TimeUtils.localDateTimeToString(endTime.plusHours(-6)));
+                //场景存在时间超过一个扫描周期，取最近一个扫描周期的漏洞数据
+                pageRequest.setStartTime(TimeUtils.localDateTimeToString(endTime.plusHours(-getWazuhVulnerabilityScanInterval())));
             }
         }
         if (StringUtils.isEmpty(pageRequest.getEndTime())) {
