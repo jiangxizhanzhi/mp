@@ -74,6 +74,7 @@ public class SysActivationController {
             return ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_NONE);
         }
         log.info("final status response:{}", content);
+        content.setVerifyCode(null);
         return ServiceResult.success(content);
     }
 
