@@ -75,7 +75,7 @@ public class CloudSceneConnectionCommon {
 
         var isConsole = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE);
         var isCom = cloudAccessMode.getProtocol().equals(AccessMode.Protocol.COM);
-        if (!isConsole && StringUtils.isEmpty(cloudAccessMode.getAccessIp())) {
+        if ((!isConsole && !isCom) && StringUtils.isEmpty(cloudAccessMode.getAccessIp())) {
             log.error("Get or create scene({}) element({}) port({}) {} connection error: empty access ip",
                     sceneId, sceneElementId, sceneElementPortId, cloudAccessMode.getProtocol());
             return null;
@@ -168,8 +168,12 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
             guacamoleCreateConnectionData.setFlag(false);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
-            var protocol = sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE) ?
-                    AccessMode.Protocol.VNC : sceneConnection.getProtocol();
+            String protocol = sceneConnection.getProtocol();
+            if (sceneConnection.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
+                protocol = AccessMode.Protocol.VNC;
+            } else if (sceneConnection.getProtocol().equals(AccessMode.Protocol.COM)) {
+                protocol = AccessMode.Protocol.TELNET;
+            }
             connectionParams.setProtocol(protocol);
             // windows系统的rdp连接,需要禁用字形缓存
             if (AccessMode.Protocol.RDP.equals(protocol) && SystemTypeCommandUtils.isWindows(SystemTypeUtils.getStandardSystemType(param.getSystemType()))) {
