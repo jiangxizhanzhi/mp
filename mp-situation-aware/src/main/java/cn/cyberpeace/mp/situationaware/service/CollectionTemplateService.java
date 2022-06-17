@@ -486,28 +486,30 @@ public class CollectionTemplateService {
             return;
         }
         for (ColTempCommonProbeRequest colTempProbeReq : colTempCommonProbeReqs) {
-            String probeId = colTempProbeReq.getId();
-            ProbeModel probe = probeService.getById(probeId);
-            CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
-                    .probeId(probeId)
-                    .templateId(templateId)
-                    //.intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
-                    .disabled(colTempProbeReq.getDisabled())
-                    .type(ProbeModel.TYPE_COMMON)
-                    .probeCategory(catagory)
-                    .name(probe.getName())
-                    .description(probe.getDescription())
-                    .build();
+            if (Objects.nonNull(colTempProbeReq.getDisabled()) && colTempProbeReq.getDisabled() == 0) {
+                String probeId = colTempProbeReq.getId();
+                ProbeModel probe = probeService.getById(probeId);
+                CollectionTemplateProbeModel colTempProbeModel = CollectionTemplateProbeModel.builder()
+                        .probeId(probeId)
+                        .templateId(templateId)
+                        //.intervalSec(colTempProbeReq.getTemplateProbeIntervalSec())
+                        .disabled(colTempProbeReq.getDisabled())
+                        .type(ProbeModel.TYPE_COMMON)
+                        .probeCategory(catagory)
+                        .name(probe.getName())
+                        .description(probe.getDescription())
+                        .build();
 
-            if (Objects.equals(0, colTempProbeReq.getDisabled())) {
-                if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("paths", colTempProbeReq.getPaths());
-                    colTempProbeModel.setConfig(jsonObject.toJSONString());
+                if (Objects.equals(0, colTempProbeReq.getDisabled())) {
+                    if (CollectionUtil.isNotEmpty(colTempProbeReq.getPaths())) {
+                        JSONObject jsonObject = new JSONObject();
+                        jsonObject.put("paths", colTempProbeReq.getPaths());
+                        colTempProbeModel.setConfig(jsonObject.toJSONString());
+                    }
                 }
-            }
 
-            allColTempProbeList.add(colTempProbeModel);
+                allColTempProbeList.add(colTempProbeModel);
+            }
         }
     }
 
