@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.util;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.ProcessStatus;
@@ -91,6 +92,12 @@ public class TopoReformUtils {
     public void addConnect(SceneElementPortBO from, SceneElementPortBO to) {
         this.pluginHandler.getSceneHandler().getPortIdConnectedPortIdMap().put(from.getId(), to.getId());
         this.pluginHandler.getSceneHandler().getPortIdConnectedPortIdMap().put(to.getId(), from.getId());
+        SceneElementPortConnectionBO sceneElementPortConnectionBO = new SceneElementPortConnectionBO();
+        sceneElementPortConnectionBO.setSource(from.getId());
+        sceneElementPortConnectionBO.setTarget(to.getId());
+        sceneElementPortConnectionBO.setName(TextUtils.uuid());
+        sceneElementPortConnectionBO.setId(TextUtils.uuid());
+        this.pluginHandler.getSceneHandler().getElementPortConnectionMap().put(from.getId() + ":" + to.getId(), sceneElementPortConnectionBO);
     }
 
     private static ElementWrapper createAuxiliarySwitchNode() {

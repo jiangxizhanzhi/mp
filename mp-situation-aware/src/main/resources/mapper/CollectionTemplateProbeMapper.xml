@@ -49,6 +49,7 @@
       <if test="type != null">
         AND p.type = #{type}
       </if>
+      AND tempp.disabled = 0
     </where>
   </select>
 
