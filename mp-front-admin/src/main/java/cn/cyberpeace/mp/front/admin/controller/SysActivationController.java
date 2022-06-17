@@ -75,6 +75,7 @@ public class SysActivationController {
         }
         log.info("final status response:{}", content);
         content.setVerifyCode(null);
+        content.setIsActived(0);
         return ServiceResult.success(content);
     }
 
