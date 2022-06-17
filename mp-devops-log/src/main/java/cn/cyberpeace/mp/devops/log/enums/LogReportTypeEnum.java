@@ -14,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @SwaggerDisplayEnum
 public enum LogReportTypeEnum {
 
+    REPORT,
+
     MP,
 
     BC,
