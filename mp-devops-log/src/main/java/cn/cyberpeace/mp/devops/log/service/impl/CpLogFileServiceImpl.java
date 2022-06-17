@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.constant.LogErrorCode;
+import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.model.CloudPlatformItemsResult;
@@ -62,16 +63,18 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             dto.setFileSize(v.getFileSize());
             dto.setUpdateTime(v.getUpdatetime());
             dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
-            dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + v.getFilename() + "&type=" + LogReportTypeEnum.CP.toValue());
+            dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?hostname=" + v.getHostname() + "&path=" + v.getPath() + "&fileName=" + v.getFilename() + "&type=" + LogReportTypeEnum.CP.toValue());
             return dto;
         }).collect(Collectors.toList());
         return reportDTOList;
     }
 
     @Override
-    public LogFileDownloadBO download(String fileName) {
+    public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("filename",fileName);
+        jsonObject.put("filename",downloadDTO.getFileName());
+        jsonObject.put("path",downloadDTO.getPath());
+        jsonObject.put("hostname",downloadDTO.getHostname());
         HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL,jsonObject.toJSONString());
         Header contentHeader = httpResponse.getFirstHeader("Content-Disposition");
         HeaderElement[] values = contentHeader.getElements();
@@ -79,18 +82,14 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         String downLoadFileName = new String(filename.getValue().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         HttpEntity entity = httpResponse.getEntity();
         var bos = new ByteArrayOutputStream();
-        try {
-            InputStream inputStream = entity.getContent();
-            byte[] tmp = new byte[4 * 1024];
-            int size = 0;
-            while ((size = inputStream.read(tmp)) != -1) {
-                bos.write(tmp, 0, size);
-            }
-            bos.flush();
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        InputStream inputStream = entity.getContent();
+        byte[] tmp = new byte[4 * 1024];
+        int size = 0;
+        while ((size = inputStream.read(tmp)) != -1) {
+            bos.write(tmp, 0, size);
         }
+        bos.flush();
+        inputStream.close();
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 

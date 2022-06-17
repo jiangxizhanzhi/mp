@@ -29,6 +29,11 @@ public class CpCloudLogPO {
      */
     private Long fileSize;
 
+    /**
+     * 路径
+     */
+    private String path;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatetime;
 }
