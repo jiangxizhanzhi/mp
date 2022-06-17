@@ -381,7 +381,7 @@ public class SysActivationService {
 
             // todo 考虑相同激活码，如果原来已经过期了怎么处理？
             // 1. 相同激活码 last_active_date，active_count变动
-            if (Objects.equals(oldLicenseCode, activationRequest.getVerifyCode())) {
+            if (Objects.equals(oldLicenseCode, encryptedLicenseCode)) {
                 updateSysActivCtlModel.setActiveCount(oldSysActivCtlModel.getActiveCount() + 1);
                 processActivCtlWhenReActiveWithOldLicense(updateSysActivCtlModel, activeDateStr);
             } else {
