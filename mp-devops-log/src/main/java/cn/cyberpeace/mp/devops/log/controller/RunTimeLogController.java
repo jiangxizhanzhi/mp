@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.constant.LogErrorCode;
+import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.log.request.RunTimeLogDownloadRequest;
@@ -49,9 +50,9 @@ public class RunTimeLogController {
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
                                                      RunTimeLogDownloadRequest request) {
         InputStreamResource resource = null;
-        String fileName = request.getFileName();
-        LogFileDownloadBO bo = logFileServiceFactory.downLoad(request.getType(),fileName);
+        LogFileDownloadBO bo = null;
         try {
+            bo = logFileServiceFactory.downLoad(new LogDownloadDTO(request));
             resource = new InputStreamResource(bo.getInputStream());
         } catch (Exception e) {
             throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);

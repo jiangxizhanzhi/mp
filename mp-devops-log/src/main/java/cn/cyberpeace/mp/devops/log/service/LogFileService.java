@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
+import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -26,9 +28,9 @@ public interface LogFileService {
 
     /**
      * 下载
-     * @param fileName
+     * @param downloadDTO
      * @return
      */
-    LogFileDownloadBO download(String fileName);
+    LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException;
 
 }
