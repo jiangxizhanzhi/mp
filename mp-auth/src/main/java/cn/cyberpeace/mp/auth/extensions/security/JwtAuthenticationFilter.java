@@ -89,7 +89,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         log.info("refreshToken, username:{}", userModel.getUsername());
         LocalDateTime expiredTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
         LocalDateTime now = LocalDateTime.now();
-        if (expiredTime.isAfter(now.minusHours(6)) && expiredTime.isBefore(now)) {
+        if (now.isAfter(expiredTime.minusHours(6)) && now.isBefore(expiredTime)) {
             log.warn("token is expired in less than 6 hours, auto refresh token...");
             JwtUtils.addResponseHeaderWithRefreshedJWT(userModel);
         }
