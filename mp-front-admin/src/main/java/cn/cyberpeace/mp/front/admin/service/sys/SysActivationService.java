@@ -288,11 +288,14 @@ public class SysActivationService {
      * @param activationRequest
      */
     private void generateEncryptedFile(ActivationRequest activationRequest) {
+        String verifyCode = activationRequest.getVerifyCode();
+        String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
         log.info("generate encrypted file activationRequest:{}", activationRequest);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
         activationResponse.setExpiredDate(expiredDateStr);
+        activationResponse.setVerifyCode(encryptedVerifyCode);
 
         String salt = RandomUtil.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
@@ -374,7 +377,7 @@ public class SysActivationService {
         // todo 这条分支不会再进入
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
             // 不是首次激活
-            String oldLicenseCode = EncryptUtils.desDecrypt(oldSysActivCtlModel.getLicenseCode());
+            String oldLicenseCode = oldSysActivCtlModel.getLicenseCode();
 
             // todo 考虑相同激活码，如果原来已经过期了怎么处理？
             // 1. 相同激活码 last_active_date，active_count变动

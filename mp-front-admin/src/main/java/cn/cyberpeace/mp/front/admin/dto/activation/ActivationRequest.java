@@ -32,7 +32,7 @@ public class ActivationRequest {
     @NotEmpty
     private List<ActivationItem> items;
 
-    @ApiModelProperty(value = "校验码")
+    @ApiModelProperty(value = "校验码，des加密")
     @NotBlank
     private String verifyCode;
 
