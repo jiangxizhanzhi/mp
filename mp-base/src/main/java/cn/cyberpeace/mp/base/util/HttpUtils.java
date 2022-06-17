@@ -245,6 +245,18 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
+    public static HttpResponse sendPostForDownLoad(String url,String body) throws IOException {
+        HttpClient client = HttpClientBuilder.create().build();
+        return doPostRequestForDownload(url,body,  client);
+    }
+
+    /**
+     * get请求
+     *
+     * @param url
+     * @return
+     * @throws IOException
+     */
     public static String sendGet(String url,Map<String,String> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url, headerMap,  client);
@@ -508,6 +520,21 @@ public class HttpUtils {
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig( requestConfig);
         HttpResponse resp = client.execute(httpget);
+
+        // 获得返回值
+        return resp;
+    }
+
+    private static HttpResponse doPostRequestForDownload(String url, String body,HttpClient client) throws IOException {
+        // 替换url中的空格
+        HttpPost httpPost = new HttpPost(url);
+        StringEntity entity = new StringEntity(body, StandardCharsets.UTF_8);
+        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
+        httpPost.setEntity(entity);
+        // 设置请求和传输超时时间
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
+        httpPost.setConfig( requestConfig);
+        HttpResponse resp = client.execute(httpPost);
 
         // 获得返回值
         return resp;

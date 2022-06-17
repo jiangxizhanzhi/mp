@@ -70,6 +70,23 @@ public class BaseHttpService {
         return result;
     }
 
+    protected HttpResponse downLoad(String url,String body){
+        HttpResponse result = null;
+        try {
+            result = HttpUtils.sendPostForDownLoad(url,body);
+            if (log.isInfoEnabled()) {
+                log.info(GET_DOWNLOAD_LOG_INFO, url, result);
+            }
+        }catch (ConnectException e){
+            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
+            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
+        } catch (IOException e) {
+            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
+            throw new MpRuntimeException(e.getMessage()).e(e);
+        }
+        return result;
+    }
+
     /**
      * 通过Get方式查询信息
      * @param url

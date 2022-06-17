@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.log.service;
 
+import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 
-import java.io.ByteArrayInputStream;
 import java.util.List;
 
 /**
@@ -26,15 +26,9 @@ public interface LogFileService {
 
     /**
      * 下载
+     * @param fileName
      * @return
      */
-    ByteArrayInputStream download();
-
-    /**
-     * 下载
-     * @param logFileNames
-     * @return
-     */
-    ByteArrayInputStream download(List<String> logFileNames);
+    LogFileDownloadBO download(String fileName);
 
 }
