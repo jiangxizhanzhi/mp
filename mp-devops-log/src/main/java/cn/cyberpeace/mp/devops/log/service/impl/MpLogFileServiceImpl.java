@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.log.service.impl;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
@@ -60,16 +61,11 @@ public class MpLogFileServiceImpl implements LogFileService {
     }
 
     @Override
-    public ByteArrayInputStream download() {
-        return null;
-    }
-
-    @Override
-    public ByteArrayInputStream download(List<String> logFileNames) {
+    public LogFileDownloadBO download(String fileName) {
         var bos = new ByteArrayOutputStream();
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
-        List<File> downloadFiles = fileList.stream().filter(file -> logFileNames.contains(file.getName())).collect(Collectors.toList());
+        List<File> downloadFiles = fileList.stream().filter(file -> fileName.equals(file.getName())).collect(Collectors.toList());
 
         var zout = new ZipOutputStream(bos);
         try {
@@ -92,7 +88,7 @@ public class MpLogFileServiceImpl implements LogFileService {
             log.error("file read path fail");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
-
-        return new ByteArrayInputStream(bos.toByteArray());
+        String downLoadFileName = !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName;
+        return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 }

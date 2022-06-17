@@ -2,9 +2,10 @@ package cn.cyberpeace.mp.devops.log.controller;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.constant.LogErrorCode;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
-import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.log.request.RunTimeLogDownloadRequest;
 import cn.cyberpeace.mp.devops.log.service.LogFileServiceFactory;
@@ -17,11 +18,11 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  *
@@ -43,43 +44,24 @@ public class RunTimeLogController {
         return new ListObjServiceResult(runTimeLogService.page(basePageRequest)).asResult();
     }
 
-    @PostMapping()
-    @ApiOperation(value = "日志下载", notes = "")
-    @Deprecated
-    public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
-                                                     @RequestBody List<String> logFileNames) {
-        InputStreamResource resource = null;
-        try {
-            resource = new InputStreamResource(runTimeLogService.zipDownLoadFile(logFileNames));
-        } catch (Exception e) {
-            throw new MpRuntimeException("获取文件流失败");
-        }
-
-        var httpHeaders = new HttpHeaders();
-
-        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=log.zip");
-        response.setHeader("Content-Type", "application/zip");
-        return ResponseEntity.ok().headers(httpHeaders).body(resource);
-    }
-
     @GetMapping("/download")
     @ApiOperation(value = "日志下载", notes = "")
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
                                                      RunTimeLogDownloadRequest request) {
         InputStreamResource resource = null;
         String fileName = request.getFileName();
+        LogFileDownloadBO bo = logFileServiceFactory.downLoad(request.getType(),fileName);
         try {
-            resource = new InputStreamResource(logFileServiceFactory.downLoad(request.getType(),Arrays.asList(fileName)));
+            resource = new InputStreamResource(bo.getInputStream());
         } catch (Exception e) {
-            throw new MpRuntimeException("获取文件流失败");
+            throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
         }
 
         var httpHeaders = new HttpHeaders();
 
         httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-        response.setHeader("Content-Disposition", "attachment; filename=" + (LogReportTypeEnum.MP.toValue().equals(request.getType()) && !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName));
-        response.setHeader("Content-Type", "application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=" + bo.getDownLoadFileName());
+        response.setHeader("Content-Type", bo.getContentType());
         return ResponseEntity.ok().headers(httpHeaders).body(resource);
     }
 }
