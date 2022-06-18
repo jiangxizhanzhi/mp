@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
@@ -71,9 +70,10 @@ public class SysActivationController {
         log.info("query activation status...");
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {
-            return ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_NONE);
+            log.error("system activation status not found!");
+            content = new ActivationResponse();
+            content.setIsActived(0);
         }
-        log.info("final status response:{}", content);
         return ServiceResult.success(content);
     }
 

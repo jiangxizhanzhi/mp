@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -625,7 +626,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         updateTaskModel.setThirdTaskId(thirdTaskId);
         updateTaskModel.setTaskStatus(taskStatus);
         updateTaskModel.setUpdateTime(LocalDateTime.now());
-        this.updateFlowTaskInfo(updateTaskModel);
+        this.updateFlowTaskDetail(updateTaskModel);
 
         TaskCommon.executeTask(() -> {
             try {
@@ -769,6 +770,20 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 flowTaskModel.setOriginIps(srcIpRange);
             }
         }
+        int result = getModelMapper().updateTaskInfo(flowTaskModel);
+        flowTaskModel = getModelMapper().get(flowTaskModel.getId());
+        AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
+        BeanUtils.copyProperties(flowTaskModel, addFlowTaskRequest);
+        asyncPlatFlowTaskService.savePlatFlowTask(addFlowTaskRequest, true);
+        return result;
+    }
+
+    /**
+     * 更新流量任务
+     * @param flowTaskModel
+     * @return
+     */
+    public int updateFlowTaskDetail(FlowTaskModel flowTaskModel) {
         return getModelMapper().updateTaskInfo(flowTaskModel);
     }
 
@@ -788,7 +803,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> batchActuator(BatchActuatorTaskRequest request) {
-        log.info("=========== Batch actuator flow tasks start ===============");
+        log.info("=========== Batch actuator flow tasks start: {}", request.getTaskIds());
         // 流量任务存在校验
         QueryParams queryParams = new QueryParams();
         queryParams.setIds(request.getTaskIds().toArray(new String[0]));
@@ -818,6 +833,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 第三方任务id集合
         List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).distinct().collect(Collectors.toList());
+        log.info("Batch actuator flow thirdTaskIds: {}", thirdTaskIds);
         // 任务id集合
         List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
 

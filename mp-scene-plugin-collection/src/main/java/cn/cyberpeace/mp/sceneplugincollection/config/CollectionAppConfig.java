@@ -43,6 +43,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_auth_port:8515}")
     private Integer wazuhAuthPort;
 
+    @Value("${mp.sceneplugincollection.wazuh_vulnerability_scan_interval:6}")
+    private Integer wazuhVulnerabilityScanInterval;
+
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 

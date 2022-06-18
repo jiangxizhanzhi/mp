@@ -115,10 +115,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.isNotBlank(jwt)) {
             tokenCache.put(md5, jwt);
-            // 后端种下一个新的token
+            // 后端回塞一个新的token
             setCookie(response, "cr_jwttoken", jwt, "/", null, Integer.MAX_VALUE);
 
-            response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
+            response.setHeader(AuthConstant.JWT_HEADER_KEY, jwt);
             response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
         }
     }

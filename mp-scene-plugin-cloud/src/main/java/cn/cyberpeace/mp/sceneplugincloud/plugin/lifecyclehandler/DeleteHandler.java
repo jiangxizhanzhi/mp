@@ -59,6 +59,7 @@ public class DeleteHandler extends HandlerCommon {
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
+        public static final EventProcess DELETE_ENTITIES = new EventProcess("delete_entities", "sceneplugincloud.event.delete_entities");
         public static final EventProcess DELETE_TERMINALS = new EventProcess("delete_terminals", "sceneplugincloud.event.delete_terminal");
         public static final EventProcess DELETE_FIREWALLS = new EventProcess("delete_firewalls", "sceneplugincloud.event.delete_firewall");
         public static final EventProcess DELETE_GATEWAYS = new EventProcess("delete_gateways", "sceneplugincloud.event.delete_gateway");
@@ -287,9 +288,26 @@ public class DeleteHandler extends HandlerCommon {
 
     public void delete() {
         prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
+        // 优先删除实体设备
+        List<CloudPluginSceneElementBO> entities = new ArrayList<>();
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
+                entities.add(e);
+            }
+        });
+        Set<String> deletedNodeIds = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(entities)) {
+            var deleteEntities = entities.stream()
+                    .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
+            entities.stream().forEach(e -> deletedNodeIds.add(e.getSrcElement().getId()));
+            runSceneProgress(SceneProcess.DELETE_ENTITIES, () -> runTasks(deleteEntities));
+        }
 
         // 删除终端
-        var deleteTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
+        var terminals = getPluginHandler().getTerminalElementMap().values().stream()
+                .filter(t -> !deletedNodeIds.contains(t.getSrcElement().getId()))
+                .collect(Collectors.toList());
+        var deleteTerminalTasks = terminals.stream()
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
         if (!deleteTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_TERMINALS, () -> runTasks(deleteTerminalTasks));
@@ -301,14 +319,20 @@ public class DeleteHandler extends HandlerCommon {
         }
 
         // 删除防火墙
-        var deleteFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
+        var firewalls = getPluginHandler().getFirewallElementMap().values().stream()
+                .filter(f -> !deletedNodeIds.contains(f.getSrcElement().getId()))
+                .collect(Collectors.toList());
+        var deleteFirewallTasks = firewalls.stream()
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
         if (!deleteFirewallTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_FIREWALLS, () -> runTasks(deleteFirewallTasks));
         }
 
         // 删除网关
-        var deleteGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
+        var gateways = getPluginHandler().getGatewayElementMap().values().stream()
+                .filter(g -> !deletedNodeIds.contains(g.getSrcElement().getId()))
+                .collect(Collectors.toList());
+        var deleteGatewayTasks = gateways.stream()
                 .map(cloudElement -> (Runnable) () -> deleteElementProcess(cloudElement)).collect(Collectors.toList());
         if (!deleteGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_GATEWAYS, () -> runTasks(deleteGatewayTasks));

@@ -58,7 +58,6 @@ public class LicenseService {
     public boolean verify(String verifyStr, String verifyCode) {
 //        verifyStr = "{\"machinecode\": \"CHTF-12H1-34S8-HV23-123S\", \"deadline\": 1, \"info\": {\"thj\":2}}";
         log.info("verifyStr:{}", verifyStr);
-        log.info("verifyCode:{}", verifyCode);
         Awesome.GoString.ByValue str = new Awesome.GoString.ByValue();
         str.p = verifyStr;
         str.n = str.p.length();

@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.situationaware.model.dto.probe;
 
 import cn.cyberpeace.mp.situationaware.model.ProbeAbilityModel;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -31,7 +30,7 @@ public class ProbeAbilityDto extends ProbeAbilityModel {
     private String engine;
 
 
-    @ApiModelProperty(value = "集合类型，操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other")
+    @ApiModelProperty(value = "集合类型，操作系统类型 0:windows, 1:Unix, 2:Linux, 3:BSD, 4:Other, 5:cisco-ios, 6:HP, 7:junos, 8:openbsd")
     private List<Integer> osTypes;
 
 

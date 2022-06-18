@@ -123,6 +123,9 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
     public ServiceResult<ScreenshotUsedSpaceResponse> queryUsedSpace() {
         // 查询已占用空间
         Long usedSpace = this.getModelMapper().queryUsedSpace();
+        if (Objects.isNull(usedSpace)) {
+            usedSpace = 0L;
+        }
         ScreenshotUsedSpaceResponse response = new ScreenshotUsedSpaceResponse(usedSpace);
         return ServiceResult.success(response);
     }
