@@ -190,7 +190,9 @@ public class ScreenrecordService extends BaseCpService {
         log.info("query screen shop used space response: {}", screenshotUsedSpace);
         if (Objects.nonNull(screenshotUsedSpace.getData())) {
             ScreenshotUsedSpaceResponse screenshotUsedSpaceResponse = screenshotUsedSpace.getData();
-            screenshotUsed = screenshotUsedSpaceResponse.getUsedSpace();
+            if (Objects.nonNull(screenshotUsedSpaceResponse.getUsedSpace())) {
+                screenshotUsed = screenshotUsedSpaceResponse.getUsedSpace();
+            }
         }
         // 资源占用空间
         usedTotal = screenRecordUsed + screenshotUsed;
