@@ -23,7 +23,7 @@ public class SerialPortConverter {
      */
     public List<SerialPortConvertModel> list() {
         SerialPortCloudPlatform model = serialPortService.list();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model) || !model.isSuccess()){
             return Lists.newArrayList();
         }
         return model.getInterfaces().stream().map(serialPort -> {
