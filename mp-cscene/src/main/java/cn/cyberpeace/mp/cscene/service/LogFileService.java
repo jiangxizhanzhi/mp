@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
@@ -82,31 +83,27 @@ public class LogFileService {
             }
         }
 
-        List<String> elementIds = pageRequest.getElementIds();
-        if (CollectionUtil.isEmpty(elementIds)) {
-            List<ElementMonitorBasicInfo> elements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
-            elementIds = elements.stream().map(ElementMonitorBasicInfo::getId).collect(Collectors.toList());
-        }
+        List<ElementMonitorBasicInfo> allElements = sceneMonitorService.getAllSceneElements(pageRequest.getSceneId(), false);
+        Map<String, String> agentNames2ElementIdMap = csceneCommonService.getAgentNames2ElementIdMap(pageRequest.getSceneId(), pageRequest.getElementIds());
+
+        List<CompletableFuture<List<LogFileVO>>> cfList = new ArrayList<>();
+        agentNames2ElementIdMap.forEach((agentName, elementId) -> {
+            ElementMonitorBasicInfo ebasicInfo = allElements.stream().filter(element -> element.getId().equals(elementId)).findFirst().orElse(null);
+            if (Objects.nonNull(ebasicInfo)) {
+                String systemType = ebasicInfo.getSystemType();
+                CompletableFuture<List<LogFileVO>> cf = CompletableFuture.supplyAsync(() -> queryLogCollectFiles(agentName, elementId, systemType));
+                cfList.add(cf);
+            }
+        });
+
 
         List<LogFileVO> allLogFileVOs = new ArrayList<>();
-        // todo 多节点并发优化
-        if (CollectionUtil.isNotEmpty(elementIds)) {
-            for (String eid : elementIds) {
-                List<WazuhControl.QueryLogCollectFileData> fileList = new ArrayList<>();;
-                List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(pageRequest.getSceneId(), Arrays.asList(eid));
-
-                if (CollectionUtil.isNotEmpty(agentNames)) {
-                    String agentName = agentNames.get(0);
-                    String osType = getOsType(pageRequest.getSceneId(), eid);
-                    fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
-                    if (CollectionUtil.isNotEmpty(fileList)) {
-                        List<LogFileVO> logFileVOS = convertLogFiles(fileList, eid, agentName, osType);
-                        allLogFileVOs.addAll(logFileVOS);
-                    }
-                }
-            }
+        if (CollectionUtil.isNotEmpty(cfList)) {
+            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[cfList.size()]);
+            CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            List<List<LogFileVO>> result = finalCF.join();
+            result.forEach(list -> allLogFileVOs.addAll(list));
         }
-
 
         if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
@@ -127,6 +124,15 @@ public class LogFileService {
     }
 
 
+    private List<LogFileVO> queryLogCollectFiles(String agentName, String elementId, String systemType) {
+        log.error("queryLogFile start! thread:{}, agentName:{}, elementId:{}, systemType:{}", Thread.currentThread().getName(), agentName, elementId, systemType);
+        String osType = getOsType(systemType);
+        List<WazuhControl.QueryLogCollectFileData> fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
+        List<LogFileVO> logFileVOS = convertLogFiles(fileList, elementId, agentName, osType);
+        log.error("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), logFileVOS.stream().map(LogFileVO::getPath));
+        return logFileVOS;
+    }
+
     /**
      * 查询节点osType
      * @param sceneId
@@ -141,6 +147,23 @@ public class LogFileService {
         ElementMonitorBasicInfo eleBasicInfo = sceneElementMonitorService.getElementMonitorInfo(sceneEleReq, false);
         String systemType = eleBasicInfo.getSystemType();
 
+        // process osType
+        ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
+        Map<String, Object> map = result.getSource();
+        Object osTypeCode = map.get(systemType);
+        String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
+        if (Objects.nonNull(osType)) {
+            osType = osType.trim().toLowerCase();
+        }
+        return osType;
+    }
+
+
+    /**
+     * 根据systemType查询节点osType
+     * @return
+     */
+    private String getOsType(String systemType) {
         // process osType
         ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();

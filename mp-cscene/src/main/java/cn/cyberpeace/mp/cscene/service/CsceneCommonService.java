@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.BatchSceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.hutool.core.collection.CollectionUtil;
@@ -13,7 +14,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -79,6 +82,36 @@ public class CsceneCommonService {
         }
 
         return agentNames;
+    }
+
+
+    /**
+     * 根据sceneId和elementIds查询agentNames
+     *
+     * @param sceneId
+     * @param elementIds 为空表示获取场景中所有的节点
+     * @return
+     */
+    @Cacheable(value = "get_agentnames_elementids_map")
+    public Map<String, String> getAgentNames2ElementIdMap(String sceneId, List<String> elementIds) {
+        log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
+        List<String> sceneIds = CollectionUtil.toList(sceneId);
+        List<String> translatedSceneIds = translateSceneIds(sceneIds);
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, elementIds);
+        Map<String, SceneElementBO> eid2ElementMap = batchSceneHandler.getAllEid2ElementMap();
+
+        Map<String, String> agentNames2ElementId = new HashMap<>();
+        eid2ElementMap.forEach((key, elementBO) -> {
+            if (Objects.nonNull(elementBO)) {
+                if (CollectionUtil.isEmpty(elementIds)) {
+                    agentNames2ElementId.put(key, elementBO.getId());
+                } else if (elementIds.contains(elementBO.getId())) {
+                    agentNames2ElementId.put(key, elementBO.getId());
+                }
+            }
+        });
+
+        return agentNames2ElementId;
     }
 
 
