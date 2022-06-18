@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlDto;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -100,7 +98,7 @@ public class LogFileService {
 
         List<LogFileVO> allLogFileVOs = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(cfList)) {
-            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[cfList.size()]);
+            CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
             CompletableFuture<List<List<LogFileVO>>> finalCF = CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
             List<List<LogFileVO>> result = finalCF.join();
             result.forEach(list -> allLogFileVOs.addAll(list));
@@ -138,33 +136,8 @@ public class LogFileService {
         String osType = getOsType(systemType);
         List<WazuhControl.QueryLogCollectFileData> fileList = WazuhControlCommon.wazuhControl.queryLogCollectFiles(agentName, osType);
         List<LogFileVO> logFileVOS = convertLogFiles(fileList, elementId, agentName, osType);
-        log.info("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), logFileVOS.stream().map(LogFileVO::getPath));
+        log.info("queryLogFile completed! thread:{}, logFileVOS.size {}, logFileVOS.paths {}", Thread.currentThread().getName(), logFileVOS.size(), logFileVOS.stream().map(LogFileVO::getPath).collect(Collectors.toList()));
         return logFileVOS;
-    }
-
-    /**
-     * 查询节点osType
-     * @param sceneId
-     * @param elementId
-     * @return
-     */
-    private String getOsType(String sceneId, String elementId) {
-        BaseSceneElementRequest sceneEleReq = BaseSceneElementRequest.builder()
-                .sceneId(sceneId)
-                .elementIds(Arrays.asList(elementId)).build();
-
-        ElementMonitorBasicInfo eleBasicInfo = sceneElementMonitorService.getElementMonitorInfo(sceneEleReq, false);
-        String systemType = eleBasicInfo.getSystemType();
-
-        // process osType
-        ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
-        Map<String, Object> map = result.getSource();
-        Object osTypeCode = map.get(systemType);
-        String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
-        if (Objects.nonNull(osType)) {
-            osType = osType.trim().toLowerCase();
-        }
-        return osType;
     }
 
 
@@ -173,7 +146,6 @@ public class LogFileService {
      * @return
      */
     private String getOsType(String systemType) {
-        // process osType
         ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
@@ -191,6 +163,7 @@ public class LogFileService {
      * @return
      */
     public List<LogFileDownloadUrlDto> getDownloadUrls(LogFileDownloadUrlRequest request) {
+        log.info("downloadurl request:{}", request);
         if (Objects.isNull(request) || CollectionUtil.isEmpty(request.getPaths())) {
             return Collections.emptyList();
         }
@@ -216,10 +189,9 @@ public class LogFileService {
         }
 
         List<LogFileDownloadUrlDto> dtos = new ArrayList<>();
-        resultMap.entrySet().forEach(entry -> {
-            log.info("key:{}, val:{}", entry.getKey(), entry.getValue());
-            String paramId = entry.getKey();
-            String downloadUrl = entry.getValue().getFileSrc();
+        resultMap.forEach((paramId, fileResult) -> {
+            log.info("key:{}, val:{}", paramId, fileResult);
+            String downloadUrl = fileResult.getFileSrc();
             downloadUrl = collectionAppConfig.getWazuhGodfsOuterHttpServer() + downloadUrl;
             LogFileDownloadUrlDto dto = paramId2DtoMap.get(paramId);
             if (Objects.nonNull(dto)) {
@@ -276,7 +248,6 @@ public class LogFileService {
 
 
     private LocalDateTime parseDateTime(String datetime) {
-        log.info("datetime:{}", datetime);
         String date1 = StringUtils.substringBeforeLast(datetime, ".");
         DateTimeFormatter df = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
         LocalDateTime dateTime = LocalDateTime.parse(date1, df);
