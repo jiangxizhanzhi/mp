@@ -122,9 +122,7 @@ public class SceneElementMonitorService {
 
         // todo 节点实时信息
         ElementRTInfo rtInfo = processRTInfo(baseRequest);
-
         elementMonitorBasicInfo.setRtInfo(rtInfo);
-
         return elementMonitorBasicInfo;
     }
 
