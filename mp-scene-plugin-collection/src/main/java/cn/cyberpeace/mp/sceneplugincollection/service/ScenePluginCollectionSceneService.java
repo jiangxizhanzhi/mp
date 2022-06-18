@@ -1178,19 +1178,6 @@ public class ScenePluginCollectionSceneService {
     }
 
     public ListObjServiceResult<Process> listPageProcess(ListPageInfoQueryParams listPageInfoQueryParams) {
-        //BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
-        //Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
-        //CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
-        //PageInfo<Process> pageInfo = new PageInfo<>();
-        //collectorBaseRequest.setAgentName(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0)));
-        //collectorBaseRequest.setPage(listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage());
-        //collectorBaseRequest.setPageSize(listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize());
-        //collectorBaseRequest.setPerPage(listPageInfoQueryParams.getPerPage());
-        //if (Objects.isNull(collectorBaseRequest.getAgentName())) {
-        //    return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
-        //}
-        //pageInfo = sysCollectorService.pageProcesses(collectorBaseRequest);
-        //return new ListObjServiceResult<>(new ListObjResult<>(pageInfo.getList(), (int) pageInfo.getTotal()).asResult()).asResult();
 
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
         Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
