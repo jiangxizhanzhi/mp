@@ -833,6 +833,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
 
         // 第三方任务id集合
         List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).distinct().collect(Collectors.toList());
+        log.info("Batch actuator flow thirdTaskIds: {}", thirdTaskIds);
         // 任务id集合
         List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
 
