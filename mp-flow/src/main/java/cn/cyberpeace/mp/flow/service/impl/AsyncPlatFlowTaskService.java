@@ -1049,7 +1049,7 @@ public class AsyncPlatFlowTaskService {
                 String runCmd = "";
 
                 if (flowName.endsWith(".py")) {
-                    runCmd = "python3 " + flowName;
+                    runCmd = "python " + flowName;
                 } else if (flowName.endsWith(".sh")) {
                     runCmd = "bash " + flowName;
                 }
