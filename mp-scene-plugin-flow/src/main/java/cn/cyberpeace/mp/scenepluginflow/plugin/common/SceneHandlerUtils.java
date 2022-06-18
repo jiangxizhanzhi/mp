@@ -256,12 +256,7 @@ public class SceneHandlerUtils {
                               boolean async, Runnable asyncCallback, int runType) {
         // 需要创建流量任务的流量
         var needCreateTaskFlows = flowWithSourceIps.stream()
-                .filter(f -> f.getFlow().getTaskId() == null)
-                .collect(Collectors.toList());
-        // 已有流量任务的流量
-        var haveTaskFlows = flowWithSourceIps.stream()
-                .filter(f -> f.getFlow().getTaskId() != null)
-                .map(f -> f.getFlow())
+                .filter(f -> StringUtils.isEmpty(f.getFlow().getTaskId()))
                 .collect(Collectors.toList());
         var flows = flowWithSourceIps.stream()
                 .map(f -> f.getFlow())
@@ -337,17 +332,16 @@ public class SceneHandlerUtils {
         var newFlows = needCreateTaskFlows.stream()
                 .filter(flow -> flow.getFlow().getId() != null)
                 .collect(Collectors.toList());
+        // 最终需要执行的流量集合
+        var executeFlows = flows.stream()
+                .filter(flow -> StringUtils.isNotEmpty(flow.getId()))
+                .collect(Collectors.toList());
         if (newFlows.isEmpty()) {
             return false;
         }
-        newFlows.forEach(flow -> {
-            preparingFLow(flow.getFlow());
+        executeFlows.forEach(flow -> {
+            preparingFLow(flow);
         });
-        if (!haveTaskFlows.isEmpty()) {
-            haveTaskFlows.forEach(flow -> {
-                preparingFLow(flow);
-            });
-        }
         final String flowNetworkId = networkId;
         final String flowIp = ip;
         String finalIp = ip;
@@ -376,13 +370,12 @@ public class SceneHandlerUtils {
             // 流量任务id与流量绑定
             Map<String, FlowTaskModel> flowId2TaskMap = flowTaskModels.stream()
                     .collect(Collectors.toMap(FlowTaskModel::getFlowId, flowTaskModel -> flowTaskModel));
-            var executorFlows = newFlows.stream().map(f -> f.getFlow()).collect(Collectors.toList());
-            executorFlows.forEach(flow -> {
-                flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
+            executeFlows.forEach(flow -> {
+                if (StringUtils.isEmpty(flow.getTaskId())) {
+                    flow.setTaskId(flowId2TaskMap.get(flow.getId()).getId());
+                }
             });
-            // 已有流量任务id的流量直接执行
-            executorFlows.addAll(haveTaskFlows);
-            return startFlows(executorFlows, stopCallback, runType);
+            return startFlows(executeFlows, stopCallback, runType);
         };
         if (async) {
             TaskCommon.executeTask(() -> {
