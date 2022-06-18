@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +109,14 @@ public class LogFileService {
         if (CollectionUtil.isEmpty(allLogFileVOs)) {
             return ResultUtils.emptyListObjServiceResult();
         }
+
+        Map<String, Integer> elementIdOrderMap = new HashMap<>();
+        int order = 0;
+        for (ElementMonitorBasicInfo element : allElements) {
+            elementIdOrderMap.put(element.getId(), order++);
+        }
+        // 按照节点排序
+        allLogFileVOs.sort(Comparator.comparing(f -> elementIdOrderMap.get(f.getElementId())));
 
         // 假分页处理
         int skip = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
