@@ -40,10 +40,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -831,8 +828,16 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             return ServiceResult.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
         }
 
-        // 第三方任务id集合
-        List<String> thirdTaskIds = flowTaskModels.stream().map(FlowTaskModel::getThirdTaskId).distinct().collect(Collectors.toList());
+        // 按顺序封装第三方任务id集合
+        List<String> thirdTaskIds = new ArrayList<>();
+        request.getTaskIds().forEach(taskId -> {
+            Optional<FlowTaskModel> optionalFlowTaskModel =
+                    flowTaskModels.stream().filter(taskModel -> taskId.equals(taskModel.getId())).findFirst();
+            if (optionalFlowTaskModel.isPresent()) {
+                FlowTaskModel sortTaskModel = optionalFlowTaskModel.get();
+                thirdTaskIds.add(sortTaskModel.getThirdTaskId());
+            }
+        });
         log.info("Batch actuator flow thirdTaskIds: {}", thirdTaskIds);
         // 任务id集合
         List<String> taskIds = flowTaskModels.stream().map(FlowTaskModel::getId).distinct().collect(Collectors.toList());
