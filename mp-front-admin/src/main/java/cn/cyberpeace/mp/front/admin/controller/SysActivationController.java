@@ -66,7 +66,7 @@ public class SysActivationController {
 
     @ApiOperation("查询激活状态")
     @GetMapping("/status")
-    public ServiceResult<ActivationResponse> status() throws InterruptedException {
+    public ServiceResult<ActivationResponse> status() {
         log.info("query activation status...");
         ActivationResponse content = activationService.status();
         if (Objects.isNull(content)) {
