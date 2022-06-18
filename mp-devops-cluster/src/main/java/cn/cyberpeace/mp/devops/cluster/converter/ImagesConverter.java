@@ -309,7 +309,7 @@ public class ImagesConverter implements BaseConverter{
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         return scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
-                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getUsername() : ""));
+                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""));
     }
 
     /**
