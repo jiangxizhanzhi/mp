@@ -40,5 +40,8 @@ public class EventListenerService {
         if (userInfo.get("id") != null) {
             pluginCloudSceneService.expireAllRemoteConnect(userInfo.get("id").toString());
         }
+        if (userInfo.get("username") != null) {
+            pluginCloudSceneService.expireAllRemoteConnect(userInfo.get("username").toString());
+        }
     }
 }
