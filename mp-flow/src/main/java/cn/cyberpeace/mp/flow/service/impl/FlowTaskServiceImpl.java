@@ -34,6 +34,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -625,7 +626,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
         updateTaskModel.setThirdTaskId(thirdTaskId);
         updateTaskModel.setTaskStatus(taskStatus);
         updateTaskModel.setUpdateTime(LocalDateTime.now());
-        this.updateFlowTaskInfo(updateTaskModel);
+        this.updateFlowTaskDetail(updateTaskModel);
 
         TaskCommon.executeTask(() -> {
             try {
@@ -769,6 +770,19 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 flowTaskModel.setOriginIps(srcIpRange);
             }
         }
+        int result = getModelMapper().updateTaskInfo(flowTaskModel);
+        AddFlowTaskRequest addFlowTaskRequest = new AddFlowTaskRequest();
+        BeanUtils.copyProperties(flowTaskModel, addFlowTaskRequest);
+        asyncPlatFlowTaskService.savePlatFlowTask(addFlowTaskRequest, true);
+        return result;
+    }
+
+    /**
+     * 更新流量任务
+     * @param flowTaskModel
+     * @return
+     */
+    public int updateFlowTaskDetail(FlowTaskModel flowTaskModel) {
         return getModelMapper().updateTaskInfo(flowTaskModel);
     }
 
