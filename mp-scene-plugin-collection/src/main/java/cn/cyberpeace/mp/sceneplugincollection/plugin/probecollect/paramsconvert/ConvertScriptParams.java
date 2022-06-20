@@ -5,7 +5,8 @@ import cn.cyberpeace.mp.scene.util.InstallerUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.collection.CollUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -50,8 +51,8 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
             });
         }
         // 参数用空格分开
-        if (!CollectionUtil.isEmpty(params)) {
-            scriptProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+        if (!CollectionUtils.isEmpty(params)) {
+            scriptProbeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params.toArray()));
         }
         if (NumberUtils.INTEGER_ZERO.equals(probe.getScriptType())) {
             scriptProbeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
@@ -71,6 +72,6 @@ public class ConvertScriptParams implements WazuhParamsConvert<WazuhControl.Cont
         if (probe.getOutputFormat() != null) {
             scriptProbeParam.setOutputFormat(probe.getOutputFormat());
         }
-        return CollectionUtil.toList(scriptProbeParam);
+        return CollUtil.toList(scriptProbeParam);
     }
 }
