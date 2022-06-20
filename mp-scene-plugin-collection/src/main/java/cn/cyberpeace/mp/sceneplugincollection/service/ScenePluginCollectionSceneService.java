@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincollection.bo.FlowAttackCountBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupByDestinationIpAndSeverityBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.FlowGroupPortWithProtocolBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.SceneAssetsBO;
+import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginWazuhRuleTypeModel;
@@ -111,10 +112,6 @@ public class ScenePluginCollectionSceneService {
         public static final String NODE_NAME = "nodeName";
     }
 
-
-    @Value("${mp.cscene.default.hours-range:24}")
-    private Integer hoursRange;
-
     @Autowired
     private DataCollectionService dataCollectionService;
 
@@ -135,6 +132,9 @@ public class ScenePluginCollectionSceneService {
 
     @Autowired
     private CollectionPluginWazuhRuleMapper collectionPluginWazuhRuleMapper;
+
+    @Autowired
+    private CollectionAppConfig collectionAppConfig ;
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
@@ -1190,7 +1190,7 @@ public class ScenePluginCollectionSceneService {
         wazuhRequest.setPageSize(1);
         // 默认24小时
         LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
+        wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
 
         if (wazuhRequest.getAgentNames().contains(null)) {
@@ -1238,7 +1238,7 @@ public class ScenePluginCollectionSceneService {
         wazuhRequest.setPageSize(1);
         // 默认24小时
         LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(endTime.minusHours(hoursRange));
+        wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
         wazuhRequest.setEndTime(endTime);
 
         if (wazuhRequest.getAgentNames().contains(null)) {
