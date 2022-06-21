@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scenepluginflow.plugin.flow;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.enums.TaskActionEnum;
 import cn.cyberpeace.mp.flow.model.FlowNetworkInfo;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.request.AddFlowTaskRequest;
 import cn.cyberpeace.mp.flow.request.BatchActuatorTaskRequest;
 import cn.cyberpeace.mp.flow.response.BatchActuatorCallbackResponse;
+import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
@@ -191,6 +193,14 @@ public class FlowExecutor {
         if (!result.isSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
+    }
+
+    public int updateFlowTaskInfo(FlowTaskModel flowTaskModel) {
+        return this.flowService3.updateFlowTaskInfo(flowTaskModel);
+    }
+
+    public ServiceResult<FlowRecordsResponse> queryFlowRecords(String taskId) {
+        return this.flowService3.queryFlowRecords(taskId);
     }
 
     private synchronized void initDefaultInstance() {

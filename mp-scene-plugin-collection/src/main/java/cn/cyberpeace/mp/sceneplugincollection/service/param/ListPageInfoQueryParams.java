@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.sceneplugincollection.service.param;
 
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

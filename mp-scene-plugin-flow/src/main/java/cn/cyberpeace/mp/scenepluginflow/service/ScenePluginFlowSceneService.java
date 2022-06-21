@@ -3,12 +3,12 @@ package cn.cyberpeace.mp.scenepluginflow.service;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
-import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scenepluginflow.bo.base.Flow;
 import cn.cyberpeace.mp.scenepluginflow.constant.PluginConstant;
 import cn.cyberpeace.mp.scenepluginflow.plugin.FlowScenePluginHandler;
+import cn.cyberpeace.mp.scenepluginflow.plugin.flow.FlowExecutor;
 import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.scenepluginflow.util.SceneFlowCacheUtil;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 public class ScenePluginFlowSceneService {
 
     @Resource
-    private FlowTaskServiceImpl flowService3;
+    private FlowExecutor flowExecutor;
 
     public ServiceResult<Boolean> startFlow(String sceneId, String nodeId, String flowId, String sourceIp, SceneContextBO context) {
         var sceneHandler = new SceneHandler(sceneId, null, false, context);
@@ -48,7 +48,7 @@ public class ScenePluginFlowSceneService {
             FlowTaskModel model = new FlowTaskModel();
             model.setId(flow.getTaskId());
             model.setOriginIps(sourceIp);
-            flowService3.updateFlowTaskInfo(model);
+            flowExecutor.updateFlowTaskInfo(model);
         }
         return new ServiceResult<>(true);
     }
@@ -90,9 +90,9 @@ public class ScenePluginFlowSceneService {
         }
         ServiceResult<FlowRecordsResponse> result;
         if (Boolean.TRUE.equals(isBatch)) {
-            result = flowService3.queryFlowRecords(flowElement.getSrcElement().getEid());
+            result = flowExecutor.queryFlowRecords(flowElement.getSrcElement().getEid());
         } else {
-            result = flowService3.queryFlowRecords(flow.getTaskId());
+            result = flowExecutor.queryFlowRecords(flow.getTaskId());
         }
         SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
         if (result.isSuccess()) {
