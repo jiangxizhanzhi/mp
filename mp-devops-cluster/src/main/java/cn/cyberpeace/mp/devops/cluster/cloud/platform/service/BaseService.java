@@ -103,7 +103,7 @@ public class BaseService {
     protected <T extends BaseModel> T sendGet(String url, Class<T> valueType){
         T model = null;
         String result = "";
-        result = HttpRequest.get(url).header(ACCEPT_LANGUAGE,ServletUtils.getAcceptLanguage()).execute().body();
+        result = HttpRequest.get(url).header(ACCEPT_LANGUAGE,ServletUtils.getAcceptLanguage()).timeout(10 * 60 * 1000).execute().body();
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
