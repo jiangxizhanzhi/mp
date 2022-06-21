@@ -79,7 +79,7 @@ public class ProbeModel extends BaseModel {
      * 自定义探针输出格式: none, json, plain
      */
     @ApiModelProperty(value = "自定义探针输出格式: none, json, plain，默认为json")
-    @DefaultStr("json")
+    @DefaultStr("none")
     private String outputFormat;
 
     /**
