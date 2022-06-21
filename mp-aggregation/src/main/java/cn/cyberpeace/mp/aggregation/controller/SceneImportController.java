@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
+import cn.cyberpeace.mp.aggregation.dto.sceneimport.MoundRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -39,5 +40,23 @@ public class SceneImportController {
         }
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getSceneFilePath());
         return ServiceResult.success(serviceResult.getSource().getId());
+    }
+
+    @PostMapping("/mount")
+    public ServiceResult<Boolean> mount(@RequestBody MoundRequest request) {
+        log.info("mount nfs , input params is {}", JsonCommon.stringify(request));
+        if (StringUtils.isEmpty(request.getHost()) || StringUtils.isEmpty(request.getPath())) {
+            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+        }
+        return this.resourceCenterService.mount(request.getHost(), request.getPath());
+    }
+
+    @PostMapping("/umount")
+    public ServiceResult<Boolean> umount(@RequestBody MoundRequest request) {
+        log.info("unmount nfs , input params is {}", JsonCommon.stringify(request));
+        if (StringUtils.isEmpty(request.getPath())) {
+            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+        }
+        return this.resourceCenterService.unmount(request.getPath());
     }
 }

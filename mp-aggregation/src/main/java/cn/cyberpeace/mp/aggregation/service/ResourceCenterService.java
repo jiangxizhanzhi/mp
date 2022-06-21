@@ -28,6 +28,8 @@ import java.util.List;
 @Service
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
+    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
+    private static String UNMOUNT_CMD = "umount %s";
 
     @Resource
     private CsceneService csceneService;
@@ -65,5 +67,25 @@ public class ResourceCenterService {
         }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+    }
+
+    public ServiceResult<Boolean> mount(String host, String path) {
+        this.execShell(String.format(MOUNT_CMD, host, path, path));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> unmount(String path) {
+        this.execShell(String.format(UNMOUNT_CMD, path));
+        return new ServiceResult<>(true);
+    }
+
+    private void execShell(String shell) {
+        log.info("Start exec shell! command=[{}]", shell);
+        try {
+            Process process = Runtime.getRuntime().exec(shell);
+        } catch (Exception e) {
+            log.error("Exec shell error! command=[{}], catch error:", shell, e);
+        }
+        log.info("End exec shell!");
     }
 }
