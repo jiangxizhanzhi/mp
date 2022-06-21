@@ -554,7 +554,7 @@ public class ScenePluginCloudSceneService {
         }
         var list = cloudPluginSceneConnectionMapper.list(humanCondition);
         if (CollectionUtils.isEmpty(list)) {
-            return new ServiceResult<>();
+            return new ServiceResult<>(new ArrayList<>());
         }
         Set<String> users = new HashSet<>();
         list.forEach(model -> {

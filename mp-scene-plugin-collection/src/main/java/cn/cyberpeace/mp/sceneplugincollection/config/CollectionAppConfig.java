@@ -88,6 +88,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.recursion_level:5}")
     private Integer registryRecursionLevel;
 
+    @Value("${mp.sceneplugincollection.default.hours-range:24}")
+    private Integer hoursRange;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
