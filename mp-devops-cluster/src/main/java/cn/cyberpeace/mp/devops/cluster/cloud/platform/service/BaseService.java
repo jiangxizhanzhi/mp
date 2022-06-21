@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.HttpRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpEntity;
@@ -103,8 +103,7 @@ public class BaseService {
     protected <T extends BaseModel> T sendGet(String url, Class<T> valueType){
         T model = null;
         String result = "";
-        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
-        result = HttpUtil.get(url,headers,10 * 60 * 1000);
+        result = HttpRequest.get(url).header(ACCEPT_LANGUAGE,ServletUtils.getAcceptLanguage()).timeout(10 * 60 * 1000).execute().body();
         if (log.isInfoEnabled()) {
             log.info(GET_LOG_INFO, url, result);
         }
