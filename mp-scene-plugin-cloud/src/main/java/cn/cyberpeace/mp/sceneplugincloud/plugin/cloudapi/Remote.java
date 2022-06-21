@@ -113,7 +113,11 @@ public class Remote extends CloudClient {
                 enableGuacamoleRecordingData, null,
                 EnableGuacamoleRecordingResult.class);
         if (!Boolean.TRUE.equals(result.getSuccess())) {
-            throw new MpRuntimeException(CloudErrorCode.ENABLE_RECORDING_ERROR.format(result.getMessages()));
+            if (result.getMessages() != null && result.getMessages().toLowerCase().contains("storage space for screen")) {
+                throw new MpRuntimeException(CloudErrorCode.NO_SPACE_RECORDING_ERROR);
+            } else {
+                throw new MpRuntimeException(CloudErrorCode.ENABLE_RECORDING_ERROR.format(result.getMessages()));
+            }
         }
         return result.getData().getRecordingName();
     }
