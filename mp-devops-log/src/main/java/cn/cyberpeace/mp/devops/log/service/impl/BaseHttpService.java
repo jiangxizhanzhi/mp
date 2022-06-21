@@ -92,7 +92,7 @@ public class BaseHttpService {
      * @param url
      * @return
      */
-    protected String sendGet(String url,Map<String,String> headers){
+    protected String sendGet(String url,Map<String,Object> headers){
         String result = "";
         try {
             result = HttpUtils.sendGet(url,headers);
@@ -120,7 +120,7 @@ public class BaseHttpService {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendGet(url,headers);
             if (log.isInfoEnabled()) {
                 log.info(GET_LOG_INFO, url, result);
@@ -145,7 +145,7 @@ public class BaseHttpService {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(POST_LOG_INFO, url, body, result);
@@ -172,7 +172,7 @@ public class BaseHttpService {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(POST_LOG_INFO, url, body, result);
@@ -197,7 +197,7 @@ public class BaseHttpService {
     protected String sendPut(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(PUT_LOG_INFO, url, body, result);
@@ -224,7 +224,7 @@ public class BaseHttpService {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(PUT_LOG_INFO, url, body, result);
@@ -249,7 +249,7 @@ public class BaseHttpService {
     private String sendDelete(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendDelete(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(DELETE_LOG_INFO, url, body, result);
@@ -291,7 +291,7 @@ public class BaseHttpService {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = wrapperHeaders(new HashMap<>());
+        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPost(url,httpEntity,headers);
         T model = JsonUtils.toSnakeObject(result,valueType);
         if (log.isInfoEnabled()) {
@@ -310,7 +310,7 @@ public class BaseHttpService {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = wrapperHeaders(new HashMap<>());
+        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPut(url,httpEntity,headers);
         if (log.isInfoEnabled()) {
             log.info("=====FormData url：{},params：{},result：{}", url, httpEntity, result);
@@ -323,7 +323,7 @@ public class BaseHttpService {
      * @param headers
      * @return
      */
-    private Map<String,String> wrapperHeaders(Map<String,String> headers){
+    private Map<String,Object> wrapperHeaders(Map<String,Object> headers){
         if (MapUtils.isEmpty(headers)){
             headers = new HashMap<>();
         }

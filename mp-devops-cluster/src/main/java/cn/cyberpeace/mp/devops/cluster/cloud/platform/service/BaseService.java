@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpEntity;
@@ -75,7 +76,7 @@ public class BaseService {
      * @param url
      * @return
      */
-    protected String sendGet(String url,Map<String,String> headers){
+    protected String sendGet(String url,Map<String,Object> headers){
         String result = "";
         try {
             result = HttpUtils.sendGet(url,headers);
@@ -102,20 +103,12 @@ public class BaseService {
     protected <T extends BaseModel> T sendGet(String url, Class<T> valueType){
         T model = null;
         String result = "";
-        try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
-            result =  HttpUtils.sendGet(url,headers);
-            if (log.isInfoEnabled()) {
-                log.info(GET_LOG_INFO, url, result);
-            }
-            model = JsonUtils.toSnakeObject(result,valueType);
-        }catch (ConnectException e){
-            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
-            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
-        }catch (IOException e) {
-            log.error(GET_LOG_ERROR,url,result,e.getMessage(),e);
-            throw new MpRuntimeException(e.getMessage()).e(e);
+        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
+        result = HttpUtil.get(url,headers,10 * 60 * 1000);
+        if (log.isInfoEnabled()) {
+            log.info(GET_LOG_INFO, url, result);
         }
+        model = JsonUtils.toSnakeObject(result,valueType);
         return model;
     }
 
@@ -128,7 +121,7 @@ public class BaseService {
     protected String sendPost(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(POST_LOG_INFO, url, body, result);
@@ -155,7 +148,7 @@ public class BaseService {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPost(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(POST_LOG_INFO, url, body, result);
@@ -180,7 +173,7 @@ public class BaseService {
     protected String sendPut(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result = HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(PUT_LOG_INFO, url, body, result);
@@ -207,7 +200,7 @@ public class BaseService {
         T model = null;
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendPut(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(PUT_LOG_INFO, url, body, result);
@@ -232,7 +225,7 @@ public class BaseService {
     private String sendDelete(String url,String body){
         String result = "";
         try {
-            Map<String,String> headers = wrapperHeaders(new HashMap<>());
+            Map<String,Object> headers = wrapperHeaders(new HashMap<>());
             result =  HttpUtils.sendDelete(url,body,headers);
             if (log.isInfoEnabled()) {
                 log.info(DELETE_LOG_INFO, url, body, result);
@@ -274,7 +267,7 @@ public class BaseService {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPost(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = wrapperHeaders(new HashMap<>());
+        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPost(url,httpEntity,headers);
         T model = JsonUtils.toSnakeObject(result,valueType);
         if (log.isInfoEnabled()) {
@@ -293,7 +286,7 @@ public class BaseService {
      * @throws IOException
      */
     protected <T extends BaseModel> T sendFormDataPut(String url, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        Map<String,String> headers = wrapperHeaders(new HashMap<>());
+        Map<String,Object> headers = wrapperHeaders(new HashMap<>());
         String result = HttpUtils.doFormDataPut(url,httpEntity,headers);
         if (log.isInfoEnabled()) {
             log.info("=====FormData url：{},params：{},result：{}", url, httpEntity, result);
@@ -306,7 +299,7 @@ public class BaseService {
      * @param headers
      * @return
      */
-    private Map<String,String> wrapperHeaders(Map<String,String> headers){
+    private Map<String,Object> wrapperHeaders(Map<String,Object> headers){
         if (MapUtils.isEmpty(headers)){
             headers = new HashMap<>();
         }
