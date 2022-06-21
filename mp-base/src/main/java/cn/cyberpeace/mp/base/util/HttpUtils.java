@@ -50,7 +50,7 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static String sendPost(String url, String content,Map<String,String> headerMap) throws IOException {
+    public static String sendPost(String url, String content,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doPost(url, content,headerMap, client);
     }
@@ -145,7 +145,7 @@ public class HttpUtils {
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
-    public static String doPost(String url, String content,Map<String,String> headerMap, HttpClient client) throws IOException {
+    public static String doPost(String url, String content,Map<String,Object> headerMap, HttpClient client) throws IOException {
 
         HttpPost httpPost = new HttpPost(url);
 
@@ -156,7 +156,7 @@ public class HttpUtils {
 
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpPost.setHeaders(headers);
         }
@@ -257,7 +257,7 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static String sendGet(String url,Map<String,String> headerMap) throws IOException {
+    public static String sendGet(String url,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url, headerMap,  client);
     }
@@ -287,20 +287,23 @@ public class HttpUtils {
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
-    private static String doGetRequest(String url, Map<String, String> headerMap, HttpClient client) throws IOException {
+    private static String doGetRequest(String url, Map<String, Object> headerMap, HttpClient client) throws IOException {
         // 替换url中的空格
         url = url.replace(" ", "%20");
         HttpGet httpget = new HttpGet(url);
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpget.setHeaders(headers);
         }
-        HttpResponse resp = client.execute(httpget);
+
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig( requestConfig);
+
+        HttpResponse resp = client.execute(httpget);
+
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
@@ -351,7 +354,7 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static String sendDelete(String url, String content,Map<String,String> headerMap) throws IOException {
+    public static String sendDelete(String url, String content,Map<String,Object> headerMap) throws IOException {
         log.info("请求地址================>{}", url);
         log.info("请求参数================>{}", content);
         HttpClient client = HttpClientBuilder.create().build();
@@ -362,7 +365,7 @@ public class HttpUtils {
 
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpDelete.setHeaders(headers);
         }
@@ -462,12 +465,12 @@ public class HttpUtils {
         return result;
     }
 
-    public static String sendPut(String url,String content,Map<String,String> headerMap) throws IOException {
+    public static String sendPut(String url,String content,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut httpPut = new HttpPut(url);
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpPut.setHeaders(headers);
         }
@@ -481,12 +484,12 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 
-    public static String doFormDataPost(String url, HttpEntity entity,Map<String,String> headerMap) throws IOException {
+    public static String doFormDataPost(String url, HttpEntity entity,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost httpPost = new HttpPost(url);
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpPost.setHeaders(headers);
         }
@@ -497,12 +500,12 @@ public class HttpUtils {
         return EntityUtils.toString(response.getEntity(), "UTF-8");
     }
 
-    public static String doFormDataPut(String url, HttpEntity entity,Map<String,String> headerMap) throws IOException {
+    public static String doFormDataPut(String url, HttpEntity entity,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPut httpPost = new HttpPut(url);
         if (MapUtils.isNotEmpty(headerMap)) {
             Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), v.getValue())
+                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
             ).toArray(Header[]::new);
             httpPost.setHeaders(headers);
         }
