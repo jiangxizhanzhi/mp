@@ -83,6 +83,10 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
             if (StrUtil.isBlank(fileName)) {
                 fileName = StrUtil.subAfter(disposition, "filename=", true);
+                final int lastIndexOf = fileName.lastIndexOf(";");
+                if (lastIndexOf > 0) {
+                    fileName = fileName.substring(0, lastIndexOf);
+                }
             }
         }
         String downLoadFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
