@@ -37,6 +37,8 @@ public enum OpTypeEnums {
     START("start"),
     // 恢复
     RECOVER("recover"),
+    //导出
+    EXPORT("export"),
 
     DEFAULT("");
 
