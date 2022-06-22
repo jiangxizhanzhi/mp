@@ -258,7 +258,7 @@ public class ImagesController {
      */
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
     public ServiceResult create(@PathVariable("id") String uuid){
         imagesConverter.create(uuid);
         return ServiceResult.successful();
@@ -269,7 +269,7 @@ public class ImagesController {
      */
     @ApiOperation("释放镜像机器")
     @PostMapping("/delete-instance")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "释放镜像", target = OpTargetEnums.IMAGE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         imagesConverter.delete(request);
         return ServiceResult.successful();
@@ -280,7 +280,7 @@ public class ImagesController {
      */
     @ApiOperation("重启镜像机器")
     @PostMapping("/reboot")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "重启镜像", target = OpTargetEnums.IMAGE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
         imagesConverter.reboot(request);
         return ServiceResult.successful();
@@ -312,7 +312,7 @@ public class ImagesController {
      */
     @ApiOperation("合并快照历史")
     @PostMapping("/snapshot/merge")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.IMAGE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
         snapshotConverter.merge(request);
         return ServiceResult.successful();
@@ -323,7 +323,7 @@ public class ImagesController {
      */
     @ApiOperation("创建快照")
     @PostMapping("/snapshot/create")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.IMAGE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
         snapshotConverter.create(request);
         return ServiceResult.successful();
