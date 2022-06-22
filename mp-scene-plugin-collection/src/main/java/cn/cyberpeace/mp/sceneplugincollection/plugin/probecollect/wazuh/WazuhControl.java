@@ -34,6 +34,7 @@ public class WazuhControl {
     public static final String CONTROL_ACTION_TYPE_SYSCHECK = "syscheck";
     public static final String CONTROL_ACTION_TYPE_FILE_MODIFY = "file_modify";
     public static final String CONTROL_ACTION_TYPE_REGISTRY_MODIFY = "registry_modify";
+    public static final String CONTROL_ACTION_TYPE_SYSCOLLECTOR = "syscollector";
 
     public static final String SCRIPT_DISABLED_NO = "no";
     public static final String SCRIPT_DISABLED_YES = "yes";
@@ -93,6 +94,9 @@ public class WazuhControl {
             for (var registryModifyParam : controlConfigParam.getRegistryModifyParams()) {
                 scriptParams.add(JsonCommon.beanToSnakeMap(registryModifyParam));
             }
+        }
+        if (controlConfigParam.getSyscollectorParam() != null) {
+            scriptParams.add(JsonCommon.beanToSnakeMap(controlConfigParam.getSyscollectorParam()));
         }
         if (scriptParams.isEmpty()) {
             return StringUtils.EMPTY;
@@ -344,6 +348,7 @@ public class WazuhControl {
         private ControlSyscheckParam syscheckParam;
         private List<ControlFileModifyParam> fileModifyParams;
         private List<ControlRegistryModifyParam> registryModifyParams;
+        private ControlSyscollectorParam syscollectorParam;
     }
 
     @Data
@@ -408,12 +413,30 @@ public class WazuhControl {
     }
 
     @Data
+    public static class ControlSyscollectorParam {
+        private String id;
+        private String action;
+        private final String type = CONTROL_ACTION_TYPE_SYSCOLLECTOR;
+        private String disabled;
+        private String interval;
+        private String hardware;
+        private String os;
+        private String network;
+        private String packages;
+        private String ports;
+        private String portsAll;
+        private String processes;
+        private String hotfixes;
+    }
+
+    @Data
     public static class QueryConfigData {
         private List<QueryConfigScriptInfo> scriptInfo;
         private List<QueryConfigLogInfo> logInfo;
         private QuerySyscheckInfo syscheckInfo;
         private List<QueryFileModifyInfo> fileModifyInfo;
         private List<QueryRegistryModifyInfo> registryModifyInfo;
+        private QuerySyscollectorInfo syscollectorInfo;
     }
 
     @Data
@@ -456,6 +479,20 @@ public class WazuhControl {
         private Integer recursionLevel;
         private List<String> ignores;
         private List<String> sregexIgnores;
+    }
+
+    @Data
+    public static class QuerySyscollectorInfo {
+        private String disabled;
+        private String interval;
+        private String hardware;
+        private String os;
+        private String network;
+        private String packages;
+        private String ports;
+        private String portsAll;
+        private String processes;
+        private String hotfixes;
     }
 
     @Data
