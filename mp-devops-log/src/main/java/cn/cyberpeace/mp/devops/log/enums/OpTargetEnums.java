@@ -16,7 +16,14 @@ public enum OpTargetEnums {
     ORG("org"),
     // "资源"
     TARGET("target"),
-
+    //镜像
+    IMAGE("image"),
+    //快照
+    SNAPSHOT("snapshot"),
+    //实装
+    REALEQUIPMENT("real_equipment"),
+    //服务
+    SERVICE("service"),
     DEFAULT("");
 
 

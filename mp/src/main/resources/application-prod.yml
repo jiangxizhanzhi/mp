@@ -9,6 +9,8 @@ ip:
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
   mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
   redis: ${REDIS_IP:10.100.7.1}
+port:
+  self-callback: ${MP_SELF_PORT:8080}
 server:
   servlet:
     context-path: /api/mp
@@ -149,7 +151,7 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
     logout:
-      reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:false}
+      reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:
       enabled: true
       method-match: true
@@ -188,7 +190,7 @@ mp:
     wazuh-es-server: http://${ip.es}:9205
     wazuh-godfs-server: http://${ip.wazuh}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
-    wazuh-run-command-http-callback-url: http://${ip.self}:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
+    wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 

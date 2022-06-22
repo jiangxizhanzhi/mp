@@ -495,6 +495,7 @@ public class CreateHandler extends HandlerCommon {
                     }
                     accessModeParam.setUsername(accessMode.getUsername());
                     accessModeParam.setPassword(accessMode.getPassword());
+                    accessModeParam.setEnablePortMapping(accessMode.getProxy());
                     if (StringUtils.isNotBlank(accessMode.getAccessIp())) {
                         accessModeParam.setIpAddress(TextUtils.emptyNull(accessMode.getAccessIp()));
                     } else {

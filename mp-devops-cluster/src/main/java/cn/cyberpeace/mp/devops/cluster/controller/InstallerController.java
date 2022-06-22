@@ -18,6 +18,10 @@ import cn.cyberpeace.mp.devops.cluster.vo.InstallerPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -92,6 +96,7 @@ public class InstallerController {
      */
     @ApiOperation("新增")
     @PostMapping
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增服务", target = OpTargetEnums.SERVICE)
     public ServiceResult add(@RequestBody InstallerRequest request){
         installerConverter.add(request);
         return ServiceResult.successful();
@@ -102,6 +107,7 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PatchMapping("/{uuid}")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改实装", target = OpTargetEnums.SERVICE)
     public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
         request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
@@ -116,6 +122,7 @@ public class InstallerController {
      */
     @ApiOperation("删除")
     @DeleteMapping
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.SERVICE)
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
         installerConverter.delete(request);
         return ServiceResult.successful();

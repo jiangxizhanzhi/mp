@@ -11,6 +11,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "mp.auth.logout")
 public class AuthLogoutConfig {
 
-    private Boolean resetSecret = false;
+    private Boolean resetSecret = true;
 
 }
