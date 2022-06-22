@@ -27,6 +27,10 @@ import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentNetworkCardPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import com.alibaba.fastjson.JSONArray;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -170,6 +174,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
         realEquipmentConverter.add(request);
         return ServiceResult.successful();
@@ -180,6 +185,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("更新")
     @PutMapping("/update")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult update(@RequestBody RealEquipmentRequest request){
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -193,6 +199,7 @@ public class RealEquipmentController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/delete")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.REALEQUIPMENT)
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
         BaseCloudPlatformResult result = realEquipmentConverter.delete(request);
         return new Result<>(result.isSuccess());
