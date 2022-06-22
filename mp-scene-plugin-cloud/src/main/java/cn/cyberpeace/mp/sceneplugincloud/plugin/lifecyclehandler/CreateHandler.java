@@ -789,6 +789,9 @@ public class CreateHandler extends HandlerCommon {
                         accessMode.setAccessIp(accessModeData.getIpAddress());
                         accessMode.setAccessPort(accessModeData.getPort());
                     }
+                    if (StringUtils.isNotEmpty(accessModeData.getIpAddress()) && cloudPort.getSrcPort() != null) {
+                        cloudPort.getSrcPort().setIp(accessModeData.getIpAddress());
+                    }
                 });
             }
         });
