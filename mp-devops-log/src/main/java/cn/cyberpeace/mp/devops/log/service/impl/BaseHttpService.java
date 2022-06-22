@@ -1,18 +1,12 @@
 package cn.cyberpeace.mp.devops.log.service.impl;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.model.BaseModel;
 import cn.cyberpeace.mp.devops.log.utils.JsonUtils;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.net.ConnectException;
 
 /**
  * 基础对接接口层
@@ -32,17 +26,9 @@ public class BaseHttpService {
 
     protected HttpResponse downLoad(String url,String body){
         HttpResponse result = null;
-        try {
-            result = HttpUtils.sendPostForDownLoad(url,body);
-            if (log.isInfoEnabled()) {
-                log.info(GET_DOWNLOAD_LOG_INFO, url, result);
-            }
-        }catch (ConnectException e){
-            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
-            throw new MpRuntimeException(BaseErrorCode.GATEWAY_TIME_OUT);
-        } catch (IOException e) {
-            log.error(GET_DOWNLOAD_LOG_ERROR,url,result,e.getMessage(),e);
-            throw new MpRuntimeException(e.getMessage()).e(e);
+        result = HttpRequest.post(url).body(body).execute();
+        if (log.isInfoEnabled()) {
+            log.info(GET_DOWNLOAD_LOG_INFO, url);
         }
         return result;
     }
