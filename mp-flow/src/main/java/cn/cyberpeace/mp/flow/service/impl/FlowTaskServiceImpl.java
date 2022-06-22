@@ -766,6 +766,8 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 srcIpRange = srcIps[0] + BaseConstants.SHORT_DASH + srcIps[0];
                 flowTaskModel.setOriginIps(srcIpRange);
             }
+        } else {
+            flowTaskModel.setOriginIps("127.0.0.1-127.0.0.1");
         }
         int result = getModelMapper().updateTaskInfo(flowTaskModel);
         flowTaskModel = getModelMapper().get(flowTaskModel.getId());
