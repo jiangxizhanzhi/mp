@@ -151,7 +151,6 @@ public class UserController {
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
     @PostMapping("/modify")
-    @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = userService.modify(modifyRequest);
