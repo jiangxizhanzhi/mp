@@ -50,6 +50,26 @@ public class EntityNodeCreateData implements CloudHttpData {
 
             private Connection connection;
             private String security;
+            private PortMapping portMapping;
+
+            @Data
+            @AllArgsConstructor
+            @NoArgsConstructor
+            public static class PortMapping {
+                private String id;
+                private String host;
+                private Integer hostPort;
+
+                private String createdAt;
+                private String user;
+                private String project;
+                private String networkId;
+                private String instanceIp;
+                private String instancePort;
+                private String proto;
+                private String requestId;
+                private Boolean success;
+            }
 
             @Data
             @AllArgsConstructor
