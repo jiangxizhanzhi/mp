@@ -780,8 +780,15 @@ public class CreateHandler extends HandlerCommon {
                         accessMode.setConnectionId(connection.getConnectionId());
                         accessMode.setConnectionUrl(connection.getUrl());
                     }
-                    accessMode.setAccessIp(accessModeData.getIpAddress());
-                    accessMode.setAccessPort(accessModeData.getPort());
+                    var portMapping = accessModeData.getPortMapping();
+                    if (portMapping != null) {
+                        accessMode.setProxyId(portMapping.getId());
+                        accessMode.setAccessIp(portMapping.getHost());
+                        accessMode.setAccessPort(portMapping.getHostPort());
+                    } else {
+                        accessMode.setAccessIp(accessModeData.getIpAddress());
+                        accessMode.setAccessPort(accessModeData.getPort());
+                    }
                 });
             }
         });
