@@ -18,8 +18,10 @@ public enum OpTargetEnums {
     TARGET("target"),
     //镜像
     IMAGE("image"),
+    //快照
+    SNAPSHOT("snapshot"),
     //实装
-    REALEQUIPMENT("realEquipment"),
+    REALEQUIPMENT("real_equipment"),
     //服务
     SERVICE("service"),
     DEFAULT("");
