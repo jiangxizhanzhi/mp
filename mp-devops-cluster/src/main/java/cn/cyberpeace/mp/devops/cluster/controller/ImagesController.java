@@ -34,6 +34,10 @@ import cn.cyberpeace.mp.devops.cluster.vo.ImagesPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -121,6 +125,7 @@ public class ImagesController {
      */
     @ApiOperation("新增")
     @PostMapping("/add")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
         validImageRequest(request);
         imagesConverter.add(request);
@@ -132,6 +137,7 @@ public class ImagesController {
      */
     @ApiOperation("更新")
     @PostMapping("/update")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult update(@RequestBody ImageRequest request){
         validImageRequest(request);
         if (StringUtils.isBlank(request.getUuid())){
@@ -197,6 +203,7 @@ public class ImagesController {
      */
     @ApiOperation("快速构建")
     @PostMapping("/build")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
         imagesConverter.build(request);
         return ServiceResult.successful();
@@ -208,6 +215,7 @@ public class ImagesController {
      */
     @ApiOperation("删除")
     @DeleteMapping("/page")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
         BaseCloudPlatformResult model = imagesConverter.delete(request);
         return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
@@ -218,6 +226,7 @@ public class ImagesController {
      */
     @ApiOperation("授权/批量授权")
     @PostMapping("/auth")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "授权镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);
         return ServiceResult.successful();
@@ -238,6 +247,7 @@ public class ImagesController {
      */
     @ApiOperation("导出")
     @GetMapping("/export")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
         BaseCloudPlatformResult model = imagesConverter.export(uuid,imageName);
         return new Result<>(model.getUrl());
@@ -248,6 +258,7 @@ public class ImagesController {
      */
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
     public ServiceResult create(@PathVariable("id") String uuid){
         imagesConverter.create(uuid);
         return ServiceResult.successful();
@@ -258,6 +269,7 @@ public class ImagesController {
      */
     @ApiOperation("释放镜像机器")
     @PostMapping("/delete-instance")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         imagesConverter.delete(request);
         return ServiceResult.successful();
@@ -268,6 +280,7 @@ public class ImagesController {
      */
     @ApiOperation("重启镜像机器")
     @PostMapping("/reboot")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
         imagesConverter.reboot(request);
         return ServiceResult.successful();
@@ -299,6 +312,7 @@ public class ImagesController {
      */
     @ApiOperation("合并快照历史")
     @PostMapping("/snapshot/merge")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.IMAGE)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
         snapshotConverter.merge(request);
         return ServiceResult.successful();
@@ -309,6 +323,7 @@ public class ImagesController {
      */
     @ApiOperation("创建快照")
     @PostMapping("/snapshot/create")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.IMAGE)
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
         snapshotConverter.create(request);
         return ServiceResult.successful();
@@ -319,6 +334,7 @@ public class ImagesController {
      */
     @ApiOperation("文件注入")
     @PostMapping("/inject-file")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "文件注入", target = OpTargetEnums.IMAGE)
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
         scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
@@ -340,6 +356,7 @@ public class ImagesController {
      */
     @ApiOperation("删除文件注入")
     @DeleteMapping("/inject-file")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除文件注入", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
         injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
         return ServiceResult.successful();
