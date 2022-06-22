@@ -120,8 +120,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.authenticationProvider(mobilePasswordAuthenticationProvider).addFilterAt(mobilePasswordAuthenticationFilter, CustomUsernamePasswordAuthenticationFilter.class);
 
-
-
         // client
 //        var clientAuthenticationFilter = new ClientAuthentication2Filter();
 //        clientAuthenticationFilter.setAuthenticationSuccessHandler(authenticationSuccessHandler);

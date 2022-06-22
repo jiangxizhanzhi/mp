@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
+import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import com.auth0.jwt.JWT;
@@ -15,10 +16,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletResponse;
@@ -26,6 +30,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -33,24 +38,47 @@ import java.util.Date;
  * @Date：2021/8/31 11:13
  */
 @Slf4j
+@Component
 public class JwtUtils {
-    private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
+
+    public static JwtUtils jwtUtils;
+
+    @Autowired
+    private AuthenticateConfig authenticateConfig;
+
+    //private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
 
     private JwtUtils() {}
 
-    private static String generateJwtSecret(UserInfo user) {
-        String secret = user.getLatestTokenSecret();
-        if (secret == null) {
-            secret = AuthConstant.JWT_SECRET;
+    @PostConstruct
+    public void init() {
+        jwtUtils = this;
+        jwtUtils.authenticateConfig = authenticateConfig;
+    }
+
+    private static String getSecret(UserInfo user) {
+        String secret = "";
+        if (jwtUtils.authenticateConfig.getUseIndividualTokenSecret()) {
+            secret = user.getLatestTokenSecret();
         }
+        if (StringUtils.isBlank(secret)) {
+            //secret = AuthConstant.JWT_SECRET;
+            secret = jwtUtils.authenticateConfig.getJwtSecret();
+        }
+        return secret;
+    }
+
+    private static String generateJwtSecret(UserInfo user) {
+        String secret = getSecret(user);
         var algorithm = "HmacSHA256";
         final Mac mac;
         try {
             mac = Mac.getInstance(algorithm);
-            mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
+            //mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
+            mac.init(new SecretKeySpec(jwtUtils.authenticateConfig.getJwtSecret().getBytes(StandardCharsets.UTF_8), algorithm));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("Generate Jwt Secret error: {}", e.getMessage());
-            return AuthConstant.JWT_SECRET_KEY;
+            return jwtUtils.authenticateConfig.getJwtSecret();
         }
 
         mac.update(secret.getBytes(StandardCharsets.UTF_8));
@@ -82,11 +110,16 @@ public class JwtUtils {
 
     public static String generateToken(UserInfo user) {
         String jwtSecret = generateJwtSecret(user);
-        var expireDate = new Date(System.currentTimeMillis() + JWT_EXPIRATION);
+        Long expireSeconds = jwtUtils.authenticateConfig.getJwtExpires();
+        if (Objects.isNull(expireSeconds)) {
+            expireSeconds = 604800L;
+        }
+        var expireDate = new Date(System.currentTimeMillis() + expireSeconds * 1000);
+        String secret = getSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
-                    .withClaim("username", user.getUsername()).withClaim("key", user.getTokenSecret()).sign(algorithm);
+                    .withClaim("username", user.getUsername()).withClaim("key", secret).sign(algorithm);
         } catch (JWTCreationException e) {
             log.error("Create jwt token error: {}", e.getMessage());
             return null;
@@ -113,22 +146,6 @@ public class JwtUtils {
         response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
         return true;
     }
-
-    //@Deprecated
-    /*public static String addResponseHeaderWithRefreshedJWT(UserModel user) {
-        if (Objects.nonNull(user)) {
-            RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-            ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;
-            HttpServletResponse response = servletRequestAttributes.getResponse();
-            String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
-            if (StringUtils.isBlank(jwt)) {
-                return null;
-            }
-            response.setHeader(AuthConstant.JWT_HEADER_KEY, AuthConstant.JWT_PREFIX + jwt);
-            response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
-            return jwt;
-        }
-    }*/
 
     public static UserInfo validateToken(String token) throws TokenExpiredException {
         var user = getUserInfo(token);

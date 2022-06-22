@@ -158,6 +158,9 @@ mp:
       authority-match: true
       ignore-if-not-defined: false
     authenticate:
+      use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
+      jwt-secret: ${MP_AUTH_JWT_SECRET:}
+      jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
       urls:
         - /auth/**
         - /sys/notice/**
