@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.devops.log.service.impl;
 
 import cn.cyberpeace.mp.devops.log.model.BaseModel;
+import cn.hutool.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class BaseCpHttpService extends BaseHttpService {
      * @return
      */
     @Override
-    protected HttpResponse downLoad(String api,String body) {
+    protected HttpResponse downLoad(String api, String body) {
         return super.downLoad(cpUrl.concat(api),body);
     }
 }

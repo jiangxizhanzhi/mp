@@ -10,10 +10,11 @@ import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.model.CloudPlatformItemsResult;
 import cn.cyberpeace.mp.devops.log.po.CpCloudLogPO;
 import cn.cyberpeace.mp.devops.log.service.LogFileService;
+import cn.hutool.core.util.ReUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.http.*;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -75,14 +76,18 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         jsonObject.put("filename",downloadDTO.getFileName());
         jsonObject.put("path",downloadDTO.getPath());
         jsonObject.put("hostname",downloadDTO.getHostname());
-        HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL,jsonObject.toJSONString());
-        Header contentHeader = httpResponse.getFirstHeader("Content-Disposition");
-        HeaderElement[] values = contentHeader.getElements();
-        NameValuePair filename = values[0].getParameterByName("filename");
-        String downLoadFileName = new String(filename.getValue().getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-        HttpEntity entity = httpResponse.getEntity();
+        final cn.hutool.http.HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
+        String disposition = httpResponse.header(cn.hutool.http.Header.CONTENT_DISPOSITION);
+        String fileName = "";
+        if (StrUtil.isNotBlank(disposition)) {
+            fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
+            if (StrUtil.isBlank(fileName)) {
+                fileName = StrUtil.subAfter(disposition, "filename=", true);
+            }
+        }
+        String downLoadFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         var bos = new ByteArrayOutputStream();
-        InputStream inputStream = entity.getContent();
+        InputStream inputStream = httpResponse.bodyStream();
         byte[] tmp = new byte[4 * 1024];
         int size = 0;
         while ((size = inputStream.read(tmp)) != -1) {
