@@ -160,6 +160,9 @@ mp:
       authority-match: true
       ignore-if-not-defined: false
     authenticate:
+      use-individual-token-secret: true
+      jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d
+      jwt-expires: 604800
       urls:
         - /auth/**
         - /sys/notice/**

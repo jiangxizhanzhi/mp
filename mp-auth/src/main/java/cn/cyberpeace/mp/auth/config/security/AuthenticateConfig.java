@@ -16,6 +16,12 @@ import java.util.List;
 @ConfigurationProperties(prefix = "mp.auth.authenticate")
 public class AuthenticateConfig {
 
+    private Boolean useIndividualTokenSecret;
+
+    private String jwtSecret;
+
+    private Long jwtExpires;
+
     // 需要认证的url
     private List<String> urls;
 
