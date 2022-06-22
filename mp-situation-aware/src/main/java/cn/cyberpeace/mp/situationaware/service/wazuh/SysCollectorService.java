@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -160,7 +161,6 @@ public class SysCollectorService extends RequestProcessor {
         var uri = "/syscollector/" + agentId + "/netaddr";
         var requestUrl = wazuhUrl + uri;
 
-        log.info("requestUrl:{}", requestUrl);
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
         if (StringUtils.isNotBlank(iface)) {
@@ -171,10 +171,15 @@ public class SysCollectorService extends RequestProcessor {
             params.add(new BasicNameValuePair("proto", URLUtil.encode(proto)));
         }
 
+        log.info("requestUrl:{}, params:{}", requestUrl, params);
+
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
         BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
+        if (Objects.isNull(result.getData()) || CollectionUtil.isEmpty(result.getData().getAffectedItems())) {
+            return Collections.emptyList();
+        }
         List<NetAddr> netAddrs = result.getData().getAffectedItems();
 
         return netAddrs;
