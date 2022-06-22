@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.cscene.SceneCronService;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.AbstractClearJob;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ContainerClearJob;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.NetClearJob;
@@ -39,15 +41,31 @@ public class ScenePluginCloudSceneCronJob {
     @Resource
     private CsceneService csceneService;
 
+    @Resource
+    private SceneCronService cronService;
+
+    @Resource
+    private CsceneAppConfig csceneAppConfig;
+
     @Scheduled(cron = "0 0 0 * * ?")
     public void scheduleNode() {
+        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
+            log.info("scene cron job is not enable");
+            return;
+        }
         log.info("start cloud plugin scene cron job");
 
         try {
             int count = csceneService.getActiveVirtualDeviceCount();
             NodeLimitUtils.refreshCount(count);
         } catch (Exception e) {
-            log.error("faild to refresh node limit count");
+            log.error("failed to refresh node limit count", e);
+        }
+
+        try {
+            cronService.correctErrorStatusScene();
+        } catch (Exception e) {
+            log.error("failed to correct error status scene", e);
         }
 
         List<AbstractClearJob> jobs = new ArrayList<>() {{

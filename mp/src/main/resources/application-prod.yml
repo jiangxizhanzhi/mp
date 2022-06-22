@@ -196,6 +196,9 @@ mp:
     wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
+    scene-error-creating-seconds: ${MP_SCENE_ERROR_CREATING_SECONDS:3600}
+    element-error-creating-seconds: ${MP_ELEMENT_ERROR_CREATING_SECONDS:300}
+    enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
 
 management:
   endpoints:

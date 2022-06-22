@@ -57,6 +57,15 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.has-own-recording-set:213,214,236}")
     private String hasOwnRecordingSet;
 
+    @Value("${mp.cscene.scene-error-creating-seconds:3600}")
+    private Integer sceneErrorCreatingSeconds;
+
+    @Value("${mp.cscene.element-error-creating-seconds:300}")
+    private Integer elementErrorCreatingSeconds;
+
+    @Value("${mp.cscene.enable-scene-cron-job:true}")
+    private Boolean enableSceneCronJob;
+
     @Autowired
     private MessageSource messageSource;
 
