@@ -46,6 +46,7 @@ public class EntityNodeCreateData implements CloudHttpData {
             private String username;
             private String password;
             private String macAddress;
+            private Boolean enablePortMapping;
 
             private Connection connection;
             private String security;
