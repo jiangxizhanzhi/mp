@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -82,27 +81,6 @@ public class BaseCpService extends BaseService {
     @Override
     protected <T extends BaseModel> T sendPut(String api,String body,Class<T> valueType){
         return super.sendPut(devopsConfig.getCpUrl().concat(api),body,valueType);
-    }
-
-    /**
-     * 通过PUT方式查询信息
-     * @param api
-     * @param body
-     * @return
-     */
-    @Override
-    protected String sendPut(String api,String body){
-        return super.sendPut(devopsConfig.getCpUrl().concat(api),body);
-    }
-
-    /**
-     * 通过PUT方式查询信息
-     * @param api
-     * @return
-     */
-    @Override
-    protected HttpResponse downLoad(String api){
-        return super.downLoad(devopsConfig.getCpUrl().concat(api));
     }
 
     /**

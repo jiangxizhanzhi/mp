@@ -8,12 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -21,15 +19,12 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -50,81 +45,9 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static String sendPost(String url, String content,Map<String,Object> headerMap) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doPost(url, content,headerMap, client);
-    }
-
-    /**
-     * 发送一个Post请求
-     *
-     * @param url
-     * @param content
-     * @return
-     * @throws IOException
-     */
     public static String sendPost(String url, String content) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doPost(url, content, client);
-    }
-
-    /**
-     * 带超时时间post请求
-     * @param url
-     * @param content
-     * @param timeOut
-     * @return
-     * @throws IOException
-     */
-    public static String sendPostWithTimeOut(String url, String content, int timeOut) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doPost(url, content, client, timeOut);
-    }
-
-    /**
-     * 对接需要授权
-     *
-     * @param url
-     * @param content
-     * @param password
-     * @param username
-     * @return
-     * @throws IOException
-     */
-    public static String sendPost(String url, String content, String password, String username) throws IOException {
-        HttpClient client = withDigestAuth(password, username);
-        return doPost(url, content, client);
-    }
-
-    /**
-     * form形式post
-     *
-     * @param url
-     * @param jsonObject
-     * @return
-     * @throws IOException
-     */
-    public static String sendPost(String url, JSONObject jsonObject) throws IOException {
-        log.info("请求地址================>{}", url);
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
-
-        List<NameValuePair> params = new ArrayList<>();
-        if (Objects.nonNull(jsonObject)) {
-            log.info("请求参数================>{}", jsonObject.toJSONString());
-            jsonObject.keySet().forEach(key -> params.add(new BasicNameValuePair(key, jsonObject.getString(key))));
-        } else {
-            log.info("请求参数================>{}", jsonObject);
-        }
-
-        httpPost.setEntity(new UrlEncodedFormEntity(params, StandardCharsets.UTF_8));
-        HttpResponse resp = client.execute(httpPost);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpPost.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
 
     private static String doPost(String url, String content, HttpClient client) throws IOException {
@@ -141,49 +64,6 @@ public class HttpUtils {
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpPost.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
-    }
-
-    public static String doPost(String url, String content,Map<String,Object> headerMap, HttpClient client) throws IOException {
-
-        HttpPost httpPost = new HttpPost(url);
-
-        // 解决中文乱码问题
-        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
-        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        httpPost.setEntity(entity);
-
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpPost.setHeaders(headers);
-        }
-
-        HttpResponse resp = client.execute(httpPost);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpPost.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
-
-
-    }
-
-    private static String doPost(String url, String content, HttpClient client, int timeOut) throws IOException {
-        log.info("请求地址================>{}", url);
-        log.info("请求参数================>{}", content);
-        HttpPost httpPost = new HttpPost(url);
-        // 解决中文乱码问题
-        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
-        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        httpPost.setEntity(entity);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(timeOut).build();
-        httpPost.setConfig(requestConfig);
-        HttpResponse resp = client.execute(httpPost);
-
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
@@ -233,33 +113,9 @@ public class HttpUtils {
      * @return
      * @throws IOException
      */
-    public static HttpResponse sendGetForDownLoad(String url) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doGetRequestForDownload(url,  client);
-    }
-
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
     public static HttpResponse sendPostForDownLoad(String url,String body) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doPostRequestForDownload(url,body,  client);
-    }
-
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
-    public static String sendGet(String url,Map<String,Object> headerMap) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doGetRequest(url, headerMap,  client);
     }
 
 
@@ -283,27 +139,6 @@ public class HttpUtils {
         // 设置请求和传输超时时间
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         httpget.setConfig( requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
-    }
-
-    private static String doGetRequest(String url, Map<String, Object> headerMap, HttpClient client) throws IOException {
-        // 替换url中的空格
-        url = url.replace(" ", "%20");
-        HttpGet httpget = new HttpGet(url);
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpget.setHeaders(headers);
-        }
-
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig( requestConfig);
-
-        HttpResponse resp = client.execute(httpget);
-
         // 获得返回值
         return EntityUtils.toString(resp.getEntity(), StandardCharsets.UTF_8);
     }
@@ -341,35 +176,6 @@ public class HttpUtils {
         entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
         HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
         httpDelete.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        HttpResponse response = client.execute(httpDelete);
-        httpDelete.setConfig(requestConfig);
-        return EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-    }
-
-    /**
-     * 删除请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
-    public static String sendDelete(String url, String content,Map<String,Object> headerMap) throws IOException {
-        log.info("请求地址================>{}", url);
-        log.info("请求参数================>{}", content);
-        HttpClient client = HttpClientBuilder.create().build();
-        StringEntity entity = new StringEntity(content, StandardCharsets.UTF_8);
-        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
-        httpDelete.setEntity(entity);
-
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpDelete.setHeaders(headers);
-        }
-
         RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
         HttpResponse response = client.execute(httpDelete);
         httpDelete.setConfig(requestConfig);
@@ -465,25 +271,6 @@ public class HttpUtils {
         return result;
     }
 
-    public static String sendPut(String url,String content,Map<String,Object> headerMap) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpPut httpPut = new HttpPut(url);
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpPut.setHeaders(headers);
-        }
-        // 解决中文乱码问题
-        StringEntity entity = new StringEntity(content, "utf-8");
-        entity.setContentType("application/json");
-        httpPut.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
-        HttpResponse response = client.execute(httpPut);
-        httpPut.setConfig(requestConfig);
-        return EntityUtils.toString(response.getEntity(), "UTF-8");
-    }
-
     public static String doFormDataPost(String url, HttpEntity entity,Map<String,Object> headerMap) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         HttpPost httpPost = new HttpPost(url);
@@ -514,18 +301,6 @@ public class HttpUtils {
         httpPost.setConfig(requestConfig);
         HttpResponse response = client.execute(httpPost);
         return EntityUtils.toString(response.getEntity(), "UTF-8");
-    }
-
-    private static HttpResponse doGetRequestForDownload(String url, HttpClient client) throws IOException {
-        // 替换url中的空格
-        HttpGet httpget = new HttpGet(url);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig( requestConfig);
-        HttpResponse resp = client.execute(httpget);
-
-        // 获得返回值
-        return resp;
     }
 
     private static HttpResponse doPostRequestForDownload(String url, String body,HttpClient client) throws IOException {
