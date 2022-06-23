@@ -16,6 +16,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -183,7 +186,13 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        return modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        String sceneName = StringUtils.EMPTY;
+        if (result != null && result.getData() != null) {
+            sceneName = result.getData().getName();
+        }
+        CsceneLogUtils.recordSceneLog(sceneName, OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.start_scene, request.getContext());
+        return result;
     }
 
     @ApiOperation("获取场景模板统计数据")
