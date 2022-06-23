@@ -7,6 +7,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
@@ -92,12 +96,14 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("新增集合关联信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/collection_rel")
     public ServiceResult<Integer> addCollectionRel(@RequestBody @Validated AddFlowCollectionRelRequest request) {
         return flowCollectionService.addCollectionRel(request);
     }
 
     @ApiOperation("删除集合关联信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @DeleteMapping("/collection_rel")
     public ServiceResult<Integer> delCollectionRel(@RequestBody @Validated DelFlowCollectionRelRequest request) {
         return flowCollectionService.delCollectionRel(request);

@@ -30,6 +30,10 @@ public enum OpTargetEnums {
     PROBE("probe"),
     // 采集模板
     COLLECTION_TEMPLATE("collection_template"),
+    // 流量文件
+    FLOW_INFO("flow_info"),
+    // 流量集合
+    FLOW_COLLECTION("flow_collection"),
     // 公告
     NOTICE("notice"),
     // 配置
