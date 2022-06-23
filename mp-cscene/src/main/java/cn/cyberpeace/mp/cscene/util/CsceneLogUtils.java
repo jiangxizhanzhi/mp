@@ -31,10 +31,10 @@ public class CsceneLogUtils {
 
     public static String CREATE_SCENE_CONFIG = "create_scene_config";
     public static String UPDATE_SCENE_CONFIG = "update_scene_config";
-    public static String delete_scene_config = "delete_scene_config";
-    public static String start_scene = "start_scene";
-    public static String delete_scene = "start_scene";
-    public static String batch_delete_scenes = "batch_delete_scenes";
+    public static String DELETE_SCENE_CONFIG = "delete_scene_config";
+    public static String START_SCENE = "start_scene";
+    public static String DELETE_SCENE = "start_scene";
+    public static String BATCH_DELETE_SCENES = "batch_delete_scenes";
 
     public static void recordSceneLog(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         try {
