@@ -16,6 +16,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -150,14 +153,18 @@ public class CsceneController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneActionRequest request) {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
-        return modelService.deleteById(request.getId(), true, false, null).asResult();
+        var result = modelService.deleteById(request.getId(), true, false, null).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_CONFIG, CsceneLogUtils.DELETE_SCENE_CONFIG, null);
+        return result;
     }
 
     @ApiOperation("批量删除场景模板")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
-        return modelService.bulkDeleteByIds(ids, true, false, null).asResult();
+        var result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_CONFIG, CsceneLogUtils.DELETE_SCENE_CONFIG, null);
+        return result;
     }
 
     @ApiOperation("创建场景模板测试实例")
@@ -170,7 +177,9 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("test_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        return modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.START_SCENE, request.getContext());
+        return result;
     }
 
     @ApiOperation("创建场景模板应用实例")
@@ -183,7 +192,9 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
-        return modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.START_SCENE, request.getContext());
+        return result;
     }
 
     @ApiOperation("获取场景模板统计数据")

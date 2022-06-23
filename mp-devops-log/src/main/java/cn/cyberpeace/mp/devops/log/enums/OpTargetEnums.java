@@ -28,6 +28,12 @@ public enum OpTargetEnums {
     PROBE("probe"),
     // 采集模板
     COLLECTION_TEMPLATE("collection_template"),
+    // 场景模板
+    SCENE_CONFIG("scene_config"),
+    // 场景
+    SCENE_INSTANCE("scene_instance"),
+    // 节点
+    SCENE_ELEMENT("scene_element"),
     DEFAULT("");
 
 
