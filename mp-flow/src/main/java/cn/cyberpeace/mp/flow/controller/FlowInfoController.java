@@ -162,4 +162,15 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.listByCollectionIds(request);
     }
 
+    /**
+     * 流量信息导入
+     * @param request
+     * @return
+     */
+    @ApiOperation("流量信息导入")
+//    @PostMapping("/flow_import")
+    public ServiceResult<Boolean> flowImport(@RequestBody @Validated ImportFlowInfoRequest request) {
+        return flowServiceImpl.flowImport(request);
+    }
+
 }

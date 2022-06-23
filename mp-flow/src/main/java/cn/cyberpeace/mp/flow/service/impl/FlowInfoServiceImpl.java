@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.FlowCategory;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.InteractiveTypeEnum;
 import cn.cyberpeace.mp.flow.enums.ParamTypeEnum;
@@ -31,6 +32,7 @@ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -41,10 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -831,6 +830,131 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return true;
+    }
+
+    /**
+     * 流量文件导入
+     * @param request
+     * @return
+     */
+    public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
+        String filePath = request.getPath();
+        File fileFolder = new File(filePath);
+        if (fileFolder.exists()) {
+            File[] flowFiles = fileFolder.listFiles();
+            if (ArrayUtil.isEmpty(flowFiles)) {
+                log.error("file folder is empty");
+                return ServiceResult.fail("file folder is empty");
+            }
+
+            // readme文本集合
+            ArrayList<String> readmeList = new ArrayList<>();
+            // pcap文件
+            File pcapFile = null;
+            for (File flowFile : flowFiles) {
+                if (flowFile.isDirectory()) {
+                    File[] pcapFiles = flowFile.listFiles();
+                    if (ArrayUtil.isEmpty(pcapFiles)) {
+                        log.error("flow info folder is empty");
+                        return ServiceResult.fail("flow info folder is empty");
+                    }
+                    pcapFile = pcapFiles[0];
+                } else {
+                    if (flowFile.getName().contains("README.md")) {
+                        // 解析README.md
+                        File readmeFile = flowFile;
+                        FileReader fileReader = null;
+                        BufferedReader bufferedReader = null;
+                        try {
+                            fileReader = new FileReader(readmeFile);
+                            bufferedReader  = new BufferedReader(fileReader);
+                            String s;
+                            while ((s = bufferedReader.readLine()) != null) {
+                                readmeList.add(s);
+                            }
+                        } catch (FileNotFoundException e) {
+                            log.error("flow info import error for FileNotFoundException", e);
+                            return ServiceResult.fail("flow file import error");
+                        } catch (IOException e) {
+                            log.error("flow info import error for IOException", e);
+                            return ServiceResult.fail("flow file import error");
+                        } finally {
+                            IOUtils.closeQuietly(fileReader);
+                            IOUtils.closeQuietly(bufferedReader);
+                        }
+                    }
+                }
+            }
+
+            if (Objects.isNull(pcapFile)) {
+                log.error("flow info file is empty");
+                return ServiceResult.fail("flow info file is empty");
+            }
+
+            FlowInfoModel flowInfoModel = new FlowInfoModel();
+            String fileName = readmeList.get(1);
+            flowInfoModel.setTitle(fileName);
+
+            // 重名校验
+            if (!this.checkNameUnique(fileName, "")) {
+                log.error("flow file name exist: {}", fileName);
+                return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            }
+
+            flowInfoModel.setFileName(pcapFile.getName());
+            String fdfsPath = fastDFSClient.uploadFileWithFilepath(pcapFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
+            flowInfoModel.setFlowDesc(readmeList.get(3));
+            String categoryName = readmeList.get(11);
+            flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
+            boolean isAttackFlow =  readmeList.get(13).contains("攻击流量");
+            if (!isAttackFlow) {
+                // 背景流量
+                flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+                flowInfoModel.setPcapFile(fdfsPath);
+            } else {
+                // 攻击流量
+                flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
+                flowInfoModel.setScriptFile(fdfsPath);
+            }
+            this.create(flowInfoModel);
+
+            if (isAttackFlow) {
+                // 攻击流量，要添加默认脚本参数信息
+                List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
+                // 参数数量
+                int countParam = readmeList.size() - 15;
+                for (int i = 0; i < countParam; i++) {
+                    FlowScriptParamModel scriptParam = new FlowScriptParamModel();
+                    // 解析攻击流量参数：- port | Number | 参数说明描述 | 90
+                    String strParam = readmeList.get(15 + i);
+                    if (StringUtils.isNotBlank(strParam)) {
+                        // 去除"-"号
+                        strParam = strParam.substring(1);
+                        String[] parmaArray = strParam.split("\\s\\|\\s");
+                        if (parmaArray.length != 4) {
+                            log.error("script param parse error");
+                            return ServiceResult.fail("script param parse error");
+                        }
+                        scriptParam.setFlowId(flowInfoModel.getId());
+                        scriptParam.setParamKey(parmaArray[0].trim());
+                        scriptParam.setParamType(FlowCategory.paramTypeMap.get(parmaArray[1].trim()));
+                        scriptParam.setParamDesc(parmaArray[2].trim());
+                        if (!ParamTypeEnum.IP.toString().equalsIgnoreCase(parmaArray[0].trim())) {
+                            scriptParam.setParamValue(parmaArray[3].trim());
+                        }
+                        scriptParamModelList.add(scriptParam);
+                    }
+                }
+                flowScriptParamService.bulkCreate(scriptParamModelList);
+            }
+        } else {
+            log.error("file floder is not exist");
+            return ServiceResult.fail("file folder is not exist");
+        }
+
+        return ServiceResult.success(true);
     }
 
 
