@@ -82,6 +82,12 @@ public class CsceneLogUtils {
     }
 
     public interface DESC {
-
+        public static String CLEAR_SCENE = "clear_scene";
+        public static String BATCH_CLEAR_SCENE = "batch_clear_scene";
+        public static String START_FLOW = "start_flow";
+        public static String BATCH_START_FLOW = "batch_start_flow";
+        public static String STOP_FLOW = "stop_flow";
+        public static String BATCH_STOP_FLOW = "batch_stop_flow";
+        public static String UPDATE_FLOW = "update_flow";
     }
 }

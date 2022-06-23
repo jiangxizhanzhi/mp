@@ -34,6 +34,8 @@ public enum OpTargetEnums {
     SCENE_INSTANCE("scene_instance"),
     // 节点
     SCENE_ELEMENT("scene_element"),
+    // 节点流量
+    SCENE_ELEMENT_FLOW("scene_element_flow"),
     DEFAULT("");
 
 
