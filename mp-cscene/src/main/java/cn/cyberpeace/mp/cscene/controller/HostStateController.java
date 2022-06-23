@@ -52,6 +52,22 @@ public class HostStateController {
 
 
     /**
+     * 集群状态趋势
+     * @param hostStateTrendRequest
+     * @return
+     */
+    @ApiOperation(value = "集群状态趋势图")
+    @GetMapping("/cluster_trend")
+    public ServiceResult<List<HostState>> getClusterHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
+        hostStateTrendRequest.setSceneId(null);
+        hostStateTrendRequest.setElementIds(null);
+        List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
+
+        return ServiceResult.success(hostStates);
+    }
+
+
+    /**
      * elementIds若为多值，则只取第一个值
      *
      * @param hostStateTrendRequest
@@ -76,7 +92,7 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
         pageRequest.setPage(1);
         pageRequest.setPageSize(1);
-        List<HostState> hostStates = hostStateService.getHostStates(pageRequest);
+        List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(pageRequest);
         return ServiceResult.success(hostStates);
     }
 

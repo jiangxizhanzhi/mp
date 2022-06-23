@@ -124,7 +124,9 @@ public class AgentService extends RequestProcessor {
     public String getSingleAgentId(String agentName) {
         log.info("agentName:{}", agentName);
         if (StringUtils.isNotBlank(agentName)) {
-            List<Agent> agents = listAgents(new AgentRequest(agentName));
+            AgentRequest agentRequest = new AgentRequest();
+            agentRequest.setName(agentName);
+            List<Agent> agents = listAgents(agentRequest);
 
             if (CollectionUtil.isEmpty(agents)) {
                 return null;
@@ -139,7 +141,6 @@ public class AgentService extends RequestProcessor {
         }
 
         return null;
-
     }
 
 
@@ -149,7 +150,10 @@ public class AgentService extends RequestProcessor {
 
         if (StringUtils.isNotBlank(agentRequest.getName())) {
             params.add(new BasicNameValuePair("name", agentRequest.getName()));
+        }
 
+        if (StringUtils.isNotBlank(agentRequest.getIp())) {
+            params.add(new BasicNameValuePair("ip", agentRequest.getIp()));
         }
 
         return params;

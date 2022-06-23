@@ -211,7 +211,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setPageSize(queryParams.getPageSize());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     // 硬件信息
-                    res = hostStateService.getHostStates(request);
+                    res = hostStateService.doProcessHostStatesTrend(request);
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }

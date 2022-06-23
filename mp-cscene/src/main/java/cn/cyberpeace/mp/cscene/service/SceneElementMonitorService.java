@@ -258,7 +258,7 @@ public class SceneElementMonitorService {
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
             request.setPage(1);
             request.setPageSize(1);
-            List<HostState> hostStates = hostStateService.getHostStates(request);
+            List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(request);
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);
                 resource.setCpuCount(hostState.getCpuCount());

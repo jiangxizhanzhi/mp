@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.situationaware.model.wazuh.common;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
@@ -11,6 +13,8 @@ import java.util.Objects;
  * @Date：2022/2/24 16:08
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BasePageRequest {
 
     @ApiModelProperty(value = "当前页")

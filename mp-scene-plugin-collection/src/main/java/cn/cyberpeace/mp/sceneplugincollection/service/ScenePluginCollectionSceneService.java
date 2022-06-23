@@ -73,7 +73,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -242,6 +241,33 @@ public class ScenePluginCollectionSceneService {
         request.setEndTime(Optional.ofNullable(queryParams.getEndTime())
                 .orElse(LocalDateTime.now())
         );
+        return doQueryHostStateEventsWithTimeRange(sceneId, agentName2Element, request);
+    }
+
+
+    public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+        // 没有探针
+        if (CollectionUtil.isEmpty(agentNames)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+        // 构建查询参数
+        var request = new WazuhMonitorEventsRequest();
+        request.setPageNum(queryParams.getPage());
+        // todo 暂时最多取 1000 条
+        request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
+        request.setAgentNames(agentNames);
+        // 开始时间,默认为场景创建时间
+        request.setStartTime(Optional.ofNullable(queryParams.getStartTime())
+                .orElse(LocalDateTime.now().minusHours(24))
+        );
+        // 结束时间,默认为当前时间
+        request.setEndTime(Optional.ofNullable(queryParams.getEndTime())
+                .orElse(LocalDateTime.now())
+        );
+        return doQueryHostStateEventsWithTimeRange(null, null, request);
+    }
+
+    private ListObjServiceResult<CollectionHostStateBO> doQueryHostStateEventsWithTimeRange(String sceneId, Map<String, SceneElementBO> agentName2Element, WazuhMonitorEventsRequest request) {
         // 执行查询
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
@@ -261,11 +287,14 @@ public class ScenePluginCollectionSceneService {
             hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
             hostState.setTime(srcHostState.getTime());
             // todo 进程，端口，网络连接，磁盘使用率
-            var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
-            if (srcElement != null) {
-                hostState.setNodeId(srcElement.getId());
-                hostState.setNodeName(srcElement.getName());
+            if (CollectionUtil.isNotEmpty(agentName2Element)) {
+                var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
+                if (srcElement != null) {
+                    hostState.setNodeId(srcElement.getId());
+                    hostState.setNodeName(srcElement.getName());
+                }
             }
+
             return hostState;
         }).collect(Collectors.toList());
         return new ListObjServiceResult<>(new ListObjResult<>(hostStates, result.size()));
@@ -832,6 +861,21 @@ public class ScenePluginCollectionSceneService {
     }
 
     /**
+     * 根据agentNames查询资源使用率
+     * @param agentNames
+     * @param startTime
+     * @param endTime
+     * @param intervalNumber
+     * @param execCal
+     * @return
+     */
+    public ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> timeIntervalAvgPercentByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalNumber, Function<CollectionHostStateBO, Double> execCal) {
+        List<IntervalSizeBO<LocalDateTime, Double>> result = this.timeIntervalAvgByAgentNames(agentNames, startTime, endTime, intervalNumber, execCal);
+        return new ServiceResult<>(result);
+    }
+
+    /**
      * @param sceneIds 场景id列表，不传默认为全部
      * @param nodeIds 节点id列表，不传默认为全部
      * @param startTime 开始时间
@@ -840,7 +884,7 @@ public class ScenePluginCollectionSceneService {
      * @param execCal 查询使用的数据
      * @return
      */
-    private List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
+    public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgBy(
             List<String> sceneIds, List<String> nodeIds, LocalDateTime startTime, LocalDateTime endTime,
             int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
         //todo 暂时先支持一个场景的查询
@@ -850,6 +894,22 @@ public class ScenePluginCollectionSceneService {
         params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
         params.setEndTime(endTime);
         var queryResult = this.listHostStates(sceneIds.get(0), params).getSource();
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult);
+    }
+
+
+    public List<IntervalSizeBO<LocalDateTime, Double>> timeIntervalAvgByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime,
+            int intervalSeconds, Function<CollectionHostStateBO, Double> execCal) {
+        //todo 暂时先支持一个场景的查询
+        HostStateQueryParams params = new HostStateQueryParams();
+        // 为计算平均值,往前多取一个周期的数据
+        params.setStartTime(startTime.minus(intervalSeconds, ChronoUnit.SECONDS));
+        params.setEndTime(endTime);
+        var queryResult = this.listHostStatesByAgentNames(agentNames, params).getSource();
+        return processIntervalSizeBOS(startTime, intervalSeconds, execCal, queryResult);
+    }
+
+    private List<IntervalSizeBO<LocalDateTime, Double>> processIntervalSizeBOS(LocalDateTime startTime, int intervalSeconds, Function<CollectionHostStateBO, Double> execCal, ListObjResult<CollectionHostStateBO> queryResult) {
         if (queryResult == null || CollectionUtils.isEmpty(queryResult.getObjs())) {
             return new ArrayList<>();
         }

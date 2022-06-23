@@ -2,10 +2,12 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.config.CPCloudConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
@@ -19,13 +21,17 @@ import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
+import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -69,51 +75,13 @@ public class HostStateService {
     @Autowired
     private CsceneSpecialService csceneSpecialService;
 
+    @Autowired
+    private AgentService agentService;
 
-    /**
-     * 查询单个节点机器当前状态
-     *
-     * @return
-     */
-    // todo 老方法，待优化
-    public List<HostState> getHostStates(BaseSceneElementPageRequest pageRequest) {
-        log.info("{}", pageRequest);
-        pageRequest.ensure();
-        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
-        String sceneId = pageRequest.getSceneId();
-        List<String> elementIds = pageRequest.getElementIds();
-        HostStateQueryParams queryParams = new HostStateQueryParams();
-        queryParams.setNodeIds(elementIds);
-        queryParams.setPage(pageRequest.getPage());
-        queryParams.setPageSize(pageRequest.getPageSize());
-//
-        ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
+    @Autowired
+    private CPCloudConfig cpCloudConfig;
 
-        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
 
-        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
-            HostState hs = new HostState();
-            hs.setCpuFreq(hostStateBO.getCpuFreq());
-            hs.setCpuCount(hostStateBO.getCpuCount());
-            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
-
-            hs.setMemoryFree(hostStateBO.getMemoryFree());
-            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
-            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
-
-            hs.setDiskSpace(hostStateBO.getDiskSpace());
-            hs.setDiskPercent(hostStateBO.getDiskPercent());
-            //hs.setDiskUsed(hostStateBO.getDiskUsed());
-            hs.setDiskUnused(hostStateBO.getDiskUnused());
-
-            hs.setSceneId(hostStateBO.getSceneId());
-            hs.setElementId(hostStateBO.getNodeId());
-            hs.setTime(hostStateBO.getTime());
-            return hs;
-        }).collect(Collectors.toList());
-
-        return hostStates;
-    }
 
 
     public List<HostState> getHostStatesFromWazuh(String sceneId, String agentName, LocalDateTime startTime, LocalDateTime endTime) {
@@ -219,6 +187,27 @@ public class HostStateService {
         return processHostStateTrend(sceneIds, null, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
     }
 
+
+    /**
+     * 查询场景机器状态趋势
+     *
+     * @param trendRequest
+     * @return
+     */
+    public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
+        log.info("{}", trendRequest);
+        if (StringUtils.isBlank(cpCloudConfig.getCpIP())) {
+            log.error("cp cloud ip is null...");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
+        AgentRequest agentRequest = new AgentRequest();
+        agentRequest.setIp(cpCloudConfig.getCpIP());
+        List<Agent> agents = agentService.listAgents(agentRequest);
+        List<String> agentNames = agents.stream().map(Agent::getName).collect(Collectors.toList());
+
+        return processHostStateTrendByAgentNames(agentNames, trendRequest.getStartTime(), trendRequest.getEndTime(), trendRequest.getSegmentCount());
+    }
+
     private List<HostState> processHostStateTrend(List<String> sceneIds, List<String> elementIds, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
         // 默认值
         if (Objects.isNull(endTime)) {
@@ -236,16 +225,92 @@ public class HostStateService {
 
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
         Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
 
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgHostCpuPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
 
+        return doProcessHostStatesTrend(timeList, cpuResult, memResult, diskResult);
+    }
+
+    private List<HostState> processHostStateTrendByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
+        // 默认值
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        if (Objects.isNull(startTime)) {
+            // todo 默认时间间隔24小时
+            startTime = endTime.minusHours(hoursRange);
+        }
+
+        if (Objects.isNull(segmentCount)) {
+            segmentCount = 10;
+        }
+
+        Long intervalSeconds = SegmentCount2IntervalSecondsUtil.calculateIntervalSeconds(startTime, endTime, segmentCount);
+        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
+
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getCpuPercent());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getMemoryPercent());
+        ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getDiskPercent());
+
+        return doProcessHostStatesTrend(timeList, cpuResult, memResult, diskResult);
+    }
+
+
+    /**
+     * 查询单个节点机器当前状态
+     *
+     * @return
+     */
+    // todo 老方法，待优化
+    public List<HostState> doProcessHostStatesTrend(BaseSceneElementPageRequest pageRequest) {
+        log.info("{}", pageRequest);
+        pageRequest.ensure();
+        BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
+        String sceneId = pageRequest.getSceneId();
+        List<String> elementIds = pageRequest.getElementIds();
+        HostStateQueryParams queryParams = new HostStateQueryParams();
+        queryParams.setNodeIds(elementIds);
+        queryParams.setPage(pageRequest.getPage());
+        queryParams.setPageSize(pageRequest.getPageSize());
+//
+        ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStates(sceneId, queryParams);
+
+        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
+
+        List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
+            HostState hs = new HostState();
+            hs.setCpuFreq(hostStateBO.getCpuFreq());
+            hs.setCpuCount(hostStateBO.getCpuCount());
+            hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
+
+            hs.setMemoryFree(hostStateBO.getMemoryFree());
+            hs.setMemoryTotal(hostStateBO.getMemoryTotal());
+            hs.setMemoryPercent(Objects.nonNull(hostStateBO.getMemoryPercent()) ? NumberUtil.round(hostStateBO.getMemoryPercent(), 2).doubleValue() : hostStateBO.getMemoryPercent());
+
+            hs.setDiskSpace(hostStateBO.getDiskSpace());
+            hs.setDiskPercent(hostStateBO.getDiskPercent());
+            //hs.setDiskUsed(hostStateBO.getDiskUsed());
+            hs.setDiskUnused(hostStateBO.getDiskUnused());
+
+            hs.setSceneId(hostStateBO.getSceneId());
+            hs.setElementId(hostStateBO.getNodeId());
+            hs.setTime(hostStateBO.getTime());
+            return hs;
+        }).collect(Collectors.toList());
+
+        return hostStates;
+    }
+
+
+    private List<HostState> doProcessHostStatesTrend(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();
 
-        List<LocalDateTime> timeList = SegmentCount2IntervalSecondsUtil.generateTimeList(startTime, endTime, intervalSeconds);
         Map<LocalDateTime, HostState> hostStateMap = new LinkedHashMap<>();
         for (LocalDateTime time : timeList) {
             HostState hostState = new HostState();
