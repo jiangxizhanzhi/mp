@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -56,11 +57,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
     @Override
-    public PageInfo<UserOnlineRecordSummaryDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
+    public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
         req.ensure();
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
-        PageInfo pageInfo = new PageInfo(recordSummaryList);
+        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
+        PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
 
         List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlined(null);
 
@@ -69,6 +70,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         summaryDtos.forEach(r -> {
             UserOnlineReportDto reportDto = new UserOnlineReportDto();
             BeanUtils.copyProperties(r, reportDto);
+
+            reportDto.setTotalOnlineHours(0.0);
+            Long totalMins = r.getTotalOnlineMinutes();
+            if (totalMins > 0) {
+                double totalHrs = totalMins / 60.0;
+                reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
+            }
 
             // orgpaths
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(r.getUser());
@@ -157,5 +165,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
         return userOnlineCntDto;
     }
+
 
 }
