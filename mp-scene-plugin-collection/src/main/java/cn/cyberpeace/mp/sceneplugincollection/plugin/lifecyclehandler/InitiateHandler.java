@@ -240,8 +240,13 @@ public class InitiateHandler extends HandlerCommon {
         WazuhControl.ControlSyscheckParam syscheckParam = new WazuhControl.ControlSyscheckParam();
         syscheckParam.setFrequency(CollectionSingleton.collectionAppConfig.getSyscheckFrequency());
         syscheckParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+        // 设置agent系统采集间隔，默认15min
+        WazuhControl.ControlSyscollectorParam syscollectorParam = new WazuhControl.ControlSyscollectorParam();
+        syscollectorParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+        syscollectorParam.setInterval(CollectionSingleton.collectionAppConfig.getSyscollectorInterval());
 
         controlParam.setSyscheckParam(syscheckParam);
+        controlParam.setSyscollectorParam(syscollectorParam);
         controlParam.setProbeParams(customProbeParams);
         controlParam.setRegistryModifyParams(registryParams);
         controlParam.setFileModifyParams(fileParams);
