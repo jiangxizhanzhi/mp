@@ -8,7 +8,8 @@ public enum CloudErrorCode implements ErrorCode {
     INVALID_IP_OR_CIDR("MP-110702", "invalid_ip_or_cidr"),
     FIRE_RULES_DATA_TOO_LONG("MP-110703", "fire_rules_data_too_long"),
     ENABLE_RECORDING_ERROR("MP-110704", "enable_recording_error"),
-    NO_SPACE_RECORDING_ERROR("MP-110705", "no_space_recording_error");
+    NO_SPACE_RECORDING_ERROR("MP-110705", "no_space_recording_error"),
+    IP_CONFLICT("MP-110706", "ip_conflict");
 
     CloudErrorCode(String code, String message) {
         setCode(code, "sceneplugincloud.error_code." + message);

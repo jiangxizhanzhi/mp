@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -881,6 +883,15 @@ public class InitiateHandler extends HandlerCommon {
     public void initiate() {
         prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
 
+        // 标记已设置的ip的端口
+        if (getPluginHandler().getElementPortMap() != null) {
+            getPluginHandler().getElementPortMap().values().forEach(p -> {
+                if (p.getSrcPort() != null && StringUtils.isNotEmpty(p.getSrcPort().getIp())) {
+                    getHandlerUtils().addManualConfigIpPort(p.getSrcPort());
+                }
+            });
+        }
+
         var cloudElements = new ArrayList<>(getPluginHandler().getElementMap().values());
         // 使用节点name排序一下,这样节点类型相同时可以有个相对固定的初始化顺序,节点名称相同的情况暂不处理
         // 使初始化结果不受数据库数据顺序的影响
@@ -1018,6 +1029,16 @@ public class InitiateHandler extends HandlerCommon {
                     excludeIps.addAll(possibleDhcpIps);
                     for (var port : ports) {
                         if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
+                            if (getHandlerUtils().isManualConfigIpPort(port)) {
+                                // 如果人工配置的端口ip和dhcp出现冲突,可根据配置判断是否要进行端口重分配
+                                if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
+                                    String nodeName = port.getElement().getName();
+                                    String ip = port.getIp();
+                                    String conflictIps = StringUtils.join(new HashSet<>(possibleDhcpIps), ",");
+                                    throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT.format(nodeName, ip, conflictIps));
+                                }
+                            }
+
                             // 和dhcp冲突 需要重新分配
                             String newIp = changeIp.get(port.getIp());
                             if (StringUtils.isEmpty(newIp)) {

@@ -126,6 +126,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.default_core_router_name:Router}")
     private String defaultCoreRouteName;
 
+    @Value("${mp.sceneplugincloud.enable_reallocate_ip_ports:true}")
+    private String enableReallocateIpPorts;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

@@ -39,6 +39,20 @@ public class HandlerUtils {
 
     private final Map<String, CloudPluginSceneElementNetworkBO> portId2network = new ConcurrentHashMap<>();
 
+    private final Set<String> manualConfigIpPort = new HashSet<>();
+
+    public void addManualConfigIpPort(SceneElementPortBO port) {
+        if (port != null && port.getId() != null) {
+            this.manualConfigIpPort.add(port.getId());
+        }
+    }
+
+    public boolean isManualConfigIpPort(SceneElementPortBO port) {
+        if (port != null && port.getId() != null) {
+            return this.manualConfigIpPort.contains(port.getId());
+        }
+        return false;
+    }
 
     public CloudPluginSceneElementNetworkBO getNetworkByPort(SceneElementPortBO port) {
         return this.portId2network.get(port.getId());
