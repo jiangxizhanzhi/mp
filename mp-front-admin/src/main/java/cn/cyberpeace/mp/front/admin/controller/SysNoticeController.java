@@ -3,6 +3,10 @@ package cn.cyberpeace.mp.front.admin.controller;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
@@ -106,6 +110,7 @@ public class SysNoticeController {
 
     @ApiOperation("新增公告")
     @PostMapping
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
         return ServiceResult.success(noticeModel);
@@ -113,6 +118,7 @@ public class SysNoticeController {
 
     @ApiOperation("更新公告")
     @PatchMapping("/{id}")
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "修改公告", target = OpTargetEnums.NOTICE)
     public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.modify(id, noticeReq);
 
@@ -122,6 +128,7 @@ public class SysNoticeController {
 
     @ApiOperation("批量删除公告")
     @DeleteMapping
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
         return ServiceResult.success(result.getSource());
@@ -132,6 +139,7 @@ public class SysNoticeController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
     })
     @DeleteMapping("/{id}")
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> delete(@PathVariable String id) {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);

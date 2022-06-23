@@ -2,5 +2,6 @@ dependencies {
     implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
     implementation project(':mp-base')
     implementation project(':mp-common')
+    implementation project(':mp-devops-log')
     implementation project(':mp-front-admin')
 }

@@ -16,6 +16,8 @@ public enum OpTargetEnums {
     ORG("org"),
     // "资源"
     TARGET("target"),
+    // 菜单
+    MENU("menu"),
     //镜像
     IMAGE("image"),
     //快照
@@ -28,6 +30,10 @@ public enum OpTargetEnums {
     PROBE("probe"),
     // 采集模板
     COLLECTION_TEMPLATE("collection_template"),
+    // 公告
+    NOTICE("notice"),
+    // 配置
+    SYS_CONFIG("sys_config"),
     // 场景模板
     SCENE_CONFIG("scene_config"),
     // 场景
