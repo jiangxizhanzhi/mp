@@ -35,6 +35,24 @@ public class CsceneLogUtils {
     public static String START_SCENE = "start_scene";
     public static String DELETE_SCENE = "start_scene";
     public static String BATCH_DELETE_SCENES = "batch_delete_scenes";
+    public static String CLEAR_SCENE = "clear_scene";
+    public static String BATCH_CLEAR_SCENE = "batch_clear_scene";
+    public static String START_FLOW = "start_flow";
+    public static String BATCH_START_FLOW = "batch_start_flow";
+    public static String STOP_FLOW = "stop_flow";
+    public static String BATCH_STOP_FLOW = "batch_stop_flow";
+    public static String UPDATE_FLOW = "update_flow";
+    public static String SCENE_ELEMENT_SUSPEND = "scene_element_suspend";
+    public static String SCENE_ELEMENT_RESUME = "scene_element_resume";
+    public static String SCENE_ELEMENT_PAUSE = "scene_element_pause";
+    public static String SCENE_ELEMENT_UNPAUSE = "scene_element_unpause";
+    public static String SCENE_ELEMENT_RECREATE = "scene_element_recreate";
+    public static String SCENE_ELEMENT_RESTART = "scene_element_restart";
+
+    public static String SCENE_SUSPEND = "scene_suspend";
+    public static String SCENE_RESUME = "scene_resume";
+    public static String SCENE_PAUSE = "scene_pause";
+    public static String SCENE_UNPAUSE = "scene_unpause";
 
     public static void recordSceneLog(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         try {
@@ -81,13 +99,4 @@ public class CsceneLogUtils {
         return SnUtils.getRealRemoteIp(request);
     }
 
-    public interface DESC {
-        public static String CLEAR_SCENE = "clear_scene";
-        public static String BATCH_CLEAR_SCENE = "batch_clear_scene";
-        public static String START_FLOW = "start_flow";
-        public static String BATCH_START_FLOW = "batch_start_flow";
-        public static String STOP_FLOW = "stop_flow";
-        public static String BATCH_STOP_FLOW = "batch_stop_flow";
-        public static String UPDATE_FLOW = "update_flow";
-    }
 }
