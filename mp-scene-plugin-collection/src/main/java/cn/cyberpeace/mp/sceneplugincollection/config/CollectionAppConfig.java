@@ -82,6 +82,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.syscheck_frequency:60}")
     private String syscheckFrequency;
 
+    @Value("${mp.sceneplugincollection.syscollector_interval:15m}")
+    private String syscollectorInterval;
+
     @Value("${mp.sceneplugincollection.recursion_level:3}")
     private Integer fileRecursionLevel;
 
