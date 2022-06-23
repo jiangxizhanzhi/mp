@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.cscene.util;
 
+import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
@@ -32,12 +36,18 @@ public class CsceneLogUtils {
     public static String delete_scene = "start_scene";
     public static String batch_delete_scenes = "batch_delete_scenes";
 
-    public static void recordSceneLog(String sceneName, OpTypeEnums opType, String desc) {
+    public static void recordSceneLog(String sceneName, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             OperationLogRequest logModel = new OperationLogRequest();
-            var user = UserCommon.getCurrentUser();
+            UserModel user = UserCommon.getCurrentUser();
             if (user == null) {
-                log.info("failed to record audit log , because user is null , sceneName is {},opType is {},desc is {}", sceneName, opType.ordinal(), desc);
+                UserService userService = BeanCommon.getBean(UserService.class);
+                if (context != null) {
+                    user = userService.getUserDtoNoRestrict(context.getAccessUserId());
+                }
+            }
+            if (user == null) {
+                log.info("failed to record audit log , because user is null , sceneName is {},opType is {},desc is {},context is {}", sceneName, opType.ordinal(), desc, JsonCommon.stringify(context));
                 return;
             }
             logModel.setUserId(user.getId());
