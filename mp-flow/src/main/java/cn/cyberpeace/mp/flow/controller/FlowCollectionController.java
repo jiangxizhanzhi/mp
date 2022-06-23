@@ -103,7 +103,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("删除集合关联信息")
-    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @DeleteMapping("/collection_rel")
     public ServiceResult<Integer> delCollectionRel(@RequestBody @Validated DelFlowCollectionRelRequest request) {
         return flowCollectionService.delCollectionRel(request);
