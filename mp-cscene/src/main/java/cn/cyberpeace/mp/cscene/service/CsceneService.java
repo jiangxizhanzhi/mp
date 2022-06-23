@@ -26,6 +26,8 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
+import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -248,6 +250,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     scenePluginCloudSceneConfigService.updateEnableRecording(sceneConfigId, csceneBO.getEnableRecording());
                 }
             }
+            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG);
             if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
                 CsceneBO result = new CsceneBO();
                 result.fromModel(serviceResult.getSource().getObj());
@@ -262,6 +265,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
+            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG);
             return new ServiceResult<>(csceneHandler.toData());
         }
     }
