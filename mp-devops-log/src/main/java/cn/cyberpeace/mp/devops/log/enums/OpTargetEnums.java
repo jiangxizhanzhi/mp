@@ -24,6 +24,10 @@ public enum OpTargetEnums {
     REALEQUIPMENT("real_equipment"),
     //服务
     SERVICE("service"),
+    // 探针
+    PROBE("probe"),
+    // 采集模板
+    COLLECTION_TEMPLATE("collection_template"),
     DEFAULT("");
 
 

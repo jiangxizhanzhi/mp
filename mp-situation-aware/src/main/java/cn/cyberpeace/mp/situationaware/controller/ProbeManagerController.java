@@ -2,6 +2,10 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -92,6 +96,7 @@ public class ProbeManagerController {
      */
     @PostMapping
     @ApiOperation(value = "新增自定义探针")
+    @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.CREATE, title = "创建探针", target = OpTargetEnums.PROBE)
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
@@ -106,6 +111,7 @@ public class ProbeManagerController {
 
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
+    @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
         String oldMd5 = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
@@ -134,6 +140,7 @@ public class ProbeManagerController {
 
     @DeleteMapping()
     @ApiOperation(value = "删除探针")
+    @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.DELETE, title = "删除探针", target = OpTargetEnums.PROBE)
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
 
         int cnt = probeService.deleteByIds(Arrays.asList(ids));
