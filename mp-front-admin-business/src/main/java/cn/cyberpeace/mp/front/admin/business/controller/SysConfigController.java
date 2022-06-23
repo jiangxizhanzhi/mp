@@ -8,6 +8,10 @@ import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.business.service.SysConfigCheckService;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.model.SysConfigModel;
@@ -18,7 +22,13 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
@@ -60,6 +70,7 @@ public class SysConfigController {
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
     @PostMapping("/update/bykeyname")
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
         log.info("updateConfig:{}", updateConfig);
         checkService.updateCheck(Arrays.asList(updateConfig));
@@ -76,6 +87,7 @@ public class SysConfigController {
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
     @PostMapping("/updateall")
+    @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
         log.info("configs:{}", configs);
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
