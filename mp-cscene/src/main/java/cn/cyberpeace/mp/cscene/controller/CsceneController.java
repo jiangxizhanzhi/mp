@@ -187,11 +187,7 @@ public class CsceneController implements BaseModelListControllerBase {
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
-        String sceneName = StringUtils.EMPTY;
-        if (result != null && result.getData() != null) {
-            sceneName = result.getData().getName();
-        }
-        CsceneLogUtils.recordSceneLog(sceneName, OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.start_scene, request.getContext());
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.start_scene, request.getContext());
         return result;
     }
 
