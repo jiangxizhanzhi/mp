@@ -74,6 +74,8 @@ public class SysActivationController {
             content = new ActivationResponse();
             content.setIsActived(0);
         }
+
+        content.setIsActived(1);
         return ServiceResult.success(content);
     }
 
