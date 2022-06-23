@@ -36,9 +36,9 @@ public class CsceneLogUtils {
     public static String delete_scene = "start_scene";
     public static String batch_delete_scenes = "batch_delete_scenes";
 
-    public static void recordSceneLog(String sceneName, OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
+    public static void recordSceneLog(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         try {
-            OperationLogRequest logModel = getOperationLogRequest(sceneName, null, opType, opTargetEnums, desc, context);
+            OperationLogRequest logModel = getOperationLogRequest(opType, opTargetEnums, desc, context);
             if (logModel == null) {
                 return;
             }
@@ -50,21 +50,7 @@ public class CsceneLogUtils {
         }
     }
 
-    public static void recordNodeLog(String sceneName, String nodeName, OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
-        try {
-            OperationLogRequest logModel = getOperationLogRequest(sceneName, nodeName, opType, opTargetEnums, desc, context);
-            if (logModel == null) {
-                return;
-            }
-            // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
-        } catch (Exception e) {
-            log.error("failed to record audit log", e);
-        }
-    }
-
-    private static OperationLogRequest getOperationLogRequest(String sceneName, String nodeName, OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
+    private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         OperationLogRequest logModel = new OperationLogRequest();
         UserModel user = null;
         if (context != null) {
@@ -72,7 +58,7 @@ public class CsceneLogUtils {
             user = userService.getUserDtoNoRestrict(context.getAccessUserId());
         }
         if (user == null) {
-            log.info("failed to record audit log , because user is null , sceneName is {},opType is {},desc is {},context is {}", sceneName, opType.ordinal(), desc, JsonCommon.stringify(context));
+            log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
             return null;
         }
         logModel.setUserId(user.getId());
@@ -84,8 +70,7 @@ public class CsceneLogUtils {
         logModel.setOpType(opType.ordinal());
         logModel.setOpTarget(MessageCommon.get(opTargetEnums.getCode()));
         logModel.setDescription(desc);
-        String target = nodeName == null ? sceneName : sceneName + "-" + nodeName;
-        logModel.setTitle(MessageCommon.get("cscene.oplog.desc." + desc, target));
+        logModel.setTitle(MessageCommon.get("cscene.oplog.desc." + desc));
         return logModel;
     }
 
