@@ -250,7 +250,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     scenePluginCloudSceneConfigService.updateEnableRecording(sceneConfigId, csceneBO.getEnableRecording());
                 }
             }
-            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG);
+            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, context);
             if (serviceResult != null && serviceResult.getSource() != null && serviceResult.getSource().getObj() != null) {
                 CsceneBO result = new CsceneBO();
                 result.fromModel(serviceResult.getSource().getObj());
@@ -265,7 +265,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             String sceneName = getSceneName(csceneBO.getSceneConfig());
             csceneBO.setName(sceneName == null ? StringUtils.EMPTY : sceneName);
             csceneHandler.save();
-            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG);
+            CsceneLogUtils.recordSceneLog(csceneBO.getName(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, context);
             return new ServiceResult<>(csceneHandler.toData());
         }
     }
