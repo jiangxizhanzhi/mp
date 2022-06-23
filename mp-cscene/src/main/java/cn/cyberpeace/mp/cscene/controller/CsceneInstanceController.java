@@ -26,6 +26,9 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
@@ -205,13 +208,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
-        return modelService.deleteById(request.getId(), true, request.getContext()).asResult();
+        var result = modelService.deleteById(request.getId(), true, request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.delete_scene, request.getContext());
+        return result;
     }
 
     @ApiOperation("批量删除场景实例")
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody CsceneInstancesActionRequest request) {
-        return modelService.bulkDeleteByIds(request.getIds(), true, request.getContext()).asResult();
+        var result = modelService.bulkDeleteByIds(request.getIds(), true, request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.batch_delete_scenes, request.getContext());
+        return result;
     }
 
     @ApiOperation("清理场景实例")
@@ -222,13 +229,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> clear(@RequestParam(required = false) String id,
                                         @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
-        return modelService.clearById(request.getId(), request.getContext()).asResult();
+        var result = modelService.clearById(request.getId(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.DESC.CLEAR_SCENE, request.getContext());
+        return result;
     }
 
     @ApiOperation("批量清理场景实例")
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstancesActionRequest request) {
-        return modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
+        var result = modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.DESC.BATCH_CLEAR_SCENE, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景实例启动节点流量")
@@ -244,8 +255,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                             @RequestParam(required = false) String sourceIp,
                                             @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
         request = formatNodeFlowActionRequest(request, id, nodeId, flowId, sourceIp);
-        return modelService.startFlow(request.getId(), request.getNodeId(), request.getFlowId(), request.getSourceIp(),
+        var result = modelService.startFlow(request.getId(), request.getNodeId(), request.getFlowId(), request.getSourceIp(),
                 request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.DESC.START_FLOW, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景实例停止节点流量")
@@ -260,8 +273,10 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                            @RequestParam(required = false) String flowId,
                                            @RequestBody(required = false) CsceneInstanceNodeFlowActionRequest request) {
         request = formatNodeFlowActionRequest(request, id, nodeId, flowId, null);
-        return modelService.stopFlow(request.getId(), request.getNodeId(), request.getFlowId(),
+        var result = modelService.stopFlow(request.getId(), request.getNodeId(), request.getFlowId(),
                 request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.STOP, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.DESC.STOP_FLOW, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景更新流量任务参数")
@@ -270,23 +285,28 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         if (request == null || request.getId() == null || request.getNodeId() == null || request.getFlowId() == null) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        return modelService.updateFlowParams(request.getId(), request.getNodeId(),
-                        request.getFlowId(), request.getSourceIp(), request.getContext())
-                .asResult();
+        var result = modelService.updateFlowParams(request.getId(), request.getNodeId(),
+                request.getFlowId(), request.getSourceIp(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.UPDATE, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.DESC.UPDATE_FLOW, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景实例批量启动节点流量")
     @PostMapping(value = "/start_flows")
     public ServiceResult<Boolean> startFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
+        var result = modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
                 request.getContext(), request.getRunType()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.DESC.BATCH_START_FLOW, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景实例批量停止节点流量")
     @PostMapping(value = "/stop_flows")
     public ServiceResult<Boolean> stopFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
-        return modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
+        var result = modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
                 request.getContext()).asResult();
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.STOP, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.DESC.BATCH_STOP_FLOW, request.getContext());
+        return result;
     }
 
     @ApiOperation("场景实例查询节点流量执行记录")
