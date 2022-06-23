@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface UserOnlineRecordService extends BaseModelService<UserOnlineRecordModel, QueryParams> {
 
-    PageInfo<UserOnlineRecordSummaryDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
+    PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req);
 
     /**
      * 判断在线的依据：

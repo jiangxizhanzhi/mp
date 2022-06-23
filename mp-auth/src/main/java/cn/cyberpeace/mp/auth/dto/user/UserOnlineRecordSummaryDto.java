@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @Description:
@@ -10,6 +12,8 @@ import lombok.Data;
  * @Date：2021/10/25 17:37
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserOnlineRecordSummaryDto {
 
@@ -22,7 +26,7 @@ public class UserOnlineRecordSummaryDto {
     @ApiModelProperty(value = "姓名")
     private String name;
 
-    @ApiModelProperty(value = "累计在线时长（小时）")
-    private String totalOnlineHours;
+    @ApiModelProperty(value = "累计在线时长（分钟）")
+    private Long totalOnlineMinutes;
 
 }
