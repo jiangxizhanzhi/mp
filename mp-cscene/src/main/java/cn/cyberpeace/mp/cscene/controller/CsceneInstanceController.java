@@ -518,7 +518,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.unpause(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
         return result;
     }
 
@@ -544,7 +544,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                               @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.resume(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_RESUME, request.getContext());
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_RESUME, request.getContext());
         return result;
     }
 
@@ -559,7 +559,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.restartElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
+        CsceneLogUtils.recordSceneLog(OpTypeEnums.UPDATE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
         return result;
     }
 
