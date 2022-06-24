@@ -206,4 +206,10 @@ public class CsceneLogUtils {
         return SnUtils.getRealRemoteIp(request);
     }
 
+    private static String getUserName() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        return String.valueOf(request.getAttribute(LogConstant.USER_NAME_KEY));
+    }
 }

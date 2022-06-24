@@ -46,6 +46,7 @@ public class InitiateHandler extends HandlerCommon {
         public static final EventProcess INITIATE_IP_POOL = new EventProcess("initiate_ip_pool", "sceneplugincloud.event.initiate_ip_pool");
         public static final EventProcess INITIATE_PORTS = new EventProcess("initiate_ports", "sceneplugincloud.event.initiate_ports");
         public static final EventProcess REALLOCATE_IPS = new EventProcess("reallocate_ips", "sceneplugincloud.event.reallocate_ips");
+        public static final EventProcess PORT_CHECK = new EventProcess("port_check", "sceneplugincloud.event.port_check");
     }
 
     public static class ElementProcess {
@@ -973,6 +974,13 @@ public class InitiateHandler extends HandlerCommon {
         List<CloudPluginSceneElementBO> networkElements = cloudElements.stream()
                 .filter(c -> CollectionUtils.isNotEmpty(c.getDeriveNetworks()))
                 .collect(Collectors.toList());
+        if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
+            if (CollectionUtils.isNotEmpty(networkElements)) {
+                runSceneProgress(SceneProcess.PORT_CHECK, () -> {
+                    portCheck(networkElements);
+                });
+            }
+        }
         if (CollectionUtils.isNotEmpty(networkElements)) {
             runSceneProgress(SceneProcess.REALLOCATE_IPS, () -> {
                 reallocateIpPorts(networkElements);
@@ -1029,16 +1037,6 @@ public class InitiateHandler extends HandlerCommon {
                     excludeIps.addAll(possibleDhcpIps);
                     for (var port : ports) {
                         if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
-                            if (getHandlerUtils().isManualConfigIpPort(port)) {
-                                // 如果人工配置的端口ip和dhcp出现冲突,可根据配置判断是否要进行端口重分配
-                                if (!Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getEnableReallocateIpPorts())) {
-                                    String nodeName = port.getElement().getName();
-                                    String ip = port.getIp();
-                                    String conflictIps = StringUtils.join(new HashSet<>(possibleDhcpIps), ",");
-                                    throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT.format(nodeName, ip, conflictIps));
-                                }
-                            }
-
                             // 和dhcp冲突 需要重新分配
                             String newIp = changeIp.get(port.getIp());
                             if (StringUtils.isEmpty(newIp)) {
@@ -1075,6 +1073,44 @@ public class InitiateHandler extends HandlerCommon {
                             }
                         });
                     }
+                } catch (MpRuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    log.error("reallocate ip error , network is {} ", JsonCommon.stringify(network), e);
+                }
+            }
+        }
+    }
+
+    private void portCheck(List<CloudPluginSceneElementBO> networkElements) {
+        for (CloudPluginSceneElementBO element : networkElements) {
+            for (ConnectedNetworkBO network : element.getDeriveNetworks()) {
+                try {
+                    if (Boolean.TRUE.equals(network.getNetwork().getExternal())) {
+                        continue;
+                    }
+                    List<SceneElementPortBO> ports = new ArrayList<>();
+                    ports.addAll(network.getFromPorts());
+                    ports.addAll(network.getToPorts());
+                    if (CollectionUtils.isEmpty(ports)) {
+                        continue;
+                    }
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
+                    excludeIps.addAll(possibleDhcpIps);
+                    for (var port : ports) {
+                        if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
+                            if (getHandlerUtils().isManualConfigIpPort(port)) {
+                                // 如果人工配置的端口ip和dhcp出现冲突,可根据配置判断是否要进行端口重分配
+                                String nodeName = port.getElement().getName();
+                                String ip = port.getIp();
+                                String conflictIps = StringUtils.join(new HashSet<>(possibleDhcpIps), ",");
+                                throw new MpRuntimeException(CloudErrorCode.IP_CONFLICT.format(nodeName, ip, conflictIps));
+                            }
+                        }
+                    }
+                } catch (MpRuntimeException e) {
+                    throw e;
                 } catch (Exception e) {
                     log.error("reallocate ip error , network is {} ", JsonCommon.stringify(network), e);
                 }
