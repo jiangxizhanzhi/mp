@@ -43,6 +43,7 @@ public class SysCtlService {
 
         // update system timestamp
         SysActivCtlModel oldActivCtlModel = getValidCtlModel();
+        log.info("updateSysTs, oldActivCtlModel:{}", oldActivCtlModel);
         // 判断系统是否已经注册，未激活不统计运行时长
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
             // not null, to update  example: oldTs 1644778431000
@@ -62,6 +63,8 @@ public class SysCtlService {
                 newActivCtlModel.setSysTimestamp(currTs);
 
                 Long newRunSeconds = diffSeconds + oldRunSeconds;
+                log.info("newRunSeconds:{}, diffSeconds:{}, oldRunSeconds:{}", newRunSeconds, diffSeconds, oldRunSeconds);
+
                 newActivCtlModel.setSysRunSeconds(EncryptUtils.desEncrypt(String.valueOf(newRunSeconds)));
                 // update sysActivCtlModel
                 sysActivCtlService.update(newActivCtlModel);

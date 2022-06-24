@@ -137,6 +137,7 @@ public class SysActivationService {
             ACTIVATION_CONTENT = activationResponse;
         }
 
+        log.info("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
 
         return ACTIVATION_CONTENT;
@@ -235,7 +236,7 @@ public class SysActivationService {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
             //默认状态为未激活
             //ACTIVATION_CONTENT.setIsActived(0);
-
+            log.info("LocalDate.now: {}", LocalDate.now());
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
 
@@ -245,7 +246,7 @@ public class SysActivationService {
             boolean isExpired = !LocalDate.now().isBefore(expireDate);
 
             SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
-
+            log.info("sysActivCtlModel:{}", sysActivCtlModel);
             if (Objects.isNull(sysActivCtlModel)) {
                 ACTIVATION_CONTENT.setIsActived(0);
                 return;
@@ -265,6 +266,7 @@ public class SysActivationService {
                     if (StringUtils.isNotBlank(sysLifeTimeSecondsStr) && StringUtils.isNotBlank(currentRunSecondsStr)) {
                         Long currentRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(currentRunSecondsStr));
                         Long sysLifeTimeSeconds = Long.valueOf(EncryptUtils.desDecrypt(sysLifeTimeSecondsStr));
+                        log.info("currentRunSeconds:{}, sysLifeTimeSeconds:{}", currentRunSeconds, sysLifeTimeSeconds);
                         if (currentRunSeconds > sysLifeTimeSeconds) {
                             isRunSecondsExceeded = true;
                         }
