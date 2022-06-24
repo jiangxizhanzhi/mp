@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.devops.cluster.utils;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class FileUtils {
 
@@ -41,17 +44,11 @@ public class FileUtils {
         return fileList;
     }
 
-    /**
-     *
-     * @param multipartFiles
-     * @return
-     * @throws IOException
-     */
-    public static Map<String,File> transferToFileMap(List<MultipartFile> multipartFiles) throws IOException {
+    public static List<File> transferToFileList(List<MultipartFile> multipartFiles) throws IOException {
         if (CollectionUtils.isEmpty(multipartFiles)){
-            return new HashMap<>();
+            return Lists.newArrayList();
         }
-        Map<String,File> fileList = new HashMap<>();
+        List<File> fileList = Lists.newArrayList();
         String originalFilename;
         String prefix;
         final File sysTempDir = new File(System.getProperty("java.io.tmpdir"));
@@ -75,7 +72,7 @@ public class FileUtils {
             // MultipartFile to File
             multipartFile.transferTo(file);
             file.deleteOnExit();
-            fileList.put(originalFilename,file);
+            fileList.add(file);
         }
         return fileList;
     }

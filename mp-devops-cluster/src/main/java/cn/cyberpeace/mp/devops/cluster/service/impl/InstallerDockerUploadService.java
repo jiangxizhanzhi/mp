@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 服务管理-Docker文件上传
@@ -41,9 +40,9 @@ public class InstallerDockerUploadService extends BaseUploadService {
 
     @Override
     protected void uploadFile() {
-        Map<String, File> fileList = null;
+        List<File> fileList = null;
         try {
-            fileList = FileUtils.transferToFileMap(Collections.singletonList(file));
+            fileList = FileUtils.transferToFileList(Collections.singletonList(file));
         } catch (IOException e) {
             log.error("file transfer error",e);
         }

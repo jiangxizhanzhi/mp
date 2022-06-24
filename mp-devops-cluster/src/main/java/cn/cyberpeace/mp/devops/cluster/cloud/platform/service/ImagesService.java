@@ -10,16 +10,12 @@ import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -76,22 +72,18 @@ public class ImagesService extends BaseCpService {
         return device;
     }
 
-
     /**
      * 上传文件
-     * @param fileMap
+     * @param fileList
      * @param type :  image or installer
      * @return
      */
-    public BaseCloudPlatformResult upload(Map<String,File> fileMap, String type){
-        if (MapUtils.isEmpty(fileMap)){
+    public BaseCloudPlatformResult upload(List<File> fileList, String type){
+        if (CollectionUtils.isEmpty(fileList)){
             return null;
         }
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        fileMap.entrySet().stream().forEach(entry -> builder.addBinaryBody("file",  entry.getValue(),ContentType.DEFAULT_BINARY,entry.getKey()));
-        builder.setMode(HttpMultipartMode.RFC6532);
         try {
-            BaseCloudPlatformResult result = super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, builder.build(), BaseCloudPlatformResult.class);
+            BaseCloudPlatformResult result = super.sendFormDataPost(CPCLOUD_DEVICE + URL_VERSION + "/file_upload?type=" + type, fileList, BaseCloudPlatformResult.class);
             super.checkResult(result);
             return result;
         } catch (IOException e) {
