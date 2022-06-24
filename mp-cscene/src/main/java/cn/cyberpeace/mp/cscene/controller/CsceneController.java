@@ -178,7 +178,7 @@ public class CsceneController implements BaseModelListControllerBase {
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.START_SCENE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }
 
@@ -193,7 +193,7 @@ public class CsceneController implements BaseModelListControllerBase {
         request = formatCreateInstanceRequest(request, id);
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createAppInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.START_SCENE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(id, OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }
 

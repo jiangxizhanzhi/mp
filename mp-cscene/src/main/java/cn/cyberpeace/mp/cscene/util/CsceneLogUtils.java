@@ -6,6 +6,8 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.service.CsceneLogService;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -54,6 +56,70 @@ public class CsceneLogUtils {
     public static String SCENE_PAUSE = "scene_pause";
     public static String SCENE_UNPAUSE = "scene_unpause";
 
+    public static void recordSceneConfigLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, true);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
+
+    public static void recordSceneInstanceLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, false);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
+
+    public static void recordSceneNodeLog(String csceneId, String nodeId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, nodeId);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
+
+    public static void recordSceneFlowLog(String csceneId, String nodeId, String flowId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, nodeId, flowId);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
+
     public static void recordSceneLog(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         try {
             OperationLogRequest logModel = getOperationLogRequest(opType, opTargetEnums, desc, context);
@@ -66,6 +132,34 @@ public class CsceneLogUtils {
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
+    }
+
+    private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, String target, String content, String desc, CsceneContextBO context) {
+        OperationLogRequest logModel = new OperationLogRequest();
+        UserModel user = null;
+        if (context != null) {
+            UserService userService = BeanCommon.getBean(UserService.class);
+            user = userService.getUserDtoNoRestrict(context.getAccessUserId());
+        }
+        if (user == null) {
+            user = UserCommon.getCurrentUser();
+            if (user == null) {
+                log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
+                return null;
+            }
+        }
+        logModel.setUserId(user.getId());
+        logModel.setUserName(user.getUsername());
+        //操作类型
+        logModel.setOpModule(OpModuleEnums.SCENES.ordinal());
+        logModel.setUserType(LogConstant.USER_TYPE_USER);
+        logModel.setOpIp(getIp());
+        logModel.setOpType(opType.ordinal());
+        logModel.setOpTarget(target);
+        logModel.setDescription(desc);
+        logModel.setTitle(MessageCommon.get("cscene.oplog.desc." + desc));
+        logModel.setContent(content);
+        return logModel;
     }
 
     private static OperationLogRequest getOperationLogRequest(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {

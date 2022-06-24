@@ -29,6 +29,8 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
     private List<CsceneInstanceBO> testScenes;
     @ApiModelProperty(value = "场景模板应用实例")
     private List<CsceneInstanceBO> appScenes;
+    @ApiModelProperty(value = "场景上下文属性")
+    private CsceneContextBO context;
 
     @Override
     public CsceneModel createModel() {
