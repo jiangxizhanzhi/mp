@@ -29,8 +29,11 @@ import java.util.Map;
 @Service
 public class CsceneLogService {
     private static final String DESC_SCENE = "cscene.oplog.desc.scene";
+    private static final String DESC_SCENE_CONFIG = "cscene.oplog.desc.scene_config";
     private static final String DESC_SCENE_ELEMENT = "cscene.oplog.desc.scene_element";
     private static final String DESC_SCENE_ELEMENT_FLOW = "cscene.oplog.desc.scene_element_flow";
+    private static final String BATCH_SCENES = "cscene.oplog.desc.batch_scenes";
+    private static final String BATCH_SCENE_CONFIGS = "cscene.oplog.desc.batch_scene_configs";
 
     @Resource
     private CsceneMapper csceneMapper;
@@ -54,9 +57,9 @@ public class CsceneLogService {
         data.put("ids", csceneIds);
         String content = JsonCommon.stringify(data);
         if (config) {
-            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, content);
+            return new LogDetail(MessageCommon.get(BATCH_SCENE_CONFIGS), content);
         } else {
-            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENES, content);
+            return new LogDetail(MessageCommon.get(BATCH_SCENES), content);
         }
     }
 
@@ -70,7 +73,7 @@ public class CsceneLogService {
     }
 
     public LogDetail getLogDetail(String csceneId, String nodeId, String flowId) {
-        List<String> target = this.getTarget(csceneId, nodeId);
+        List<String> target = this.getTarget(csceneId, nodeId, flowId);
         Map<String, String> data = new HashMap<>();
         data.put("id", csceneId);
         data.put("nodeId", nodeId);
@@ -83,7 +86,7 @@ public class CsceneLogService {
         if (config) {
             var model = csceneMapper.get(csceneId);
             if (model != null) {
-                return Arrays.asList(MessageCommon.get(DESC_SCENE, model.getName()));
+                return Arrays.asList(MessageCommon.get(DESC_SCENE_CONFIG, model.getName()));
             }
             return new ArrayList<>();
         } else {

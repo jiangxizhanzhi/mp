@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.auth.service.init;
 
 import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.AuthenticationConfigModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.AuthenticationConfigMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -13,7 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -25,7 +25,9 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class AuthInitService implements ApplicationListener<ContextRefreshedEvent> {
+public class AuthInitService implements ApplicationListener<ContextRefreshedEvent>, EnvironmentAware {
+
+    private Environment environment;
 
     @Autowired
     private AuthenticateConfig authenticateConfig;
@@ -57,11 +59,17 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
         authenticateConfig.setJwtSecret(jwtSecret);
 
         // 更新admin的tokenSecret
-        var updateUser = new UserModel();
-        updateUser.setId(AuthConstant.ROOT_USER_ID);
-        updateUser.initDefault("tokenSecret");
-        userService.update(updateUser);
-
+        /*String env = environment.getProperty("spring.profiles.active");
+        if (StringUtils.isNotBlank(env) && "prod".equals(env)) {
+            var updateUser = new UserModel();
+            updateUser.setId(AuthConstant.ROOT_USER_ID);
+            updateUser.initDefault("tokenSecret");
+            userService.update(updateUser);
+        }*/
     }
 
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 }

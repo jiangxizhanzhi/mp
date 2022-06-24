@@ -130,8 +130,15 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        return modelService.sync(csceneBO, null).asResult();
+        var result = modelService.sync(csceneBO, null).asResult();
+        if (isUpdate) {
+            CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
+        } else {
+            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+        }
+        return result;
     }
 
     @ApiOperation("克隆指定id场景模板")
@@ -142,7 +149,9 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
                                          @RequestBody(required = false) CsceneActionRequest request) {
         request = formatActionRequest(request, id);
-        return modelService.clone(request.getId(), null).asResult();
+        var result = modelService.clone(request.getId(), null).asResult();
+        CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, request.getContext());
+        return result;
     }
 
     @ApiOperation("删除场景模板")

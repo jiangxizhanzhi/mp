@@ -33,6 +33,7 @@ import oshi.util.ExecutingCommand;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -138,6 +139,7 @@ public class SysActivationService {
             ACTIVATION_CONTENT = activationResponse;
         }
 
+        log.info("before processActived status: {}", ACTIVATION_CONTENT);
         processActivedStatus();
 
         return ACTIVATION_CONTENT;
@@ -236,7 +238,7 @@ public class SysActivationService {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
             //默认状态为未激活
             //ACTIVATION_CONTENT.setIsActived(0);
-
+            log.info("LocalDate.now: {}", LocalDate.now());
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
 
@@ -246,7 +248,7 @@ public class SysActivationService {
             boolean isExpired = !LocalDate.now().isBefore(expireDate);
 
             SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
-
+            log.info("sysActivCtlModel:{}", sysActivCtlModel);
             if (Objects.isNull(sysActivCtlModel)) {
                 ACTIVATION_CONTENT.setIsActived(0);
                 return;
@@ -258,14 +260,20 @@ public class SysActivationService {
                     log.info("System is not activated right now!");
                     // 未激活，但是CONTENT有值，说明是升级的场景，则还是以CONTENT内容为主
                 } else {
-                    String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
-                    LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
-                    Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
-                    Long calculatedRunSeconds = duration.toSeconds();
-
-                    if (sysActivCtlModel.getSysRunSeconds() > calculatedRunSeconds) {
-                        isRunSecondsExceeded = true;
+                    //String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
+                    //LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
+                    //Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
+                    String sysLifeTimeSecondsStr = sysActivCtlModel.getSysLifetime();
+                    String currentRunSecondsStr = sysActivCtlModel.getSysRunSeconds();
+                    if (StringUtils.isNotBlank(sysLifeTimeSecondsStr) && StringUtils.isNotBlank(currentRunSecondsStr)) {
+                        Long currentRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(currentRunSecondsStr));
+                        Long sysLifeTimeSeconds = Long.valueOf(EncryptUtils.desDecrypt(sysLifeTimeSecondsStr));
+                        log.info("currentRunSeconds:{}, sysLifeTimeSeconds:{}", currentRunSeconds, sysLifeTimeSeconds);
+                        if (currentRunSeconds > sysLifeTimeSeconds) {
+                            isRunSecondsExceeded = true;
+                        }
                     }
+
                 }
             }
 
@@ -369,6 +377,11 @@ public class SysActivationService {
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
+
+        LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
+        Long lifeTimeSeconds = duration.toSeconds();
+        updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
 
         String activeDateStr = LocalDate.now().format(dateFormatter);
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
