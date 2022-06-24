@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +53,7 @@ public class CsceneLogService {
     public LogDetail getLogDetail(List<String> csceneIds, boolean config) {
         LogContent logContent = new LogContent();
         logContent.setIds(csceneIds);
-        String content = JsonCommon.stringify(logContent);
+        String content = JSON.toJSONString(logContent);
         if (config) {
             return new LogDetail(MessageCommon.get(BATCH_SCENE_CONFIGS), content);
         } else {
@@ -65,7 +66,7 @@ public class CsceneLogService {
         LogContent logContent = new LogContent();
         logContent.setId(csceneId);
         logContent.setNodeId(nodeId);
-        String content = JsonCommon.stringify(logContent);
+        String content = JSON.toJSONString(logContent);
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
@@ -77,7 +78,7 @@ public class CsceneLogService {
         if (flowId != null) {
             logContent.setFlowId(flowId);
         }
-        String content = JsonCommon.stringify(logContent);
+        String content = JSON.toJSONString(logContent);
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
