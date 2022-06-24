@@ -31,7 +31,9 @@ import org.springframework.stereotype.Service;
 import oshi.util.ExecutingCommand;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -375,6 +377,11 @@ public class SysActivationService {
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
+
+        LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
+        Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
+        Long lifeTimeSeconds = duration.toSeconds();
+        updateSysActivCtlModel.setSysLifetime(EncryptUtils.desEncrypt(String.valueOf(lifeTimeSeconds)));
 
         String activeDateStr = LocalDate.now().format(dateFormatter);
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
