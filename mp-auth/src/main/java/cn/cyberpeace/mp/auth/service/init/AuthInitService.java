@@ -1,9 +1,7 @@
 package cn.cyberpeace.mp.auth.service.init;
 
 import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.AuthenticationConfigModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.AuthenticationConfigMapper;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -61,13 +59,13 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
         authenticateConfig.setJwtSecret(jwtSecret);
 
         // 更新admin的tokenSecret
-        String env = environment.getProperty("spring.profiles.active");
+        /*String env = environment.getProperty("spring.profiles.active");
         if (StringUtils.isNotBlank(env) && "prod".equals(env)) {
             var updateUser = new UserModel();
             updateUser.setId(AuthConstant.ROOT_USER_ID);
             updateUser.initDefault("tokenSecret");
             userService.update(updateUser);
-        }
+        }*/
     }
 
     @Override
