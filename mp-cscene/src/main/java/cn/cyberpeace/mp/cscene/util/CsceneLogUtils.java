@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -58,6 +60,26 @@ public class CsceneLogUtils {
     public static String SCENE_RESUME = "scene_resume";
     public static String SCENE_PAUSE = "scene_pause";
     public static String SCENE_UNPAUSE = "scene_unpause";
+
+    public static void recordSceneConfigLog(CsceneBO csceneBO, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            if (csceneBO == null) {
+                log.info("cscene bo is null");
+                return;
+            }
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneBO.getId(), true);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
 
     public static void recordSceneConfigLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
@@ -177,8 +199,17 @@ public class CsceneLogUtils {
         if (user == null) {
             user = UserCommon.getCurrentUser();
             if (user == null) {
-                log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
-                return null;
+                String userName = getUserName();
+                String userId = getUserId();
+                if (StringUtils.isNotEmpty(userName)) {
+                    user = new UserModel();
+                    user.setUsername(userName);
+                    user.setId(userId);
+                }
+                if (user == null) {
+                    log.info("failed to record audit log , because user is null , opType is {},desc is {},context is {}", opType.ordinal(), desc, JsonCommon.stringify(context));
+                    return null;
+                }
             }
         }
         logModel.setUserId(user.getId());
@@ -231,5 +262,12 @@ public class CsceneLogUtils {
         ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
         HttpServletRequest request = servletRequestAttributes.getRequest();
         return String.valueOf(request.getAttribute(LogConstant.USER_NAME_KEY));
+    }
+
+    private static String getUserId() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
+        HttpServletRequest request = servletRequestAttributes.getRequest();
+        return String.valueOf(request.getAttribute(LogConstant.USER_ID_KEY));
     }
 }
