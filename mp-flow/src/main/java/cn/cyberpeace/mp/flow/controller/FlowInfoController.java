@@ -3,6 +3,10 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -49,6 +53,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("删除流量信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowInfo(@PathVariable String id) {
         return flowServiceImpl.deleteFlowInfo(id);
@@ -60,6 +65,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("批量删除流量信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/batch_delete")
     public ServiceResult<Integer> batchDeleteFlowInfo(@RequestBody String[] ids) {
         if (Objects.isNull(ids)) {
@@ -102,6 +108,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("新增背景流量")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增背景流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/background")
     public ServiceResult<BackgroundFlowResponse> addBackgroundFlow(@Validated AddBackgroundFlowRequest addRequest) {
         return flowServiceImpl.addBackgroundFlow(addRequest);
@@ -113,6 +120,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("更新背景流量")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新背景流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/background")
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(@Validated ModifyBackgroundFlowRequest modifyRequest) {
         return flowServiceImpl.modifyBackgroundFlow(modifyRequest);
@@ -135,6 +143,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("新增攻击流量")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PostMapping("/attack")
     public ServiceResult<AttackFlowResponse> addAttackFlow(@Validated AddAttackFlowRequest addRequest) {
         return flowServiceImpl.addAttackFlow(addRequest);
@@ -146,6 +155,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("更新攻击流量")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新攻击流量", target = OpTargetEnums.FLOW_INFO)
     @PatchMapping("/attack")
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(@Validated ModifyAttackFlowRequest modifyRequest) {
         return flowServiceImpl.modifyAttackFlow(modifyRequest);
@@ -160,6 +170,17 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @GetMapping("/list_by_collection_ids")
     public ServiceResult<List<FlowInfoResponse>> listByCollectionIds(ListByCollectionIdsRequest request) {
         return flowServiceImpl.listByCollectionIds(request);
+    }
+
+    /**
+     * 流量信息导入
+     * @param request
+     * @return
+     */
+    @ApiOperation("流量信息导入")
+    @PostMapping("/flow_import")
+    public ServiceResult<Boolean> flowImport(@RequestBody @Validated ImportFlowInfoRequest request) {
+        return flowServiceImpl.flowImport(request);
     }
 
 }

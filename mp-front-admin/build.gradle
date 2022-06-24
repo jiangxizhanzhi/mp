@@ -3,4 +3,5 @@ dependencies {
     implementation 'com.github.oshi:oshi-core:5.3.6'
     implementation project(':mp-base')
     implementation project(':mp-auth')
+    implementation project(':mp-devops-log')
 }

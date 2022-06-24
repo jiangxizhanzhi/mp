@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -46,6 +47,17 @@ public class CsceneLogService {
         data.put("id", csceneId);
         String content = JsonCommon.stringify(data);
         return new LogDetail(StringUtils.join(target, ","), content);
+    }
+
+    public LogDetail getLogDetail(List<String> csceneIds, boolean config) {
+        Map<String, List<String>> data = new HashMap<>();
+        data.put("ids", csceneIds);
+        String content = JsonCommon.stringify(data);
+        if (config) {
+            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, content);
+        } else {
+            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENES, content);
+        }
     }
 
     public LogDetail getLogDetail(String csceneId, String nodeId) {
