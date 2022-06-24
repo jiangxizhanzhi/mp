@@ -32,6 +32,8 @@ public class CsceneLogService {
     private static final String DESC_SCENE_CONFIG = "cscene.oplog.desc.scene_config";
     private static final String DESC_SCENE_ELEMENT = "cscene.oplog.desc.scene_element";
     private static final String DESC_SCENE_ELEMENT_FLOW = "cscene.oplog.desc.scene_element_flow";
+    private static final String BATCH_SCENES = "cscene.oplog.desc.batch_scenes";
+    private static final String BATCH_SCENE_CONFIGS = "cscene.oplog.desc.batch_scene_configs";
 
     @Resource
     private CsceneMapper csceneMapper;
@@ -55,9 +57,9 @@ public class CsceneLogService {
         data.put("ids", csceneIds);
         String content = JsonCommon.stringify(data);
         if (config) {
-            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, content);
+            return new LogDetail(MessageCommon.get(BATCH_SCENE_CONFIGS), content);
         } else {
-            return new LogDetail(CsceneLogUtils.BATCH_DELETE_SCENES, content);
+            return new LogDetail(MessageCommon.get(BATCH_SCENES), content);
         }
     }
 
