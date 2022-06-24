@@ -52,6 +52,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -424,7 +425,7 @@ public class SceneElementMonitorService {
             vulnerabilityInfo.setSeverity(r.getVulnerability().getSeverity().toLowerCase());
             vulnerabilityInfo.setTitle(r.getVulnerability().getTitle());
             vulnerabilityInfo.setTime(r.getTime());
-            vulnerabilityInfo.setPublished(r.getVulnerability().getPublished());
+            vulnerabilityInfo.setPublished(convertDate(r.getVulnerability().getPublished()));
             vulnerabilityInfo.setUpdate(r.getVulnerability().getUpdated());
             vulnerabilityInfo.setTime(r.getTime());
             vulnerabilityInfo.setReferences(r.getVulnerability().getReferences());
@@ -698,5 +699,24 @@ public class SceneElementMonitorService {
         listPageInfoQueryParams.setNodeIds(baseRequest.getElementIds());
         return listPageInfoQueryParams;
     }
+
+
+    private LocalDate convertDate(String date) {
+        try {
+            return TimeUtils.stringToLocalDate(date);
+        } catch (Exception e) {
+            log.warn("date parse error! {}", date);
+        }
+
+        try {
+            LocalDateTime localDateTime = TimeUtils.utcToLocalDateTime(date);
+            return localDateTime.toLocalDate();
+        } catch (Exception e) {
+            log.warn("date parse error! {}", date);
+        }
+
+        return null;
+    }
+
 
 }
