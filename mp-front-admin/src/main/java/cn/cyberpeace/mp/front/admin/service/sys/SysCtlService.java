@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.service.sys;
 
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.front.admin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.front.admin.util.EncryptUtils;
 import cn.hutool.core.util.RandomUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -42,6 +43,7 @@ public class SysCtlService {
 
         // update system timestamp
         SysActivCtlModel oldActivCtlModel = getValidCtlModel();
+        log.info("updateSysTs, oldActivCtlModel:{}", oldActivCtlModel);
         // 判断系统是否已经注册，未激活不统计运行时长
         if (Objects.nonNull(oldActivCtlModel) && StringUtils.isNotBlank(oldActivCtlModel.getFirstActiveDate())) {
             // not null, to update  example: oldTs 1644778431000
@@ -51,17 +53,19 @@ public class SysCtlService {
                 // 更新数据库系统时间戳，同时累加run_seconds
                 Long diff = currTs - oldTs;
                 Long diffSeconds = diff / 1000;
-                Long oldRunSeconds = oldActivCtlModel.getSysRunSeconds();
+                String oldRunSecondsStr = oldActivCtlModel.getSysRunSeconds();
+                Long oldRunSeconds = 0L;
+                if (StringUtils.isNotBlank(oldRunSecondsStr)) {
+                    oldRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(oldRunSecondsStr));
+                }
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
                 newActivCtlModel.setSysTimestamp(currTs);
 
-                if (Objects.nonNull(oldRunSeconds)) {
-                    newActivCtlModel.setSysRunSeconds(diffSeconds + oldRunSeconds);
-                } else {
-                    // todo ?
-                    newActivCtlModel.setSysRunSeconds(0L);
-                }
+                Long newRunSeconds = diffSeconds + oldRunSeconds;
+                log.info("newRunSeconds:{}, diffSeconds:{}, oldRunSeconds:{}", newRunSeconds, diffSeconds, oldRunSeconds);
+
+                newActivCtlModel.setSysRunSeconds(EncryptUtils.desEncrypt(String.valueOf(newRunSeconds)));
                 // update sysActivCtlModel
                 sysActivCtlService.update(newActivCtlModel);
                 log.info("update sysTs success! {}", newActivCtlModel);

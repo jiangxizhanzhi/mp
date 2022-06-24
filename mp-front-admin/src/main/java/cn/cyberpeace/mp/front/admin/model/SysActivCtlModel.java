@@ -58,9 +58,13 @@ public class SysActivCtlModel extends BaseModel {
     @DefaultLong(-1)
     private Long sysTimestamp;
 
-    @ApiModelProperty(value = "系统运行秒数(该条件与过期日期，二者达到其一即可判断为license过期。防止通过回拨服务器时间，达到白嫖目的)")
-    @DefaultLong(0)
-    private Long sysRunSeconds;
+    @ApiModelProperty(value = "(密文）系统运行秒数(该条件与过期日期，二者达到其一即可判断为license过期。防止通过回拨服务器时间，达到白嫖目的)")
+    @DefaultStr
+    private String sysRunSeconds;
+
+    @ApiModelProperty(value = "（密文）系统寿命，用于判断runSeconds是否超期")
+    @DefaultStr
+    private String sysLifetime;
 
     @ApiModelProperty(value = "状态 2:生成的随机码，未使用，1:有效，0:无效")
     @DefaultInt(1)
