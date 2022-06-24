@@ -222,7 +222,7 @@ public class CsceneLogUtils {
         logModel.setOpTarget(target);
         logModel.setDescription(content);
         logModel.setTitle(MessageCommon.get("cscene.oplog.desc." + desc));
-        String operateContent = logModel.getUserName() + ":" + MessageCommon.get(opType.getCode()) + ":[" + target + "]";
+        String operateContent = MessageCommon.get(opType.getCode()) + ":[" + target + "]";
         logModel.setContent(operateContent);
         return logModel;
     }
