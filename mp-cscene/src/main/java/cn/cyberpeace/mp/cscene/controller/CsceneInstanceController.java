@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -209,7 +210,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                          @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.deleteById(request.getId(), true, request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.DELETE_SCENE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE, request.getContext());
         return result;
     }
 
@@ -217,7 +218,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody CsceneInstancesActionRequest request) {
         var result = modelService.bulkDeleteByIds(request.getIds(), true, request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.BATCH_DELETE_SCENES, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(Arrays.asList(request.getIds()), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_DELETE_SCENES, request.getContext());
         return result;
     }
 
@@ -230,7 +231,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                         @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.clearById(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.CLEAR_SCENE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.CLEAR_SCENE, request.getContext());
         return result;
     }
 
@@ -238,7 +239,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstancesActionRequest request) {
         var result = modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_INSTANCE, CsceneLogUtils.BATCH_CLEAR_SCENE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(Arrays.asList(request.getIds()), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_CLEAR_SCENE, request.getContext());
         return result;
     }
 
@@ -257,7 +258,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeFlowActionRequest(request, id, nodeId, flowId, sourceIp);
         var result = modelService.startFlow(request.getId(), request.getNodeId(), request.getFlowId(), request.getSourceIp(),
                 request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.START_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.START, CsceneLogUtils.START_FLOW, request.getContext());
         return result;
     }
 
@@ -275,7 +276,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         request = formatNodeFlowActionRequest(request, id, nodeId, flowId, null);
         var result = modelService.stopFlow(request.getId(), request.getNodeId(), request.getFlowId(),
                 request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.STOP, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.STOP_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.STOP, CsceneLogUtils.STOP_FLOW, request.getContext());
         return result;
     }
 
@@ -287,7 +288,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         }
         var result = modelService.updateFlowParams(request.getId(), request.getNodeId(),
                 request.getFlowId(), request.getSourceIp(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.UPDATE, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.UPDATE_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), request.getFlowId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_FLOW, request.getContext());
         return result;
     }
 
@@ -296,7 +297,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> startFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
         var result = modelService.startFlows(request.getId(), request.getNodeId(), request.getFlows(),
                 request.getContext(), request.getRunType()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.START, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.BATCH_START_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), null, OpTypeEnums.START, CsceneLogUtils.BATCH_START_FLOW, request.getContext());
         return result;
     }
 
@@ -305,7 +306,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Boolean> stopFlows(@RequestBody CsceneInstanceNodeFlowsActionRequest request) {
         var result = modelService.stopFlows(request.getId(), request.getNodeId(), request.getFlows(),
                 request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.STOP, OpTargetEnums.SCENE_ELEMENT_FLOW, CsceneLogUtils.BATCH_STOP_FLOW, request.getContext());
+        CsceneLogUtils.recordSceneFlowLog(request.getId(), request.getNodeId(), null, OpTypeEnums.STOP, CsceneLogUtils.BATCH_STOP_FLOW, request.getContext());
         return result;
     }
 
@@ -505,7 +506,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                              @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.pause(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_PAUSE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_PAUSE, request.getContext());
         return result;
     }
 
@@ -518,7 +519,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.unpause(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_UNPAUSE, request.getContext());
         return result;
     }
 
@@ -531,7 +532,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.suspend(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_SUSPEND, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_SUSPEND, request.getContext());
         return result;
     }
 
@@ -544,7 +545,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                               @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         var result = modelService.resume(request.getId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_RESUME, request.getContext());
+        CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_RESUME, request.getContext());
         return result;
     }
 
@@ -559,7 +560,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.restartElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.UPDATE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RESTART, request.getContext());
         return result;
     }
 
@@ -574,7 +575,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.pauseElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_PAUSE, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_ELEMENT_PAUSE, request.getContext());
         return result;
     }
 
@@ -589,7 +590,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.unpauseElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_UNPAUSE, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_UNPAUSE, request.getContext());
         return result;
     }
 
@@ -604,7 +605,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                   @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.recreateElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.UPDATE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_RECREATE, request.getContext());
         return result;
     }
 
@@ -619,7 +620,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.suspendElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.PAUSE, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_SUSPEND, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.PAUSE, CsceneLogUtils.SCENE_ELEMENT_SUSPEND, request.getContext());
         return result;
     }
 
@@ -635,7 +636,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                 @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         var result = modelService.resumeElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.RECOVER, OpTargetEnums.SCENE_ELEMENT, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
         return result;
     }
 }
