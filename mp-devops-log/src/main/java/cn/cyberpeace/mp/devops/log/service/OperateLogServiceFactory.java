@@ -195,7 +195,14 @@ public class OperateLogServiceFactory {
             return;
         }
 
-        String content = model.getOpType() + ":" + model.getOpModule() + ", IP: " + model.getOpIp();
+        String content = "";
+
+        if (Objects.equals(model.getOpModuleID(), OpModuleEnums.SYSTEM.ordinal())) {
+            content = model.getOpType() + ":" + model.getOpTarget() + ", IP: " + model.getOpIp();
+        } else {
+            content = model.getOpType() + ":" + model.getOpModule() + ", IP: " + model.getOpIp();
+        }
+
         model.setContent(content);
     }
 
