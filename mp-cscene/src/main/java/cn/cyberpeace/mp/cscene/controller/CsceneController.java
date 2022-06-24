@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -154,7 +155,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
         var result = modelService.deleteById(request.getId(), true, false, null).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_CONFIG, CsceneLogUtils.DELETE_SCENE_CONFIG, null);
+        CsceneLogUtils.recordSceneConfigLog(id, OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }
 
@@ -163,7 +164,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
         var result = modelService.bulkDeleteByIds(ids, true, false, null).asResult();
-        CsceneLogUtils.recordSceneLog(OpTypeEnums.DELETE, OpTargetEnums.SCENE_CONFIG, CsceneLogUtils.DELETE_SCENE_CONFIG, null);
+        CsceneLogUtils.recordSceneConfigLog(Arrays.asList(ids), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_DELETE_SCENE_CONFIGS, null);
         return result;
     }
 
