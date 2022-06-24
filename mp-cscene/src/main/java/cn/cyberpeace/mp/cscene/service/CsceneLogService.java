@@ -73,7 +73,7 @@ public class CsceneLogService {
     }
 
     public LogDetail getLogDetail(String csceneId, String nodeId, String flowId) {
-        List<String> target = this.getTarget(csceneId, nodeId);
+        List<String> target = this.getTarget(csceneId, nodeId, flowId);
         Map<String, String> data = new HashMap<>();
         data.put("id", csceneId);
         data.put("nodeId", nodeId);
