@@ -18,6 +18,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -103,6 +104,17 @@ public class BaseCpService extends BaseService {
     @Override
     protected <T extends BaseModel> T sendFormDataPost(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
         return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
+    }
+
+    /**
+     * 上传文件
+     * @param api
+     * @param fileList
+     * @return
+     */
+    @Override
+    protected <T extends BaseModel> T sendFormDataPost(String api, List<File> fileList , Class<T> valueType) throws IOException {
+        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),fileList,valueType);
     }
 
     /**

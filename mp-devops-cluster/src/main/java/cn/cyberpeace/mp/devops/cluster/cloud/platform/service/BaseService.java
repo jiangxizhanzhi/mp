@@ -5,13 +5,16 @@ import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -174,6 +177,25 @@ public class BaseService {
         T model = JsonUtils.toSnakeObject(result, valueType);
         if (log.isInfoEnabled()) {
             log.info("=====FormDataPost url：{},params：{},result：{}", url, httpEntity, result);
+        }
+        return model;
+    }
+
+    /**
+     * 表单新增
+     *
+     * @param url
+     * @param fileList
+     * @param valueType
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
+    protected <T extends BaseModel> T sendFormDataPost(String url, List<File> fileList, Class<T> valueType) throws IOException {
+        String result = HttpUtil.createPost(url).header(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage()).form("file",fileList.toArray(File[]::new)).execute().body();
+        T model = JsonUtils.toSnakeObject(result, valueType);
+        if (log.isInfoEnabled()) {
+            log.info("=====FormDataPost url：{},result：{}", url, result);
         }
         return model;
     }
