@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
-import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
@@ -17,9 +16,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description
@@ -46,16 +43,16 @@ public class CsceneLogService {
 
     public LogDetail getLogDetail(String csceneId, boolean config) {
         List<String> target = this.getTarget(csceneId, config);
-        Map<String, String> data = new HashMap<>();
-        data.put("id", csceneId);
-        String content = JsonCommon.stringify(data);
+        LogContent logContent = new LogContent();
+        logContent.setId(csceneId);
+        String content = JsonCommon.stringify(logContent);
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
     public LogDetail getLogDetail(List<String> csceneIds, boolean config) {
-        Map<String, List<String>> data = new HashMap<>();
-        data.put("ids", csceneIds);
-        String content = JsonCommon.stringify(data);
+        LogContent logContent = new LogContent();
+        logContent.setIds(csceneIds);
+        String content = JsonCommon.stringify(logContent);
         if (config) {
             return new LogDetail(MessageCommon.get(BATCH_SCENE_CONFIGS), content);
         } else {
@@ -65,20 +62,22 @@ public class CsceneLogService {
 
     public LogDetail getLogDetail(String csceneId, String nodeId) {
         List<String> target = this.getTarget(csceneId, nodeId);
-        Map<String, String> data = new HashMap<>();
-        data.put("id", csceneId);
-        data.put("nodeId", nodeId);
-        String content = JsonCommon.stringify(data);
+        LogContent logContent = new LogContent();
+        logContent.setId(csceneId);
+        logContent.setNodeId(nodeId);
+        String content = JsonCommon.stringify(logContent);
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
     public LogDetail getLogDetail(String csceneId, String nodeId, String flowId) {
         List<String> target = this.getTarget(csceneId, nodeId, flowId);
-        Map<String, String> data = new HashMap<>();
-        data.put("id", csceneId);
-        data.put("nodeId", nodeId);
-        data.put("flowId", flowId);
-        String content = JsonCommon.stringify(data);
+        LogContent logContent = new LogContent();
+        logContent.setId(csceneId);
+        logContent.setNodeId(nodeId);
+        if (flowId != null) {
+            logContent.setFlowId(flowId);
+        }
+        String content = JsonCommon.stringify(logContent);
         return new LogDetail(StringUtils.join(target, ","), content);
     }
 
@@ -116,12 +115,17 @@ public class CsceneLogService {
 
     private List<String> getTarget(String csceneId, String nodeId, String flowId) {
         List<String> targets = getTarget(csceneId, nodeId);
+        if (StringUtils.isEmpty(flowId)) {
+            return targets;
+        }
         var flow = flowInfoService.get(flowId);
         if (flow == null || flow.getSource() == null || flow.getSource().getObj() == null) {
             return targets;
         } else {
-            targets.add(MessageCommon.get(DESC_SCENE_ELEMENT_FLOW, flow.getSource().getObj().getTitle()));
-            return targets;
+            List<String> result = new ArrayList<>();
+            result.addAll(targets);
+            result.add(MessageCommon.get(DESC_SCENE_ELEMENT_FLOW, flow.getSource().getObj().getTitle()));
+            return result;
         }
     }
 
@@ -134,5 +138,13 @@ public class CsceneLogService {
             this.target = target;
             this.content = content;
         }
+    }
+
+    @Data
+    private static class LogContent {
+        private List<String> ids;
+        private String id;
+        private String nodeId;
+        private String flowId;
     }
 }
