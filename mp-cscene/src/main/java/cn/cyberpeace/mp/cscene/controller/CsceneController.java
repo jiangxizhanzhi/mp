@@ -155,7 +155,7 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("delete cscene config , cscene id is {}", id);
         request = formatActionRequest(request, id);
         var result = modelService.deleteById(request.getId(), true, false, null).asResult();
-        CsceneLogUtils.recordSceneConfigLog(id, OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
+        CsceneLogUtils.recordSceneConfigLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.DELETE_SCENE_CONFIG, request.getContext());
         return result;
     }
 
