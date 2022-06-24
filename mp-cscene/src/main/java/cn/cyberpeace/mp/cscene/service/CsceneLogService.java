@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
@@ -13,7 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,6 +27,10 @@ import java.util.Map;
  */
 @Service
 public class CsceneLogService {
+    private static final String DESC_SCENE = "cscene.oplog.desc.scene";
+    private static final String DESC_SCENE_ELEMENT = "cscene.oplog.desc.scene_element";
+    private static final String DESC_SCENE_ELEMENT_FLOW = "cscene.oplog.desc.scene_element_flow";
+
     @Resource
     private CsceneMapper csceneMapper;
     @Resource
@@ -32,72 +40,73 @@ public class CsceneLogService {
     @Resource
     private FlowInfoService flowInfoService;
 
-    public LogDetail getLogDesc(String csceneId, boolean config) {
-        String target = this.getTarget(csceneId, config);
+    public LogDetail getLogDetail(String csceneId, boolean config) {
+        List<String> target = this.getTarget(csceneId, config);
         Map<String, String> data = new HashMap<>();
         data.put("id", csceneId);
         String content = JsonCommon.stringify(data);
-        return new LogDetail(target, content);
+        return new LogDetail(StringUtils.join(target, ","), content);
     }
 
-    public LogDetail getLogDesc(String csceneId, String nodeId) {
-        String target = this.getTarget(csceneId, nodeId);
+    public LogDetail getLogDetail(String csceneId, String nodeId) {
+        List<String> target = this.getTarget(csceneId, nodeId);
         Map<String, String> data = new HashMap<>();
         data.put("id", csceneId);
         data.put("nodeId", nodeId);
         String content = JsonCommon.stringify(data);
-        return new LogDetail(target, content);
+        return new LogDetail(StringUtils.join(target, ","), content);
     }
 
-    public LogDetail getLogDesc(String csceneId, String nodeId, String flowId) {
-        String target = this.getTarget(csceneId, nodeId);
+    public LogDetail getLogDetail(String csceneId, String nodeId, String flowId) {
+        List<String> target = this.getTarget(csceneId, nodeId);
         Map<String, String> data = new HashMap<>();
         data.put("id", csceneId);
         data.put("nodeId", nodeId);
         data.put("flowId", flowId);
         String content = JsonCommon.stringify(data);
-        return new LogDetail(target, content);
+        return new LogDetail(StringUtils.join(target, ","), content);
     }
 
-    private String getTarget(String csceneId, boolean config) {
+    private List<String> getTarget(String csceneId, boolean config) {
         if (config) {
             var model = csceneMapper.get(csceneId);
             if (model != null) {
-                return model.getName();
+                return Arrays.asList(MessageCommon.get(DESC_SCENE, model.getName()));
             }
-            return StringUtils.EMPTY;
+            return new ArrayList<>();
         } else {
             var model = csceneInstanceMapper.get(csceneId);
             if (model != null) {
-                return model.getName();
+                return Arrays.asList(MessageCommon.get(DESC_SCENE, model.getName()));
             }
-            return StringUtils.EMPTY;
+            return new ArrayList<>();
         }
     }
 
-    private String getTarget(String csceneId, String nodeId) {
+    private List<String> getTarget(String csceneId, String nodeId) {
         var cscene = csceneInstanceMapper.get(csceneId);
         if (cscene == null) {
-            return StringUtils.EMPTY;
+            return new ArrayList<>();
         }
         var dbs = sceneElementMapper.list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, cscene.getScene())
                 .filterEqual(SceneElementModel::getNodeId, nodeId)
         );
         if (CollectionUtils.isEmpty(dbs)) {
-            return cscene.getName();
+            return Arrays.asList(MessageCommon.get(DESC_SCENE, cscene.getName()));
         } else {
-            return cscene.getName() + "-" + dbs.get(0).getName();
+            return Arrays.asList(MessageCommon.get(DESC_SCENE, cscene.getName()), MessageCommon.get(DESC_SCENE_ELEMENT, dbs.get(0).getName()));
         }
     }
 
-    private String getTarget(String csceneId, String nodeId, String flowId) {
-        String name = getTarget(csceneId, nodeId);
+    private List<String> getTarget(String csceneId, String nodeId, String flowId) {
+        List<String> targets = getTarget(csceneId, nodeId);
         var flow = flowInfoService.get(flowId);
         if (flow == null || flow.getSource() == null || flow.getSource().getObj() == null) {
-            return name;
+            return targets;
         } else {
-            return name + "-" + flow.getSource().getObj().getTitle();
+            targets.add(MessageCommon.get(DESC_SCENE_ELEMENT_FLOW, flow.getSource().getObj().getTitle()));
+            return targets;
         }
     }
 

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.service.CsceneLogService;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
@@ -59,7 +60,7 @@ public class CsceneLogUtils {
     public static void recordSceneConfigLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
-            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, true);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneId, true);
             OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
             if (logModel == null) {
                 return;
@@ -72,17 +73,13 @@ public class CsceneLogUtils {
         }
     }
 
-    public static void recordSceneInstanceLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+    public static void recordSceneInstanceLog(CsceneInstanceBO instanceBO, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
-            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
-            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, false);
-            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
-            if (logModel == null) {
+            if (instanceBO == null) {
+                log.info("instance bo is null");
                 return;
             }
-            // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            recordSceneInstanceLog(instanceBO.getId(), opType, desc, context);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -91,7 +88,7 @@ public class CsceneLogUtils {
     public static void recordSceneNodeLog(String csceneId, String nodeId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
-            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, nodeId);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneId, nodeId);
             OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
             if (logModel == null) {
                 return;
@@ -107,7 +104,7 @@ public class CsceneLogUtils {
     public static void recordSceneFlowLog(String csceneId, String nodeId, String flowId, OpTypeEnums opType, String desc, CsceneContextBO context) {
         try {
             CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
-            CsceneLogService.LogDetail detail = csceneLogService.getLogDesc(csceneId, nodeId, flowId);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneId, nodeId, flowId);
             OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
             if (logModel == null) {
                 return;
@@ -123,6 +120,22 @@ public class CsceneLogUtils {
     public static void recordSceneLog(OpTypeEnums opType, OpTargetEnums opTargetEnums, String desc, CsceneContextBO context) {
         try {
             OperationLogRequest logModel = getOperationLogRequest(opType, opTargetEnums, desc, context);
+            if (logModel == null) {
+                return;
+            }
+            // 记录登录日志
+            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
+            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        } catch (Exception e) {
+            log.error("failed to record audit log", e);
+        }
+    }
+
+    private static void recordSceneInstanceLog(String csceneId, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        try {
+            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
+            CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneId, false);
+            OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
             if (logModel == null) {
                 return;
             }
