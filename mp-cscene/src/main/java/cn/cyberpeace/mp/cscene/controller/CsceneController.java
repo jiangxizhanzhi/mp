@@ -130,9 +130,10 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
         var result = modelService.sync(csceneBO, null).asResult();
-        if (csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId())) {
+        if (isUpdate) {
             CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
         } else {
             CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());

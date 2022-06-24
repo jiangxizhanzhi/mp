@@ -29,6 +29,7 @@ import java.util.Map;
 @Service
 public class CsceneLogService {
     private static final String DESC_SCENE = "cscene.oplog.desc.scene";
+    private static final String DESC_SCENE_CONFIG = "cscene.oplog.desc.scene_config";
     private static final String DESC_SCENE_ELEMENT = "cscene.oplog.desc.scene_element";
     private static final String DESC_SCENE_ELEMENT_FLOW = "cscene.oplog.desc.scene_element_flow";
 
@@ -83,7 +84,7 @@ public class CsceneLogService {
         if (config) {
             var model = csceneMapper.get(csceneId);
             if (model != null) {
-                return Arrays.asList(MessageCommon.get(DESC_SCENE, model.getName()));
+                return Arrays.asList(MessageCommon.get(DESC_SCENE_CONFIG, model.getName()));
             }
             return new ArrayList<>();
         } else {
