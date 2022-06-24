@@ -63,7 +63,7 @@ public class SysConfigController {
 
     @ApiOperation(value = "查询所有系统设置", notes = "")
     @GetMapping("/all")
-    public ServiceResult<List<SysConfigModel>> getall() {
+    public ServiceResult<List<SysConfigModel>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
         return ServiceResult.success(configs);
     }

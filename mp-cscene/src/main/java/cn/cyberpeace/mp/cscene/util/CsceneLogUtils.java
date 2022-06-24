@@ -220,9 +220,10 @@ public class CsceneLogUtils {
         logModel.setOpIp(getIp());
         logModel.setOpType(opType.ordinal());
         logModel.setOpTarget(target);
-        logModel.setDescription(desc);
+        logModel.setDescription(content);
         logModel.setTitle(MessageCommon.get("cscene.oplog.desc." + desc));
-        logModel.setContent(content);
+        String operateContent = MessageCommon.get(opType.getCode()) + ":[" + target + "]";
+        logModel.setContent(operateContent);
         return logModel;
     }
 
@@ -258,16 +259,12 @@ public class CsceneLogUtils {
     }
 
     private static String getUserName() {
-        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
-        HttpServletRequest request = servletRequestAttributes.getRequest();
-        return String.valueOf(request.getAttribute(LogConstant.USER_NAME_KEY));
+        // todo
+        return "admin";
     }
 
     private static String getUserId() {
-        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-        ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) attributes;
-        HttpServletRequest request = servletRequestAttributes.getRequest();
-        return String.valueOf(request.getAttribute(LogConstant.USER_ID_KEY));
+        // todo
+        return "admin";
     }
 }
