@@ -56,7 +56,7 @@ public class SwitchConverter {
      */
     public List<Switches> list() {
         SwitchesCloudPlatform model = switchService.list();
-        if (Objects.isNull(model)){
+        if (Objects.isNull(model) || !model.isSuccess()){
             return Lists.newArrayList();
         }
         return model.getSwitchs();
