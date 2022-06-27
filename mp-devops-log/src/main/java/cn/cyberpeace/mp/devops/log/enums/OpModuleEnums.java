@@ -22,7 +22,7 @@ public enum OpModuleEnums {
     // "职业体系"
     CAREER_SYSTEM("career_system"),
     // "考试"
-    TEST("test"),
+    //TEST("test"),
     // "习题集管理"
     PROBLEM_SET("problem_set"),
     // "夺旗解题"
