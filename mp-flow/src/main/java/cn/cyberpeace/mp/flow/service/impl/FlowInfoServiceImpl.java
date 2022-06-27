@@ -958,4 +958,19 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     }
 
 
+    /**
+     * 名称存在校验
+     * @param request
+     * @return
+     */
+    public ServiceResult<List<String>> checkNamesExist(CheckNamesRequest request) {
+        List<String> existNameList = new ArrayList<>();
+        List<FlowInfoModel> flowInfoModels = getModelMapper().selectByTitles(request.getFileNames());
+        if (CollectionUtils.isNotEmpty(flowInfoModels)) {
+            existNameList = flowInfoModels.stream().map(FlowInfoModel::getTitle).collect(Collectors.toList());
+        }
+
+        return ServiceResult.success(existNameList);
+    }
+
 }
