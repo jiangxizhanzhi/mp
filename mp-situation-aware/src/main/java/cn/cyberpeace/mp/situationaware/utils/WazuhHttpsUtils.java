@@ -105,8 +105,15 @@ public class WazuhHttpsUtils {
                 httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
                 response = httpClient.execute(httpGet);
             }
+
+            StatusLine sl2 = response.getStatusLine();
+            if (sl2.getStatusCode() != 200) {
+                log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
+                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            }
+
             return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (UncheckedExecutionException | IOException e) {
+        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
