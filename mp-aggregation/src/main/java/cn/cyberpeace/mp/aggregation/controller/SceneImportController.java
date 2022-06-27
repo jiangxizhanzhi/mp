@@ -38,7 +38,7 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getSceneFilePath());
+        ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ServiceResult.success(serviceResult.getSource().getId());
     }
 
@@ -48,7 +48,7 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getHost()) || StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        return this.resourceCenterService.mount(request.getHost(), request.getPath());
+        return this.resourceCenterService.mount(request.getHost(), request.getPath()).asResult();
     }
 
     @PostMapping("/umount")
@@ -57,6 +57,6 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        return this.resourceCenterService.unmount(request.getPath());
+        return this.resourceCenterService.unmount(request.getPath()).asResult();
     }
 }

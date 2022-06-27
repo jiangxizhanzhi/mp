@@ -37,11 +37,16 @@ public class ResourceCenterService {
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
 
-    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, String sceneFilePath) {
+    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
-        List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
+        List<ImageParseResult> imageInfos = null;
+        if (StringUtils.isNotEmpty(imageFilePath)) {
+            imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
+        } else {
+            imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePathList);
+        }
         // 处理附件
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {

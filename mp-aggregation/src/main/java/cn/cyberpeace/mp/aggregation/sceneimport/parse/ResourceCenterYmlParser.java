@@ -48,6 +48,26 @@ public final class ResourceCenterYmlParser {
         return results;
     }
 
+    public static List<ImageParseResult> parseImageServicesYml(String filePath, List<String> imageFilePathList) {
+        List<ImageParseResult> results = new ArrayList<>();
+        // env/images 下的目录
+        results.addAll(parseServicesYml(filePath + FILE_PATH_SEPARATOR + "images"));
+
+        // imageFilePath 下的目录
+        if (CollectionUtils.isNotEmpty(imageFilePathList)) {
+            imageFilePathList.forEach(imageFilePath -> results.addAll(parseServicesYml(imageFilePath)));
+        }
+
+        // env 下的server.yml
+        String envServerYmlPath = filePath + FILE_PATH_SEPARATOR + "servers.yml";
+        File file = new File(envServerYmlPath);
+        if (file.exists()) {
+            ImageParseResult imageParseResult = new FilePathYmlParser<>(envServerYmlPath, ImageParseResult.class).parse();
+            results.add(imageParseResult);
+        }
+        return results;
+    }
+
     private static List<ImageParseResult> parseServicesYml(String dirPath) {
         File file = new File(dirPath);
         if (!file.exists() || !file.isDirectory() || file.listFiles() == null || file.listFiles().length == 0) {
