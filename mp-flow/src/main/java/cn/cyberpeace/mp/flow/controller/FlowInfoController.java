@@ -56,7 +56,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowInfo(@PathVariable String id) {
-        return flowServiceImpl.deleteFlowInfo(id);
+        return flowServiceImpl.deleteFlowInfo(id, true);
     }
 
     /**
@@ -181,6 +181,18 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @PostMapping("/flow_import")
     public ServiceResult<Boolean> flowImport(@RequestBody @Validated ImportFlowInfoRequest request) {
         return flowServiceImpl.flowImport(request);
+    }
+
+
+    /**
+     * 名称存在校验
+     * @param request
+     * @return
+     */
+    @ApiOperation("名称存在校验")
+    @PostMapping("/check_names")
+    public ServiceResult<List<String>> checkNames(@RequestBody @Validated CheckNamesRequest request) {
+        return flowServiceImpl.checkNamesExist(request);
     }
 
 }

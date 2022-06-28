@@ -46,8 +46,9 @@ public class OperationLogPageRequest extends BasePageRequest{
 
     /**
      * 模块
+     * 删除"考试"模块
      */
-    @ApiModelProperty(value = "模块 (0:系统; 1:工具; 2:课程; 3:资源; 4:账号; 5:场景; 6:职业体系; 7:考试; " +
+    @ApiModelProperty(value = "模块 (0:系统; 1:工具; 2:课程; 3:资源; 4:账号; 5:场景; 6:职业体系; " +
             "8:习题集管理; 9:夺旗解题; 10:理论基础; 11:试卷; 12:任务; 13:流量; 14:探针; 15:靶标；16:红蓝对抗; 17:单兵训练; 18:团队训练)")
     private Integer module;
 

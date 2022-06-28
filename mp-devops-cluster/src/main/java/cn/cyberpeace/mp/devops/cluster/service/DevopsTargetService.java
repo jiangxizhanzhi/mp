@@ -1,75 +1,191 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.dto.ImageDeleteDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.ImageTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 靶标管理
  * @author wanggang
  */
-public interface DevopsTargetService {
+@Service
+@RequiredArgsConstructor
+public class DevopsTargetService {
+
+    private final DeviceTargetMapper deviceTargetMapper;
 
     /**
-     * 分页查询
+     * 分页
      * @param dto
      * @return
      */
-    List<DeviceTargetPO> page(ImagePageDTO dto);
+    public List<DeviceTargetPO> page(ImagePageDTO dto) {
+        return deviceTargetMapper.page(dto);
+    }
 
     /**
-     * 获取总数
+     * 统计总数
      * @param dto
      * @return
      */
-    Integer totalCount(ImagePageDTO dto);
+    public Integer totalCount(ImagePageDTO dto) {
+        return deviceTargetMapper.totalCount(dto);
+    }
 
     /**
      * 更新
      * @param device
      * @return
      */
-    Integer updateById(Device device);
+    @Transactional
+    public Integer updateById(Device device) {
+        DeviceTargetPO oldDeviceTargetPO = deviceTargetMapper.findByUuid(device.getUuid());
+        if (Objects.nonNull(oldDeviceTargetPO)) {
+            DeviceTargetPO deviceTargetPO = convertDevice(device);
+            deviceTargetPO.setIsPublic(oldDeviceTargetPO.getIsPublic());
+            return deviceTargetMapper.updateById(deviceTargetPO);
+        }
+        return 0;
+    }
 
     /**
      * 新增
      * @param deviceList
      * @return
      */
-    Integer insert(List<Device> deviceList);
+    @Transactional
+    public Integer insert(List<Device> deviceList) {
+        if (CollectionUtils.isEmpty(deviceList)){
+            return 0;
+        }
+        List<DeviceTargetPO> deviceTargetPOS = deviceList.stream().map(this::convertToTargetModel)
+                .collect(Collectors.toList());
+        return deviceTargetMapper.batchInsert(deviceTargetPOS);
+    }
 
     /**
      * 靶标类型统计
      * @return
      */
-    Map<String,Object> countTarget();
+    public Map<String,Object> countTarget() {
+        return deviceTargetMapper.countTarget();
+    }
 
     /**
      * 虚拟靶标统计
      * @return
      */
-    Map<String,Object> countVmTarget();
+    public Map<String,Object> countVmTarget() {
+        return deviceTargetMapper.countVmTarget();
+    }
 
     /**
      * 实体靶标统计
      * @return
      */
-    Map<String,Object> countEntityTarget();
+    public Map<String,Object> countEntityTarget() {
+        return deviceTargetMapper.countEntityTarget();
+    }
 
     /**
      * 删除所有靶标数据
      * @return
      */
-    int deleteAllTarget();
+    @Transactional
+    public int deleteAllTarget() {
+        return deviceTargetMapper.deleteAllTarget();
+    }
 
     /**
-     * 删除
+     * 删除指定靶标
      * @param dto
      * @return
      */
-    Integer delete(ImageDeleteDTO dto);
+    @Transactional
+    public Integer delete(ImageDeleteDTO dto) {
+        return deviceTargetMapper.delete(dto);
+    }
+
+    protected DeviceTargetPO convertToTargetModel(Device device){
+        DeviceTargetPO deviceTargetPO = convertDevice(device);
+        deviceTargetPO.setIsPublic(PublicEnum.ALL_PUBLIC);
+        deviceTargetPO.setUseStatus(StatusEnum.NO);
+        deviceTargetPO.setReferenceStatus(NumberUtils.INTEGER_ZERO);
+        return deviceTargetPO;
+    }
+
+    /**
+     * 转换Device
+     * @param device
+     * @return
+     */
+    protected DeviceTargetPO convertDevice(Device device){
+        DeviceTargetPO deviceTargetPO = new DeviceTargetPO();
+        deviceTargetPO.setId(device.getId().toString());
+        deviceTargetPO.setUuid(device.getUuid());
+        deviceTargetPO.setName(device.getName());
+        deviceTargetPO.setLogo(device.getLogo());
+        deviceTargetPO.setRole(device.getRole());
+        deviceTargetPO.setMainCategory(device.getCategory());
+        deviceTargetPO.setSubCategory(device.getSecondCategory());
+        deviceTargetPO.setThirdCategory(device.getL3Category());
+        deviceTargetPO.setImageType(device.getImageType());
+        deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
+        String imageType = device.getImageType();
+        deviceTargetPO.setIsImport(device.getIsImport());
+        ExtVm extVm = device.getExtVm();
+        ExtDocker extDocker = device.getExtDocker();
+        if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.VM.toValue()) && Objects.nonNull(extVm)){
+            deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
+            deviceTargetPO.setInitSupport(extVm.getInitSupport());
+        }
+        else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)){
+            deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
+            deviceTargetPO.setInitSupport(extDocker.getInitSupport());
+        }else{
+            deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
+            deviceTargetPO.setInitSupport(Boolean.FALSE);
+        }
+
+        deviceTargetPO.setCreateTime(TimeUtils.utcStringToLocalDateTime(device.getCreatedAt()));
+        deviceTargetPO.setUpdateTime(TimeUtils.utcStringToLocalDateTime(device.getUpdatedAt()));
+        ExtEntity extEntity = device.getExtEntity();
+        if (Objects.nonNull(extEntity)){
+            deviceTargetPO.setInPosition(extEntity.getEntityStatus() ? StatusEnum.YES : StatusEnum.NO);
+        }
+
+        ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo)){
+            deviceTargetPO.setImageStatus(extImageInfo.getImageStatus());
+            deviceTargetPO.setImageSource(extImageInfo.getImageSource());
+            deviceTargetPO.setBaseImageSupport(extImageInfo.getBaseImageSupport());
+        }
+
+        ExtSystemInfo extSystemInfo = device.getExtSystemInfo();
+        if (Objects.nonNull(extSystemInfo)){
+            deviceTargetPO.setParentSystemType(extSystemInfo.getParentSystemType());
+            deviceTargetPO.setSystemType(extSystemInfo.getSystemType());
+            deviceTargetPO.setLanguage(extSystemInfo.getLanguage());
+            deviceTargetPO.setSystemArchitecure(extSystemInfo.getSystemArchitecture());
+        }
+
+        return deviceTargetPO;
+    }
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.service.impl;
+package cn.cyberpeace.mp.devops.cluster.service.upload;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
@@ -16,26 +16,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 服务管理-Docker文件上传
+ * 自定义上传镜像
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class InstallerDockerUploadService extends BaseUploadService {
+public class CustomImageUploadService extends BaseUploadService {
 
     /**
      * 文件上传客户端
      */
     private final ImagesService imagesService;
 
-    public InstallerDockerUploadService build(MultipartFile file) {
+    public CustomImageUploadService build(MultipartFile file) {
         this.file = file;
         return this;
     }
 
     @Override
     protected List<String> supportUploadType() {
-        return List.of("tar","zip");
+        return List.of("vmdk","raw","qcow2","vdi","zip","tar");
     }
 
     @Override
@@ -46,7 +46,7 @@ public class InstallerDockerUploadService extends BaseUploadService {
         } catch (IOException e) {
             log.error("file transfer error",e);
         }
-        BaseCloudPlatformResult model = imagesService.upload(fileList,"installer");
+        BaseCloudPlatformResult model = imagesService.upload(fileList,"image");
         this.serviceResult = new Result(new TargetUploadVO(model.getTmpdirUuid(),model.getFileNames()));
     }
 }

@@ -112,14 +112,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * 删除流量信息
      *
      * @param id
+     * @param checkTask
      * @return
      */
     @Transactional
-    public ServiceResult<Boolean> deleteFlowInfo(String id) {
+    public ServiceResult<Boolean> deleteFlowInfo(String id, boolean checkTask) {
         // 判断流量任务是否关联该流量信息
-        List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Collections.singletonList(id));
-        if (CollectionUtils.isNotEmpty(flowTaskList)) {
-            return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
+        if (checkTask) {
+            List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Collections.singletonList(id));
+            if (CollectionUtils.isNotEmpty(flowTaskList)) {
+                return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
+            }
         }
 
         // 判断流量是否关联流量集合信息
@@ -896,9 +899,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowInfoModel.setTitle(fileName);
 
             // 重名校验
-            if (!this.checkNameUnique(fileName, "")) {
-                log.error("flow file name exist: {}", fileName);
-                return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
+            if (Objects.nonNull(existFlowInfoModel)) {
+                // 删除重名流量文件
+                this.deleteFlowInfo(existFlowInfoModel.getId(), false);
             }
 
             flowInfoModel.setFileName(pcapFile.getName());
@@ -957,5 +961,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         return ServiceResult.success(true);
     }
 
+
+    /**
+     * 名称存在校验
+     * @param request
+     * @return
+     */
+    public ServiceResult<List<String>> checkNamesExist(CheckNamesRequest request) {
+        List<String> existNameList = new ArrayList<>();
+        List<FlowInfoModel> flowInfoModels = getModelMapper().selectByTitles(request.getFileNames());
+        if (CollectionUtils.isNotEmpty(flowInfoModels)) {
+            existNameList = flowInfoModels.stream().map(FlowInfoModel::getTitle).collect(Collectors.toList());
+        }
+
+        return ServiceResult.success(existNameList);
+    }
 
 }

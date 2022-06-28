@@ -3,10 +3,7 @@ package cn.cyberpeace.mp.base.util;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -18,14 +15,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -104,18 +99,6 @@ public class HttpUtils {
     public static String sendGet(String url) throws IOException {
         HttpClient client = HttpClientBuilder.create().build();
         return doGetRequest(url, client);
-    }
-
-    /**
-     * get请求
-     *
-     * @param url
-     * @return
-     * @throws IOException
-     */
-    public static HttpResponse sendPostForDownLoad(String url,String body) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        return doPostRequestForDownload(url,body,  client);
     }
 
 
@@ -269,53 +252,6 @@ public class HttpUtils {
         }
 
         return result;
-    }
-
-    public static String doFormDataPost(String url, HttpEntity entity,Map<String,Object> headerMap) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpPost httpPost = new HttpPost(url);
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpPost.setHeaders(headers);
-        }
-        httpPost.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
-        httpPost.setConfig(requestConfig);
-        HttpResponse response = client.execute(httpPost);
-        return EntityUtils.toString(response.getEntity(), "UTF-8");
-    }
-
-    public static String doFormDataPut(String url, HttpEntity entity,Map<String,Object> headerMap) throws IOException {
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpPut httpPost = new HttpPut(url);
-        if (MapUtils.isNotEmpty(headerMap)) {
-            Header[] headers = headerMap.entrySet().stream().map(v ->
-                    new BasicHeader(v.getKey(), String.valueOf(v.getValue()))
-            ).toArray(Header[]::new);
-            httpPost.setHeaders(headers);
-        }
-        httpPost.setEntity(entity);
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000).setConnectTimeout(60000).build();
-        httpPost.setConfig(requestConfig);
-        HttpResponse response = client.execute(httpPost);
-        return EntityUtils.toString(response.getEntity(), "UTF-8");
-    }
-
-    private static HttpResponse doPostRequestForDownload(String url, String body,HttpClient client) throws IOException {
-        // 替换url中的空格
-        HttpPost httpPost = new HttpPost(url);
-        StringEntity entity = new StringEntity(body, StandardCharsets.UTF_8);
-        entity.setContentType(ContentType.APPLICATION_JSON.getMimeType());
-        httpPost.setEntity(entity);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpPost.setConfig( requestConfig);
-        HttpResponse resp = client.execute(httpPost);
-
-        // 获得返回值
-        return resp;
     }
 
     static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {

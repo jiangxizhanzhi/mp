@@ -21,4 +21,17 @@
             f.title = #{title}
         </where>
     </select>
+
+    <select id="selectByTitles" resultType="cn.cyberpeace.mp.flow.model.FlowInfoModel">
+        select f.* from mp_flow_flow_info f
+        <where>
+            1 = 1
+            <if test="titleList != null and titleList.size() > 0">
+                AND f.title in
+                <foreach item="title" index="index" collection="titleList" open="(" separator="," close=")">
+                    #{title}
+                </foreach>
+            </if>
+        </where>
+    </select>
 </mapper>

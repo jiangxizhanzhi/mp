@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.URL_VERSION;
@@ -55,10 +57,10 @@ public class ImagesService extends BaseCpService {
     /**
      * 导出
      */
-    public BaseCloudPlatformResult export(String uuid, String imageName){
-        BaseCloudPlatformResult result = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName, BaseCloudPlatformResult.class);
+    public String export(String uuid, String imageName){
+        BaseCloudPlatformResult result = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName,10 * 60 * 1000, BaseCloudPlatformResult.class);
         super.checkResult(result);
-        return result;
+        return result.getUrl();
     }
 
     /**
@@ -98,7 +100,7 @@ public class ImagesService extends BaseCpService {
      * @return
      */
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
-        CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
+        CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid + "&user_id=" + (Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""),CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();

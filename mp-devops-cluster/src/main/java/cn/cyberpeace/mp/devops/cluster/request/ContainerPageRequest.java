@@ -23,13 +23,4 @@ public class ContainerPageRequest extends BasePageRequest implements Serializabl
 
     @ApiModelProperty(value = "IP地址")
     private String addr;
-
-    public ContainerPageRequest(String host) {
-        this.host = host;
-    }
-
-    public ContainerPageRequest(String host, String addr) {
-        this.host = host;
-        this.addr = addr;
-    }
 }
