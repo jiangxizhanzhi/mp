@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -32,6 +33,12 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "名称")
     private String name;
 
+    /**
+     * 名称
+     */
+    @ApiModelProperty(value = "名称集合")
+    private List<String> nameList;
+    
     /**
      * 角色
      */
