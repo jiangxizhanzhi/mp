@@ -81,4 +81,9 @@ public class ExtEntity implements Serializable {
      */
     @ApiModelProperty("串口密码")
     private String ccmPassword;
+
+    @ApiModelProperty("扩展信息")
+    private ExtEntityExtInfo extInfo;
+
+
 }
