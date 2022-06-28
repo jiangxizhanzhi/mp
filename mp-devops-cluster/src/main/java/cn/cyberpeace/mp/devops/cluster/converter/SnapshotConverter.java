@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.params.ScenariosSnapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
@@ -99,13 +98,14 @@ public class SnapshotConverter {
      * @param request
      * @return
      */
-    public BaseCloudPlatformResult create(SnapshotRequest request) {
+    public void create(SnapshotRequest request) {
         ScenariosSnapshot snapshotCreate = new ScenariosSnapshot();
         snapshotCreate.setDeviceUuid(request.getUuid());
         snapshotCreate.setImageType(request.getImageType());
         snapshotCreate.setName(request.getName());
         snapshotCreate.setDescription(request.getDescription());
-        return scenariosService.create(snapshotCreate);
+        scenariosService.create(snapshotCreate);
+        return;
     }
 
     /**
@@ -113,14 +113,15 @@ public class SnapshotConverter {
      * @param request
      * @return
      */
-    public BaseCloudPlatformResult merge(SnapshotMergeRequest request) {
+    public void merge(SnapshotMergeRequest request) {
         validSnapshot(Arrays.asList(request.getUuid()));
         DeviceSnapshotMergeCloudPlatform mergeCloudPlatform = new DeviceSnapshotMergeCloudPlatform();
         mergeCloudPlatform.setSnapshotName(request.getSnapshotName());
         mergeCloudPlatform.setNewName(request.getNewName());
         mergeCloudPlatform.setDeviceUuid(request.getUuid());
         mergeCloudPlatform.setImageType(request.getImageType());
-        return scenariosService.mergeSnapshot(mergeCloudPlatform);
+        scenariosService.mergeSnapshot(mergeCloudPlatform);
+        return;
     }
 
     /**

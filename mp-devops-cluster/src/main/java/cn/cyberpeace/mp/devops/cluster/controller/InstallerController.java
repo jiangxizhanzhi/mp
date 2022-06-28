@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.request.DockerInstallerData;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstallerRequest;
-import cn.cyberpeace.mp.devops.cluster.service.impl.InstallerDockerUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.InstallerDockerUploadService;
 import cn.cyberpeace.mp.devops.cluster.vo.InstallerByIdVO;
 import cn.cyberpeace.mp.devops.cluster.vo.InstallerPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;

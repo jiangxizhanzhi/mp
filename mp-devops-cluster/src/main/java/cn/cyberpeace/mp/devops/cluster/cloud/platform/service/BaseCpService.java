@@ -1,12 +1,16 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.model.BaseModel;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
@@ -15,14 +19,12 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.HttpEntity;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 基础对接云平台接口层
@@ -31,7 +33,17 @@ import java.util.Objects;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class BaseCpService extends BaseService {
+public class BaseCpService {
+
+    private static final String ACCEPT_LANGUAGE = "Accept-Language";
+
+    private static final String GET_LOG_INFO = "=====GET url：{},result：{}";
+
+    private static final String POST_LOG_INFO = "=====POST url：{},params：{},>>>>>result：{}";
+
+    private static final String PUT_LOG_INFO = "=====PUT url：{},params：{},>>>>>>>result：{}";
+
+    private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},>>>>>>>result：{}";
 
     private final DevopsConfig devopsConfig;
 
@@ -42,9 +54,37 @@ public class BaseCpService extends BaseService {
      * @param <T>
      * @return
      */
-    @Override
     protected <T extends BaseModel> T sendGet(String api, Class<T> valueType){
-        return super.sendGet(devopsConfig.getCpUrl().concat(api),valueType);
+        String url = this.buildUrl(api);
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(GET_LOG_INFO, url, result);
+        }
+        result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(GET_LOG_INFO, url, result);
+        }
+        return this.buildSnakeObject(result, valueType);
+    }
+
+    /**
+     * 通过Get方式查询信息
+     * @param api
+     * @param valueType
+     * @param <T>
+     * @return
+     */
+    protected <T extends BaseModel> T sendGet(String api,int timeout, Class<T> valueType){
+        String url = this.buildUrl(api);
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(GET_LOG_INFO, url, result);
+        }
+        result = HttpRequest.get(url).addHeaders(wrapperHeaders(new HashMap<>())).timeout(timeout).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(GET_LOG_INFO, url, result);
+        }
+        return this.buildSnakeObject(result, valueType);
     }
 
     /**
@@ -55,9 +95,19 @@ public class BaseCpService extends BaseService {
      * @param <T>
      * @return
      */
-    @Override
     protected <T extends BaseModel> T sendPost(String api,String body,Class<T> valueType){
-        return super.sendPost(devopsConfig.getCpUrl().concat(api),body,valueType);
+        String url = this.buildUrl(api);
+        T model = null;
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        result = HttpRequest.post(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        model = this.buildSnakeObject(result, valueType);
+        return model;
     }
 
     /**
@@ -66,9 +116,17 @@ public class BaseCpService extends BaseService {
      * @param body
      * @return
      */
-    @Override
     protected String sendPost(String api,String body){
-        return super.sendPost(devopsConfig.getCpUrl().concat(api),body);
+        String url = this.buildUrl(api);
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        result = HttpRequest.post(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(POST_LOG_INFO, url, body, result);
+        }
+        return result;
     }
 
     /**
@@ -79,9 +137,19 @@ public class BaseCpService extends BaseService {
      * @param <T>
      * @return
      */
-    @Override
     protected <T extends BaseModel> T sendPut(String api,String body,Class<T> valueType){
-        return super.sendPut(devopsConfig.getCpUrl().concat(api),body,valueType);
+        String url = this.buildUrl(api);
+        T model = null;
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(PUT_LOG_INFO, url, body, result);
+        }
+        result = HttpRequest.put(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info(PUT_LOG_INFO, url, body, result);
+        }
+        model = this.buildSnakeObject(result, valueType);
+        return model;
     }
 
     /**
@@ -90,20 +158,37 @@ public class BaseCpService extends BaseService {
      * @param body
      * @return
      */
-    @Override
     protected <T extends BaseModel> T sendDelete(String api, String body,Class<T> valueType){
-        return super.sendDelete(devopsConfig.getCpUrl().concat(api),body, valueType);
+        String url = this.buildUrl(api);
+
+        String result = "";
+        if (log.isInfoEnabled()) {
+            log.info(DELETE_LOG_INFO, url, body, result);
+        }
+
+        result = HttpRequest.delete(url).body(body).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+
+        T model = this.buildSnakeObject(result, valueType);
+        if (log.isInfoEnabled()) {
+            log.info(DELETE_LOG_INFO, url, body, result);
+        }
+        return model;
     }
 
     /**
      * 上传文件
      * @param api
-     * @param httpEntity
+     * @param formMap
      * @return
      */
-    @Override
-    protected <T extends BaseModel> T sendFormDataPost(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
+    protected <T extends BaseModel> T sendFormDataPost(String api, Map<String, Object> formMap , Class<T> valueType) throws IOException {
+        String url = this.buildUrl(api);
+        String result = HttpUtil.createPost(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        T model = this.buildSnakeObject(result, valueType);
+        if (log.isInfoEnabled()) {
+            log.info("=====FormDataPost url：{},params：{},result：{}", url, formMap, result);
+        }
+        return model;
     }
 
     /**
@@ -112,20 +197,29 @@ public class BaseCpService extends BaseService {
      * @param fileList
      * @return
      */
-    @Override
     protected <T extends BaseModel> T sendFormDataPost(String api, List<File> fileList , Class<T> valueType) throws IOException {
-        return super.sendFormDataPost(devopsConfig.getCpUrl().concat(api),fileList,valueType);
+        String url = this.buildUrl(api);
+        String result = HttpUtil.createPost(url).addHeaders(wrapperHeaders(new HashMap<>())).form("file",fileList.toArray(File[]::new)).execute().body();
+        T model = this.buildSnakeObject(result, valueType);
+        if (log.isInfoEnabled()) {
+            log.info("=====FormDataPost url：{},result：{}", url, result);
+        }
+        return model;
     }
 
     /**
      * 上传文件
      * @param api
-     * @param httpEntity
+     * @param formMap
      * @return
      */
-    @Override
-    protected <T extends BaseModel> T sendFormDataPut(String api, HttpEntity httpEntity ,Class<T> valueType) throws IOException {
-        return super.sendFormDataPut(devopsConfig.getCpUrl().concat(api),httpEntity,valueType);
+    protected <T extends BaseModel> T sendFormDataPut(String api, Map<String, Object> formMap ,Class<T> valueType) throws IOException {
+        String url = this.buildUrl(api);
+        String result = HttpRequest.put(url).form(formMap).addHeaders(wrapperHeaders(new HashMap<>())).execute().body();
+        if (log.isInfoEnabled()) {
+            log.info("=====FormData url：{},params：{},result：{}", url, formMap, result);
+        }
+        return this.buildSnakeObject(result, valueType);
     }
 
     /**
@@ -173,5 +267,39 @@ public class BaseCpService extends BaseService {
 
             private Integer total = 0;
         }
+    }
+
+    /**
+     * 包装请求头信息
+     *
+     * @param headers
+     * @return
+     */
+    private Map<String, String> wrapperHeaders(Map<String, String> headers) {
+        if (MapUtils.isEmpty(headers)) {
+            headers = new HashMap<>();
+        }
+        headers.put(ACCEPT_LANGUAGE, ServletUtils.getAcceptLanguage());
+        return headers;
+    }
+
+    /**
+     * 获取请求链接URL
+     * @param api 接口URL
+     * @return
+     */
+    private String buildUrl(String api){
+        return devopsConfig.getCpUrl().concat(api);
+    }
+
+    /**
+     * 构建驼峰对象
+     * @param result
+     * @param tClass
+     * @param <T>
+     * @return
+     */
+    private <T extends BaseModel> T buildSnakeObject(String result, Class<T> tClass){
+        return JsonUtils.toSnakeObject(result, tClass);
     }
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.service.impl;
+package cn.cyberpeace.mp.devops.cluster.service.upload;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;

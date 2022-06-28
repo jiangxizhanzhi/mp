@@ -57,10 +57,10 @@ public class ImagesService extends BaseCpService {
     /**
      * 导出
      */
-    public BaseCloudPlatformResult export(String uuid, String imageName){
-        BaseCloudPlatformResult result = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName, BaseCloudPlatformResult.class);
+    public String export(String uuid, String imageName){
+        BaseCloudPlatformResult result = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + "/image/export?device_uuid=" + uuid + "&&image_name=" + imageName,10 * 60 * 1000, BaseCloudPlatformResult.class);
         super.checkResult(result);
-        return result;
+        return result.getUrl();
     }
 
     /**

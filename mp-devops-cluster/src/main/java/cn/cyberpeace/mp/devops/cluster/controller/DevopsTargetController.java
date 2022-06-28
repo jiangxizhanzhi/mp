@@ -17,7 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceTargetByTypeVO;
