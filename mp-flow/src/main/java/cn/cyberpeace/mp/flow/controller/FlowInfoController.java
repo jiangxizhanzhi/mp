@@ -56,7 +56,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowInfo(@PathVariable String id) {
-        return flowServiceImpl.deleteFlowInfo(id);
+        return flowServiceImpl.deleteFlowInfo(id, true);
     }
 
     /**
