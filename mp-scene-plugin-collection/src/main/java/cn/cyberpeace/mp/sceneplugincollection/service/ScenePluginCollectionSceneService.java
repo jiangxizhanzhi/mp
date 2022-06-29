@@ -1504,7 +1504,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ServiceResult<>(new HashMap<>());
         }
-        List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds);
     }
 
@@ -1525,7 +1525,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new HashMap<>();
         }
-        List<String> ruleIds = relationModels.stream().map(r -> r.getRuleId()).collect(Collectors.toList());
+        List<String> ruleIds = relationModels.stream().distinct().map(r -> r.getRuleId()).collect(Collectors.toList());
         return getRuleId2FileByIds(ruleIds).getSource();
     }
 
@@ -1545,7 +1545,7 @@ public class ScenePluginCollectionSceneService {
         if (CollectionUtils.isEmpty(relationModels)) {
             return new ArrayList<>();
         }
-        List<String> typeIds = relationModels.stream().map(r -> r.getTypeId()).collect(Collectors.toList());
+        List<String> typeIds = relationModels.stream().distinct().map(r -> r.getTypeId()).collect(Collectors.toList());
         return getTypes(typeIds);
     }
 
