@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.devops.log.service.OperateLogService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.stereotype.Service;
@@ -27,10 +26,10 @@ public class MpOperateLogServiceImpl extends BasEsLogService implements OperateL
     private static final String INDEX_MP_OPERATE_LOG = "mp_operate_log";
 
     @Override
-    public IndexResponse create(OperationLogModel operationLogModel) {
+    public void create(OperationLogModel operationLogModel) {
         Map<String,Object> source = JSON.parseObject(JSON.toJSONString(operationLogModel), Map.class);
         IndexRequest indexRequest = new IndexRequest(INDEX_MP_OPERATE_LOG).source(source);
-        return super.create(indexRequest);
+        super.create(indexRequest);
     }
 
 

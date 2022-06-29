@@ -126,11 +126,11 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public void add(ImageRequest request) {
+    public Device add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
         devopsTargetService.insert(Collections.singletonList(device));
-        return;
+        return device;
     }
 
     /**
@@ -154,6 +154,7 @@ public class ImagesConverter implements BaseConverter{
             ImageTargetConvertModel model = new ImageTargetConvertModel();
             model.setUuid(v.getUuid());
             model.setName(v.getName());
+            model.setId(v.getId());
             return model;
         }).collect(Collectors.toList());
     }
@@ -164,10 +165,10 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public void update(ImageRequest request) {
+    public Device update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return;
+        return device;
     }
 
     /**
@@ -175,7 +176,7 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public void build(ImagesBuildRequest request) {
+    public Device build(ImagesBuildRequest request) {
         DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
         List<QuickCreateParam> quickCreateParams = installerDTOList.stream().map(v -> {
@@ -188,7 +189,7 @@ public class ImagesConverter implements BaseConverter{
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
         devopsTargetService.insert(Collections.singletonList(device));
-        return;
+        return device;
     }
 
     /**

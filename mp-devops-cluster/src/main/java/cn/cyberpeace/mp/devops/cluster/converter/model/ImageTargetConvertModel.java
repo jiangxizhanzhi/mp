@@ -21,4 +21,9 @@ public class ImageTargetConvertModel{
      */
     private String name;
 
+    /**
+     * ID
+     */
+    private String id;
+
 }

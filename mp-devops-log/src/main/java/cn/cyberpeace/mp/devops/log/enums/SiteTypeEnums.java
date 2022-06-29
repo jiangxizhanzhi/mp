@@ -10,7 +10,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum SiteTypeEnums {
 
     //MP中台
-    MP;
+    MP,
+
+    //对接HLD
+    HLD;
 
     @JsonCreator
     public static SiteTypeEnums fromValue(int value) {

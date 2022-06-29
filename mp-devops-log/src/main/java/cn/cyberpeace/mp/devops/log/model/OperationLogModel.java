@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OperationLogModel {
+public class OperationLogModel<T> {
 
     /**
      * 站点类型：应用、中台、前端、平台
@@ -101,4 +101,8 @@ public class OperationLogModel {
      */
     private String opIp;
 
+    /**
+     * 扩展信息
+     */
+    private T extInfo;
 }

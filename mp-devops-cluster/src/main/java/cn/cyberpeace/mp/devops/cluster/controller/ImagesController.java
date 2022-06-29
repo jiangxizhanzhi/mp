@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
@@ -24,16 +25,17 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.service.DeviceLogAsyncService;
 import cn.cyberpeace.mp.devops.cluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devops.cluster.service.upload.SshPrivateKeyUploadService;
-import cn.cyberpeace.mp.devops.cluster.vo.ImagesByIdVO;
-import cn.cyberpeace.mp.devops.cluster.vo.ImagesByUuidsVO;
-import cn.cyberpeace.mp.devops.cluster.vo.ImagesPageVO;
-import cn.cyberpeace.mp.devops.cluster.vo.TargetUploadVO;
+import cn.cyberpeace.mp.devops.cluster.vo.*;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
+import cn.cyberpeace.mp.devops.cluster.vo.convert.DeviceVoConverter;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.bo.TargetLogBO;
+import cn.cyberpeace.mp.devops.log.dto.LogOperateDTO;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
@@ -46,12 +48,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -92,6 +96,10 @@ public class ImagesController {
     @NonNull
     private CustomImageUploadService customImageUploadService;
 
+    private final DeviceVoConverter deviceVoConverter;
+
+    private final DeviceLogAsyncService deviceLogAsyncService;
+
     /**
      * 分页查询
      */
@@ -127,7 +135,11 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
         validImageRequest(request);
-        imagesConverter.add(request);
+        Device device = imagesConverter.add(request);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).build();
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.CREATE)
+                .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
         return ServiceResult.successful();
     }
 
@@ -142,7 +154,11 @@ public class ImagesController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        imagesConverter.update(request);
+        Device device = imagesConverter.update(request);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).build();
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.UPDATE)
+                .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
         return ServiceResult.successful();
     }
 
@@ -202,8 +218,12 @@ public class ImagesController {
     @ApiOperation("快速构建")
     @PostMapping("/build")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
-    public ServiceResult build(@RequestBody ImagesBuildRequest request){
-        imagesConverter.build(request);
+    public ServiceResult<DeviceVO> build(@RequestBody ImagesBuildRequest request){
+        Device device = imagesConverter.build(request);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).build();
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.CREATE)
+                .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
         return ServiceResult.successful();
     }
 
@@ -215,7 +235,31 @@ public class ImagesController {
     @DeleteMapping("/page")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(request.getImageIds());
         imagesConverter.delete(request);
+        for (ImageTargetConvertModel model : models){
+            final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.DELETE)
+                    .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
+        return ServiceResult.successful();
+    }
+
+    /**
+     * 登入
+     */
+    @ApiOperation("登入")
+    @GetMapping("/login/{uuid}")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.LOGIN, title = "镜像登录", target = OpTargetEnums.IMAGE)
+    public ServiceResult login(@PathVariable String uuid){
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(Arrays.asList(uuid));
+        for (ImageTargetConvertModel model : models){
+            final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.LOGIN)
+                    .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
         return ServiceResult.successful();
     }
 
@@ -247,7 +291,14 @@ public class ImagesController {
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(Arrays.asList(uuid));
         String downloadUrl = imagesConverter.export(uuid,imageName);
+        for (ImageTargetConvertModel model : models){
+            final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.EXPORT)
+                    .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
         return new Result<>(downloadUrl);
     }
 
@@ -257,9 +308,16 @@ public class ImagesController {
     @ApiOperation("编辑镜像")
     @PostMapping("/{id}/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
-    public ServiceResult create(@PathVariable("id") String uuid){
+    public ServiceResult<TargetLogVO> create(@PathVariable("id") String uuid){
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(Arrays.asList(uuid));
         imagesConverter.create(uuid);
-        return ServiceResult.successful();
+        for (ImageTargetConvertModel model : models){
+            final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.START)
+                    .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
+        return new Result(TargetLogVO.builder().uuid(uuid).build());
     }
 
     /**
@@ -270,7 +328,14 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         imagesConverter.delete(request);
-        return ServiceResult.successful();
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(Arrays.asList(request.getUuid()));
+        for (ImageTargetConvertModel model : models) {
+            final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.STOP)
+                    .target(OpTargetEnums.IMAGE).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
+        return new Result(TargetLogVO.builder().uuid(request.getUuid()).build());
     }
 
     /**

@@ -12,6 +12,11 @@ import lombok.Data;
 public class ExtEntityExtInfo {
 
     /**
+     * 是否开启扩展
+     */
+    private Boolean enable;
+
+    /**
      * 主机名
      */
     @ApiModelProperty("主机名")

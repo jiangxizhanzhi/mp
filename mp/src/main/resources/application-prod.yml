@@ -11,6 +11,7 @@ ip:
   redis: ${REDIS_IP:10.100.7.1}
   hld-users: ${HLD_USERS:192.168.12.72}           # hld查询用户地址
   hld-login: ${HLD_LOGIN:192.168.12.72}           # hld获取登录session地址
+  hld-log: ${HLD_LOG_API:192.168.12.72}           # hld对接的日志管理接口IP
 port:
   self-callback: ${MP_SELF_PORT:8080}
   hld-port: ${HLD_PORT:85}
@@ -156,6 +157,7 @@ mp:
   hld:
     users-url: http://${ip.hld-users}:${port.hld-port}
     login-url: http://${ip.hld-login}:${port.hld-port}
+    log-api-url: http://${ip.hld-log}:${port.hld-port}
     logout:
       reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:

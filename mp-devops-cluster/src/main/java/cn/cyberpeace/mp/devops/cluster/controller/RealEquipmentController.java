@@ -3,14 +3,18 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.RealEquipmentBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.converter.model.ImageTargetConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
@@ -21,13 +25,13 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentByIdVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentDevopsDetailVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentNetworkCardPageVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentPageVO;
+import cn.cyberpeace.mp.devops.cluster.service.DeviceLogAsyncService;
+import cn.cyberpeace.mp.devops.cluster.vo.*;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.bo.TargetLogBO;
+import cn.cyberpeace.mp.devops.log.dto.LogOperateDTO;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
@@ -40,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,6 +63,12 @@ public class RealEquipmentController {
     private final RealEquipmentService realEquipmentService;
 
     private final TypeConverter typeConverter;
+
+    private final DeviceLogAsyncService deviceLogAsyncService;
+
+    private final ImagesConverter imagesConverter;
+
+    private final DeviceService deviceService;
 
     /**
      * 分页查询
@@ -176,8 +187,16 @@ public class RealEquipmentController {
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
-        realEquipmentConverter.add(request);
-        return ServiceResult.successful();
+        Device device = realEquipmentConverter.add(request);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+        final ExtEntity extEntity = device.getExtEntity();
+        if (Objects.nonNull(extEntity)) {
+            bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
+        }
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.CREATE)
+                .target(OpTargetEnums.REALEQUIPMENT).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        return new Result(TargetLogVO.builder().uuid(device.getUuid()).name(device.getName()).build());
     }
 
     /**
@@ -190,8 +209,16 @@ public class RealEquipmentController {
         if (StringUtils.isBlank(request.getUuid())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        realEquipmentConverter.update(request);
-        return ServiceResult.successful();
+        Device device = realEquipmentConverter.update(request);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+        final ExtEntity extEntity = device.getExtEntity();
+        if (Objects.nonNull(extEntity)) {
+            bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
+        }
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.UPDATE)
+                .target(OpTargetEnums.REALEQUIPMENT).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        return new Result(TargetLogVO.builder().uuid(device.getUuid()).name(device.getName()).build());
     }
 
     /**
@@ -201,8 +228,37 @@ public class RealEquipmentController {
     @DeleteMapping("/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.REALEQUIPMENT)
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
+        List<ImageTargetConvertModel> models = imagesConverter.findByUuids(request.getUuids());
+        List<Integer> deviceIdList = models.stream().map(ImageTargetConvertModel::getId).map(Integer::valueOf).collect(Collectors.toList());
+        final CloudPlatformPageResult<Device> cloudPlatformPageResult = deviceService.findByIds(deviceIdList);
+        List<Device> deviceList = cloudPlatformPageResult.getList();
         BaseCloudPlatformResult result = realEquipmentConverter.delete(request);
+        for (Device device : deviceList) {
+            final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+            final ExtEntity extEntity = device.getExtEntity();
+            if (Objects.nonNull(extEntity)) {
+                bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
+            }
+            LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.DELETE)
+                    .target(OpTargetEnums.REALEQUIPMENT).locale(LocaleContextHolder.getLocale()).t(bo).build();
+            deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        }
         return new Result<>(result.isSuccess());
+    }
+
+    /**
+     * 登入
+     */
+    @ApiOperation("登入")
+    @GetMapping("/login/{uuid}")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.LOGIN, title = "实装登录", target = OpTargetEnums.REALEQUIPMENT)
+    public ServiceResult login(@PathVariable String uuid){
+        RealEquipmentBO model = realEquipmentConverter.findByUuid(uuid);
+        final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+        LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.LOGIN)
+                .target(OpTargetEnums.REALEQUIPMENT).locale(LocaleContextHolder.getLocale()).t(bo).build();
+        deviceLogAsyncService.log(dto, ServletUtils.getRequest());
+        return ServiceResult.successful();
     }
 
     @ApiOperation("查询详情")

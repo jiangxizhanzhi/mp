@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devops.log.aop;
 
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
+import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
+import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,11 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -158,7 +156,8 @@ public class RequestLogAspect {
             if (Objects.isNull(operateLog)){
                 return;
             }
-            operateLogServiceFactory.create(operateLog, request, locale);
+            OperationLogModel operationLogModel = operateLogServiceFactory.buildOperationLogModel(operateLog, request, locale, SiteTypeEnums.MP);
+            operateLogServiceFactory.create(operationLogModel);
 
         } catch (Exception e) {
             log.error("====插入操作日志异常:{}==",e.getMessage());

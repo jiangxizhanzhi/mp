@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devops.log.dto.LogOperateDTO;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
@@ -11,7 +12,6 @@ import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -60,8 +60,7 @@ public class OperateLogServiceFactory {
      * @param request
      * @return
      */
-    @Async
-    public IndexResponse create(OperationLogRequest request, Locale locale){
+    public void create(OperationLogRequest request, Locale locale){
         OperationLogModel model = new OperationLogModel();
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
@@ -86,7 +85,7 @@ public class OperateLogServiceFactory {
         }
 
         model.setOpTarget(request.getOpTarget());
-
+        model.setSiteType(SiteTypeEnums.MP);
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
         model.setUserName(request.getUserName());
@@ -99,10 +98,10 @@ public class OperateLogServiceFactory {
 
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
-            return null;
+            return;
         }
 
-        return this.create(model);
+        this.create(model);
     }
 
     /**
@@ -110,13 +109,17 @@ public class OperateLogServiceFactory {
      * @param operateLog
      * @return
      */
-    @Async
-    public IndexResponse create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
-        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
+    public OperationLogModel buildOperationLogModel(OperateLog operateLog, HttpServletRequest request, Locale locale,SiteTypeEnums siteTypeEnums) {
+        OperationLogModel model = new OperationLogModel();
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
+        if (Objects.isNull(userName) || StringUtils.isBlank(userName.toString())) {
+            log.error("operationlog, username cannot be null. {}", userName);
+            return model;
+        }
+        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
 
-        OperationLogModel model = new OperationLogModel();
+
         if (Objects.nonNull(userId)) {
             model.setUserId(userId.toString());
         }
@@ -130,7 +133,7 @@ public class OperateLogServiceFactory {
         }
 
         //站点类型
-        model.setSiteType(SiteTypeEnums.MP);
+        model.setSiteType(siteTypeEnums);
 
         if (Objects.nonNull(operateLog.module())) {
             //操作模块
@@ -164,21 +167,83 @@ public class OperateLogServiceFactory {
 
         processDefaultContent(model);
 
-        if (StringUtils.isBlank(model.getUserName())) {
-            log.error("operationlog, username cannot be null. {}", model);
-            return null;
-        }
-        return this.create(model);
+
+        return model;
     }
+
+
+    public <T> OperationLogModel<T> buildOperationLogModel(LogOperateDTO<T> dto,HttpServletRequest request) {
+        OperationLogModel model = new OperationLogModel();
+        Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
+        if (Objects.isNull(userName) || StringUtils.isBlank(userName.toString())) {
+            log.error("operationlog, username cannot be null. {}", userName);
+            return model;
+        }
+        Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
+        Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
+
+
+        if (Objects.nonNull(userId)) {
+            model.setUserId(userId.toString());
+        }
+
+        if (Objects.nonNull(userName)) {
+            model.setUserName(userName.toString());
+        }
+
+        if (Objects.nonNull(userType)) {
+            model.setUserType(userType.toString());
+        }
+
+        //站点类型
+        model.setSiteType(dto.getSiteTypeEnums());
+
+        if (Objects.nonNull(dto.getModule())) {
+            //操作模块
+            model.setOpModule(getlocalizedMessage(dto.getLocale(), dto.getModule().getCode()));
+            //操作模块ID
+            model.setOpModuleID(dto.getModule().ordinal());
+        }
+
+        if (Objects.nonNull(dto.getType())) {
+            //操作类型
+            model.setOpType(getlocalizedMessage(dto.getLocale(), dto.getType().getCode()));
+            //操作类型ID
+            model.setOpTypeID(dto.getType().ordinal());
+        }
+
+        if (Objects.nonNull(dto.getTarget())) {
+            //操作对象
+            model.setOpTarget(getlocalizedMessage(dto.getLocale(), dto.getTarget().getCode()));
+            //操作ID
+            model.setOpTargetID(dto.getTarget().ordinal());
+        }
+
+        //操作主题
+        model.setTitle(dto.getTitle());
+        //操作描述
+        model.setDescription(dto.getDescription());
+        //记录操作时间
+        model.setOpTime(LocalDateTime.now());
+        //请求IP
+        model.setOpIp(SnUtils.getRealRemoteIp(request));
+
+        processDefaultContent(model);
+
+        model.setExtInfo(dto.getT());
+        return model;
+    }
+
 
 
     /**
      * 创建日志
      * @param operationLogModel
      */
-    private IndexResponse create(OperationLogModel operationLogModel){
+    @Async
+    public void create(OperationLogModel operationLogModel){
         log.info("{}", operationLogModel);
-       return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
+        operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 
     /**
