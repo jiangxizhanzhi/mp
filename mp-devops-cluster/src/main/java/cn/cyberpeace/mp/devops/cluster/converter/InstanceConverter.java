@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
-import cn.cyberpeace.mp.devops.cluster.model.InstanceCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
@@ -53,11 +53,11 @@ public class InstanceConverter implements BaseConverter{
     public InstanceConvertModel page(InstancePageRequest request, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(request,ignoreFields);
-        InstanceCloudPlatformModel model = vmService.page(getParams);
-        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getInstances())){
+        CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
+        if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return null;
         }
-        List<InstanceConvertModel.Model> list = model.getInstances().stream().map(instanceModel ->
+        List<InstanceConvertModel.Model> list = model.getList().stream().map(instanceModel ->
                 InstanceConvertModel.Model.builder().name(instanceModel.getName()).node(instanceModel.getHost())
                         .flavor(instanceModel.getFlavor())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
@@ -78,7 +78,7 @@ public class InstanceConverter implements BaseConverter{
     public Integer getTotalInstances(InstancePageRequest request) {
         request.setPerPage(NumberUtils.INTEGER_ONE);
         String getParams = ParamUtils.wrapperGetParamsByObject(request,this.getTotalPageIgnoreField());
-        InstanceCloudPlatformModel page = vmService.page(getParams);
+        CloudPlatformPageResult<InstanceModel>  page = vmService.page(getParams);
         return Objects.isNull(page) ||  Objects.isNull(page.getTotal()) ? NumberUtils.INTEGER_ZERO : page.getTotal() ;
     }
 }

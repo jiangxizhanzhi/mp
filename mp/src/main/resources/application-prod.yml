@@ -9,10 +9,10 @@ ip:
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
   mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
   redis: ${REDIS_IP:10.100.7.1}
-port:
-  self-callback: ${MP_SELF_PORT:8080}
   hld-users: ${HLD_USERS:192.168.12.72}           # hld查询用户地址
   hld-login: ${HLD_LOGIN:192.168.12.72}           # hld获取登录session地址
+port:
+  self-callback: ${MP_SELF_PORT:8080}
   hld-port: ${HLD_PORT:85}
 server:
   servlet:
@@ -154,8 +154,8 @@ mp:
       enable: true
       licenseDir: /home/mp/config/license
   hld:
-    users-url: http://${ip.hld-users}:${ip.hld-port}
-    login-url: http://${ip.hld-login}:${ip.hld-port}
+    users-url: http://${ip.hld-users}:${port.hld-port}
+    login-url: http://${ip.hld-login}:${port.hld-port}
     logout:
       reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:

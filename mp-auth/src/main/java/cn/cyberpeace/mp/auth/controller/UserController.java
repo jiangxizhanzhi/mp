@@ -10,12 +10,9 @@ import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
-import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.controller.BaseModelController;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
@@ -58,15 +55,6 @@ import java.io.IOException;
 public class UserController {
 
     @Autowired
-    private UserHeartbeatService heartbeatService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    public UserController(UserService modelService) {
-        setModelService(modelService);
-    }
     private UserService userService;
 
     @Value("${mp.hld.login-url}")
@@ -207,7 +195,7 @@ public class UserController {
             log.error("user : {}", JsonCommon.stringify(hldUserRequest));
             return ServiceResult.fail("userId is null");
         }
-        UserDto userDto = getModelService().getUserDto(hldUserRequest.getUserId());
+        UserDto userDto = userService.getUserDtoNoRestrict(hldUserRequest.getUserId());
         if (userDto == null) {
             log.error("userId : {}", hldUserRequest.getUserId());
             return ServiceResult.fail("user is not exist");

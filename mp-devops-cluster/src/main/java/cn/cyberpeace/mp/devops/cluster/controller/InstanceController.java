@@ -6,9 +6,9 @@ import cn.cyberpeace.mp.devops.cluster.converter.InstanceConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.model.FlavorConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
-import cn.cyberpeace.mp.devops.cluster.response.InstancePageResponse;
-import cn.cyberpeace.mp.devops.cluster.response.base.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.FlavorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.InstancePageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,18 +52,18 @@ public class InstanceController {
      */
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
-    public PageResult<InstancePageResponse> page(InstancePageRequest request){
+    public PageResult<InstancePageVO> page(InstancePageRequest request){
         InstanceConvertModel model = instanceConverter.page(request);
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getModelList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
         List<InstanceConvertModel.Model> instances = model.getModelList();
 
-        List<InstancePageResponse> list = instances.stream().map(instanceModel ->
+        List<InstancePageVO> list = instances.stream().map(instanceModel ->
                 {
-                    InstancePageResponse response = InstancePageResponse.builder().name(instanceModel.getName()).node(instanceModel.getNode())
+                    InstancePageVO response = InstancePageVO.builder().name(instanceModel.getName()).node(instanceModel.getNode())
                             .addressList(instanceModel.getAddressList())
-                            .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+                            .status(instanceModel.getStatus().toValue()).createTime(instanceModel.getCreateTime()).build();
                     FlavorConvertModel flavorConvertModel = flavorConverter.getById(instanceModel.getFlavor());
                     response.setFlavor(buildFlavorVO(flavorConvertModel));
                     return response;

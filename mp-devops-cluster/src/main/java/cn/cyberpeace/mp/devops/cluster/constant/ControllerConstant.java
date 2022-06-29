@@ -14,4 +14,6 @@ public final class ControllerConstant {
 
     public static final String ERROR_CODE_PREFIX = "devops.error_code.";
 
+    public static final String CODE = "0";
+
 }

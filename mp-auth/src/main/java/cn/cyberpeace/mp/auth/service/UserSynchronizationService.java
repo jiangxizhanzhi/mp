@@ -18,9 +18,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -141,20 +138,11 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getName() != null) {
             userRequest.setName(hldUserDto.getName());
         }
-        if (hldUserDto.getIdCard() != null) {
-            userRequest.setIdCard(hldUserDto.getIdCard());
-        }
         if (hldUserDto.getBirthday() != null) {
             userRequest.setBirthday(hldUserDto.getBirthday());
         }
-        if (hldUserDto.getMobilePhone() != null) {
-            userRequest.setMobile(hldUserDto.getMobilePhone());
-        }
         if (hldUserDto.getE_mail() != null) {
             userRequest.setEmail(hldUserDto.getE_mail());
-        }
-        if (hldUserDto.getPostalAddress() != null) {
-            userRequest.setAddress(hldUserDto.getPostalAddress());
         }
         if (hldUserDto.getMhDescribe() != null) {
             userRequest.setDescription(hldUserDto.getMhDescribe());
@@ -184,16 +172,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         if (hldUserDto.getE_mail() != null && !hldUserDto.getE_mail().equals(userDto.getEmail())) {
             return true;
         }
-        if (hldUserDto.getIdCard() != null && !hldUserDto.getIdCard().equals(userDto.getIdCard())) {
-            return true;
-        }
         if (hldUserDto.getMhDescribe() != null && !hldUserDto.getMhDescribe().equals(userDto.getDescription())) {
-            return true;
-        }
-        if (hldUserDto.getMobilePhone() != null && !hldUserDto.getMobilePhone().equals(userDto.getMobile())) {
-            return true;
-        }
-        if (hldUserDto.getPostalAddress() != null && !hldUserDto.getPostalAddress().equals(userDto.getAddress())) {
             return true;
         }
         return false;

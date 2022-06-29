@@ -231,16 +231,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                         @RequestBody(required = false) CsceneInstanceActionRequest request) {
         request = formatActionRequest(request, id);
         CsceneLogUtils.recordSceneInstanceLog(request.getId(), OpTypeEnums.DELETE, CsceneLogUtils.CLEAR_SCENE, request.getContext());
-        var result = modelService.clearById(request.getId(), request.getContext()).asResult();
-        return result;
+        return modelService.clearById(request.getId(), request.getContext()).asResult();
     }
 
     @ApiOperation("批量清理场景实例")
     @DeleteMapping("/bulk_clear")
     public ServiceResult<Integer> bulkClear(@RequestBody CsceneInstancesActionRequest request) {
         CsceneLogUtils.recordSceneInstanceLog(Arrays.asList(request.getIds()), OpTypeEnums.DELETE, CsceneLogUtils.BATCH_CLEAR_SCENE, request.getContext());
-        var result = modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
-        return result;
+        return modelService.bulkClearByIds(request.getIds(), request.getContext()).asResult();
     }
 
     @ApiOperation("场景实例启动节点流量")
