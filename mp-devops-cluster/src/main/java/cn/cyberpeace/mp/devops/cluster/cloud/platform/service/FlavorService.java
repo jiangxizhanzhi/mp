@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Flavor;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.model.FlavorByIdCloudPlatformModel;
+import cn.cyberpeace.mp.devops.cluster.model.FlavorCloudPlatformModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,5 +29,14 @@ public class FlavorService extends BaseCpService {
      */
     public CloudPlatformPageResult<Flavor> page(String getParams) {
         return super.page(URL_VERSION + "/flavors" + getParams, Flavor.class);
+    }
+
+    /**
+     * 根据ID查询
+     * @param id
+     * @return
+     */
+    public FlavorByIdCloudPlatformModel getById(String id) {
+        return super.sendGet(  URL_VERSION + "/flavors/" + id, FlavorByIdCloudPlatformModel.class);
     }
 }

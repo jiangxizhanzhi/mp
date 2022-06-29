@@ -37,18 +37,18 @@ public class UserUpdateCheckService implements UserCheckService {
 
         // 修改操作允许直接修改密码
         // 密码是否合法
-        if (StringUtils.isNotBlank(user.getPassword())) {
-            if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
-                throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
-            }
-        }
+//        if (StringUtils.isNotBlank(user.getPassword())) {
+//            if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
+//                throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+//            }
+//        }
 
         // 邮箱是否合法
-        if (StringUtils.isNotBlank(user.getEmail())) {
-            if (!Validator.isEmail(user.getEmail())) {
-                throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
-            }
-        }
+//        if (StringUtils.isNotBlank(user.getEmail())) {
+//            if (!Validator.isEmail(user.getEmail())) {
+//                throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
+//            }
+//        }
 
         // 手机号是否合法
 

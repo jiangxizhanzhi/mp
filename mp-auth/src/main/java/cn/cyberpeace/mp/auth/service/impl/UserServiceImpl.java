@@ -978,5 +978,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
-
+    @Override
+    public List<UserModel> queryAllUsers() {
+        return getModelMapper().queryAllUsers();
+    }
 }

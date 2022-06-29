@@ -182,6 +182,9 @@ mp:
         - /devops/cluster/router/**
         - /devops/cluster/types/**
         - /devops/cluster/instance/**
+  hld:
+      users-url: http://192.168.12.72:85
+      login-url: http://192.168.12.72:85
   flow:
     trex-image: tgn-trex
   sceneplugincloud:

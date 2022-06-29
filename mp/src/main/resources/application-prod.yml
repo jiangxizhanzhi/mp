@@ -11,6 +11,9 @@ ip:
   redis: ${REDIS_IP:10.100.7.1}
 port:
   self-callback: ${MP_SELF_PORT:8080}
+  hld-users: ${HLD_USERS:192.168.12.72}           # hld查询用户地址
+  hld-login: ${HLD_LOGIN:192.168.12.72}           # hld获取登录session地址
+  hld-port: ${HLD_PORT:85}
 server:
   servlet:
     context-path: /api/mp
@@ -150,6 +153,9 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
+  hld:
+    users-url: http://${ip.hld-users}:${ip.hld-port}
+    login-url: http://${ip.hld-login}:${ip.hld-port}
     logout:
       reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:

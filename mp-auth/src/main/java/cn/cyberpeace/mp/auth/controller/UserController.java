@@ -2,18 +2,28 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.login.LoginResp;
+import cn.cyberpeace.mp.auth.dto.user.HLDLoginCheckResponse;
+import cn.cyberpeace.mp.auth.dto.user.HLDUserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
+import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.hutool.core.exceptions.ExceptionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -21,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +43,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Objects;
+
+import java.io.IOException;
 
 /**
  * @Description: 用户管理接口
@@ -45,9 +58,22 @@ import java.util.Objects;
 public class UserController {
 
     @Autowired
+    private UserHeartbeatService heartbeatService;
+
+    @Autowired
     private UserService userService;
 
-    /*@Override
+    @Autowired
+    public UserController(UserService modelService) {
+        setModelService(modelService);
+    }
+    private UserService userService;
+
+    @Value("${mp.hld.login-url}")
+    private String hldLoginUrl;
+
+    /*
+    @Override
     @ApiIgnore
     @ApiOperation(value = "(弃用，建议用/api/mp/auth/org_users/page/byorg) 分页查询组织下的用户", notes = "")
     @GetMapping
@@ -157,4 +183,39 @@ public class UserController {
         return ServiceResult.success(userModel);
     }
 
+    @ApiOperation(value = "HLD定制化登录接口", notes = "")
+    @PostMapping("/hld/login")
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGIN, title = "用户登录", target = OpTargetEnums.USER)
+    public ServiceResult<LoginResp> login(@RequestBody(required = false) HLDUserRequest hldUserRequest) {
+        if (hldUserRequest.getSessionId() != null) {
+            String response = "";
+            String hldCheckUrl = hldLoginUrl + "/xinan-server/login/logincheck?sessionId=";
+            try {
+                log.info("hldCheckUrl:{},sessionId:{}", hldCheckUrl, hldUserRequest.getSessionId());
+                response = HttpUtils.sendGet(hldCheckUrl + hldUserRequest.getSessionId());
+                log.info("response:{}", response);
+            } catch (Exception e) {
+                log.error("get hldLoginCheck response error,msg:{},e:{}", e.getMessage(), ExceptionUtil.stacktraceToString(e), e);
+            }
+            HLDLoginCheckResponse hldLoginCheckResponse = JsonCommon.parse(response, HLDLoginCheckResponse.class);
+            if (hldLoginCheckResponse.getCode() != null && hldLoginCheckResponse.getCode() != 200) {
+                log.error("user : {},response : {}", JsonCommon.stringify(hldUserRequest), response);
+                return ServiceResult.fail("user is not login");
+            }
+        }
+        if (hldUserRequest.getUserId() == null) {
+            log.error("user : {}", JsonCommon.stringify(hldUserRequest));
+            return ServiceResult.fail("userId is null");
+        }
+        UserDto userDto = getModelService().getUserDto(hldUserRequest.getUserId());
+        if (userDto == null) {
+            log.error("userId : {}", hldUserRequest.getUserId());
+            return ServiceResult.fail("user is not exist");
+        }
+        String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
+        LoginResp loginResp = new LoginResp();
+        loginResp.setUser(userDto);
+        loginResp.setToken(jwt);
+        return ServiceResult.success(loginResp);
+    }
 }

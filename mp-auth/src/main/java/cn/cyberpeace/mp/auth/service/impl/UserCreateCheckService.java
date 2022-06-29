@@ -29,16 +29,16 @@ public class UserCreateCheckService implements UserCheckService {
         ParamCheck.notBlank(user.getUsername(), AuthBasei18nCode.USER_USERNAME);
 
         // 密码是否合法
-        if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
-            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
-        }
+//        if (PasswordUtils.isPasswordStrengthLowLevel(user.getPassword())) {
+//            throw new MpRuntimeException(AuthErrorCode.PASSWORD_STRENGTH_INVALID);
+//        }
 
         // 邮箱是否合法
-        if (StringUtils.isNotBlank(user.getEmail())) {
-            if (!Validator.isEmail(user.getEmail())) {
-                throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
-            }
-        }
+//        if (StringUtils.isNotBlank(user.getEmail())) {
+//            if (!Validator.isEmail(user.getEmail())) {
+//                throw new MpRuntimeException(AuthErrorCode.EMAIL_INVALID);
+//            }
+//        }
 
         // 手机号是否合法
         /*
@@ -61,6 +61,11 @@ public class UserCreateCheckService implements UserCheckService {
             }
         }
 
+//        if (StringUtils.isNotBlank(user.getIdentifier())) {
+//            if (userService.getByIdent(user.getIdentifier()) != null) {
+//                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_IDENTIFIER_EXISTED);
+//            }
+//        }
 
     }
 
