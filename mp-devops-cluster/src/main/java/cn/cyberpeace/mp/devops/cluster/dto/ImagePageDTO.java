@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -53,6 +54,11 @@ public class ImagePageDTO extends BasePageDTO{
      * 镜像名称
      */
     private String name;
+
+    /**
+     * 镜像名称集合
+     */
+    private List<String> nameList;
 
     /**
      * 用户ID
@@ -179,6 +185,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setThirdCategory(request.getThirdCategory());
         this.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         this.setName(request.getName());
+        this.setNameList(request.getNameList());
         this.setSearchPublicEnum(1);
         this.setRole(request.getRole());
         this.setIsHide(request.getIsHide());

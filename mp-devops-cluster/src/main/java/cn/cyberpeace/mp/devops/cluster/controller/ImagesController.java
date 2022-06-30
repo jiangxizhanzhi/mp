@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
@@ -25,9 +24,9 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.service.impl.CustomImageUploadService;
-import cn.cyberpeace.mp.devops.cluster.service.impl.InjectFileUploadService;
-import cn.cyberpeace.mp.devops.cluster.service.impl.SshPrivateKeyUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.CustomImageUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.InjectFileUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.SshPrivateKeyUploadService;
 import cn.cyberpeace.mp.devops.cluster.vo.ImagesByIdVO;
 import cn.cyberpeace.mp.devops.cluster.vo.ImagesByUuidsVO;
 import cn.cyberpeace.mp.devops.cluster.vo.ImagesPageVO;
@@ -177,8 +176,7 @@ public class ImagesController {
         imagesByIdVO.setExtVm(extVm);
         imagesByIdVO.setExtSystemInfo(model.getExtSystemInfo());
         imagesByIdVO.setExtDocker(extDocker);
-        Result<ImagesByIdVO> imagesByIdResponseResult = new Result<>(imagesByIdVO);
-        return imagesByIdResponseResult;
+        return new Result<>(imagesByIdVO);
     }
 
 
@@ -217,8 +215,8 @@ public class ImagesController {
     @DeleteMapping("/page")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
-        BaseCloudPlatformResult model = imagesConverter.delete(request);
-        return model.isSuccess() ? new Result<>(model.getUrl()) : ServiceResult.fail(model.getMessage());
+        imagesConverter.delete(request);
+        return ServiceResult.successful();
     }
 
     /**
@@ -249,8 +247,8 @@ public class ImagesController {
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
-        BaseCloudPlatformResult model = imagesConverter.export(uuid,imageName);
-        return new Result<>(model.getUrl());
+        String downloadUrl = imagesConverter.export(uuid,imageName);
+        return new Result<>(downloadUrl);
     }
 
     /**

@@ -23,13 +23,4 @@ public class InstancePageRequest extends BasePageRequest implements Serializable
 
     @ApiModelProperty(value = "IP地址")
     private String addr;
-
-    public InstancePageRequest(String host) {
-        this.host = host;
-    }
-
-    public InstancePageRequest(String host, String addr) {
-        this.host = host;
-        this.addr = addr;
-    }
 }

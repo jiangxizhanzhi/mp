@@ -24,6 +24,12 @@
             <if test=" name != null and name != '' and likeName != false">
                 and i.name like CONCAT('%',#{name},'%')
             </if>
+            <if test="nameList != null and nameList.size > 0">
+                and i.name in
+                <foreach collection="nameList" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test=" name != null and name != '' and likeName == false">
                 and i.name = #{name}
             </if>
@@ -99,6 +105,12 @@
             <if test=" name != null and name != '' and likeName != false">
                 and i.name like CONCAT('%',#{name},'%')
             </if>
+            <if test="nameList != null and nameList.size > 0">
+                and i.name in
+                <foreach collection="nameList" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test=" name != null and name != '' and likeName == false">
                 and i.name = #{name}
             </if>
@@ -172,7 +184,7 @@
         i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
         i.in_position,i.reference_status,i.use_status,i.create_time
     </sql>
-    
+
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
         select
                count(distinct i.pk)

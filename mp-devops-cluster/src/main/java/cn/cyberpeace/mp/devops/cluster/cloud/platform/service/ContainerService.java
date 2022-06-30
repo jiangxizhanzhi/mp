@@ -43,9 +43,9 @@ public class ContainerService extends BaseCpService {
      * @param uuid
      * @return
      */
-    public BaseCloudPlatformResult action(ContainerActionCloudPlatformModel model, String uuid) {
+    public void action(ContainerActionCloudPlatformModel model, String uuid) {
         BaseCloudPlatformResult result = super.sendPost(URL_VERSION + CONTAINERS + "/" + uuid +"/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
         super.checkResult(result);
-        return result;
+        return;
     }
 }

@@ -126,11 +126,11 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Device add(ImageRequest request) {
+    public void add(ImageRequest request) {
         Device device = imagesService.add(convertRequest(request));
         device.setIsHide(Objects.nonNull(request.getIsHide()) ? request.getIsHide() : Boolean.FALSE);
-        devopsTargetService.insert(Arrays.asList(device));
-        return device;
+        devopsTargetService.insert(Collections.singletonList(device));
+        return;
     }
 
     /**
@@ -164,10 +164,10 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public Device update(ImageRequest request) {
+    public void update(ImageRequest request) {
         Device device = imagesService.update(request.getUuid(),convertRequest(request));
         devopsTargetService.updateById(device);
-        return device;
+        return;
     }
 
     /**
@@ -175,7 +175,7 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public Device build(ImagesBuildRequest request) {
+    public void build(ImagesBuildRequest request) {
         DeviceQuickCreateCloudPlatformModel model = new DeviceQuickCreateCloudPlatformModel(request.getName(),request.getImageName());
         List<InstallerDTO> installerDTOList = request.getInstallerDTOList();
         List<QuickCreateParam> quickCreateParams = installerDTOList.stream().map(v -> {
@@ -187,8 +187,8 @@ public class ImagesConverter implements BaseConverter{
         }).collect(Collectors.toList());
         model.setQuickCreateParams(quickCreateParams);
         Device device = imagesService.quickCreate(model);
-        devopsTargetService.insert(Arrays.asList(device));
-        return device;
+        devopsTargetService.insert(Collections.singletonList(device));
+        return;
     }
 
     /**
@@ -197,7 +197,7 @@ public class ImagesConverter implements BaseConverter{
      * @return
      */
     @Transactional
-    public BaseCloudPlatformResult delete(ImagesDeleteRequest request) {
+    public void delete(ImagesDeleteRequest request) {
         targetConverter.validTargetCanDelete(request.getImageIds());
         snapshotConverter.validSnapshot(request.getImageIds());
         BaseCloudPlatformResult result = deviceService.deleteByIds(request.getImageIds());
@@ -208,7 +208,7 @@ public class ImagesConverter implements BaseConverter{
             deviceTargetMapper.delete(dto);
             devopsTargetAuthService.deleteByTargets(request.getImageIds());
         }
-        return result;
+        return;
     }
 
     /**
@@ -270,23 +270,22 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public BaseCloudPlatformResult reboot(ImagesRebootInstanceRequest request) {
+    public void reboot(ImagesRebootInstanceRequest request) {
         if (StringUtils.isBlank(request.getInstanceId()) || StringUtils.isBlank(request.getImageType())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        BaseCloudPlatformResult platformModel = null;
         if(ImageTypeEnum.VM.toValue().equals(request.getImageType())) {
             VmActionCloudPlatformModel model = new VmActionCloudPlatformModel();
             model.setReboot(new VmActionCloudPlatformModel.Reboot("HARD"));
-            platformModel = vmService.action(model,request.getInstanceId());
+            vmService.action(model,request.getInstanceId());
         }
         else if(ImageTypeEnum.CONTAINER.toValue().equals(request.getImageType())) {
             ContainerActionCloudPlatformModel model = new ContainerActionCloudPlatformModel();
             model.setAction("reboot");
             model.setWaitForStatus(Boolean.TRUE);
-            platformModel = containerService.action(model, request.getInstanceId());
+            containerService.action(model, request.getInstanceId());
         }
-        return platformModel;
+        return;
     }
 
     /**
@@ -295,7 +294,7 @@ public class ImagesConverter implements BaseConverter{
      * @param imageName
      * @return
      */
-    public BaseCloudPlatformResult export(String uuid, String imageName) {
+    public String export(String uuid, String imageName) {
         return imagesService.export(uuid,imageName);
     }
 
@@ -304,12 +303,13 @@ public class ImagesConverter implements BaseConverter{
      * @param uuid
      * @return
      */
-    public BaseCloudPlatformResult create(String uuid) {
+    public void create(String uuid) {
         if (StringUtils.isBlank(uuid)){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        return scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
                 Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""));
+        return;
     }
 
     /**
@@ -317,11 +317,12 @@ public class ImagesConverter implements BaseConverter{
      * @param request
      * @return
      */
-    public BaseCloudPlatformResult delete(ImagesDeleteInstanceRequest request) {
+    public void delete(ImagesDeleteInstanceRequest request) {
         if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        return scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
+        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
+        return;
     }
 
     /**

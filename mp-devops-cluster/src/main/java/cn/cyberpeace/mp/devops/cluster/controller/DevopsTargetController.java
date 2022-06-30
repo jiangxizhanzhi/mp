@@ -17,7 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetMultiAsyncRequest;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
-import cn.cyberpeace.mp.devops.cluster.service.impl.TargetIconUploadService;
+import cn.cyberpeace.mp.devops.cluster.service.upload.TargetIconUploadService;
 import cn.cyberpeace.mp.devops.cluster.thread.ITask;
 import cn.cyberpeace.mp.devops.cluster.utils.MultiThreadUtils;
 import cn.cyberpeace.mp.devops.cluster.vo.DeviceTargetByTypeVO;
@@ -266,6 +266,17 @@ public class DevopsTargetController {
     @ResponseBody
     public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
         return targetIconUploadService.build(file).upload();
+    }
+
+
+    @ApiOperation("校验靶标是否存在")
+    @PostMapping("/check")
+    @ResponseBody
+    public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request){
+        request.setPage(null);
+        request.setPerPage(null);
+        List<String> nameList = targetConverter.findByImagePageDTO(new ImagePageDTO(request));
+        return new Result(nameList);
     }
 
 }
