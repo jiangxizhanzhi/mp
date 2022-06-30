@@ -56,13 +56,13 @@ public class ExtEntityExtInfo {
      * CPU核心数
      */
     @ApiModelProperty("CPU核心数")
-    private Integer numCores;
+    private String numCores;
 
     /**
      * 线程数
      */
     @ApiModelProperty("线程数")
-    private Integer numThreads;
+    private String numThreads;
 
     /**
      * 主频
