@@ -45,14 +45,14 @@ public class FlowRecords {
      * 发包数量
      */
     @ApiModelProperty(value = "发包数量")
-    private Integer opackets;
+    private Long opackets;
 
     /**
      * 发包大小
      * 单位为 byte
      */
     @ApiModelProperty(value = "发包大小 单位byte")
-    private Integer obytes;
+    private Long obytes;
 
     /**
      * 每秒发包率
