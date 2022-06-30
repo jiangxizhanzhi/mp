@@ -181,20 +181,6 @@ mp:
         - /sys/notice/**
         - /systemOperation/**
         - /devops/log/operate/page
-        - /flow/**
-        - /cscene/**
-        - /devops/cluster/monitor/**
-        - /devops/cluster/container/**
-        - /devops/cluster/elasticip/**
-        - /devops/cluster/firewall/**
-        - /devops/cluster/images/**
-        - /devops/cluster/service/**
-        - /devops/cluster/network/**
-        - /devops/cluster/openflow/**
-        - /devops/cluster/real-equipment/**
-        - /devops/cluster/router/**
-        - /devops/cluster/types/**
-        - /devops/cluster/instance/**
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
