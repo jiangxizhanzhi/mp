@@ -188,7 +188,7 @@ public class RealEquipmentController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
         Device device = realEquipmentConverter.add(request);
-        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getCategory()) ? device.getCategory().toString() : "").build();
         final ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)) {
             bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
@@ -210,7 +210,7 @@ public class RealEquipmentController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Device device = realEquipmentConverter.update(request);
-        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+        final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getCategory()) ? device.getCategory().toString() : "").build();
         final ExtEntity extEntity = device.getExtEntity();
         if (Objects.nonNull(extEntity)) {
             bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
@@ -234,7 +234,7 @@ public class RealEquipmentController {
         List<Device> deviceList = cloudPlatformPageResult.getList();
         BaseCloudPlatformResult result = realEquipmentConverter.delete(request);
         for (Device device : deviceList) {
-            final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getL3Category()) ? device.getL3Category().toString() : "").build();
+            final TargetLogBO bo = TargetLogBO.builder().uuid(device.getUuid()).name(device.getName()).equType(Objects.nonNull(device.getCategory()) ? device.getCategory().toString() : "").build();
             final ExtEntity extEntity = device.getExtEntity();
             if (Objects.nonNull(extEntity)) {
                 bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
@@ -254,7 +254,11 @@ public class RealEquipmentController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.LOGIN, title = "实装登录", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult login(@PathVariable String uuid){
         RealEquipmentBO model = realEquipmentConverter.findByUuid(uuid);
-        final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).build();
+        final TargetLogBO bo = TargetLogBO.builder().uuid(model.getUuid()).name(model.getName()).equType(Objects.nonNull(model.getMainCategory()) ? model.getMainCategory().toString() : "").build();
+        final ExtEntity extEntity = model.getExtEntity();
+        if (Objects.nonNull(extEntity)) {
+            bo.setEquIp(Objects.nonNull(extEntity.getExtInfo()) ? extEntity.getExtInfo().getIpAddress() : "");
+        }
         LogOperateDTO dto = LogOperateDTO.builder().module(OpModuleEnums.TARGET).type(OpTypeEnums.LOGIN)
                 .target(OpTargetEnums.REALEQUIPMENT).locale(LocaleContextHolder.getLocale()).t(bo).build();
         deviceLogAsyncService.log(dto, ServletUtils.getRequest());

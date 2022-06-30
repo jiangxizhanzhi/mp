@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.devops.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OperationLogModel;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author：Geek Wang
  * @date: 2022/6/29
  */
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class DeviceLogAsyncService {
@@ -24,14 +25,17 @@ public class DeviceLogAsyncService {
     /**
      *
      * @param dto
-     * @param t
      * @param request
      * @param <T>
      */
-    @Async
     public  <T> void log(LogOperateDTO dto,HttpServletRequest request){
-        dto.setSiteTypeEnums(SiteTypeEnums.HLD);
-        OperationLogModel hldLog = operateLogServiceFactory.buildOperationLogModel(dto,request);
-        operateLogServiceFactory.create(hldLog);
+        try {
+            dto.setSiteTypeEnums(SiteTypeEnums.HLD);
+            OperationLogModel hldLog = operateLogServiceFactory.buildOperationLogModel(dto,request);
+            operateLogServiceFactory.create(hldLog);
+        }catch (Exception e){
+            log.info("async operate log to hld error ===>",e);
+        }
+
     }
 }
