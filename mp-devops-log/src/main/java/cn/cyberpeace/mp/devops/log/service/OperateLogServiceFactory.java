@@ -240,7 +240,7 @@ public class OperateLogServiceFactory {
      * 创建日志
      * @param operationLogModel
      */
-    @Async
+    @Async(value = "logThreadPoolTaskExecutor")
     public void create(OperationLogModel operationLogModel){
         log.info("{}", operationLogModel);
         operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);

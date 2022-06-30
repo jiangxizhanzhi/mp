@@ -150,6 +150,13 @@ mp:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
     exclude-method: OPTIONS
+    async-thread-pool:
+      core-pool-size: 10
+      max-pool-size: 20
+      queue-capacity: 500
+      keep-alive-seconds: 60
+      await-termination-seconds: 300
+      thread-name-prefix: Log-Thread-
   auth:
     activation:
       enable: true
