@@ -78,7 +78,7 @@ public class ResourceCenterService {
     public ServiceResult<Boolean> mount(String host, String path) {
         File file = new File(path);
         if (!file.exists()) {
-            file.mkdir();
+            file.mkdirs();
         }
         this.execShell(String.format(MOUNT_CMD, host, path, path));
         return new ServiceResult<>(true);
