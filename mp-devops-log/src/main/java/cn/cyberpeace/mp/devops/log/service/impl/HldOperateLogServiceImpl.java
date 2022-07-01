@@ -9,7 +9,8 @@ import cn.cyberpeace.mp.devops.log.po.RealDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.po.VirtualDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogService;
-import cn.hutool.http.HttpUtil;
+import cn.hutool.http.ContentType;
+import cn.hutool.http.HttpRequest;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
@@ -68,7 +69,7 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
             String url = hldLogApiUrl.concat("/testApi/zyLogVirtual/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            String result = HttpUtil.post(url, formMap);
+            String result = HttpRequest.post(url).form(formMap).contentType(ContentType.JSON.getValue()).execute().body();
             log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
         }else if (operationLogModel.getOpTargetID().equals(OpTargetEnums.REALEQUIPMENT.ordinal())) {
             RealDeviceLogPO po = new RealDeviceLogPO();
@@ -84,7 +85,7 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
             String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            String result = HttpUtil.post(url, formMap);
+            String result = HttpRequest.post(url).form(formMap).contentType(ContentType.JSON.getValue()).execute().body();
             log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
         }
     }
