@@ -89,8 +89,7 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             po.setStatus("成功");
             po.setOptContent(operationLogModel.getContent());
             String params = JsonUtils.toUnderlineJSONString(po);
-//            String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
-            String url = "http://127.0.0.1:8080".concat("/api/mp/devops/log/runtime_log/testApi/zyLogEquipment/add");
+            String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,params);
             String result = null;
             try {
