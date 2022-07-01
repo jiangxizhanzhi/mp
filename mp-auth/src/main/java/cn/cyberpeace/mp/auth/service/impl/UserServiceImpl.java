@@ -234,9 +234,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean>  delete(String userId) {
-        if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
-            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
-        }
+//        if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
+//            throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
+//        }
         deleteReleated(userId);
 
         var ret = super.delete(userId);
@@ -263,7 +263,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Transactional(rollbackFor = Exception.class)
     public UserModel add(UserRequest createRequest) {
         ParamCheck.notNull(createRequest, AuthBasei18nCode.REQUEST_PARAMS);
-        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
+//        opUserPermCheckService.checkByTargetRoleIds(createRequest.getRoleIds());
 
         // 保存用户
         UserModel userModel = new UserModel();
@@ -321,10 +321,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public UserModel modify(UserRequest modifyRequest) {
-        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
-            // 如果操作的对象不是自己，则进行权限校验
-            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
-        }
+//        if (!opUserPermCheckService.isOperateSelf(Arrays.asList(modifyRequest.getId()))) {
+//            // 如果操作的对象不是自己，则进行权限校验
+//            opUserPermCheckService.checkByTargetRoleIds(modifyRequest.getRoleIds());
+//        }
 
         // 保存用户
         UserModel userModel = new UserModel();
