@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -249,9 +249,8 @@ public class LogFileService {
 
     private LocalDateTime parseDateTime(String datetime) {
         String date1 = StringUtils.substringBeforeLast(datetime, ".");
-        DateTimeFormatter df = DateTimeFormatter.ofPattern(DATETIME_FORMAT);
-        LocalDateTime dateTime = LocalDateTime.parse(date1, df);
-        return dateTime;
+        date1 = date1.concat("Z");
+        return TimeUtils.utcStringToLocalDateTime(date1);
     }
 
 }
