@@ -92,14 +92,14 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
             }
             String userId = in.getId().toString();
             userIds.add(in.getId().toString());
-            UserDto user = getModelService().getUserDto(userId);
+            UserDto user = userService.getUserDtoNoRestrict(userId);
             boolean needUpdate = this.checkUpdate(user, in);
             if (user == null) {
                 UserRequest createRequest = HLDUser2UserRequest(in, true);
-                getModelService().add(createRequest);
+                userService.add(createRequest);
             } else if (needUpdate) {
                 UserRequest modifyRequest = HLDUser2UserRequest(in, false);
-                getModelService().modify(modifyRequest);
+                userService.modify(modifyRequest);
             }
         });
         List<UserModel> userModels = new ArrayList<>();
@@ -107,7 +107,7 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
         userModels.forEach(user -> {
             if (!userIds.contains(user.getId()) && !user.getId().equals(AuthConstant.ROOT_USER_ID)) {
                 log.info("delete user:{}", user.getId());
-                getModelService().delete(user.getId());
+                userService.delete(user.getId());
             }
         });
     }
