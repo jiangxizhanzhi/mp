@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devops.log.po.RealDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.po.VirtualDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogService;
+import cn.cyberpeace.mp.devops.log.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
@@ -82,13 +83,14 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             if (Objects.nonNull(extInfo)) {
                 po.setEquName(extInfo.getName());
                 po.setEquType(extInfo.getEquType());
-                po.setEquIp(extInfo.getEquIp());
             }
+            po.setEquIp(operationLogModel.getOpIp());
             po.setOptType(EQUIPMENT_TYPE_MAP.get(OpTypeEnums.fromValue(operationLogModel.getOpTypeID())));
             po.setStatus("成功");
             po.setOptContent(operationLogModel.getContent());
-            String params = JSONObject.toJSONString(po);
-            String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
+            String params = JsonUtils.toUnderlineJSONString(po);
+//            String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
+            String url = "http://127.0.0.1:8080".concat("/api/mp/devops/log/runtime_log/testApi/zyLogEquipment/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,params);
             String result = null;
             try {

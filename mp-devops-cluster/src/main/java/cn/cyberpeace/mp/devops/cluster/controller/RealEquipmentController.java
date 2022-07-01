@@ -43,7 +43,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -78,7 +77,7 @@ public class RealEquipmentController {
     public PageResult<RealEquipmentPageVO> page(RealEquipmentPageRequest request){
         BasePageBO<RealEquipmentBO> model = realEquipmentConverter.page(new ImagePageDTO(request));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
-            return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
+            return new PageResult<>(Lists.newArrayList(), model.getTotal());
         }
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         TypeAllConvertModel language = typeConverter.findLanguage();

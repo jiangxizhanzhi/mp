@@ -70,7 +70,7 @@ public class RealEquipmentConverter implements BaseConverter{
 
         BasePageBO<RealEquipmentBO> convertModel = new BasePageBO<>();
         if (total == 0){
-            convertModel.setTotal(0);
+            convertModel.setTotal(total);
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
@@ -78,14 +78,14 @@ public class RealEquipmentConverter implements BaseConverter{
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            convertModel.setTotal(0);
+            convertModel.setTotal(total);
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
         CloudPlatformPageResult<Device> model = deviceService.findByIds(ids);
 
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
-            convertModel.setTotal(0);
+            convertModel.setTotal(total);
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }

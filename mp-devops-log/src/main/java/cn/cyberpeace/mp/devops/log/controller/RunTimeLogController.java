@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.constant.LogErrorCode;
 import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
+import cn.cyberpeace.mp.devops.log.po.RealDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.cyberpeace.mp.devops.log.request.RunTimeLogDownloadRequest;
 import cn.cyberpeace.mp.devops.log.service.LogFileServiceFactory;
@@ -14,20 +15,20 @@ import cn.cyberpeace.mp.devops.log.service.RuntimeLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
 /**
  *
  **/
+@Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/runtime_log")
 @Api(value = "日志模块", tags = "日志模块")
@@ -38,6 +39,14 @@ public class RunTimeLogController {
 
     private final LogFileServiceFactory logFileServiceFactory;
 
+
+
+    @PostMapping("/testApi/zyLogEquipment/add")
+    @ApiOperation(value = "TETS", notes = "")
+    public ListObjServiceResult<RunTimeLogDTO> test(@RequestBody RealDeviceLogPO basePageRequest) {
+        log.info("实装日志：{}",basePageRequest);
+        return null;
+    }
 
     @GetMapping("/logs")
     @ApiOperation(value = "分页查询运行时日志", notes = "")
