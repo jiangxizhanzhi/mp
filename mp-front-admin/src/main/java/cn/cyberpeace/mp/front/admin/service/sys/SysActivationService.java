@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
+import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationModuleItem;
@@ -79,6 +80,22 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
+
+        ActivationResponse content = status();
+        SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
+        boolean isSysActivited = false;
+        if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
+            isSysActivited = true;
+        }
+        if (Objects.nonNull(validModel)) {
+            isSysActivited = true;
+        }
+        if (isSysActivited) {
+            log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
+            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
+        }
+
+
         SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         if (Objects.isNull(unusedActivCtlModel)) {
             log.error("unused activctl not existed!");
@@ -149,7 +166,7 @@ public class SysActivationService {
     public String getValueByKey(String key) {
         log.info(key);
         ActivationResponse activationResponse = status();
-        if (Objects.isNull(activationResponse) || !Objects.equals(1, activationResponse.getIsActived())) {
+        if (Objects.isNull(activationResponse) || !Objects.equals(AdminConstant.STATUS_ACTIVITED, activationResponse.getIsActived())) {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
         }
 
@@ -180,7 +197,7 @@ public class SysActivationService {
     public String querySysUUID() {
         status();
         SysActivCtlModel sysActivCtlModel = null;
-        if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(0, ACTIVATION_CONTENT.getIsActived())) {
+        if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
@@ -250,7 +267,7 @@ public class SysActivationService {
             SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
             log.info("sysActivCtlModel:{}", sysActivCtlModel);
             if (Objects.isNull(sysActivCtlModel)) {
-                ACTIVATION_CONTENT.setIsActived(0);
+                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
                 return;
             }
 
@@ -278,7 +295,7 @@ public class SysActivationService {
             }
 
             if (isExpired || isRunSecondsExceeded) {
-                ACTIVATION_CONTENT.setIsActived(0);
+                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
 
                 // 过期状态，更新激活限制项配置
                 SysActivCtlModel updateActivCtlModel = new SysActivCtlModel();
@@ -287,7 +304,7 @@ public class SysActivationService {
                 sysActivCtlService.update(updateActivCtlModel);
             }
 
-            ACTIVATION_CONTENT.setIsActived(1);
+            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
         }
     }
 
@@ -378,6 +395,7 @@ public class SysActivationService {
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
+        // todo 考虑用时间戳替代
         LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
         Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
         Long lifeTimeSeconds = duration.toSeconds();
@@ -403,6 +421,7 @@ public class SysActivationService {
             }
         } else {
             // 首次激活，添加first_active_date, last_active_date, expire_date, active_count;
+            sysActivCtlService.invalidOtherExceptOne(updateSysActivCtlModel.getId());
             processActivCtlWhenFirstActiveWithNewLicense(updateSysActivCtlModel, activeDateStr, expiredDateStr, encryptedLicenseCode);
         }
     }
@@ -474,7 +493,7 @@ public class SysActivationService {
     private ActivationResponse mockActivationContent() {
         ActivationResponse content = new ActivationResponse();
         content.setExpiredDate("2022-05-26");
-        content.setIsActived(1);
+        content.setIsActived(AdminConstant.STATUS_ACTIVITED);
         content.setEdition(1);
 
 

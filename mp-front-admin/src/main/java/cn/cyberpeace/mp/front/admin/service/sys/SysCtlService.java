@@ -117,6 +117,10 @@ public class SysCtlService {
             sysActivCtlModel.setStatus(2);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
+
+            // todo 将其他状态为1的记录，全更新为0
+            //sysActivCtlService.invalidOtherExceptOne("-1");
+
             if (Objects.nonNull(objResult.getSource())) {
                 log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
                 sysActivCtlModel = objResult.getSource().getObj();

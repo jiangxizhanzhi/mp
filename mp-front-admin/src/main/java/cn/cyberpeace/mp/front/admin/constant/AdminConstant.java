@@ -9,5 +9,9 @@ public class AdminConstant {
 
     public static final String ERROR_CODE_PREFIX = "admin.error_code.";
 
+    public static final Integer STATUS_ACTIVITED = 1;
+
+    public static final Integer STATUS_NOT_ACTIVITED = 0;
+
     private AdminConstant() {}
 }
