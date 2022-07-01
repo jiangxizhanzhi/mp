@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ import java.util.List;
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
     private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
-    private static String UNMOUNT_CMD = "umount %s";
+    private static String UMOUNT_CMD = "umount %s";
 
     @Resource
     private CsceneService csceneService;
@@ -75,12 +76,16 @@ public class ResourceCenterService {
     }
 
     public ServiceResult<Boolean> mount(String host, String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdir();
+        }
         this.execShell(String.format(MOUNT_CMD, host, path, path));
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> unmount(String path) {
-        this.execShell(String.format(UNMOUNT_CMD, path));
+    public ServiceResult<Boolean> umount(String path) {
+        this.execShell(String.format(UMOUNT_CMD, path));
         return new ServiceResult<>(true);
     }
 
