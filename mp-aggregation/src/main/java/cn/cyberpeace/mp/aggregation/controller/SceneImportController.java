@@ -57,6 +57,6 @@ public class SceneImportController {
         if (StringUtils.isEmpty(request.getPath())) {
             return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
         }
-        return this.resourceCenterService.unmount(request.getPath()).asResult();
+        return this.resourceCenterService.umount(request.getPath()).asResult();
     }
 }
