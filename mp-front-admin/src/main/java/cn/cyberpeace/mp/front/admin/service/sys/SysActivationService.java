@@ -256,34 +256,29 @@ public class SysActivationService {
     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
             //默认状态为未激活
-            //ACTIVATION_CONTENT.setIsActived(0);
-            log.info("LocalDate.now: {}", LocalDate.now());
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
 
             // 运行时长超限
             boolean isRunSecondsExceeded = false;
             // 过期日期到期
-            boolean isExpired = !LocalDate.now().isBefore(expireDate);
+            boolean isExpiredDateExceeded = !LocalDate.now().isBefore(expireDate);
 
-            SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
-            log.info("sysActivCtlModel:{}", sysActivCtlModel);
-            if (Objects.isNull(sysActivCtlModel)) {
+            SysActivCtlModel validActivCtlModel = sysCtlService.getValidCtlModel();
+            log.info("validActivCtlModel:{}", validActivCtlModel);
+            if (Objects.isNull(validActivCtlModel)) {
                 ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
                 return;
             }
 
-            if (!isExpired) {
+            if (!isExpiredDateExceeded) {
                 // 过期日期未到，继续判断运行时长
-                if (StringUtils.isBlank(sysActivCtlModel.getFirstActiveDate())) {
+                if (StringUtils.isBlank(validActivCtlModel.getFirstActiveDate())) {
                     log.info("System is not activated right now!");
                     // 未激活，但是CONTENT有值，说明是升级的场景，则还是以CONTENT内容为主
                 } else {
-                    //String firstActiveDateStr = EncryptUtils.desDecrypt(sysActivCtlModel.getFirstActiveDate());
-                    //LocalDate firstActiveDate = LocalDate.parse(firstActiveDateStr, dateFormatter);
-                    //Duration duration = Duration.between(firstActiveDate.atTime(0, 0, 0), expireDate.atTime(0, 0, 0));
-                    String sysLifeTimeSecondsStr = sysActivCtlModel.getSysLifetime();
-                    String currentRunSecondsStr = sysActivCtlModel.getSysRunSeconds();
+                    String sysLifeTimeSecondsStr = validActivCtlModel.getSysLifetime();
+                    String currentRunSecondsStr = validActivCtlModel.getSysRunSeconds();
                     if (StringUtils.isNotBlank(sysLifeTimeSecondsStr) && StringUtils.isNotBlank(currentRunSecondsStr)) {
                         Long currentRunSeconds = Long.valueOf(EncryptUtils.desDecrypt(currentRunSecondsStr));
                         Long sysLifeTimeSeconds = Long.valueOf(EncryptUtils.desDecrypt(sysLifeTimeSecondsStr));
@@ -296,13 +291,14 @@ public class SysActivationService {
                 }
             }
 
-            if (isExpired || isRunSecondsExceeded) {
+            if (isExpiredDateExceeded || isRunSecondsExceeded) {
+                log.info("isExpiredDateExceeded:{}, isRunSecondsExceeded:{}", isExpiredDateExceeded, isRunSecondsExceeded);
                 ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
 
                 // 过期状态，更新激活限制项配置
                 SysActivCtlModel updateActivCtlModel = new SysActivCtlModel();
-                updateActivCtlModel.setId(sysActivCtlModel.getId());
-                updateActivCtlModel.setStatus(0);
+                updateActivCtlModel.setId(validActivCtlModel.getId());
+                updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
                 sysActivCtlService.update(updateActivCtlModel);
             }
 
@@ -485,7 +481,7 @@ public class SysActivationService {
         updateSysActivCtlModel.setLicenseCode(encryptedLicenseCode);
         updateSysActivCtlModel.setSysTimestamp(System.currentTimeMillis());
         updateSysActivCtlModel.setActiveCount(1);
-        updateSysActivCtlModel.setStatus(1);
+        updateSysActivCtlModel.setStatus(SysActivCtlModel.STATUS_VALID);
         sysActivCtlService.update(updateSysActivCtlModel);
     }
 
