@@ -15,6 +15,7 @@ ip:
 port:
   self-callback: ${MP_SELF_PORT:8080}
   hld-port: ${HLD_PORT:85}
+  hld-log-port: ${HLD_LOG_PORT:85}
 server:
   servlet:
     context-path: /api/mp
@@ -164,7 +165,7 @@ mp:
   hld:
     users-url: http://${ip.hld-users}:${port.hld-port}
     login-url: http://${ip.hld-login}:${port.hld-port}
-    log-api-url: http://${ip.hld-log}:${port.hld-port}
+    log-api-url: http://${ip.hld-log}:${port.hld-log-port}
     logout:
       reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
     url-ac-filter:
