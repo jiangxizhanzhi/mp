@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
+import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.front.admin.dto.ActivMenuDTO;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
@@ -52,6 +53,9 @@ public class ActivMenuService {
     @Autowired
     private MenuExtraInfoService menuExtraInfoService;
 
+    @Autowired
+    private UserCacheService userCacheService;
+
     /**
      * 适用场景：重新导入menu.json
      * 1. 清空原有menu, keymenu, editionmenu表。
@@ -86,6 +90,7 @@ public class ActivMenuService {
         log.info("targetModels.size:{}", targetModels.size());
 
         boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
+        evictCache();
         return success;
     }
 
@@ -107,6 +112,7 @@ public class ActivMenuService {
         processMenuVisibility(allTargets, menuExtraInfos, content);
 
         boolean success = reImportSupportService.rebuildAllMenus(allTargets);
+        evictCache();
         return success;
     }
 
@@ -297,6 +303,12 @@ public class ActivMenuService {
             }
         });
 
+    }
+
+
+    private void evictCache() {
+        userCacheService.evictAllUserCache();
+        userCacheService.evictAllTargetsCache();
     }
 
 }
