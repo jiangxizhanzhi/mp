@@ -37,7 +37,6 @@ public class SysActivationController {
     @ApiOperation("激活")
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
-        log.info("activateRequest:{}", activationRequest);
         activationService.activate(activationRequest);
         return ServiceResult.successful();
     }
