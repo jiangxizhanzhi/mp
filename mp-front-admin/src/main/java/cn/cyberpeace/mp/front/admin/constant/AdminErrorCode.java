@@ -15,6 +15,7 @@ public enum AdminErrorCode implements ErrorCode {
     SYS_CONFIG_MODIFY_ERROR("MP-110024", "sys_config_modify_error"),
 
 
+    SYS_ACTIVATION_STATUS_ERROR("MP-110029", "sys_activation_status_error"),
     SYS_ACTIVATION_ERROR("MP-110030", "sys_activation_error"),
     SYS_ACTIVATION_FAILED("MP-110031", "sys_activation_failed"),
     SYS_ACTIVATION_EXPIRED("MP-110032", "sys_activation_expired"),
