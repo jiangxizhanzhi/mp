@@ -85,9 +85,11 @@ public class SysActivationService {
         SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
         boolean isSysActivited = false;
         if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
+            log.error("content status is actived!");
             isSysActivited = true;
         }
         if (Objects.nonNull(validModel)) {
+            log.error("valid model existed!");
             isSysActivited = true;
         }
         if (isSysActivited) {
