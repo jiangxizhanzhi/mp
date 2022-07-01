@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.log.service.impl;
 
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.log.bo.TargetLogBO;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
@@ -9,14 +10,13 @@ import cn.cyberpeace.mp.devops.log.po.RealDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.po.VirtualDeviceLogPO;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.service.OperateLogService;
-import cn.hutool.http.ContentType;
-import cn.hutool.http.HttpRequest;
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -66,11 +66,16 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             po.setType(VIRTUAL_TYPE_MAP.get(OpTypeEnums.fromValue(operationLogModel.getOpTypeID())));
             po.setStatus("成功");
             po.setContent(operationLogModel.getContent());
-            Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
             String url = hldLogApiUrl.concat("/testApi/zyLogVirtual/add");
-            log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            String result = HttpRequest.post(url).form(formMap).contentType(ContentType.JSON.getValue()).execute().body();
-            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
+            String params = JSONObject.toJSONString(po);
+            log.info("=======>>>POST LOG URL:{},params:{}",url,params);
+            String result = null;
+            try {
+                result = HttpUtils.sendPost(url, params);
+            } catch (IOException e) {
+                log.info("=======>>>POST LOG URL:{},params:{}====",url,po,e);
+            }
+            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,params,result);
         }else if (operationLogModel.getOpTargetID().equals(OpTargetEnums.REALEQUIPMENT.ordinal())) {
             RealDeviceLogPO po = new RealDeviceLogPO();
             po.setUserName(operationLogModel.getUserName());
@@ -79,14 +84,19 @@ public class HldOperateLogServiceImpl implements OperateLogService {
                 po.setEquType(extInfo.getEquType());
                 po.setEquIp(extInfo.getEquIp());
             }
-            po.setType(EQUIPMENT_TYPE_MAP.get(OpTypeEnums.fromValue(operationLogModel.getOpTypeID())));
+            po.setOptType(EQUIPMENT_TYPE_MAP.get(OpTypeEnums.fromValue(operationLogModel.getOpTypeID())));
             po.setStatus("成功");
-            po.setContent(operationLogModel.getContent());
-            Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
+            po.setOptContent(operationLogModel.getContent());
+            String params = JSONObject.toJSONString(po);
             String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
-            log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            String result = HttpRequest.post(url).form(formMap).contentType(ContentType.JSON.getValue()).execute().body();
-            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
+            log.info("=======>>>POST LOG URL:{},params:{}",url,params);
+            String result = null;
+            try {
+                result = HttpUtils.sendPost(url, params);
+            } catch (IOException e) {
+                log.info("=======>>>POST LOG URL:{},params:{}====",url,po,e);
+            }
+            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,params,result);
         }
     }
 

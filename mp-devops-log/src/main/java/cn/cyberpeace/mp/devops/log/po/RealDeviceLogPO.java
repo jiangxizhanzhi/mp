@@ -34,7 +34,7 @@ public class RealDeviceLogPO {
     /**
      * 01:新增、02：编辑、03：删除、04：下载、05：审核、06：同步、07：启动、08：停止、09：
      */
-    private String type;
+    private String optType;
 
     /**
      * 执行状态
@@ -44,5 +44,5 @@ public class RealDeviceLogPO {
     /**
      * 内容
      */
-    private String content;
+    private String optContent;
 }
