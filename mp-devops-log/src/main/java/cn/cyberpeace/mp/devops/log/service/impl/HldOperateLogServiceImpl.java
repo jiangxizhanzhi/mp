@@ -68,7 +68,8 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
             String url = hldLogApiUrl.concat("/testApi/zyLogVirtual/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            HttpUtil.post(hldLogApiUrl.concat("/testApi/zyLogVirtual/add"), formMap);
+            String result = HttpUtil.post(url, formMap);
+            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
         }else if (operationLogModel.getOpTargetID().equals(OpTargetEnums.REALEQUIPMENT.ordinal())) {
             RealDeviceLogPO po = new RealDeviceLogPO();
             po.setUserName(operationLogModel.getUserName());
@@ -83,7 +84,8 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             Map<String, Object> formMap = JSON.parseObject(JSON.toJSONString(po), Map.class);
             String url = hldLogApiUrl.concat("/testApi/zyLogEquipment/add");
             log.info("=======>>>POST LOG URL:{},params:{}",url,formMap);
-            HttpUtil.post(url, formMap);
+            String result = HttpUtil.post(url, formMap);
+            log.info("=======>>>POST LOG URL:{},params:{},result:{}",url,formMap,result);
         }
     }
 
