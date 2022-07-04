@@ -26,7 +26,7 @@
                     #{excludeUserId}
                 </foreach>
             </if>
-            order by mp_auth_user.username
+            order by -update_time, username
     </select>
 
     <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
