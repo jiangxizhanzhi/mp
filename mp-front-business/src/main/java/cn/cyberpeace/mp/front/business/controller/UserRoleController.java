@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.auth.dto.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.role.UserRolesRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -44,14 +46,14 @@ public class UserRoleController {
     @ApiOperation(value = "分页查询 根据userId查询用户所有角色", notes = "")
     @GetMapping("/roles/page/byuser")
     public ListObjServiceResult getRolesByUser(UserRolePageRequest pageRequest) {
-        PageInfo pageInfo = userRoleService.pageByUserId(pageRequest);
+        PageInfo<RoleModel> pageInfo = userRoleService.pageByUserId(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/page/byrole")
     public ListObjServiceResult getUsersByRole(UserRolePageRequest pageRequest) {
-        PageInfo pageInfo = userRoleService.pageByRoleId(pageRequest);
+        PageInfo<UserDto> pageInfo = userRoleService.pageByRoleId(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
