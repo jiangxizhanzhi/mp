@@ -63,7 +63,7 @@ public class InstanceController {
                 {
                     InstancePageVO response = InstancePageVO.builder().name(instanceModel.getName()).node(instanceModel.getNode())
                             .addressList(instanceModel.getAddressList())
-                            .status(instanceModel.getStatus().toValue()).createTime(instanceModel.getCreateTime()).build();
+                            .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
                     FlavorConvertModel flavorConvertModel = flavorConverter.getById(instanceModel.getFlavor());
                     response.setFlavor(buildFlavorVO(flavorConvertModel));
                     return response;

@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
 import cn.cyberpeace.mp.devops.cluster.converter.model.InstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.InstanceModel;
 import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
@@ -62,7 +61,7 @@ public class InstanceConverter implements BaseConverter{
                         .flavor(instanceModel.getFlavor())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
-                        .status(CloudPlatformEnum.fromValue(instanceModel.getStatus())).createTime(instanceModel.getCreatedAt()).build()
+                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()
         ).collect(Collectors.toList());
         InstanceConvertModel convertModel = new InstanceConvertModel();
         convertModel.setModelList(list);

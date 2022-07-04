@@ -81,7 +81,7 @@ public class HldOperateLogServiceImpl implements OperateLogService {
             po.setUserName(operationLogModel.getUserName());
             if (Objects.nonNull(extInfo)) {
                 po.setEquName(extInfo.getName());
-                po.setEquType(extInfo.getEquType());
+                po.setEquType("0".concat(extInfo.getEquType()));
                 po.setEquIp(extInfo.getEquIp());
             }
             po.setOptType(EQUIPMENT_TYPE_MAP.get(OpTypeEnums.fromValue(operationLogModel.getOpTypeID())));
