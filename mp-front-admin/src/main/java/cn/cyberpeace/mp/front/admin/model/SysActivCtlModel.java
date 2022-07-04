@@ -22,6 +22,16 @@ import lombok.NoArgsConstructor;
 @Table("mp_front_admin_activ_ctl")
 public class SysActivCtlModel extends BaseModel {
 
+    // 无效状态
+    public static final Integer STATUS_INVALID = 0;
+
+    // 有效状态
+    public static final Integer STATUS_VALID = 1;
+
+    // 未使用
+    public static final Integer STATUS_UNUSED = 2;
+
+
     @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
