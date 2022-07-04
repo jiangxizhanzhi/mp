@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -24,9 +25,9 @@ public interface UserRoleService extends BaseModelService<UserRoleModel, QueryPa
 
     List<UserModel> listUsersByRoleIdNoRestrict(String roleId);
 
-    PageInfo pageByUserId(UserRolePageRequest pageRequest);
+    PageInfo<RoleModel> pageByUserId(UserRolePageRequest pageRequest);
 
-    PageInfo pageByRoleId(UserRolePageRequest pageRequest);
+    PageInfo<UserDto> pageByRoleId(UserRolePageRequest pageRequest);
 
     // 绑定一个用户，多个角色 会清除用户原来绑定的角色
     boolean bindUserRoles(String userId, List<String> roleIds, boolean cleanOldRoles);

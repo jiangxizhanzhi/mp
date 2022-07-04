@@ -118,7 +118,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Override
     public List<RoleModel> listAll() {
-        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
         return roles;
     }
@@ -172,7 +172,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching());
+        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
         PageInfo pageInfo = new PageInfo(roleDtos);
 
         roleDtos.forEach(r -> {
@@ -190,7 +190,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RoleDto getRoleDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
-        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }
@@ -202,7 +202,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public RolePermDto getRolePermDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
-        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearching();
+        List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }
