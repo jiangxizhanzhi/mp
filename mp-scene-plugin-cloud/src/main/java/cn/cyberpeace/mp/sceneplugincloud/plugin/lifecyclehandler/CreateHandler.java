@@ -51,6 +51,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.Create
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.hutool.core.io.file.FileNameUtil;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -77,7 +79,7 @@ public class CreateHandler extends HandlerCommon {
     private final Npc npcClient = new Npc();
     private final VmRouter vmRouter = new VmRouter();
 
-    private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+    private Map<String, List<NpcInfo>> network2Info = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
@@ -957,19 +959,29 @@ public class CreateHandler extends HandlerCommon {
         cloudElement.getAccessNetworks().forEach(net -> {
             String networkId = net.network.getResourceId();
             if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                network2Info.put(networkId, new ArrayList<>());
             }
             net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                NpcInfo npcInfo = new NpcInfo();
+                npcInfo.setIp(port.getIp());
+                npcInfo.setName(npcName);
+                npcInfo.setNetworkId(networkId);
+                npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                network2Info.get(networkId).add(npcInfo);
             });
         });
         cloudElement.getDeriveNetworks().forEach(net -> {
             String networkId = net.network.getResourceId();
             if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                network2Info.put(networkId, new ArrayList<>());
             }
             net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                NpcInfo npcInfo = new NpcInfo();
+                npcInfo.setIp(port.getIp());
+                npcInfo.setName(npcName);
+                npcInfo.setNetworkId(networkId);
+                npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                network2Info.get(networkId).add(npcInfo);
             });
         });
     }
@@ -1012,11 +1024,22 @@ public class CreateHandler extends HandlerCommon {
         }
         // 批量创建NPC节点
         if (network2Info.values().size() > 0) {
-            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
+            runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(network2Info));
         }
     }
 
-    public void createNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
+    public void createNpcElements(Map<String, List<NpcInfo>> npcInfos) {
+        List<BaseNpcData.NetWorkNpcInfo> list = new ArrayList<>();
+        for (List<NpcInfo> npcInfoList : npcInfos.values()) {
+            if (npcInfoList.isEmpty()) {
+                continue;
+            }
+            BaseNpcData.NetWorkNpcInfo param = new BaseNpcData.NetWorkNpcInfo(npcInfoList.get(0).networkId);
+            for (NpcInfo n : npcInfoList) {
+                param.addNpcInfo(n.getName(), n.getIp());
+            }
+            list.add(param);
+        }
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
         npcClient.create(npcCreateData);
@@ -1137,5 +1160,14 @@ public class CreateHandler extends HandlerCommon {
             Thread.sleep(millSeconds);
         } catch (InterruptedException e) {
         }
+    }
+
+    @Getter
+    @Setter
+    private static class NpcInfo {
+        private String networkId;
+        private String ip;
+        private String name;
+        private Boolean auxiliary;
     }
 }

@@ -30,6 +30,26 @@ public class ElementTypeUtils {
         return isCoreRouter(element.getImage());
     }
 
+    public static boolean isNs3(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC;
+    }
+
+    public static boolean isNpc(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC;
+    }
+
+    public static boolean isVirtualMachine(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE;
+    }
+
+    public static boolean isContainer(CloudPluginSceneElementBO element) {
+        return element.getVirtualType() != null && element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER;
+    }
+
+    public static boolean isVirtualTerminal(CloudPluginSceneElementBO element) {
+        return isNs3(element) || isNpc(element) || isContainer(element) || isVirtualMachine(element);
+    }
+
     public static boolean isExternal(CloudPluginSceneElementBO element) {
         return Boolean.TRUE.equals(element.getExternal());
     }
