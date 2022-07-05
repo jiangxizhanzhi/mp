@@ -107,7 +107,7 @@ public class InstallerController {
      */
     @ApiOperation("更新")
     @PatchMapping("/{uuid}")
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改实装", target = OpTargetEnums.SERVICE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改服务", target = OpTargetEnums.SERVICE)
     public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
         request.setUuid(uuid);
         if (StringUtils.isBlank(request.getUuid())){
@@ -122,7 +122,7 @@ public class InstallerController {
      */
     @ApiOperation("删除")
     @DeleteMapping
-    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.SERVICE)
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除服务", target = OpTargetEnums.SERVICE)
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
         installerConverter.delete(request);
         return ServiceResult.successful();

@@ -75,8 +75,8 @@ public class ImagesConverter implements BaseConverter{
         Integer total = devopsTargetService.totalCount(dto);
 
         BasePageBO<ImageConvertModel> imageConvertPageModel = new BasePageBO<>();
+        imageConvertPageModel.setTotal(total);
         if (total == 0){
-            imageConvertPageModel.setTotal(0);
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
@@ -84,14 +84,12 @@ public class ImagesConverter implements BaseConverter{
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
-            imageConvertPageModel.setTotal(0);
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
 
         if (CollectionUtils.isEmpty(deviceList)){
-            imageConvertPageModel.setTotal(0);
             imageConvertPageModel.setList(Lists.newArrayList());
             return imageConvertPageModel;
         }
@@ -116,7 +114,6 @@ public class ImagesConverter implements BaseConverter{
         }
 
         imageConvertPageModel.setList(modelList);
-        imageConvertPageModel.setTotal(total);
         return imageConvertPageModel;
     }
 
