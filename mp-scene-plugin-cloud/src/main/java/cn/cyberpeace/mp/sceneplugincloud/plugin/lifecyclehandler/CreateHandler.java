@@ -956,34 +956,36 @@ public class CreateHandler extends HandlerCommon {
 
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        cloudElement.getAccessNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new ArrayList<>());
-            }
-            net.getFromPorts().forEach(port -> {
-                NpcInfo npcInfo = new NpcInfo();
-                npcInfo.setIp(port.getIp());
-                npcInfo.setName(npcName);
-                npcInfo.setNetworkId(networkId);
-                npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
-                network2Info.get(networkId).add(npcInfo);
+        synchronized (network2Info){
+            cloudElement.getAccessNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new ArrayList<>());
+                }
+                net.getFromPorts().forEach(port -> {
+                    NpcInfo npcInfo = new NpcInfo();
+                    npcInfo.setIp(port.getIp());
+                    npcInfo.setName(npcName);
+                    npcInfo.setNetworkId(networkId);
+                    npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                    network2Info.get(networkId).add(npcInfo);
+                });
             });
-        });
-        cloudElement.getDeriveNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new ArrayList<>());
-            }
-            net.getFromPorts().forEach(port -> {
-                NpcInfo npcInfo = new NpcInfo();
-                npcInfo.setIp(port.getIp());
-                npcInfo.setName(npcName);
-                npcInfo.setNetworkId(networkId);
-                npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
-                network2Info.get(networkId).add(npcInfo);
+            cloudElement.getDeriveNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new ArrayList<>());
+                }
+                net.getFromPorts().forEach(port -> {
+                    NpcInfo npcInfo = new NpcInfo();
+                    npcInfo.setIp(port.getIp());
+                    npcInfo.setName(npcName);
+                    npcInfo.setNetworkId(networkId);
+                    npcInfo.setAuxiliary(cloudElement.getSrcElement().getIsAuxiliary());
+                    network2Info.get(networkId).add(npcInfo);
+                });
             });
-        });
+        }
     }
 
     public CreateHandler(CloudScenePluginHandler pluginHandler) {

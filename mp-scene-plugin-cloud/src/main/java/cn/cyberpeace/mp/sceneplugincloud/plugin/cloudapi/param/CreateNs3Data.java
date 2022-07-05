@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CreateNs3Data implements CloudHttpData {
     private String cmd;
-    private String host;
+    private String hostname;
 }

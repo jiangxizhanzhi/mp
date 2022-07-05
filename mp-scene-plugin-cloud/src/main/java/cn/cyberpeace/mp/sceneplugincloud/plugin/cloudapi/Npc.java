@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcGetData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -29,13 +30,13 @@ public class Npc extends CloudClient {
     }
 
     public void createNs3(String gateway, List<String> ips, String tagName) {
-        String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", "tap_" + TextUtils.uuid());
+        String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", RandomStringUtils.random(11, true, true));
         cmd = StringUtils.replace(cmd, "${Tag}", tagName);
         cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(ips, ","));
         cmd = StringUtils.replace(cmd, "${gateway}", gateway);
         CreateNs3Data createData = new CreateNs3Data();
         createData.setCmd(cmd);
-        createData.setHost("controller");
+        createData.setHostname("controller");
         CloudResponse<Object> result = cloudPost(CloudUrlConstant.CREATE_NS3_URL, createData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
