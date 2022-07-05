@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
@@ -60,6 +61,10 @@ public class ImagesService extends BaseCpService {
         //此状态MP只可查看，不可更新
         if (Objects.nonNull(extDocker)){
             extDocker.setInstanceState(null);
+        }
+        final ExtImageInfo extImageInfo = device.getExtImageInfo();
+        if (Objects.nonNull(extImageInfo)){
+            extImageInfo.setDeviceActions(null);
         }
         Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
         super.checkResult(result);
