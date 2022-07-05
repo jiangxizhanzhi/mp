@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -8,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -30,6 +33,36 @@ public class OperateUserPermissionService extends OperatePermissionService {
     @Autowired
     private UserRoleService userRoleService;
 
+
+    public List<String> getExcludeRoleIdsByLoginUserForSearchingUsers() {
+
+        boolean isSupserUser = isLoginUserSuperUser();
+        if (isSupserUser) {
+            // 超级用户不受限制
+            return Collections.emptyList();
+        }
+
+        boolean isAdmin = isLoginUserAdmin();
+        if (isAdmin) {
+            // 管理员可以查询同级管理员用户，但不能查询超级用户
+            return Collections.emptyList();
+        }
+
+        // 普通用户不可查询管理员和超级用户
+        return Arrays.asList(AuthConstant.ROLE_ADMIN_ID);
+    }
+
+    public List<String> getExcludeUserIdsByLoginUserForSearchingUsers() {
+
+        boolean isSupserUser = isLoginUserSuperUser();
+        if (isSupserUser) {
+            // 超级用户不受限制
+            return Collections.emptyList();
+        }
+
+        // 其他角色用户不允许查询超级用户
+        return Arrays.asList(AuthConstant.ROOT_USER_ID);
+    }
 
     /**
      * targetUserId是否是登录用户自身

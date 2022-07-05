@@ -89,6 +89,16 @@ public class TargetConverter{
     }
 
     /**
+     * 查询匹配的镜像名称
+     * @param dto
+     * @return
+     */
+    public List<String> findByImagePageDTO(ImagePageDTO dto){
+        BasePageBO<DeviceTargetPO> targetPageModel = this.page(dto);
+        return targetPageModel.getList().stream().map(DeviceTargetPO::getName).collect(Collectors.toList());
+    }
+
+    /**
      * 查询常用靶标信息,支持通过名称查询
      * @return
      */

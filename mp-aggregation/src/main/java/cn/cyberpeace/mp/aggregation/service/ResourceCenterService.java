@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -28,6 +29,8 @@ import java.util.List;
 @Service
 public class ResourceCenterService {
     private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
+    private static String MOUNT_CMD = "mount -t nfs -o soft -o nolock %s:%s %s";
+    private static String UMOUNT_CMD = "umount %s";
 
     @Resource
     private CsceneService csceneService;
@@ -35,11 +38,16 @@ public class ResourceCenterService {
     @Resource
     private ResourceCenterConverter cSceneBoConverter;
 
-    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, String sceneFilePath) {
+    public ServiceResult<CsceneBO> importByYmlConfig(String ymlFilePath, String imageFilePath, List<String> imageFilePathList, String sceneFilePath) {
         // 解析 topo.yml
         YmlParseResult ymlParseResult = ResourceCenterYmlParser.parseTopoYml(ymlFilePath);
         // 解析 image/services.yml
-        List<ImageParseResult> imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
+        List<ImageParseResult> imageInfos = null;
+        if (StringUtils.isNotEmpty(imageFilePath)) {
+            imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePath);
+        } else {
+            imageInfos = ResourceCenterYmlParser.parseImageServicesYml(ymlFilePath, imageFilePathList);
+        }
         // 处理附件
         String fdfsSceneFilePath = null;
         if (StringUtils.isNotEmpty(sceneFilePath)) {
@@ -65,5 +73,29 @@ public class ResourceCenterService {
         }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+    }
+
+    public ServiceResult<Boolean> mount(String host, String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        this.execShell(String.format(MOUNT_CMD, host, path, path));
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> umount(String path) {
+        this.execShell(String.format(UMOUNT_CMD, path));
+        return new ServiceResult<>(true);
+    }
+
+    private void execShell(String shell) {
+        log.info("Start exec shell! command=[{}]", shell);
+        try {
+            Process process = Runtime.getRuntime().exec(shell);
+        } catch (Exception e) {
+            log.error("Exec shell error! command=[{}], catch error:", shell, e);
+        }
+        log.info("End exec shell!");
     }
 }

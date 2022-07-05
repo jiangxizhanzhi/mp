@@ -20,7 +20,13 @@
                 </where>
                 )
             </if>
-            order by mp_auth_user.username
+            <if test="excludeUserIds != null and excludeUserIds.size() > 0">
+                AND id not in
+                <foreach item="excludeUserId" index="index" collection="excludeUserIds" open="(" separator="," close=")">
+                    #{excludeUserId}
+                </foreach>
+            </if>
+            order by -update_time, username
     </select>
 
     <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
@@ -58,6 +64,12 @@
                         </if>
                     </where>
                 )
+            </if>
+            <if test="excludeUserIds != null and excludeUserIds.size() > 0">
+                AND id not in
+                <foreach item="excludeUserId" index="index" collection="excludeUserIds" open="(" separator="," close=")">
+                    #{excludeUserId}
+                </foreach>
             </if>
             <if test="userCondition.isEnabled != null">
                 AND is_enabled = #{userCondition.isEnabled}

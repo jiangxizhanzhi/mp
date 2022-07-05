@@ -268,4 +268,15 @@ public class DevopsTargetController {
         return targetIconUploadService.build(file).upload();
     }
 
+
+    @ApiOperation("校验靶标是否存在")
+    @PostMapping("/check")
+    @ResponseBody
+    public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request){
+        request.setPage(null);
+        request.setPerPage(null);
+        List<String> nameList = targetConverter.findByImagePageDTO(new ImagePageDTO(request));
+        return new Result(nameList);
+    }
+
 }
