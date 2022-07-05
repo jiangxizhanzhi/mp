@@ -141,6 +141,10 @@ mp:
         id: 4894f48375ee4dd5b7a7bad7c1a78376
         interval: 180s
         outputFormat: json
+      - probe-name: get_internet_speed.py
+        id: e0553a594a7742099e7139d58aeded28
+        interval: 180s
+        outputFormat: plain
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 
@@ -148,6 +152,13 @@ mp:
     es-nodes: ${ip.es}:9205
     exclude-uri: /login
     exclude-method: OPTIONS
+    async-thread-pool:
+      core-pool-size: 10
+      max-pool-size: 20
+      queue-capacity: 500
+      keep-alive-seconds: 60
+      await-termination-seconds: 300
+      thread-name-prefix: Log-Thread-
   auth:
     activation:
       enable: true
@@ -171,6 +182,7 @@ mp:
   hld:
       users-url: http://192.168.12.72:85
       login-url: http://192.168.12.72:85
+      log-api-url: http://192.168.12.117:9092
   flow:
     trex-image: tgn-trex
   sceneplugincloud:

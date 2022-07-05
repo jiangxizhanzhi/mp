@@ -92,6 +92,9 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
         pageRequest.setPage(1);
         pageRequest.setPageSize(1);
+        if (pageRequest.getNeedInternetSpeed() == null) {
+            pageRequest.setNeedInternetSpeed(Boolean.TRUE);
+        }
         List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(pageRequest);
         return ServiceResult.success(hostStates);
     }

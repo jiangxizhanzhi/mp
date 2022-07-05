@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.HostStateQueryParams;
@@ -299,12 +300,40 @@ public class HostStateService {
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());
+
+            hs.setComprehensiveLoad(hs.getCpuPercent() * 0.4 + hs.getDiskPercent() * 0.3 + hs.getMemoryPercent() * 0.3);
             return hs;
         }).collect(Collectors.toList());
+
+        if (Boolean.TRUE.equals(pageRequest.getNeedInternetSpeed() && CollectionUtil.isNotEmpty(hostStates))) {
+            String id = csceneInstanceService.getSceneId(sceneId);
+            SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
+            WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
+            request.setPageNum(1);
+            request.setPageSize(1);
+            request.setStartTime(sceneHandler.getScene().getCreateTime());
+            request.setEndTime(LocalDateTime.now());
+            request.setAgentNames(getAgentNames(pageRequest, sceneHandler));
+            var result = dataCollectionService.queryInternetSpeed(request);
+            if (CollectionUtil.isNotEmpty(result)) {
+                HostState.InternetSpeed internetSpeed = new HostState.InternetSpeed();
+                internetSpeed.setDownloadSpeed(result.get(0).getDownloadspeed());
+                internetSpeed.setUploadSpeed(result.get(0).getUploadSpeed());
+                hostStates.get(0).setInternetSpeed(internetSpeed);
+            }
+        }
 
         return hostStates;
     }
 
+    private List<String> getAgentNames(BaseSceneElementPageRequest pageRequest, SceneHandler sceneHandler) {
+        List<String> agentNames;
+        agentNames = sceneHandler.getElementMap().values().stream()
+                .filter(e -> pageRequest.getElementIds().contains(e.getId()))
+                .map(e -> e.getEid())
+                .collect(Collectors.toList());
+        return agentNames;
+    }
 
     private List<HostState> doProcessHostStatesTrend(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();

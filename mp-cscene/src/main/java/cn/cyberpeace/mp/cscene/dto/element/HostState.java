@@ -60,4 +60,19 @@ public class HostState {
     @ApiModelProperty("磁盘使用率")
     private Double diskPercent;
 
+    @ApiModelProperty("综合负载")
+    private Double comprehensiveLoad;
+
+    @ApiModelProperty("网络速度")
+    private InternetSpeed internetSpeed;
+
+    @Data
+    public static class InternetSpeed {
+
+        @ApiModelProperty("下载速度")
+        private String downloadSpeed;
+
+        @ApiModelProperty("上传速度")
+        private String uploadSpeed;
+    }
 }

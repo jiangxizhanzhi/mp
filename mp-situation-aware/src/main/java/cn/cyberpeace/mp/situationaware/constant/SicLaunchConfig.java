@@ -22,4 +22,7 @@ public class SicLaunchConfig {
     // 进程
     public static final String LAUNCH_ID_PROCESSES = "38949dcf3829489d8dd9e0e63cc66541";
 
+    // 网络速度
+    public static final String LAUNCH_ID_INTERNET_SPEED = "e0553a594a7742099e7139d58aeded28";
+
 }

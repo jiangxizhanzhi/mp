@@ -11,25 +11,10 @@ import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.Launch;
+import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -527,6 +512,33 @@ public class DataCollectionService {
 //                    result.setMacIds(multiValueMap.get(model.getAgent().getId()));
                 wazuhHostStateModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
                 return wazuhHostStateModel;
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        return wazuhModelList;
+    }
+
+    public List<WazuhInternetSpeedModel> queryInternetSpeed(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_INTERNET_SPEED);
+        List<WazuhMonitorRoot<Launch<InternetSpeedOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+                .getHits()).map(hit ->
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<InternetSpeedOutput, BaseInput>>>() {
+                })).collect(Collectors.toList());
+
+        var wazuhModelList = wazuhFileRootList.stream().map(model -> {
+            if (Objects.nonNull(model.getData()) && Objects.nonNull(model.getData().getOutput())) {
+                InternetSpeedOutput output = model.getData().getOutput();
+                WazuhInternetSpeedModel wazuhInternetSpeedModel = new WazuhInternetSpeedModel();
+                wazuhInternetSpeedModel.setDownloadspeed(output.getDownLoadSpeed());
+                wazuhInternetSpeedModel.setUploadSpeed(output.getUploadSpeed());
+                wazuhInternetSpeedModel.setAgentId(model.getAgent().getId());
+                wazuhInternetSpeedModel.setAgentName(model.getAgent().getName());
+                wazuhInternetSpeedModel.setTime(TimeUtils.dateToLocalDateTime(model.getTimestamp()));
+                return wazuhInternetSpeedModel;
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());

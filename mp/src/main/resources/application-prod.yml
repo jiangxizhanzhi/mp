@@ -147,6 +147,10 @@ mp:
         id: 4894f48375ee4dd5b7a7bad7c1a78376
         interval: 180s
         outputFormat: json
+      - probe-name: get_internet_speed.py
+        id: e0553a594a7742099e7139d58aeded28
+        interval: 180s
+        outputFormat: plain
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
