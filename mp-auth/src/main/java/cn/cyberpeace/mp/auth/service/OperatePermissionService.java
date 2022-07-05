@@ -71,7 +71,42 @@ public class OperatePermissionService {
     }
 
     /**
-     * 根据操作对象的所有角色id集合检查权限
+     * 针对查询用户操作，对操作对象的所有角色id集合检查权限
+     * 超级用户不受限制
+     * 管理员可以查询管理员和普通用户，但是不能修改
+     * 普通用户可以查普通用户
+     * @param targetRoleIds
+     */
+    public void checkByTargetRoleIdsForSearching(List<String> targetRoleIds) {
+        if (CollectionUtil.isEmpty(targetRoleIds)) {
+            return;
+        }
+
+        boolean isSupserUser = isLoginUserSuperUser();
+        boolean isAdmin = isLoginUserAdmin();
+
+        // 超级用户,管理员不受限制
+        if (isSupserUser || isAdmin) {
+            return;
+        }
+
+        UserModel currentUser = UserUtils.getLoginUser();
+
+        // 普通用户不允许查管理员角色以上用户
+        if (hasAdminRole(targetRoleIds)) {
+            if (Objects.nonNull(currentUser)) {
+                log.error("permission denied! Cause target role is admin or superuser! " +
+                        "current username:{}, isAdmin:{}, isSuperUser:{}", currentUser.getUsername(), isAdmin, isSupserUser);
+            }
+            throw new MpRuntimeException(AuthErrorCode.PERMISSION_DENIED);
+        }
+    }
+
+    /**
+     * 针对修改用户操作，对操作对象的所有角色id集合检查权限
+     * 超级用户不受限制
+     * 管理员可以修改普通用户，不能修改管理员
+     * 普通用户无修改权限
      * @param targetRoleIds
      */
     public void checkByTargetRoleIds(List<String> targetRoleIds) {
