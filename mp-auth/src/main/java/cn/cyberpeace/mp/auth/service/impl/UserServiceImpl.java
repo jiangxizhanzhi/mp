@@ -146,7 +146,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERDTO)
     public UserDto getUserDto(String id) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
+        opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
@@ -176,7 +176,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
+        opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(queryParams.getIds()));
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;

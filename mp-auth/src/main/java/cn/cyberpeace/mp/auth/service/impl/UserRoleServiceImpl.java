@@ -98,7 +98,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public PageInfo<RoleModel> pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
-        opUserPermService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
+        opUserPermService.checkByTargetUserIdsForSearching(Arrays.asList(pageRequest.getUserId()));
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
