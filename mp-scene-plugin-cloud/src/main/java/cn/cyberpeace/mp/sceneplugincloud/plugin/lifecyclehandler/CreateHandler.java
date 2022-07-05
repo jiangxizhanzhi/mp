@@ -30,10 +30,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualRouter;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualSwitch;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VmRouter;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.BaseNpcData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.EntityNodeCreateData;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.RouterConfigCmdData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualFirewallCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
@@ -80,6 +78,7 @@ public class CreateHandler extends HandlerCommon {
     private final VmRouter vmRouter = new VmRouter();
 
     private Map<String, List<NpcInfo>> network2Info = new ConcurrentHashMap<>();
+    private Map<String, Integer> network2VlanId = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess CREATE_AUXILIARY_NETWORKS = new EventProcess("create_auxiliary_networks", "sceneplugincloud.event.create_auxiliary_network");
@@ -238,6 +237,7 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
+            network2VlanId.put(virtualSwitch.getId(), virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
             // 向端口回写网络id
             connectedNetwork.getFromPorts().forEach(p -> {
@@ -1029,20 +1029,35 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void createNpcElements(Map<String, List<NpcInfo>> npcInfos) {
-        List<BaseNpcData.NetWorkNpcInfo> list = new ArrayList<>();
-        for (List<NpcInfo> npcInfoList : npcInfos.values()) {
-            if (npcInfoList.isEmpty()) {
-                continue;
+        for (var npcInfo : npcInfos.entrySet()) {
+            Integer vlanId = network2VlanId.get(npcInfo.getKey());
+            if (vlanId != null && !npcInfo.getValue().isEmpty()) {
+                String gateway = null;
+                List<String> ips = new ArrayList<>();
+                for (var n : npcInfo.getValue()) {
+                    if (Boolean.TRUE.equals(n.getAuxiliary())) {
+                        gateway = n.getIp();
+                    } else {
+                        ips.add(n.getIp());
+                    }
+                }
+                npcClient.createNs3(gateway, ips, String.valueOf(vlanId));
             }
-            BaseNpcData.NetWorkNpcInfo param = new BaseNpcData.NetWorkNpcInfo(npcInfoList.get(0).networkId);
-            for (NpcInfo n : npcInfoList) {
-                param.addNpcInfo(n.getName(), n.getIp());
-            }
-            list.add(param);
         }
-        NpcCreateData npcCreateData = new NpcCreateData();
-        npcCreateData.setNetWorkNpcInfos(list);
-        npcClient.create(npcCreateData);
+//        List<BaseNpcData.NetWorkNpcInfo> list = new ArrayList<>();
+//        for (List<NpcInfo> npcInfoList : npcInfos.values()) {
+//            if (npcInfoList.isEmpty()) {
+//                continue;
+//            }
+//            BaseNpcData.NetWorkNpcInfo param = new BaseNpcData.NetWorkNpcInfo(npcInfoList.get(0).networkId);
+//            for (NpcInfo n : npcInfoList) {
+//                param.addNpcInfo(n.getName(), n.getIp());
+//            }
+//            list.add(param);
+//        }
+//        NpcCreateData npcCreateData = new NpcCreateData();
+//        npcCreateData.setNetWorkNpcInfos(list);
+//        npcClient.create(npcCreateData);
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
