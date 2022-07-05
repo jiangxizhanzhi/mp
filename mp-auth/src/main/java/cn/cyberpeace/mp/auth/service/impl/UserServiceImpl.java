@@ -237,6 +237,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
+
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         deleteReleated(userId);
 
         var ret = super.delete(userId);
@@ -250,6 +252,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (opUserPermCheckService.isOperateSelf(Arrays.asList(userIds))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
+
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userIds));
         for (String userId : userIds) {
             deleteReleated(userId);
         }
