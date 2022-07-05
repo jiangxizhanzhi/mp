@@ -835,6 +835,20 @@ public class InitiateHandler extends HandlerCommon {
                 if (CollectionUtils.isNotEmpty(defaultConnectedNetwork.getFromPorts())) {
                     deriveNetworks.add(defaultConnectedNetwork);
                 }
+                // 如果虚拟终端没有默认网络 那么加一个
+                if (CollectionUtils.isEmpty(deriveNetworks) && cloudElement.getVirtualType() != null &&
+                        (
+                                cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE
+                                        || cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
+                        )
+                ) {
+                    for (ConnectedNetworkBO n : cidr2ConnectedNetwork.values()) {
+                        if (CollectionUtils.isNotEmpty(n.getFromPorts())) {
+                            deriveNetworks.add(n);
+                            break;
+                        }
+                    }
+                }
             }
             cloudElement.setDeriveNetworks(deriveNetworks);
         }
