@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtVm;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
@@ -49,6 +51,16 @@ public class ImagesService extends BaseCpService {
      * 更新
      */
     public Device update(String uuid,Device device){
+        final ExtVm extVm = device.getExtVm();
+        //此状态MP只可查看，不可更新
+        if (Objects.nonNull(extVm)){
+            extVm.setInstanceState(null);
+        }
+        final ExtDocker extDocker = device.getExtDocker();
+        //此状态MP只可查看，不可更新
+        if (Objects.nonNull(extDocker)){
+            extDocker.setInstanceState(null);
+        }
         Device result = super.sendPut(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/" + uuid,JsonUtils.toUnderlineJSONString(device),Device.class);
         super.checkResult(result);
         return result;

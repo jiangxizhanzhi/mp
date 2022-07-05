@@ -50,13 +50,13 @@ public class BaseUploadService extends BaseAbstractUploadService{
      */
     @Override
     protected Boolean validUploadType(MultipartFile file) {
+        if (Objects.isNull(file)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
         List<String> supportUploadTypeList = this.supportUploadType();
         if (CollectionUtils.isEmpty(supportUploadTypeList)) {
             return Boolean.TRUE;
-        }
-
-        if (Objects.isNull(file)){
-            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
         String originalFilename = file.getOriginalFilename();

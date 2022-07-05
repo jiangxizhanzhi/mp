@@ -41,13 +41,22 @@ public class FirewallController {
     @GetMapping("/page")
     public PageResult<FirewallPageVO> page(BasePageRequest request){
         BasePageBO<Firewall> model = firewallConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
-        List<FirewallPageVO> list = model.getList().stream().map(firewall ->
-            new FirewallPageVO(firewall.getName(),
-                    Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
-                    Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
-                    firewall.getDescription(),firewall.getStatus())
-        ).collect(Collectors.toList());
+        List<FirewallPageVO> list = convertBOToPageVO(model);
         return new PageResult<>(list,model.getTotal());
+    }
+
+    /**
+     * 转换BO to VO
+     * @param model
+     * @return
+     */
+    private List<FirewallPageVO> convertBOToPageVO(BasePageBO<Firewall> model){
+        return model.getList().stream().map(firewall ->
+                new FirewallPageVO(firewall.getName(),
+                        Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
+                        Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
+                        firewall.getDescription(),firewall.getStatus())
+        ).collect(Collectors.toList());
     }
 
 }

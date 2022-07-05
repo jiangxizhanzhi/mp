@@ -48,17 +48,27 @@ public class ContainerController {
     @GetMapping("/page")
     public PageResult<ContainerPageVO> page(ContainerPageRequest request){
         BasePageBO<ContainerBO> model = containerConverter.page(new ContainerPageDTO(request));
-        List<String> nameList = model.getList().stream().map(ContainerBO::getName).collect(Collectors.toList());
+        List<ContainerPageVO> list = convertBOToPageVO(model);
+        return new PageResult<>(list, model.getTotal());
+    }
+
+    /**
+     * 转换BO to VO
+     * @param model
+     * @return
+     */
+    private List<ContainerPageVO> convertBOToPageVO(BasePageBO<ContainerBO> model){
+        final List<ContainerBO> modelList = model.getList();
+        List<String> nameList = modelList.stream().map(ContainerBO::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
-        List<ContainerPageVO> list = model.getList().stream().map(containerModel ->
+        return modelList.stream().map(containerModel ->
                 ContainerPageVO.builder().name(containerModel.getName())
                         .sceneName(Objects.isNull(source.get(containerModel.getName())) ? "" : source.get(containerModel.getName()).getCsceneName())
-                .image(containerModel.getImage()).node(containerModel.getNode())
-                .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
+                        .image(containerModel.getImage()).node(containerModel.getNode())
+                        .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
                         .vlanIdList(containerModel.getVlanIdList()).build())
                 .collect(Collectors.toList());
-        return new PageResult<>(list, model.getTotal());
     }
 
 }
