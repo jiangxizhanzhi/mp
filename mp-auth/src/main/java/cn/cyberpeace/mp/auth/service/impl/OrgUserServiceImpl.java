@@ -86,7 +86,11 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         if (Objects.nonNull(selfUser)) {
             selfUserId = selfUser.getId();
         }
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
+        List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
+
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
 
         return users;
     }
@@ -95,7 +99,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null);
+        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
 
         return users;
     }
@@ -122,7 +126,10 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             selfUserId = selfUser.getId();
         }
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
+        List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
+
+        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
         return users;
     }
 
@@ -240,7 +247,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, opUserPermService.getExcludeRoleIdsByLoginUserForSearching());
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
+        List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
+        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
         PageInfo pageInfo = new PageInfo(users);
 
         List<UserDto> userDtos = users.stream().map(u -> {

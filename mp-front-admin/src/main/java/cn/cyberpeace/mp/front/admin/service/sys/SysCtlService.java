@@ -32,7 +32,6 @@ public class SysCtlService {
      * @return
      */
     @Scheduled(initialDelay = 10 * 1000, fixedRate = 30 * 60 * 1000)
-//    @Scheduled(initialDelay = 10 * 1000, fixedRate = 60 * 1000)
     public boolean updateSysTs() {
 
 //        if (isSystemTimestampRollback) {
@@ -72,11 +71,6 @@ public class SysCtlService {
                 return true;
             } else {
                 // 直接更新系统时间戳，不累加run_seconds
-//                Long diff = oldTs - currTs;
-//                if (diff > maxDiffMilliSecond) {
-//                    isSystemTimestampRollback = true;
-//                    log.error("Detected that system timestamp has rollback, currentTimestamp:{}, oldTimestamp:{}, diff:{}, maxDiff:{}", currTs, oldTs, diff, maxDiffMilliSecond);
-//                }
                 SysActivCtlModel newActivCtlModel = new SysActivCtlModel();
                 newActivCtlModel.setId(oldActivCtlModel.getId());
                 newActivCtlModel.setSysTimestamp(currTs);
@@ -87,10 +81,6 @@ public class SysCtlService {
         return false;
     }
 
-
-    //public SysActivCtlModel getDefaultSysActivCtl() {
-    //    return generateOrGetUnusedActivCtlModel();
-    //}
 
     public boolean isSystemTimestampRollback() {
         return isSystemTimestampRollback;
@@ -110,13 +100,15 @@ public class SysCtlService {
         if (Objects.isNull(sysActivCtlModel)) {
             sysActivCtlModel = new SysActivCtlModel();
             // 只有在一个新的license第一次激活的时候才会写入系统时间戳
-//            Long currTs = System.currentTimeMillis();
-//            sysActivCtlModel.setSysTimestamp(currTs);
             String suffix = RandomUtil.randomString(6);
             sysActivCtlModel.setSuffix(suffix);
-            sysActivCtlModel.setStatus(2);
+            sysActivCtlModel.setStatus(SysActivCtlModel.STATUS_UNUSED);
 
             ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
+
+            // todo 将其他状态为1的记录，全更新为0
+            //sysActivCtlService.invalidOtherExceptOne("-1");
+
             if (Objects.nonNull(objResult.getSource())) {
                 log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
                 sysActivCtlModel = objResult.getSource().getObj();
@@ -135,24 +127,6 @@ public class SysCtlService {
      */
     public SysActivCtlModel getValidCtlModel() {
         SysActivCtlModel sysActivCtlModel = sysActivCtlService.selectValid();
-//        if (Objects.isNull(sysActivCtlModel)) {
-//            sysActivCtlModel = new SysActivCtlModel();
-//            // 只有在一个新的license第一次激活的时候才会写入系统时间戳
-////            Long currTs = System.currentTimeMillis();
-////            sysActivCtlModel.setSysTimestamp(currTs);
-//            String suffix = RandomUtil.randomString(6);
-//            sysActivCtlModel.setSuffix(suffix);
-//            sysActivCtlModel.setStatus(2);
-//
-//            ObjServiceResult<SysActivCtlModel> objResult  = sysActivCtlService.create(sysActivCtlModel);
-//            if (Objects.nonNull(objResult.getSource())) {
-//                log.info("Generate default activCtlModel success! {}", objResult.getSource().getObj());
-//                sysActivCtlModel = objResult.getSource().getObj();
-//            }
-//        } else {
-//            log.info("Default activCtlModel has already generated! {}", sysActivCtlModel);
-//        }
-
         return sysActivCtlModel;
     }
 

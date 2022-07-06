@@ -49,19 +49,26 @@ public class VmController {
     @GetMapping("/page")
     public PageResult<InstancePageVO> page(InstancePageRequest request){
         BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
+        List<InstancePageVO> list = convertBOToPageVO(model);
+        return new PageResult<>(list, model.getTotal());
+    }
+
+    /**
+     * 转换BO to VO
+     * @param model
+     * @return
+     */
+    private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
-        List<InstancePageVO> list = instances.stream().map(instanceModel ->
-            InstancePageVO.builder().name(instanceModel.getName())
-                    .sceneName(Objects.isNull(source.get(instanceModel.getName())) ? "" : source.get(instanceModel.getName()).getCsceneName())
-                    .node(instanceModel.getNode())
-                    .addressList(instanceModel.getAddressList())
-                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
+        return instances.stream().map(instanceModel ->
+                InstancePageVO.builder().name(instanceModel.getName())
+                        .sceneName(Objects.isNull(source.get(instanceModel.getName())) ? "" : source.get(instanceModel.getName()).getCsceneName())
+                        .node(instanceModel.getNode())
+                        .addressList(instanceModel.getAddressList())
+                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
         ).collect(Collectors.toList());
-
-        return new PageResult<>(list, model.getTotal());
     }
-
 }

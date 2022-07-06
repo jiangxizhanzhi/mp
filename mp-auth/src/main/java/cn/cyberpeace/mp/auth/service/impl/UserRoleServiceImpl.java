@@ -95,10 +95,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public PageInfo pageByUserId(UserRolePageRequest pageRequest) {
+    public PageInfo<RoleModel> pageByUserId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getUserId(), AuthBasei18nCode.USER_ID);
-        opUserPermService.checkByTargetUserIds(Arrays.asList(pageRequest.getUserId()));
+        opUserPermService.checkByTargetUserIdsForSearching(Arrays.asList(pageRequest.getUserId()));
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         // 查询user直接绑定的角色
         List<RoleModel> roles = getModelMapper().listRolesByUserId(pageRequest.getUserId());
@@ -108,11 +108,11 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public PageInfo pageByRoleId(UserRolePageRequest pageRequest) {
+    public PageInfo<UserDto> pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
-        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearching();
-        if (excludeRoleIds.contains(pageRequest.getRoleId())) {
+        List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
+        if (CollectionUtil.isNotEmpty(excludeRoleIds) && excludeRoleIds.contains(pageRequest.getRoleId())) {
             new PageInfo<>(Collections.emptyList());
         }
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());

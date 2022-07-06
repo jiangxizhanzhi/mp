@@ -146,7 +146,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERDTO)
     public UserDto getUserDto(String id) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(id));
+        opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
 
         UserDto userDto = userModel2UserDto(userModel);
@@ -176,7 +176,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
-        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(queryParams.getIds()));
+        opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(queryParams.getIds()));
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         List<UserDto> userDtos;
@@ -237,6 +237,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (opUserPermCheckService.isOperateSelf(Collections.singletonList(userId))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
+
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userId));
         deleteReleated(userId);
 
         var ret = super.delete(userId);
@@ -250,6 +252,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (opUserPermCheckService.isOperateSelf(Arrays.asList(userIds))) {
             throw new MpRuntimeException(AuthErrorCode.USER_CANNOT_DELETE_SELF);
         }
+
+        opUserPermCheckService.checkByTargetUserIds(Arrays.asList(userIds));
         for (String userId : userIds) {
             deleteReleated(userId);
         }

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
@@ -36,7 +37,6 @@ public class SysActivationController {
     @ApiOperation("激活")
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
-        log.info("activateRequest:{}", activationRequest);
         activationService.activate(activationRequest);
         return ServiceResult.successful();
     }
@@ -72,7 +72,7 @@ public class SysActivationController {
         if (Objects.isNull(content)) {
             log.error("system activation status not found!");
             content = new ActivationResponse();
-            content.setIsActived(0);
+            content.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
         }
 
         return ServiceResult.success(content);

@@ -19,6 +19,7 @@
     <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
         select distinct * from mp_auth_user where id in
             (select user from mp_auth_user_role where role = #{roleId})
+        order by -update_time, username
     </select>
 
     <select id="getUserRoleStatistics" resultType="cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic">

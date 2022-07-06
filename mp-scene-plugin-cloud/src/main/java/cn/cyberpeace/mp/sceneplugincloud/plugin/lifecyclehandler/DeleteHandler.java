@@ -55,7 +55,7 @@ public class DeleteHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
 
-    private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+    private final Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -262,24 +262,26 @@ public class DeleteHandler extends HandlerCommon {
 
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        cloudElement.getAccessNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-            }
-            net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+        synchronized (network2Info) {
+            cloudElement.getAccessNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                }
+                net.getFromPorts().forEach(port -> {
+                    network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                });
             });
-        });
-        cloudElement.getDeriveNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-            }
-            net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+            cloudElement.getDeriveNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
+                }
+                net.getFromPorts().forEach(port -> {
+                    network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+                });
             });
-        });
+        }
     }
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {

@@ -99,22 +99,7 @@ public class ImagesController {
     @GetMapping("/page")
     public PageResult<ImagesPageVO> page(ImagePageRequest request){
         BasePageBO<ImageConvertModel> model = imagesConverter.page(new ImagePageDTO(request));
-        List<ImagesPageVO> list = model.getList().stream().map(v -> {
-            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
-            ExtVm extVm = v.getExtVm();
-            ExtImageInfo extImageInfo = v.getExtImageInfo();
-            return ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
-                    .logo(v.getLogo())
-                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
-                    .imageType(v.getImageType())
-                    .isImport(v.getIsImport())
-                    .isInternal(v.getIsInternal())
-                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
-                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
-                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
-                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
-                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
-        }).collect(Collectors.toList());
+        List<ImagesPageVO> list = convertBOToPageVO(model);
 
         return new PageResult<>(list,model.getTotal());
     }
@@ -463,5 +448,29 @@ public class ImagesController {
         if (StringUtils.isNotBlank(request.getDescription()) && request.getDescription().length() > 1000){
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH);
         }
+    }
+
+    /**
+     * 转换BO to VO
+     * @param model
+     * @return
+     */
+    private List<ImagesPageVO> convertBOToPageVO(BasePageBO<ImageConvertModel> model){
+        return model.getList().stream().map(v -> {
+            ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
+            ExtVm extVm = v.getExtVm();
+            ExtImageInfo extImageInfo = v.getExtImageInfo();
+            return ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
+                    .logo(v.getLogo())
+                    .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
+                    .imageType(v.getImageType())
+                    .isImport(v.getIsImport())
+                    .isInternal(v.getIsInternal())
+                    .systemType(Objects.nonNull(extSystemInfo) ? extSystemInfo.getSystemType() : null)
+                    .flavor(Objects.nonNull(extVm) ? extVm.getFlavor() : "")
+                    .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
+                    .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
+                    .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
+        }).collect(Collectors.toList());
     }
 }
