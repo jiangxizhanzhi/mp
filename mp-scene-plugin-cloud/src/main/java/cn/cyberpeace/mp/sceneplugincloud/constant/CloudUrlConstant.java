@@ -49,6 +49,7 @@ public class CloudUrlConstant {
     public static final String DELETE_NPC_URL = "/cpcloud/npc_node/v1/node";
     public static final String GET_NPC_URL = "/cpcloud/npc_node/v1/node";
     public static final String CREATE_NS3_URL = "/cpcloud/info/v1/command";
+    public static final String DELETE_NS3_URL = "/cpcloud/info/v1/command";
 
     public static final String GET_ALL_CONTAINER_URL = "/v1/containers";
     public static final String DELETE_CONTAINER_URL = "/v1/containers/{container_id}";

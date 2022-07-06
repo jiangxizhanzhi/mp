@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CreateNs3Data;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeleteNs3Data;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcCreateResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NpcDeleteData;
@@ -25,19 +26,38 @@ public class Npc extends CloudClient {
             "ovs-vsctl add-port br-vlan ${tapName} && ovs-vsctl set port ${tapName} tag=${Tag} && " +
             "docker exec ns3 ./waf --run=\"main --npcIps=${npcIps} --tapName=${tapName} --gateway=${gateway}\" >> /var/log/test.log &";
 
+    private String deleteNs3Cmds = "docker exec ns3 pkill -f \"/home/build/scratch/main --npcIps=${npcIps} --tapName=${tapName} --gateway=${gateway}\"" +
+            "ovs-vsctl del-port br-vlan ${tapName}" +
+            "ip tuntap del ${tapName} mod tap";
+
     public Npc() {
         super();
     }
 
-    public void createNs3(String gateway, List<String> ips, String tagName) {
-        String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", RandomStringUtils.random(11, true, true));
-        cmd = StringUtils.replace(cmd, "${Tag}", tagName);
+    public void createNs3(String gateway, List<String> ips, String tag,String tapName) {
+        String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", tapName);
+        cmd = StringUtils.replace(cmd, "${Tag}", tag);
         cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(ips, ","));
         cmd = StringUtils.replace(cmd, "${gateway}", gateway);
         CreateNs3Data createData = new CreateNs3Data();
         createData.setCmd(cmd);
         createData.setHostname("controller");
         CloudResponse<Object> result = cloudPost(CloudUrlConstant.CREATE_NS3_URL, createData, null,
+                new TypeReference<CloudResponse<Object>>() {
+                }, true);
+        // todo
+        System.out.println(result.isSuccess());
+    }
+
+    public void deleteNs3(String gateway, List<String> ips, String tag,String tagName) {
+        String cmd = StringUtils.replace(createNs3Cmds, "${tapName}", tagName);
+        cmd = StringUtils.replace(cmd, "${Tag}", tag);
+        cmd = StringUtils.replace(cmd, "${npcIps}", StringUtils.join(ips, ","));
+        cmd = StringUtils.replace(cmd, "${gateway}", gateway);
+        DeleteNs3Data createData = new DeleteNs3Data();
+        createData.setCmd(cmd);
+        createData.setHostname("controller");
+        CloudResponse<Object> result = cloudPost(CloudUrlConstant.DELETE_NS3_URL, createData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
         // todo

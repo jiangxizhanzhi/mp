@@ -238,6 +238,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
             network2VlanId.put(virtualSwitch.getId(), virtualSwitch.getSegmentationId());
+            connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
             // 向端口回写网络id
             connectedNetwork.getFromPorts().forEach(p -> {
@@ -1043,7 +1044,7 @@ public class CreateHandler extends HandlerCommon {
                         ips.add(n.getIp());
                     }
                 }
-                npcClient.createNs3(gateway, ips, String.valueOf(vlanId));
+                npcClient.createNs3(gateway, ips, String.valueOf(vlanId), "tap_" + npcInfo.getKey().substring(0, 7));
             }
         }
 //        List<BaseNpcData.NetWorkNpcInfo> list = new ArrayList<>();

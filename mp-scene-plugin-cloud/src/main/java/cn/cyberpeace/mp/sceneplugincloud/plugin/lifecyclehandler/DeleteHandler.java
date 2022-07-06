@@ -31,7 +31,9 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +57,8 @@ public class DeleteHandler extends HandlerCommon {
     private final EntityNode enClient = new EntityNode();
     private final Npc npcClient = CloudApiProxyBuilder.build(new Npc(), Npc.class);
 
-    private Map<String, BaseNpcData.NetWorkNpcInfo> network2Info = new ConcurrentHashMap<>();
+    private Map<String, List<NpcInfo>> network2Info = new ConcurrentHashMap<>();
+    private Map<String, Integer> network2VlanId = new ConcurrentHashMap<>();
 
     public static class SceneProcess {
         public static final EventProcess DELETE_NPCS = new EventProcess("delete_npcs", "sceneplugincloud.event.delete_npcs");
@@ -262,24 +265,38 @@ public class DeleteHandler extends HandlerCommon {
 
     protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
         String npcName = HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid());
-        cloudElement.getAccessNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-            }
-            net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+        synchronized (network2Info) {
+            cloudElement.getAccessNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                network2VlanId.put(networkId, net.getNetwork().getVlanId());
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new ArrayList<>());
+                }
+                net.getFromPorts().forEach(port -> {
+                    NpcInfo npcInfo = new NpcInfo();
+                    npcInfo.setAuxiliary(port.getIsAuxiliary());
+                    npcInfo.setName(npcName);
+                    npcInfo.setIp(port.getIp());
+                    npcInfo.setNetworkId(networkId);
+                    network2Info.get(networkId).add(npcInfo);
+                });
             });
-        });
-        cloudElement.getDeriveNetworks().forEach(net -> {
-            String networkId = net.network.getResourceId();
-            if (!network2Info.containsKey(networkId)) {
-                network2Info.put(networkId, new BaseNpcData.NetWorkNpcInfo(networkId));
-            }
-            net.getFromPorts().forEach(port -> {
-                network2Info.get(networkId).addNpcInfo(npcName, port.getIp());
+            cloudElement.getDeriveNetworks().forEach(net -> {
+                String networkId = net.network.getResourceId();
+                network2VlanId.put(networkId, net.getNetwork().getVlanId());
+                if (!network2Info.containsKey(networkId)) {
+                    network2Info.put(networkId, new ArrayList<>());
+                }
+                net.getFromPorts().forEach(port -> {
+                    NpcInfo npcInfo = new NpcInfo();
+                    npcInfo.setAuxiliary(port.getIsAuxiliary());
+                    npcInfo.setName(npcName);
+                    npcInfo.setIp(port.getIp());
+                    npcInfo.setNetworkId(networkId);
+                    network2Info.get(networkId).add(npcInfo);
+                });
             });
-        });
+        }
     }
 
     public DeleteHandler(CloudScenePluginHandler pluginHandler) {
@@ -315,7 +332,7 @@ public class DeleteHandler extends HandlerCommon {
 
         // 删除npc节点
         if (network2Info.values().size() > 0) {
-            runSceneProgress(SceneProcess.DELETE_NPCS, () -> deleteNpcElements(new ArrayList<>(network2Info.values())));
+            runSceneProgress(SceneProcess.DELETE_NPCS, () -> deleteNpcElements(network2Info));
         }
 
         // 删除防火墙
@@ -362,10 +379,22 @@ public class DeleteHandler extends HandlerCommon {
         }
     }
 
-    private void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
-        NpcDeleteData npcDeleteData = new NpcDeleteData();
-        npcDeleteData.setNetWorkNpcInfos(list);
-        npcClient.delete(npcDeleteData);
+    private void deleteNpcElements(Map<String, List<NpcInfo>> npcInfos) {
+        for (var npcInfo : npcInfos.entrySet()) {
+            Integer vlanId = network2VlanId.get(npcInfo.getKey());
+            if (vlanId != null && !npcInfo.getValue().isEmpty()) {
+                String gateway = null;
+                List<String> ips = new ArrayList<>();
+                for (var n : npcInfo.getValue()) {
+                    if (Boolean.TRUE.equals(n.getAuxiliary())) {
+                        gateway = n.getIp();
+                    } else {
+                        ips.add(n.getIp());
+                    }
+                }
+                npcClient.deleteNs3(gateway, ips, String.valueOf(vlanId),"tap_" + npcInfo.getKey().substring(0, 7));
+            }
+        }
     }
 
     public void deleteAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
@@ -442,5 +471,14 @@ public class DeleteHandler extends HandlerCommon {
             result.addAll(connectionIds);
         }
         return result;
+    }
+
+    @Getter
+    @Setter
+    private static class NpcInfo {
+        private String networkId;
+        private String ip;
+        private String name;
+        private Boolean auxiliary;
     }
 }
