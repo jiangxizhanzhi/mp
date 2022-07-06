@@ -920,6 +920,11 @@ public class CreateHandler extends HandlerCommon {
 //        createData.setCpu(IntUtils.zeroNull(srcElement.getCpu()));
 //        createData.setRam(IntUtils.zeroNull(srcElement.getRam()));
 //        createData.setDisk(IntUtils.zeroNull(srcElement.getDisk()));
+
+        if (srcElement.getRam() != null && srcElement.getRam() > 1) {
+            createData.setRam(srcElement.getRam());
+        }
+
         // 容器初始化命令通过execContainerInitCommand执行
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
 //            createData.setPostCommand(TextUtils.emptyNull(combineInitCommand(cloudElement)));
