@@ -72,7 +72,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void downloadExcelTemplate();
 
-    void importExcel(List<ImportUser> list);
+    void importUsers(List<ImportUser> list);
 
     List<ExportUser> exportExcel(List<UserModel> users);
 

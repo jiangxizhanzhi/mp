@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -44,6 +43,7 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -126,6 +127,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private OperateUserPermissionService opUserPermCheckService;
+
+    @Autowired
+    private UserImportService userImportService;
 
     @Autowired
     private UserCacheService userCacheService;
@@ -276,6 +280,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         String decryptedPwd = PasswordUtils.desDecrypt(createRequest.getPassword());
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
+        userModel.setId(null);
 
         createCheckService.check(userModel);
 
@@ -668,9 +673,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void importExcel(List<ImportUser> list) {
+    public void importUsers(List<ImportUser> list) {
         log.info("Now import users from excel...");
+
+        List<UserModel> userModels = new ArrayList<>();
+        List<UserRoleModel> userRoleModels = new ArrayList<>();
+        List<OrgUserModel> orgUserModels = new ArrayList<>();
+
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
             log.info("importUser:{}", importUser);
@@ -684,20 +693,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userModel.setAvatar(getDefaultUserAvatar());
             }
 
-            var result = create(userModel);
-            ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
-            UserModel userCreated = result.getSource().getObj();
-            String userId = userCreated.getId();
+            String userId = TextUtils.uuid();
+            userModel.setId(userId);
+            userModels.add(userModel);
 
             // http://10.10.10.10/biz/bug-view-4861.html
             // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
             if (CollectionUtil.isNotEmpty(importUser.getRoleIdList())) {
-                importUser.getRoleIdList().forEach(rid -> {
-                            UserRoleModel userRoleModel = UserRoleModel.builder().user(userId).role(rid).build();
-                            var re = userRoleService.create(userRoleModel);
-                            ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ROLE_ADD_ERROR);
-                        }
-                );
+                List<UserRoleModel> userRoles = importUser.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(userRoles)) {
+                    userRoleModels.addAll(userRoles);
+                }
             }
 
             // 3. 保存组织-用户关系
@@ -709,12 +715,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
                         }
                 );
+                List<OrgUserModel> orgUsers = importUser.getOrgIdList().stream().map(oid -> OrgUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(orgUsers)) {
+                    orgUserModels.addAll(orgUsers);
+                }
             }
-
-            log.info("import success...");
         }
 
-        userCacheService.evictAllUserCache();
+        userImportService.doImport(userModels, userRoleModels, orgUserModels);
+
     }
 
     @Override
@@ -887,9 +896,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public String getDefaultUserAvatar() {
-        List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
-        String avatar = "/api/mp" + avatarList.get(0);
-        return avatar;
+        //List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
+        //String avatar = "/api/mp" + avatarList.get(0);
+        //return avatar;
+        return "/api/mp/avatar/1.png";
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
