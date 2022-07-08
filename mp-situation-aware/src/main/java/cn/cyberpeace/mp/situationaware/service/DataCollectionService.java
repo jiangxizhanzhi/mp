@@ -45,6 +45,7 @@ import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -86,7 +87,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
@@ -1280,13 +1291,13 @@ public class DataCollectionService {
     private void buildKeywordsQuery(List<String> keywords, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(keywords)) {
             for (String keyword : keywords) {
-                boolQueryBuilder.must(QueryBuilders.wildcardQuery("rule.description", "*" + keyword + "*"));
+                boolQueryBuilder.must(QueryBuilders.wildcardQuery("rule.description", "*" + QueryParserUtil.escape(keyword) + "*"));
             }
         }
     }
 
     private void buildPathQuery(String path, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + path + "*"));
+        boolQueryBuilder.must(QueryBuilders.wildcardQuery("syscheck.path", "*" + QueryParserUtil.escape(path) + "*"));
     }
 
     private void buildLevelQuery(List<Integer> levels, BoolQueryBuilder boolQueryBuilder) {
