@@ -152,13 +152,14 @@ mp:
     activation:
       enable: true
       licenseDir: /home/mp/config/license
-    logout:
-      reset-secret: true
     url-ac-filter:
       enabled: true
       method-match: true
       authority-match: true
       ignore-if-not-defined: false
+    biz:
+      max-import-size: 100
+      logout-reset-secret: true
     authenticate:
       use-individual-token-secret: true
       jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d

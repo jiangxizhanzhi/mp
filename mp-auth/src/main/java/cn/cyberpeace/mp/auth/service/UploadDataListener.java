@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.config.AuthBizConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -33,11 +34,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     private static final int BATCH_COUNT = 100;
 
-    /**
-     * 最大一次性导入100条数据
-     */
-    private static final int MAX_COUNT = 100;
-
     List<ImportUser> list = new ArrayList<ImportUser>();
     /**
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
@@ -50,17 +46,21 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
     private OperateUserPermissionService opUserPermCheckService;
 
+    private AuthBizConfig authBizConfig;
+
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
      *
      * @param userService
      */
-    public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService, OperateUserPermissionService opUserPermCheckService) {
+    public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
+                              OperateUserPermissionService opUserPermCheckService, AuthBizConfig authBizConfig) {
         log.info("New UploadDataListener Instance...");
         this.userService = userService;
         this.roleService = roleService;
         this.orgService = orgService;
         this.opUserPermCheckService = opUserPermCheckService;
+        this.authBizConfig = authBizConfig;
     }
 
     /**
@@ -75,7 +75,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
 
-        if (list.size() > MAX_COUNT) {
+        if (list.size() > authBizConfig.getMaxImportUserSize()) {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format("100"));
         }
     }
