@@ -680,8 +680,12 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
             // 流量运行结果：1 成功， 2 失败
             Integer result = rows.getJSONObject(0).getInteger("result");
 
-            if (Objects.nonNull(flowRecordsArray)) {
-                flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
+            try {
+                if (Objects.nonNull(flowRecordsArray)) {
+                    flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
+                }
+            } catch (Exception e) {
+                log.error("queryFlowRecords parse result error:", e);
             }
             response.setFlowRecordsList(flowRecordsList);
             response.setStatus(status);
