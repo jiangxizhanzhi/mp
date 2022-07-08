@@ -842,6 +842,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
         String filePath = request.getPath();
+        filePath = "/Users/qkjoe/Downloads/流量包/标准流量包-20220622/Emotet-infection-with-Trickbot-traffic";
         File fileFolder = new File(filePath);
         if (fileFolder.exists()) {
             File[] flowFiles = fileFolder.listFiles();
@@ -919,10 +920,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
             }
 
-            // 是否脚本
-            boolean isScript = pcapFile.getName().endsWith("pcap");
+            // 是否pcap
+            boolean isPcap = pcapFile.getName().endsWith("pcap");
 //            boolean isAttackFlow = readmeList.get(13 - diffCount).contains("攻击流量");
-            if (!isScript) {
+            if (isPcap) {
                 // 背景流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
                 flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
@@ -935,7 +936,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
             this.create(flowInfoModel);
 
-            if (isScript) {
+            if (!isPcap) {
                 // 脚本流量，要添加默认脚本参数信息
                 List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
                 // 参数数量
