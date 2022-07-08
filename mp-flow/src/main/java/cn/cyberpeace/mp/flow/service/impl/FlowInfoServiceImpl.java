@@ -908,10 +908,21 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             flowInfoModel.setFileName(pcapFile.getName());
             String fdfsPath = fastDFSClient.uploadFileWithFilepath(pcapFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
             flowInfoModel.setFlowDesc(readmeList.get(3));
-            String categoryName = readmeList.get(11);
-            flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
-            boolean isAttackFlow =  readmeList.get(13).contains("攻击流量");
-            if (!isAttackFlow) {
+            boolean isContainType = readmeList.get(10).contains("类型");
+            int diffCount = 0;
+            if (!isContainType) {
+                diffCount = 2;
+                // 默认类型：测试测量
+                flowInfoModel.setCategory(0);
+            } else {
+                String categoryName = readmeList.get(11);
+                flowInfoModel.setCategory(FlowCategory.flowCategoryMap.get(categoryName));
+            }
+
+            // 是否脚本
+            boolean isScript = pcapFile.getName().endsWith("pcap");
+//            boolean isAttackFlow = readmeList.get(13 - diffCount).contains("攻击流量");
+            if (!isScript) {
                 // 背景流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
                 flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
@@ -924,15 +935,15 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
             this.create(flowInfoModel);
 
-            if (isAttackFlow) {
-                // 攻击流量，要添加默认脚本参数信息
+            if (isScript) {
+                // 脚本流量，要添加默认脚本参数信息
                 List<FlowScriptParamModel> scriptParamModelList = new ArrayList<>();
                 // 参数数量
-                int countParam = readmeList.size() - 15;
+                int countParam = readmeList.size() - (15 - diffCount);
                 for (int i = 0; i < countParam; i++) {
                     FlowScriptParamModel scriptParam = new FlowScriptParamModel();
                     // 解析攻击流量参数：- port | Number | 参数说明描述 | 90
-                    String strParam = readmeList.get(15 + i);
+                    String strParam = readmeList.get((15 - diffCount) + i);
                     if (StringUtils.isNotBlank(strParam)) {
                         // 去除"-"号
                         strParam = strParam.substring(1);
@@ -951,7 +962,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         scriptParamModelList.add(scriptParam);
                     }
                 }
-                flowScriptParamService.bulkCreate(scriptParamModelList);
+
+                if (CollectionUtils.isNotEmpty(scriptParamModelList)) {
+                    flowScriptParamService.bulkCreate(scriptParamModelList);
+                }
             }
         } else {
             log.error("file floder is not exist");
