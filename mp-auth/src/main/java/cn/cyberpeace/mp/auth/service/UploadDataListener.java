@@ -74,10 +74,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     public void invoke(ImportUser data, AnalysisContext context) {
         log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
-
-        if (list.size() > authBizConfig.getMaxImportUserSize()) {
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format("100"));
-        }
     }
 
     /**
@@ -104,6 +100,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     private void saveData() {
         log.info("list size:{}！", list.size());
 
+        if (list.size() > authBizConfig.getMaxImportUserSize()) {
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authBizConfig.getMaxImportUserSize().toString()));
+        }
+
         // 校验字段是否合法
         checkImportUsers(list);
         userService.importUsers(list);
@@ -122,10 +122,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
             ImportUser user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
+                // todo 批量插入场景，对以下方法做优化
                 checkUserName(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
-
                 checkOrgs(user, index);
                 checkRole(user, index);
             }

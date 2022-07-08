@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -896,10 +897,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public String getDefaultUserAvatar() {
-        //List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
-        //String avatar = "/api/mp" + avatarList.get(0);
-        //return avatar;
-        return "/api/mp/avatar/1.png";
+        List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
+        String avatar = "/api/mp" + avatarList.get(0);
+        return avatar;
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {
