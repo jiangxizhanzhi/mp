@@ -842,7 +842,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
         String filePath = request.getPath();
-        filePath = "/Users/qkjoe/Downloads/流量包/标准流量包-20220622/Emotet-infection-with-Trickbot-traffic";
         File fileFolder = new File(filePath);
         if (fileFolder.exists()) {
             File[] flowFiles = fileFolder.listFiles();
