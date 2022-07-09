@@ -25,7 +25,7 @@ public interface LogFileService extends Ordered {
      * 列表
      * @return
      */
-    List<LogReportDTO> list();
+    List<LogReportDTO> list(String type);
 
     /**
      * 下载

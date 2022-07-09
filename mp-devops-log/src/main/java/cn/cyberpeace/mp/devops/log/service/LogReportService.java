@@ -24,5 +24,5 @@ public interface LogReportService {
      * 查询全部日志上报数据
      * @return
      */
-    List<LogReportDTO> list();
+    List<LogReportDTO> list(String type);
 }

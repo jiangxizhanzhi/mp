@@ -14,17 +14,22 @@ import java.util.concurrent.ConcurrentHashMap;
 @SwaggerDisplayEnum
 public enum LogReportTypeEnum {
 
-    REPORT,
+    REPORT("report_"),
+    // 中台
+    MP("mp_"),
+    // 靶场
+    BC("cr_"),
+    // 云平台
+    CP("cp_"),
+    // 竞赛
+    AD("ad_"),
+    // 实训
+    OJ("oj_");
 
-    MP,
+    private String prefix;
 
-    BC,
-
-    CP;
-
-
-    LogReportTypeEnum() {
-
+    LogReportTypeEnum(String prefix) {
+        this.prefix = prefix;
     }
 
     private static Map<String, LogReportTypeEnum> map = new ConcurrentHashMap<>();
@@ -33,6 +38,10 @@ public enum LogReportTypeEnum {
         Arrays.stream(LogReportTypeEnum.values()).forEach(
                 t -> map.put(t.name(), t)
         );
+    }
+
+    public String getPrefix() {
+        return prefix;
     }
 
     @JsonCreator
