@@ -17,7 +17,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -106,6 +108,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
         // 校验字段是否合法
         checkImportUsers(list);
+        preProcessImportUsers(list);
         userService.importUsers(list);
         log.info("save success！");
     }
@@ -122,12 +125,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
             ImportUser user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
-                // todo 批量插入场景，对以下方法做优化
                 checkUserName(user.getUsername(), index);
                 checkName(user.getName(), index);
                 checkPwd(user.getPassword(), index);
-                checkOrgs(user, index);
-                checkRole(user, index);
             }
         }
     }
@@ -229,7 +229,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     }
 
     /**
-     * 校验角色是否存在，如果存在则查出id留待后面绑定的时候用
+     * 校验组织是否存在，如果存在则查出id留待后面绑定的时候用
      *
      * @param
      * @param index
@@ -262,5 +262,104 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
             }
         });
     }
+
+
+    private void preProcessImportUsers(List<ImportUser> users) {
+        preProcessPwd(users);
+        preProcessOrgs(users);
+        preProcessRoles(users);
+    }
+
+
+    /**
+     * 预处理密码
+     */
+    private void preProcessPwd(List<ImportUser> users) {
+        Map<String, String> pwdMap = new HashMap<>();
+        for (ImportUser user : users) {
+            if (StringUtils.isEmpty(pwdMap.get(user.getPassword()))) {
+                pwdMap.put(user.getPassword(), PasswordUtils.encode(user.getPassword().trim()));
+            }
+            user.setPassword(pwdMap.get(user.getPassword()));
+        }
+    }
+
+
+    /**
+     * 预处理组织
+     */
+    private void preProcessOrgs(List<ImportUser> users) {
+        Map<String, OrgModel> orgPath2ModelMap = new HashMap<>();
+        List<OrgModel> orgs = orgService.listParents();
+        OrgModel defaultTopOrg = orgs.get(0);
+        if (Objects.isNull(defaultTopOrg)) {
+            log.error("默认一级组织不存在！");
+            throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
+        }
+
+        for (int i = 0; i < users.size(); i++) {
+            ImportUser user = users.get(i);
+            int index = i + 1;
+            String orgPaths = user.getOrgpath();
+            if (StringUtils.isBlank(orgPaths)) {
+                // 组织路径不存在，默认都存一级组织
+                // 组织为空则默认一级组织
+                user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
+                return;
+            }
+
+            user.setOrgIdList(new ArrayList<>());
+            Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
+                OrgModel orgModel = orgPath2ModelMap.get(path.trim());
+                if (Objects.isNull(orgModel)) {
+                    orgModel = orgService.getByPath(path.trim());
+                    orgPath2ModelMap.put(path.trim(), orgModel);
+                }
+                if (Objects.isNull(orgModel)) {
+                    log.error("No {} row error! org {} not existed!", index, path.trim());
+                    throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ORG_NOT_EXISTED.format(String.valueOf(index), path.trim()));
+                } else {
+                    user.getOrgIdList().add(orgModel.getId());
+                }
+            });
+        }
+    }
+
+    private void preProcessRoles(List<ImportUser> users) {
+        List<String> allRoleNames = new ArrayList<>();
+        Map<String, RoleModel> roleName2ModelMap = new HashMap<>();
+        for (int i = 0; i < users.size(); i++) {
+            ImportUser user = users.get(i);
+            int index = i + 1;
+
+            String roles = user.getRoles();
+            if (StringUtils.isBlank(roles)) {
+                log.error("No {} row error! roles:{} is empty! ", index, roles);
+                throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_EMPTY.format(String.valueOf(index)));
+            }
+
+            // 清空roleIdList
+            user.setRoleIdList(new ArrayList<>());
+            String[] roleNameArr = StringUtils.split(roles, ",");
+            allRoleNames.addAll(Arrays.asList(roleNameArr));
+
+            for (String roleName : roleNameArr) {
+                RoleModel roleModel = roleName2ModelMap.get(roleName.trim());
+                if (Objects.isNull(roleModel)) {
+                    roleModel = roleService.getByName(roleName.trim());
+                    roleName2ModelMap.put(roleName.trim(), roleModel);
+                }
+
+                if (Objects.isNull(roleModel)) {
+                    log.error("No {} row error! role {} not existed!", index, roleName.trim());
+                    throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ROLE_NOT_EXISTED.format(String.valueOf(index), roleName.trim()));
+                }
+                user.getRoleIdList().add(roleModel.getId());
+            }
+        }
+
+        opUserPermCheckService.checkByTargetRoleNames(allRoleNames);
+    }
+
 
 }

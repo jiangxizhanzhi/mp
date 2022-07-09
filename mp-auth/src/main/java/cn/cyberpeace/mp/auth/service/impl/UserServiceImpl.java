@@ -228,6 +228,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    public ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs) {
+        var ret = super.bulkCreate(objs);
+        return ret;
+    }
+
     @Override
     public ServiceResult<Integer> bulkUpdate(List<UserModel> objs) {
         objs.forEach(UserModel::encodePassword);
@@ -680,7 +685,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<OrgUserModel> orgUserModels = new ArrayList<>();
-
+        String defaultavatar = getDefaultUserAvatar();
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
             log.info("importUser:{}", importUser);
@@ -691,7 +696,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             if (StringUtils.isEmpty(userModel.getAvatar())) {
-                userModel.setAvatar(getDefaultUserAvatar());
+                userModel.setAvatar(defaultavatar);
             }
 
             String userId = TextUtils.uuid();
@@ -724,7 +729,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         userImportService.doImport(userModels, userRoleModels, orgUserModels);
-
     }
 
     @Override

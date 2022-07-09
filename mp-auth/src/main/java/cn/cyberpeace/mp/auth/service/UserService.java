@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -99,5 +100,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     int totalUserCnt();
 
     String getDefaultUserAvatar();
+
+    ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 
 }
