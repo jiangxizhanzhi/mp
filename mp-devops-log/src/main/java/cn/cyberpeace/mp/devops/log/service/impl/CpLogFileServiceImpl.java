@@ -52,7 +52,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
 
 
     @Override
-    public List<LogReportDTO> list() {
+    public List<LogReportDTO> list(String type) {
         CloudPlatformItemsResult t = super.sendPost(LIST_URL,JSONObject.toJSONString(new LogListParams()), CloudPlatformItemsResult.class);
         if (Objects.isNull(t) || !t.isSuccess() ){
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(t.getMessage()));
@@ -60,10 +60,14 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         List<CpCloudLogPO> list = JSONObject.parseArray(JSONObject.toJSONString(t.getItems()), CpCloudLogPO.class);
         List<LogReportDTO> reportDTOList = list.stream().map(v -> {
             LogReportDTO dto = new LogReportDTO();
-            dto.setFileName(v.getFilename());
+            String fileName = v.getFilename();
+            if (!fileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
+                fileName = LogReportTypeEnum.CP.getPrefix() + fileName;
+            }
+            dto.setFileName(fileName);
             dto.setFileSize(v.getFileSize());
             dto.setUpdateTime(v.getUpdatetime());
-            dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
+            dto.setLogReportTypeEnum(LogReportTypeEnum.CP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?hostname=" + v.getHostname() + "&path=" + v.getPath() + "&fileName=" + v.getFilename() + "&type=" + LogReportTypeEnum.CP.toValue());
             return dto;
         }).collect(Collectors.toList());

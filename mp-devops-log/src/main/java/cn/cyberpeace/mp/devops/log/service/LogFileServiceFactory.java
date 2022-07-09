@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
+import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
+import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,12 +43,22 @@ public class LogFileServiceFactory {
      * 查询全部日志上报数据
      * @return
      */
-    public List<LogReportDTO> listAll(){
+    public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
         List<LogReportDTO> result = Lists.newArrayList();
-        for (LogFileService logFileService : fileServiceList){
-            var list = logFileService.list();
-            result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+        if (Objects.nonNull(basePageRequest.getType())) {
+            LogFileService logFileService = logFileServiceMap.get(basePageRequest.getType().name());
+            if (Objects.isNull(logFileService)) {
+                result.addAll(logFileServiceMap.get(LogReportTypeEnum.REPORT.name()).list(basePageRequest.getType().name()));
+            } else {
+                result.addAll(logFileService.list(basePageRequest.getType().name()));
+            }
+        } else {
+            for (LogFileService logFileService : fileServiceList) {
+                var list = logFileService.list(null);
+                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+            }
         }
+
         return result;
     }
 

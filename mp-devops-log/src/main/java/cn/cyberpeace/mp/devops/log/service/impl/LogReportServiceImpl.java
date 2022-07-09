@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.po.LogReportPO;
 import cn.cyberpeace.mp.devops.log.repository.LogReportMapper;
 import cn.cyberpeace.mp.devops.log.service.LogReportService;
+import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,8 +42,20 @@ public class LogReportServiceImpl implements LogReportService {
     }
 
     @Override
-    public List<LogReportDTO> list(){
-        List<LogReportPO> list = logReportMapper.list(new HumanCondition());
+    public List<LogReportDTO> list(String type){
+        HumanCondition humanCondition = new HumanCondition();
+        if (StringUtils.isNotBlank(type)) {
+            humanCondition.filterEqual("type", type);
+        }
+        List<LogReportPO> list = logReportMapper.list(humanCondition);
+        list.forEach(logReportPO -> {
+            String fileName = logReportPO.getFileName();
+            LogReportTypeEnum logType = logReportPO.getType();
+            if (!fileName.startsWith(logType.getPrefix())) {
+                fileName = logType.getPrefix() + fileName;
+                logReportPO.setFileName(fileName);
+            }
+        });
         return logReportDTOConverter.targetToSource(list);
     }
 }

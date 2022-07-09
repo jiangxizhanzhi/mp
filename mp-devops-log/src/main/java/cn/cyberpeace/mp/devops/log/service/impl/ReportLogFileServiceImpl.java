@@ -32,8 +32,8 @@ public class ReportLogFileServiceImpl implements LogFileService {
     }
 
     @Override
-    public List<LogReportDTO>  list() {
-        return logReportService.list();
+    public List<LogReportDTO> list(String type) {
+        return logReportService.list(type);
     }
 
     @Override

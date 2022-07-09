@@ -40,12 +40,16 @@ public class MpLogFileServiceImpl implements LogFileService {
     }
 
     @Override
-    public List<LogReportDTO>  list() {
+    public List<LogReportDTO> list(String type) {
         var logFile = new File(logPath);
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<LogReportDTO> logReportDTOList = fileList.stream().map(f -> {
             LogReportDTO dto = new LogReportDTO();
-            dto.setFileName(f.getName());
+            String fileName = f.getName();
+            if (!fileName.startsWith(LogReportTypeEnum.MP.getPrefix())) {
+                fileName = LogReportTypeEnum.MP.getPrefix() + fileName;
+            }
+            dto.setFileName(fileName);
             dto.setFileSize(f.length());
             dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
