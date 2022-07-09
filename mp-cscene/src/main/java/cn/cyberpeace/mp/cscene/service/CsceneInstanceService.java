@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -523,5 +524,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.resumeElement(nodeId);
         return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {
+        String sceneId = getSceneId(csceneId);
+        var result = scenePluginCloudSceneService.linkStatus(sceneId).getSource();
+        SceneLinkStatusInfo sceneLinkStatusInfo = new SceneLinkStatusInfo();
+        sceneLinkStatusInfo.setNodeLinkStatusList(result);
+        sceneLinkStatusInfo.setCsceneId(csceneId);
+        return new ServiceResult<>(sceneLinkStatusInfo);
     }
 }

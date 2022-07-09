@@ -9,8 +9,16 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -18,9 +26,7 @@ import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
-import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
-import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionFlowBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
@@ -36,7 +42,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -517,5 +529,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                 @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
         request = formatNodeActionRequest(request, id, nodeId);
         return modelService.resumeElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("link_status")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/link_status")
+    public ServiceResult<SceneLinkStatusInfo> linkStatus(String id) {
+        return modelService.linkStatus(id).asResult();
     }
 }

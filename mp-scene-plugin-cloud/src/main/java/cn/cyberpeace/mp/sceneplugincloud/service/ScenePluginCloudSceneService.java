@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
@@ -32,10 +33,15 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -561,5 +567,28 @@ public class ScenePluginCloudSceneService {
                 log.error("change vlan range {} error", formatVlanRange);
             }
         });
+    }
+
+    public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
+        var list = SceneInstanceLinkCacheUtil.getCloned(sceneId);
+        List<Runnable> tasks = new ArrayList<>();
+        Remote remote = new Remote();
+        for (var n : list) {
+            for (var p : n.getConnectionStatusList()) {
+                tasks.add(() -> {
+                    LinkStatusParams params = new LinkStatusParams();
+                    params.setInstanceId(n.getResourceId());
+                    params.setNetworkId(p.getNetworkId());
+                    var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                    }, true);
+                    if (result.isSuccess()) {
+                        n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
+                        p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
+                    }
+                });
+            }
+        }
+        TaskCommon.runTasks(tasks);
+        return new ServiceResult<>(list);
     }
 }
