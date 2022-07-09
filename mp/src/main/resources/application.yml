@@ -164,25 +164,7 @@ mp:
       use-individual-token-secret: true
       jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d
       jwt-expires: 604800
-      urls:
-        - /auth/**
-        - /sys/notice/**
-        - /systemOperation/**
-        - /devops/log/operate/page
-        - /flow/**
-        - /cscene/**
-        - /devops/cluster/monitor/**
-        - /devops/cluster/container/**
-        - /devops/cluster/elasticip/**
-        - /devops/cluster/firewall/**
-        - /devops/cluster/images/**
-        - /devops/cluster/service/**
-        - /devops/cluster/network/**
-        - /devops/cluster/openflow/**
-        - /devops/cluster/real-equipment/**
-        - /devops/cluster/router/**
-        - /devops/cluster/types/**
-        - /devops/cluster/instance/**
+      urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
   flow:
     trex-image: tgn-trex
   sceneplugincloud:
