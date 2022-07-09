@@ -52,11 +52,13 @@ class NodeElementConverter implements IConverter {
         sceneConfigElementBO.setId(node.getId());
         sceneConfigElementBO.setName(node.getName());
         if (CollectionUtils.isNotEmpty(node.getInitCommands())) {
-            List<String> initCommands = node.getInitCommands().stream()
-                    .filter(command -> command != null)
-                    .map(command -> "n:" + command.getO())
-                    .collect(Collectors.toList());
-            sceneConfigElementBO.setInitCommands(initCommands);
+            List<String> result = new ArrayList<>();
+            for (var initCommand : node.getInitCommands()) {
+                if (initCommand != null) {
+                    result.addAll(initCommand.getAllCommands());
+                }
+            }
+            sceneConfigElementBO.setInitCommands(result);
         }
         if (node.getId().startsWith("server")) {
             sceneConfigElementBO.setType(BaseSceneElementModel.Type.TERMINAL);
