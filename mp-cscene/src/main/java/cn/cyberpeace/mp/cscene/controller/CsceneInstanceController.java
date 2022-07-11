@@ -21,13 +21,13 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionR
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -459,7 +459,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
 
-
     @ApiOperation("查询场景实例事件列表（滚动分页）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
@@ -638,5 +637,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var result = modelService.resumeElement(request.getId(), request.getNodeId(), request.getContext()).asResult();
         CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.RECOVER, CsceneLogUtils.SCENE_ELEMENT_RESUME, request.getContext());
         return result;
+    }
+
+    @ApiOperation("场景链路状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
+    })
+    @PostMapping("/link_status")
+    public ServiceResult<SceneLinkStatusInfo> linkStatus(String id) {
+        return modelService.linkStatus(id).asResult();
     }
 }
