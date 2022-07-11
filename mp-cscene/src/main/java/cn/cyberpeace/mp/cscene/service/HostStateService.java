@@ -305,7 +305,7 @@ public class HostStateService {
             return hs;
         }).collect(Collectors.toList());
 
-        if (Boolean.TRUE.equals(pageRequest.getNeedInternetSpeed() && CollectionUtil.isNotEmpty(hostStates))) {
+        if (Boolean.TRUE.equals(pageRequest.getNeedInternetSpeed()) && CollectionUtil.isNotEmpty(hostStates)) {
             String id = csceneInstanceService.getSceneId(sceneId);
             SceneHandler sceneHandler = new SceneHandler(id, null, false, null);
             WazuhMonitorEventsRequest request = new WazuhMonitorEventsRequest();
