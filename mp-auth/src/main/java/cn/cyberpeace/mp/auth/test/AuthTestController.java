@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.service.UserOnlineReportService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
@@ -77,8 +76,6 @@ public class AuthTestController {
     @Autowired
     private UserHeartbeatService userHeartbeatService;
 
-    @Autowired
-    private UserOnlineReportService userOnlineReportService;
 
     @ApiOperation("DES加密")
     @PostMapping("/desEncryptPwd")

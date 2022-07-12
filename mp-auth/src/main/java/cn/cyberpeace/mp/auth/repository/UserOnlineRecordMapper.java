@@ -27,10 +27,9 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      * 判断在线的依据：
      * end_time > (now() - 5m) && status = 0
      *
-     * @param deadline
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
+    List<UserOnlineRecordModel> listCurrentOnlined(int minutes);
 
     /**
      * 判断离线的依据:
@@ -48,7 +47,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      *
      * @return
      */
-    List<UserOnlineRecordModel> listOnlinedUserByPeriod(int minutes);
+    //List<UserOnlineRecordModel> listOnlinedUserByPeriod(int minutes);
 
 
     /**
@@ -57,7 +56,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      *
      * @return
      */
-    int cntOnlinedUser(int minutes);
+    //int cntOnlinedUser(int minutes);
 
 
     /**

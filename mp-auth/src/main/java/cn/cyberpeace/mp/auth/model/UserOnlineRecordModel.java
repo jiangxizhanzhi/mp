@@ -24,8 +24,10 @@ import java.time.LocalDateTime;
 @Table("mp_auth_user_online_record")
 public class UserOnlineRecordModel extends BaseModel {
 
+    // 状态失效
     public static final Integer STATUS_FINISHED = 1;
 
+    // 状态有效
     public static final Integer STATUS_NOT_FINISHED = 0;
 
     @ApiModelProperty(value = "用户id")

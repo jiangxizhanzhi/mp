@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordScheduleService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
@@ -115,8 +116,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlined(String userId) {
-        LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userId, deadline);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(DEFAULT_MINUTES);
         return onlineList;
     }
 
@@ -128,6 +128,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         return list;
     }
 
+    /*
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlinedUser() {
         List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
@@ -144,7 +145,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public List<UserOnlineRecordModel> listOnlinedUserByPeriod() {
         List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
         return list;
-    }
+    }*/
 
 
     @Override
@@ -161,7 +162,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public UserOnlineCntDto onlineUserCnt() {
-        int olcnt = cntCurrentOnlinedUser();
+        int olcnt = UserOnlineRecordScheduleService.REALTIME_ONLINE_USER_CNT;
         int totalUser = userService.totalUserCnt();
 
         UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();

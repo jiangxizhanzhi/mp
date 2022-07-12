@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 @Slf4j
-public class UserOnlineReportService {
+public class UserOnlineRecordScheduleService {
 
     // 每2分钟统计一次
     public static final long REFRESH_RATE = 2;
@@ -40,21 +40,26 @@ public class UserOnlineReportService {
 
     private static ExecutorService threadPool = null;
 
+    public static int REALTIME_ONLINE_USER_CNT = 0;
+
     @Autowired
     private UserHeartbeatService heartbeatService;
 
     @Autowired
     private ApplicationContext applicationContext;
 
+    /**
+     * 创建或者更新用户在线记录
+     */
     @Scheduled(initialDelay = REFRESH_RATE * REFRESH_MINUTE, fixedRate = REFRESH_RATE * REFRESH_MINUTE)
     public void scheduleUserOlRecord() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
         log.info("start online record task...");
-//        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(REFRESH_RATE_MINUTES));
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
-        log.info("heartbeatMap.size:{}", heartbeatMap.size());
+        REALTIME_ONLINE_USER_CNT = heartbeatMap.size();
+        log.info("REALTIME_ONLINE_USER_CNT:{}", REALTIME_ONLINE_USER_CNT);
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             UserModel userModel = entry.getKey();
             String userId = userModel.getId();
@@ -66,10 +71,16 @@ public class UserOnlineReportService {
                 heartbeatMap.remove(userModel);
             }
         }
+
         log.info("finish online record task...");
+        log.info("heartbeatMap.size:{} after...", heartbeatMap.size());
+
     }
 
 
+    /**
+     * 检查状态是否过期，过期状态更新
+     */
     @Scheduled(initialDelay = 10000, fixedRate = 5 * REFRESH_MINUTE)
     public void checkUserOlRecord() {
         if (threadPool == null) {
@@ -93,7 +104,7 @@ public class UserOnlineReportService {
 
     private static class ThreadPoolHolder {
         static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
-        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 200, 180, TimeUnit.SECONDS,
+        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(30, 200, 180, TimeUnit.SECONDS,
                 new ArrayBlockingQueue(10000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 

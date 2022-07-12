@@ -38,24 +38,24 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
 
 
     /**
-     * 在线用户
+     * 当前离线用户
      *
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlinedUser();
+    //List<UserOnlineRecordModel> listCurrentOnlinedUser();
 
     /**
      * 当前在线用户数
      * @return
      */
-    int cntCurrentOnlinedUser();
+    //int cntCurrentOnlinedUser();
 
     /**
      * 根据时间段查找在线用户
      *
      * @return
      */
-    List<UserOnlineRecordModel> listOnlinedUserByPeriod();
+    //List<UserOnlineRecordModel> listOnlinedUserByPeriod();
 
 
     /**

@@ -19,8 +19,8 @@
             <if test="userId != null and userId != ''">
                 AND user = #{userId}
             </if>
-            <if test="deadline != null">
-                AND end_time > #{deadline}
+            <if test="minutes != null">
+                AND end_time &gt; NOW() - INTERVAL #{minutes} MINUTE
             </if>
             AND status = 0
         </where>
@@ -32,8 +32,8 @@
             <if test="userId != null and userId != ''">
                 AND user = #{userId}
             </if>
-            <if test="deadline != null">
-                AND end_time &lt; #{deadline}
+            <if test="minutes != null">
+                AND end_time &lt; NOW() - INTERVAL #{minutes} MINUTE
             </if>
             AND status = 0
         </where>
@@ -55,6 +55,7 @@
     </select>
     -->
 
+    <!--
     <select id="listOnlinedUserByPeriod" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select *
         from mp_auth_user_online_record
@@ -71,6 +72,7 @@
               (select pk from mp_auth_user_online_record where start_time &gt;= NOW()
                 or end_time &lt;= NOW() - INTERVAL #{minutes} MINUTE group by user)
     </select>
+    -->
 
     <select id="getOnlinedUserCntByPeriod" resultType="integer">
         select count(*)
