@@ -286,6 +286,9 @@ public class ScenePluginCollectionSceneService {
             hostState.setDiskUsed(this.byte2GB(srcHostState.getDiskUsed()));
             hostState.setDiskUnused(this.byte2GB(srcHostState.getDiskUnused()));
             hostState.setTime(srcHostState.getTime());
+            // 网速
+            hostState.setDownloadSpeed(srcHostState.getDownloadSpeed());
+            hostState.setUploadSpeed(srcHostState.getUploadSpeed());
             // todo 进程，端口，网络连接，磁盘使用率
             if (CollectionUtil.isNotEmpty(agentName2Element)) {
                 var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);
@@ -391,7 +394,7 @@ public class ScenePluginCollectionSceneService {
             request.setRuleGroups(queryParams.getRuleGroups());
         }
 
-        if (queryParams.getPath() != null) {
+        if (StringUtils.isNotEmpty(queryParams.getPath())) {
             request.setPath(queryParams.getPath());
         }
 

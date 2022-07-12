@@ -52,6 +52,12 @@ public class WazuhHostStateModel {
     @ApiModelProperty("磁盘使用率")
     private double diskPercent;
 
+    @ApiModelProperty("下载速度")
+    private String downloadSpeed;
+
+    @ApiModelProperty("上传速度")
+    private String uploadSpeed;
+
     @ApiModelProperty("agentId")
     private String agentId;
 
