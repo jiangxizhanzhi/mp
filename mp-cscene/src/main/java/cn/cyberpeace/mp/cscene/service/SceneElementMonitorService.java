@@ -272,6 +272,9 @@ public class SceneElementMonitorService {
                 resource.setMemoryPercent(Objects.nonNull(hostState.getMemoryPercent()) ? NumberUtil.round(hostState.getMemoryPercent(), 2).doubleValue() : 0.0);
                 resource.setMemoryFree(hostState.getMemoryFree());
                 resource.setDiskPercent(Objects.nonNull(hostState.getDiskPercent()) ? NumberUtil.round(hostState.getDiskPercent(), 2).doubleValue() : 0.0);
+
+                resource.setDownloadSpeed(hostState.getDownloadSpeed());
+                resource.setUploadSpeed(hostState.getUploadSpeed());
             } else {
                 // 如果从探针中查不到， 从拓扑图中获取数据
                 resource.setCpuCount(sceneElementBO.getCpu());

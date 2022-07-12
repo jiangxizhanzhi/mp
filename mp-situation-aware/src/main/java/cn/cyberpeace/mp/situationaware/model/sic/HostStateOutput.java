@@ -35,5 +35,9 @@ public class HostStateOutput {
     @JSONField(name = "MemoryTotal")
     private String memoryTotal;
 
+    @JSONField(name = "DownLoadSpeed")
+    private String downloadSpeed;
 
+    @JSONField(name = "UploadSpeed")
+    private String uploadSpeed;
 }

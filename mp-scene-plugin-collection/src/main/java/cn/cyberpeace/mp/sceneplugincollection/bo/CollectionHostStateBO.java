@@ -76,4 +76,9 @@ public class CollectionHostStateBO {
     @ApiModelProperty(value = "网络连接数")
     private Integer connectionCount;
 
+    @ApiModelProperty("下载速度")
+    private String downloadSpeed;
+
+    @ApiModelProperty("上传速度")
+    private String uploadSpeed;
 }
