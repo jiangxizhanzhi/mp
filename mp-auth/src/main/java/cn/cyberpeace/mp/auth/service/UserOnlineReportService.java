@@ -54,7 +54,7 @@ public class UserOnlineReportService {
         log.info("start online record task...");
 //        List<UserOlReportCntDto> list = heartbeatService.groupCntByUserId(LocalDateTime.now().minusMinutes(REFRESH_RATE_MINUTES));
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
-        log.info("heartbeatMap: {}", heartbeatMap);
+        log.info("heartbeatMap.size:{}", heartbeatMap.size());
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             UserModel userModel = entry.getKey();
             String userId = userModel.getId();
@@ -93,8 +93,8 @@ public class UserOnlineReportService {
 
     private static class ThreadPoolHolder {
         static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
-        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 400, 60, TimeUnit.SECONDS,
-                new ArrayBlockingQueue(1000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
+        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 200, 180, TimeUnit.SECONDS,
+                new ArrayBlockingQueue(10000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
 }
