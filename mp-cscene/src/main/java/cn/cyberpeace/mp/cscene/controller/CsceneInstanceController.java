@@ -536,7 +536,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class)
     })
-    @PostMapping("/link_status")
+    @GetMapping("/link_status")
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String id) {
         return modelService.linkStatus(id).asResult();
     }
