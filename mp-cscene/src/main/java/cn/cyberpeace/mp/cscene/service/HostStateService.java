@@ -299,6 +299,9 @@ public class HostStateService {
             hs.setSceneId(hostStateBO.getSceneId());
             hs.setElementId(hostStateBO.getNodeId());
             hs.setTime(hostStateBO.getTime());
+
+            hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
+            hs.setUploadSpeed(hostStateBO.getUploadSpeed());
             return hs;
         }).collect(Collectors.toList());
 

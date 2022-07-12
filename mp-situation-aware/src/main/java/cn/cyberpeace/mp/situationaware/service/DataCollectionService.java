@@ -1258,7 +1258,7 @@ public class DataCollectionService {
         }
 
         // path
-        if (wazuhEventRequest.getPath() != null) {
+        if (StringUtils.isNotEmpty(wazuhEventRequest.getPath())) {
             buildPathQuery(wazuhEventRequest.getPath(), boolQueryBuilder);
         }
 
@@ -1418,6 +1418,9 @@ public class DataCollectionService {
         if (StringUtils.isNotBlank(output.getMemoryUsedPercent())) {
             wazuhHostStateModel.setMemoryPercent(Double.parseDouble(output.getMemoryUsedPercent()));
         }
+
+        wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
+        wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
 
         return wazuhHostStateModel;
     }
