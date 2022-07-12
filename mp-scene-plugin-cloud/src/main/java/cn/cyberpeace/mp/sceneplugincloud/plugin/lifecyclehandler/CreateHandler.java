@@ -236,6 +236,7 @@ public class CreateHandler extends HandlerCommon {
             subnet.setDnsNameservers(CollectionUtils.emptyNull(connectedNetwork.network.getDnsNameservers()));
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
+            cloudElement.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
             // 向端口回写网络id
             connectedNetwork.getFromPorts().forEach(p -> {
