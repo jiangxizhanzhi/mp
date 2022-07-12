@@ -93,8 +93,8 @@ public class UserOnlineReportService {
 
     private static class ThreadPoolHolder {
         static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
-        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 100, 20, TimeUnit.SECONDS,
-                new ArrayBlockingQueue(100), namedThreadFactory, new ThreadPoolExecutor.DiscardOldestPolicy());
+        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(20, 400, 60, TimeUnit.SECONDS,
+                new ArrayBlockingQueue(1000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
 }
