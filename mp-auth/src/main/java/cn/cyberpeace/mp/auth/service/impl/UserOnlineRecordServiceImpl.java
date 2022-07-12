@@ -49,6 +49,8 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     @Autowired
     private UserService userService;
 
+    private static final int DEFAULT_MINUTES = 5;
+
     @Autowired
     public UserOnlineRecordServiceImpl(UserOnlineRecordMapper modelMapper, UserOnlineRecordFields modelFields) {
         setModelMapper(modelMapper);
@@ -121,22 +123,26 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(String userId) {
         // 默认超过5分钟没有更新end_time既判定为离线
-        LocalDateTime deadline = LocalDateTime.now().minusMinutes(5);
+        LocalDateTime deadline = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userId, deadline);
         return list;
     }
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlinedUser() {
-        LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime startTime = endTime.minusMinutes(5);
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(startTime, endTime);
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
         return list;
     }
 
+
     @Override
-    public List<UserOnlineRecordModel> listOnlinedUserByPeriod(LocalDateTime startTime, LocalDateTime endTime) {
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(startTime, endTime);
+    public int cntCurrentOnlinedUser() {
+        return getModelMapper().cntOnlinedUser(DEFAULT_MINUTES);
+    }
+
+    @Override
+    public List<UserOnlineRecordModel> listOnlinedUserByPeriod() {
+        List<UserOnlineRecordModel> list = getModelMapper().listOnlinedUserByPeriod(DEFAULT_MINUTES);
         return list;
     }
 
@@ -155,8 +161,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public UserOnlineCntDto onlineUserCnt() {
-        List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlinedUser();
-        int olcnt = onlineRecordModels.size();
+        int olcnt = cntCurrentOnlinedUser();
         int totalUser = userService.totalUserCnt();
 
         UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();

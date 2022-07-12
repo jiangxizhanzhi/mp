@@ -59,8 +59,17 @@
         select *
         from mp_auth_user_online_record
         where pk not in
-              (select pk from mp_auth_user_online_record where start_time >= #{endTime} or end_time &lt;= #{startTime})
-        group by user
+              (select pk from mp_auth_user_online_record where start_time &gt;= NOW()
+                 or end_time &lt;= NOW() - INTERVAL #{minutes} MINUTE group by user)
+    </select>
+
+
+    <select id="cntOnlinedUser" resultType="integer">
+        select count(pk)
+        from mp_auth_user_online_record
+        where pk not in
+              (select pk from mp_auth_user_online_record where start_time &gt;= NOW()
+                or end_time &lt;= NOW() - INTERVAL #{minutes} MINUTE group by user)
     </select>
 
     <select id="getOnlinedUserCntByPeriod" resultType="integer">
