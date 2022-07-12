@@ -925,6 +925,9 @@ public class CreateHandler extends HandlerCommon {
         if (srcElement.getRam() != null && srcElement.getRam() > 1) {
             createData.setRam(srcElement.getRam());
         }
+        if (srcElement.getDisk() != null && srcElement.getDisk() > 1) {
+            createData.setDisk(srcElement.getDisk());
+        }
 
         // 容器初始化命令通过execContainerInitCommand执行
 //        if (Boolean.TRUE.equals(cloudElement.getInitSupport())) {
