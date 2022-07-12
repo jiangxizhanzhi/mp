@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotParams;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
@@ -194,5 +196,16 @@ public class VirtualMachine extends CloudClient {
         cloudDelete(url, null, null, new TypeReference<CloudResponse<VirtualMachineAddPortResult>>() {
         }, true);
         return true;
+    }
+
+    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName) {
+        SnapshotParams params = new SnapshotParams();
+        params.setDescription(StringUtils.EMPTY);
+        params.setImageName(image);
+        params.setInstanceUuid(instanceId);
+        params.setName(snapshotName);
+        var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
+        }, true);
+        return response.getData();
     }
 }
