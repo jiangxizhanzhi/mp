@@ -27,7 +27,7 @@
     <!-- 控制台日志 -->
     <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([${PID}-%thread]){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%-40.40logger{39}){cyan} %L %clr(-){faint} %clr(%CALL_CHAIN_ID){faint} %clr(|){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
     <!-- 同步输出文件日志 使用 %CALL_CHAIN_ID 打印追踪id  -->
-<!--    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %CALL_CHAIN_ID | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
+    <!--    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %CALL_CHAIN_ID | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
     <!-- 异步输出文件日志 使用 %X{CALL_CHAIN_ID} 打印追踪id  -->
     <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %X{CALL_CHAIN_ID} | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
@@ -38,11 +38,13 @@
     <!--日志级别-->
     <springProperty scope="context" name="LOG_LEVEL_ROOT" source="logging.level.root" defaultValue="ERROR"/>
     <!--日志最大天数-->
-    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="7"/>
+    <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="15"/>
+    <!--日志最大容量-->
+    <springProperty scope="context" name="LOG_FILE_TOTAL_SIZE" source="logging.file.max-total-size" defaultValue="1GB"/>
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
-    <property name="LOG_FILE_MAX_SIZE" value="300MB"/>
+    <property name="LOG_FILE_TOTAL_SIZE" value="${LOG_FILE_TOTAL_SIZE}"/>
     <property name="LOG_FILE_MAX_HISTORY" value="${LOG_FILE_MAX_HISTORY}"/>
 
     <!-- 控制台日志输出 -->
@@ -55,14 +57,13 @@
 
     <!-- 时间滚动输出日志 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/mp.log</file>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${LOG_HOME}/%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/mp_%d{yyyy-MM-dd}.log.zip</fileNamePattern>
             <!--日志文件保留天数-->
-            <maxFileSize>${LOG_FILE_MAX_SIZE}</maxFileSize>
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
+            <totalSizeCap>${LOG_FILE_TOTAL_SIZE}</totalSizeCap>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
         <encoder>

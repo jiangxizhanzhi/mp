@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.cluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.StatusEnum;
@@ -128,4 +129,10 @@ public class DeviceTargetPO extends BaseModel {
      * 是否隐藏
      */
     private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
+     */
+    @DefaultInt
+    private Integer instanceState;
 }

@@ -127,6 +127,11 @@ public class ImagePageDTO extends BasePageDTO{
 
     private Boolean isHide = Boolean.FALSE;
 
+    /**
+     * 已启动镜像
+     */
+    private Boolean vmStarted;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -159,6 +164,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setBaseImageSupport(request.getBaseImageSupport());
         this.setLikeName(request.getLikeName());
         this.setIsHide(Boolean.FALSE);
+        this.setVmStarted(request.getVmStarted());
     }
 
     /**

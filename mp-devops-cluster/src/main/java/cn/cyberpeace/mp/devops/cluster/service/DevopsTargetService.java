@@ -155,10 +155,12 @@ public class DevopsTargetService {
         if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.VM.toValue()) && Objects.nonNull(extVm)){
             deviceTargetPO.setQuickCreateSupport(extVm.getQuickCreateSupport());
             deviceTargetPO.setInitSupport(extVm.getInitSupport());
+            deviceTargetPO.setInstanceState(extVm.getInstanceState());
         }
         else if (StringUtils.isNotBlank(imageType) && imageType.equals(ImageTypeEnum.CONTAINER.toValue()) && Objects.nonNull(extDocker)){
             deviceTargetPO.setQuickCreateSupport(extDocker.getQuickCreateSupport());
             deviceTargetPO.setInitSupport(extDocker.getInitSupport());
+            deviceTargetPO.setInstanceState(extDocker.getInstanceState());
         }else{
             deviceTargetPO.setQuickCreateSupport(Boolean.FALSE);
             deviceTargetPO.setInitSupport(Boolean.FALSE);
