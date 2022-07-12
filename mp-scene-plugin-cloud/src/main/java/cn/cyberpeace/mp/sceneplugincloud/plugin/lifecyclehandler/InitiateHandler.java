@@ -287,14 +287,14 @@ public class InitiateHandler extends HandlerCommon {
             if (!Boolean.TRUE.equals(cloudElement.getAuxiliaryRouterOff())) {
                 // 是否开启辅助路由(是否未连接默认路由)
                 var routerOn = true;
-                if (this.isRouter(cloudElement.getCoreType(), cloudElement.getVirtualType())) {
+                if (this.isGateway(cloudElement.getCoreType(), cloudElement.getVirtualType(), cloudElement.getSrcElement().getType())) {
                     routerOn = false;
                 } else {
                     for (var p : connectNetwork.getFromPorts()) {
                         var connectedCloudElement = getHandlerUtils().getPortConnectedOpaqueSrcElement(p.getId());
                         var pluginConnectedCloudElement = connectedCloudElement == null ? null : getPluginHandler().getElement(connectedCloudElement.getId());
                         if (pluginConnectedCloudElement != null) {
-                            if (this.isRouter(pluginConnectedCloudElement.getCoreType(), pluginConnectedCloudElement.getVirtualType())) {
+                            if (this.isGateway(pluginConnectedCloudElement.getCoreType(), pluginConnectedCloudElement.getVirtualType(), pluginConnectedCloudElement.getSrcElement().getType())) {
                                 routerOn = false;
                                 break;
                             }
@@ -305,6 +305,20 @@ public class InitiateHandler extends HandlerCommon {
             } else {
                 connectNetwork.network.setAuxiliaryNetworkRouterOn(false);
             }
+        }
+    }
+
+    private boolean isGateway(CoreType coreType, Integer virtualType, Integer type) {
+        if (this.isRouter(coreType, virtualType)) {
+            return true;
+        } else if (type != null && type == BaseSceneElementModel.Type.SWITCH) {
+            return true;
+        } else if (type != null && type == BaseSceneElementModel.Type.ROUTER) {
+            return true;
+        } else if (type != null && type == BaseSceneElementModel.Type.FIREWALL) {
+            return true;
+        } else {
+            return false;
         }
     }
 
