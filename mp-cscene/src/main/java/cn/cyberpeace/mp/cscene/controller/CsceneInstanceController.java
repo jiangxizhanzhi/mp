@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRe
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
@@ -646,5 +647,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/link_status")
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String id) {
         return modelService.linkStatus(id).asResult();
+    }
+
+    @ApiOperation("节点快照")
+    @PostMapping("/snapshot_element")
+    public ServiceResult<Boolean> snapshotElement(@RequestBody(required = false) CsceneInstanceNodeSnapshotRequest request) {
+        var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getContext()).asResult();
+        CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_SNAPSHOT, request.getContext());
+        return result;
     }
 }

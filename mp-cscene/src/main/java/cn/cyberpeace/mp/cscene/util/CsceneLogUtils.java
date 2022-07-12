@@ -55,6 +55,7 @@ public class CsceneLogUtils {
     public static String SCENE_ELEMENT_UNPAUSE = "scene_element_unpause";
     public static String SCENE_ELEMENT_RECREATE = "scene_element_recreate";
     public static String SCENE_ELEMENT_RESTART = "scene_element_restart";
+    public static String SCENE_ELEMENT_SNAPSHOT = "scene_element_snapshot";
 
     public static String SCENE_SUSPEND = "scene_suspend";
     public static String SCENE_RESUME = "scene_resume";
