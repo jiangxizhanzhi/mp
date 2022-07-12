@@ -96,6 +96,9 @@
             <if test="isHide != null and isHide == 0">
                 and i.is_hide = 0
             </if>
+            <if test="vmStarted != null and vmStarted == true">
+                and instance_state in (1,2,3)
+            </if>
         </where>
     </sql>
 
@@ -334,6 +337,9 @@
             </if>
             <if test="imageSource != null">
                 image_source = #{imageSource},
+            </if>
+            <if test="instanceState != null">
+                instance_state = #{instanceState},
             </if>
         </set>
         where uuid = #{uuid}

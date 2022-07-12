@@ -92,6 +92,9 @@ public class ImagePageRequest extends BasePageRequest {
     @ApiModelProperty(value = "是否支持基础镜像")
     private Boolean baseImageSupport;
 
+    @ApiModelProperty("已启动镜像")
+    private Boolean vmStarted;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }

@@ -49,6 +49,9 @@ public class ExtDocker implements Serializable {
     @ApiModelProperty("实例ID")
     private String instanceUuid;
 
+    /**
+     * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
+     */
     @ApiModelProperty("实例状态")
     private Integer instanceState;
 
