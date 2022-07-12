@@ -88,6 +88,9 @@ public class MpLogFileServiceImpl implements LogFileService {
         }
         zout.finish();
         String downLoadFileName = !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName;
+        if (!downLoadFileName.startsWith(LogReportTypeEnum.MP.getPrefix())) {
+            downLoadFileName = LogReportTypeEnum.MP.getPrefix() + downLoadFileName;
+        }
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
