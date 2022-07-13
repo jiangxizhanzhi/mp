@@ -29,6 +29,11 @@ public class LogReportPO extends BaseModel {
     private String downloadUrl;
 
     /**
+     * 节点ip
+     */
+    private String hostIp;
+
+    /**
      * 日志类型（mp/cr）
      */
     private LogReportTypeEnum type;
