@@ -29,12 +29,14 @@ public class SnapshotHandler extends HandlerCommon {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
     }
 
-    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName) {
+    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName,String desc) {
         // 调用云平台接口 snapshot
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setName(snapshotName);
         snapshotBO.setAddress(result.getImageName());
+        snapshotBO.setDescription(desc);
+        element.setImage(result.getImageName());
         var model = snapshotBO.toModel();
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());

@@ -313,12 +313,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void snapshotElement(String nodeId, String snapshotName) {
+    public void snapshotElement(String nodeId, String snapshotName, String desc) {
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
-        new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotName);
+        new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotName, desc);
     }
 
     public List<String> allocateOuterIps(String auxiliaryNetworkNodeId, int count) {

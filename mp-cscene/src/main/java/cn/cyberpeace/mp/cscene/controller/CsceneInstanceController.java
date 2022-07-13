@@ -544,7 +544,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("节点快照")
     @PostMapping("/snapshot_element")
     public ServiceResult<Boolean> snapshotElement(@RequestBody(required = false) CsceneInstanceNodeSnapshotRequest request) {
-        var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getContext()).asResult();
+        var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getDescription(), request.getContext()).asResult();
         return result;
     }
 }
