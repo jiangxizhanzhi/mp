@@ -29,7 +29,7 @@ public class SnapshotHandler extends HandlerCommon {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
     }
 
-    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName,String desc) {
+    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName, String desc) {
         // 调用云平台接口 snapshot
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
@@ -41,6 +41,7 @@ public class SnapshotHandler extends HandlerCommon {
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
         var snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
+        getPluginHandler().updateElements(element.getSrcElement().getId());
         snapshotMapper.save(model);
     }
 }

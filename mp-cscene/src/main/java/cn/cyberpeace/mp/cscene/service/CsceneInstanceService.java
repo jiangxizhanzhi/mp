@@ -546,14 +546,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
-        boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description);
-        if (result) {
-            var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
-            if (CollectionUtils.isNotEmpty(list)) {
-                var csceneInstance = this.get(id).asResult().getData();
-                csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
+        ElementTaskPool.getInstance().executeTask(() -> {
+            boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description);
+            if (result) {
+                var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+                if (CollectionUtils.isNotEmpty(list)) {
+                    var csceneInstance = this.get(id).asResult().getData();
+                    csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
+                }
             }
-        }
+        });
         return new ServiceResult<>(true);
     }
 
