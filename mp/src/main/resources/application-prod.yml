@@ -54,10 +54,10 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-    max-total-size: 1GB
+    max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:1GB}
   logback:
     rollingpolicy:
-      max-history: 15
+      max-history: ${MP_LOGFILE_MAX_HISTORY:15}
 springfox:
   documentation:
     enabled: ${SWAGGER_DOC_ENABLED:false}
