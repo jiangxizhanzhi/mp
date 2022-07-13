@@ -185,6 +185,8 @@ mp:
     element-error-creating-seconds: ${MP_ELEMENT_ERROR_CREATING_SECONDS:300}
     enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
     enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
+  scene:
+    gateway_types: ${GATEWAY_TYPES:2,3}
 
 management:
   endpoints:

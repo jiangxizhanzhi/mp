@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -311,15 +312,18 @@ public class InitiateHandler extends HandlerCommon {
     private boolean isGateway(CoreType coreType, Integer virtualType, Integer type) {
         if (this.isRouter(coreType, virtualType)) {
             return true;
-        } else if (type != null && type == BaseSceneElementModel.Type.SWITCH) {
-            return true;
-        } else if (type != null && type == BaseSceneElementModel.Type.ROUTER) {
-            return true;
-        } else if (type != null && type == BaseSceneElementModel.Type.FIREWALL) {
-            return true;
-        } else {
-            return false;
+        } else if (type != null) {
+            String gatewayTypes = SceneSingleton.sceneAppConfig.getGatewayTypes();
+            if (StringUtils.isNotEmpty(gatewayTypes)) {
+                String[] gatewayTypeStr = gatewayTypes.split(",");
+                for (String gatewayType : gatewayTypeStr) {
+                    if (type.toString().equals(gatewayType)) {
+                        return true;
+                    }
+                }
+            }
         }
+        return false;
     }
 
     private boolean isRouter(CoreType coreType, Integer virtualType) {
