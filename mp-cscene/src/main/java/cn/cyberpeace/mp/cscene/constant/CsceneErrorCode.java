@@ -7,6 +7,7 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_EDIT_NODE_LIMIT("MP-110201", "scene_edit_node_limit"),
     SCENE_USING_NODE_LIMIT("MP-110202", "scene_using_node_limit"),
     ENTITY_HAS_BEEN_USED("MP-110203", "entity_has_been_used"),
+    NODE_SNAPSHOT_NAME_USED("MP-110204", "node_snapshot_name_used"),
 
 
 

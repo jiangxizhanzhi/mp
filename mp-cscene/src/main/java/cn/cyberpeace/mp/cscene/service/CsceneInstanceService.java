@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -536,10 +537,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName,String description, CsceneContextBO context) {
+        String sceneId = this.getSceneId(id);
+        var originSnapshots = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+        if (CollectionUtils.isNotEmpty(originSnapshots)) {
+            var sameName = originSnapshots.stream().filter(o -> snapshotName.equals(o.getName())).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(sameName)) {
+                throw new MpRuntimeException(CsceneErrorCode.NODE_SNAPSHOT_NAME_USED);
+            }
+        }
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description);
         if (result) {
-            String sceneId = this.getSceneId(id);
             var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
             if (CollectionUtils.isNotEmpty(list)) {
                 var csceneInstance = this.get(id).asResult().getData();
