@@ -15,6 +15,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -44,6 +45,9 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
     private static final String LIST_URL = CPCLOUD_URL + "/logger_app/v1/logfile";
 
     private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
+
+    @Value("${ip.cp}")
+    private String cpUrl;
 
     @Override
     public String logReportType() {
@@ -96,6 +100,11 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         String downLoadFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
         if (!downLoadFileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
             downLoadFileName = LogReportTypeEnum.CP.getPrefix() + downLoadFileName;
+        }
+        int index = downLoadFileName.indexOf(".log");
+        if (index != -1) {
+            StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
+            downLoadFileName = nameBuffer.insert(index, "_" + cpUrl).toString();
         }
         var bos = new ByteArrayOutputStream();
         InputStream inputStream = httpResponse.bodyStream();
