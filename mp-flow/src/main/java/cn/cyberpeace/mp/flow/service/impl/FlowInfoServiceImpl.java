@@ -851,7 +851,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
 
             // readme文本集合
-            ArrayList<String> readmeList = new ArrayList<>();
+            List<String> readmeList = new ArrayList<>();
             // pcap文件
             File pcapFile = null;
             for (File flowFile : flowFiles) {
@@ -875,6 +875,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             while ((s = bufferedReader.readLine()) != null) {
                                 readmeList.add(s);
                             }
+                            // 过滤空行数据
+                            readmeList = readmeList.stream().filter(text -> StringUtils.isNotBlank(text)).collect(Collectors.toList());
                         } catch (FileNotFoundException e) {
                             log.error("flow info import error for FileNotFoundException", e);
                             return ServiceResult.fail("flow file import error");
