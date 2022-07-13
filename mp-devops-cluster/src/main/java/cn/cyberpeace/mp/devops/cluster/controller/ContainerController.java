@@ -67,6 +67,7 @@ public class ContainerController {
                         .sceneName(Objects.isNull(source.get(containerModel.getName())) ? "" : source.get(containerModel.getName()).getCsceneName())
                         .image(containerModel.getImage()).node(containerModel.getNode())
                         .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
+                        .createdAt(containerModel.getCreatedAt())
                         .vlanIdList(containerModel.getVlanIdList()).build())
                 .collect(Collectors.toList());
     }

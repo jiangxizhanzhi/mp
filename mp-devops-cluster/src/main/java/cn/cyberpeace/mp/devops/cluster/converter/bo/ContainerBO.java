@@ -42,4 +42,9 @@ public class ContainerBO {
      * 状态
      */
     private String status;
+
+    /**
+     * 创建时间
+     */
+    private String createdAt;
 }
