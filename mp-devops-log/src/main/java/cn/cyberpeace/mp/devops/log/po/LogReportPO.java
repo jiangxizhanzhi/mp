@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.log.po;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import lombok.AllArgsConstructor;
@@ -31,6 +32,7 @@ public class LogReportPO extends BaseModel {
     /**
      * 节点ip
      */
+    @DefaultStr
     private String hostIp;
 
     /**

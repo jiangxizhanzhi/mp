@@ -73,6 +73,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             dto.setUpdateTime(v.getUpdatetime());
             dto.setLogReportTypeEnum(LogReportTypeEnum.CP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?hostname=" + v.getHostname() + "&path=" + v.getPath() + "&fileName=" + v.getFilename() + "&type=" + LogReportTypeEnum.CP.toValue());
+            dto.setHostIp(cpUrl);
             return dto;
         }).collect(Collectors.toList());
         return reportDTOList;

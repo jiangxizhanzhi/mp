@@ -33,6 +33,12 @@ public class RunTimeLogDTO {
     private String downloadUrl;
 
     /**
+     * 节点ip
+     */
+    @ApiModelProperty(value = "节点ip")
+    private String hostIp;
+
+    /**
      * 日志类型
      */
     @ApiModelProperty(value = "日志类型")
