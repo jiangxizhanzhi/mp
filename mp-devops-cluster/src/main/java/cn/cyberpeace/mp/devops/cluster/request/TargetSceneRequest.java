@@ -27,6 +27,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "系统二级类型")
     private Integer secondCategory;
 
+
     /**
      * 名称
      */
@@ -104,4 +105,23 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
 
     @ApiModelProperty("是否查询隐藏数据，false:排除隐藏数据")
     private Boolean isHide = Boolean.FALSE;
+
+    /**
+     * 系统子类型
+     */
+    @ApiModelProperty(value = "系统二级类型列表")
+    private List<Integer> secondCategoryList;
+
+    /**
+     * 系统类型集合：vm，container,simple, entity
+     */
+    @ApiModelProperty(value = "系统类型集合")
+    private List<String> imageTypeList;
+
+    /**
+     * 预置类型：0 自定义，1 内置
+     */
+    @ApiModelProperty(value = "系统类型集合")
+    private List<Integer> preTypeList;
+
 }

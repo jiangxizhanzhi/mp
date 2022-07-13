@@ -135,6 +135,50 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
+    @ApiOperation("查询所有靶标信息")
+    @GetMapping("/listAll")
+    public ServiceResult<Device> listAll(TargetSceneRequest request){
+        TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
+        List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
+        List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
+
+        Integer category = request.getCategory();
+        if (Objects.nonNull(category)) {
+            firstTypeList = firstTypeList.stream().filter(v -> v.getId().equals(category)).collect(Collectors.toList());
+        }
+
+        if (CollectionUtils.isNotEmpty(request.getSecondCategoryList())) {
+            secondTypeList = secondTypeList.stream().filter(v -> request.getSecondCategoryList().contains(v.getId())).collect(Collectors.toList());
+        }
+
+        List<Device> deviceList = new ArrayList<>();
+        for (TypeConvertModel first : firstTypeList){
+            Integer firstId = first.getId();
+            List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
+                    .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+
+            for (TypeConvertModel second : typeConvertModels){
+                request.setCategory(firstId);
+                request.setSecondCategory(second.getId());
+                request.setPage(null);
+                request.setPerPage(null);
+                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
+                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
+                    continue;
+                }
+                List<Device> secondDeviceList = targetSceneConvertModel.getList();
+                deviceList.addAll(secondDeviceList);
+            }
+        }
+        return new Result(new ListResult<>(deviceList));
+    }
+
+
+    /**
+     * 查询所有靶标信息
+     * @param request
+     * @return
+     */
     @ApiOperation("查询所有靶标部分信息")
     @GetMapping("/list-part-info")
     public ServiceResult<DeviceTargetByTypeVO> listPartInfo(TargetSceneRequest request){
