@@ -99,6 +99,19 @@
             <if test="vmStarted != null and vmStarted == true">
                 and instance_state in (1,2,3)
             </if>
+            <if test="imageTypeList != null">
+                and image_type in
+                <foreach collection="imageTypeList" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <if test="preTypeList != null">
+                and is_import in
+                <foreach collection="preTypeList" item="item" index="index"  open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+
         </where>
     </sql>
 

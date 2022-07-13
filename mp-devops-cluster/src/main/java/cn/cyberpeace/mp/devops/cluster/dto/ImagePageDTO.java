@@ -132,6 +132,16 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private Boolean vmStarted;
 
+    /**
+     * 系统类型集合：vm，container,simple, entity
+     */
+    private List<String> imageTypeList;
+
+    /**
+     * 预置类型：0 自定义，1 内置
+     */
+    private List<Integer> preTypeList;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -214,5 +224,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setLanguage(request.getLanguage());
         this.setImageStatus(request.getImageStatus());
         this.setBaseImageSupport(request.getBaseImageSupport());
+        this.setImageTypeList(request.getImageTypeList());
+        this.setPreTypeList(request.getPreTypeList());
     }
 }
