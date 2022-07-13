@@ -681,6 +681,21 @@ public class SceneHandler extends BaseSceneHandler<
         overElementEvent(nodeId, SceneElementModel.Event.RESUME);
     }
 
+    public void snapshotElement(String nodeId,String snapshotName) {
+        SceneElementBO element = getElement(nodeId);
+        prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
+        startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        try {
+            for (ScenePluginHandler plugin : getPlugins()) {
+                plugin.snapshotElement(nodeId, snapshotName);
+            }
+        } catch (Exception e) {
+            errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
+            return;
+        }
+        overElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+    }
+
     @Override
     public SceneDataBO toData() {
         SceneDataBO sceneDataBO = super.toData();

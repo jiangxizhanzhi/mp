@@ -34,6 +34,8 @@ import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -57,6 +59,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -94,6 +97,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ProbeService probeService;
+
+    @Resource
+    private SceneService sceneService;
+
+    @Resource
+    private CsceneService csceneService;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -524,6 +533,22 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         boolean result = instanceHandler.resumeElement(nodeId);
         return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, CsceneContextBO context) {
+        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        ElementTaskPool.getInstance().executeTask(() -> {
+            boolean result = instanceHandler.snapshotElement(nodeId, snapshotName);
+            if (result) {
+                String sceneId = this.getSceneId(id);
+                var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+                if (CollectionUtils.isNotEmpty(list)) {
+                    var csceneInstance = this.get(id).asResult().getData();
+                    csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
+                }
+            }
+        });
+        return new ServiceResult<>(true);
     }
 
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {

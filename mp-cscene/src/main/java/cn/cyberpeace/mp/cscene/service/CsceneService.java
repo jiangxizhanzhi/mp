@@ -390,6 +390,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
 
+    public ServiceResult<Boolean> updateElementImage(String id, String nodeId, String image) {
+        String sceneConfig = this.getSceneConfigId(id);
+        if (StringUtils.isEmpty(sceneConfig)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return scenePluginCloudSceneConfigService.updateElementImage(sceneConfig, nodeId, image);
+    }
+
     private List<String> getRunningSceneIds() {
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false);

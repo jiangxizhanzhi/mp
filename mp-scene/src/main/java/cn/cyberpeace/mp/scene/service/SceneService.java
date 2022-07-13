@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -8,26 +9,28 @@ import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
 public class SceneService {
 
+    @Resource
     private SceneConfigService sceneConfigService;
 
-    @Autowired
-    public SceneService(SceneConfigService sceneConfigService) {
-        this.sceneConfigService = sceneConfigService;
-    }
+    @Resource
+    private SceneElementSnapshotMapper sceneElementSnapshotMapper;
 
     public ServiceResult<SceneDataBO> get(String id, boolean isAreaMode, String areaId, SceneContextBO context) {
         SceneHandler sceneHandler;
@@ -187,4 +190,18 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotName, SceneContextBO context) {
+        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
+        sceneHandler.setRealTimeUpdate(true);
+        sceneHandler.snapshotElement(nodeId, snapshotName);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneId, String nodeId) {
+        var list = sceneElementSnapshotMapper.list(new HumanCondition()
+                .filterEqual(SceneElementSnapshotModel::getScene, sceneId)
+                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
+                .reverseOrderBy(SceneElementSnapshotModel::getPk));
+        return new ServiceResult<>(list);
+    }
 }
