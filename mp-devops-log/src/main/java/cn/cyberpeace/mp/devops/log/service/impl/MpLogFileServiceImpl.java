@@ -34,6 +34,9 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Value("${logging.file.path}")
     private String logPath;
 
+    @Value("${ip.mp}")
+    private String mpUrl;
+
     @Override
     public String logReportType() {
         return LogReportTypeEnum.MP.toValue();
@@ -91,6 +94,12 @@ public class MpLogFileServiceImpl implements LogFileService {
         if (!downLoadFileName.startsWith(LogReportTypeEnum.MP.getPrefix())) {
             downLoadFileName = LogReportTypeEnum.MP.getPrefix() + downLoadFileName;
         }
+        int index = downLoadFileName.indexOf(".log");
+        if (index != -1) {
+            StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
+            downLoadFileName = nameBuffer.insert(index, "_" + mpUrl).toString();
+        }
+
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
