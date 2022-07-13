@@ -57,4 +57,10 @@ public class ContainerPageVO extends BaseVO {
      */
     @ApiModelProperty("状态")
     private String status;
+
+    /**
+     * 创建时间
+     */
+    @ApiModelProperty("创建时间")
+    private String createdAt;
 }

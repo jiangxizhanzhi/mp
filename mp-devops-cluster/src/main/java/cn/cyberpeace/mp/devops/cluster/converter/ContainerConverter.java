@@ -68,6 +68,7 @@ public class ContainerConverter implements BaseConverter {
                         .name(containerModel.getName()).image(containerModel.getImage())
                         .node(containerModel.getHost())
                         .status(containerModel.getStatus())
+                        .createdAt(containerModel.getCreatedAt())
                         .build();
                 Map<String, Object> addresses = containerModel.getAddresses();
                 if (MapUtils.isNotEmpty(addresses)) {
