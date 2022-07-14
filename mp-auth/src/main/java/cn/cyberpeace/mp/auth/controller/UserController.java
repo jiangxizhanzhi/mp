@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -175,7 +176,7 @@ public class UserController {
     @PostMapping("/hld/login")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGIN, title = "用户登录", target = OpTargetEnums.USER)
     public ServiceResult<LoginResp> login(@RequestBody(required = false) HLDUserRequest hldUserRequest) {
-        if (hldUserRequest.getSessionId() != null) {
+        if (StringUtils.isNotEmpty(hldUserRequest.getSessionId())) {
             String response = "";
             String hldCheckUrl = hldLoginUrl + "/xinan-server/login/logincheck?sessionId=";
             try {
@@ -191,7 +192,7 @@ public class UserController {
                 return ServiceResult.fail("user is not login");
             }
         }
-        if (hldUserRequest.getUserId() == null) {
+        if (StringUtils.isEmpty(hldUserRequest.getUserId())) {
             log.error("user : {}", JsonCommon.stringify(hldUserRequest));
             return ServiceResult.fail("userId is null");
         }
