@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.CpNodeMonitorScriptConfigMapper">
+  <resultMap id="BaseResultMap" type="cn.cyberpeace.mp.devops.cluster.model.CpNodeMonitorScriptConfigModel">
+    <id column="pk" jdbcType="INTEGER" property="pk" />
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="agent_name" jdbcType="VARCHAR" property="agentName" />
+    <result column="script_name" jdbcType="VARCHAR" property="scriptName" />
+    <result column="hostname" jdbcType="VARCHAR" property="hostname" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    pk, id, agent_name, script_name, hostname, ip, is_installed, create_time, update_time
+  </sql>
+
+  <select id="listAll" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from mp_devops_cpnode_monitor_script_config
+  </select>
+
+
+  <select id="listByAgentName" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from mp_devops_cpnode_monitor_script_config
+    where agent_name = #{agentName}
+  </select>
+
+</mapper>

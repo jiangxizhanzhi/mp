@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.init;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
+import cn.cyberpeace.mp.devops.cluster.service.CpNodeMonitorScriptConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -16,6 +17,9 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     private InitRegisterService initRegisterService;
 
     @Autowired
+    private CpNodeMonitorScriptConfigService cpNodeMonitorScriptConfigService;
+
+    @Autowired
     private IpAddressConfig ipAddressConfig;
 
     public String getUrl() {
@@ -26,6 +30,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         try {
             initRegisterService.register(getUrl());
+            cpNodeMonitorScriptConfigService.init();
         }catch (Exception e){
             log.error("ServerConfigListener onApplicationEvent error : {} ",e);
         }
