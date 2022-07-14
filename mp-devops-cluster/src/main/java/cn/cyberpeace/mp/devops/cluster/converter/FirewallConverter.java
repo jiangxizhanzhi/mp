@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -36,5 +37,15 @@ public class FirewallConverter implements BaseConverter{
         convertModel.setList(model.getList());
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+    /**
+     * 获取防火墙总数
+     * @return
+     */
+    public Integer getTotalFirewall(BasePageDTO dto) {
+        dto.setLimit(NumberUtils.INTEGER_ONE);
+        BasePageBO<Firewall> page = this.page(dto, this.getTotalPageIgnoreField());
+        return page.getTotal();
     }
 }

@@ -68,6 +68,10 @@ public class CloudPlatformMonitorController {
 
     private final NpcConverter npcConverter;
 
+    private final FirewallConverter firewallConverter;
+
+    private final SwitchConverter switchConverter;
+
     /**
      * 资源统计
      * @return
@@ -93,12 +97,19 @@ public class CloudPlatformMonitorController {
         //NPC个数
         Integer totalNpcs = npcConverter.getTotalNpcs(new BasePageDTO());
 
+        // 防火墙个数
+        Integer totalFirewalls = firewallConverter.getTotalFirewall(new BasePageDTO());
+
+        // 交换机个数
+        Integer totalSwitchs = switchConverter.getTotalSwitch();
+
         HypervisorStatisticsConvertModel hypervisorStatisticsConvertModel = hypervisorConverter.statistics();
 
         HypervisorStatisticsVO response = HypervisorStatisticsVO.builder().diskIo(BigDecimal.ZERO)
                 .netIo(BigDecimal.ZERO)
                 .totalNpc(totalNpcs).totalInstances(totalInstances)
-                .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters).build();
+                .totalContainers(totalContainers).totalRealEquipments(totalRealEquipments).totalRouters(totalRouters)
+                .totalFireWall(totalFirewalls).totalSwitch(totalSwitchs).build();
         if(Objects.isNull(hypervisorStatisticsConvertModel)){
             return new Result<>(response);
         }
