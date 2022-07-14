@@ -84,6 +84,7 @@ class DeviceInfoConverter implements IConverter {
             }
         }
         element.setDescription(device.getDescription());
+        pluginElement.setImageUuid(device.getUuid());
         pluginElement.setCategory(device.getCategory());
         pluginElement.setCategory2(device.getSecondCategory());
         pluginElement.setCategory3(device.getL3Category());

@@ -1,0 +1,2 @@
+ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `image_uuid` varchar(64) NOT NULL COMMENT '靶标id';
+ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `image_uuid` varchar(64) NOT NULL COMMENT '靶标id';
