@@ -373,6 +373,9 @@ public class CsceneDataModifier {
     }
 
     public static void correctReturnCsceneData(CsceneBO csceneBO) {
+        if (csceneBO == null) {
+            return;
+        }
         addFilePathPrefix(csceneBO.getSceneConfig());
         handlerNodeCommand(csceneBO.getSceneConfig());
         correctVlanId(csceneBO);
