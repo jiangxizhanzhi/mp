@@ -61,4 +61,12 @@ public class SwitchConverter {
         }
         return model.getSwitchs();
     }
+
+    /**
+     * 获取交换机总数
+     * @return
+     */
+    public Integer getTotalSwitch() {
+        return this.list().size();
+    }
 }
