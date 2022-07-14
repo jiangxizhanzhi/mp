@@ -20,4 +20,7 @@ public class CsceneNodeInfoBO {
     private String nodeId;
     private String nodeName;
     private String resourceName;
+    private Integer referenceType;
+    private Integer event;
+    private Integer eventStatus;
 }
