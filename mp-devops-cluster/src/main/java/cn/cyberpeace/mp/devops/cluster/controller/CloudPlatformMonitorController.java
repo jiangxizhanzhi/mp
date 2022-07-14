@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
@@ -71,6 +73,8 @@ public class CloudPlatformMonitorController {
     private final FirewallConverter firewallConverter;
 
     private final SwitchConverter switchConverter;
+
+    private final ClearService clearService;
 
     /**
      * 资源统计
@@ -212,5 +216,14 @@ public class CloudPlatformMonitorController {
         return new Result<>(list);
     }
 
-
+    /**
+     * 释放无效资源
+     * @return
+     */
+    @ApiOperation("释放无效资源")
+    @GetMapping("/release_resource")
+    public ServiceResult<Boolean> releaseResource() {
+        TaskCommon.executeTask(() -> clearService.clearUselessResource());
+        return new ServiceResult<>(true);
+    }
 }
