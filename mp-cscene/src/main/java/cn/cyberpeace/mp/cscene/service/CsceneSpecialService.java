@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -697,6 +698,7 @@ public class CsceneSpecialService {
                 .filterIn(CsceneInstanceModel::getScene, sceneIds.toArray())
                 .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
+                .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
                 .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
         var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(result)) {
@@ -721,6 +723,7 @@ public class CsceneSpecialService {
                 .currentLink(CsceneInstanceModel.class)
                 .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
+                .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
                 .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
         var elementInfos = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(elementInfos)) {
@@ -731,6 +734,20 @@ public class CsceneSpecialService {
 
     private List<CsceneNodeInfoBO> assembleInfos(List<CsceneNodeInfoBO> infoBOS, Map<String, List<String>> nameMap, Function<CsceneNodeInfoBO, String> getFlag) {
         List<CsceneNodeInfoBO> result = new ArrayList<>();
+        var sceneIds = infoBOS.stream()
+                .map(p -> p.getInternalSceneEid())
+                .filter(p -> StringUtils.isNotEmpty(p))
+                .collect(Collectors.toList());
+        Map<String, SceneModel> sceneMaps = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(sceneIds)) {
+            var sceneModels = sceneMapper.list(new HumanCondition().filterIn(SceneModel::getId, sceneIds.toArray(new String[]{})));
+            if (CollectionUtils.isNotEmpty(sceneModels)) {
+                sceneModels.stream().forEach(s -> {
+                    sceneMaps.put(s.getId(), s);
+                });
+            }
+        }
+
         infoBOS.forEach(e -> {
             List<String> names = nameMap.get(getFlag.apply(e));
             if (CollectionUtils.isEmpty(names)) {
@@ -740,6 +757,11 @@ public class CsceneSpecialService {
                 CsceneNodeInfoBO nodeInfoBO = new CsceneNodeInfoBO();
                 BeanUtils.copyProperties(e, nodeInfoBO);
                 nodeInfoBO.setResourceName(name);
+                var scene = sceneMaps.get(nodeInfoBO.getInternalSceneEid());
+                if (scene != null) {
+                    nodeInfoBO.setEvent(scene.getEvent());
+                    nodeInfoBO.setEventStatus(scene.getEventStatus());
+                }
                 result.add(nodeInfoBO);
             });
         });
