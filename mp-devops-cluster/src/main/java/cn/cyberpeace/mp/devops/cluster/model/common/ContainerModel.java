@@ -135,6 +135,11 @@ public class ContainerModel implements Serializable {
      */
     private String updatedAt;
 
+    /**
+     * 运行时间
+     */
+    private Long runningTime;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

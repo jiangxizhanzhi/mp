@@ -37,4 +37,20 @@ public class InstanceBO {
      * 创建时间
      */
     private String createTime;
+
+    /**
+     * 用户id
+     */
+    private String userId;
+
+    /**
+     * 创建者
+     */
+    private String userName;
+
+    /**
+     * 运行时间
+     */
+    private Long runningTime;
+
 }

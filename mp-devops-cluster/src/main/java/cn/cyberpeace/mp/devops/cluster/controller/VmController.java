@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -15,6 +17,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +43,8 @@ public class VmController {
     private final VmConverter vmConverter;
 
     private final CsceneSpecialService csceneSpecialService;
+
+    private final UserService userService;
 
     /**
      * 分页查询虚拟机信息
@@ -61,14 +67,32 @@ public class VmController {
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
+        List<String> userIdList = instances.stream().map(InstanceBO::getUserId).distinct().collect(Collectors.toList());
+        List<UserDto> userDtoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
+
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
-        return instances.stream().map(instanceModel ->
-                InstancePageVO.builder().name(instanceModel.getName())
-                        .sceneName(Objects.isNull(source.get(instanceModel.getName())) ? "" : source.get(instanceModel.getName()).getCsceneName())
-                        .node(instanceModel.getNode())
-                        .addressList(instanceModel.getAddressList())
-                        .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build()
-        ).collect(Collectors.toList());
+        return instances.stream().map(instanceModel -> {
+            CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
+            if (Objects.nonNull(source.get(instanceModel.getName()))) {
+                csceneNodeInfoBO = source.get(instanceModel.getName());
+            }
+            String userName = "";
+            Optional<UserDto> optional =
+                    userDtoList.stream().filter(userDto -> userDto.getId().equals(instanceModel.getUserId())).findFirst();
+            if (optional.isPresent()) {
+                userName = optional.get().getUsername();
+            }
+            return InstancePageVO.builder().name(instanceModel.getName())
+                    .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                    .node(instanceModel.getNode())
+                    .addressList(instanceModel.getAddressList())
+                    .userName(userName)
+                    .referenceType(csceneNodeInfoBO.getReferenceType())
+                    .event(csceneNodeInfoBO.getEvent())
+                    .eventStatus(csceneNodeInfoBO.getEventStatus())
+                    .runningTime(instanceModel.getRunningTime())
+                    .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
+        }).collect(Collectors.toList());
     }
 }

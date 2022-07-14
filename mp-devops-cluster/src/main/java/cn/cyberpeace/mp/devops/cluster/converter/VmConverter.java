@@ -38,6 +38,8 @@ public class VmConverter implements BaseConverter{
         CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
         List<InstanceBO> list = model.getList().stream().map(instanceModel ->
                 InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
+                        .runningTime(instanceModel.getRunningTime())
+                        .userId(instanceModel.getUser())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))
                         .status(instanceModel.getStatus()).createTime(instanceModel.getCreatedAt()).build()

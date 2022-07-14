@@ -47,4 +47,20 @@ public class ContainerBO {
      * 创建时间
      */
     private String createdAt;
+
+
+    /**
+     * 用户id
+     */
+    private String userId;
+
+    /**
+     * 创建者
+     */
+    private String userName;
+
+    /**
+     * 运行时间
+     */
+    private Long runningTime;
 }
