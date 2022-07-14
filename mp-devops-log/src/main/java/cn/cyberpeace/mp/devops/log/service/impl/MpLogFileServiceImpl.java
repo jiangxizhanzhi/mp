@@ -56,7 +56,7 @@ public class MpLogFileServiceImpl implements LogFileService {
             dto.setFileSize(f.length());
             dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
-            dto.setHostIp(mpUrl);
+            dto.setHostIp(mpUrl.split(":")[0]);
             try {
                 dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
             } catch (IOException e) {
@@ -66,6 +66,7 @@ public class MpLogFileServiceImpl implements LogFileService {
         }).collect(Collectors.toList());
         return logReportDTOList;
     }
+
 
     @Override
     public LogFileDownloadBO download(LogDownloadDTO downloadDTO) throws IOException{
@@ -98,7 +99,7 @@ public class MpLogFileServiceImpl implements LogFileService {
         int index = downLoadFileName.indexOf(".log");
         if (index != -1) {
             StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
-            downLoadFileName = nameBuffer.insert(index, "_" + mpUrl).toString();
+            downLoadFileName = nameBuffer.insert(index, "_" + mpUrl.split(":")[0]).toString();
         }
 
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();

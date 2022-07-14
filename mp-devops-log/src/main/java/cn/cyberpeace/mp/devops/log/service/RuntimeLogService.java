@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,14 @@ public class RuntimeLogService {
         }
 
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
+        // 添加临时返回id
+        if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
+            runTimeLogDTOS.forEach(dto -> {
+                String md5Id = DigestUtil.md5Hex(dto.getLogReportTypeEnum().name().concat(dto.getLogName()));
+                dto.setId(md5Id);
+            });
+        }
+
         int offset = (basePageRequest.getPage() - 1) * basePageRequest.getPerPage();
         if (offset < runTimeLogDTOS.size()) {
             int toIndex = Math.min(offset + basePageRequest.getPerPage(), runTimeLogDTOS.size());

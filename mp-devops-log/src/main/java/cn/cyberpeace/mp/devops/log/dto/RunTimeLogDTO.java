@@ -27,6 +27,12 @@ public class RunTimeLogDTO {
     private Long size;
 
     /**
+     * id
+     */
+    @ApiModelProperty(value = "id")
+    private String id;
+
+    /**
      * 下载地址
      */
     @ApiModelProperty(value = "下载地址")
