@@ -1,7 +1,12 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
+import cn.cyberpeace.mp.base.config.FastDfsConfig;
+import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.devops.cluster.config.MonitorConfig;
+import cn.cyberpeace.mp.devops.cluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
@@ -12,12 +17,14 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhCon
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon.WAZUH_AGENT_GROUP;
@@ -37,12 +44,18 @@ public class CpNodeMonitorScriptConfigService {
     @Autowired
     private HypervisorConverter hypervisorConverter;
 
+    @Autowired
+    private FastDfsConfig fastDfsConfig;
+
+    @Autowired
+    private MonitorConfig monitorConfig;
+
     public void init() {
         scriptInstallationCheck();
     }
 
     public void scriptInstallationCheck() {
-        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 0));
+        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 1));
         if (CollectionUtils.isNotEmpty(model.getList())) {
 
             List<CpNodeMonitorScriptConfigModel> scriptConfigModelList = listAll();
@@ -63,7 +76,6 @@ public class CpNodeMonitorScriptConfigService {
                     }
                 }
             }
-
 
             if (CollectionUtils.isNotEmpty(notInstalledHosts)) {
                 // 发送安装指令
@@ -94,38 +106,45 @@ public class CpNodeMonitorScriptConfigService {
 
     private void sendScriptInstallCmd(String hostname) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
-        String probeName = "monitor_cp_service.py";
-        LocalFileMappingModel fileMappingModel = LocalFileMappingCommon.getMapping(WAZUH_AGENT_GROUP, probeName);
-        WazuhControl.ControlProbeParam probeParam = generateControlProbeParam(hostname, fileMappingModel);
-        configParam.setProbeParams(Arrays.asList(probeParam));
-        WazuhControlCommon.wazuhControl.controlConfig(hostname, "linux", configParam);
+        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
+        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
+                LocalFileMappingModel::getRemoteFile));
+
+        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
+        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+
+        List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
+        for (MonitorConfig.MonitorProbe cpSrvProbe : cpSrvs) {
+            controlProbeParams.add(generateControlProbeParam(cpSrvProbe, nameFileMap));
+        }
+
+        for (MonitorConfig.MonitorProbe bizSrvProbe : bizSrvs) {
+            controlProbeParams.add(generateControlProbeParam(bizSrvProbe, nameFileMap));
+        }
+
+        configParam.setProbeParams(controlProbeParams);
+        // 控制节点和计算节点，hostname = agentName
+        WazuhControlCommon.wazuhControl.controlConfig(hostname, MonitorConstant.OS_TYPE_LINUX, configParam);
     }
 
 
-    private WazuhControl.ControlProbeParam generateControlProbeParam(String agentName, LocalFileMappingModel fileMappingModel) {
+    private WazuhControl.ControlProbeParam generateControlProbeParam(MonitorConfig.MonitorProbe monitorProbe, Map<String, String> nameFileMap) {
 
-        String launchId = "AAAABBBBCCCC";
+        WazuhControl.ControlProbeParam probeParam = new WazuhControl.ControlProbeParam();
 
-        WazuhControl.ControlProbeParam controlConfigParam = new WazuhControl.ControlProbeParam();
+        probeParam.setId(monitorProbe.getLaunchId());
+        probeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+        probeParam.setGroup("server");
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+        String url = group.getFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
+        probeParam.setScriptUrl(url);
+        probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
+        probeParam.setOutputFormat("json");
+        probeParam.setInterval(monitorProbe.getInterval());
 
-        controlConfigParam.setId(launchId);
-        controlConfigParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-        controlConfigParam.setGroup(agentName);
-        controlConfigParam.setScriptUrl(fileMappingModel.getRemoteFile());
-        //if (scriptType.equals(WazuhControl.SCRIPT_SUFFIX_BAT)) {
-        //    controlConfigParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-        //} else if (scriptType.equals(WazuhControl.SCRIPT_SUFFIX_PY)) {
-        //    controlConfigParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-        //} else if (scriptType.equals(WazuhControl.SCRIPT_SUFFIX_SH)) {
-        //    controlConfigParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_SH);
-        //}
-        controlConfigParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-        controlConfigParam.setOutputFormat("json");
-        controlConfigParam.setInterval("180");
-
-        controlConfigParam.setScriptParam("TestParam1");
-
-        return controlConfigParam;
+        String[] params = {MonitorConstant.OP_STATUS, monitorProbe.getServiceList()};
+        probeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
+        return probeParam;
     }
 
     private void updateScriptConfigByHostName(String hostName) {

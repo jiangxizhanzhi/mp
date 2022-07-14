@@ -95,6 +95,21 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
+    monitor:
+      cp_srv_monitors:
+        - probe-name: monitor_cp_service.py
+          launch-id: 093f61683e1a4e3fbe80664e791eae03
+          interval: 180s
+          service-list: aaa,bbb,ccc
+        - probe-name: monitor_cp_service.py
+          launch-id: 093f6512519d49b2986819e29e4b2281
+          interval: 180s
+          service-list: ddd,eee,fff
+      biz_srv_monitors:
+        - probe-name: monitor_cp_service.py
+          launch-id: 093fc7abba264d38a022a4c143d66411
+          interval: 180s
+          service-list: srv1,srv2,srv3
   situationaware:
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
