@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 
 import java.util.List;
 
@@ -186,7 +187,9 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext()).getSource();
+        return this.sceneService.recreateElement(sceneId, nodeId, generateSceneContext(), () -> {
+            SceneInstanceLinkCacheUtil.clear(sceneId);
+        }).getSource();
     }
 
     public boolean suspendElement(String nodeId) {
