@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,10 +13,13 @@ import lombok.NoArgsConstructor;
 @Table("mp_devops_cpnode_monitor_script_config")
 public class CpNodeMonitorScriptConfigModel extends BaseModel {
 
+    // 安装成功
     public static final Integer STATUS_INSTALLED = 1;
 
+    // 待安装
     public static final Integer STATUS_TO_INSTALL = 2;
 
+    // 安装失败
     public static final Integer STATUS_FAILED = 3;
 
     /**
@@ -26,6 +30,7 @@ public class CpNodeMonitorScriptConfigModel extends BaseModel {
     /**
      * 脚本名称
      */
+    @DefaultStr
     private String scriptName;
 
     /**
@@ -36,6 +41,7 @@ public class CpNodeMonitorScriptConfigModel extends BaseModel {
     /**
      * IP地址
      */
+    @DefaultStr
     private String ip;
 
     /**

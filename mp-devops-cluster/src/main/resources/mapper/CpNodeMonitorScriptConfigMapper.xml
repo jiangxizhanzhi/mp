@@ -13,7 +13,7 @@
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
   </resultMap>
   <sql id="Base_Column_List">
-    pk, id, agent_name, script_name, hostname, ip, is_installed, create_time, update_time
+    pk, id, agent_name, script_name, hostname, ip, `status`, create_time, update_time
   </sql>
 
   <select id="listAll" resultMap="BaseResultMap">

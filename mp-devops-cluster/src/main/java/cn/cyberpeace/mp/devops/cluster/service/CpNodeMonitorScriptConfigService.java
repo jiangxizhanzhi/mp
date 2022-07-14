@@ -15,10 +15,12 @@ import cn.cyberpeace.mp.devops.cluster.model.CpNodeMonitorScriptConfigModel;
 import cn.cyberpeace.mp.devops.cluster.repository.CpNodeMonitorScriptConfigMapper;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -50,24 +52,25 @@ public class CpNodeMonitorScriptConfigService {
     @Autowired
     private MonitorConfig monitorConfig;
 
+    @Async
     public void init() {
-        scriptInstallationCheck();
+        //scriptInstallationCheck();
     }
 
     public void scriptInstallationCheck() {
         BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 1));
         if (CollectionUtils.isNotEmpty(model.getList())) {
 
-            List<CpNodeMonitorScriptConfigModel> scriptConfigModelList = listAll();
+            List<CpNodeMonitorScriptConfigModel> configModelList = listAll();
             // 检查每个节点，是否安装了脚本
             List<String> hostNames = model.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
             List<String> notInstalledHosts = new ArrayList<>();
 
-            if (CollectionUtils.isEmpty(scriptConfigModelList)) {
+            if (CollectionUtils.isEmpty(configModelList)) {
                 notInstalledHosts = hostNames;
             } else {
                 for (String nodeName : hostNames) {
-                    for (CpNodeMonitorScriptConfigModel config : scriptConfigModelList) {
+                    for (CpNodeMonitorScriptConfigModel config : configModelList) {
                         if (config.getHostname().equals(nodeName)) {
                             if (!config.getStatus().equals(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED)) {
                                 notInstalledHosts.add(nodeName);
@@ -104,6 +107,7 @@ public class CpNodeMonitorScriptConfigService {
     }
 
 
+
     private void sendScriptInstallCmd(String hostname) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
         List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
@@ -136,7 +140,7 @@ public class CpNodeMonitorScriptConfigService {
         probeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         probeParam.setGroup("server");
         FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String url = group.getFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
+        String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
         probeParam.setScriptUrl(url);
         probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
         probeParam.setOutputFormat("json");
@@ -149,6 +153,14 @@ public class CpNodeMonitorScriptConfigService {
 
     private void updateScriptConfigByHostName(String hostName) {
         log.info("hotName:{}", hostName);
+        List<CpNodeMonitorScriptConfigModel> scriptConfigModelList = listByAgentName(hostName);
+        if (CollectionUtil.isEmpty(scriptConfigModelList)) {
+            CpNodeMonitorScriptConfigModel configModel = new CpNodeMonitorScriptConfigModel();
+            configModel.setAgentName(hostName);
+            configModel.setHostname(hostName);
+            configModel.setStatus(CpNodeMonitorScriptConfigModel.STATUS_TO_INSTALL);
+            monitorScriptConfigMapper.save(configModel);
+        }
     }
 
 }
