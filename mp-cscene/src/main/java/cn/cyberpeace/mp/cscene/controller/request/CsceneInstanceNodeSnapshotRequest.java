@@ -7,4 +7,6 @@ import lombok.Data;
 public class CsceneInstanceNodeSnapshotRequest extends CsceneInstanceNodeActionRequest {
     @ApiModelProperty(value = "快照名称")
     private String snapshotName;
+    @ApiModelProperty(value = "快照描述")
+    private String description;
 }

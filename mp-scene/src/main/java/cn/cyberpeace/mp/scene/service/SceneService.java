@@ -198,10 +198,10 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotName, SceneContextBO context) {
+    public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotName, String description, SceneContextBO context) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.snapshotElement(nodeId, snapshotName);
+        sceneHandler.snapshotElement(nodeId, snapshotName, description);
         return new ServiceResult<>(true);
     }
 
