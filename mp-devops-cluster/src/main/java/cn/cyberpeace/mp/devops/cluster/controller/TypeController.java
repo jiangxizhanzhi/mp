@@ -23,10 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 类型管理类
@@ -130,10 +132,15 @@ public class TypeController {
      */
     @ApiOperation("查询所有二级分类")
     @GetMapping("/l2-categories")
-    public Result<TypeL2AllVO> l2List(){
+    public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId){
         ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();
         if (Objects.isNull(l1AndL2AndL3Type)){
             return new Result<>();
+        }
+        if (Objects.nonNull(firstTypeId)) {
+            List<TargetType> l2AndL3TypeList = l1AndL2AndL3Type.getList();
+            l2AndL3TypeList = l2AndL3TypeList.stream().filter(type -> Objects.equals(firstTypeId, type.getId())).collect(Collectors.toList());
+            l1AndL2AndL3Type.setList(l2AndL3TypeList);
         }
         return new Result<>(new TypeL2AllVO(l1AndL2AndL3Type.getList()));
     }
