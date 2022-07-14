@@ -63,4 +63,23 @@ public class ContainerPageVO extends BaseVO {
      */
     @ApiModelProperty("创建时间")
     private String createdAt;
+
+
+    /**
+     * 创建者
+     */
+    @ApiModelProperty("创建者")
+    private String userName;
+
+    /**
+     * 运行时间
+     */
+    @ApiModelProperty("运行时间")
+    private Long runningTime;;
+
+    private Integer referenceType;
+
+    private Integer event;
+
+    private Integer eventStatus;
 }

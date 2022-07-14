@@ -69,6 +69,8 @@ public class ContainerConverter implements BaseConverter {
                         .node(containerModel.getHost())
                         .status(containerModel.getStatus())
                         .createdAt(containerModel.getCreatedAt())
+                        .userId(containerModel.getUser())
+                        .runningTime(containerModel.getRunningTime())
                         .build();
                 Map<String, Object> addresses = containerModel.getAddresses();
                 if (MapUtils.isNotEmpty(addresses)) {
