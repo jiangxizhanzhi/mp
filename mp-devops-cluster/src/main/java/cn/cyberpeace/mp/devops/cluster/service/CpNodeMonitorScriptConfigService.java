@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
-import cn.cyberpeace.mp.devops.cluster.config.MonitorConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
@@ -15,6 +14,7 @@ import cn.cyberpeace.mp.devops.cluster.model.CpNodeMonitorScriptConfigModel;
 import cn.cyberpeace.mp.devops.cluster.repository.CpNodeMonitorScriptConfigMapper;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,7 +54,7 @@ public class CpNodeMonitorScriptConfigService {
 
     @Async
     public void init() {
-        //scriptInstallationCheck();
+        scriptInstallationCheck();
     }
 
     public void scriptInstallationCheck() {
@@ -158,7 +158,8 @@ public class CpNodeMonitorScriptConfigService {
             CpNodeMonitorScriptConfigModel configModel = new CpNodeMonitorScriptConfigModel();
             configModel.setAgentName(hostName);
             configModel.setHostname(hostName);
-            configModel.setStatus(CpNodeMonitorScriptConfigModel.STATUS_TO_INSTALL);
+            // todo status installed
+            configModel.setStatus(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED);
             monitorScriptConfigMapper.save(configModel);
         }
     }

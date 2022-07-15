@@ -17,7 +17,7 @@ public class DevopsTestController {
     private CpNodeMonitorScriptConfigService monitorScriptConfigService;
 
 
-    @PostMapping("/devops/monitor/test")
+    @PostMapping("/devops/monitor/init")
     public void test() {
         monitorScriptConfigService.init();
     }

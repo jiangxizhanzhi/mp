@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.cluster.config;
+package cn.cyberpeace.mp.situationaware.config;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
