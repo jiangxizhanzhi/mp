@@ -71,5 +71,7 @@ public class CloudUrlConstant {
 
     public static final String LINK_STATUS = "/cpcloud/instance_control/v1/link_status";
 
+    public static final String DEVICE_SNAPSHOT = "/cpcloud/device/v1/snapshot";
+
     private CloudUrlConstant() {}
 }

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -17,6 +18,9 @@ public class CloudPluginSceneElementBO extends BaseCloudPluginSceneElementBO<Clo
 
     @JsonIgnore
     private CoreType coreType;
+
+    @ApiModelProperty(value = "靶标快照数量,仅消息推送中有该字段")
+    private Integer imageSnapshotNum;
 
     // 加入的网络
     @JsonIgnore
