@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 public class SceneInstanceLinkCacheUtil {
     private static LoadingCache<String, List<NodeLinkStatusBO>> cache = CacheBuilder.newBuilder()
             .maximumSize(300)
-            .expireAfterAccess(24, TimeUnit.HOURS)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
             .build(new CacheLoader<>() {
                 @Override
                 public List<NodeLinkStatusBO> load(String sceneId) {
@@ -78,5 +78,9 @@ public class SceneInstanceLinkCacheUtil {
             list.add(clonedNode);
         }
         return cache.getUnchecked(sceneId);
+    }
+
+    public static void clear(String sceneId) {
+        cache.invalidate(sceneId);
     }
 }
