@@ -104,12 +104,12 @@ mp:
         - probe-name: monitor_cp_service.py
           launch-id: 093f6512519d49b2986819e29e4ba002
           interval: 180s
-          service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql,wazuh-kibana,wazuh-manager,mp,mp_es,bc,drm,PY-HOST
+          service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql,bc,drm,PY-HOST
       biz_srv_monitors:
-        - probe-name: monitor_cp_service.py
+        - probe-name: monitor_biz_service.py
           launch-id: 093fc7abba264d38a022a4c143d6a003
           interval: 180s
-          service-list: srv1,srv2,srv3
+          service-list: mp,mp_es,wazuh-kibana,wazuh-manager,ad
   situationaware:
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
