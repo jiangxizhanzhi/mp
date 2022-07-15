@@ -89,4 +89,11 @@ public class AddAttackFlowRequest {
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String parameter;
 
+    /**
+     * 资源类型：0 pcap包，1 脚本
+     */
+    @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
+    @NotNull(message = "resourceType can not be empty")
+    private Integer resourceType;
+
 }

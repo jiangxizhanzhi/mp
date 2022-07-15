@@ -17,16 +17,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,22 +65,34 @@ public class VmController {
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
-        List<String> userIdList = instances.stream().map(InstanceBO::getUserId).distinct().collect(Collectors.toList());
-        List<UserDto> userDtoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
-
+        List<UserDto> userDtoList = new ArrayList<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
+        if (Objects.nonNull(source)) {
+            List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
+            if (CollectionUtils.isNotEmpty(values)) {
+                List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(userIdList)) {
+                    userDtoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                }
+            }
+        }
+        List<UserDto> tmpUserDtoList = userDtoList;
         return instances.stream().map(instanceModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
             if (Objects.nonNull(source.get(instanceModel.getName()))) {
                 csceneNodeInfoBO = source.get(instanceModel.getName());
             }
             String userName = "";
-            Optional<UserDto> optional =
-                    userDtoList.stream().filter(userDto -> userDto.getId().equals(instanceModel.getUserId())).findFirst();
-            if (optional.isPresent()) {
-                userName = optional.get().getUsername();
+            String userId = csceneNodeInfoBO.getUserId();
+            if (StringUtils.isNotBlank(userId)) {
+                Optional<UserDto> optional =
+                        tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
+                if (optional.isPresent()) {
+                    userName = optional.get().getUsername();
+                }
             }
+
             return InstancePageVO.builder().name(instanceModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
                     .node(instanceModel.getNode())

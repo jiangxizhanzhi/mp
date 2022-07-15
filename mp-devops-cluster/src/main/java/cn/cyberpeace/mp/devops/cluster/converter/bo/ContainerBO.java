@@ -48,12 +48,6 @@ public class ContainerBO {
      */
     private String createdAt;
 
-
-    /**
-     * 用户id
-     */
-    private String userId;
-
     /**
      * 创建者
      */
