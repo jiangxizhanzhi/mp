@@ -699,6 +699,7 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
+                .selectAs(CsceneInstanceModel::getCreateUser, CsceneNodeInfoBO::getUserId)
                 .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
         var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(result)) {
@@ -724,6 +725,7 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getId, CsceneNodeInfoBO::getCsceneId)
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
+                .selectAs(CsceneInstanceModel::getCreateUser, CsceneNodeInfoBO::getUserId)
                 .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
         var elementInfos = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(elementInfos)) {
