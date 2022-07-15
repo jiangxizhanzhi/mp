@@ -28,6 +28,7 @@ import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
+import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
@@ -108,7 +109,7 @@ import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.
 @Service
 @Slf4j
 @CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
-public class DataCollectionService {
+public class DataCollectionService extends CollectionBaseService {
 
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
@@ -601,6 +602,7 @@ public class DataCollectionService {
     }
 
 
+
     /**
      * 一段时间内的环境变量数变动
      * @param wazuhMonitorEventsRequest
@@ -715,7 +717,7 @@ public class DataCollectionService {
      * @param response
      * @return
      */
-    private JSONArray processBaseChangeOutput(SearchResponse response) {
+    public JSONArray processBaseChangeOutput(SearchResponse response) {
         List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
@@ -727,7 +729,6 @@ public class DataCollectionService {
 
         // 只取最近一条
         WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
-        List<WazuhProcessModel> list = new ArrayList<>();
         if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
             BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
             if (StringUtils.isNotBlank(changedCntOutput.getData())) {
@@ -743,6 +744,36 @@ public class DataCollectionService {
         return null;
     }
 
+
+    /**
+     * 处理BaseRawOutput通用方法
+     * @param response
+     * @return
+     */
+    public JSONObject processBaseRawOutput(SearchResponse response) {
+        List<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
+                .getHits()).map(hit ->
+                JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>>>() {
+                })).collect(Collectors.toList());
+
+        if (CollectionUtil.isEmpty(wazuhFileRootList)) {
+            return null;
+        }
+
+        // 只取最近一条
+        WazuhMonitorRoot<Launch<BaseRawOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
+        if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
+            BaseRawOutput rawOutput = launchModel.getData().getOutput();
+            if (StringUtils.isNotBlank(rawOutput.getRawOutput())) {
+                byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(rawOutput.getRawOutput().trim(), "\""));
+                String output = TextUtils.decompress(raw);
+                JSONObject jsonObject = JSONObject.parseObject(output);
+                return jsonObject;
+            }
+        }
+
+        return null;
+    }
 
 
     public int aggsChangedCountWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest, String launchId) {
@@ -1442,6 +1473,7 @@ public class DataCollectionService {
      * @param agentNames
      * @return
      */
+    /*
     private List<String> agentNamesExcludeNullValue(List<String> agentNames) {
         List<String> nullExcludedAgentNames = agentNames.stream().filter(Objects::nonNull).collect(Collectors.toList());
         return nullExcludedAgentNames;
@@ -1454,6 +1486,6 @@ public class DataCollectionService {
             log.warn("agentNames is empty:{}", agentNames);
         }
         return isEmpty;
-    }
+    }*/
 
 }

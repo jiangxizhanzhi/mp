@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
@@ -64,6 +66,9 @@ public class SituationAwareTestController {
 
     @Autowired
     private DataCollectionService dataCollectionService;
+
+    @Autowired
+    private ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
 
     @GetMapping("/token")
     public String getToken() throws IOException, ExecutionException {
@@ -254,6 +259,15 @@ public class SituationAwareTestController {
         ListObjResult<FileEventModel> list = dataCollectionService.scrollFileEvents(scrollId);
 
         return list.asResult();
+    }
+
+
+
+    @GetMapping("/monitor/cpservice")
+    public ListObjResult<FileEventModel> cpServiceMonitorData(@RequestParam String hostname) {
+        List<ServiceMonitorDto> dtos1 = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostname);
+        List<ServiceMonitorDto> dtos2 = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostname);
+        return null;
     }
 
 }

@@ -13,13 +13,16 @@ import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordStrengthChecker;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -105,6 +108,14 @@ public class AuthTestController {
     }
 
 
+    @ApiOperation("解压缩密文")
+    @PostMapping("/decompress")
+    public String test(@RequestBody String compressText) {
+        byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(compressText.trim(), "\""));
+        String output = TextUtils.decompress(raw);
+        return output;
+    }
+
     @ApiOperation("密码强度查询")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "pwd", value = "密码字段（明文）", dataTypeClass = String[].class),
@@ -187,5 +198,13 @@ public class AuthTestController {
         return formattedMessage.toString();
     }
     */
+
+
+    public static void main(String[] args) {
+        String compressText = "eJytVttunDAQ/ZVon4vluz35gbYvadXLQ5+QAWeDshjCJVfl3zve7VYkFQtpkBCykHVmOHNmzjxtLl3XF5fd5vzsadP1rh/icfPt58XF54uPmw9nm7KJH+JpaPqy8ml84c0qflecMWKk5kCBc6bVM97Lm3xXD0W6HVzuqnrn58CZ4URQQomYCMOsAkW4tVxTENoIE+M8DiG565q2vn+YjUAJQHzU5I+AUZowxiXXAJrHAK5wDWKWdfhPejBvwwjjihtDJRcQUasm9bN8/6VETkCDBKIFGGSdWispjJg/R06yedbnOMHsLRvD3vlsFdA9uXkdelcG3xbrFE/gDa60oKiQiN/6olxOM5+AtkZrVDiVkmow2rzW93zyxwhMwgl1ayIlp0YwqjHimPQy4L2Q+zQS1ta7VSpAxxG6IqSZ63x6265X3jv3OFwllQtu6+dhjyRNUyRxvhAhpBIWJ4B+octdvcUgqWua9TSf5YuT1qdkKYkBbbikB9i68bGe+XWSl6HwbdLlV74Ydgs4WtQFEnWGEwFjihcqum1mZ9gbWvconNVy/0t75drSFe8fM0gGtWgo2Fo8Hu0479xjzu/3jH8aqQyX9Xqo0d5cU66iC4M65Vwohcowr3t/rb55oY3Q5GmoixVd6NFlWXmfoAklYVuG+6R66G7mxyF2KTMnjPSPeVAO6P2Us/0K08ZYfXWzeAaYqezRoRlRUqEagVIGe5K+/ko+ffn+Y7l3TNnTPnlF0DWw7QHrHNGLtlqMPDNMQAkuBCgjDpvLYlw7ubZgJSxYg8RYo8COKtv59hYn4tvKepIZQazWXCkAO56GadRQ3z8k+a70oV8ca2o93cdCLoFRxrHIx+7N66oZ+lVaABcEGrdfND/L2aHMdX69km1IQ3DlVRYVBCP3vi4z9O/lKqXT7o0lJ/gbTElg8lCMPUOhTArnq/kNe/GYw12bGxDYCs+/AWlEqso=";
+        byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(compressText.trim(), "\""));
+        String output = TextUtils.decompress(raw);
+        log.info(output);
+    }
 
 }

@@ -11,7 +11,13 @@ dependencies {
 
     implementation project(':mp-cscene')
 
+    implementation project(':mp-scene-plugin-collection')
+
+    implementation project(':mp-scene-plugin-cloud')
+
     implementation project(':mp-auth-base')
+
+    implementation project(':mp-situation-aware')
 
     implementation 'org.apache.httpcomponents:httpmime:4.4.1'
 
