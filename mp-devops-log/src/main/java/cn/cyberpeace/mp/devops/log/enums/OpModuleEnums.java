@@ -7,49 +7,58 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 @SwaggerDisplayEnum
 public enum OpModuleEnums {
-    // "系统"
+    // 0."系统"
     SYSTEM("system"),
-    // "工具"
+    // 1."工具"
     tool("tool"),
-    // "课程"
+    // 2."课程"
     COURSE("course"),
-    // "资源"
+    // 3."资源"
     RESOURCE("resource"),
-    // "账号"
+    // 4."账号"
     ACCOUNT("account"),
-    // "场景"
+    // 5."场景"
     SCENES("scenes"),
-    // "职业体系"
+    // 6."职业体系"
     CAREER_SYSTEM("career_system"),
-    // "考试"
+    // 7."考试"
     TEST("test"),
-    // "习题集管理"
+    // 8."习题集管理"
     PROBLEM_SET("problem_set"),
-    // "夺旗解题"
+    // 9."夺旗解题"
     CAPTURE_SOLVE_PROBLEM("capture_solve_problem"),
-    // "理论基础"
+    // 10."理论基础"
     BASIS("basis"),
-    // "试卷"
+    // 11."试卷"
     TEST_PAPER("test_paper"),
-    // "任务"
+    // 12."任务"
     TASK("task"),
-    // "流量"
+    // 13."流量"
     FLOW("flow"),
-    // "探针"
+    // 14."探针"
     PROBE("probe"),
-    // "靶标"
+    // 15."靶标"
     TARGET("target"),
-    // "红蓝对抗"
+    // 16."红蓝对抗"
     RED_VS_BLUE("red_vs_blue"),
-    // "单兵训练"
+    // 17."单兵训练"
     TRAINING_SINGLE("training_single"),
-    // "团队训练"
+    // 18."团队训练"
     TRAINING_TEAM("training_team"),
-
-
-    //COMPETITION_TERRAIN("competition_terrain"),
-    //
-    // "19:赛场, 20:理论赛, 21:运维赛, 22:夺旗赛, 23:攻防赛, 24:渗透赛, 25:战队"
+    // 19:赛场
+    ARENA("arena"),
+    // 20:理论赛
+    THEORY("theory"),
+    // 21:运维赛,
+    OPERATIONS("operations"),
+    // 22:夺旗赛,
+    FLAG_RACE("flag_race"),
+    // 23:攻防赛,
+    OFFENSIVE_VS_DEFENSIVE("offensive_vs_defensive"),
+    // 24:渗透赛,
+    PENETRATION("penetration"),
+    // 25:战队"
+    TEAM("team"),
 
     DEFAULT("");
 

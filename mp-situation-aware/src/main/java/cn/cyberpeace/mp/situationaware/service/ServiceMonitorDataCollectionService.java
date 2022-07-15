@@ -113,7 +113,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         wazuhRequest.setAgentNames(hostnames);
         wazuhRequest.setPageSize(1);
         LocalDateTime endTime = LocalDateTime.now();
-        wazuhRequest.setStartTime(endTime.minusHours(2));
+        wazuhRequest.setStartTime(endTime.minusHours(12));
         wazuhRequest.setEndTime(endTime);
         return wazuhRequest;
     }
