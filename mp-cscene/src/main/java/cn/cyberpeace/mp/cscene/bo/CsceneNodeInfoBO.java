@@ -23,4 +23,5 @@ public class CsceneNodeInfoBO {
     private Integer referenceType;
     private Integer event;
     private Integer eventStatus;
+    private String userId;
 }

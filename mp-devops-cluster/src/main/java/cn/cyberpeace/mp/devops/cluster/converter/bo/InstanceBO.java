@@ -39,11 +39,6 @@ public class InstanceBO {
     private String createTime;
 
     /**
-     * 用户id
-     */
-    private String userId;
-
-    /**
      * 创建者
      */
     private String userName;
