@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
@@ -18,8 +19,10 @@ import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
@@ -27,6 +30,7 @@ import cn.cyberpeace.mp.devops.cluster.vo.VirtualRealSwitchStatusVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
+import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,6 +79,8 @@ public class CloudPlatformMonitorController {
     private final SwitchConverter switchConverter;
 
     private final ClearService clearService;
+
+    private final ServiceMonitorService serviceMonitorService;
 
     /**
      * 资源统计
@@ -226,4 +232,15 @@ public class CloudPlatformMonitorController {
         TaskCommon.executeTask(() -> clearService.clearUselessResource());
         return new ServiceResult<>(true);
     }
+
+    /**
+     * 云平台服务状态监控
+     * @return
+     */
+    @ApiOperation("云平台服务状态监控")
+    @GetMapping("/cp_page")
+    public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request){
+        return serviceMonitorService.cpPage(request);
+    }
+
 }
