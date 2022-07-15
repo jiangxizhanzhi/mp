@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.BizServicePageRequest;
-import cn.cyberpeace.mp.devops.cluster.service.BizServiceMonitorService;
+import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class BizServiceMonitorController {
 
-    private final BizServiceMonitorService bizServiceMonitorService;
+    private final ServiceMonitorService serviceMonitorService;
 
     /**
      * 业务服务监控
@@ -34,7 +34,7 @@ public class BizServiceMonitorController {
     @ApiOperation("业务服务监控")
     @GetMapping("/page")
     public ListObjResult<ServiceMonitorDto> page(BizServicePageRequest request){
-        return bizServiceMonitorService.page(request);
+        return serviceMonitorService.bizServicePage(request);
     }
 
 
