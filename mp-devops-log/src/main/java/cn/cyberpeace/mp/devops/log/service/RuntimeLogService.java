@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -34,6 +35,12 @@ public class RuntimeLogService {
 
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll();
         allLogReportDTOList.addAll(mpAndCpLogList);
+        allLogReportDTOList.sort(new Comparator<LogReportDTO>() {
+            @Override
+            public int compare(LogReportDTO o1, LogReportDTO o2) {
+                return o2.getUpdateTime().compareTo(o1.getUpdateTime());
+            }
+        });
 
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);
         int offset = (basePageRequest.getPage() - 1) * basePageRequest.getPerPage();
