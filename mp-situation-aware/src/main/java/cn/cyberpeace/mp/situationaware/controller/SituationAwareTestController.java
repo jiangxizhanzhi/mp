@@ -264,9 +264,9 @@ public class SituationAwareTestController {
 
 
     @GetMapping("/monitor/cpservice")
-    public ListObjResult<FileEventModel> cpServiceMonitorData(@RequestParam String hostname) {
-        List<ServiceMonitorDto> dtos1 = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostname);
-        List<ServiceMonitorDto> dtos2 = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostname);
+    public ListObjResult<FileEventModel> cpServiceMonitorData(@RequestParam List<String> hostnames) {
+        List<ServiceMonitorDto> dtos1 = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostnames);
+        List<ServiceMonitorDto> dtos2 = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostnames);
         return null;
     }
 

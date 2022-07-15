@@ -46,6 +46,11 @@ public enum OpModuleEnums {
     // "团队训练"
     TRAINING_TEAM("training_team"),
 
+
+    //COMPETITION_TERRAIN("competition_terrain"),
+    //
+    // "19:赛场, 20:理论赛, 21:运维赛, 22:夺旗赛, 23:攻防赛, 24:渗透赛, 25:战队"
+
     DEFAULT("");
 
     private String code;

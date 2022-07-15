@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -36,24 +35,24 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
     /**
      * 查询平台服务状态列表
-     * @param hostname
+     * @param hostnames
      * @return
      */
-    public List<ServiceMonitorDto>  queryCPServiceMonitorData(String hostname) {
+    public List<ServiceMonitorDto>  queryCPServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = monitorConfig.getCpSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
-        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostname);
+        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostnames);
         return queryServiceMonitorData(wazuhRequest, launchIds);
     }
 
 
     /**
      * 查询业务服务状态列表
-     * @param hostname
+     * @param hostnames
      * @return
      */
-    public List<ServiceMonitorDto>  queryBizServiceMonitorData(String hostname) {
+    public List<ServiceMonitorDto>  queryBizServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = monitorConfig.getBizSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
-        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostname);
+        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostnames);
         return queryServiceMonitorData(wazuhRequest, launchIds);
     }
 
@@ -109,9 +108,9 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
-    private WazuhMonitorEventsRequest genDefaultWazuhRequest(String hostname) {
+    private WazuhMonitorEventsRequest genDefaultWazuhRequest(List<String> hostnames) {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(Arrays.asList(hostname));
+        wazuhRequest.setAgentNames(hostnames);
         wazuhRequest.setPageSize(1);
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(2));

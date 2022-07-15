@@ -25,6 +25,7 @@ public class ServiceMonitorDto {
     // 运行时长（秒）
     private Long uptime;
 
+    // ERROR, DOWN, RUNNNING
     private String state;
 
     private String ip;
