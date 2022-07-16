@@ -158,7 +158,7 @@ public class AsyncPlatFlowTaskService {
                         flowPortMapper.list(new HumanCondition()
                                 .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
                                 .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.ATTACK.toValue()));
+                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.SCRIPT.toValue()));
                 if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
                     flowPortModel = attackFlowPorts.get(0);
                 } else {
@@ -177,7 +177,7 @@ public class AsyncPlatFlowTaskService {
                                 .filterEqual(FlowPortModel::getClientGateway,
                                         flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
                                 .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.BACKGROUND.toValue()));
+                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.PCAP.toValue()));
                 if (CollectionUtils.isEmpty(backFlowPorts)) {
                     log.error("create background flow port info error");
                     return;
@@ -315,7 +315,7 @@ public class AsyncPlatFlowTaskService {
                         flowPortMapper.list(new HumanCondition().filterEqual(FlowPortModel::getClientGateway,
                                 flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
                                 .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.BACKGROUND.toValue()));
+                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.PCAP.toValue()));
                 if (CollectionUtils.isEmpty(backFlowPorts)) {
                     log.error("get background flow port info error");
                     throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
@@ -352,7 +352,7 @@ public class AsyncPlatFlowTaskService {
                             flowPortMapper.list(new HumanCondition()
                                     .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
                                     .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                    .filterEqual(FlowPortModel::getPortType, PortTypeEnum.ATTACK.toValue()));
+                                    .filterEqual(FlowPortModel::getPortType, PortTypeEnum.SCRIPT.toValue()));
                     if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
                         attackPortModel = attackFlowPorts.get(0);
                     } else {
@@ -562,7 +562,7 @@ public class AsyncPlatFlowTaskService {
                         .clientGateway(fixedIp) // Trex的ip作为网关地址
                         .networkId(externalNetId)
                         .actuatorId(flowActuatorModel.getId())
-                        .portType(PortTypeEnum.ATTACK.toValue())
+                        .portType(PortTypeEnum.SCRIPT.toValue())
                         .build();
                 flowPortMapper.create(flowPortModel);
 
@@ -606,7 +606,7 @@ public class AsyncPlatFlowTaskService {
             String clientIp = "";
             String clientPortId = "";
             // 默认背景流量网口类型
-            int portType = PortTypeEnum.BACKGROUND.toValue();
+            int portType = PortTypeEnum.PCAP.toValue();
             if (ResourceTypeEnum.PACP.toValue() == resourceType) {
                 // pcap需要给trex虚拟机添加client网口
                 String addTrexClientPortRsp =
@@ -630,7 +630,7 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 // 攻击流量网口类型
-                portType = PortTypeEnum.ATTACK.toValue();
+                portType = PortTypeEnum.SCRIPT.toValue();
                 // 给trex虚拟机添加server网口
                 String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
                         flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
