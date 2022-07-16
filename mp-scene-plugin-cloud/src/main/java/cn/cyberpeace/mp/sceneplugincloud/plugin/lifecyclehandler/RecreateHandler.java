@@ -53,6 +53,7 @@ public class RecreateHandler extends HandlerCommon {
             log.error("faild to execute delete process when recreate element,nodeId is {}", nodeId, e);
         }
         this.createHandler.createElementProcess(element);
+        getPluginHandler().updateElements(element.getSrcElement().getId());
     }
 
     private void prepareElementProcess(String nodeId, Integer virtualType) {

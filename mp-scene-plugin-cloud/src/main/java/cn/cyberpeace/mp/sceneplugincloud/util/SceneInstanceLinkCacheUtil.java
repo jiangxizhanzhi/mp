@@ -81,7 +81,7 @@ public class SceneInstanceLinkCacheUtil {
         return cache.getUnchecked(sceneId);
     }
 
-    public static void clear(String sceneId) {
-        cache.invalidate(sceneId);
+    public static void refresh(String sceneId) {
+        cache.refresh(sceneId);
     }
 }
