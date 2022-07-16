@@ -6,8 +6,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -89,5 +91,24 @@ public class ModifyAttackFlowRequest {
      */
     @ApiModelProperty(value = "攻击脚本运行参数")
     private String parameter;
+
+    /**
+     * 资源类型：0 pcap包，1 脚本
+     */
+    @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
+    @NotNull(message = "resourceType can not be empty")
+    private Integer resourceType;
+
+    /**
+     * 文件
+     */
+    @ApiModelProperty(value = "文件")
+    private MultipartFile pcapFile;
+
+    /**
+     * 文件路径
+     */
+    @ApiModelProperty("文件路径")
+    private String pcapFilePath;
 
 }

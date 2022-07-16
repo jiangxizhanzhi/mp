@@ -352,7 +352,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
-        if (!addRequest.getFileName().endsWith(".pcap") || !BaseConstants.STR_PCAP.equals(suffix)) {
+        if (!BaseConstants.STR_PCAP.equals(suffix)) {
             return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
@@ -388,83 +388,126 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
-        // 解析攻击流量脚本参数
-        if (StringUtils.isNotBlank(addRequest.getParameter())) {
-            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
-            JSONObject paramObj = JSONObject.parseObject(addRequest.getParameter());
-            paramObj.keySet().forEach(paramKey -> {
-                FlowScriptParamModel paramModel = new FlowScriptParamModel();
-                paramModel.setParamKey(paramKey);
+        AttackFlowResponse response = new AttackFlowResponse();
+        if (ResourceTypeEnum.SCRIPT.toValue() == addRequest.getResourceType()) {
+            if (StringUtils.isBlank(addRequest.getCode())) {
+                return ServiceResult.fail("code can not be empty");
+            }
+            if (Objects.isNull(addRequest.getSuffix())) {
+                return ServiceResult.fail("suffix can not be empty");
+            }
 
-                JSONArray paramArray = paramObj.getJSONArray(paramKey);
-                // 参数类型
-                Integer type;
-                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.STRING.toValue();
-                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.IP.toValue();
-                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.NUMBER.toValue();
-                } else {
-                    type = ParamTypeEnum.BOOL.toValue();
-                }
-                paramModel.setParamType(type);
+            // 解析攻击流量脚本参数
+            if (StringUtils.isNotBlank(addRequest.getParameter())) {
+                List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+                JSONObject paramObj = JSONObject.parseObject(addRequest.getParameter());
+                paramObj.keySet().forEach(paramKey -> {
+                    FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                    paramModel.setParamKey(paramKey);
 
-                // 参数值
-                paramModel.setParamValue(paramArray.getString(1));
-                // 参数描述
-                paramModel.setParamDesc(paramArray.getString(2));
+                    JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                    // 参数类型
+                    Integer type;
+                    if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.STRING.toValue();
+                    } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.IP.toValue();
+                    } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.NUMBER.toValue();
+                    } else {
+                        type = ParamTypeEnum.BOOL.toValue();
+                    }
+                    paramModel.setParamType(type);
 
-                // 参数校验
-                if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 ||
-                        paramModel.getParamDesc().length() > 2048) {
-                    log.error("param length is invalid");
-                    throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
-                }
+                    // 参数值
+                    paramModel.setParamValue(paramArray.getString(1));
+                    // 参数描述
+                    paramModel.setParamDesc(paramArray.getString(2));
 
-                scriptParamModels.add(paramModel);
-            });
+                    // 参数校验
+                    if (paramKey.length() > 40 || paramModel.getParamValue().length() > 50 ||
+                            paramModel.getParamDesc().length() > 2048) {
+                        log.error("param length is invalid");
+                        throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                    }
 
-            addRequest.setScriptParamModels(scriptParamModels);
+                    scriptParamModels.add(paramModel);
+                });
+
+                addRequest.setScriptParamModels(scriptParamModels);
+            }
+
+            // 判断是否有文件名，没有则根据脚本语言默认生成一个
+            String fileName;
+            String suffix = addRequest.getSuffix() == 1 ? "sh" : "py";
+            if (StringUtils.isBlank(addRequest.getFileName())) {
+                fileName = TextUtils.uuid() + "." + suffix;
+                addRequest.setFileName(fileName);
+            }
+
+            InputStream is = null;
+            try {
+                is = new ByteArrayInputStream(addRequest.getCode().getBytes());
+                String filePath = FsCommon.upload(is, suffix);
+                addRequest.setFilePath(filePath);
+            } catch (MpRuntimeException e) {
+                log.error("add attack flow error", e);
+                return ServiceResult.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
+            } finally {
+                IOUtils.closeQuietly(is);
+            }
+
+            // 请求对象转换
+            FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
+            // 保存流量信息
+            ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
+            FlowInfoModel resultModel = serviceResult.getSource().getObj();
+
+            // 批量保存流量脚本参数信息
+            List<FlowScriptParamModel> scriptParamModels = addRequest.getScriptParamModels();
+            if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+                scriptParamModels.forEach(model -> model.setFlowId(resultModel.getId()));
+                flowScriptParamService.bulkCreate(scriptParamModels);
+            }
+
+            String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
+            // 转换返回对象
+            response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
+            response.setCode(addRequest.getCode());
+        } else {
+            if (StringUtils.isEmpty(addRequest.getFileName())) {
+                return ServiceResult.fail("fileName can not be empty");
+            }
+            if (Objects.isNull(addRequest.getPcapFile())) {
+                return ServiceResult.fail("pcapFile can not be empty");
+            }
+
+            String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
+            if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+            }
+
+            // 上传文件获取路径
+            String filePath;
+            try {
+                filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
+            } catch (IOException e) {
+                log.error("attack upload pcap file error", e);
+                return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+            }
+            addRequest.setPcapFilePath(filePath);
+
+            // 请求对象转换
+            FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
+            // 保存流量信息
+            ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
+            FlowInfoModel resultModel = serviceResult.getSource().getObj();
+
+            String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
+            // 转换返回对象
+            response = new AttackFlowResponse(resultModel, prefixUrl, null);
         }
 
-        // 判断是否有文件名，没有则根据脚本语言默认生成一个
-        String fileName;
-        String suffix = addRequest.getSuffix() == 1 ? "sh" : "py";
-        if (StringUtils.isBlank(addRequest.getFileName())) {
-            fileName = TextUtils.uuid() + "." + suffix;
-            addRequest.setFileName(fileName);
-        }
-
-        InputStream is = null;
-        try {
-            is = new ByteArrayInputStream(addRequest.getCode().getBytes());
-            String filePath = FsCommon.upload(is, suffix);
-            addRequest.setFilePath(filePath);
-        } catch (MpRuntimeException e) {
-            log.error("add attack flow error", e);
-            return ServiceResult.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
-        } finally {
-            IOUtils.closeQuietly(is);
-        }
-
-        // 请求对象转换
-        FlowInfoModel flowInfoModel = this.getFlowInfoModel(addRequest);
-        // 保存流量信息
-        ObjServiceResult<FlowInfoModel> serviceResult = create(flowInfoModel);
-        FlowInfoModel resultModel = serviceResult.getSource().getObj();
-
-        // 批量保存流量脚本参数信息
-        List<FlowScriptParamModel> scriptParamModels = addRequest.getScriptParamModels();
-        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
-            scriptParamModels.forEach(model -> model.setFlowId(resultModel.getId()));
-            flowScriptParamService.bulkCreate(scriptParamModels);
-        }
-
-        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
-        // 转换返回对象
-        AttackFlowResponse response = new AttackFlowResponse(resultModel, prefixUrl, scriptParamModels);
-        response.setCode(addRequest.getCode());
         return ServiceResult.success(response);
     }
 
@@ -543,84 +586,113 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
         }
 
-        // 解析攻击流量脚本参数
-        if (StringUtils.isNotBlank(modifyRequest.getParameter())) {
-            List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
-            JSONObject paramObj = JSONObject.parseObject(modifyRequest.getParameter());
-            paramObj.keySet().forEach(paramKey -> {
-                FlowScriptParamModel paramModel = new FlowScriptParamModel();
-                paramModel.setParamKey(paramKey);
+        AttackFlowResponse response;
+        if (ResourceTypeEnum.SCRIPT.toValue() == modifyRequest.getResourceType()) {
+            // 解析攻击流量脚本参数
+            if (StringUtils.isNotBlank(modifyRequest.getParameter())) {
+                List<FlowScriptParamModel> scriptParamModels = new ArrayList<>();
+                JSONObject paramObj = JSONObject.parseObject(modifyRequest.getParameter());
+                paramObj.keySet().forEach(paramKey -> {
+                    FlowScriptParamModel paramModel = new FlowScriptParamModel();
+                    paramModel.setParamKey(paramKey);
 
-                JSONArray paramArray = paramObj.getJSONArray(paramKey);
-                // 参数类型
-                Integer type;
-                if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.STRING.toValue();
-                } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.IP.toValue();
-                } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
-                    type = ParamTypeEnum.NUMBER.toValue();
+                    JSONArray paramArray = paramObj.getJSONArray(paramKey);
+                    // 参数类型
+                    Integer type;
+                    if (ParamTypeEnum.STRING.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.STRING.toValue();
+                    } else if (ParamTypeEnum.IP.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.IP.toValue();
+                    } else if (ParamTypeEnum.NUMBER.toString().equals(paramArray.getString(0))) {
+                        type = ParamTypeEnum.NUMBER.toValue();
+                    } else {
+                        type = ParamTypeEnum.BOOL.toValue();
+                    }
+                    paramModel.setParamType(type);
+
+                    // 参数值
+                    paramModel.setParamValue(paramArray.getString(1));
+                    // 参数描述
+                    paramModel.setParamDesc(paramArray.getString(2));
+                    scriptParamModels.add(paramModel);
+                });
+
+                modifyRequest.setScriptParamModels(scriptParamModels);
+            }
+
+            if (StringUtils.isNotBlank(modifyRequest.getCode())) {
+                // 判断是否有文件名，没有则根据脚本语言默认生成一个
+                String fileName;
+                String suffix = null;
+                if (Objects.nonNull(modifyRequest.getSuffix())) {
+                    suffix = modifyRequest.getSuffix() == 1 ? "sh" : "py";
                 } else {
-                    type = ParamTypeEnum.BOOL.toValue();
+                    // 没变更suffix时，根据文件名后缀判断之前类型
+                    suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? "sh" : "py";
                 }
-                paramModel.setParamType(type);
 
-                // 参数值
-                paramModel.setParamValue(paramArray.getString(1));
-                // 参数描述
-                paramModel.setParamDesc(paramArray.getString(2));
-                scriptParamModels.add(paramModel);
-            });
+                if (StringUtils.isBlank(modifyRequest.getFileName())) {
+                    fileName = TextUtils.uuid() + "." + suffix;
+                    modifyRequest.setFileName(fileName);
+                }
 
-            modifyRequest.setScriptParamModels(scriptParamModels);
-        }
-
-        if (StringUtils.isNotBlank(modifyRequest.getCode())) {
-            // 判断是否有文件名，没有则根据脚本语言默认生成一个
-            String fileName;
-            String suffix = null;
-            if (Objects.nonNull(modifyRequest.getSuffix())) {
-                suffix = modifyRequest.getSuffix() == 1 ? "sh" : "py";
-            } else {
-                // 没变更suffix时，根据文件名后缀判断之前类型
-                suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? "sh" : "py";
+                InputStream is = null;
+                try {
+                    is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
+                    String filePath = FsCommon.upload(is, suffix);
+                    modifyRequest.setFilePath(filePath);
+                } catch (MpRuntimeException e) {
+                    log.error("modify attack flow error", e);
+                    return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
+                } finally {
+                    IOUtils.closeQuietly(is);
+                }
             }
 
-            if (StringUtils.isBlank(modifyRequest.getFileName())) {
-                fileName = TextUtils.uuid() + "." + suffix;
-                modifyRequest.setFileName(fileName);
+            // 请求对象转换
+            FlowInfoModel flowInfoModel = this.getFlowInfoModel(modifyRequest);
+            // 更新流量信息
+            ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
+
+            // 更新脚本参数时，先删除旧参数，再重新保存新参数
+            List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
+            if (CollectionUtils.isNotEmpty(scriptParamModels)) {
+                flowScriptParamService.deleteByFlowId(modifyRequest.getId());
+                scriptParamModels.forEach(model -> model.setFlowId(modifyRequest.getId()));
+                flowScriptParamService.bulkCreate(scriptParamModels);
             }
 
-            InputStream is = null;
-            try {
-                is = new ByteArrayInputStream(modifyRequest.getCode().getBytes(StandardCharsets.UTF_8));
-                String filePath = FsCommon.upload(is, suffix);
-                modifyRequest.setFilePath(filePath);
-            } catch (MpRuntimeException e) {
-                log.error("modify attack flow error", e);
-                return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
-            } finally {
-                IOUtils.closeQuietly(is);
+            String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
+            // 转换返回对象
+            response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
+            response.setCode(modifyRequest.getCode());
+        } else {
+            if (Objects.nonNull(modifyRequest.getPcapFile())) {
+                // 文件后缀校验
+                String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
+                if (!BaseConstants.STR_PCAP.equals(suffix)) {
+                    return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+                }
+                // 上传文件获取路径
+                String filePath = null;
+                try {
+                    filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
+                } catch (IOException e) {
+                    log.error("attack upload pcap file for update error", e);
+                    return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                }
+                modifyRequest.setPcapFilePath(filePath);
             }
+
+            // 请求对象转换
+            FlowInfoModel flowInfoModel = this.getFlowInfoModel(modifyRequest);
+            // 更新流量信息
+            ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
+            String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
+            // 转换返回对象
+            response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, null);
         }
 
-        // 请求对象转换
-        FlowInfoModel flowInfoModel = this.getFlowInfoModel(modifyRequest);
-        // 更新流量信息
-        ObjServiceResult<FlowInfoModel> serviceResult = update(flowInfoModel);
-
-        // 更新脚本参数时，先删除旧参数，再重新保存新参数
-        List<FlowScriptParamModel> scriptParamModels = modifyRequest.getScriptParamModels();
-        if (CollectionUtils.isNotEmpty(scriptParamModels)) {
-            flowScriptParamService.deleteByFlowId(modifyRequest.getId());
-            scriptParamModels.forEach(model -> model.setFlowId(modifyRequest.getId()));
-            flowScriptParamService.bulkCreate(scriptParamModels);
-        }
-
-        String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
-        // 转换返回对象
-        AttackFlowResponse response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
-        response.setCode(modifyRequest.getCode());
         return ServiceResult.success(response);
     }
 
@@ -670,10 +742,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setFlowDesc(addRequest.getIntroduction());
         flowInfoModel.setCategory(addRequest.getCategory());
         flowInfoModel.setFileName(addRequest.getFileName());
-        flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
+        flowInfoModel.setResourceType(addRequest.getResourceType());
         flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
         flowInfoModel.setScriptFile(addRequest.getFilePath());
         flowInfoModel.setRunCmd(addRequest.getRunCmd());
+        flowInfoModel.setPcapFile(addRequest.getPcapFilePath());
 
         return flowInfoModel;
     }
@@ -692,6 +765,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         flowInfoModel.setFileName(modifyRequest.getFileName());
         flowInfoModel.setScriptFile(modifyRequest.getFilePath());
         flowInfoModel.setRunCmd(modifyRequest.getRunCmd());
+        flowInfoModel.setResourceType(modifyRequest.getResourceType());
+        flowInfoModel.setPcapFile(modifyRequest.getPcapFilePath());
 
         return flowInfoModel;
     }
