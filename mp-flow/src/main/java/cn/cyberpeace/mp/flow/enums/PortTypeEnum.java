@@ -3,13 +3,13 @@ package cn.cyberpeace.mp.flow.enums;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * 网口类型：0 背景流量，1攻击流量
+ * 网口类型：0 pcap包，1 脚本
  */
 public enum PortTypeEnum {
 
-    BACKGROUND("BACKGROUND"),
+    PCAP("PCAP"),
 
-    ATTACK("ATTACK");
+    SCRIPT("SCRIPT");
 
     private final String resource;
 
