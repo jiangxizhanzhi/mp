@@ -30,7 +30,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         try {
             initRegisterService.register(getUrl());
-            cpNodeMonitorScriptConfigService.init();
+            //cpNodeMonitorScriptConfigService.init();
         }catch (Exception e){
             log.error("ServerConfigListener onApplicationEvent error : {} ",e);
         }

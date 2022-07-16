@@ -3,7 +3,10 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.devops.cluster.service.CpNodeMonitorScriptConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description:
@@ -19,7 +22,13 @@ public class DevopsTestController {
 
     @PostMapping("/devops/monitor/init")
     public void test() {
-        monitorScriptConfigService.init();
+        //monitorScriptConfigService.init();
+    }
+
+
+    @PostMapping("/devops/monitor/restart")
+    public void restart(@RequestParam String hostname, @RequestParam List<String> services) {
+        monitorScriptConfigService.restart(hostname, services);
     }
 
 

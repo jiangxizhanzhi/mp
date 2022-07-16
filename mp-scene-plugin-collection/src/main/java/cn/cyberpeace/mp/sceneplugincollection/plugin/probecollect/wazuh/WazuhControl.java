@@ -25,6 +25,9 @@ public class WazuhControl {
     public static final String WINDOWS_SPEC_QUERY_SCRIPT_PATH = "C:\\ossec-agent\\spec-query.bat";
     public static final String LINUX_SPEC_QUERY_SCRIPT_PATH = "/var/ossec/bin/spec-query.py";
 
+    public static final String WINDOWS_CMD_LAUNCHER_SCRIPT_PATH = "C:\\ossec-agent\\cmd-launcher.bat";
+    public static final String LINUX_CMD_LAUNCHER_SCRIPT_PATH = "/var/ossec/bin/cmd-launcher.py";
+
     public static final String CONTROL_ACTION_ADD = "add";
     public static final String CONTROL_ACTION_REMOVE = "remove";
     public static final String CONTROL_ACTION_ENABLE = "enable";
@@ -152,6 +155,34 @@ public class WazuhControl {
         String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
         return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
     }
+
+    public void controlCmdLauncher(String agentName, String osType, ControlCmdLauncherParam cmdLauncherParam) {
+        var runCommandItem = new WazuhLauncher.RunCommandItem();
+        runCommandItem.setAgentName(agentName);
+        runCommandItem.setOsType(osType);
+        runCommandItem.setCommand(genCmdLauncherCommand(osType, cmdLauncherParam));
+        wazuhLauncher.runCommand(List.of(runCommandItem));
+    }
+
+    public static String genCmdLauncherCommand(String osType, ControlCmdLauncherParam cmdLauncherParam) {
+        String controlScriptPath;
+        if (WazuhLauncher.OS_TYPE_WINDOWS.equals(osType)) {
+            controlScriptPath = WINDOWS_CMD_LAUNCHER_SCRIPT_PATH;
+        } else {
+            controlScriptPath = LINUX_CMD_LAUNCHER_SCRIPT_PATH;
+        }
+
+        List<Map<String, Object>> scriptParams = new ArrayList<>();
+        if (cmdLauncherParam != null) {
+            scriptParams.add(JsonCommon.beanToSnakeMap(cmdLauncherParam));
+        }
+        if (scriptParams.isEmpty()) {
+            return StringUtils.EMPTY;
+        }
+        String scriptParamsStr = TextUtils.encodeBase64(JsonCommon.stringify(scriptParams));
+        return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
+    }
+
 
     @Getter
     private WazuhLauncher wazuhLauncher;
@@ -583,6 +614,16 @@ public class WazuhControl {
             this.filepath = filepath;
         }
 
+    }
+
+
+    @Data
+    public static class ControlCmdLauncherParam {
+        private String id;
+        private final String matcher = WazuhLauncher.COMMAND_MATCHER_CMD;
+        private String group;
+        private String outputFormat;
+        private String command;
     }
 
     @Data
