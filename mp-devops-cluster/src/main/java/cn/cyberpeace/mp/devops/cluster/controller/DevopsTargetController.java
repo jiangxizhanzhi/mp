@@ -135,7 +135,7 @@ public class DevopsTargetController {
      * @param request
      * @return
      */
-    @ApiOperation("查询所有靶标信息")
+    @ApiOperation("查询所有靶标信息(带过滤条件)")
     @GetMapping("/listAll")
     public ServiceResult<Device> listAll(TargetSceneRequest request){
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
