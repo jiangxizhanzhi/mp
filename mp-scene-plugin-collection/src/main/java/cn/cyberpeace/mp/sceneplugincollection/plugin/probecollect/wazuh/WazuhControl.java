@@ -153,6 +153,7 @@ public class WazuhControl {
         return String.format("%s \"%s\"", controlScriptPath, scriptParamsStr);
     }
 
+
     @Getter
     private WazuhLauncher wazuhLauncher;
 
@@ -215,7 +216,7 @@ public class WazuhControl {
         var runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
-        runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigParam, true));
+        runCommandItem.setCommand("//python xxx.py restart mp");
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 

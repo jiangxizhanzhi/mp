@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
-import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devops.cluster.constant.MonitorConstant;
@@ -14,22 +14,22 @@ import cn.cyberpeace.mp.devops.cluster.model.CpNodeMonitorScriptConfigModel;
 import cn.cyberpeace.mp.devops.cluster.repository.CpNodeMonitorScriptConfigMapper;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
+import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon.WAZUH_AGENT_GROUP;
 
 /**
  * @Description:
@@ -52,13 +52,58 @@ public class CpNodeMonitorScriptConfigService {
     @Autowired
     private MonitorConfig monitorConfig;
 
-    @Async
-    public void init() {
-        scriptInstallationCheck();
+    @EventListener
+    public void init(LocalFileSyncSuccessEvent syncSuccessEvent) {
+        scriptInstallationCheck(syncSuccessEvent);
     }
 
-    public void scriptInstallationCheck() {
+    // 定时调度，查询脚本是否安装成功
+    public void schedule() {
+
+    }
+
+    public List<CpNodeMonitorScriptConfigModel> listAll() {
+        return monitorScriptConfigMapper.listAll();
+    }
+
+
+    public List<CpNodeMonitorScriptConfigModel> listByAgentName(String agentName) {
+        return monitorScriptConfigMapper.listByAgentName(agentName);
+    }
+
+
+    public void restart(String hostname, List<String> serviceList) {
+        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
+        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+
+        if (CollectionUtil.isEmpty(cpSrvs)) {
+            return;
+        }
+
+        String cpLaunchId = cpSrvs.get(0).getLaunchId();
+        String bizLaunchId = bizSrvs.get(0).getLaunchId();
+        String srvs = StringUtils.join(serviceList, ",");
+        List<String> launchIds = Arrays.asList(cpLaunchId, bizLaunchId);
+
+        for (String launchId : launchIds) {
+            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py restart " + srvs;
+            log.info("hostname:{}, cmd:{}" + hostname, cmd);
+            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setAgentName(hostname);
+            runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
+            runCommandItem.setCommand(cmd);
+            WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+        }
+    }
+
+
+    private void scriptInstallationCheck(LocalFileSyncSuccessEvent syncSuccessEvent) {
         BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 1));
+
+        List<LocalFileMappingModel> mappings = (List<LocalFileMappingModel>) syncSuccessEvent.getSource();
+        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
+                LocalFileMappingModel::getRemoteFile));
+
         if (CollectionUtils.isNotEmpty(model.getList())) {
 
             List<CpNodeMonitorScriptConfigModel> configModelList = listAll();
@@ -83,7 +128,7 @@ public class CpNodeMonitorScriptConfigService {
             if (CollectionUtils.isNotEmpty(notInstalledHosts)) {
                 // 发送安装指令
                 notInstalledHosts.forEach(hostName -> {
-                    sendScriptInstallCmd(hostName);
+                    sendScriptInstallCmd(hostName, nameFileMap);
                     updateScriptConfigByHostName(hostName);
                 });
             }
@@ -91,28 +136,9 @@ public class CpNodeMonitorScriptConfigService {
         }
     }
 
-
-    // 定时调度，查询脚本是否安装成功
-    public void schedule() {
-
-    }
-
-    public List<CpNodeMonitorScriptConfigModel> listAll() {
-        return monitorScriptConfigMapper.listAll();
-    }
-
-
-    public List<CpNodeMonitorScriptConfigModel> listByAgentName(String agentName) {
-        return monitorScriptConfigMapper.listByAgentName(agentName);
-    }
-
-
-
-    private void sendScriptInstallCmd(String hostname) {
+    private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
-        List<LocalFileMappingModel> mappings = LocalFileMappingCommon.getMappings(WAZUH_AGENT_GROUP);
-        Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
-                LocalFileMappingModel::getRemoteFile));
+
 
         List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
         List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
@@ -143,7 +169,7 @@ public class CpNodeMonitorScriptConfigService {
         String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
         probeParam.setScriptUrl(url);
         probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-        probeParam.setOutputFormat("json");
+        probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_JSON);
         probeParam.setInterval(monitorProbe.getInterval());
 
         String[] params = {MonitorConstant.OP_STATUS, monitorProbe.getServiceList()};

@@ -13,4 +13,6 @@ public class MonitorConstant {
 
     public static final String OS_TYPE_LINUX = "linux";
 
+    public static final String BIN_TOOLS_DIR = "/var/ossec/bin/tools";
+
 }
