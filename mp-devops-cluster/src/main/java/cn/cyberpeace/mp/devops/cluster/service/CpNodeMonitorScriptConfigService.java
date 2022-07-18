@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,22 +73,27 @@ public class CpNodeMonitorScriptConfigService {
 
 
     public void restart(String hostname, List<String> serviceList) {
-
         List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
         List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
 
-        // todo loop
-        String launchId = cpSrvs.get(0).getLaunchId();
-        WazuhControl.ControlCmdLauncherParam cmdLauncherParam = new WazuhControl.ControlCmdLauncherParam();
+        if (CollectionUtil.isEmpty(cpSrvs)) {
+            return;
+        }
 
-        //String servicesStr = StringUtils.join(serviceList, ",");
-        //cmdLauncherParam.setCommand(StringUtils.join(Arrays.asList("/var/ossec/bint/tools/python27/python /var/ossec/bint/tools/093fc7abba264d38a022a4c143d6a003.py restart mp", servicesStr), " "));
-        cmdLauncherParam.setCommand("/var/ossec/bint/tools/python27/python /var/ossec/bint/tools/093fc7abba264d38a022a4c143d6a003.py restart mp");
-        cmdLauncherParam.setId(launchId);
-        cmdLauncherParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_NONE);
-        cmdLauncherParam.setGroup("server");
+        String cpLaunchId = cpSrvs.get(0).getLaunchId();
+        String bizLaunchId = bizSrvs.get(0).getLaunchId();
+        String srvs = StringUtils.join(serviceList, ",");
+        List<String> launchIds = Arrays.asList(cpLaunchId, bizLaunchId);
 
-        WazuhControlCommon.wazuhControl.controlCmdLauncher(hostname, "linux", cmdLauncherParam);
+        for (String launchId : launchIds) {
+            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py restart " + srvs;
+            log.info("hostname:{}, cmd:{}" + hostname, cmd);
+            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setAgentName(hostname);
+            runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
+            runCommandItem.setCommand(cmd);
+            WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+        }
     }
 
 
