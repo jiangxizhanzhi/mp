@@ -142,6 +142,11 @@ public class ImagePageDTO extends BasePageDTO{
      */
     private List<Integer> preTypeList;
 
+    /**
+     * 操作系统类型 1 WINDOWS, 2 LINUX, 3 UNIX, 4 BSD, 5 OTHER
+     */
+    private Integer parentSystemType;
+
     public Boolean getLikeName() {
         return Objects.isNull(likeName) ? Boolean.TRUE : likeName;
     }
@@ -226,5 +231,6 @@ public class ImagePageDTO extends BasePageDTO{
         this.setBaseImageSupport(request.getBaseImageSupport());
         this.setImageTypeList(request.getImageTypeList());
         this.setPreTypeList(request.getPreTypeList());
+        this.setParentSystemType(request.getParentSystemType());
     }
 }

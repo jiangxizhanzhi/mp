@@ -111,6 +111,9 @@
                     #{item}
                 </foreach>
             </if>
+            <if test="parentSystemType != null">
+                and parent_system_type = #{parentSystemType}
+            </if>
 
         </where>
     </sql>

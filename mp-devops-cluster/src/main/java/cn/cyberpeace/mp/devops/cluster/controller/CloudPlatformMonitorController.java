@@ -23,10 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
-import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
-import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
-import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
-import cn.cyberpeace.mp.devops.cluster.vo.VirtualRealSwitchStatusVO;
+import cn.cyberpeace.mp.devops.cluster.vo.*;
 import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
@@ -239,8 +236,19 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("云平台服务状态监控")
     @GetMapping("/cp_page")
-    public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request){
+    public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request) {
         return serviceMonitorService.cpPage(request);
+    }
+
+    /**
+     * 系统告警
+     * @return
+     */
+    @ApiOperation("系统告警信息")
+    @GetMapping("/system_alarm")
+    public ServiceResult<SystemAlarmVO> getSystemAlarm() {
+        SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
+        return ServiceResult.success(systemAlarm);
     }
 
 }

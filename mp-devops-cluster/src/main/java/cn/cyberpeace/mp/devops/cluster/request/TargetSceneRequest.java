@@ -115,7 +115,7 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     /**
      * 系统类型集合：vm,container,simple,entity
      */
-    @ApiModelProperty(value = "系统类型系统类型集合：vm,container,simple,entity集合")
+    @ApiModelProperty(value = "系统类型集合：vm,container,simple,entity集合")
     private List<String> imageTypeList;
 
     /**
@@ -123,5 +123,11 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
      */
     @ApiModelProperty(value = "预置类型：0 自定义，1 内置")
     private List<Integer> preTypeList;
+
+    /**
+     * 操作系统类型
+     */
+    @ApiModelProperty(value = "操作系统类型：1 WINDOWS, 2 LINUX, 3 UNIX, 4 BSD, 5 OTHER")
+    private Integer parentSystemType;
 
 }
