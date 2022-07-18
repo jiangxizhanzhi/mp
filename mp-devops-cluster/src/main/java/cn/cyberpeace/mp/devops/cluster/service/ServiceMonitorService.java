@@ -7,6 +7,10 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
+import cn.cyberpeace.mp.devops.cluster.vo.BizServiceMonitorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.CloudPlatformMonitorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.ServerMonitorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import com.google.common.collect.Lists;
@@ -30,6 +34,8 @@ public class ServiceMonitorService {
     private final HypervisorConverter hypervisorConverter;
 
     private final ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
+
+    private static final String RUNNNING = "RUNNNING";
 
     /**
      * 分页查询业务服务监控数据
@@ -89,6 +95,55 @@ public class ServiceMonitorService {
         } else {
             return new ListObjResult<>(Lists.newArrayList(), serviceMonitorDtos.size());
         }
+    }
+
+    /**
+     * 系统告警
+     * @return
+     */
+    public SystemAlarmVO getSystemAlarm() {
+        CloudPlatformMonitorVO cloudPlatformMonitorVO = new CloudPlatformMonitorVO();
+        BizServiceMonitorVO bizServiceMonitorVO = new BizServiceMonitorVO();
+        ServerMonitorVO serverMonitorVO = new ServerMonitorVO();
+
+        // 服务器监控
+        List<String> hostNameList = new ArrayList<>();
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        if (CollectionUtils.isNotEmpty(modelPage.getList())) {
+            modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
+
+            int totalCount = modelPage.getTotal();
+            int errorCount = (int )modelPage.getList().stream().filter(model -> "".equals(model.getStatus())).count();
+            serverMonitorVO.setServerMonitors(modelPage.getList());
+            serverMonitorVO.setErrorCount(errorCount);
+            serverMonitorVO.setTotalCount(totalCount);
+
+            // 云平台服务监控
+            List<ServiceMonitorDto> cpMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
+            if (CollectionUtils.isNotEmpty(cpMonitorDtos)) {
+                cloudPlatformMonitorVO.setCloudPlatformMonitors(cpMonitorDtos);
+                int cpTotalCount = cpMonitorDtos.size();
+                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !RUNNNING.equals(cpDto.getState())).count();
+                cloudPlatformMonitorVO.setTotalCount(cpTotalCount);
+                cloudPlatformMonitorVO.setErrorCount(cpErrorCount);
+            }
+
+            // 业务服务监控
+            List<ServiceMonitorDto> bizMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
+            if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
+                cloudPlatformMonitorVO.setCloudPlatformMonitors(bizMonitorDtos);
+                int bizTotalCount = bizMonitorDtos.size();
+                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !RUNNNING.equals(bizDto.getState())).count();
+                cloudPlatformMonitorVO.setTotalCount(bizTotalCount);
+                cloudPlatformMonitorVO.setErrorCount(bizErrorCount);
+            }
+        } else {
+            cloudPlatformMonitorVO.setCloudPlatformMonitors(new ArrayList<>());
+            bizServiceMonitorVO.setBizServiceMonitors(new ArrayList<>());
+            serverMonitorVO.setServerMonitors(new ArrayList<>());
+        }
+
+        return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO);
     }
 
 }
