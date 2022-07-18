@@ -763,6 +763,7 @@ public class CsceneSpecialService {
                 if (scene != null) {
                     nodeInfoBO.setEvent(scene.getEvent());
                     nodeInfoBO.setEventStatus(scene.getEventStatus());
+                    nodeInfoBO.setProcessMessage(scene.getProcessMessage());
                 }
                 result.add(nodeInfoBO);
             });
