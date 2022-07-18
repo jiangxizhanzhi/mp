@@ -87,11 +87,16 @@ public class UserSynchronizationService extends BaseModelController<UserModel, U
                 return;
             }
             if (in.getId() == null) {
-                log.error("this userId is null:{}", in);
+                log.error("this userId is null:{}", JsonCommon.stringify(in));
                 return;
             }
             String userId = in.getId().toString();
-            userIds.add(in.getId().toString());
+            userIds.add(userId);
+            UserModel checkUser = userService.getByUserName(in.getAccount());
+            if (checkUser != null && !userId.equals(checkUser.getId())) {
+                log.error("this username is exist:{}", JsonCommon.stringify(in));
+                return;
+            }
             UserDto user = userService.getUserDtoNoRestrict(userId);
             boolean needUpdate = this.checkUpdate(user, in);
             if (user == null) {
