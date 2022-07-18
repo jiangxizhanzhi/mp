@@ -77,6 +77,12 @@ public class AttackFlowResponse extends FlowInfoResponse {
     @ApiModelProperty(value = "流量文件地址(全地址)")
     private String pcapFilePath;
 
+    /**
+     * 资源类型：0 pcap包，1 脚本
+     */
+    @ApiModelProperty(value = "资源类型：0 pcap包，1 脚本")
+    private Integer resourceType;
+
     public AttackFlowResponse(FlowInfoModel flowInfoModel, String prefixUrl, List<FlowScriptParamModel> scriptParamModels) {
         setResourceId(flowInfoModel.getId());
         setTitle(flowInfoModel.getTitle());
@@ -123,6 +129,7 @@ public class AttackFlowResponse extends FlowInfoResponse {
             setPcapFile(flowInfoModel.getPcapFile());
             setPcapFilePath(prefixUrl + File.separator + flowInfoModel.getPcapFile());
         }
+        setResourceType(flowInfoModel.getResourceType());
     }
 
 }
