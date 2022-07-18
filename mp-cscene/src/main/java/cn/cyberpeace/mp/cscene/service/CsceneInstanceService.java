@@ -379,7 +379,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             });
         });
         if (CollUtil.isEmpty(probeIds)) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         // 构造查询请求
         WazuhEventRequest request = new WazuhEventRequest();
@@ -392,7 +392,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var listObjResult = dataCollectionService.queryCustomProbeData(request, probeIds);
         var res = listObjResult.getObjs();
         if (CollUtil.isEmpty(res)) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         var total = listObjResult.getTotal();
         res.forEach(r -> {
@@ -678,7 +678,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         }
         if (newNodeIds.isEmpty()) {
-            return new ListObjServiceResult<>();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         Map<String, Map<String, String>> nodeId2ProbeNameMap = new HashMap<>();
         CollectionScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
