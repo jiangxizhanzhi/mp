@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -38,10 +39,13 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @param hostnames
      * @return
      */
-    public List<ServiceMonitorDto>  queryCPServiceMonitorData(List<String> hostnames) {
+    public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = monitorConfig.getCpSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
-        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostnames);
-        return queryServiceMonitorData(wazuhRequest, launchIds);
+        List<ServiceMonitorDto> dtos = new ArrayList<>();
+        for (String hostname : hostnames) {
+            dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
+        }
+        return dtos;
     }
 
 
@@ -50,10 +54,13 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @param hostnames
      * @return
      */
-    public List<ServiceMonitorDto>  queryBizServiceMonitorData(List<String> hostnames) {
+    public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = monitorConfig.getBizSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
-        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostnames);
-        return queryServiceMonitorData(wazuhRequest, launchIds);
+        List<ServiceMonitorDto> dtos = new ArrayList<>();
+        for (String hostname : hostnames) {
+            dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
+        }
+        return dtos;
     }
 
     /**
@@ -85,6 +92,16 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
+    private List<ServiceMonitorDto> doQueryServiceMonitorDto(String hostname, List<String> launchIds) {
+        WazuhMonitorEventsRequest wazuhRequest = genDefaultWazuhRequest(hostname);
+        List<ServiceMonitorDto> dtos = queryServiceMonitorData(wazuhRequest, launchIds);
+        for (ServiceMonitorDto dto : dtos) {
+            dto.setHostname(hostname);
+        }
+        return dtos;
+    }
+
+
 
     private List<ServiceMonitorDto> jsonObj2ServiceMonitorDtos(JSONObject jsonObject, String launchId) {
         List<ServiceMonitorDto> dtos = new ArrayList<>();
@@ -108,9 +125,9 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     }
 
 
-    private WazuhMonitorEventsRequest genDefaultWazuhRequest(List<String> hostnames) {
+    private WazuhMonitorEventsRequest genDefaultWazuhRequest(String hostname) {
         WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
-        wazuhRequest.setAgentNames(hostnames);
+        wazuhRequest.setAgentNames(Arrays.asList(hostname));
         wazuhRequest.setPageSize(1);
         LocalDateTime endTime = LocalDateTime.now();
         wazuhRequest.setStartTime(endTime.minusHours(12));

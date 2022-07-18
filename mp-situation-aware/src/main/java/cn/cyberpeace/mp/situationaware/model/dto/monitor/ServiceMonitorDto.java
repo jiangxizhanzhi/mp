@@ -18,6 +18,8 @@ public class ServiceMonitorDto {
 
     private String launchId;
 
+    private String hostname;
+
     //private String type;
 
     private String name;
