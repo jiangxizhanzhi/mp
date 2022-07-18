@@ -134,11 +134,20 @@ public class FlowMonitorController {
 
     @ApiOperation(value = "流量风险各级别统计")
     @GetMapping("/risk_count")
-    public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseTimeRangeRequest baseRequest) {
         log.info("{}", baseRequest);
-
+        baseRequest.setEndTime(null);
+        baseRequest.setEndTime(null);
         FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
         return ServiceResult.success(riskCount);
+    }
+
+    @ApiOperation(value = "测试接口")
+    @GetMapping("/test_monitor_flow")
+    public ServiceResult monitorHighRiskFlows() {
+
+        flowMonitorService.monitorHighRiskFlows();
+        return ServiceResult.successful();
     }
 
     @ApiOperation(value = "攻击流量各类别统计")
