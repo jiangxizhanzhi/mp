@@ -49,13 +49,13 @@ public class AddAttackFlowRequest {
     /**
      * 攻击脚本代码
      */
-    @ApiModelProperty(required = true, value = "攻击脚本代码")
+    @ApiModelProperty(value = "攻击脚本代码")
     private String code;
 
     /**
      * 攻击脚本语言 0:python, 1:shell
      */
-    @ApiModelProperty(required = true, value = "攻击脚本语言 0:python, 1:shell")
+    @ApiModelProperty(value = "攻击脚本语言 0:python, 1:shell")
     private Integer suffix;
 
     /**
@@ -98,7 +98,7 @@ public class AddAttackFlowRequest {
     /**
      * 文件
      */
-    @ApiModelProperty(required = true, value = "文件")
+    @ApiModelProperty(value = "文件")
     private MultipartFile pcapFile;
 
     /**
