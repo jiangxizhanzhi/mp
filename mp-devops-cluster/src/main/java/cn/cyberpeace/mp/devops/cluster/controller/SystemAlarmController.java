@@ -7,17 +7,21 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devops.cluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devops.cluster.service.SystemAlarmService;
+import cn.cyberpeace.mp.devops.cluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -38,6 +42,9 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
 
     @Autowired
     private ServiceMonitorService serviceMonitorService;
+
+    @Autowired
+    private AlarmStatisticsService alarmStatisticsService;
 
     /**
      * 分页查询告警信息
@@ -66,6 +73,18 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @GetMapping("/statistics")
     public ServiceResult<SystemAlarmVO> getSystemAlarm() {
         SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
+
+        // 服务告警
+        List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics();
+        if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
+            systemAlarm.setServiceAlarmList(serviceAlarmList);
+        }
+
+        // 设备告警
+        List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics();
+        if (CollectionUtils.isNotEmpty(serverAlarmList)) {
+            systemAlarm.setServerAlarmList(serverAlarmList);
+        }
         return ServiceResult.success(systemAlarm);
     }
 
