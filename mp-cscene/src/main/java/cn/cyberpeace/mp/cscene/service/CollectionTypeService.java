@@ -156,7 +156,7 @@ public class CollectionTypeService {
 
 
     /**
-     * 日志事件
+     * 日志事件 02*
      * @return
      */
     private CollectionType logEvent(String code, Integer type) {
@@ -181,7 +181,9 @@ public class CollectionTypeService {
         CollectionType hp = CollectionType.builder().name("HP").code(code + "04").type(type).build();
         CollectionType freebsd = CollectionType.builder().name("FreeBSD").code(code + "05").type(type).build();
         CollectionType junos = CollectionType.builder().name("Junos").code(code + "06").type(type).build();
-        List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos);
+        CollectionType solaris = CollectionType.builder().name("solaris").code(code + "07").type(type).build();
+        CollectionType common = CollectionType.builder().name("common").code(code + "08").type(type).build();
+        List<CollectionType> osSubTypes = Arrays.asList(windows, linux, cisco, hp, freebsd, junos, solaris, common);
         osType.setChildren(osSubTypes);
 
         return osType;
@@ -205,7 +207,13 @@ public class CollectionTypeService {
         CollectionType cloud = CollectionType.builder().name("云").code(code + "06").type(type).build();
         CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "07").type(type).build();
         CollectionType appframework = CollectionType.builder().name("应用框架").code(code + "08").type(type).build();
-        List<CollectionType> appSubTypes = Arrays.asList(mailserver, webserver, database, networkserver, app, cloud, loadbalancer, appframework);
+
+        CollectionType cron = CollectionType.builder().name("定时任务").code(code + "09").type(type).build();
+        CollectionType ftp = CollectionType.builder().name("文件服务器").code(code + "10").type(type).build();
+        CollectionType vmware = CollectionType.builder().name("虚拟机").code(code + "11").type(type).build();
+
+        List<CollectionType> appSubTypes = Arrays.asList(mailserver, webserver, database, networkserver,
+                app, cloud, loadbalancer, appframework, cron, ftp, vmware);
         appType.setChildren(appSubTypes);
 
         return appType;
@@ -223,7 +231,17 @@ public class CollectionTypeService {
         CollectionType ds_ips = CollectionType.builder().name("DS/IPS").code(code + "03").type(type).build();
         CollectionType vpn = CollectionType.builder().name("VPN").code(code + "04").type(type).build();
         CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
-        List<CollectionType> secSubTypes = Arrays.asList(av, fw, ds_ips, vpn, other);
+
+        CollectionType access_control = CollectionType.builder().name("接入控制").code(code + "06").type(type).build();
+        CollectionType errors = CollectionType.builder().name("错误").code(code + "07").type(type).build();
+        CollectionType auth = CollectionType.builder().name("用户").code(code + "08").type(type).build();
+        CollectionType remote = CollectionType.builder().name("远程登录").code(code + "09").type(type).build();
+        CollectionType sca = CollectionType.builder().name("sca").code(code + "10").type(type).build();
+        CollectionType attack = CollectionType.builder().name("攻击").code(code + "11").type(type).build();
+        CollectionType windows_security = CollectionType.builder().name("windows安全事件").code(code + "12").type(type).build();
+
+        List<CollectionType> secSubTypes = Arrays.asList(av, fw, ds_ips, vpn, other,
+                access_control,errors,auth,remote,sca,attack,windows_security);
         secSysType.setChildren(secSubTypes);
 
         return secSysType;
