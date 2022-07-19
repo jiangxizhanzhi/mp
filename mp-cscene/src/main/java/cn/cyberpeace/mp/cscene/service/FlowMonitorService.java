@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.dto.common.AttackCountRequest;
@@ -13,7 +14,6 @@ import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.dto.flow.CsceneHighRiskFlowStatistic;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackRatio;
@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowSceneSimulationRequest;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.dto.flow.FlowTrendRequest;
+import cn.cyberpeace.mp.cscene.dto.flow.HighRiskFlowStatistic;
 import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.event.CsceneEventPublisher;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
@@ -67,6 +68,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -82,10 +84,8 @@ public class FlowMonitorService {
     @Autowired
     private FlowMonitorConfig flowMonitorConfig;
 
-    // 每30分钟统计一次
-    public static final int INIT_DELAY = 20;
-
-    public static final long REFRESH_MINUTE = 60000;
+    // 延迟统计（分钟）
+    public static final int INIT_DELAY = 1;
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -112,7 +112,7 @@ public class FlowMonitorService {
     private CsceneEventPublisher csceneEventPublisher;
 
 
-    @Scheduled(initialDelay = INIT_DELAY * REFRESH_MINUTE, fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
+    @Scheduled(initialDelay = INIT_DELAY, fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
     public void monitorHighRiskFlows() {
         if (!flowMonitorConfig.getEnabled()) {
             return;
@@ -122,31 +122,31 @@ public class FlowMonitorService {
         queryParams.setPage(1);
         queryParams.setPageSize(1000);
         ListObjServiceResult<CsceneInstanceStat> cinstanceResult = csceneSpecialService.listCsceneInstanceStats(queryParams);
+        List<CsceneInstanceStat> instanceStatList = cinstanceResult.getSource().getObjs();
         //if (cinstanceResult.getSource().getTotal() > 1000) {
         //    // todo
         //}
-        List<CsceneHighRiskFlowStatistic> statisticList = new ArrayList<>();
-        List<CsceneInstanceStat> csceneInstanceStats = cinstanceResult.getSource().getObjs();
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime endTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency())); // todo 改为1小时间隔？
-        if (CollectionUtil.isNotEmpty(csceneInstanceStats)) {
-            // todo 异步执行
-            for (CsceneInstanceStat instance : csceneInstanceStats) {
-                CsceneHighRiskFlowStatistic statistic = new CsceneHighRiskFlowStatistic();
-                String sceneId = instance.getId();
-                BaseTimeRangeRequest request = new BaseTimeRangeRequest();
-                request.setSceneId(sceneId);
-                request.setStartTime(endTime);
-                request.setEndTime(now);
-                FlowRiskCount riskCount = getFlowRiskCount(request);
-                if (Objects.nonNull(riskCount)) {
-                    if (riskCount.getHighCount() > 0) {
-                        statistic.setHighRiskCount(riskCount.getHighCount());
-                        statistic.setId(instance.getId());
-                        statistic.setName(instance.getName());
-                        statisticList.add(statistic);
-                    }
-                }
+        List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(instanceStatList)) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime startTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency()));
+            // 拆分集合
+            List<List<CsceneInstanceStat>> subListCollection = CollectionUtil.splitList(instanceStatList, 5);
+
+            // 异步执行
+            List<CompletableFuture<List<HighRiskFlowStatistic>>> cfList = new ArrayList<>();
+            for (List<CsceneInstanceStat> subList : subListCollection) {
+                CompletableFuture<List<HighRiskFlowStatistic>> cf = CompletableFuture.supplyAsync(() -> processForSublist(subList, startTime, now));
+                cfList.add(cf);
+            }
+
+            List<HighRiskFlowStatistic> allStatistics = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(cfList)) {
+                CompletableFuture[] cfArray = cfList.toArray(new CompletableFuture[0]);
+                CompletableFuture<List<List<HighRiskFlowStatistic>>> totalCF =
+                        CompletableFuture.allOf(cfArray).thenApply(v -> cfList.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+                List<List<HighRiskFlowStatistic>> alllist = totalCF.join();
+                alllist.forEach(list -> allStatistics.addAll(list));
             }
 
             // todo 统计高危流量情况，发送事件
@@ -156,6 +156,33 @@ public class FlowMonitorService {
             }
 
         }
+    }
+
+
+    public List<HighRiskFlowStatistic> processForSublist(List<CsceneInstanceStat> instanceStatList, LocalDateTime startTime, LocalDateTime endTime) {
+        LocalDateTime begin = LocalDateTime.now();
+        log.info("start... thread:{}, instances.size:{}, begin time:{}", Thread.currentThread().getName(), instanceStatList.size(), TimeUtils.localDateTimeToString(begin));
+        List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
+        for (CsceneInstanceStat instance : instanceStatList) {
+            HighRiskFlowStatistic statistic = new HighRiskFlowStatistic();
+            String sceneId = instance.getId();
+            BaseTimeRangeRequest request = new BaseTimeRangeRequest();
+            request.setSceneId(sceneId);
+            request.setStartTime(startTime);
+            request.setEndTime(endTime);
+            FlowRiskCount riskCount = getFlowRiskCount(request);
+            if (Objects.nonNull(riskCount)) {
+                if (riskCount.getHighCount() > 0) {
+                    statistic.setHighRiskCount(riskCount.getHighCount());
+                    statistic.setId(instance.getId());
+                    statistic.setName(instance.getName());
+                    statisticList.add(statistic);
+                }
+            }
+        }
+
+        log.info("end... thread:{}, statics.size:{}, cost seconds:{}", Thread.currentThread().getName(), statisticList.size(), Duration.between(begin, LocalDateTime.now()).toSeconds());
+        return statisticList;
     }
 
 
@@ -201,8 +228,6 @@ public class FlowMonitorService {
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
 
-
-        // todo 转好
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowSimulationParams params = new FlowSimulationParams();
@@ -368,7 +393,6 @@ public class FlowMonitorService {
 
     public FlowRiskCount getFlowRiskCount(BaseTimeRangeRequest baseRequest) {
         log.info("baseRequest:{}", baseRequest);
-
         BaseRequestUtil.checkBaseRequestWithSceneId(baseRequest);
 
         List<String> sceneIds = CollectionUtil.toList(baseRequest.getSceneId());

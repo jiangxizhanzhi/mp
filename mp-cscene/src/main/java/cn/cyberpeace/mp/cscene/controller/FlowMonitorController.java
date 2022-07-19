@@ -136,8 +136,8 @@ public class FlowMonitorController {
     @GetMapping("/risk_count")
     public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseTimeRangeRequest baseRequest) {
         log.info("{}", baseRequest);
-        baseRequest.setEndTime(null);
-        baseRequest.setEndTime(null);
+        //baseRequest.setStartTime(null);
+        //baseRequest.setEndTime(null);
         FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
         return ServiceResult.success(riskCount);
     }

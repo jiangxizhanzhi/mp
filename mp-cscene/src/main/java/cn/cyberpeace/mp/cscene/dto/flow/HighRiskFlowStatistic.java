@@ -11,7 +11,7 @@ import java.util.List;
  * @Date：2022/7/18 14:38
  */
 @Data
-public class CsceneHighRiskFlowStatistic {
+public class HighRiskFlowStatistic {
 
     // 场景名称
     private String name;
