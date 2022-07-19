@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description:
@@ -31,7 +32,7 @@ public class SysCtlService {
      * 每30分钟执行一次
      * @return
      */
-    @Scheduled(initialDelay = 10 * 1000, fixedRate = 30 * 60 * 1000)
+    @Scheduled(initialDelay = 1, fixedRate = 30, timeUnit = TimeUnit.MINUTES)
     public boolean updateSysTs() {
 
 //        if (isSystemTimestampRollback) {
