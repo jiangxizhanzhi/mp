@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -615,7 +617,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(list);
     }
 
-    public ServiceResult<Boolean> execElementCommand(String sceneId, String nodeId, String command) {
+    public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
@@ -624,24 +626,39 @@ public class ScenePluginCloudSceneService {
                 Container container = new Container();
                 var result = container.executeCommand(node.getResourceId(), command);
                 if (result.getExitCode() != null && result.getExitCode() == 0) {
-                    return new ServiceResult<>(true);
+                    ElementCommandExecBO execRes = new ElementCommandExecBO();
+                    execRes.setOutput(result.getOutput());
+                    execRes.setStatus(true);
+                    return new ServiceResult<>(execRes);
                 } else {
                     log.error("failed to exec command {} , nodeId is {}", command, nodeId);
-                    return new ServiceResult<>(false);
+                    ElementCommandExecBO execRes = new ElementCommandExecBO();
+                    execRes.setStatus(false);
+                    execRes.setOutput(result.getOutput());
+                    return new ServiceResult<>(execRes);
                 }
             }
         }
-        return new ServiceResult<>(true);
+        ElementCommandExecBO execRes = new ElementCommandExecBO();
+        execRes.setStatus(false);
+        return new ServiceResult<>(execRes);
     }
 
-    public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String destPath) {
+    public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String filename, String destPath) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(filePath), TextUtils.uuid());
+                String finalPath = filePath;
+                if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
+                    finalPath = StringUtils.replace(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
+                }
+                if (StringUtils.startsWith(finalPath, "/")) {
+                    finalPath = StringUtils.replace(finalPath, "/", "");
+                }
+                var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {

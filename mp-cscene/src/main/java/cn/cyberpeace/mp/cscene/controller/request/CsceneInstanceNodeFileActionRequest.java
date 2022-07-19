@@ -7,6 +7,8 @@ import lombok.Data;
 public class CsceneInstanceNodeFileActionRequest extends CsceneInstanceNodeActionRequest {
     @ApiModelProperty(value = "文件路径(fdfs路径)")
     private String filePath;
+    @ApiModelProperty(value = "文件名称")
+    private String filename;
     @ApiModelProperty(value = "目标路径")
     private String destPath;
 }

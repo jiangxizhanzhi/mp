@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
@@ -956,15 +957,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> execElement(String id, String nodeId, String command, CsceneContextBO context) {
+    public ServiceResult<ElementCommandExecResult> execElement(String id, String nodeId, String command, CsceneContextBO context) {
         String sceneId = getSceneId(id);
-        scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command);
-        return new ServiceResult<>(true);
+        var execBO = scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command).getSource();
+        var result = new ElementCommandExecResult();
+        result.setOutput(execBO.getOutput());
+        result.setStatus(execBO.getStatus());
+        return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String destPath, CsceneContextBO context) {
+    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath,String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
-        scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, destPath);
+        scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
         return new ServiceResult<>(true);
     }
 
