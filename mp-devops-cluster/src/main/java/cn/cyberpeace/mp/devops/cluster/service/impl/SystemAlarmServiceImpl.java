@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
 import cn.cyberpeace.mp.devops.cluster.repository.SystemAlarmMapper;
 import cn.cyberpeace.mp.devops.cluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devops.cluster.service.fields.SystemAlarmFields;
+import cn.cyberpeace.mp.devops.cluster.vo.AlarmCountVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
@@ -94,5 +95,14 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
             });
             this.getModelMapper().bulkUpdate(enabledAlarms);
         }
+    }
+
+    /**
+     * 当天告警数量统计
+     * @return
+     */
+    @Override
+    public List<AlarmCountVO> todayAlarmCount() {
+        return this.getModelMapper().todayAlarmCount();
     }
 }

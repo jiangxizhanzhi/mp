@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devops.cluster.service;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devops.cluster.vo.AlarmCountVO;
 
 import java.util.List;
 
@@ -18,6 +19,12 @@ public interface SystemAlarmService extends BaseModelService<SystemAlarmModel, Q
      * @param systemAlarmModels
      */
     void processSystemAlarm(List<SystemAlarmModel> systemAlarmModels);
+
+    /**
+     * 当天告警数量统计
+     * @return
+     */
+    List<AlarmCountVO> todayAlarmCount();
 
 }
 
