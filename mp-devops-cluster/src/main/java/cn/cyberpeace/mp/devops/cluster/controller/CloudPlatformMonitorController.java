@@ -240,15 +240,4 @@ public class CloudPlatformMonitorController {
         return serviceMonitorService.cpPage(request);
     }
 
-    /**
-     * 系统告警
-     * @return
-     */
-    @ApiOperation("系统告警信息")
-    @GetMapping("/system_alarm")
-    public ServiceResult<SystemAlarmVO> getSystemAlarm() {
-        SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
-        return ServiceResult.success(systemAlarm);
-    }
-
 }

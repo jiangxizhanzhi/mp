@@ -1,10 +1,16 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
+import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devops.cluster.repository.SystemAlarmMapper;
 import cn.cyberpeace.mp.devops.cluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.BizServiceMonitorVO;
@@ -35,7 +41,7 @@ public class ServiceMonitorService {
 
     private final ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
 
-    private static final String RUNNNING = "RUNNNING";
+    private final SystemAlarmMapper systemAlarmMapper;
 
     /**
      * 分页查询业务服务监控数据
@@ -106,6 +112,19 @@ public class ServiceMonitorService {
         BizServiceMonitorVO bizServiceMonitorVO = new BizServiceMonitorVO();
         ServerMonitorVO serverMonitorVO = new ServerMonitorVO();
 
+        // 查询当前生效的告警信息
+        List<SystemAlarmModel> enabledAlarms =
+                systemAlarmMapper.list(new HumanCondition().filterEqual(SystemAlarmModel::getAlarmStatus,
+                        AlarmStatusEnum.ENABLED.toValue()));
+        if (CollectionUtils.isNotEmpty(enabledAlarms)) {
+            Long cpAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CP.toValue()).count();
+            Long crAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.CR.toValue()).count();
+            Long serverAlarmCount = enabledAlarms.stream().filter(alarm -> alarm.getAlarmType() == AlarmTypeEnum.SERVER.toValue()).count();
+            cloudPlatformMonitorVO.setAlarmCount(cpAlarmCount.intValue());
+            bizServiceMonitorVO.setAlarmCount(crAlarmCount.intValue());
+            serverMonitorVO.setAlarmCount(serverAlarmCount.intValue());
+        }
+
         // 服务器监控
         List<String> hostNameList = new ArrayList<>();
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
@@ -113,7 +132,7 @@ public class ServiceMonitorService {
             modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
 
             int totalCount = modelPage.getTotal();
-            int errorCount = (int )modelPage.getList().stream().filter(model -> "".equals(model.getStatus())).count();
+            int errorCount = (int )modelPage.getList().stream().filter(model -> !"up".equals(model.getState()) || !"enabled".equals(model.getStatus())).count();
             serverMonitorVO.setServerMonitors(modelPage.getList());
             serverMonitorVO.setErrorCount(errorCount);
             serverMonitorVO.setTotalCount(totalCount);
@@ -123,7 +142,7 @@ public class ServiceMonitorService {
             if (CollectionUtils.isNotEmpty(cpMonitorDtos)) {
                 cloudPlatformMonitorVO.setCloudPlatformMonitors(cpMonitorDtos);
                 int cpTotalCount = cpMonitorDtos.size();
-                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !RUNNNING.equals(cpDto.getState())).count();
+                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !MonitorStateEnum.RUNNING.getDesc().equals(cpDto.getState())).count();
                 cloudPlatformMonitorVO.setTotalCount(cpTotalCount);
                 cloudPlatformMonitorVO.setErrorCount(cpErrorCount);
             }
@@ -133,14 +152,10 @@ public class ServiceMonitorService {
             if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
                 cloudPlatformMonitorVO.setCloudPlatformMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
-                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !RUNNNING.equals(bizDto.getState())).count();
+                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState())).count();
                 cloudPlatformMonitorVO.setTotalCount(bizTotalCount);
                 cloudPlatformMonitorVO.setErrorCount(bizErrorCount);
             }
-        } else {
-            cloudPlatformMonitorVO.setCloudPlatformMonitors(new ArrayList<>());
-            bizServiceMonitorVO.setBizServiceMonitors(new ArrayList<>());
-            serverMonitorVO.setServerMonitors(new ArrayList<>());
         }
 
         return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO);
