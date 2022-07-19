@@ -19,4 +19,9 @@ public class DevopsConfig {
      */
     private String cpUrl;
 
+    /**
+     * 磁盘空间告警阈值
+     */
+    private Integer diskAlarmPercent;
+
 }

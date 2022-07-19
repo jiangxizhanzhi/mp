@@ -95,6 +95,7 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
+    disk-alarm-percent: 80 # 磁盘空间告警阈值
     monitor:
       cp_srv_monitors:
         - probe-name: monitor_cp_service.py
