@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
@@ -91,6 +92,9 @@ public class ImagesController {
 
     @NonNull
     private CustomImageUploadService customImageUploadService;
+
+    @NonNull
+    private CsceneSpecialService csceneSpecialService;
 
     /**
      * 分页查询
@@ -276,7 +280,18 @@ public class ImagesController {
     @GetMapping("/{id}/snapshot/list")
     public Result<List<SnapshotConvertModel>> listSnapshot(@PathVariable("id") String uuid){
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
-        return new Result(convertModel.getList());
+        var list = convertModel.getList();
+        if (CollectionUtils.isNotEmpty(list)) {
+            List<String> csceneIds = list.stream().map(m -> m.getSceneId()).collect(Collectors.toList());
+            var nameMap = csceneSpecialService.getCsceneName(csceneIds).getSource();
+            for (var m : list) {
+                var sceneInfo = nameMap.get(m.getSceneId());
+                if (sceneInfo != null) {
+                    m.setSceneName(sceneInfo.getName());
+                }
+            }
+        }
+        return new Result(list);
     }
 
 
