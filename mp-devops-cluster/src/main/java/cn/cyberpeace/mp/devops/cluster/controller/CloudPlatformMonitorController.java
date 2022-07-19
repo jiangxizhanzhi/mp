@@ -18,12 +18,13 @@ import cn.cyberpeace.mp.devops.cluster.dto.*;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
-import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
-import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.*;
+import cn.cyberpeace.mp.devops.cluster.service.CpNodeMonitorScriptConfigService;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
-import cn.cyberpeace.mp.devops.cluster.vo.*;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
+import cn.cyberpeace.mp.devops.cluster.vo.HypervisorStatisticsVO;
+import cn.cyberpeace.mp.devops.cluster.vo.VirtualRealSwitchStatusVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
@@ -36,9 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -78,6 +78,8 @@ public class CloudPlatformMonitorController {
     private final ClearService clearService;
 
     private final ServiceMonitorService serviceMonitorService;
+
+    private final CpNodeMonitorScriptConfigService cpNodeMonitorScriptConfigService;
 
     /**
      * 资源统计
@@ -239,5 +241,18 @@ public class CloudPlatformMonitorController {
     public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request) {
         return serviceMonitorService.cpPage(request);
     }
+
+    /**
+     * 服务重启
+     * @param serverRestartRequest
+     * @return
+     */
+    @ApiOperation("服务重启")
+    @PostMapping("/restart")
+    public ServiceResult<Boolean> restartServer(@RequestBody @Validated ServerRestartRequest serverRestartRequest) {
+        cpNodeMonitorScriptConfigService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());
+        return new ServiceResult<>(true);
+    }
+
 
 }
