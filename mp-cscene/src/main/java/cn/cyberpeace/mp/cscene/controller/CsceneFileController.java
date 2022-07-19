@@ -54,6 +54,21 @@ public class CsceneFileController {
      * @return
      * @throws IOException
      */
+    @ApiOperation("上传场景中的执行脚本")
+    @PostMapping("/script_upload")
+    public ServiceResult<SceneFileUploadResponse> scriptUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
+        String[] legalType = new String[]{ "sh" };
+        var fileName = file.getOriginalFilename();
+        var inputStream = file.getInputStream();
+        var fileSuffix = FileUtil.getSuffix(file.getOriginalFilename());
+        return csceneFileService.sceneUpload(inputStream, fileName, fileSuffix, legalType).asResult();
+    }
+
+    /**
+     * @param file
+     * @return
+     * @throws IOException
+     */
     @ApiOperation("上传场景中的图标")
     @PostMapping("/icon_upload")
     public ServiceResult<SceneFileUploadResponse> iconUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
