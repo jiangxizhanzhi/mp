@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeAc
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFileActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
@@ -658,6 +659,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getDescription(), request.getContext()).asResult();
         CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_SNAPSHOT, request.getContext());
         return result;
+    }
+
+    @ApiOperation("删除节点快照")
+    @PostMapping("/delete_snapshot")
+    public ServiceResult<Boolean> deleteElementSnapshot(@RequestBody(required = false) CsceneInstanceNodeDelSnapshotRequest request) {
+        //todo
+        return new ServiceResult<>(true);
     }
 
     @ApiOperation("节点命令执行")

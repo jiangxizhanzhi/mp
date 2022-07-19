@@ -52,6 +52,18 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     @ApiModelProperty("创建时间")
     private LocalDateTime createdAt;
 
+    /**
+     * 创建时间
+     */
+    @ApiModelProperty("父快照名称")
+    private String imageName;
+
+    @ApiModelProperty("场景id")
+    private String sceneId;
+
+    @ApiModelProperty("场景名称")
+    private String sceneName;
+
     @ApiModelProperty("快速构建参数")
     private List<QuickCreateParam> quickCreateParams;
 
