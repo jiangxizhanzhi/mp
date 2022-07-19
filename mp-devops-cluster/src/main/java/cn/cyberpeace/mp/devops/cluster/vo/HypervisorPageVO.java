@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.devops.cluster.vo;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -53,42 +52,36 @@ public class HypervisorPageVO extends BaseVO {
      * CPU核数
      */
     @ApiModelProperty("CPU核数")
-    @JsonIgnore
     private Integer cpu;
 
     /**
      * 内存大小
      */
     @ApiModelProperty("内存大小")
-    @JsonIgnore
     private Long ram;
 
     /**
      * 磁盘大小
      */
     @ApiModelProperty("磁盘大小")
-    @JsonIgnore
     private Long disk;
 
     /**
      * 已使用CPU核数
      */
     @ApiModelProperty("已使用CPU核数")
-    @JsonIgnore
     private Integer cpuUsed;
 
     /**
      * 已使用内存大小
      */
     @ApiModelProperty("已使用内存大小")
-    @JsonIgnore
     private Long ramUsed;
 
     /**
      * 已使用磁盘大小
      */
     @ApiModelProperty("已使用磁盘大小")
-    @JsonIgnore
     private Long diskUsed;
 
     /**
