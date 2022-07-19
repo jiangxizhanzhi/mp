@@ -173,6 +173,7 @@ public class DataCollectionService extends CollectionBaseService {
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
         // 按时间降序
         sourceBuilder.sort("timestamp", SortOrder.DESC);
+        sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         if (wazuhEventRequest.isScroll()) {
@@ -182,7 +183,7 @@ public class DataCollectionService extends CollectionBaseService {
         //配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         //处理分页
-        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+        processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
@@ -196,7 +197,11 @@ public class DataCollectionService extends CollectionBaseService {
                 fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             }
 
-            return new ListObjResult<>(fileEventModelList, total);
+            long total = 0l;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult(fileEventModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
             log.error("es queryFileEvents error: {} ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -258,7 +263,7 @@ public class DataCollectionService extends CollectionBaseService {
         // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         // 处理分页
-        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+        processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
@@ -279,7 +284,12 @@ public class DataCollectionService extends CollectionBaseService {
                     wazuhModelList.add(wazuhProbeCommonModel);
                 }
             }
-            return new ListObjResult<>(wazuhModelList, total);
+
+            long total = 0l;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
             log.error("es queryCustomProbeData error", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -317,7 +327,7 @@ public class DataCollectionService extends CollectionBaseService {
         // 配置索引为空
         searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         // 处理分页
-        int total = processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
+        processPageable(wazuhEventRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
@@ -339,7 +349,12 @@ public class DataCollectionService extends CollectionBaseService {
                     }
                 }
             }
-            return new ListObjResult<>(wazuhModelList, total);
+
+            long total = 0l;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult<>(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
             log.error("es queryVulnerabilityInfo error:", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
