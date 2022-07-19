@@ -956,6 +956,18 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> execElement(String id, String nodeId, String command, CsceneContextBO context) {
+        String sceneId = getSceneId(id);
+        scenePluginCloudSceneService.execElementCommand(sceneId, nodeId, command);
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String destPath, CsceneContextBO context) {
+        String sceneId = getSceneId(id);
+        scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, destPath);
+        return new ServiceResult<>(true);
+    }
+
     public ServiceResult<SceneLinkStatusInfo> linkStatus(String csceneId) {
         String sceneId = getSceneId(csceneId);
         var result = scenePluginCloudSceneService.linkStatus(sceneId).getSource();

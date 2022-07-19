@@ -662,12 +662,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("节点命令执行")
     @PostMapping("/exec_element")
     public ServiceResult<Boolean> execElement(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
-        return new ServiceResult<>(true);
+        return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getContext()).asResult();
     }
 
     @ApiOperation("节点文件上传")
     @PostMapping("/upload_element_file")
     public ServiceResult<Boolean> uploadElementFile(@RequestBody CsceneInstanceNodeFileActionRequest request) {
-        return new ServiceResult<>(true);
+        return modelService.uploadElementFile(request.getId(), request.getNodeId(), request.getFilePath(), request.getDestPath(), request.getContext()).asResult();
     }
 }
