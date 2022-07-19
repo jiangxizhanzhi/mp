@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,10 @@ public class ServerMonitorVO {
     @ApiModelProperty("服务总数量")
     private int totalCount;
 
+    @ApiModelProperty("告警数量")
+    private int alarmCount;
+
     @ApiModelProperty("服务器监控列表")
-    private List<HypervisorBO> serverMonitors;
+    private List<HypervisorBO> serverMonitors = new ArrayList<>();
 
 }

@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,10 @@ public class BizServiceMonitorVO {
     @ApiModelProperty("服务总数量")
     private int totalCount;
 
+    @ApiModelProperty("告警数量")
+    private int alarmCount;
+
     @ApiModelProperty("业务服务监控列表")
-    private List<ServiceMonitorDto> bizServiceMonitors;
+    private List<ServiceMonitorDto> bizServiceMonitors = new ArrayList<>();
 
 }
