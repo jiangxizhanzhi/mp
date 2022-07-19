@@ -32,8 +32,6 @@ public class UserOnlineRecordScheduleService {
     // 每2分钟统计一次
     public static final long REFRESH_RATE = 2;
 
-    public static final long REFRESH_MINUTE = 60000;
-
     //    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
 //    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
     public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
@@ -51,7 +49,7 @@ public class UserOnlineRecordScheduleService {
     /**
      * 创建或者更新用户在线记录
      */
-    @Scheduled(initialDelay = REFRESH_RATE * REFRESH_MINUTE, fixedRate = REFRESH_RATE * REFRESH_MINUTE)
+    @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
     public void scheduleUserOlRecord() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
@@ -81,7 +79,7 @@ public class UserOnlineRecordScheduleService {
     /**
      * 检查状态是否过期，过期状态更新
      */
-    @Scheduled(initialDelay = 10000, fixedRate = 5 * REFRESH_MINUTE)
+    @Scheduled(initialDelay = 1, fixedRate = 5, timeUnit = TimeUnit.MINUTES)
     public void checkUserOlRecord() {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();

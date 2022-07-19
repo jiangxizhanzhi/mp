@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.BaseCommon;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -8,6 +10,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -15,6 +18,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.ElementCommandExecBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -31,17 +35,21 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginContext;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.util.URLUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -607,5 +615,87 @@ public class ScenePluginCloudSceneService {
         }
         TaskCommon.runTasks(tasks);
         return new ServiceResult<>(list);
+    }
+
+    public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var node = pluginHandler.getElement(nodeId);
+        if (node != null && node.getVirtualType() != null) {
+            if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
+                Container container = new Container();
+                var result = container.executeCommand(node.getResourceId(), command);
+                if (result.getExitCode() != null && result.getExitCode() == 0) {
+                    ElementCommandExecBO execRes = new ElementCommandExecBO();
+                    execRes.setOutput(result.getOutput());
+                    execRes.setStatus(true);
+                    return new ServiceResult<>(execRes);
+                } else {
+                    log.error("failed to exec command {} , nodeId is {}", command, nodeId);
+                    ElementCommandExecBO execRes = new ElementCommandExecBO();
+                    execRes.setStatus(false);
+                    execRes.setOutput(result.getOutput());
+                    return new ServiceResult<>(execRes);
+                }
+            }
+        }
+        ElementCommandExecBO execRes = new ElementCommandExecBO();
+        execRes.setStatus(false);
+        return new ServiceResult<>(execRes);
+    }
+
+    public ServiceResult<Boolean> uploadElementFile(String sceneId, String nodeId, String filePath, String filename, String destPath) {
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var node = pluginHandler.getElement(nodeId);
+        if (node != null && node.getVirtualType() != null) {
+            if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
+                Container container = new Container();
+                String finalPath = filePath;
+                if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
+                    finalPath = StringUtils.replace(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
+                }
+                if (StringUtils.startsWith(finalPath, "/")) {
+                    finalPath = StringUtils.replace(finalPath, "/", "");
+                }
+                var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
+                var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
+                return new ServiceResult<>(result);
+            } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
+                var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+                if (param != null) {
+                    param.setFile(filePath);
+                    param.setDestPath(destPath);
+                    VirtualMachine virtualMachine = new VirtualMachine();
+                    virtualMachine.uploadFile(param);
+                    // todo 报错信息处理下
+                    return new ServiceResult<>(true);
+                }
+            }
+        }
+        return new ServiceResult<>(true);
+    }
+
+    private VirtualMachineUploadFileData getVirtualMachineUploadFileInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
+        var ports = node.getSrcElement().getPorts();
+        if (CollectionUtils.isNotEmpty(ports)) {
+            for (var port : ports) {
+                if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
+                    for (var mode : port.getAccessModes()) {
+                        if (AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
+                            String networkId = pluginHandler.getPort(port.getId()).getAuxiliaryNetworkId();
+                            if (StringUtils.isNotEmpty(networkId)) {
+                                VirtualMachineUploadFileData result = new VirtualMachineUploadFileData();
+                                result.setNetworkId(networkId);
+                                result.setUsername(mode.getUsername());
+                                result.setPassword(mode.getPassword());
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

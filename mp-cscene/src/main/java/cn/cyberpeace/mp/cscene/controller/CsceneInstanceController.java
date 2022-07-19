@@ -13,7 +13,9 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFileActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
@@ -22,6 +24,7 @@ import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequ
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
@@ -655,5 +658,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         var result = modelService.snapshotElement(request.getId(), request.getNodeId(), request.getSnapshotName(), request.getDescription(), request.getContext()).asResult();
         CsceneLogUtils.recordSceneNodeLog(request.getId(), request.getNodeId(), OpTypeEnums.UPDATE, CsceneLogUtils.SCENE_ELEMENT_SNAPSHOT, request.getContext());
         return result;
+    }
+
+    @ApiOperation("节点命令执行")
+    @PostMapping("/exec_element")
+    public ServiceResult<ElementCommandExecResult> execElement(@RequestBody CsceneInstanceNodeCommandActionRequest request) {
+        return modelService.execElement(request.getId(), request.getNodeId(), request.getCommand(), request.getContext()).asResult();
+    }
+
+    @ApiOperation("节点文件上传")
+    @PostMapping("/upload_element_file")
+    public ServiceResult<Boolean> uploadElementFile(@RequestBody CsceneInstanceNodeFileActionRequest request) {
+        return modelService.uploadElementFile(request.getId(), request.getNodeId(), request.getFilePath(), request.getFilename(), request.getDestPath(), request.getContext()).asResult();
     }
 }
