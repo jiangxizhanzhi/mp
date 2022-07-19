@@ -200,6 +200,22 @@ mp:
     scene-error-creating-seconds: ${MP_SCENE_ERROR_CREATING_SECONDS:3600}
     element-error-creating-seconds: ${MP_ELEMENT_ERROR_CREATING_SECONDS:300}
     enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
+  flow-monitor:
+    enabled: ${MP_FLOW_MONITOR_ENABLED:true}
+    frequency: ${MP_FLOW_MONITOR_FREQUENCY:60}
+    mail:
+      enalbed: ${MP_FLOW_MONITOR_MAIL_ENABLED:true}
+      host: ${MP_FLOW_MONITOR_MAIL_HOST:}
+      port: ${MP_FLOW_MONITOR_MAIL_PORT:25}
+      from: ${MP_FLOW_MONITOR_MAIL_FROM:}
+      to: ${MP_FLOW_MONITOR_MAIL_TO:}
+      username: ${MP_FLOW_MONITOR_MAIL_USERNAME:}
+      password: ${MP_FLOW_MONITOR_MAIL_PASSWORD:}
+      defaultEncoding: ${MP_FLOW_MONITOR_MAIL_ENCODE:utf-8}
+      auth: ${MP_FLOW_MONITOR_MAIL_AUTH:true}
+      timeout: ${MP_FLOW_MONITOR_MAIL_TIMEOUT:20000}
+    sys-notice:
+      enabled: ${MP_FLOW_MONITOR_NOTICE_ENABLED:true}
 
 management:
   endpoints:

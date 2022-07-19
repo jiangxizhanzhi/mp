@@ -194,6 +194,22 @@ mp:
     wazuh-godfs-server: http://${ip.wazuh}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
+  flow-monitor:
+    enabled: ${MP_FLOW_MONITOR_ENABLED:true}
+    frequency: ${MP_FLOW_MONITOR_FREQUENCY:60}
+    mail:
+      enalbed: ${MP_FLOW_MONITOR_MAIL_ENABLED:true}
+      host: ${MP_FLOW_MONITOR_MAIL_HOST:}
+      port: ${MP_FLOW_MONITOR_MAIL_PORT:25}
+      from: ${MP_FLOW_MONITOR_MAIL_FROM:}
+      to: ${MP_FLOW_MONITOR_MAIL_TO:}
+      username: ${MP_FLOW_MONITOR_MAIL_USERNAME:mp_monitor}
+      password: ${MP_FLOW_MONITOR_MAIL_PASSWORD:}
+      defaultEncoding: ${MP_FLOW_MONITOR_MAIL_ENCODE:utf-8}
+      auth: ${MP_FLOW_MONITOR_MAIL_AUTH:true}
+      timeout: ${MP_FLOW_MONITOR_MAIL_TIMEOUT:20000}
+    sys-notice:
+      enabled: ${MP_FLOW_MONITOR_NOTICE_ENABLED:true}
 
 management:
   endpoints:

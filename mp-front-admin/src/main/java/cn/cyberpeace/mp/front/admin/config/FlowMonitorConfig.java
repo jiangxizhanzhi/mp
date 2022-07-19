@@ -1,0 +1,61 @@
+package cn.cyberpeace.mp.front.admin.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+/**
+ * @Description:
+ * @Author zhouxinghuai
+ * @Date：2022/7/19 13:52
+ */
+@Data
+@Component
+@ConfigurationProperties(prefix = "mp.flow-monitor")
+public class FlowMonitorConfig {
+
+    private Boolean enabled;
+
+    private String frequency;
+
+    private Mail mail;
+
+    private SysNotice sysNotice;
+
+
+    @Data
+    public static class Mail {
+
+        private Boolean enabled;
+
+        private String host;
+
+        private int port;
+
+        private String from;
+
+        private String to;
+
+        private String username;
+
+        private String password;
+
+        private String auth;
+
+        private String defaultEncoding;
+
+        private Integer timeout;
+
+    }
+
+
+
+    @Data
+    public static class SysNotice {
+
+        private Boolean enabled;
+
+    }
+
+
+}

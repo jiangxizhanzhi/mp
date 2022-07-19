@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupByDestinationIpAndSeverityVO;
 import cn.cyberpeace.mp.cscene.vo.FlowGroupPortWithProtocolVO;
+import cn.cyberpeace.mp.front.admin.config.FlowMonitorConfig;
 import cn.cyberpeace.mp.front.admin.event.HighRiskAttachEvent;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.AttackInfo;
@@ -66,6 +67,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -77,8 +79,11 @@ import java.util.stream.Collectors;
 @Service
 public class FlowMonitorService {
 
+    @Autowired
+    private FlowMonitorConfig flowMonitorConfig;
+
     // 每30分钟统计一次
-    public static final long REFRESH_RATE = 10;
+    public static final int INIT_DELAY = 20;
 
     public static final long REFRESH_MINUTE = 60000;
 
@@ -107,8 +112,11 @@ public class FlowMonitorService {
     private CsceneEventPublisher csceneEventPublisher;
 
 
-    @Scheduled(initialDelay = 10 * REFRESH_MINUTE, fixedRate = REFRESH_RATE * REFRESH_MINUTE)
+    @Scheduled(initialDelay = INIT_DELAY * REFRESH_MINUTE, fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
     public void monitorHighRiskFlows() {
+        if (!flowMonitorConfig.getEnabled()) {
+            return;
+        }
         CsceneInstanceStatQueryParams queryParams = new CsceneInstanceStatQueryParams();
         queryParams.setActive(true);
         queryParams.setPage(1);
@@ -120,7 +128,7 @@ public class FlowMonitorService {
         List<CsceneHighRiskFlowStatistic> statisticList = new ArrayList<>();
         List<CsceneInstanceStat> csceneInstanceStats = cinstanceResult.getSource().getObjs();
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime endTime = now.minusHours(12); // todo 改为1小时间隔？
+        LocalDateTime endTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency())); // todo 改为1小时间隔？
         if (CollectionUtil.isNotEmpty(csceneInstanceStats)) {
             // todo 异步执行
             for (CsceneInstanceStat instance : csceneInstanceStats) {
