@@ -962,6 +962,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      */
     private UserModel addUserRoleOrgInfo(ThirdUser thirdUser, String token) {
         UserModel user = UserModel.builder()
+                .id(thirdUser.getUserId())
                 .username(thirdUser.getUserName())
                 .password(PasswordUtils.encode(TextUtils.uuid().substring(26)))
                 .mobile(thirdUser.getPhone())
