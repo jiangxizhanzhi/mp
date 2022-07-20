@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.flow;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,6 +12,7 @@ import java.util.List;
  * @Date：2022/7/18 14:38
  */
 @Data
+@Builder
 public class HighRiskFlowStatistic {
 
     // 场景名称

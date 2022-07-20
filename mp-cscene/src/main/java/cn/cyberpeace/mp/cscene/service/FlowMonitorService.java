@@ -165,7 +165,7 @@ public class FlowMonitorService {
         log.info("start... thread:{}, instances.size:{}, begin time:{}", Thread.currentThread().getName(), instanceStatList.size(), TimeUtils.localDateTimeToString(begin));
         List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
         for (CsceneInstanceStat instance : instanceStatList) {
-            HighRiskFlowStatistic statistic = new HighRiskFlowStatistic();
+            HighRiskFlowStatistic statistic = null;
             String sceneId = instance.getId();
             BaseTimeRangeRequest request = new BaseTimeRangeRequest();
             request.setSceneId(sceneId);
@@ -173,12 +173,23 @@ public class FlowMonitorService {
             request.setEndTime(endTime);
             FlowRiskCount riskCount = getFlowRiskCount(request);
             if (Objects.nonNull(riskCount)) {
-                if (riskCount.getHighCount() > 0) {
-                    statistic.setHighRiskCount(riskCount.getHighCount());
-                    statistic.setId(instance.getId());
-                    statistic.setName(instance.getName());
-                    statisticList.add(statistic);
+                if (Objects.equals("high", flowMonitorConfig.getLevel())) {
+                    if (riskCount.getHighCount() > 0) {
+                        statistic = HighRiskFlowStatistic.builder().highRiskCount(riskCount.getHighCount()).id(instance.getId()).name(instance.getName()).build();
+                    }
+                } else if (Objects.equals("medium", flowMonitorConfig.getLevel())) {
+                    if (riskCount.getHighCount() > 0) {
+                        statistic = HighRiskFlowStatistic.builder().highRiskCount(riskCount.getMediumCount()).id(instance.getId()).name(instance.getName()).build();
+                    }
+                } else if (Objects.equals("low", flowMonitorConfig.getLevel())) {
+                    if (riskCount.getHighCount() > 0) {
+                        statistic = HighRiskFlowStatistic.builder().highRiskCount(riskCount.getLowCount()).id(instance.getId()).name(instance.getName()).build();
+                    }
                 }
+            }
+
+            if (Objects.nonNull(statistic)) {
+                statisticList.add(statistic);
             }
         }
 

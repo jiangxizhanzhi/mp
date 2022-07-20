@@ -203,6 +203,8 @@ mp:
   flow-monitor:
     enabled: ${MP_FLOW_MONITOR_ENABLED:true}
     frequency: ${MP_FLOW_MONITOR_FREQUENCY:60}
+    init-delay: ${MP_FLOW_MONITOR_INIT_DELAY:10}
+    level: ${MP_FLOW_MONITOR_LEVEL:high}
     mail:
       enalbed: ${MP_FLOW_MONITOR_MAIL_ENABLED:true}
       host: ${MP_FLOW_MONITOR_MAIL_HOST:}

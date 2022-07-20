@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -17,6 +19,10 @@ public class FlowMonitorConfig {
     private Boolean enabled;
 
     private String frequency;
+
+    private String initDelay;
+
+    private String level;
 
     private Mail mail;
 
@@ -55,6 +61,12 @@ public class FlowMonitorConfig {
 
         private Boolean enabled;
 
+    }
+
+
+    @PostConstruct
+    public void init() {
+        System.out.println(this);
     }
 
 
