@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
@@ -148,6 +149,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneService csceneService;
+
+    @Resource
+    private CsceneSpecialService csceneSpecialService ;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -966,7 +970,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath,String filename, String destPath, CsceneContextBO context) {
+    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
         return new ServiceResult<>(true);
@@ -979,5 +983,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneLinkStatusInfo.setNodeLinkStatusList(result);
         sceneLinkStatusInfo.setCsceneId(csceneId);
         return new ServiceResult<>(sceneLinkStatusInfo);
+    }
+
+    public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
+        String sceneId = getSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshotId);
     }
 }
