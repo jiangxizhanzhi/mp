@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -48,6 +49,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
@@ -666,24 +668,25 @@ public class ScenePluginCloudSceneService {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
+        String finalPath = filePath;
+        if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
+            finalPath = StringUtils.replaceOnce(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
+        }
+        if (StringUtils.startsWith(finalPath, "/")) {
+            finalPath = StringUtils.replaceOnce(finalPath, "/", "");
+        }
         if (node != null && node.getVirtualType() != null) {
             if (BaseCloudPluginSceneElementModel.VirtualType.CONTAINER == node.getVirtualType()) {
                 Container container = new Container();
-                String finalPath = filePath;
-                if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
-                    finalPath = StringUtils.replaceOnce(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
-                }
-                if (StringUtils.startsWith(finalPath, "/")) {
-                    finalPath = StringUtils.replaceOnce(finalPath, "/", "");
-                }
                 var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
                 return new ServiceResult<>(result);
             } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
                 var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
-                    param.setFile(filePath);
-                    param.setDestPath(destPath);
+                    var standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
+                    param.setFile(finalPath);
+                    param.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
                     VirtualMachine virtualMachine = new VirtualMachine();
                     virtualMachine.uploadFile(param);
                     // todo 报错信息处理下
@@ -756,6 +759,7 @@ public class ScenePluginCloudSceneService {
                                 result.setNetworkId(networkId);
                                 result.setUsername(mode.getUsername());
                                 result.setPassword(mode.getPassword());
+                                result.setInstanceIp(port.getIp());
                                 return result;
                             }
                         }
