@@ -84,9 +84,6 @@ public class FlowMonitorService {
     @Autowired
     private FlowMonitorConfig flowMonitorConfig;
 
-    // 延迟统计（分钟）
-    public static final int INIT_DELAY = 10;
-
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
@@ -112,7 +109,7 @@ public class FlowMonitorService {
     private CsceneEventPublisher csceneEventPublisher;
 
 
-    @Scheduled(initialDelay = INIT_DELAY, fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
+    @Scheduled(initialDelayString = "${mp.flow-monitor.init-delay}", fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
     public void monitorHighRiskFlows() {
         log.info("monitorHighRiskFlows starts...");
         if (!flowMonitorConfig.getEnabled()) {
@@ -123,21 +120,22 @@ public class FlowMonitorService {
         queryParams.setPage(1);
         queryParams.setPageSize(1000);
         ListObjServiceResult<CsceneInstanceStat> cinstanceResult = csceneSpecialService.listCsceneInstanceStats(queryParams);
-        List<CsceneInstanceStat> instanceStatList = cinstanceResult.getSource().getObjs();
+        List<CsceneInstanceStat> activeInstanceList = cinstanceResult.getSource().getObjs();
         //if (cinstanceResult.getSource().getTotal() > 1000) {
         //    // todo
         //}
         List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(instanceStatList)) {
+        if (CollectionUtil.isNotEmpty(activeInstanceList)) {
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime startTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency()));
+            //LocalDateTime startTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency()));
+            LocalDateTime startTime = now.minusHours(1);
             // 拆分集合
-            List<List<CsceneInstanceStat>> subListCollection = CollectionUtil.splitList(instanceStatList, 5);
+            List<List<CsceneInstanceStat>> subActiveInstanceListCollection = CollectionUtil.splitList(activeInstanceList, 5);
 
             // 异步执行
             List<CompletableFuture<List<HighRiskFlowStatistic>>> cfList = new ArrayList<>();
-            for (List<CsceneInstanceStat> subList : subListCollection) {
-                CompletableFuture<List<HighRiskFlowStatistic>> cf = CompletableFuture.supplyAsync(() -> processForSublist(subList, startTime, now));
+            for (List<CsceneInstanceStat> subActiveInstanceList : subActiveInstanceListCollection) {
+                CompletableFuture<List<HighRiskFlowStatistic>> cf = CompletableFuture.supplyAsync(() -> processForSublist(subActiveInstanceList, startTime, now));
                 cfList.add(cf);
             }
 
@@ -160,11 +158,11 @@ public class FlowMonitorService {
     }
 
 
-    public List<HighRiskFlowStatistic> processForSublist(List<CsceneInstanceStat> instanceStatList, LocalDateTime startTime, LocalDateTime endTime) {
+    public List<HighRiskFlowStatistic> processForSublist(List<CsceneInstanceStat> activedInstanceList, LocalDateTime startTime, LocalDateTime endTime) {
         LocalDateTime begin = LocalDateTime.now();
-        log.info("start... thread:{}, instances.size:{}, begin time:{}", Thread.currentThread().getName(), instanceStatList.size(), TimeUtils.localDateTimeToString(begin));
+        log.info("start... thread:{}, instances.size:{}, begin time:{}", Thread.currentThread().getName(), activedInstanceList.size(), TimeUtils.localDateTimeToString(begin));
         List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
-        for (CsceneInstanceStat instance : instanceStatList) {
+        for (CsceneInstanceStat instance : activedInstanceList) {
             HighRiskFlowStatistic statistic = null;
             String sceneId = instance.getId();
             BaseTimeRangeRequest request = new BaseTimeRangeRequest();
