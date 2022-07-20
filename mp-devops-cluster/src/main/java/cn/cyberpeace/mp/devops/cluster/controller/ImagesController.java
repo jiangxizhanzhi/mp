@@ -317,6 +317,16 @@ public class ImagesController {
     }
 
     /**
+     * 合并快照历史
+     */
+    @ApiOperation("删除快照")
+    @PostMapping("/snapshot/delete")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
+    public ServiceResult deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
+        return ServiceResult.successful();
+    }
+
+    /**
      * 创建快照
      */
     @ApiOperation("创建快照")

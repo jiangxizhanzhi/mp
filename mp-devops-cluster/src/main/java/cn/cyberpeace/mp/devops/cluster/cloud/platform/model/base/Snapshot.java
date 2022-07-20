@@ -39,4 +39,8 @@ public class Snapshot extends BaseCloudPlatformResult {
      * 创建时间
      */
     private String createdAt;
+
+    private String imageName;
+
+    private String sceneId;
 }
