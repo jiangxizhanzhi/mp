@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +18,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ApiModel(description = "服务器监控对象")
 public class ServerMonitorVO {
 

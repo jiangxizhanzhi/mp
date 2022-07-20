@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.dto.scene.CsceneInstanceInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
@@ -771,4 +772,19 @@ public class CsceneSpecialService {
         return result;
     }
 
+    public ServiceResult<Map<String, CsceneInstanceInfo>> getCsceneName(List<String> csceneIds) {
+        if (CollectionUtils.isNotEmpty(csceneIds)) {
+            return new ServiceResult<>(new HashMap<>());
+        }
+        Map<String, CsceneInstanceInfo> result = new HashMap<>();
+        var models = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getId, csceneIds.toArray(new String[]{})));
+        for (var model : models) {
+            CsceneInstanceInfo info = new CsceneInstanceInfo();
+            info.setName(model.getName());
+            info.setCreateUser(model.getCreateUser());
+            info.setId(model.getId());
+            result.put(info.getId(), info);
+        }
+        return new ServiceResult<>(result);
+    }
 }
