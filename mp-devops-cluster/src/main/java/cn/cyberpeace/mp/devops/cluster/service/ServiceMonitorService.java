@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -64,6 +65,7 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
+        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -94,6 +96,7 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
+        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
