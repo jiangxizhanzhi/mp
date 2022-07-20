@@ -85,7 +85,7 @@ public class FlowMonitorService {
     private FlowMonitorConfig flowMonitorConfig;
 
     // 延迟统计（分钟）
-    public static final int INIT_DELAY = 1;
+    public static final int INIT_DELAY = 10;
 
     @Autowired
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
@@ -114,6 +114,7 @@ public class FlowMonitorService {
 
     @Scheduled(initialDelay = INIT_DELAY, fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
     public void monitorHighRiskFlows() {
+        log.info("monitorHighRiskFlows starts...");
         if (!flowMonitorConfig.getEnabled()) {
             return;
         }
