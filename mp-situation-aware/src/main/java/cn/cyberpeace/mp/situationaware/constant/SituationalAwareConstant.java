@@ -28,5 +28,9 @@ public class SituationalAwareConstant {
 
     public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
 
+    public static String PROBE_TYPES_CODE_PREFIX = "situationaware.probe.type.";
+
+
+
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 }

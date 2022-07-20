@@ -96,6 +96,20 @@ public class HostStateController {
         return ServiceResult.success(hostStates);
     }
 
+    /**
+     * 查询节点当前状态信息
+     *
+     * @return
+     */
+    @ApiOperation(value = "节点主机状态")
+    @GetMapping("/by_agent_name")
+    public ServiceResult<List<HostState>> getHostStateByAgentName(BaseSceneElementPageRequest pageRequest) {
+        pageRequest.setPage(1);
+        pageRequest.setPageSize(1);
+        List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(pageRequest);
+        return ServiceResult.success(hostStates);
+    }
+
     @ApiOperation(value = "节点端口信息")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {

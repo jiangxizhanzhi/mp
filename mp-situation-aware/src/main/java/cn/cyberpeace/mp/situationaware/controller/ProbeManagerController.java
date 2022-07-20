@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -10,6 +11,8 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeEnum;
+import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeVO;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
@@ -35,6 +38,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -53,6 +57,21 @@ public class ProbeManagerController {
     @Autowired
     private ProbeScriptService probeScriptService;
 
+
+    @GetMapping("/types")
+    @ApiOperation(value = "分页查询探针类型")
+    public ServiceResult<ProbeTypeEnum> probeTypes() {
+        ProbeTypeEnum[] typeEnums = ProbeTypeEnum.values();
+        List<ProbeTypeVO> typeVOS = new ArrayList<>();
+        for (ProbeTypeEnum typeEnum : typeEnums) {
+            String name = MessageCommon.get(typeEnum.getName());
+            int coce = typeEnum.getCode();
+            ProbeTypeVO vo = ProbeTypeVO.builder().name(name).code(coce).build();
+            typeVOS.add(vo);
+
+        }
+        return ServiceResult.success(typeVOS);
+    }
 
     @GetMapping("/page")
     @ApiOperation(value = "分页查询探针，不含探针脚本内容")
