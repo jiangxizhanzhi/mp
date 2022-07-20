@@ -250,6 +250,12 @@ public class SysActivationService {
         return jsonStr;
     }
 
+
+    public void resetMenu() {
+        ACTIVATION_CONTENT = status();
+        activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+    }
+
     /**
      * 判断是否过期有两种方法，1. 过期日期超限  2.系统运行时长超限
      */

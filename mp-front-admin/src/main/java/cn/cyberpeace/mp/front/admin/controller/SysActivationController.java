@@ -96,5 +96,10 @@ public class SysActivationController {
         return ServiceResult.success(code);
     }
 
+    @PostMapping("/reset_menu")
+    public ServiceResult resetMenu() {
+        activationService.resetMenu();
+        return ServiceResult.successful();
+    }
 
 }
