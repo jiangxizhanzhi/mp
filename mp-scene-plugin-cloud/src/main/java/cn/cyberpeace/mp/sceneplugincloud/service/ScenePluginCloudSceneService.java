@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.service;
 import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -10,11 +11,13 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneConfigModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.scene.service.SceneService;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
@@ -29,6 +32,7 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.LinkStatusConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementPortModel;
@@ -42,7 +46,9 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GetGuacamoleRecor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordingData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
@@ -97,6 +103,12 @@ public class ScenePluginCloudSceneService {
                     CloudPluginSceneElementPortModel::getFirewallRules
             )
     );
+
+    private SceneService sceneService;
+
+    private CloudPluginSceneConfigElementMapper configElementMapper;
+
+    private CloudPluginSceneConfigElementMapper elementMapper;
 
     private CloudSceneStatCommon cloudSceneStatCommon;
 
@@ -250,9 +262,15 @@ public class ScenePluginCloudSceneService {
 
     @Autowired
     public ScenePluginCloudSceneService(CloudSceneStatCommon cloudSceneStatCommon,
-                                        CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper) {
+                                        CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper,
+                                        SceneService sceneService,
+                                        CloudPluginSceneConfigElementMapper configElementMapper,
+                                        CloudPluginSceneConfigElementMapper elementMapper) {
         this.cloudSceneStatCommon = cloudSceneStatCommon;
         this.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
+        this.sceneService = sceneService;
+        this.configElementMapper = configElementMapper;
+        this.elementMapper = elementMapper;
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
@@ -653,10 +671,10 @@ public class ScenePluginCloudSceneService {
                 Container container = new Container();
                 String finalPath = filePath;
                 if (StringUtils.startsWith(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer())) {
-                    finalPath = StringUtils.replace(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
+                    finalPath = StringUtils.replaceOnce(finalPath, BaseCommon.baseAppConfig.getFdfsOuterHttpServer(), "");
                 }
                 if (StringUtils.startsWith(finalPath, "/")) {
-                    finalPath = StringUtils.replace(finalPath, "/", "");
+                    finalPath = StringUtils.replaceOnce(finalPath, "/", "");
                 }
                 var tmpZipFilepath = FsCommon.downloadTmp(URLUtil.getPath(finalPath), filename);
                 var result = container.copyFile(node.getResourceId(), tmpZipFilepath, destPath);
@@ -672,6 +690,55 @@ public class ScenePluginCloudSceneService {
                     return new ServiceResult<>(true);
                 }
             }
+        }
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId) {
+        var listSnapshot = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+        if (CollectionUtils.isEmpty(listSnapshot)) {
+            return new ServiceResult<>(true);
+        }
+        var snapshot = listSnapshot.stream()
+                .filter(s -> StringUtils.equals(s.getSnapshotUuid(), snapshotId))
+                .findFirst().get();
+        if (snapshot == null) {
+            return new ServiceResult<>(true);
+        }
+        var configCondition = new HumanCondition().link(SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
+                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
+                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
+                .currentLink(SceneConfigModel.class)
+                .filterEqual(SceneConfigModel::getDeleted, false)
+                .currentLink(CloudPluginSceneConfigElementModel.class)
+                .filterEqual(CloudPluginSceneConfigElementModel::getImage, snapshot.getAddress());
+        var configUsed = configElementMapper.list(configCondition);
+        if (CollectionUtils.isNotEmpty(configUsed)) {
+            throw new MpRuntimeException(CloudErrorCode.SNAPSHOT_BE_USED);
+        }
+        var instanceCondition = new HumanCondition().link(SceneModel.class, CloudPluginSceneElementModel.class)
+                .filterLink(SceneModel.class, SceneModel::getId,
+                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
+                .currentLink(SceneModel.class)
+                .filterEqual(SceneModel::getDeleted, false)
+                .currentLink(CloudPluginSceneElementModel.class)
+                .filterEqual(CloudPluginSceneElementModel::getImage, snapshot.getAddress());
+        var instanceUsed = elementMapper.list(instanceCondition);
+        if (CollectionUtils.isNotEmpty(instanceUsed)) {
+            throw new MpRuntimeException(CloudErrorCode.SNAPSHOT_BE_USED);
+        }
+        var sceneHandler = new SceneHandler(sceneId, null, false, null);
+        CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var node = pluginHandler.getElement(nodeId);
+        if (node != null) {
+            SnapshotDeleteParams params = new SnapshotDeleteParams();
+            params.setSnapshotName(snapshot.getName());
+            params.setSnapshotUuid(snapshot.getSnapshotUuid());
+            params.setImageType(node.getImageType());
+            params.setDeviceUuid(node.getImageUuid());
+//            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+//            }, true);
+            sceneService.deleteElementSnapshot(snapshot.getId());
         }
         return new ServiceResult<>(true);
     }

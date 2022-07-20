@@ -78,6 +78,7 @@ public class SnapshotHandler extends HandlerCommon {
         var model = snapshotBO.toModel();
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
+        model.setSnapshotUuid(result.getUuid());
         var snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
         snapshotMapper.save(model);
         this.setSnapshotNum(element);

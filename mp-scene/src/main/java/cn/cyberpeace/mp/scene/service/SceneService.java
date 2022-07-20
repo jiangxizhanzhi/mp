@@ -215,4 +215,9 @@ public class SceneService {
                 .reverseOrderBy(SceneElementSnapshotModel::getPk));
         return new ServiceResult<>(list);
     }
+
+    public ServiceResult<Boolean> deleteElementSnapshot(String id) {
+        var result = sceneElementSnapshotMapper.delete(id);
+        return new ServiceResult<>(result);
+    }
 }
