@@ -224,7 +224,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setPageSize(queryParams.getPageSize());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     // 硬件信息
-                    res = hostStateService.doProcessHostStatesTrend(request);
+                    res = hostStateService.listHostStates(request);
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }
@@ -629,6 +629,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+        queryParams.setNodeIds(null);
+        return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);
     }
 
     /**

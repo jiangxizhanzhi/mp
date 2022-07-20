@@ -1467,6 +1467,8 @@ public class DataCollectionService extends CollectionBaseService {
 
         wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
         wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        wazuhHostStateModel.setDiskReadBytes(Long.valueOf(output.getDiskReadBytes()));
+        wazuhHostStateModel.setDiskWriteBytes(Long.valueOf(output.getDiskWriteBytes()));
 
         return wazuhHostStateModel;
     }

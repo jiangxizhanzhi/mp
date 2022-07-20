@@ -22,11 +22,8 @@ public class CollectionHostStateBO {
     @ApiModelProperty("节点名称")
     private String nodeName;
 
-    @ApiModelProperty("探针id")
-    private String probeId;
-
     @ApiModelProperty("探针名称")
-    private String probeName;
+    private String agentName;
 
     @ApiModelProperty("时间")
     private LocalDateTime time;
@@ -81,4 +78,10 @@ public class CollectionHostStateBO {
 
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("磁盘读速度")
+    private Long diskReadBytes;
+
+    @ApiModelProperty("磁盘写速度")
+    private Long diskWriteBytes;
 }
