@@ -197,7 +197,7 @@ public class DataCollectionService extends CollectionBaseService {
                 fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
@@ -285,7 +285,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
@@ -350,7 +350,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
