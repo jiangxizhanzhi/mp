@@ -238,8 +238,9 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("云平台服务状态监控")
     @GetMapping("/cp_page")
-    public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request) {
-        return serviceMonitorService.cpPage(request);
+    public ServiceResult<ListObjResult<ServiceMonitorDto>> page(CloudPlatformPageRequest request) {
+        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.cpPage(request);
+        return ServiceResult.success(result);
     }
 
     /**
