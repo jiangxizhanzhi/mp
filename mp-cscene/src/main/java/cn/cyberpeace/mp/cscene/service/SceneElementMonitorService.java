@@ -300,14 +300,18 @@ public class SceneElementMonitorService {
 
         // ip, 用户名，登录方式
         var ports = sceneElementBO.getPorts();
-        List<ElementPort> ePorts = ports.stream().map(p -> {
-            ElementPort port = new ElementPort();
-            port.setIp(p.getIp());
-            port.setName(p.getName());
-            port.setAccessModes(p.getAccessModes());
-            return port;
-        }).collect(Collectors.toList());
-        basicInfo.setPorts(ePorts);
+        if (CollUtil.isEmpty(ports)) {
+            basicInfo.setPorts(CollUtil.toList(new ElementPort()));
+        } else {
+            List<ElementPort> ePorts = ports.stream().map(p -> {
+                ElementPort port = new ElementPort();
+                port.setIp(p.getIp());
+                port.setName(p.getName());
+                port.setAccessModes(p.getAccessModes());
+                return port;
+            }).collect(Collectors.toList());
+            basicInfo.setPorts(ePorts);
+        }
 
     }
 
