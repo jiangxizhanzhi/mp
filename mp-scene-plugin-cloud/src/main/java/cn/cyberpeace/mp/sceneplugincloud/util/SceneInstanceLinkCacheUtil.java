@@ -162,7 +162,6 @@ public class SceneInstanceLinkCacheUtil {
         return () -> {
             Map<String, Long> currentMap = new HashMap<>(latestReadTime);
             for (Map.Entry<String, Long> entry : currentMap.entrySet()) {
-                // todo
                 if (System.currentTimeMillis() - entry.getValue() < CACHE_TERM_SECONDS * 1000) {
                     // 一个缓存周期内有过访问,执行下更新
                     var nodeLinkStatusList = getCached(entry.getKey());
