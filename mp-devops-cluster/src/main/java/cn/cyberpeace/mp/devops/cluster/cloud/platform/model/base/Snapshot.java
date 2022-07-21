@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Data
 @NoArgsConstructor
@@ -42,5 +44,11 @@ public class Snapshot extends BaseCloudPlatformResult {
 
     private String imageName;
 
-    private String sceneId;
+    private ExtInfo extInfo;
+
+    @Setter
+    @Getter
+    public static class ExtInfo{
+        private String sceneId ;
+    }
 }
