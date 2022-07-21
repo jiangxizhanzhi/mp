@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.BaseCommon;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -48,6 +49,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.GuacamoleRecordin
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePrivateOperateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
@@ -657,7 +660,26 @@ public class ScenePluginCloudSceneService {
                     execRes.setOutput(result.getOutput());
                     return new ServiceResult<>(execRes);
                 }
+            } else if (BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE == node.getVirtualType()) {
+                VirtualMachine virtualMachine = new VirtualMachine();
+                var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
+                if (param != null) {
+                    var execCommandData = new VirtualMachineExecCommandData();
+                    BeanUtils.copyProperties(param, execCommandData);
+                    execCommandData.setCmd(command);
+                    var result = virtualMachine.execCommand(execCommandData);
+                    if (result != null && Boolean.TRUE.equals(result.getSuccess())) {
+                        ElementCommandExecBO execRes = new ElementCommandExecBO();
+                        execRes.setStatus(true);
+                        execRes.setOutput(result.getStdout());
+                        return new ServiceResult<>(execRes);
+                    } else {
+                        ElementCommandExecBO execRes = new ElementCommandExecBO();
+                        return new ServiceResult<>(execRes);
+                    }
+                }
             }
+
         }
         ElementCommandExecBO execRes = new ElementCommandExecBO();
         execRes.setStatus(false);
@@ -685,10 +707,12 @@ public class ScenePluginCloudSceneService {
                 var param = this.getVirtualMachineUploadFileInfo(pluginHandler, node);
                 if (param != null) {
                     var standardSystemType = SystemTypeUtils.getStandardSystemType(node.getSrcElement().getSystemType());
-                    param.setFile(finalPath);
-                    param.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
+                    var uploadInfoData = new VirtualMachineUploadFileData();
+                    BeanUtils.copyProperties(param, uploadInfoData);
+                    uploadInfoData.setFile(finalPath);
+                    uploadInfoData.setDestPath(destPath + SystemTypeCommandUtils.getPathDelimiter(standardSystemType) + filename);
                     VirtualMachine virtualMachine = new VirtualMachine();
-                    virtualMachine.uploadFile(param);
+                    virtualMachine.uploadFile(uploadInfoData);
                     // todo 报错信息处理下
                     return new ServiceResult<>(true);
                 }
@@ -746,7 +770,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    private VirtualMachineUploadFileData getVirtualMachineUploadFileInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
+    private VirtualMachinePrivateOperateData getVirtualMachineUploadFileInfo(CloudScenePluginHandler pluginHandler, CloudPluginSceneElementBO node) {
         var ports = node.getSrcElement().getPorts();
         if (CollectionUtils.isNotEmpty(ports)) {
             for (var port : ports) {
@@ -755,7 +779,7 @@ public class ScenePluginCloudSceneService {
                         if (AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
                             String networkId = pluginHandler.getPort(port.getId()).getAuxiliaryNetworkId();
                             if (StringUtils.isNotEmpty(networkId)) {
-                                VirtualMachineUploadFileData result = new VirtualMachineUploadFileData();
+                                VirtualMachinePrivateOperateData result = new VirtualMachineUploadFileData();
                                 result.setNetworkId(networkId);
                                 result.setUsername(mode.getUsername());
                                 result.setPassword(mode.getPassword());
