@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.admin.service;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.front.admin.config.FlowMonitorConfig;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
@@ -31,15 +32,16 @@ public class HighRiskFlowNoticeService {
     @Async
     public void sendNotice(String content) {
         log.info("content:{}", content);
+        String title = "场景流量监控";
         if (StringUtils.isNotBlank(content)) {
-            sendSysNotice(content);
-            sendMail(content);
+            sendSysNotice(content, title);
+            sendMail(content, title);
         }
     }
 
-    private void sendMail(String content) {
+    private void sendMail(String content, String subject) {
         FlowMonitorConfig.Mail mailConfig = flowMonitorConfig.getMail();
-        if (Objects.isNull(mailConfig) || mailConfig.getEnabled()) {
+        if (Objects.isNull(mailConfig) || !mailConfig.getEnabled()) {
             return;
         }
 
@@ -58,14 +60,14 @@ public class HighRiskFlowNoticeService {
         account.setUser(mailConfig.getUsername());
         account.setPass(mailConfig.getPassword());
 
-        MailUtil.send(account, mailConfig.getTo(), "场景流量监控", content, true);
+        MailUtil.send(account, mailConfig.getTo(), subject, content, true);
         log.info("mail send success!");
     }
 
 
-    private void sendSysNotice(String content) {
+    private void sendSysNotice(String content, String title) {
         FlowMonitorConfig.SysNotice sysNoticeConfig = flowMonitorConfig.getSysNotice();
-        if (Objects.isNull(sysNoticeConfig) || sysNoticeConfig.getEnabled()) {
+        if (Objects.isNull(sysNoticeConfig) || !sysNoticeConfig.getEnabled()) {
             return;
         }
 
@@ -73,6 +75,8 @@ public class HighRiskFlowNoticeService {
         noticeRequest.setContent(content);
         noticeRequest.setIsPublic(1);
         noticeRequest.setType(1);
+        noticeRequest.setTitle(title);
+        noticeRequest.setPublisher(AuthConstant.ROOT_USER_ID);
         sysNoticeService.add(noticeRequest);
         log.info("sysnotice send success!");
     }

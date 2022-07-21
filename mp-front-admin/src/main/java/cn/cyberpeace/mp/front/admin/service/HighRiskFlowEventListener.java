@@ -5,6 +5,8 @@ import cn.cyberpeace.mp.front.admin.constant.MailConstant;
 import cn.cyberpeace.mp.front.admin.dto.CsceneHighRiskFlowStatisticDto;
 import cn.cyberpeace.mp.front.admin.event.HighRiskAttachEvent;
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,8 @@ public class HighRiskFlowEventListener {
     @EventListener
     public void onEvent(HighRiskAttachEvent highRiskAttachEvent) {
         log.info("event:{}", highRiskAttachEvent);
-        List<CsceneHighRiskFlowStatisticDto> dtos = (List<CsceneHighRiskFlowStatisticDto>) highRiskAttachEvent.getSource();
+        String jsonStr = (String) highRiskAttachEvent.getSource();
+        List<CsceneHighRiskFlowStatisticDto> dtos = JSONObject.parseObject(jsonStr, new TypeReference<List<CsceneHighRiskFlowStatisticDto>>(){});
         if (CollectionUtil.isNotEmpty(dtos)) {
             String content = processNoticeContent(dtos);
             noticeService.sendNotice(content);

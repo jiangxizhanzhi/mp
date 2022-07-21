@@ -4,8 +4,6 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -54,20 +52,11 @@ public class FlowMonitorConfig {
 
     }
 
-
-
     @Data
     public static class SysNotice {
 
         private Boolean enabled;
 
     }
-
-
-    @PostConstruct
-    public void init() {
-        System.out.println(this);
-    }
-
 
 }

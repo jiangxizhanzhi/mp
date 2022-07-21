@@ -49,6 +49,7 @@ import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowAnalysisService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -110,8 +111,7 @@ public class FlowMonitorService {
 
 
     @Scheduled(initialDelayString = "${mp.flow-monitor.init-delay}", fixedRateString = "${mp.flow-monitor.frequency}", timeUnit = TimeUnit.MINUTES)
-    public void monitorHighRiskFlows() {
-        log.info("monitorHighRiskFlows starts...");
+    public void monitorHighRiskFlows() { log.info("monitorHighRiskFlows starts...");
         if (!flowMonitorConfig.getEnabled()) {
             return;
         }
@@ -124,11 +124,13 @@ public class FlowMonitorService {
         //if (cinstanceResult.getSource().getTotal() > 1000) {
         //    // todo
         //}
-        List<HighRiskFlowStatistic> statisticList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(activeInstanceList)) {
             LocalDateTime now = LocalDateTime.now();
-            //LocalDateTime startTime = now.minusMinutes(Integer.valueOf(flowMonitorConfig.getFrequency()));
-            LocalDateTime startTime = now.minusHours(1);
+            Integer freqMinutes = 60;
+            if (StringUtils.isNotBlank(flowMonitorConfig.getFrequency())) {
+                freqMinutes = Integer.valueOf(flowMonitorConfig.getFrequency());
+            }
+            LocalDateTime startTime = now.minusMinutes(freqMinutes);
             // 拆分集合
             List<List<CsceneInstanceStat>> subActiveInstanceListCollection = CollectionUtil.splitList(activeInstanceList, 5);
 
@@ -149,8 +151,10 @@ public class FlowMonitorService {
             }
 
             // todo 统计高危流量情况，发送事件
-            if (CollectionUtil.isNotEmpty(statisticList)) {
-                HighRiskAttachEvent highRiskAttachEvent = new HighRiskAttachEvent(statisticList);
+            log.info("allStatistics:{}", allStatistics);
+            if (CollectionUtil.isNotEmpty(allStatistics)) {
+                String jsonStr = JSONObject.toJSONString(allStatistics);
+                HighRiskAttachEvent highRiskAttachEvent = new HighRiskAttachEvent(jsonStr);
                 csceneEventPublisher.publishEvent(highRiskAttachEvent);
             }
 
@@ -187,6 +191,8 @@ public class FlowMonitorService {
             }
 
             if (Objects.nonNull(statistic)) {
+                statistic.setStartTime(startTime);
+                statistic.setEndTime(endTime);
                 statisticList.add(statistic);
             }
         }
@@ -414,7 +420,7 @@ public class FlowMonitorService {
 
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
-        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, null, null);
+        ServiceResult<Map<String, Integer>> mapResult = scenePluginCollectionSceneService.groupCountFlowByLevel(sceneIdList, nodeIds, baseRequest.getStartTime(), baseRequest.getEndTime());
         Map<String, Integer> map = mapResult.getSource();
 
         // 风险等级 1,2,3,4 数字越低，级别越高
@@ -646,6 +652,8 @@ public class FlowMonitorService {
         Double totalAttackFlowBytes = flowAnalysisService.calcNetworkBytes(flowAnalysisRequest);
 
         // 攻击事件
+        timeRangeRequest.setStartTime(null);
+        timeRangeRequest.setEndTime(null);
         FlowRiskCount riskCount = getFlowRiskCount(timeRangeRequest);
         Long attackCount = (long) (riskCount.getHighCount() + riskCount.getMediumCount() + riskCount.getLowCount());
 

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.front.admin.config.FlowMonitorConfig;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
@@ -17,12 +18,15 @@ import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.extra.mail.MailAccount;
+import cn.hutool.extra.mail.MailUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -50,6 +54,9 @@ public class SysNoticeController {
 
     @Autowired
     private SysNoticeService noticeService;
+
+    @Autowired
+    private FlowMonitorConfig flowMonitorConfig;
 
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
@@ -144,6 +151,33 @@ public class SysNoticeController {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
         return ServiceResult.success(result.getSource());
+    }
+
+
+
+    @PostMapping("/send_test_mail")
+    public void testSendMail() {
+        FlowMonitorConfig.Mail mailConfig = flowMonitorConfig.getMail();
+        if (Objects.isNull(mailConfig) || !mailConfig.getEnabled()) {
+            return;
+        }
+
+        MailAccount account = new MailAccount();
+        if (StringUtils.isBlank(mailConfig.getHost()) || StringUtils.isBlank(mailConfig.getFrom()) ||
+                StringUtils.isBlank(mailConfig.getUsername()) || StringUtils.isBlank(mailConfig.getPassword())) {
+            log.error("mail config error!");
+            return;
+        }
+
+        account.setHost(mailConfig.getHost());
+        account.setPort(mailConfig.getPort());
+        account.setAuth(true);
+        account.setFrom(mailConfig.getFrom());
+        account.setUser(mailConfig.getUsername());
+        account.setPass(mailConfig.getPassword());
+
+        MailUtil.send(account, mailConfig.getTo(), "测试邮件", "测试内容", false);
+        log.info("mail send success!");
     }
 
 }

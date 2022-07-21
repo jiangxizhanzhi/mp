@@ -206,7 +206,7 @@ mp:
     init-delay: ${MP_FLOW_MONITOR_INIT_DELAY:10}
     level: ${MP_FLOW_MONITOR_LEVEL:high}
     mail:
-      enalbed: ${MP_FLOW_MONITOR_MAIL_ENABLED:true}
+      enabled: ${MP_FLOW_MONITOR_MAIL_ENABLED:true}
       host: ${MP_FLOW_MONITOR_MAIL_HOST:}
       port: ${MP_FLOW_MONITOR_MAIL_PORT:25}
       from: ${MP_FLOW_MONITOR_MAIL_FROM:}
