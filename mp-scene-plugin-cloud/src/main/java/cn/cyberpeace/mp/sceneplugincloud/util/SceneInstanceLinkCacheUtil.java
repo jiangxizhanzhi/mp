@@ -35,7 +35,8 @@ public class SceneInstanceLinkCacheUtil {
                         var cloudElement = handler.getElement(e.getId());
                         Integer virtualType = cloudElement.getVirtualType();
                         if (virtualType != null && (
-                                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE
+                                virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                                        virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER
                         )) {
                             NodeLinkStatusBO nodeStatus = new NodeLinkStatusBO(e.getId());
                             nodeStatus.setResourceId(handler.getElement(e.getId()).getResourceId());
