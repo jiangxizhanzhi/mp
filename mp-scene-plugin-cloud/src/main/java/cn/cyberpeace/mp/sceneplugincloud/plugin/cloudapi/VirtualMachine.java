@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineRes
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
+import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -62,6 +63,11 @@ public class VirtualMachine extends CloudClient {
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
+        return true;
+    }
+
+    public boolean forceDelete(VirtualMachineDeleteData deleteData) {
+        ForceReleaseResourceUtils.forceDeleteVm(deleteData.getVms());
         return true;
     }
 
@@ -202,12 +208,13 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
-    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName, Map<String, Object> extInfo) {
+    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName,String desc, Map<String, Object> extInfo) {
         SnapshotParams params = new SnapshotParams();
         params.setDescription(StringUtils.EMPTY);
         params.setImageName(image);
         params.setInstanceUuid(instanceId);
         params.setName(snapshotName);
+        params.setDescription(desc);
         params.setExtInfo(extInfo);
         var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
         }, true);

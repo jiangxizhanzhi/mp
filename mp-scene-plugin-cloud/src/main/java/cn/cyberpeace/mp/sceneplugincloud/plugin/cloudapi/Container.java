@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeDa
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
+import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudListData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -46,6 +47,11 @@ public class Container extends CloudClient {
         CloudResponse<Object> result = cloudDelete(CloudUrlConstant.CONTAINER_DELETE_URL, deleteData, null,
                 new TypeReference<CloudResponse<Object>>() {
                 }, true);
+        return true;
+    }
+
+    public boolean forceDelete(ContainerDeleteData deleteData) {
+        ForceReleaseResourceUtils.forceDeleteContainer(deleteData.getContainers());
         return true;
     }
 
