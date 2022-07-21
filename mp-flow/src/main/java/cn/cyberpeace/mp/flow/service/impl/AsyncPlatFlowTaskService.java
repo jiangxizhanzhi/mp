@@ -152,37 +152,15 @@ public class AsyncPlatFlowTaskService {
                 return;
             }
         } else {
-            if (ResourceTypeEnum.SCRIPT.toValue() == flowInfoModel.getResourceType()) {
-                // 新增时，攻击流量需要判断是否已有网口
-                List<FlowPortModel> attackFlowPorts =
-                        flowPortMapper.list(new HumanCondition()
-                                .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
-                                .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.SCRIPT.toValue()));
-                if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
-                    flowPortModel = attackFlowPorts.get(0);
-                } else {
-                    // 新增攻击流量网口
-                    flowPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0],
-                            flowActuatorModel, flowInfoModel.getResourceType(), request.getNetworkId());
-                    if (Objects.isNull(flowPortModel)) {
-                        log.error("create attack flow port info error");
-                        return;
-                    }
-                }
+            List<FlowPortModel> attackFlowPorts =
+                    flowPortMapper.list(new HumanCondition()
+                            .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
+                            .filterEqual(FlowPortModel::getActuatorId, actuatorId));
+            if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
+                flowPortModel = attackFlowPorts.get(0);
             } else {
-                // 其他情况，根据目标ip查询网口信息
-                List<FlowPortModel> backFlowPorts =
-                        flowPortMapper.list(new HumanCondition()
-                                .filterEqual(FlowPortModel::getClientGateway,
-                                        flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
-                                .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.PCAP.toValue()));
-                if (CollectionUtils.isEmpty(backFlowPorts)) {
-                    log.error("create background flow port info error");
-                    return;
-                }
-                flowPortModel = backFlowPorts.get(0);
+                log.error("get flow port info error");
+                return;
             }
         }
 
@@ -347,22 +325,15 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 if (Objects.isNull(attackPortModel)) {
-                    // 新增时，攻击流量需要判断是否已有网口
                     List<FlowPortModel> attackFlowPorts =
                             flowPortMapper.list(new HumanCondition()
                                     .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
-                                    .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                    .filterEqual(FlowPortModel::getPortType, PortTypeEnum.SCRIPT.toValue()));
+                                    .filterEqual(FlowPortModel::getActuatorId, actuatorId));
                     if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
                         attackPortModel = attackFlowPorts.get(0);
                     } else {
-                        // 攻击网口不存在时新增一个
-                        attackPortModel = this.createPort(flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0],
-                                flowActuatorModel, flowInfoModel.getResourceType(), request.getNetworkId());
-                        if (Objects.isNull(attackPortModel)) {
-                            log.error("batch create attack flow port info error");
-                            throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                        }
+                        log.error("batch get flow port info error");
+                        throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
                     }
                 }
                 // 设置网口id
