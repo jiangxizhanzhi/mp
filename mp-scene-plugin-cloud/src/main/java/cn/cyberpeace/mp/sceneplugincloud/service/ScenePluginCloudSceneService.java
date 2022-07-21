@@ -675,6 +675,10 @@ public class ScenePluginCloudSceneService {
                         return new ServiceResult<>(execRes);
                     } else {
                         ElementCommandExecBO execRes = new ElementCommandExecBO();
+                        execRes.setStatus(false);
+                        if (result != null) {
+                            execRes.setOutput(result.getStdout());
+                        }
                         return new ServiceResult<>(execRes);
                     }
                 }
