@@ -53,7 +53,7 @@ public class SnapshotConverter {
         List<SnapshotConvertModel> list = model.getList().stream().map(item -> {
                     var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                             item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
-                    result.setImageName(item.getName());
+                    result.setImageName(item.getImageName());
                     if (item.getExtInfo() != null) {
                         result.setSceneId(item.getExtInfo().getSceneId());
                     }
