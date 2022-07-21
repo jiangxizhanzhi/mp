@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -10,6 +11,8 @@ import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
+import cn.cyberpeace.mp.flow.enums.FlowCategoryEnum;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
@@ -18,6 +21,7 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.flow.vo.FlowCategoryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +42,8 @@ import java.util.Objects;
 @Api(tags = "流量管理接口")
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/info")
-public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowInfoQueryParams, FlowInfoService> {
+public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowInfoQueryParams, FlowInfoService>
+        implements FlowPrefixConstant {
 
     @Autowired
     private FlowInfoServiceImpl flowServiceImpl;
@@ -72,6 +78,21 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
             return ServiceResult.fail(FlowErrorCode.IDS_CAN_NOT_EMPTY);
         }
         return flowServiceImpl.batchDeleteFlowInfo(ids);
+    }
+
+    @GetMapping("/categories")
+    @ApiOperation(value = "查询流量分类")
+    public ServiceResult<FlowCategoryVO> flowCategories() {
+        FlowCategoryEnum[] flowCategoryEnums = FlowCategoryEnum.values();
+        List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
+        for (FlowCategoryEnum flowCategoryEnum : flowCategoryEnums) {
+            String name = MessageCommon.get(FLOW_CATEGORY_PREFIX + "." + flowCategoryEnum.getName());
+            int code = flowCategoryEnum.getCode();
+            FlowCategoryVO flowCategoryVO = FlowCategoryVO.builder().name(name).code(code).build();
+            flowCategoryVos.add(flowCategoryVO);
+
+        }
+        return ServiceResult.success(flowCategoryVos);
     }
 
     /**

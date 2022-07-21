@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -13,9 +14,11 @@ import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.dto.validate.AddGroup;
 import cn.cyberpeace.mp.front.admin.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.front.admin.enums.NoticeTypeEnum;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
+import cn.cyberpeace.mp.front.admin.vo.NoticeTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -34,7 +37,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -144,6 +149,22 @@ public class SysNoticeController {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
         return ServiceResult.success(result.getSource());
+    }
+
+    @GetMapping("/types")
+    @ApiOperation(value = "查询系统公告类型")
+    public ServiceResult<NoticeTypeVO> getTypes() {
+        List<NoticeTypeVO> typeVOList = new ArrayList<>();
+        for (NoticeTypeEnum typeEnum : NoticeTypeEnum.values()) {
+            String name = MessageCommon.get(typeEnum.getName());
+            typeVOList.add(
+                    NoticeTypeVO.builder()
+                            .name(name)
+                            .code(typeEnum.getCode())
+                            .build()
+            );
+        }
+        return ServiceResult.success(typeVOList);
     }
 
 }
