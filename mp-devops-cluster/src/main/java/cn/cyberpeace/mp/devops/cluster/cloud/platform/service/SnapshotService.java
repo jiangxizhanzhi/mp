@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceAndSnapshotCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.model.SnapshotCreate;
+import cn.cyberpeace.mp.devops.cluster.request.SnapshotDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloud
 public class SnapshotService extends BaseCpService {
 
     private static final String SNAPSHOT = "/snapshot";
+
+    private static final String DEVICE_SNAPSHOT = "/scenarios/device_snapshot";
 
     public SnapshotService(DevopsConfig devopsConfig) {
         super(devopsConfig);
@@ -70,4 +73,19 @@ public class SnapshotService extends BaseCpService {
         BaseCloudPlatformResult model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + SNAPSHOT,JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         return model.isSuccess();
     }
+
+    /**
+     * 删除快照
+     * @param request
+     * @return
+     */
+    public Boolean deleteSnapshot(SnapshotDeleteRequest request) {
+        var jsonObject = new JSONObject();
+        jsonObject.put("device_uuid", request.getDeviceUuid());
+        jsonObject.put("snapshot_uuid", request.getSnapshotUuid());
+        jsonObject.put("snapshot_name", request.getSnapshotName());
+        BaseCloudPlatformResult model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + DEVICE_SNAPSHOT, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        return model.isSuccess();
+    }
+
 }
