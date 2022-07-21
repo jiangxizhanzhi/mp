@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -584,6 +585,8 @@ public class ScenePluginCloudSceneService {
                     if (result.isSuccess()) {
                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
                         p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
+                    } else {
+                        log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                     }
                 });
             }
