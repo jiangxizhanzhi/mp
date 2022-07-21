@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param;
 
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpData;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.Map;
 
 /**
  * @Description
@@ -21,4 +22,5 @@ public class SnapshotParams implements CloudHttpData {
     private String instanceUuid;
     private String name;
     private String description;
+    private Map<String, Object> extInfo;
 }

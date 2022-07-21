@@ -54,7 +54,9 @@ public class SnapshotConverter {
                     var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
                             item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
                     result.setImageName(item.getName());
-                    result.setSceneId(item.getSceneId());
+                    if (item.getExtInfo() != null) {
+                        result.setSceneId(item.getExtInfo().getSceneId());
+                    }
                     return result;
                 })
                 .collect(Collectors.toList());
