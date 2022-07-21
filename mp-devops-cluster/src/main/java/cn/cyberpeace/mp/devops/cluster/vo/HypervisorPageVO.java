@@ -126,6 +126,18 @@ public class HypervisorPageVO extends BaseVO {
     @ApiModelProperty("虚拟机数量限制")
     private Integer maxInstances;
 
+    @ApiModelProperty("下载速度")
+    private String downloadSpeed;
+
+    @ApiModelProperty("上传速度")
+    private String uploadSpeed;
+
+    @ApiModelProperty("磁盘读速度 Bytes")
+    private Long diskReadBytes;
+
+    @ApiModelProperty("磁盘写速度 Bytes")
+    private Long diskWriteBytes;
+
 
     public BigDecimal getRamPercent() {
         return Objects.isNull(this.ram) || Objects.isNull(this.ramUsed) ?
