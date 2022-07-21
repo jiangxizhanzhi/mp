@@ -269,6 +269,8 @@ public class CloudPlatformMonitorController {
     @ApiOperation("设备运行监控")
     @GetMapping("/server/state")
     public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){
+        request.setPage(1);
+        request.setPageSize(1);
         List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
         List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
         hostStates.forEach(hostState -> {
