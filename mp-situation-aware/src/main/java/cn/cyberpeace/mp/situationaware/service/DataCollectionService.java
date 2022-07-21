@@ -1465,10 +1465,29 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setMemoryPercent(Double.parseDouble(output.getMemoryUsedPercent()));
         }
 
-        wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
-        wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
-        wazuhHostStateModel.setDiskReadBytes(Long.valueOf(output.getDiskReadBytes()));
-        wazuhHostStateModel.setDiskWriteBytes(Long.valueOf(output.getDiskWriteBytes()));
+        if (StringUtils.isBlank(output.getDownloadSpeed())) {
+            wazuhHostStateModel.setDownloadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getUploadSpeed())) {
+            wazuhHostStateModel.setUploadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getDiskReadBytes())) {
+            wazuhHostStateModel.setDiskReadBytes(0);
+        } else {
+            wazuhHostStateModel.setDiskReadBytes(Long.parseLong(output.getDiskReadBytes()));
+        }
+
+        if (StringUtils.isBlank(output.getDiskWriteBytes())) {
+            wazuhHostStateModel.setDiskWriteBytes(0);
+        } else {
+            wazuhHostStateModel.setDiskWriteBytes(Long.parseLong(output.getDiskWriteBytes()));
+        }
 
         return wazuhHostStateModel;
     }
