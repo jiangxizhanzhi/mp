@@ -118,12 +118,13 @@ public class VirtualMachine extends CloudClient {
         }, true);
     }
 
-    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName) {
+    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName,String desc) {
         SnapshotParams params = new SnapshotParams();
         params.setDescription(StringUtils.EMPTY);
         params.setImageName(image);
         params.setInstanceUuid(instanceId);
         params.setName(snapshotName);
+        params.setDescription(desc);
         var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
         }, true);
         return response.getData();

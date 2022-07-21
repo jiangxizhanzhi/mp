@@ -60,7 +60,7 @@ public class SnapshotHandler extends HandlerCommon {
 
     private void snapshot(CloudPluginSceneElementBO element, String snapshotName, String desc) {
         // 调用云平台接口 snapshot
-        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName);
+        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, desc);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setName(snapshotName);
         snapshotBO.setAddress(result.getImageName());
