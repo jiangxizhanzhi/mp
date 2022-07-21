@@ -33,10 +33,10 @@ public class MailConstant {
 
     public static final String COLUMN_TEMPLATE =
             "    <tr>\n" +
-            "        <td>${name}</td>\n" +
-            "        <td>${id}</td>\n" +
-            "        <td>${highRiskCount}</td>\n" +
-            "        <td>${startTime}</td>\n" +
-            "        <td>${endTime}</td>\n" +
+            "        <td align=\"center\">${name}</td>\n" +
+            "        <td align=\"center\">${id}</td>\n" +
+            "        <td align=\"center\">${highRiskCount}</td>\n" +
+            "        <td align=\"center\">${startTime}</td>\n" +
+            "        <td align=\"center\">${endTime}</td>\n" +
             "    </tr>\n";
 }

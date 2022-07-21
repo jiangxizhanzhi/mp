@@ -150,11 +150,11 @@ public class FlowMonitorService {
                 alllist.forEach(list -> allStatistics.addAll(list));
             }
 
-            // todo 统计高危流量情况，发送事件
             log.info("allStatistics:{}", allStatistics);
             if (CollectionUtil.isNotEmpty(allStatistics)) {
                 String jsonStr = JSONObject.toJSONString(allStatistics);
                 HighRiskAttachEvent highRiskAttachEvent = new HighRiskAttachEvent(jsonStr);
+                // 发布事件
                 csceneEventPublisher.publishEvent(highRiskAttachEvent);
             }
 
