@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
@@ -149,6 +150,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private CsceneService csceneService;
 
+    @Resource
+    private CsceneSpecialService csceneSpecialService ;
+
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
     private static final String ASSISTANT = "assistance";
@@ -220,7 +224,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 request.setPageSize(queryParams.getPageSize());
                 if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId)) {
                     // 硬件信息
-                    res = hostStateService.doProcessHostStatesTrend(request);
+                    res = hostStateService.listHostStates(request);
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }
@@ -368,18 +372,31 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         // 获取节点所有自定义探针id
         List<String> agentNames = new ArrayList<>();
         List<String> probeIds = new ArrayList<>();
+        Map<String, String> probeId2ProbeName = new HashMap<>();
         pluginHandler.getElementMap().values().forEach(e -> {
             var element = e.getSrcElement();
             if (nodeIds.contains(element.getId())) {
                 agentNames.add(element.getEid());
             }
             e.getProbes().forEach(probe -> {
-                if (Boolean.FALSE.equals(probe.getCommon())) {
+                if (Boolean.FALSE.equals(probe.getCommon()) && !probeIds.contains(probe.getId())) {
                     probeIds.add(probe.getId());
+                    probeId2ProbeName.put(probe.getId(), probe.getName());
                 }
             });
         });
-        if (CollUtil.isEmpty(probeIds)) {
+        List<String> queryProbeIds = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(queryParams.getKeyword())) {
+            String keyword = queryParams.getKeyword().get(0);
+            probeId2ProbeName.forEach((k, v) -> {
+                if (v.contains(keyword)) {
+                    queryProbeIds.add(k);
+                }
+            });
+        } else {
+            queryProbeIds.addAll(probeIds);
+        }
+        if (CollUtil.isEmpty(queryProbeIds)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
         // 构造查询请求
@@ -390,7 +407,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         request.setPageSize(queryParams.getPageSize());
         request.setAgentNames(agentNames);
         // 分页查询自定义探针数据
-        var listObjResult = dataCollectionService.queryCustomProbeData(request, probeIds);
+        var listObjResult = dataCollectionService.queryCustomProbeData(request, queryProbeIds);
         var res = listObjResult.getObjs();
         if (CollUtil.isEmpty(res)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -625,6 +642,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         return scenePluginCollectionSceneService.listHostStates(sceneId, queryParams);
+    }
+
+    public ListObjServiceResult<CollectionHostStateBO> listHostStatesByAgentNames(List<String> agentNames, HostStateQueryParams queryParams) {
+        queryParams.setNodeIds(null);
+        return scenePluginCollectionSceneService.listHostStatesByAgentNames(agentNames, queryParams);
     }
 
     /**
@@ -966,7 +988,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath,String filename, String destPath, CsceneContextBO context) {
+    public ServiceResult<Boolean> uploadElementFile(String id, String nodeId, String filePath, String filename, String destPath, CsceneContextBO context) {
         String sceneId = getSceneId(id);
         scenePluginCloudSceneService.uploadElementFile(sceneId, nodeId, filePath, filename, destPath);
         return new ServiceResult<>(true);
@@ -979,5 +1001,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneLinkStatusInfo.setNodeLinkStatusList(result);
         sceneLinkStatusInfo.setCsceneId(csceneId);
         return new ServiceResult<>(sceneLinkStatusInfo);
+    }
+
+    public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
+        String sceneId = getSceneId(csceneId);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        return scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshotId);
     }
 }

@@ -1,15 +1,19 @@
 package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -128,6 +133,14 @@ public class SceneService {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
+        sceneHandler.getElementMap().values().forEach(e -> {
+            var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                    EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
+            );
+            if (!validEvents.contains(SceneElementModel.Event.PAUSE)) {
+                throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
+            }
+        });
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.pause());
         return new ServiceResult<>(true);
     }
@@ -144,6 +157,14 @@ public class SceneService {
 //        SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
 //        sceneHandler.setRealTimeUpdate(true);
         SceneHandler sceneHandler = SceneHandlerProxyBuilder.build(id, null, false, context, true);
+        sceneHandler.getElementMap().values().forEach(e -> {
+            var validEvents = SceneElementEventTransition.SCENE_ELEMENT_EVENT_TRANSITION.getOrDefault(
+                    EventTransition.genKey(e.getEvent(), e.getEventStatus()), new ArrayList<>()
+            );
+            if (!validEvents.contains(SceneElementModel.Event.SUSPEND)) {
+                throw new MpRuntimeException(SceneErrorCode.SCENE_DOES_NOT_ALLOW_OPERATION.format(e.getProcessMessage()));
+            }
+        });
         SceneTaskPool.getInstance().executeTask(() -> sceneHandler.suspend());
         return new ServiceResult<>(true);
     }
@@ -214,5 +235,10 @@ public class SceneService {
                 .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
                 .reverseOrderBy(SceneElementSnapshotModel::getPk));
         return new ServiceResult<>(list);
+    }
+
+    public ServiceResult<Boolean> deleteElementSnapshot(String id) {
+        var result = sceneElementSnapshotMapper.delete(id);
+        return new ServiceResult<>(result);
     }
 }

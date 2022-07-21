@@ -14,6 +14,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAdd
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineAddPortResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineCreateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecCommandData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExecuteResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePauseData;
@@ -30,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class VirtualMachine extends CloudClient {
@@ -199,12 +202,13 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
-    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName) {
+    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName, Map<String, Object> extInfo) {
         SnapshotParams params = new SnapshotParams();
         params.setDescription(StringUtils.EMPTY);
         params.setImageName(image);
         params.setInstanceUuid(instanceId);
         params.setName(snapshotName);
+        params.setExtInfo(extInfo);
         var response = cloudPost(CloudUrlConstant.VIRTUAL_MACHINE_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<SnapshotResultData>>() {
         }, true);
         return response.getData();
@@ -213,5 +217,10 @@ public class VirtualMachine extends CloudClient {
     public void uploadFile(VirtualMachineUploadFileData data) {
         var response = cloudPost(CloudUrlConstant.SCP_FILE, data, null, new TypeReference<CloudResponse<Object>>() {
         }, true);
+    }
+
+    public VirtualMachineExecuteResult execCommand(VirtualMachineExecCommandData data) {
+        var virtualMachineExecuteResult = getHttpClient().post(CloudUrlConstant.SSH_CMD, data, null, VirtualMachineExecuteResult.class);
+        return virtualMachineExecuteResult;
     }
 }

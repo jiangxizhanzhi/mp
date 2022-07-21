@@ -772,18 +772,18 @@ public class CsceneSpecialService {
         return result;
     }
 
-    public ServiceResult<Map<String, CsceneInstanceInfo>> getCsceneName(List<String> csceneIds) {
-        if (CollectionUtils.isNotEmpty(csceneIds)) {
+    public ServiceResult<Map<String, CsceneInstanceInfo>> getCsceneNameBySceneIds(List<String> sceneIds) {
+        if (CollectionUtils.isEmpty(sceneIds)) {
             return new ServiceResult<>(new HashMap<>());
         }
         Map<String, CsceneInstanceInfo> result = new HashMap<>();
-        var models = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getId, csceneIds.toArray(new String[]{})));
+        var models = csceneInstanceMapper.list(new HumanCondition().filterIn(CsceneInstanceModel::getScene, sceneIds.toArray(new String[]{})));
         for (var model : models) {
             CsceneInstanceInfo info = new CsceneInstanceInfo();
             info.setName(model.getName());
             info.setCreateUser(model.getCreateUser());
             info.setId(model.getId());
-            result.put(info.getId(), info);
+            result.put(model.getScene(), info);
         }
         return new ServiceResult<>(result);
     }

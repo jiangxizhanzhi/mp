@@ -8,6 +8,7 @@ package cn.cyberpeace.mp.cscene.constant;
 public class CsceneBasei18nCode {
 
     // Scene
+    public static final String AGENT_NAME = "cscene.error_code.base.agent.name";
     public static final String SCENE_ID = "cscene.error_code.base.scene.id";
     // Element
     public static final String ELEMENT_ID = "cscene.error_code.base.element.id";

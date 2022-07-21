@@ -670,8 +670,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("删除节点快照")
     @PostMapping("/delete_snapshot")
     public ServiceResult<Boolean> deleteElementSnapshot(@RequestBody(required = false) CsceneInstanceNodeDelSnapshotRequest request) {
-        //todo
-        return new ServiceResult<>(true);
+        return modelService.deleteElementSnapshot(request.getId(), request.getNodeId(), request.getSnapshotId()).asResult();
     }
 
     @ApiOperation("节点命令执行")

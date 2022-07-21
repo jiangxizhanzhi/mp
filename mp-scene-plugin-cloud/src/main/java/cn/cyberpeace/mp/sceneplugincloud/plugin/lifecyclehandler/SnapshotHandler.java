@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @Description
@@ -68,7 +70,8 @@ public class SnapshotHandler extends HandlerCommon {
 
     private void snapshot(CloudPluginSceneElementBO element, String snapshotName, String desc) {
         // 调用云平台接口 snapshot
-        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName);
+        Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
+        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, extInfo);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setName(snapshotName);
         snapshotBO.setAddress(result.getImageName());
@@ -78,6 +81,7 @@ public class SnapshotHandler extends HandlerCommon {
         var model = snapshotBO.toModel();
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
+        model.setSnapshotUuid(result.getUuid());
         var snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
         snapshotMapper.save(model);
         this.setSnapshotNum(element);

@@ -27,6 +27,9 @@ public class HostState {
     @ApiModelProperty("节点id")
     private String elementId;
 
+    @ApiModelProperty("探针名称")
+    private String agentName;
+
     @ApiModelProperty("时间")
     private LocalDateTime time;
 
@@ -65,4 +68,10 @@ public class HostState {
 
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("磁盘读速度 Bytes")
+    private Long diskReadBytes;
+
+    @ApiModelProperty("磁盘写速度 Bytes")
+    private Long diskWriteBytes;
 }

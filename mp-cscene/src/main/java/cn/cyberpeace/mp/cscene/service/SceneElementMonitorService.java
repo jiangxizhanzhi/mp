@@ -259,9 +259,10 @@ public class SceneElementMonitorService {
             request.setElementIds(Arrays.asList(sceneElementBO.getId()));
             request.setPage(1);
             request.setPageSize(1);
-            List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(request);
+            List<HostState> hostStates = hostStateService.listHostStates(request);
             if (CollectionUtil.isNotEmpty(hostStates)) {
                 HostState hostState = hostStates.get(0);
+                resource.setAgentName(hostState.getAgentName());
                 resource.setCpuCount(hostState.getCpuCount());
                 resource.setMemoryTotal(hostState.getMemoryTotal());
                 resource.setDiskSpace(hostState.getDiskSpace());
@@ -275,6 +276,8 @@ public class SceneElementMonitorService {
 
                 resource.setDownloadSpeed(hostState.getDownloadSpeed());
                 resource.setUploadSpeed(hostState.getUploadSpeed());
+                resource.setDiskReadBytes(hostState.getDiskReadBytes());
+                resource.setDiskWriteBytes(hostState.getDiskWriteBytes());
             } else {
                 // 如果从探针中查不到， 从拓扑图中获取数据
                 resource.setCpuCount(sceneElementBO.getCpu());

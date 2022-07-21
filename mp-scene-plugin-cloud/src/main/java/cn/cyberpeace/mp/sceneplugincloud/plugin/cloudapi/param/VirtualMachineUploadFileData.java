@@ -8,11 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VirtualMachineUploadFileData implements CloudHttpData {
-    private String networkId;
-    private String instanceIp;
-    private String username;
-    private String password;
+public class VirtualMachineUploadFileData extends VirtualMachinePrivateOperateData {
     private String file;
     private String destPath;
 }

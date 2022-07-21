@@ -22,7 +22,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 流量网口service
@@ -58,8 +61,12 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
             return;
         }
 
+        List<FlowNetworkInfo> createNetworkinfos = networkInfos.stream().collect(
+                Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(
+                        Comparator.comparing(FlowNetworkInfo::getNetworkId))), ArrayList::new));
+
         List<FlowPortModel> flowPortModels = new ArrayList<>();
-        networkInfos.forEach(networkInfo -> {
+        createNetworkinfos.forEach(networkInfo -> {
             String networkId = networkInfo.getNetworkId();
             try {
                 JSONObject addPortReq = new JSONObject();
@@ -118,6 +125,13 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
         getModelMapper().bulkCreate(flowPortModels);
 
         // 流量发生器初始化网口信息
+        networkInfos.forEach(networkInfo -> {
+            createNetworkinfos.forEach(createNetworkinfo -> {
+                if (networkInfo.getNetworkId().equals(createNetworkinfo.getNetworkId())) {
+                    networkInfo.setMac(createNetworkinfo.getMac());
+                }
+            });
+        });
         JSONObject taskInitObj = new JSONObject();
         taskInitObj.put("network_infos", networkInfos);
         String taskInitRsp;

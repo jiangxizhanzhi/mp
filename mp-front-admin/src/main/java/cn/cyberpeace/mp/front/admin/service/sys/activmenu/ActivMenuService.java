@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.ActivMenuDTO;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
@@ -231,7 +232,7 @@ public class ActivMenuService {
 
         String edition = String.valueOf(activationResponse.getEdition());
         List<String> positiveKeys = new ArrayList<>();
-        positiveKeys.add("no_auth");
+        positiveKeys.add(AdminConstant.MENU_NO_AUTH);
         items.stream().forEach(item -> {
             if (Objects.nonNull(item.getType()) && Objects.equals(item.getType(), 1)) {
                 if (Objects.nonNull(item.getValue()) && Objects.equals("1", item.getValue())) {

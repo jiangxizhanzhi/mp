@@ -282,12 +282,18 @@ public class ImagesController {
         BasePageBO<SnapshotConvertModel> convertModel = snapshotConverter.list(uuid);
         var list = convertModel.getList();
         if (CollectionUtils.isNotEmpty(list)) {
-            List<String> csceneIds = list.stream().map(m -> m.getSceneId()).collect(Collectors.toList());
-            var nameMap = csceneSpecialService.getCsceneName(csceneIds).getSource();
+            List<String> sceneIds = list.stream()
+                    .map(m -> m.getSceneId())
+                    .filter(m -> m != null)
+                    .collect(Collectors.toList());
+            var nameMap = csceneSpecialService.getCsceneNameBySceneIds(sceneIds).getSource();
             for (var m : list) {
                 var sceneInfo = nameMap.get(m.getSceneId());
                 if (sceneInfo != null) {
                     m.setSceneName(sceneInfo.getName());
+                    m.setSceneId(sceneInfo.getId());
+                } else {
+                    m.setSceneId(null);
                 }
             }
         }
@@ -313,6 +319,16 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
         snapshotConverter.merge(request);
+        return ServiceResult.successful();
+    }
+
+    /**
+     * 合并快照历史
+     */
+    @ApiOperation("删除快照")
+    @PostMapping("/snapshot/delete")
+    @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
+    public ServiceResult deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         return ServiceResult.successful();
     }
 

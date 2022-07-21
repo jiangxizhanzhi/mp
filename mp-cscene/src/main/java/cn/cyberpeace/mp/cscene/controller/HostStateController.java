@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.request.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.sceneplugincollection.service.param.ListPageInfoQueryParams;
@@ -92,7 +93,7 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
         pageRequest.setPage(1);
         pageRequest.setPageSize(1);
-        List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(pageRequest);
+        List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
         return ServiceResult.success(hostStates);
     }
 
@@ -103,10 +104,10 @@ public class HostStateController {
      */
     @ApiOperation(value = "节点主机状态")
     @GetMapping("/by_agent_name")
-    public ServiceResult<List<HostState>> getHostStateByAgentName(BaseSceneElementPageRequest pageRequest) {
-        pageRequest.setPage(1);
-        pageRequest.setPageSize(1);
-        List<HostState> hostStates = hostStateService.doProcessHostStatesTrend(pageRequest);
+    public ServiceResult<List<HostState>> getHostStateByAgentName(AgentNameBasedRequest request) {
+        request.setPage(1);
+        request.setPageSize(1);
+        List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
         return ServiceResult.success(hostStates);
     }
 

@@ -50,9 +50,15 @@ public class SnapshotConverter {
      */
     public BasePageBO<SnapshotConvertModel> list(String deviceUuid) {
         CloudPlatformPageResult<Snapshot> model = snapshotService.list(deviceUuid);
-        List<SnapshotConvertModel> list = model.getList().stream().map(item ->
-                new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
-                        item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt())))
+        List<SnapshotConvertModel> list = model.getList().stream().map(item -> {
+                    var result = new SnapshotConvertModel(item.getUuid(), item.getName(), item.getUserSnapshotName(), item.getDeviceUuid(),
+                            item.getDescription(), TimeUtils.utcStringToLocalDateTime(item.getCreatedAt()));
+                    result.setImageName(item.getName());
+                    if (item.getExtInfo() != null) {
+                        result.setSceneId(item.getExtInfo().getSceneId());
+                    }
+                    return result;
+                })
                 .collect(Collectors.toList());
         BasePageBO<SnapshotConvertModel> convertModel = new BasePageBO<>();
         convertModel.setList(list);

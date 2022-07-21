@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.exception;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -63,7 +64,7 @@ public class CpRuntimeExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public ServiceResult<Object> handleException(Exception ex){
-        log.error(LOGGER_FORMAT, ex.getMessage(), ex);
+        log.error(LOGGER_FORMAT, ex.getMessage(), ExceptionUtils.getStackTrace(ex));
         return new ServiceResult<>(null, BaseErrorCode.ERROR, ex.getMessage()).asResult();
     }
 }
