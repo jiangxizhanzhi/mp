@@ -40,11 +40,11 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SceneInstanceLinkCacheUtil {
 
-    private static Long CACHE_TERM_SECONDS = 50L;
+    private static Long CACHE_TERM_SECONDS = 300L;
 
     private static LoadingCache<String, List<NodeLinkStatusBO>> cache = CacheBuilder.newBuilder()
             .maximumSize(300)
-            .expireAfterAccess(CACHE_TERM_SECONDS, TimeUnit.MINUTES)
+            .expireAfterAccess(CACHE_TERM_SECONDS, TimeUnit.SECONDS)
             .build(new CacheLoader<>() {
                 @Override
                 public List<NodeLinkStatusBO> load(String sceneId) {
