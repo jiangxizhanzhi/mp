@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -79,6 +80,8 @@ public class ImagesController {
     private final InjectFileConverter injectFileConverter;
 
     private final ImagesService imagesService;
+
+    private final SnapshotService snapshotService;
 
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
@@ -328,8 +331,9 @@ public class ImagesController {
     @ApiOperation("删除快照")
     @PostMapping("/snapshot/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
-    public ServiceResult deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
-        return ServiceResult.successful();
+    public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
+        Boolean result = snapshotService.deleteSnapshot(request);
+        return ServiceResult.success(result);
     }
 
     /**
