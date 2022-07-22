@@ -2,6 +2,10 @@ package cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDeleteData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDeleteData;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cglib.proxy.MethodInterceptor;
@@ -52,6 +56,33 @@ public class CloudApiProxy<T> implements MethodInterceptor {
         if (success) {
             return result;
         } else {
+            try {
+                var config = BeanCommon.getBean(CloudAppConfig.class);
+                if (Boolean.TRUE.equals(config.getEnableForceDelete()) && method.getName().equals("delete")) {
+                    if (this.target instanceof VirtualSwitch) {
+                        VirtualSwitch vs = (VirtualSwitch) this.target;
+                        result = vs.forceDelete((VirtualSwitchDeleteData) objects[0]);
+                        success = true;
+                    } else if (this.target instanceof VirtualRouter) {
+                        VirtualRouter vr = (VirtualRouter) this.target;
+                        result = vr.forceDelete((VirtualRouterDeleteData) objects[0]);
+                        success = true;
+                    } else if (this.target instanceof VirtualMachine) {
+                        VirtualMachine vm = (VirtualMachine) this.target;
+                        result = vm.forceDelete((VirtualMachineDeleteData) objects[0]);
+                        success = true;
+                    } else if (this.target instanceof Container) {
+                        Container container = (Container) this.target;
+                        result = container.forceDelete((ContainerDeleteData) objects[0]);
+                        success = true;
+                    }
+                }
+            } catch (Exception e) {
+                error = e;
+            }
+            if (success) {
+                return result;
+            }
             if (this.excludeDeleteException(error)) {
                 return true;
             } else {

@@ -76,5 +76,11 @@ public class CloudUrlConstant {
 
     public static final String DEVICE_SNAPSHOT = "/cpcloud/device/v1/snapshot";
 
-    private CloudUrlConstant() {}
+    public static final String FORCE_DELETE_VM = "/cpcloud/host/v1/vm";
+    public static final String FORCE_DELETE_CONTAINER = "/cpcloud/host/v1/container";
+    public static final String FORCE_DELETE_NETWORK = "/cpcloud/host/v1/network";
+    public static final String FORCE_DELETE_ROUTER = "/cpcloud/host/v1/router";
+
+    private CloudUrlConstant() {
+    }
 }
