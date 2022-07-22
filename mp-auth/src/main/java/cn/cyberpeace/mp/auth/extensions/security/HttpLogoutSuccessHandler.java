@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -20,7 +21,9 @@ import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
@@ -54,6 +57,9 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Autowired
     private UserEventPublisher userEventPublisher ;
 
+    @Value("${mp.hld.users-url}")
+    private String hldUsersUrl;
+
     @Autowired
     public HttpLogoutSuccessHandler(MappingJackson2HttpMessageConverter messageConverter, UserService userService) {
         this.mapper = messageConverter.getObjectMapper();
@@ -76,6 +82,11 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             userName = user.getName();
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
+            try {
+                HttpUtils.sendGet(hldUsersUrl + "/xinan-server/login/logoutByUserId?userId=" + user.getId());
+            } catch (Exception e) {
+                log.error("hld logout error {}", ExceptionUtils.getStackTrace(e));
+            }
         }
 
         if (StringUtils.isNotBlank(userName)) {
