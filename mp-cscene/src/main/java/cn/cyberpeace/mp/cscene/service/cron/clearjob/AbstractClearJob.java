@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,7 +43,20 @@ public abstract class AbstractClearJob<Q> {
                 try {
                     if (this.needToClear(eid)) {
                         log.info("find one error status node , eid is {},node info is {}", eid, JsonCommon.stringify(node));
-                        this.doClear(node);
+                        Integer retryTimes = BeanCommon.getBean(CloudAppConfig.class).getDeleteRetryTimes();
+                        boolean success = false;
+                        for (int i = 0; i < retryTimes; i++) {
+                            try {
+                                this.doClear(node);
+                                success = true;
+                                break;
+                            } catch (Exception e) {
+                                log.error("failed to delete container at clear job , resource is {} ", JsonCommon.stringify(node), e);
+                            }
+                        }
+                        if (!success) {
+                            this.forceClear(node);
+                        }
                         log.info("success to clear error status node ,eid is {}", eid);
                     }
                 } catch (Exception e) {
@@ -91,5 +105,8 @@ public abstract class AbstractClearJob<Q> {
             return sceneInfo;
         }
         return null;
+    }
+
+    protected void forceClear(Q data) {
     }
 }

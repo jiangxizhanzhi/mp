@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.BaseCommon;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
@@ -770,8 +769,9 @@ public class ScenePluginCloudSceneService {
             params.setSnapshotUuid(snapshot.getSnapshotUuid());
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
-//            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-//            }, true);
+            // todo
+            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
             sceneService.deleteElementSnapshot(snapshot.getId());
         }
         return new ServiceResult<>(true);
