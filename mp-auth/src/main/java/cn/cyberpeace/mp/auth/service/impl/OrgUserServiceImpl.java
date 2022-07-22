@@ -344,6 +344,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
                     userDto.setIsSuperUser(0);
                 }
             } else {
+                userDto.setRoles(Collections.emptyList());
                 userDto.setIsSuperUser(0);
                 userDto.setIsAdmin(0);
             }
