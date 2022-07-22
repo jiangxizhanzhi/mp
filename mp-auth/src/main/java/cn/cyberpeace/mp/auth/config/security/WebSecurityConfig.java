@@ -79,7 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         }
 
         http.authorizeRequests()
-                .antMatchers("/auth/users/hld/login").permitAll()
+                .antMatchers("/auth/users/hld/**").permitAll()
                 .antMatchers(authenticateUrls).authenticated()
                 .antMatchers("/unauth/**").permitAll()
                 .anyRequest().permitAll()

@@ -193,7 +193,7 @@ public class UserController {
             }
         }
         if (StringUtils.isEmpty(hldUserRequest.getUserId())) {
-            log.error("user : {}", JsonCommon.stringify(hldUserRequest));
+            log.error("hldUserRequest : {}", JsonCommon.stringify(hldUserRequest));
             return ServiceResult.fail("userId is null");
         }
         UserDto userDto = userService.getUserDtoNoRestrict(hldUserRequest.getUserId());
@@ -206,5 +206,26 @@ public class UserController {
         loginResp.setUser(userDto);
         loginResp.setToken(jwt);
         return ServiceResult.success(loginResp);
+    }
+
+    @ApiOperation(value = "HLD定制化登出接口", notes = "")
+    @PostMapping("/hld/logout")
+    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGOUT, title = "用户登出", target = OpTargetEnums.USER)
+    public ServiceResult<Boolean> logout(@RequestParam String userId) {
+        log.info("hld logout,userId: {}", userId);
+        if (StringUtils.isEmpty(userId)) {
+            log.error("userId:{} is null", userId);
+            return ServiceResult.fail("userId is null");
+        }
+        UserDto userDto = userService.getUserDtoNoRestrict(userId);
+        if (userDto == null) {
+            log.error("user is not exist,userId : {}", userId);
+            return ServiceResult.fail("user is not exist");
+        }
+        var updateUser = new UserModel();
+        updateUser.setId(userId);
+        updateUser.initDefault("tokenSecret");
+        userService.update(updateUser);
+        return ServiceResult.success(true);
     }
 }
