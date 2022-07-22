@@ -58,7 +58,10 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_api_pass:wazuh}")
     private String wazuhApiPass;
 
-    @Value("${mp.sceneplugincollection.wazuh_es_server:http://127.0.0.1:9200}")
+    @Value("${mp.sceneplugincollection.wazuh_mongo_server:}")
+    private String wazuhMongoServer;
+
+    @Value("${mp.sceneplugincollection.wazuh_es_server:}")
     private String wazuhEsServer;
 
     @Value("${mp.sceneplugincollection.wazuh_godfs_server:http://127.0.0.1:1888}")

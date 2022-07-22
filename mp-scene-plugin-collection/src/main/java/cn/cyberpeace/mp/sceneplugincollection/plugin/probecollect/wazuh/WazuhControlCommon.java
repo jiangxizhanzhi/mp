@@ -15,6 +15,7 @@ public class WazuhControlCommon {
                         CollectionSingleton.collectionAppConfig.getWazuhApiServer(),
                         CollectionSingleton.collectionAppConfig.getWazuhApiUser(),
                         CollectionSingleton.collectionAppConfig.getWazuhApiPass())
+                .configMongo(CollectionSingleton.collectionAppConfig.getWazuhMongoServer())
                 .configEs(CollectionSingleton.collectionAppConfig.getWazuhEsServer())
                 .configGodfs(CollectionSingleton.collectionAppConfig.getWazuhGodfsServer());
 
