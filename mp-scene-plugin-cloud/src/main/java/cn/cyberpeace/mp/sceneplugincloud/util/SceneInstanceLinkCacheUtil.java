@@ -44,7 +44,7 @@ public class SceneInstanceLinkCacheUtil {
 
     private static LoadingCache<String, List<NodeLinkStatusBO>> cache = CacheBuilder.newBuilder()
             .maximumSize(300)
-            .expireAfterAccess(CACHE_TERM_SECONDS, TimeUnit.SECONDS)
+            .expireAfterWrite(CACHE_TERM_SECONDS, TimeUnit.SECONDS)
             .build(new CacheLoader<>() {
                 @Override
                 public List<NodeLinkStatusBO> load(String sceneId) {
