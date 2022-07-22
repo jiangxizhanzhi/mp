@@ -6,7 +6,7 @@
         select distinct *
         from mp_auth_target
         where id in
-              (select target from mp_auth_role_permission where owner = #{roleId})
+              (select target from mp_auth_role_permission where tenant = #{tenant} and owner = #{roleId})
           and visible = 1
     </select>
 

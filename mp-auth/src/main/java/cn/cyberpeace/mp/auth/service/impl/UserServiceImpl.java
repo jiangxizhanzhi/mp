@@ -812,6 +812,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
+    public List<UserDto> userModels2UserDtos(List<UserModel> userModels) {
+        return null;
+    }
+
+    @Override
     public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;

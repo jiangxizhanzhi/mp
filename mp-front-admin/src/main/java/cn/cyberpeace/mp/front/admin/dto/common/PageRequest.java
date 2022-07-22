@@ -48,7 +48,7 @@ public class PageRequest {
         if (Objects.isNull(page) || page <= 1) {
             page = 1;
         }
-        if (Objects.isNull(pageSize) || pageSize <= 0) {
+        if (Objects.isNull(pageSize)) {
             pageSize = 10;
         }
 
