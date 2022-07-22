@@ -71,7 +71,6 @@ public class SceneMonitorController {
     @ApiOperation(value = "查询场景top5节点状态")
     @GetMapping("/elements/top_by_states/{sceneId}")
     public ServiceResult<Map<String, List<ElementMonitorBasicInfo>>> topByHoststates(@PathVariable String sceneId, @RequestParam(required = false) Integer topCount) {
-        log.info("sceneId:{}", sceneId);
         Map<String, List<ElementMonitorBasicInfo>> result = sceneMonitorService.topAggrByHoststates(sceneId, 5);
 
         return ServiceResult.success(result);

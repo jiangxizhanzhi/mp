@@ -194,7 +194,6 @@ public class SceneMonitorService {
      * @return
      */
     public List<String> listIps(BaseSceneElementRequest request) {
-        log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
 
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
@@ -210,7 +209,6 @@ public class SceneMonitorService {
      * @return
      */
     public List<UserModel> listSceneRecordingUsers(BaseSceneElementRequest request) {
-        log.info("{}", request);
         List<String> translatedSceneIds = csceneCommonService.translateSceneIds(CollectionUtil.toList(request.getSceneId()));
         if (CollectionUtil.isEmpty(translatedSceneIds)) {
             return new ArrayList<>();

@@ -287,7 +287,6 @@ public class HostStateService {
     }
 
     public List<HostState> listHostStatesByAgentName(AgentNameBasedRequest request) {
-        log.info("{}", request);
         request.ensure();
         if (CollectionUtil.isEmpty(request.getAgentNames())) {
             throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.AGENT_NAME)));
