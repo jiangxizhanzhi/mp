@@ -36,6 +36,11 @@ public class ImagePageDTO extends BasePageDTO{
     private Integer subCategory;
 
     /**
+     * 子分类列表
+     */
+    private List<Integer> subCategories;
+
+    /**
      * 三级分类
      */
     private Integer thirdCategory;
@@ -192,6 +197,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setSystemType(request.getSystemType());
         this.setSystemArchitecure(request.getSystemArchitecure());
         this.setQuickCreateSupport(request.getQuickCreateSupport());
+        this.setSubCategories(request.getSecondCategories());
         if (Objects.nonNull(request.getPage()) && Objects.nonNull(request.getPerPage())) {
             this.setOffset((request.getPage() - 1) * request.getPerPage());
             this.setLimit(request.getPerPage());

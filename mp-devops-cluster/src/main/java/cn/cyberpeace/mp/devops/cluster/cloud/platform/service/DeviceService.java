@@ -10,6 +10,7 @@ import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant.CPCLOUD_DEVICE;
@@ -58,12 +59,17 @@ public class DeviceService extends BaseCpService {
      * @param ids
      * @return
      */
-    public CloudPlatformPageResult<Device> findByIds(List<Integer> ids){
-        CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION +  DEVICE + "/byid?ids=" + Joiner.on(",").join(ids), CloudPlatformItemsPageResult.class);
-        super.checkResult(pageResult);
-        List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
+    public CloudPlatformPageResult<Device> findByIds(List<Integer> ids) {
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
-        model.setList(list);
+        model.setList(new ArrayList<>());
+        for (int i = 0; i < ids.size(); i += 500) {
+            int index = Math.min(i + 500, ids.size());
+            List<Integer> newIds = ids.subList(i, index);
+            CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + DEVICE + "/byid?ids=" + Joiner.on(",").join(newIds), CloudPlatformItemsPageResult.class);
+            super.checkResult(pageResult);
+            List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), Device.class);
+            model.getList().addAll(list);
+        }
         return model;
     }
 
