@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.cscene.service.cron.clearjob;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineGetData;
+import cn.cyberpeace.mp.sceneplugincloud.util.ForceReleaseResourceUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,5 +46,10 @@ public class VmClearJob extends AbstractClearJob<VirtualMachineGetData> {
     @Override
     protected void doClear(VirtualMachineGetData data) {
         vmClient.deleteInstanceById(data.getId());
+    }
+
+    @Override
+    protected void forceClear(VirtualMachineGetData data) {
+        ForceReleaseResourceUtils.forceDeleteVm(Arrays.asList(data.getId()));
     }
 }
