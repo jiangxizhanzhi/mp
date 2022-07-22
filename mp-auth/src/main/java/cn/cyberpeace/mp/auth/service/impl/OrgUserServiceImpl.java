@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -240,7 +241,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         }
 
         log.info("orgIds: {}", orgIds);
-
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
             orders = CollectionUtil.newArrayList(req.getOrders());
@@ -265,11 +265,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<UserTmpDto> userTmpDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
         PageInfo pageInfo = new PageInfo(userTmpDtos);
 
-        //List<UserDto> userDtos = users.stream().map(u -> {
-        //    UserDto userDto = userService.userModel2UserDto(u);
-        //    return userDto;
-        //}).collect(Collectors.toList());
-        List<UserDto> userDtos = processUserTmpDto2UserDto(userTmpDtos);
+        List<UserDto> userDtos = processUserTmpDto2UserDtoForBatchSearching(userTmpDtos);
 
         pageInfo.setList(userDtos);
         return pageInfo;
@@ -304,7 +300,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
 
-    private List<UserDto> processUserTmpDto2UserDto(List<UserTmpDto> users) {
+    private List<UserDto> processUserTmpDto2UserDtoForBatchSearching(List<UserTmpDto> users) {
         List<OrgModel> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
         List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
         List<UserDto> userDtos = new ArrayList<>();
@@ -321,6 +317,10 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
                 userDto.setOrgs(userOrgModels);
                 userDto.setOrgIds(userOrgIds);
                 userDto.setOrgpaths(allorgpath);
+            } else {
+                userDto.setOrgs(Collections.emptyList());
+                userDto.setOrgIds(Collections.emptyList());
+                userDto.setOrgpaths(Collections.emptyList());
             }
 
             if (StringUtils.isNotBlank(userTmpDto.getRoles())) {
