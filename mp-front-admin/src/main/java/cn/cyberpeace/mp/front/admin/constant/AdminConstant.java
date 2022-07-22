@@ -13,5 +13,7 @@ public class AdminConstant {
 
     public static final Integer STATUS_NOT_ACTIVITED = 0;
 
+    public static final String MENU_NO_AUTH = "no_auth";
+
     private AdminConstant() {}
 }

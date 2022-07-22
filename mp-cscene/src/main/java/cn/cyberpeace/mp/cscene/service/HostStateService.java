@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.request.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.dto.request.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
@@ -89,6 +90,7 @@ public class HostStateService {
 
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
             HostState hs = new HostState();
+            hs.setAgentName(hostStateBO.getAgentName());
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
             hs.setMemoryFree(hostStateBO.getMemoryFree());
@@ -231,7 +233,7 @@ public class HostStateService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgHostMemoryPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgHostDiskPercent(sceneIdList, elementIds, startTime, endTime, intervalSeconds.intValue());
 
-        return doProcessHostStatesTrend(timeList, cpuResult, memResult, diskResult);
+        return listHostStates(timeList, cpuResult, memResult, diskResult);
     }
 
     private List<HostState> processHostStateTrendByAgentNames(List<String> agentNames, LocalDateTime startTime, LocalDateTime endTime, Integer segmentCount) {
@@ -256,7 +258,7 @@ public class HostStateService {
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getMemoryPercent());
         ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult = scenePluginCollectionSceneService.timeIntervalAvgPercentByAgentNames(agentNames, startTime, endTime, intervalSeconds.intValue(), (state) -> state.getDiskPercent());
 
-        return doProcessHostStatesTrend(timeList, cpuResult, memResult, diskResult);
+        return listHostStates(timeList, cpuResult, memResult, diskResult);
     }
 
 
@@ -266,7 +268,7 @@ public class HostStateService {
      * @return
      */
     // todo 老方法，待优化
-    public List<HostState> doProcessHostStatesTrend(BaseSceneElementPageRequest pageRequest) {
+    public List<HostState> listHostStates(BaseSceneElementPageRequest pageRequest) {
         log.info("{}", pageRequest);
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
@@ -281,8 +283,30 @@ public class HostStateService {
 
         List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
 
+        return collectionHostStateBOs2HostStates(hostStateBOS);
+    }
+
+    public List<HostState> listHostStatesByAgentName(AgentNameBasedRequest request) {
+        log.info("{}", request);
+        request.ensure();
+        if (CollectionUtil.isEmpty(request.getAgentNames())) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(CsceneBasei18nCode.AGENT_NAME)));
+        }
+        HostStateQueryParams queryParams = new HostStateQueryParams();
+        queryParams.setPage(request.getPage());
+        queryParams.setPageSize(request.getPageSize());
+//
+        ListObjServiceResult<CollectionHostStateBO> listObjServiceResult = csceneInstanceService.listHostStatesByAgentNames(request.getAgentNames(), queryParams);
+
+        List<CollectionHostStateBO> hostStateBOS = listObjServiceResult.getSource().getObjs();
+
+        return collectionHostStateBOs2HostStates(hostStateBOS);
+    }
+
+    private List<HostState> collectionHostStateBOs2HostStates(List<CollectionHostStateBO> hostStateBOS) {
         List<HostState> hostStates = hostStateBOS.stream().map(hostStateBO -> {
             HostState hs = new HostState();
+            hs.setAgentName(hostStateBO.getAgentName());
             hs.setCpuFreq(hostStateBO.getCpuFreq());
             hs.setCpuCount(hostStateBO.getCpuCount());
             hs.setCpuPercent(Objects.nonNull(hostStateBO.getCpuPercent()) ? NumberUtil.round(hostStateBO.getCpuPercent(), 2).doubleValue() : hostStateBO.getCpuPercent());
@@ -302,6 +326,8 @@ public class HostStateService {
 
             hs.setDownloadSpeed(hostStateBO.getDownloadSpeed());
             hs.setUploadSpeed(hostStateBO.getUploadSpeed());
+            hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
+            hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
             return hs;
         }).collect(Collectors.toList());
 
@@ -309,7 +335,7 @@ public class HostStateService {
     }
 
 
-    private List<HostState> doProcessHostStatesTrend(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
+    private List<HostState> listHostStates(List<LocalDateTime> timeList, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> cpuResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> memResult, ServiceResult<List<IntervalSizeBO<LocalDateTime, Double>>> diskResult) {
         List<IntervalSizeBO<LocalDateTime, Double>> intervalCpuPercentBOs = cpuResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalMemPercentBOs = memResult.getSource();
         List<IntervalSizeBO<LocalDateTime, Double>> intervalDiskPercentBOs = diskResult.getSource();

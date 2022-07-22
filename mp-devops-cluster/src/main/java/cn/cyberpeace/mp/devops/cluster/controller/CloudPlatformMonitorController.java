@@ -5,6 +5,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.request.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.*;
@@ -41,6 +44,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +84,8 @@ public class CloudPlatformMonitorController {
     private final ServiceMonitorService serviceMonitorService;
 
     private final CpNodeMonitorScriptConfigService cpNodeMonitorScriptConfigService;
+
+    private final HostStateService hostStateService;
 
     /**
      * 资源统计
@@ -238,8 +244,9 @@ public class CloudPlatformMonitorController {
      */
     @ApiOperation("云平台服务状态监控")
     @GetMapping("/cp_page")
-    public ListObjResult<ServiceMonitorDto> page(CloudPlatformPageRequest request) {
-        return serviceMonitorService.cpPage(request);
+    public ServiceResult<ListObjResult<ServiceMonitorDto>> page(CloudPlatformPageRequest request) {
+        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.cpPage(request);
+        return ServiceResult.success(result);
     }
 
     /**
@@ -252,6 +259,37 @@ public class CloudPlatformMonitorController {
     public ServiceResult<Boolean> restartServer(@RequestBody @Validated ServerRestartRequest serverRestartRequest) {
         cpNodeMonitorScriptConfigService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());
         return new ServiceResult<>(true);
+    }
+
+    /**
+     * 设备运行监控
+     * @param request
+     * @return
+     */
+    @ApiOperation("设备运行监控")
+    @GetMapping("/server/state")
+    public ServiceResult<List<HypervisorPageVO>> page(AgentNameBasedRequest request){
+        request.setPage(1);
+        request.setPageSize(1);
+        List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
+        List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
+        hostStates.forEach(hostState -> {
+            HypervisorPageVO hypervisorPageVO  = HypervisorPageVO.builder()
+                    .name(hostState.getAgentName())
+                    .cpu(hostState.getCpuCount())
+                    .cpuPercent(Objects.isNull(hostState.getCpuPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getCpuPercent()))
+                    .ram(hostState.getMemoryTotal())
+                    .ramPercent(Objects.isNull(hostState.getMemoryPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getMemoryPercent()))
+                    .disk(hostState.getDiskSpace())
+                    .diskPercent(Objects.isNull(hostState.getDiskPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getDiskPercent()))
+                    .downloadSpeed(hostState.getDownloadSpeed())
+                    .uploadSpeed(hostState.getUploadSpeed())
+                    .diskReadBytes(hostState.getDiskReadBytes())
+                    .diskWriteBytes(hostState.getDiskWriteBytes())
+                    .build();
+            hypervisorPageVOList.add(hypervisorPageVO);
+        });
+        return ServiceResult.success(hypervisorPageVOList);
     }
 
 

@@ -253,7 +253,6 @@ public class ScenePluginCollectionSceneService {
         // 构建查询参数
         var request = new WazuhMonitorEventsRequest();
         request.setPageNum(queryParams.getPage());
-        // todo 暂时最多取 1000 条
         request.setPageSize(Optional.ofNullable(queryParams.getPageSize()).orElse(1000));
         request.setAgentNames(agentNames);
         // 开始时间,默认为场景创建时间
@@ -272,6 +271,7 @@ public class ScenePluginCollectionSceneService {
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
         List<CollectionHostStateBO> hostStates = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostState = new CollectionHostStateBO();
+            hostState.setAgentName(srcHostState.getAgentName());
             hostState.setSceneId(sceneId);
             hostState.setCpuFreq(srcHostState.getCpuFreq());
             hostState.setCpuCount(srcHostState.getCpuCount());
@@ -289,6 +289,8 @@ public class ScenePluginCollectionSceneService {
             // 网速
             hostState.setDownloadSpeed(srcHostState.getDownloadSpeed());
             hostState.setUploadSpeed(srcHostState.getUploadSpeed());
+            hostState.setDiskReadBytes(srcHostState.getDiskReadBytes());
+            hostState.setDiskWriteBytes(srcHostState.getDiskWriteBytes());
             // todo 进程，端口，网络连接，磁盘使用率
             if (CollectionUtil.isNotEmpty(agentName2Element)) {
                 var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);

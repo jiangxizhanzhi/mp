@@ -38,15 +38,17 @@ public class PageRequest {
     private String[] sort;
 
     public void ensure() {
+
         if (perPage != null) {
             pageSize = perPage;
         }
 
         // 默认值
-        if (Objects.isNull(page)) {
+        if (Objects.isNull(page) || page <= 1) {
             page = 1;
         }
-        if (Objects.isNull(pageSize)) {
+
+        if (Objects.isNull(pageSize) || pageSize <= 0) {
             pageSize = 10;
         }
 

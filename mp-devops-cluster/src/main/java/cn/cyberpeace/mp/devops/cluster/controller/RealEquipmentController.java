@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -15,16 +16,15 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
+import cn.cyberpeace.mp.devops.cluster.enums.EquipmentPositionStatusEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.EquipmentUseStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentByIdVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentDevopsDetailVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentNetworkCardPageVO;
-import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.*;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -42,6 +42,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -371,5 +372,37 @@ public class RealEquipmentController {
             return new Result<>();
         }
         return new Result<>(bySerialPort.getList());
+    }
+
+    @GetMapping("/position")
+    @ApiOperation(value = "查询实装设备的在位状态")
+    public ServiceResult<EquipmentPositionStatusVO> getPositionStatus() {
+        List<EquipmentPositionStatusVO> equipmentPositionStatusVOList = new ArrayList<>();
+        for (EquipmentPositionStatusEnum positionStatusEnum : EquipmentPositionStatusEnum.values()) {
+            String name = MessageCommon.get(positionStatusEnum.getName());
+            equipmentPositionStatusVOList.add(
+                    EquipmentPositionStatusVO.builder()
+                            .name(name)
+                            .code(positionStatusEnum.getCode())
+                            .build()
+            );
+        }
+        return ServiceResult.success(equipmentPositionStatusVOList);
+    }
+
+    @GetMapping("/use")
+    @ApiOperation(value = "实装设备的使用状态")
+    public ServiceResult<EquipmentUseStatusVO> getUseStatus() {
+        List<EquipmentUseStatusVO> equipmentUseStatusVOList = new ArrayList<>();
+        for (EquipmentUseStatusEnum useStatusEnum : EquipmentUseStatusEnum.values()) {
+            String name = MessageCommon.get(useStatusEnum.getName());
+            equipmentUseStatusVOList.add(
+                    EquipmentUseStatusVO.builder()
+                            .name(name)
+                            .code(useStatusEnum.getCode())
+                            .build()
+            );
+        }
+        return ServiceResult.success(equipmentUseStatusVOList);
     }
 }

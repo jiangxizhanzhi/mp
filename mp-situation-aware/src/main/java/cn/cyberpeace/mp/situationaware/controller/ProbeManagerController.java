@@ -15,10 +15,12 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeVO;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.situationaware.model.enums.OsTypeEnum;
 import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
 import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
+import cn.cyberpeace.mp.situationaware.vo.OsTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.github.pagehelper.PageInfo;
@@ -65,12 +67,24 @@ public class ProbeManagerController {
         List<ProbeTypeVO> typeVOS = new ArrayList<>();
         for (ProbeTypeEnum typeEnum : typeEnums) {
             String name = MessageCommon.get(typeEnum.getName());
-            int coce = typeEnum.getCode();
-            ProbeTypeVO vo = ProbeTypeVO.builder().name(name).code(coce).build();
+            int code = typeEnum.getCode();
+            ProbeTypeVO vo = ProbeTypeVO.builder().name(name).code(code).build();
             typeVOS.add(vo);
 
         }
         return ServiceResult.success(typeVOS);
+    }
+
+    @GetMapping("/os-types")
+    @ApiOperation(value = "查询操作系统类型")
+    public ServiceResult<OsTypeVO> osTypes() {
+        List<OsTypeVO> osTypeVOs = new ArrayList<>();
+        for (OsTypeEnum osTypeEnum : OsTypeEnum.values()) {
+            String name = MessageCommon.get(osTypeEnum.getName());
+            int code = osTypeEnum.getCode();
+            osTypeVOs.add(OsTypeVO.builder().name(name).code(code).build());
+        }
+        return ServiceResult.success(osTypeVOs);
     }
 
     @GetMapping("/page")

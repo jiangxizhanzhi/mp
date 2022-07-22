@@ -197,7 +197,7 @@ public class DataCollectionService extends CollectionBaseService {
                 fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
@@ -285,7 +285,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
@@ -350,7 +350,7 @@ public class DataCollectionService extends CollectionBaseService {
                 }
             }
 
-            long total = 0l;
+            long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
             }
@@ -1465,8 +1465,29 @@ public class DataCollectionService extends CollectionBaseService {
             wazuhHostStateModel.setMemoryPercent(Double.parseDouble(output.getMemoryUsedPercent()));
         }
 
-        wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
-        wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        if (StringUtils.isBlank(output.getDownloadSpeed())) {
+            wazuhHostStateModel.setDownloadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setDownloadSpeed(output.getDownloadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getUploadSpeed())) {
+            wazuhHostStateModel.setUploadSpeed("0.00KB/s");
+        } else {
+            wazuhHostStateModel.setUploadSpeed(output.getUploadSpeed());
+        }
+
+        if (StringUtils.isBlank(output.getDiskReadBytes())) {
+            wazuhHostStateModel.setDiskReadBytes(0);
+        } else {
+            wazuhHostStateModel.setDiskReadBytes(Long.parseLong(output.getDiskReadBytes()));
+        }
+
+        if (StringUtils.isBlank(output.getDiskWriteBytes())) {
+            wazuhHostStateModel.setDiskWriteBytes(0);
+        } else {
+            wazuhHostStateModel.setDiskWriteBytes(Long.parseLong(output.getDiskWriteBytes()));
+        }
 
         return wazuhHostStateModel;
     }

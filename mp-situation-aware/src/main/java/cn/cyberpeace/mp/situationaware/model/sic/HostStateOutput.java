@@ -40,4 +40,10 @@ public class HostStateOutput {
 
     @JSONField(name = "UploadSpeed")
     private String uploadSpeed;
+
+    @JSONField(name = "DiskReadBytes")
+    private String diskReadBytes;
+
+    @JSONField(name = "DiskWriteBytes")
+    private String diskWriteBytes;
 }
