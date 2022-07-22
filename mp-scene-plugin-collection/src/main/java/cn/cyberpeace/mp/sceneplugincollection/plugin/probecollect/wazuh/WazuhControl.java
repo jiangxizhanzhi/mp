@@ -216,7 +216,7 @@ public class WazuhControl {
         var runCommandItem = new WazuhLauncher.RunCommandItem();
         runCommandItem.setAgentName(agentName);
         runCommandItem.setOsType(osType);
-        runCommandItem.setCommand("//python xxx.py restart mp");
+        runCommandItem.setCommand(genControlConfigCommand(osType, controlConfigParam, true));
         wazuhLauncher.runCommand(List.of(runCommandItem));
     }
 
