@@ -35,7 +35,7 @@
             order by mp_auth_org.pk
     </select>
 
-    <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserTmpDto">
+    <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select
             distinct u.*,
             group_concat(distinct ou.org separator ',') as orgs,

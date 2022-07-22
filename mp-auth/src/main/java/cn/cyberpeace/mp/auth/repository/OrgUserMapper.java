@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserTmpDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -35,13 +35,13 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
      * @param userIds
      * @return
      */
-    List<UserTmpDto> listUsers(@Param("orgIds") List<String> orgIds,
-                               @Param("userIds") List<String> userIds,
-                               @Param("orders") List<String> orders,
-                               @Param("userCondition") UserDto userDto,
-                               @Param("selfUserId") String selfUserId,
-                               @Param("excludeRoleIds") List<String> excludeRoleIds,
-                               @Param("excludeUserIds") List<String> excludeUserIds
+    List<UserOrgRoleDto> listUsers(@Param("orgIds") List<String> orgIds,
+                                   @Param("userIds") List<String> userIds,
+                                   @Param("orders") List<String> orders,
+                                   @Param("userCondition") UserDto userDto,
+                                   @Param("selfUserId") String selfUserId,
+                                   @Param("excludeRoleIds") List<String> excludeRoleIds,
+                                   @Param("excludeUserIds") List<String> excludeUserIds
     );
 
     Integer selectUserCnt(@Param("orgId") String orgId);

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
@@ -184,19 +185,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(queryParams.getIds()));
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
-        List<UserDto> userDtos;
         if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
             return listObjSrvResult;
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
-        userDtos = users.stream().map(this::userModel2UserDto).collect(Collectors.toList());
-
-        if (CollectionUtil.isNotEmpty(userDtos)) {
+        if (CollectionUtil.isNotEmpty(users)) {
             // 转换
-            ListObjServiceResult<UserDto> result = new ListObjServiceResult<>();
+            ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
             BeanUtils.copyProperties(listObjSrvResult, result);
-            result.getSource().setObjs(userDtos);
+            result.getSource().setObjs(users);
             return result;
         }
 
@@ -812,16 +810,60 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    public List<UserDto> userModels2UserDtos(List<UserModel> userModels) {
-        return null;
-    }
-
-    @Override
     public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
         }
         return doModel2Dto(userModel, false, true);
+    }
+
+
+
+    public List<UserDto> userOrgRoleDtos2UserDtos(List<UserOrgRoleDto> userOrgRoleDtos) {
+        if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
+            return Collections.emptyList();
+        }
+        List<OrgModel> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
+        List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
+        List<UserDto> userDtos = new ArrayList<>();
+        for (UserOrgRoleDto userOrgRoleDto : userOrgRoleDtos) {
+            UserDto userDto = new UserDto();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(userOrgRoleDto, userDto);
+            // 过期状态处理
+            processExpiredStatus(userDto);
+
+            if (StringUtils.isNotBlank(userOrgRoleDto.getOrgs())) {
+                List<String> userOrgIds = Arrays.asList(userOrgRoleDto.getOrgs().split(","));
+                List<OrgModel> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
+                List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+                userDto.setOrgs(userOrgModels);
+                userDto.setOrgIds(userOrgIds);
+                userDto.setOrgpaths(allorgpath);
+            } else {
+                userDto.setOrgs(Collections.emptyList());
+                userDto.setOrgIds(Collections.emptyList());
+                userDto.setOrgpaths(Collections.emptyList());
+            }
+
+            if (StringUtils.isNotBlank(userOrgRoleDto.getRoles())) {
+                List<String> userRoleIds = Arrays.asList(userOrgRoleDto.getRoles().split(","));
+                List<RoleModel> userRoleModels = allRoles.stream().filter(r -> userRoleIds.contains(r.getId())).collect(Collectors.toList());
+                userDto.setRoles(userRoleModels);
+
+                boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));
+                boolean isSuperUser = Objects.equals(userOrgRoleDto.getId(), AuthConstant.ROOT_USER_ID);
+
+                processIsAdminSuperUser(userDto, isAdmin, isSuperUser);
+            } else {
+                userDto.setRoles(Collections.emptyList());
+                userDto.setIsSuperUser(0);
+                userDto.setIsAdmin(0);
+            }
+
+            userDtos.add(userDto);
+        }
+
+        return userDtos;
     }
 
     @Override
@@ -851,22 +893,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
-            if (isAdmin) {
-                userDto.setIsAdmin(1);
-            } else {
-                userDto.setIsAdmin(0);
-            }
-
-            if (isSuperUser) {
-                userDto.setIsSuperUser(1);
-            } else {
-                userDto.setIsSuperUser(0);
-            }
+            processIsAdminSuperUser(userDto, isAdmin, isSuperUser);
         }
 
         return userDto;
-
     }
+
 
 
 //    @Override
@@ -882,13 +914,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<UserDto> listByUserIds(String[] userIds) {
-        List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterIn("id", userIds).orderBy("pk"));
-
-        List<UserDto> userDtos = userModels.stream().map(u -> {
-            UserDto userDto = userModel2UserDto(u);
-            return userDto;
-        }).collect(Collectors.toList());
-
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
+        List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
         return userDtos;
     }
 
@@ -909,6 +936,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
         String avatar = "/api/mp" + avatarList.get(0);
         return avatar;
+    }
+
+
+    private void processIsAdminSuperUser(UserDto userDto, boolean isAdmin, boolean isSuperUser) {
+        if (isAdmin) {
+            userDto.setIsAdmin(1);
+        } else {
+            userDto.setIsAdmin(0);
+        }
+
+        if (isSuperUser) {
+            userDto.setIsSuperUser(1);
+        } else {
+            userDto.setIsSuperUser(0);
+        }
     }
 
     private UserModel importUser2UserModel(ImportUser importUser) {

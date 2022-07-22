@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2022/7/22 09:43
  */
 @Data
-public class UserTmpDto extends UserModel {
+public class UserOrgRoleDto extends UserModel {
 
     private String orgs;
 

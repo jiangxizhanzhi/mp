@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -86,14 +87,12 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     // userModel转换为userdto，附加组织，角色信息
     UserDto userModel2UserDto(UserModel userModel);
 
-    List<UserDto> userModels2UserDtos(List<UserModel> userModels);
-
     // userModel转换为userdto，附加角色信息，不包括组织相关信息
     UserDto userModel2UserDtoWithoutOrg(UserModel userModel);
 
-    UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole);
+    List<UserDto> userOrgRoleDtos2UserDtos(List<UserOrgRoleDto> userOrgRoleDtos);
 
-//    PageInfo onlineReport(UserOnlineReportPageRequest pageRequest);
+    UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole);
 
     List<UserModel> listNotAudited();
 

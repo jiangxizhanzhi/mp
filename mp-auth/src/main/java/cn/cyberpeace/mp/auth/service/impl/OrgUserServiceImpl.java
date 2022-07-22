@@ -6,10 +6,9 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserTmpDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -136,7 +134,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
 
-        List<UserTmpDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
@@ -240,7 +238,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             }
         }
 
-        log.info("orgIds: {}", orgIds);
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
             orders = CollectionUtil.newArrayList(req.getOrders());
@@ -262,10 +259,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-        List<UserTmpDto> userTmpDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
-        PageInfo pageInfo = new PageInfo(userTmpDtos);
-
-        List<UserDto> userDtos = processUserTmpDto2UserDtoForBatchSearching(userTmpDtos);
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
+        List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
 
         pageInfo.setList(userDtos);
         return pageInfo;
@@ -300,59 +296,5 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
 
-    private List<UserDto> processUserTmpDto2UserDtoForBatchSearching(List<UserTmpDto> users) {
-        List<OrgModel> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
-        List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
-        List<UserDto> userDtos = new ArrayList<>();
-        for (UserTmpDto userTmpDto : users) {
-            UserDto userDto = new UserDto();
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(userTmpDto, userDto);
-            // 过期状态处理
-            userService.processExpiredStatus(userDto);
-
-            if (StringUtils.isNotBlank(userTmpDto.getOrgs())) {
-                List<String> userOrgIds = Arrays.asList(userTmpDto.getOrgs().split(","));
-                List<OrgModel> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
-                List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-                userDto.setOrgs(userOrgModels);
-                userDto.setOrgIds(userOrgIds);
-                userDto.setOrgpaths(allorgpath);
-            } else {
-                userDto.setOrgs(Collections.emptyList());
-                userDto.setOrgIds(Collections.emptyList());
-                userDto.setOrgpaths(Collections.emptyList());
-            }
-
-            if (StringUtils.isNotBlank(userTmpDto.getRoles())) {
-                List<String> userRoleIds = Arrays.asList(userTmpDto.getRoles().split(","));
-                List<RoleModel> userRoleModels = allRoles.stream().filter(r -> userRoleIds.contains(r.getId())).collect(Collectors.toList());
-
-                userDto.setRoles(userRoleModels);
-
-                boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));
-                boolean isSuperUser = Objects.equals(userTmpDto.getId(), AuthConstant.ROOT_USER_ID);
-
-                if (isAdmin) {
-                    userDto.setIsAdmin(1);
-                } else {
-                    userDto.setIsAdmin(0);
-                }
-
-                if (isSuperUser) {
-                    userDto.setIsSuperUser(1);
-                } else {
-                    userDto.setIsSuperUser(0);
-                }
-            } else {
-                userDto.setRoles(Collections.emptyList());
-                userDto.setIsSuperUser(0);
-                userDto.setIsAdmin(0);
-            }
-
-            userDtos.add(userDto);
-        }
-
-        return userDtos;
-    }
 
 }
