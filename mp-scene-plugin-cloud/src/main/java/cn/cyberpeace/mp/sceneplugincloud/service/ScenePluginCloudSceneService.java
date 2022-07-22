@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugincloud.service;
 import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -632,6 +633,8 @@ public class ScenePluginCloudSceneService {
                     if (result.isSuccess()) {
                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? LinkStatusConstant.Node.ON_LINE : LinkStatusConstant.Node.OFF_LINE);
                         p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? LinkStatusConstant.Connection.ON_LINE : LinkStatusConstant.Connection.OFF_LINE);
+                    } else {
+                        log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                     }
                 });
             }
