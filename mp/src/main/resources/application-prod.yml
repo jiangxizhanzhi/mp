@@ -133,6 +133,10 @@ mp:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
+    link_status_refresh_period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
+    link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
+    link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
+    link_status_hold_size: ${MP_LINK_STATUS_HOLD_SIZE:200}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
 

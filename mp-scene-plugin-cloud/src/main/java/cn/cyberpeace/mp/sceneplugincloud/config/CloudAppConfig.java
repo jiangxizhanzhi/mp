@@ -126,6 +126,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.link_status_refresh_period:5}")
     private Integer linkStatusRefreshPeriod;
 
+    @Value("${mp.sceneplugincloud.link_status_cache_seconds:600}")
+    private Integer linkStatusCacheSeconds;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

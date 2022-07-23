@@ -567,7 +567,6 @@ public class ScenePluginCloudSceneService {
 
     public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
         var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
-        SceneInstanceLinkCacheUtil.setLatestReadTime(sceneId);
         SceneInstanceLinkCacheUtil.tryStartCronRefresh();
         return new ServiceResult<>(list);
     }

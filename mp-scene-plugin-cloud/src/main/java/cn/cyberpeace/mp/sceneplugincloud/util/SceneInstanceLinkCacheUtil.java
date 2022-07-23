@@ -25,10 +25,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -40,35 +37,39 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SceneInstanceLinkCacheUtil {
 
-    private static Long CACHE_TERM_SECONDS = 300L;
-
-    private static LoadingCache<String, List<NodeLinkStatusBO>> cache = CacheBuilder.newBuilder()
-            .maximumSize(300)
-            .expireAfterWrite(CACHE_TERM_SECONDS, TimeUnit.SECONDS)
-            .build(new CacheLoader<>() {
-                @Override
-                public List<NodeLinkStatusBO> load(String sceneId) {
-                    var nodeLinkStatusList = getNodeLinkStatusList(sceneId);
-                    loadStatus(sceneId, nodeLinkStatusList);
-                    return nodeLinkStatusList;
-                }
-            });
+    private static LoadingCache<String, List<NodeLinkStatusBO>> cache = null;
 
     private static volatile boolean startCronRefresh = false;
 
+    private static volatile boolean cacheInit = false;
+
     private static ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
-    private static Map<String, Long> latestReadTime = new ConcurrentHashMap<>();
+    private static LinkStatusTaskPool taskPool;
 
-    private static LinkStatusTaskPool taskPool = LinkStatusTaskPool.getInstance();
-
-    public static void setLatestReadTime(String sceneId) {
-        latestReadTime.put(sceneId, System.currentTimeMillis());
+    public static void init() {
+        if (!cacheInit) {
+            taskPool = LinkStatusTaskPool.getInstance();
+            CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+            int cacheSeconds = config.getLinkStatusCacheSeconds();
+            log.info("init link status cache , cache times is {} seconds", cacheSeconds);
+            cache = CacheBuilder.newBuilder()
+                    .maximumSize(300)
+                    .expireAfterWrite(cacheSeconds, TimeUnit.SECONDS)
+                    .build(new CacheLoader<>() {
+                        @Override
+                        public List<NodeLinkStatusBO> load(String sceneId) {
+                            var nodeLinkStatusList = getNodeLinkStatusList(sceneId);
+                            loadStatus(sceneId, nodeLinkStatusList);
+                            return nodeLinkStatusList;
+                        }
+                    });
+            cacheInit = true;
+        }
     }
 
     public static void clear(String sceneId) {
         try {
-            latestReadTime.remove(sceneId);
             cache.invalidate(sceneId);
         } catch (Exception e) {
             log.error("clear failed ,sceneId is {}", sceneId, e);
@@ -85,12 +86,12 @@ public class SceneInstanceLinkCacheUtil {
 
     public static void tryStartCronRefresh() {
         if (!startCronRefresh) {
+            var config = BeanCommon.getBean(CloudAppConfig.class);
+            int linkStatusRefreshPeriod = config.getLinkStatusRefreshPeriod();
+            log.info("init link status cache , cache times is {} seconds", linkStatusRefreshPeriod);
             try {
-                var config = BeanCommon.getBean(CloudAppConfig.class);
-                if (config != null) {
-                    executor.scheduleAtFixedRate(getCronRefreshTask(), 1, config.getLinkStatusRefreshPeriod(), TimeUnit.SECONDS);
-                    startCronRefresh = true;
-                }
+                executor.scheduleAtFixedRate(getCronRefreshTask(), 1, config.getLinkStatusRefreshPeriod(), TimeUnit.SECONDS);
+                startCronRefresh = true;
             } catch (Exception e) {
                 log.error("failed to start schedule task for refresh link status");
             }
@@ -160,14 +161,9 @@ public class SceneInstanceLinkCacheUtil {
 
     private static Runnable getCronRefreshTask() {
         return () -> {
-            Map<String, Long> currentMap = new HashMap<>(latestReadTime);
-            for (Map.Entry<String, Long> entry : currentMap.entrySet()) {
-                if (System.currentTimeMillis() - entry.getValue() < CACHE_TERM_SECONDS * 1000) {
-                    // 一个缓存周期内有过访问,执行下更新
-                    var nodeLinkStatusList = getCached(entry.getKey());
-                    loadStatus(entry.getKey(), nodeLinkStatusList);
-                }
-            }
+            cache.asMap().entrySet().forEach(e -> {
+                loadStatus(e.getKey(), e.getValue());
+            });
         };
     }
 
