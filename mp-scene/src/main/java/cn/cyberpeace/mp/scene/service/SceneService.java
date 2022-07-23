@@ -222,16 +222,16 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotName, String description, SceneContextBO context) {
+    public ServiceResult<Boolean> snapshotElementSync(String id, String nodeId, String snapshotName, String description, SceneContextBO context,String sceneConfigId) {
         SceneHandler sceneHandler = new SceneHandler(id, null, false, context);
         sceneHandler.setRealTimeUpdate(true);
-        sceneHandler.snapshotElement(nodeId, snapshotName, description);
+        sceneHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneId, String nodeId) {
+    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId, String nodeId) {
         var list = sceneElementSnapshotMapper.list(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getScene, sceneId)
+                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
                 .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
                 .reverseOrderBy(SceneElementSnapshotModel::getPk));
         return new ServiceResult<>(list);

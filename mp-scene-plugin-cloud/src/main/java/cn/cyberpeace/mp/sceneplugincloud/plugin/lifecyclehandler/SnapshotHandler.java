@@ -47,7 +47,7 @@ public class SnapshotHandler extends HandlerCommon {
         super(pluginHandler, ResumeTaskPool.getInstance(), event);
     }
 
-    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName, String desc) {
+    public void snapshotElement(CloudPluginSceneElementBO element, String snapshotName, String desc,String sceneConfigId) {
         String nodeId = element.getSrcElement().getId();
         Integer virtualType = element.getVirtualType();
         if (virtualType == null) {
@@ -58,17 +58,17 @@ public class SnapshotHandler extends HandlerCommon {
         if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_VIRTUAL_MACHINE));
             runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_VIRTUAL_MACHINE, () -> {
-                this.snapshot(element, snapshotName, desc);
+                this.snapshot(element, snapshotName, desc,sceneConfigId);
             });
         } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SNAPSHOT, Arrays.asList(ElementProcess.SNAPSHOT_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.SNAPSHOT, ElementProcess.SNAPSHOT_CONTAINER, () -> {
-                this.snapshot(element, snapshotName, desc);
+                this.snapshot(element, snapshotName, desc,sceneConfigId);
             });
         }
     }
 
-    private void snapshot(CloudPluginSceneElementBO element, String snapshotName, String desc) {
+    private void snapshot(CloudPluginSceneElementBO element, String snapshotName, String desc,String sceneConfigId) {
         // 调用云平台接口 snapshot
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, desc, extInfo);
@@ -79,6 +79,7 @@ public class SnapshotHandler extends HandlerCommon {
         element.setImage(result.getImageName());
         getPluginHandler().updateElements(element.getSrcElement().getId());
         var model = snapshotBO.toModel();
+        model.setSceneConfig(sceneConfigId);
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
         model.setSnapshotUuid(result.getUuid());
