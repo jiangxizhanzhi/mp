@@ -727,8 +727,8 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId) {
-        var listSnapshot = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId) {
+        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
         if (CollectionUtils.isEmpty(listSnapshot)) {
             return new ServiceResult<>(true);
         }
