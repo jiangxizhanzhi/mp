@@ -985,7 +985,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
             if (result) {
                 String sceneId = this.getSceneId(id);
-                var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+                var list = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
                 if (CollectionUtils.isNotEmpty(list)) {
                     var csceneInstance = this.get(id).asResult().getData();
                     csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
