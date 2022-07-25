@@ -25,7 +25,7 @@ public class WazuhFileRoot {
     private String id;
     private Date timestamp;
 
-    private WindowsData data;
+    private CommonData data;
 
     public Syscheck getSyscheck() {
         return syscheck;
@@ -429,8 +429,10 @@ public class WazuhFileRoot {
     }
 
     @Data
-    public static class WindowsData {
+    public static class CommonData {
         private Win win;
+
+        private Sca sca;
 
         @Data
         public static class Win {
@@ -478,6 +480,44 @@ public class WazuhFileRoot {
                 private String processID;
                 private String severityValue;
                 private String providerName;
+            }
+        }
+    }
+
+    @Data
+    public static class Sca {
+        private String score;
+        @JSONField(name = "total_checks")
+        private String totalChecks;
+        private String file;
+        @JSONField(name = "policy_id")
+        private String policyId;
+        private String invalid;
+        private String description;
+        @JSONField(name = "scan_id")
+        private String scanId;
+        private String passed;
+        private String failed;
+        private String type;
+        private String policy;
+        private Check check;
+
+        @Data
+        public static class Check {
+            private String remediation;
+            private List<String> registry;
+            private String reason;
+            private Compliance compliance;
+            private String description;
+            private String id;
+            private String title;
+            private String rationale;
+            private String status;
+
+            @Data
+            public static class Compliance {
+                @JSONField(name = "cis_csc")
+                private String cisCsc;
             }
         }
     }
