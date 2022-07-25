@@ -114,6 +114,13 @@ public class SceneInstanceLinkCacheUtil {
                 nodeLinkStatusList.add(nodeStatus);
                 if (CollectionUtils.isNotEmpty(e.getPorts())) {
                     for (var p : e.getPorts()) {
+                        if (StringUtils.isEmpty(nodeStatus.getDefaultNetworkId())) {
+                            // 设置一个默认网络,如果没有连线,则使用该网络查询状态
+                            var cloudPort = handler.getPort(p.getId());
+                            if (cloudPort != null && cloudPort.getAuxiliaryNetworkId() != null) {
+                                nodeStatus.setDefaultNetworkId(cloudPort.getAuxiliaryNetworkId());
+                            }
+                        }
                         var connectPort = sceneHandler.getPortIdConnectedPortIdMap().get(p.getId());
                         if (connectPort != null) {
                             String connectionId = null;
@@ -140,16 +147,31 @@ public class SceneInstanceLinkCacheUtil {
         List<Runnable> tasks = new ArrayList<>();
         Remote remote = new Remote();
         for (var n : nodeLinkStatusList) {
-            for (var p : n.getConnectionStatusList()) {
+            if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
+                for (var p : n.getConnectionStatusList()) {
+                    tasks.add(() -> {
+                        LinkStatusParams params = new LinkStatusParams();
+                        params.setInstanceId(n.getResourceId());
+                        params.setNetworkId(p.getNetworkId());
+                        var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                        }, true);
+                        if (result.isSuccess()) {
+                            n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
+                            p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
+                        } else {
+                            log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                        }
+                    });
+                }
+            } else if (StringUtils.isNotEmpty(n.getDefaultNetworkId())) {
                 tasks.add(() -> {
                     LinkStatusParams params = new LinkStatusParams();
                     params.setInstanceId(n.getResourceId());
-                    params.setNetworkId(p.getNetworkId());
+                    params.setNetworkId(n.getDefaultNetworkId());
                     var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                     }, true);
                     if (result.isSuccess()) {
                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
-                        p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
                     } else {
                         log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                     }
