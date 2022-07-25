@@ -622,16 +622,31 @@ public class ScenePluginCloudSceneService {
         List<Runnable> tasks = new ArrayList<>();
         Remote remote = new Remote();
         for (var n : list) {
-            for (var p : n.getConnectionStatusList()) {
+            if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
+                for (var p : n.getConnectionStatusList()) {
+                    tasks.add(() -> {
+                        LinkStatusParams params = new LinkStatusParams();
+                        params.setInstanceId(n.getResourceId());
+                        params.setNetworkId(p.getNetworkId());
+                        var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                        }, true);
+                        if (result.isSuccess()) {
+                            n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? LinkStatusConstant.Node.ON_LINE : LinkStatusConstant.Node.OFF_LINE);
+                            p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? LinkStatusConstant.Connection.ON_LINE : LinkStatusConstant.Connection.OFF_LINE);
+                        } else {
+                            log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                        }
+                    });
+                }
+            } else {
                 tasks.add(() -> {
                     LinkStatusParams params = new LinkStatusParams();
                     params.setInstanceId(n.getResourceId());
-                    params.setNetworkId(p.getNetworkId());
+                    params.setNetworkId(n.getDefaultNetworkId());
                     var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                     }, true);
                     if (result.isSuccess()) {
                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? LinkStatusConstant.Node.ON_LINE : LinkStatusConstant.Node.OFF_LINE);
-                        p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? LinkStatusConstant.Connection.ON_LINE : LinkStatusConstant.Connection.OFF_LINE);
                     } else {
                         log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                     }
