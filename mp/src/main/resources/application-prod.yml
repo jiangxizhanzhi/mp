@@ -205,6 +205,7 @@ mp:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
   scene:
     gateway_types: ${GATEWAY_TYPES:2,3}
+    access-mode-ip: ${MP_ACCESS_MODE_IP:}
 
 management:
   endpoints:
