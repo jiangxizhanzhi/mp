@@ -203,39 +203,44 @@ public class DevopsTargetController {
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
+            List<Integer> secondCategories = typeConvertModels.stream()
+                    .map(model -> model.getId())
+                    .collect(Collectors.toList());
+            request.setCategory(firstId);
+            request.setSecondCategories(secondCategories);
+            request.setPage(null);
+            request.setPerPage(null);
+            BasePageBO<DeviceTargetPO> targetSceneConvertModel = targetConverter.page(new ImagePageDTO(request));
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
+                continue;
+            }
+            List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getList();
 
-            for (TypeConvertModel second : typeConvertModels){
-                request.setCategory(firstId);
-                request.setSecondCategory(second.getId());
-                request.setPage(null);
-                request.setPerPage(null);
-                BasePageBO<DeviceTargetPO> targetSceneConvertModel = targetConverter.page(new ImagePageDTO(request));
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
-                    continue;
-                }
-                List<DeviceTargetPO> deviceTargetPOList = targetSceneConvertModel.getList();
-
-                List<DeviceTargetVO> deviceTargetVOList = deviceTargetPOList.stream().map(v -> {
-                    DeviceTargetVO vo = new DeviceTargetVO();
-                    vo.setUuid(v.getUuid());
-                    vo.setName(v.getName());
-                    vo.setLogo(v.getLogo());
-                    vo.setRole(v.getRole());
-                    vo.setCategory(v.getMainCategory());
-                    vo.setSecondCategory(v.getSubCategory());
-                    vo.setThirdCategory(v.getThirdCategory());
-                    vo.setImageType(v.getImageType());
-                    return vo;
-                }).collect(Collectors.toList());
+            List<DeviceTargetVO> deviceTargetVOList = deviceTargetPOList.stream().map(v -> {
+                DeviceTargetVO vo = new DeviceTargetVO();
+                vo.setUuid(v.getUuid());
+                vo.setName(v.getName());
+                vo.setLogo(v.getLogo());
+                vo.setRole(v.getRole());
+                vo.setCategory(v.getMainCategory());
+                vo.setSecondCategory(v.getSubCategory());
+                vo.setThirdCategory(v.getThirdCategory());
+                vo.setImageType(v.getImageType());
+                return vo;
+            }).collect(Collectors.toList());
+            typeConvertModels.forEach(typeConvertModel -> {
                 DeviceTargetByTypeVO targetScene = new DeviceTargetByTypeVO();
                 targetScene.setFirstTypeId(firstId);
                 targetScene.setFirstTypeName(first.getName());
-                Integer secondId = second.getId();
-                targetScene.setSecondTypeId(secondId);
-                targetScene.setSecondTypeName(second.getName());
-                targetScene.setDeviceList(deviceTargetVOList);
-                targetScenes.add(targetScene);
-            }
+                targetScene.setSecondTypeId(typeConvertModel.getId());
+                targetScene.setSecondTypeName(typeConvertModel.getName());
+                targetScene.setDeviceList(deviceTargetVOList.stream()
+                        .filter(vo -> vo.getSecondCategory().equals(typeConvertModel.getId()))
+                        .collect(Collectors.toList()));
+                if (CollectionUtils.isNotEmpty(targetScene.getDeviceList())) {
+                    targetScenes.add(targetScene);
+                }
+            });
         }
         return new Result(new ListResult<>(targetScenes));
     }

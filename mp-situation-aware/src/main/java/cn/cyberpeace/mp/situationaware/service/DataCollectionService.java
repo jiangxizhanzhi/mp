@@ -254,7 +254,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        if (!CollUtil.isEmpty(probeIds)) {
+        if (CollUtil.isNotEmpty(probeIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
         }
         // 按时间降序
