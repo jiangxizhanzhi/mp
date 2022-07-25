@@ -38,7 +38,7 @@ public class OrgUserPageRequest extends PageRequest {
     public void ensure() {
         super.ensure();
         if (super.getOrders() == null || super.getOrders().length == 0) {
-            super.setOrders(new String[]{"-update_time", "username"});
+            super.setOrders(new String[]{"-u.update_time", "u.username"});
         }
     }
 }

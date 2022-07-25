@@ -129,6 +129,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.enable_reallocate_ip_ports:false}")
     private Boolean enableReallocateIpPorts;
 
+    @Value("${mp.sceneplugincloud.enable_force_delete:true}")
+    private Boolean enableForceDelete;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

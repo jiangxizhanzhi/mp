@@ -44,7 +44,6 @@ public class AuthUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("load users by username:{}", username);
         if (StringUtils.isEmpty(username)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
@@ -67,7 +66,6 @@ public class AuthUserDetailsService implements UserDetailsService {
 
 
     public UserDetails loadUserByMobile(String mobile) {
-        log.info("mobile:{}", mobile);
         if (StringUtils.isEmpty(mobile)) {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
@@ -99,7 +97,6 @@ public class AuthUserDetailsService implements UserDetailsService {
         roles.forEach(r -> {
             authoritySet.add(new SimpleGrantedAuthority("ROLE_" + r.getIdentifier()));
         });
-
 
         // 加载权限
         List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);

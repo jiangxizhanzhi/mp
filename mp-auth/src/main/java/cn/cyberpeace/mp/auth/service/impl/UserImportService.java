@@ -49,8 +49,6 @@ public class UserImportService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<OrgUserModel> orgUserModels) {
-        log.info("doImport... userModels.size:{}, userRoleModels.size:{}, orgUserModels.size:{}", userModels.size(), userRoleModels.size(), orgUserModels.size());
-
         if (CollectionUtil.isNotEmpty(userModels)) {
             ServiceResult<Integer> re = userService.bulkCreateWithPasswordPreSet(userModels);
             if (!Objects.equals(userModels.size(), re.getSource())) {

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.BaseCommon;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -632,6 +632,8 @@ public class ScenePluginCloudSceneService {
                     if (result.isSuccess()) {
                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? LinkStatusConstant.Node.ON_LINE : LinkStatusConstant.Node.OFF_LINE);
                         p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? LinkStatusConstant.Connection.ON_LINE : LinkStatusConstant.Connection.OFF_LINE);
+                    } else {
+                        log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                     }
                 });
             }
@@ -725,8 +727,8 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId) {
-        var listSnapshot = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId) {
+        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
         if (CollectionUtils.isEmpty(listSnapshot)) {
             return new ServiceResult<>(true);
         }
@@ -767,8 +769,9 @@ public class ScenePluginCloudSceneService {
             params.setSnapshotUuid(snapshot.getSnapshotUuid());
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
-//            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-//            }, true);
+            // todo
+            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
             sceneService.deleteElementSnapshot(snapshot.getId());
         }
         return new ServiceResult<>(true);

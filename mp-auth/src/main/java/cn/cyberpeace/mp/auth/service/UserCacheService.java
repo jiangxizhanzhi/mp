@@ -42,14 +42,14 @@ public class UserCacheService {
     private CacheManager cacheManager10M;
 
     public void evictAllUserCache() {
-        log.info("evict user releated cache...");
+        log.debug("evict user releated cache...");
         for (String cacheValue : USER_CACHE_VALUES) {
             clean(cacheValue);
         }
     }
 
     public void evictAllTargetsCache() {
-        log.info("evict targets releated cache...");
+        log.debug("evict targets releated cache...");
         for (String cacheValue : TARGET_CACHE_VALUES) {
             clean(cacheValue);
         }
@@ -59,7 +59,7 @@ public class UserCacheService {
         Cache cache20s = cacheManager20s.getCache(cacheValue);
         Cache cache45s = cacheManager45s.getCache(cacheValue);
         Cache cache10M = cacheManager10M.getCache(cacheValue);
-        log.info("cache20s:{}, cache45s:{}, cache10M:{}", cache20s, cache45s, cache10M);
+        log.debug("cache20s:{}, cache45s:{}, cache10M:{}", cache20s, cache45s, cache10M);
 
         if (Objects.nonNull(cache20s)) {
             cache20s.clear();

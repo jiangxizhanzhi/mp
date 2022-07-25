@@ -38,8 +38,6 @@ public class UserOnlineRecordScheduleService {
 
     private static ExecutorService threadPool = null;
 
-    public static int REALTIME_ONLINE_USER_CNT = 0;
-
     @Autowired
     private UserHeartbeatService heartbeatService;
 
@@ -56,8 +54,6 @@ public class UserOnlineRecordScheduleService {
         }
         log.info("start online record task...");
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
-        REALTIME_ONLINE_USER_CNT = heartbeatMap.size();
-        log.info("REALTIME_ONLINE_USER_CNT:{}", REALTIME_ONLINE_USER_CNT);
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             UserModel userModel = entry.getKey();
             String userId = userModel.getId();
@@ -72,9 +68,12 @@ public class UserOnlineRecordScheduleService {
 
         log.info("finish online record task...");
         log.info("heartbeatMap.size:{} after...", heartbeatMap.size());
-
     }
 
+
+    public int getOlUserCnt() {
+        return heartbeatService.getHeartbeatMap().size();
+    }
 
     /**
      * 检查状态是否过期，过期状态更新

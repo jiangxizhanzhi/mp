@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -13,6 +14,7 @@ import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -50,6 +52,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Autowired
     private OrgService orgService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     private UserService userService;
@@ -129,8 +134,15 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
 
-        List<UserModel> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
-        return users;
+        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+
+        List<UserModel> userModels = users.stream().map(u -> {
+            UserModel userModel = new UserModel();
+            BeanUtils.copyProperties(u, userModel);
+            return userModel;
+        }).collect(Collectors.toList());
+
+        return userModels;
     }
 
     @Override
@@ -226,8 +238,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
             }
         }
 
-        log.info("orgIds: {}", orgIds);
-
         ArrayList<String> orders = null;
         if (req.getOrders() != null && req.getOrders().length > 0) {
             orders = CollectionUtil.newArrayList(req.getOrders());
@@ -249,13 +259,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-        List<UserModel> users = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
-        PageInfo pageInfo = new PageInfo(users);
-
-        List<UserDto> userDtos = users.stream().map(u -> {
-            UserDto userDto = userService.userModel2UserDto(u);
-            return userDto;
-        }).collect(Collectors.toList());
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
+        List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
 
         pageInfo.setList(userDtos);
         return pageInfo;
@@ -288,6 +294,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         userCacheService.evictAllUserCache();
         return true;
     }
+
 
 
 }

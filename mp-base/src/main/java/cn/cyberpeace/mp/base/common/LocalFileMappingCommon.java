@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
 import cn.hutool.core.io.FileUtil;
-import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,14 +60,11 @@ public class LocalFileMappingCommon {
     }
 
     public static List<LocalFileMappingModel> syncDir(String group, String localDir) {
-        log.info("syncDir:" + localDir);
         List<String> fileNames = FileUtil.listFileNames(localDir);
-        log.info("syncDir:" + JSONObject.toJSONString(fileNames));
         Map<String, String> namePathMap = new LinkedHashMap<>();
         fileNames.forEach(fileName -> {
             namePathMap.put(fileName, StringUtils.joinWith(FileUtil.FILE_SEPARATOR, localDir, fileName));
         });
-        log.info("syncDir:" + JSONObject.toJSONString(namePathMap));
         List<LocalFileMappingModel> mappings = syncMap(group, namePathMap);
         eventPublisher.publishEvent(new LocalFileSyncSuccessEvent(mappings));
         return mappings;

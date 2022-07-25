@@ -36,6 +36,7 @@ import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
@@ -151,7 +152,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private CsceneService csceneService;
 
     @Resource
-    private CsceneSpecialService csceneSpecialService ;
+    private CsceneSpecialService csceneSpecialService;
+
+    @Resource
+    private CsceneMapper csceneMapper;
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -177,6 +181,17 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var csceneInstance = csceneInstanceResult.getObj();
         var sceneId = csceneInstance.getScene();
         return sceneId;
+    }
+
+    public String getSceneConfigId(String csceneId) {
+        var csceneInstanceResult = get(csceneId).getSource();
+        if (csceneInstanceResult == null) {
+            return null;
+        }
+        var csceneInstance = csceneInstanceResult.getObj();
+        var sceneId = csceneInstance.getCscene();
+        var cscene = csceneService.get(csceneInstance.getCscene()).getSource();
+        return cscene.getObj().getSceneConfig();
     }
 
     private List<CsceneInstanceModel> getCsceneInstanceObjs(List<String> csceneIds) {
@@ -966,10 +981,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         ElementTaskPool.getInstance().executeTask(() -> {
-            boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description);
+            String sceneConfigId = this.getSceneConfigId(id);
+            boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
             if (result) {
                 String sceneId = this.getSceneId(id);
-                var list = sceneService.getElementSnapshots(sceneId, nodeId).getSource();
+                var list = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
                 if (CollectionUtils.isNotEmpty(list)) {
                     var csceneInstance = this.get(id).asResult().getData();
                     csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
@@ -1004,10 +1020,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
+        // todo 合成一次查询
         String sceneId = getSceneId(csceneId);
+        String sceneConfigId = getSceneConfigId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshotId);
+        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshotId);
     }
 }

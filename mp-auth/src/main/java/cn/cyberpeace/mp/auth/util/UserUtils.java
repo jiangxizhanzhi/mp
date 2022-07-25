@@ -8,12 +8,9 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
-import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -26,7 +23,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -96,14 +92,12 @@ public class UserUtils {
         if (Objects.isNull(authentication)) {
             return null;
         }
-        log.info("authentication type:{}", authentication.getClass().getSimpleName());
         Object principal = authentication.getPrincipal();
         if (principal instanceof AuthUserDetails) {
             user = ((AuthUserDetails) principal).getUser();
         }
 
         if (principal instanceof ClientDetailsModel) {
-            log.warn("Login account type is Client, return null!");
             user = null;
         }
 
@@ -119,12 +113,6 @@ public class UserUtils {
 
         Collection authorities = authentication.getAuthorities();
         Set<String> authoritySet = AuthorityUtils.authorityListToSet(authorities);
-        //Set<GrantedAuthority> authoritySet = authorities.stream().collect(Collectors.toSet());
-
-        //if (CollectionUtil.isNotEmpty(authoritySet)) {
-        //    Set<String> set = authoritySet.stream().map(a -> a.getAuthority()).collect(Collectors.toSet());
-        //    return set;
-        //}
         return authoritySet;
     }
 

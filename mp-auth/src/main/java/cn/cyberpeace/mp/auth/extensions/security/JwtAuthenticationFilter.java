@@ -99,12 +99,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Cache tokenCache = cacheManager.getCache("_token");
         String jwt = tokenCache.get(md5, String.class);
         if (StringUtils.isBlank(jwt)) {
-            log.info("hit cache... md5:{}, jwt:{}", md5, jwt);
+            log.debug("hit cache... md5:{}, jwt:{}", md5, jwt);
             Date date = JwtUtils.getTokenExpiredTime(token);
             if (Objects.isNull(date)) {
                 return;
             }
-            log.info("refreshToken, username:{}", userModel.getUsername());
+            log.debug("refreshToken, username:{}", userModel.getUsername());
             LocalDateTime expiredTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(expiredTime.minusHours(6)) && now.isBefore(expiredTime)) {

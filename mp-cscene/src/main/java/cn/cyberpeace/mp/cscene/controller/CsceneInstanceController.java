@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -28,11 +29,15 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.enums.CsceneStatusEnum;
+import cn.cyberpeace.mp.cscene.enums.CsceneTypeEnum;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
+import cn.cyberpeace.mp.cscene.vo.CsceneStatusVO;
+import cn.cyberpeace.mp.cscene.vo.CsceneTypeVO;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -61,6 +66,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -677,5 +683,37 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping("/upload_element_file")
     public ServiceResult<Boolean> uploadElementFile(@RequestBody CsceneInstanceNodeFileActionRequest request) {
         return modelService.uploadElementFile(request.getId(), request.getNodeId(), request.getFilePath(), request.getFilename(), request.getDestPath(), request.getContext()).asResult();
+    }
+
+    @GetMapping("/status")
+    @ApiOperation(value = "查询靶场监控的场景实例状态")
+    public ServiceResult<CsceneStatusVO> getSceneStatus() {
+        List<CsceneStatusVO> statusVOList = new ArrayList<>();
+        for (CsceneStatusEnum statusEnum : CsceneStatusEnum.values()) {
+            String name = MessageCommon.get(statusEnum.getName());
+            statusVOList.add(
+                    CsceneStatusVO.builder()
+                            .name(name)
+                            .code(statusEnum.getCode())
+                            .build()
+            );
+        }
+        return ServiceResult.success(statusVOList);
+    }
+
+    @GetMapping("/types")
+    @ApiOperation(value = "查询靶场监控的场景实例类型")
+    public ServiceResult<CsceneTypeVO> getSceneType() {
+        List<CsceneTypeVO> typeVOList = new ArrayList<>();
+        for (CsceneTypeEnum typeEnum : CsceneTypeEnum.values()) {
+            String name = MessageCommon.get(typeEnum.getName());
+            typeVOList.add(
+                    CsceneTypeVO.builder()
+                            .name(name)
+                            .code(typeEnum.getCode())
+                            .build()
+            );
+        }
+        return ServiceResult.success(typeVOList);
     }
 }

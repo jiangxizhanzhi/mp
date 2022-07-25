@@ -88,7 +88,6 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
 
     protected void additionalAuthenticationChecks(UserDetails userDetails, MobilePasswordAuthenticationToken authentication) throws AuthenticationException {
         if (authentication.getCredentials() == null) {
-            log.info("Failed to authenticate since no credentials provided");
             throw new BadCredentialsException(this.messages
                     .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }

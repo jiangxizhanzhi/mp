@@ -84,7 +84,7 @@ public class SnapshotService extends BaseCpService {
         jsonObject.put("device_uuid", request.getDeviceUuid());
         jsonObject.put("snapshot_uuid", request.getSnapshotUuid());
         jsonObject.put("snapshot_name", request.getSnapshotName());
-        BaseCloudPlatformResult model = super.sendDelete(CPCLOUD_DEVICE + URL_VERSION + DEVICE_SNAPSHOT, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        BaseCloudPlatformResult model = super.sendDelete(URL_VERSION + DEVICE_SNAPSHOT, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
         return model;
     }
 

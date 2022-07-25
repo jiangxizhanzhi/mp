@@ -275,7 +275,6 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
         }
 
         List<Object> condList = (List<Object>) ClassUtils.getFieldValue(AndCondition.class, "conds", andCondition);
-        log.info("before convert conds:{}", condList);
 
         assert condList != null;
         condList.forEach(c -> {
@@ -288,7 +287,6 @@ public interface BasePermissionMapper<P extends BasePermissionModel, T extends B
             }
         });
 
-        log.info("after convert conds:{}", condList);
         return andCondition;
 
     }

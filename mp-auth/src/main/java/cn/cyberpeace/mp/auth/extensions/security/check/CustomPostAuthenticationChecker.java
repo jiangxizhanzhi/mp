@@ -17,7 +17,6 @@ public class CustomPostAuthenticationChecker implements UserDetailsChecker {
     @Override
     public void check(UserDetails user) {
         if (!user.isCredentialsNonExpired()) {
-            log.info("Failed to authenticate since user account credentials have expired");
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_CREDENTIALS_EXPIRED);
         }
     }

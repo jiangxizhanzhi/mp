@@ -14,4 +14,7 @@ public final class ControllerConstant {
 
     public static final String ERROR_CODE_PREFIX = "devops.error_code.";
 
+    public static final String REAL_EQUIPMENT_USE_STATUS_PREFIX = "devops.cluster.real.equipment.use.status";
+    public static final String REAL_EQUIPMENT_POSITION_STATUS_PREFIX = "devops.cluster.real.equipment.position.status";
+
 }

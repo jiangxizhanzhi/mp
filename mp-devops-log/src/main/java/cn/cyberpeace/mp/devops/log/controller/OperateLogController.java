@@ -1,16 +1,21 @@
 package cn.cyberpeace.mp.devops.log.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.enums.OpModuleEnum;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devops.log.enums.OpTypeEnum;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
+import cn.cyberpeace.mp.devops.log.vo.OpModuleVO;
+import cn.cyberpeace.mp.devops.log.vo.OpTypeVO;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -77,7 +82,28 @@ public class OperateLogController {
             list.add(operationLog);
         }
         return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
+    }
 
+    @GetMapping("/modules")
+    @ApiOperation(value = "查询审计日志操作模块")
+    public ServiceResult<OpModuleVO> getModules() {
+        List<OpModuleVO> opModuleVOList = new ArrayList<>();
+        for (OpModuleEnum moduleEnum : OpModuleEnum.values()) {
+            String name = MessageCommon.get(moduleEnum.getName());
+            opModuleVOList.add(OpModuleVO.builder().name(name).code(moduleEnum.getCode()).build());
+        }
+        return ServiceResult.success(opModuleVOList);
+    }
+
+    @GetMapping("/types")
+    @ApiOperation(value = "查询审计日志操作类型")
+    public ServiceResult<OpTypeVO> getTypes() {
+        List<OpTypeVO> opTypeVOList = new ArrayList<>();
+        for (OpTypeEnum opTypeEnum : OpTypeEnum.values()) {
+            String name = MessageCommon.get(opTypeEnum.getName());
+            opTypeVOList.add(OpTypeVO.builder().name(name).code(opTypeEnum.getCode()).build());
+        }
+        return ServiceResult.success(opTypeVOList);
     }
 
 

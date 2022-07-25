@@ -17,7 +17,7 @@ import javax.annotation.Resource;
  */
 @Component
 @Slf4j
-public class ScenePluginCloudSceneCronJob {
+public class ScenePluginCloudSceneCronService {
     @Resource
     private CsceneService csceneService;
 
@@ -30,8 +30,7 @@ public class ScenePluginCloudSceneCronJob {
     @Resource
     private ClearService clearService;
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void scheduleNode() {
+    public void action() {
         if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
             log.info("scene cron job is not enable");
             return;
