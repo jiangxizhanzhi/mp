@@ -1171,6 +1171,13 @@ public class DataCollectionService extends CollectionBaseService {
             builder.message(wazuhFileRoot.getData().getWin().getSystem().getMessage());
         }
 
+        if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getSca())) {
+            builder.message(wazuhFileRoot.getData().getSca().getDescription());
+            if (Objects.nonNull(wazuhFileRoot.getData().getSca().getCheck())) {
+                builder.message(wazuhFileRoot.getData().getSca().getCheck().getDescription());
+            }
+        }
+
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
 //            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
 //                    .agentName(wazuhFileRoot.getAgent().getName())

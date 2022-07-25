@@ -36,6 +36,11 @@ public class ImagePageDTO extends BasePageDTO{
     private Integer subCategory;
 
     /**
+     * 子分类集合
+     */
+    private List<Integer> subCategories;
+
+    /**
      * 三级分类
      */
     private Integer thirdCategory;
@@ -203,6 +208,7 @@ public class ImagePageDTO extends BasePageDTO{
         this.setTargetCategory(request.getTargetCategory());
         this.setMainCategory(request.getCategory());
         this.setSubCategory(request.getSecondCategory());
+        this.setSubCategories(request.getSecondCategories());
         this.setThirdCategory(request.getThirdCategory());
         this.setImageType(Objects.nonNull(request.getImageType()) ? request.getImageType().toValue() : "");
         this.setName(request.getName());

@@ -27,6 +27,11 @@ public class TargetSceneRequest extends BasePageRequest implements Serializable 
     @ApiModelProperty(value = "系统二级类型")
     private Integer secondCategory;
 
+    /**
+     * 系统子类型集合
+     */
+    @ApiModelProperty(value = "系统二级类型集合")
+    private List<Integer> secondCategories;
 
     /**
      * 名称
