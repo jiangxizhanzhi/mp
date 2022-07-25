@@ -94,6 +94,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -1022,10 +1023,51 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
         // todo 合成一次查询
         String sceneId = getSceneId(csceneId);
-        String sceneConfigId = getSceneConfigId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshotId);
+
+        String sceneConfigId = getSceneConfigId(csceneId);
+        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
+        if (CollectionUtils.isEmpty(listSnapshot)) {
+            return new ServiceResult<>(true);
+        }
+
+        var filteredSnapshots = listSnapshot.stream()
+                .filter(s -> StringUtils.equals(s.getSnapshotUuid(), snapshotId))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(filteredSnapshots)) {
+            return new ServiceResult<>(true);
+        }
+
+        var snapshot = filteredSnapshots.get(0);
+        String image = snapshot.getAddress();
+
+        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
+        var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
+        if (CollectionUtils.isNotEmpty(configNames)) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(configNames, ",")));
+        }
+
+        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image }).getSource();
+        var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
+        if (CollectionUtils.isNotEmpty(instanceNames)) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(instanceNames, ",")));
+        }
+
+        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName());
+    }
+
+    private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
+        if (CollectionUtils.isEmpty(usingList)) {
+            return null;
+        }
+        Set<String> names = new HashSet<>();
+        for (var used : usingList) {
+            if (names.size() < nameSize) {
+                names.add(getName.apply(used));
+            }
+        }
+        return new ArrayList<>(names);
     }
 }
