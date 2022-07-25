@@ -93,7 +93,6 @@ public class MobilePasswordAuthenticationProvider implements AuthenticationProvi
         }
         String presentedPassword = authentication.getCredentials().toString();
         if (!this.passwordEncoder.matches(presentedPassword, userDetails.getPassword())) {
-            log.info("Failed to authenticate since password does not match stored value");
             throw new BadCredentialsException(this.messages
                     .getMessage("AbstractUserDetailsAuthenticationProvider.badCredentials", "Bad credentials"));
         }

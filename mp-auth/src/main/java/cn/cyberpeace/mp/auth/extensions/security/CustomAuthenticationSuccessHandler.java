@@ -124,9 +124,8 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
                 result = ServiceResult.builder().source(loginResp).build();
 
-                // 首次登陆，需要修改密码
+                // 首次登陆，需要修改密码, 返回code:MP-110005 提示前端弹出修改初始密码的页面
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
-                    log.info("user first login, should update password!");
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
             }

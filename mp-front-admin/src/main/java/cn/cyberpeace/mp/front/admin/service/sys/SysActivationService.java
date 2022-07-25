@@ -166,7 +166,6 @@ public class SysActivationService {
 
 
     public String getValueByKey(String key) {
-        log.info(key);
         ActivationResponse activationResponse = status();
         if (Objects.isNull(activationResponse) || !Objects.equals(AdminConstant.STATUS_ACTIVITED, activationResponse.getIsActived())) {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
@@ -323,12 +322,10 @@ public class SysActivationService {
         String salt = RandomUtil.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
-        log.info("salt:{}", salt);
 
         MD5 md5 = MD5.create();
         md5.setSalt(salt.getBytes());
         String md5Str = md5.digestHex(content);
-        log.info("md5Str:{}", md5Str);
 
         String encryptedContent = EncryptUtils.desEncrypt(content);
         String finalContent = salt + encryptedContent;
