@@ -83,7 +83,8 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
             recordLogoutLog(user, request);
             userEventPublisher.publishEvent(new UserLogoutEvent(JsonCommon.beanToMap(user)));
             try {
-                HttpUtils.sendGet(hldUsersUrl + "/xinan-server/login/logoutByUserId?userId=" + user.getId());
+                var result = HttpUtils.sendGet(hldUsersUrl + "/xinan-server/login/logoutByUserId?userId=" + user.getId());
+                log.info("hld logout result: {}", result);
             } catch (Exception e) {
                 log.error("hld logout error {}", ExceptionUtils.getStackTrace(e));
             }
