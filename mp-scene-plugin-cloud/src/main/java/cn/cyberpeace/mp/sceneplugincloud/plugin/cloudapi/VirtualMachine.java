@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.common.CloudClient;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ComInfoGetResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.CommonQueryParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ConsoleInfoGetResult;
@@ -163,6 +165,14 @@ public class VirtualMachine extends CloudClient {
         param.setHostname(hostname);
         return getHttpClient().get(CloudUrlConstant.CONSOLE_INFO_GET_URL, param,
                 ConsoleInfoGetResult.class);
+    }
+
+    public ComInfoGetResult getComInfo(String instanceId, String hostname) {
+        var param = new ComInfoGetParam();
+        param.setInstanceUuid(instanceId);
+        param.setHostname(hostname);
+        return getHttpClient().get(CloudUrlConstant.COM_INFO_GET_URL, param,
+                ComInfoGetResult.class);
     }
 
     private boolean doAction(String instanceId, CloudHttpData httpData) {
