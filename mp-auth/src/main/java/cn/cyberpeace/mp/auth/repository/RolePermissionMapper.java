@@ -20,7 +20,7 @@ import java.util.List;
 @ModelClass(RolePermissionModel.class)
 public interface RolePermissionMapper extends BaseModelMapper<RolePermissionModel> {
 
-    List<TargetModel> listTargetsByRoleId(@Param("roleId") String roleId);
+    List<TargetModel> listTargetsByRoleId(@Param("tenant") String tenant, @Param("roleId") String roleId);
 
     int deleteByOwner(@Param("owner") String owner);
 

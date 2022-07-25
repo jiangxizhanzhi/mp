@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -26,16 +27,17 @@ import cn.hutool.core.lang.Assert;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -83,15 +85,25 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
         List<RoleModel> roles = getModelMapper().listRolesByUserIds(userIds);
-
         return roles;
     }
 
     @Override
     public List<UserModel> listUsersByRoleIdNoRestrict(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-        List<UserModel> users = getModelMapper().listUsersByRoleId(roleId);
-        return users;
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsersByRoleId(roleId);
+        if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
+            return Collections.emptyList();
+        }
+
+        List<UserModel> userModels =
+            userOrgRoleDtos.stream().map(uor -> {
+                UserModel userModel = new UserModel();
+                BeanUtils.copyProperties(uor, userModel);
+                return userModel;
+            }).collect(Collectors.toList());
+
+        return userModels;
     }
 
     @Override
@@ -116,12 +128,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             new PageInfo<>(Collections.emptyList());
         }
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
-        List<UserModel> userModels = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
-        PageInfo pageInfo = new PageInfo(userModels);
-        List<UserDto> userDtos = new ArrayList<>();
-        if (CollectionUtil.isNotEmpty(userModels)) {
-            userModels.forEach(u -> userDtos.add(userService.userModel2UserDto(u)));
-        }
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
+        PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
+        List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
         pageInfo.setList(userDtos);
         return pageInfo;
     }

@@ -620,13 +620,30 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 modifyRequest.setScriptParamModels(scriptParamModels);
             }
 
+            String suffix = null;
+            if (Objects.nonNull(modifyRequest.getSuffix())) {
+                suffix = modifyRequest.getSuffix() == 1 ? "sh" : "py";
+                if (StringUtils.isBlank(modifyRequest.getCode())) {
+                    // 下载攻击脚本，更改后缀重新上传
+                    String code = FsCommon.downloadContent(oldServiceResult.getSource().getObj().getScriptFile());
+                    InputStream is = null;
+                    try {
+                        is = new ByteArrayInputStream(code.getBytes(StandardCharsets.UTF_8));
+                        String filePath = FsCommon.upload(is, suffix);
+                        modifyRequest.setFilePath(filePath);
+                    } catch (MpRuntimeException e) {
+                        log.error("modify attack flow error", e);
+                        return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
+                    } finally {
+                        IOUtils.closeQuietly(is);
+                    }
+                }
+            }
+
             if (StringUtils.isNotBlank(modifyRequest.getCode())) {
                 // 判断是否有文件名，没有则根据脚本语言默认生成一个
                 String fileName;
-                String suffix = null;
-                if (Objects.nonNull(modifyRequest.getSuffix())) {
-                    suffix = modifyRequest.getSuffix() == 1 ? "sh" : "py";
-                } else {
+                if (StringUtils.isBlank(suffix)) {
                     // 没变更suffix时，根据文件名后缀判断之前类型
                     suffix = oldServiceResult.getSource().getObj().getScriptFile().endsWith(".sh") ? "sh" : "py";
                 }

@@ -47,7 +47,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
 
-        List<TargetModel> targets = getModelMapper().listTargetsByRoleId(roleId);
+        List<TargetModel> targets = getModelMapper().listTargetsByRoleId(AuthConstant.DEFAULT_TENANT, roleId);
         return targets;
     }
 

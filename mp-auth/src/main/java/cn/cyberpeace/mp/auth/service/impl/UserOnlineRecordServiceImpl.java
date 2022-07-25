@@ -8,8 +8,8 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordScheduleService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
@@ -49,6 +49,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private UserHeartbeatService heartbeatService;
 
     private static final int DEFAULT_MINUTES = 5;
 
@@ -162,7 +165,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public UserOnlineCntDto onlineUserCnt() {
-        int olcnt = UserOnlineRecordScheduleService.REALTIME_ONLINE_USER_CNT;
+        int olcnt = heartbeatService.getHeartbeatMap().size();
         int totalUser = userService.totalUserCnt();
 
         UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();

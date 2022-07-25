@@ -17,4 +17,19 @@
             #{userName}
         </foreach>
     </select>
+
+    <select id="listByUserIds" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
+        select distinct u.*,
+            group_concat(distinct ou.org separator ',') as orgs,
+            group_concat(distinct ur.role separator ',') as roles
+        from mp_auth_user u
+                 left join mp_auth_org_user ou on u.id = ou.user
+                 left join mp_auth_user_role ur on u.id = ur.user
+        where u.id in
+        <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        group by u.id
+        order by u.pk
+    </select>
 </mapper>

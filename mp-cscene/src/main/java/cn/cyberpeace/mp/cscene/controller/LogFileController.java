@@ -56,7 +56,6 @@ public class LogFileController {
     @ApiOperation(value = "查询日志原始文件下载地址")
     @GetMapping("/download_urls")
     public ListObjServiceResult<LogFileDownloadUrlDto> getDownloadUrl(LogFileDownloadUrlRequest request) {
-        log.info("{}", request);
         List<LogFileDownloadUrlDto> downloadUrlDtos = logFileService.getDownloadUrls(request);
         return new ListObjServiceResult(new ListObjResult(downloadUrlDtos, downloadUrlDtos.size())).asResult();
 

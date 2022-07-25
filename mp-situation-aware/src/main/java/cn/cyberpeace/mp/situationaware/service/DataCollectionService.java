@@ -648,8 +648,6 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
-
-        log.info("system users changed count: {}", sum);
         return sum;
     }
 
@@ -661,7 +659,6 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
-        log.info("processes changed count: {}", sum);
         return sum;
     }
 
@@ -672,7 +669,6 @@ public class DataCollectionService extends CollectionBaseService {
         }
 
         int sum = aggsChangedCountWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
-        log.info("processes changed count: {}", sum);
         return sum;
     }
 
@@ -714,13 +710,9 @@ public class DataCollectionService extends CollectionBaseService {
         log.info("monitor JSON query index:{}, \n DSL:{}", indexArray, searchRequest.source().toString());
 
         try {
-            log.info("es search start");
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            log.info("es search end");
-
             return response;
         } catch (IOException e) {
-            log.error("es queryMonitorEventsWithTimeRange error: {}", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1177,6 +1169,13 @@ public class DataCollectionService extends CollectionBaseService {
         if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getWin()) &&
                 Objects.nonNull(wazuhFileRoot.getData().getWin().getSystem())) {
             builder.message(wazuhFileRoot.getData().getWin().getSystem().getMessage());
+        }
+
+        if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getSca())) {
+            builder.message(wazuhFileRoot.getData().getSca().getDescription());
+            if (Objects.nonNull(wazuhFileRoot.getData().getSca().getCheck())) {
+                builder.message(wazuhFileRoot.getData().getSca().getCheck().getDescription());
+            }
         }
 
 //        if (Objects.nonNull(wazuhFileRoot.getAgent())) {

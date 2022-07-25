@@ -128,8 +128,6 @@ public class FlowMonitorService {
      * @return
      */
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
-        log.info("{}", request);
-
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
 
@@ -159,7 +157,6 @@ public class FlowMonitorService {
      * @return
      */
     public List<FlowGroupPortWithProtocolVO> groupByDestinationPortWithProtocol(FlowCommonRequest request) {
-        log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
@@ -203,7 +200,6 @@ public class FlowMonitorService {
      * @return
      */
     public List<FlowGroupByDestinationIpAndSeverityVO> groupByDestinationIpAndSeverity(FlowCommonRequest request) {
-        log.info("{}", request);
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
@@ -609,7 +605,6 @@ public class FlowMonitorService {
                 closestTime = entry.getKey();
             }
         }
-        log.info("time:{}, closestTime:{}", time, closestTime);
         return flowTrendMap.get(closestTime);
     }
 

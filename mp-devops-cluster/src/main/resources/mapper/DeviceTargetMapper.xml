@@ -39,6 +39,12 @@
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
             </if>
+            <if test="subCategories != null and subCategories.size > 0">
+                and i.sub_category in
+                <foreach collection="subCategories" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test=" role != null">
                 and i.role = #{role}
             </if>
@@ -95,9 +101,6 @@
             </if>
             <if test="isHide != null and isHide == 0">
                 and i.is_hide = 0
-            </if>
-            <if test="vmStarted != null and vmStarted == true">
-                and instance_state in (1,2,3)
             </if>
             <if test="imageTypeList != null">
                 and image_type in
@@ -200,7 +203,7 @@
     </sql>
 
     <sql id="commonTargetColumn">
-        i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
+        i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
         i.in_position,i.reference_status,i.use_status,i.create_time
     </sql>
 
@@ -249,6 +252,11 @@
                 <include refid="commonTargetAuthWhere"/>
              </if>
         ) as i
+        <where>
+            <if test="vmStarted != null and vmStarted == true">
+                and i.instance_state in (1,2,3)
+            </if>
+        </where>
         ORDER BY i.create_time desc
         <if test="offset != null and limit != null">
             limit #{offset}, #{limit}

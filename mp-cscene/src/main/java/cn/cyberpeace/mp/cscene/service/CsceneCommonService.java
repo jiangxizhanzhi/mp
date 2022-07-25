@@ -41,22 +41,18 @@ public class CsceneCommonService {
 
     @Cacheable(value = "translate_sceneids")
     public List<String> translateSceneIds(List<String> sceneIds) {
-        log.info("before translate: {}", sceneIds);
         List<String> translatedScendIds = new ArrayList<>();
         for (String sceneId : sceneIds) {
             String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
             translatedScendIds.add(translatedSceneId);
         }
-        log.info("after translate: {}", translatedScendIds);
         return translatedScendIds;
     }
 
 
     @Cacheable(value = "translate_sceneid")
     public String translateSceneId(String sceneId) {
-        log.info("before translate: {}", sceneId);
         String translatedSceneId = csceneInstanceService.getSceneId(sceneId);
-        log.info("after translate: {}", translatedSceneId);
         return translatedSceneId;
     }
 
@@ -69,7 +65,6 @@ public class CsceneCommonService {
      */
     @Cacheable(value = "query_agentnames_by_elementids")
     public List<String> getAgentNamesBySceneIdAndElementIds(String sceneId, List<String> elementIds) {
-        log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
         List<String> translatedSceneIds = translateSceneIds(sceneIds);
         List<SceneElementBO> elementBOs = scenePluginCollectionSceneService.listProbeEnabledElementBOs(translatedSceneIds.get(0)).getSource();
@@ -94,7 +89,6 @@ public class CsceneCommonService {
      */
     @Cacheable(value = "get_agentnames_elementids_map")
     public Map<String, String> getAgentNames2ElementIdMap(String sceneId, List<String> elementIds) {
-        log.info("hit getAgentNamesBySceneIdAndElementIds...sceneId:{}, elementIds:{}", sceneId, elementIds);
         List<String> sceneIds = CollectionUtil.toList(sceneId);
         List<String> translatedSceneIds = translateSceneIds(sceneIds);
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(translatedSceneIds, elementIds);

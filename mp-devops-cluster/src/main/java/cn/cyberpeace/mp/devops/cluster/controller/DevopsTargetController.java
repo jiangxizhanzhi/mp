@@ -85,7 +85,7 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询所有靶标信息")
     @GetMapping("/list")
-    public ServiceResult<TargetSceneVO> list(TargetSceneRequest request){
+    public ServiceResult<TargetSceneVO> list(TargetSceneRequest request) {
         TypeAllConvertModel l1AndL2AndL3Type = typeConverter.findL1AndL2AndL3Type();
         List<TypeConvertModel> firstTypeList = l1AndL2AndL3Type.getFirstTypeList();
         List<TypeConvertModel> secondTypeList = l1AndL2AndL3Type.getSecondTypeList();
@@ -100,32 +100,35 @@ public class DevopsTargetController {
         }
 
         List<TargetSceneVO> targetSceneVOS = new ArrayList<>();
-        for (TypeConvertModel first : firstTypeList){
+        for (TypeConvertModel first : firstTypeList) {
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-
-            for (TypeConvertModel second : typeConvertModels){
-                request.setCategory(firstId);
-                request.setSecondCategory(second.getId());
-                request.setPage(null);
-                request.setPerPage(null);
-                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
-                    continue;
-                }
-                List<Device> secondDeviceList = targetSceneConvertModel.getList();
-
+            List<Integer> secondCategories = typeConvertModels.stream()
+                    .map(model -> model.getId())
+                    .collect(Collectors.toList());
+            request.setCategory(firstId);
+            request.setSecondCategories(secondCategories);
+            request.setPage(null);
+            request.setPerPage(null);
+            BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
+                continue;
+            }
+            List<Device> secondDeviceList = targetSceneConvertModel.getList();
+            typeConvertModels.forEach(typeConvertModel -> {
                 TargetSceneVO targetSceneVO = new TargetSceneVO();
-
                 targetSceneVO.setFirstTypeId(firstId);
                 targetSceneVO.setFirstTypeName(first.getName());
-                Integer secondId = second.getId();
-                targetSceneVO.setSecondTypeId(secondId);
-                targetSceneVO.setSecondTypeName(second.getName());
-                targetSceneVO.setDeviceList(secondDeviceList);
-                targetSceneVOS.add(targetSceneVO);
-            }
+                targetSceneVO.setSecondTypeId(typeConvertModel.getId());
+                targetSceneVO.setSecondTypeName(typeConvertModel.getName());
+                targetSceneVO.setDeviceList(secondDeviceList.stream()
+                        .filter(s -> s.getSecondCategory().equals(typeConvertModel.getId()))
+                        .collect(Collectors.toList()));
+                if (CollectionUtils.isNotEmpty(targetSceneVO.getDeviceList())) {
+                    targetSceneVOS.add(targetSceneVO);
+                }
+            });
         }
         return new Result(new ListResult<>(targetSceneVOS));
     }
@@ -156,19 +159,19 @@ public class DevopsTargetController {
             Integer firstId = first.getId();
             List<TypeConvertModel> typeConvertModels = secondTypeList.stream()
                     .filter(v -> v.getL1ParentId().equals(firstId)).collect(Collectors.toList());
-
-            for (TypeConvertModel second : typeConvertModels){
-                request.setCategory(firstId);
-                request.setSecondCategory(second.getId());
-                request.setPage(null);
-                request.setPerPage(null);
-                BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
-                if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())){
-                    continue;
-                }
-                List<Device> secondDeviceList = targetSceneConvertModel.getList();
-                deviceList.addAll(secondDeviceList);
+            List<Integer> secondCategories = typeConvertModels.stream()
+                    .map(model -> model.getId())
+                    .collect(Collectors.toList());
+            request.setCategory(firstId);
+            request.setSecondCategories(secondCategories);
+            request.setPage(null);
+            request.setPerPage(null);
+            BasePageBO<Device> targetSceneConvertModel = targetConverter.allTarget(new ImagePageDTO(request));
+            if (Objects.isNull(targetSceneConvertModel) || CollectionUtils.isEmpty(targetSceneConvertModel.getList())) {
+                continue;
             }
+            List<Device> secondDeviceList = targetSceneConvertModel.getList();
+            deviceList.addAll(secondDeviceList);
         }
         return new Result(new ListResult<>(deviceList));
     }
