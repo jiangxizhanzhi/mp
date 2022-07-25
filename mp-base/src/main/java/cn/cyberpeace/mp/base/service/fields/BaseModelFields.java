@@ -12,7 +12,7 @@ public abstract class BaseModelFields extends BaseFields {
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields(BaseModel::getCreateTime,
+    public static final DynamicFields readonlyFields = new DynamicFields(BaseModel::getId, BaseModel::getCreateTime,
             BaseModel::getUpdateTime);
 
     public static final DynamicFields searchFields = new DynamicFields();

@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,7 +73,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     @Override
     public void invoke(ImportUser data, AnalysisContext context) {
-        log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
     }
 
@@ -87,7 +85,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     public void doAfterAllAnalysed(AnalysisContext context) {
         // 这里也要保存数据，确保最后遗留的数据也存储到数据库
         saveData();
-        log.info("所有数据解析完成！");
+        log.info("all data saved success！");
     }
 
     /**
@@ -100,9 +98,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        log.info("list size:{}！", list.size());
-
         if (list.size() > authBizConfig.getMaxImportUserSize()) {
+            log.error("size exceed the limit:{}！", list.size());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authBizConfig.getMaxImportUserSize().toString()));
         }
 
@@ -110,13 +107,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         checkImportUsers(list);
         preProcessImportUsers(list);
         userService.importUsers(list);
-        log.info("save success！");
     }
 
 
 
     private void checkImportUsers(List<ImportUser> users) {
-        log.info("checkImportUsers... list size:{}", users.size());
         if (CollectionUtil.isEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
@@ -246,7 +241,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
                 throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
             }
 
-            log.info("org not specified! use default org!");
             user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
             return;
         }
@@ -293,7 +287,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         List<OrgModel> orgs = orgService.listParents();
         OrgModel defaultTopOrg = orgs.get(0);
         if (Objects.isNull(defaultTopOrg)) {
-            log.error("默认一级组织不存在！");
             throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
         }
 
