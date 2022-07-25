@@ -24,13 +24,6 @@
     <!-- 调用模块为 logger -->
     <!-- 调用源id为 追踪id -->
 
-    <!-- 控制台日志 -->
-    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([${PID}-%thread]){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%-40.40logger{39}){cyan} %L %clr(-){faint} %clr(%CALL_CHAIN_ID){faint} %clr(|){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
-    <!-- 同步输出文件日志 使用 %CALL_CHAIN_ID 打印追踪id  -->
-    <!--    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %CALL_CHAIN_ID | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
-    <!-- 异步输出文件日志 使用 %X{CALL_CHAIN_ID} 打印追踪id  -->
-    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %X{CALL_CHAIN_ID} | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
-
     <!--应用名称-->
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="mp"/>
     <!--日志路径-->
@@ -41,6 +34,14 @@
     <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="15"/>
     <!--日志最大容量-->
     <springProperty scope="context" name="LOG_FILE_TOTAL_SIZE" source="logging.file.max-total-size" defaultValue="1GB"/>
+    <springProperty scope="context" name="LOG_FILE_MAX_ROW_LENGTH" source="logging.file.max-row-length" defaultValue="2000"/>
+
+    <!-- 控制台日志 -->
+    <property name="CONSOLE_LOG_PATTERN" value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr([${PID}-%thread]){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(%-40.40logger{39}){cyan} %L %clr(-){faint} %clr(%CALL_CHAIN_ID){faint} %clr(|){faint} %.-${LOG_FILE_MAX_ROW_LENGTH}m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+    <!-- 同步输出文件日志 使用 %CALL_CHAIN_ID 打印追踪id  -->
+    <!--    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %CALL_CHAIN_ID | %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>-->
+    <!-- 异步输出文件日志 使用 %X{CALL_CHAIN_ID} 打印追踪id  -->
+    <property name="FILE_LOG_PATTERN" value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}} [${PID:-}-%thread] ${LOG_LEVEL_PATTERN:-%5p} %-40.40logger{39} %L - %X{CALL_CHAIN_ID} | %.-${LOG_FILE_MAX_ROW_LENGTH}m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
