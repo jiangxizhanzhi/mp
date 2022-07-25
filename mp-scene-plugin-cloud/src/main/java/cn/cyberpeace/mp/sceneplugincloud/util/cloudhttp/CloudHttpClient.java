@@ -70,6 +70,7 @@ public class CloudHttpClient {
         var objectMapper = new ObjectMapper();
         objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             response = objectMapper.readValue(result.getResult(), valueType);
         } catch (Exception e) {
             log.error("Cloud {}[url - {}?{}, data - {}] parse result[{}] error: {}", method, url,
