@@ -16,7 +16,13 @@ public class ThirdUserInfoDto {
     @ApiModelProperty(value = "用户id")
     private String userId;
 
+    @ApiModelProperty(value = "用户名")
+    private String userName;
+
     @ApiModelProperty(value = "第三方token")
     private String thirdToken;
+
+    @ApiModelProperty(value = "是否是管理员 1：是 0：否")
+    private int isAdmin;
 
 }

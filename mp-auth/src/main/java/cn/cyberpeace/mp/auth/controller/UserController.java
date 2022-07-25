@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.GetTokenRequest;
@@ -8,10 +9,9 @@ import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
@@ -55,6 +55,12 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
     @Autowired
     private UserHeartbeatService heartbeatService;
+
+    @Autowired
+    private UserRoleService userRoleService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     public UserController(UserService modelService) {
@@ -184,6 +190,21 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             log.info("get third user infos result is empty");
             return ServiceResult.success(new ArrayList<>());
         }
+
+        RoleModel roleModel = roleService.getByIdent(AuthConstant.ROLE_ADMIN);
+        if (Objects.nonNull(roleModel)) {
+            List<UserModel> adminUsers = userRoleService.listUsersByRoleId(roleModel.getId());
+            if (CollectionUtils.isNotEmpty(adminUsers)) {
+                thirdUserInfoDtos.forEach(thirdUserInfoDto -> adminUsers.forEach(adminUser -> {
+                    if (adminUser.getId().equals(thirdUserInfoDto.getUserId())) {
+                        thirdUserInfoDto.setIsAdmin(1);
+                    }
+                }));
+            } else {
+                log.info("get admin users is empty");
+            }
+        }
+
 
         log.info("get third user infos result: {}", thirdUserInfoDtos);
         return ServiceResult.success(thirdUserInfoDtos);
