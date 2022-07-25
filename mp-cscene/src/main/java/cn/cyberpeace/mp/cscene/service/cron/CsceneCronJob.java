@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service.cron;
 
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.service.ScenePluginCloudSceneCronService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -17,11 +18,15 @@ import javax.annotation.Resource;
  * @Author maojun
  * @Date 2022/7/22
  */
+@Slf4j
 @Configuration
 @EnableScheduling
 public class CsceneCronJob implements SchedulingConfigurer {
 
     private static String cron;
+
+    @Resource
+    private CsceneAppConfig csceneAppConfig;
 
     @Resource
     private ScenePluginCloudSceneCronService scenePluginCloudSceneCronService;
@@ -33,6 +38,10 @@ public class CsceneCronJob implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
+            log.info("scene cron job is not enable");
+            return;
+        }
         taskRegistrar.addTriggerTask(new TriggerTask(() -> scenePluginCloudSceneCronService.action(), triggerContext -> {
             CronTrigger cronTrigger = new CronTrigger(cron);
             return cronTrigger.nextExecutionTime(triggerContext);
