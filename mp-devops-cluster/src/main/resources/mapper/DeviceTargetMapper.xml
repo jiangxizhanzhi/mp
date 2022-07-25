@@ -39,6 +39,12 @@
             <if test=" subCategory != null">
                 and i.sub_category = #{subCategory}
             </if>
+            <if test="subCategories != null and subCategories.size > 0">
+                and i.sub_category in
+                <foreach collection="subCategories" item="item" index="index" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test=" role != null">
                 and i.role = #{role}
             </if>

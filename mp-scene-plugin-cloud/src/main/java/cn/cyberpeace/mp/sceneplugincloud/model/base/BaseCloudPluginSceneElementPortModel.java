@@ -64,5 +64,7 @@ public class BaseCloudPluginSceneElementPortModel extends BasePluginSceneElement
     private String bgpPeer;
     @DefaultStr
     private String bgpPeerAs;
+    @DefaultStr
+    private String connectMode;
 
 }

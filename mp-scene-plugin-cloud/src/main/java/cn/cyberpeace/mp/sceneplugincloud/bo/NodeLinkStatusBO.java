@@ -20,6 +20,8 @@ public class NodeLinkStatusBO {
     private String nodeId;
     @JsonIgnore
     private String resourceId;
+    @JsonIgnore
+    private String defaultNetworkId;
     @ApiModelProperty("节点状态,0:离线,1:在线")
     private Integer status;
     @ApiModelProperty("连线状态列表")

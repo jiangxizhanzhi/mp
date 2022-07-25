@@ -43,6 +43,17 @@ public class SceneInstanceLinkCacheUtil {
                             nodeLinkStatusList.add(nodeStatus);
                             if (CollectionUtils.isNotEmpty(e.getPorts())) {
                                 for (var p : e.getPorts()) {
+                                    if (StringUtils.isEmpty(nodeStatus.getDefaultNetworkId())) {
+                                        // 设置一个默认网络,如果没有连线,则使用该网络查询状态
+                                        var cloudPort = handler.getPort(p.getId());
+                                        if (cloudPort != null && cloudPort.getAuxiliaryNetworkId() != null) {
+                                            nodeStatus.setDefaultNetworkId(cloudPort.getAuxiliaryNetworkId());
+                                        }
+                                    }
+                                    if (Boolean.TRUE.equals(p.getIsAuxiliary())) {
+                                        // 辅助端口不需要查询链路状态
+                                        continue;
+                                    }
                                     var connectPort = sceneHandler.getPortIdConnectedPortIdMap().get(p.getId());
                                     if (connectPort != null) {
                                         String key = StringUtils.joinWith(":", p.getId(), connectPort);
