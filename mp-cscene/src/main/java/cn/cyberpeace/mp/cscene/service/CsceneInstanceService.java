@@ -155,7 +155,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private CsceneMapper csceneMapper;
 
-    // expires in 30 minutes
+    // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
@@ -264,7 +264,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     total = res.size() + total;
                 }
             } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId) || ProbeConstant.ProbeId.PORT_INFO.equals(probeId) ||
-                    ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
+                    ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId) || ProbeConstant.ProbeId.USERS_MODIFY.equals(probeId)) {
                 ListPageInfoQueryParams params = new ListPageInfoQueryParams();
                 params.setSceneIds(CollUtil.toList(sceneInstanceId));
                 params.setNodeIds(CollUtil.toList(nodeId));
@@ -285,9 +285,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
                     }
-                } else {
+                } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     // 进程信息
                     var r = hostStateService.pageProcesses(params);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                } else if (ProbeConstant.ProbeId.USERS_MODIFY.equals(probeId)) {
+                    // 用户变更信息
+                    var r = hostStateService.pageSystemUserEvents(params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -676,6 +683,33 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         var sceneId = getSceneId(id);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+        }
+
+        // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
+        if (Objects.nonNull(queryParams.getType())) {
+            // 传入的sceneId不需要提前转
+            if (queryParams.getType().equals(1)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO, queryParams);
+            }
+
+            if (queryParams.getType().equals(2)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams);
+            }
+
+            if (queryParams.getType().equals(3)) {
+                // 网络连接同进程
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams);
+            }
+
+            if (queryParams.getType().equals(4)) {
+                // 文件变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY, queryParams);
+            }
+
+            if (queryParams.getType().equals(5)) {
+                // 用户变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams);
+            }
         }
 
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);

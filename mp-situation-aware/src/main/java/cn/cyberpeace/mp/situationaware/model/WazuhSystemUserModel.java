@@ -1,0 +1,36 @@
+package cn.cyberpeace.mp.situationaware.model;
+
+import com.alibaba.fastjson.annotation.JSONField;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class WazuhSystemUserModel {
+
+    @JSONField(name = "comment")
+    private String comment;
+
+    @JSONField(name = "shell")
+    private String shell;
+
+    @JSONField(name = "name")
+    private String name;
+
+    @JSONField(name = "group_name")
+    private String groupName;
+
+    @JSONField(name = "group_id")
+    private String groupId;
+
+    @JSONField(name = "id")
+    private String id;
+
+    @JSONField(name = "dir")
+    private String dir;
+
+}

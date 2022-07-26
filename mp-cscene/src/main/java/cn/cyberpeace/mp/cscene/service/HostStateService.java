@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.core.collection.CollectionUtil;
@@ -421,6 +422,21 @@ public class HostStateService {
             }
         });
 
+        return listResult;
+    }
+
+
+    public ListObjServiceResult<SystemUser> pageSystemUserEvents(ListPageInfoQueryParams listPageInfoQueryParams) {
+        listPageInfoQueryParams.ensure();
+        checkListPageParams(listPageInfoQueryParams);
+        if (Objects.isNull(listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) || !listPageInfoQueryParams.getFetchIfSceneInstanceShutdown()) {
+            if (!csceneCommonService.isCsceneInstanceRunning(listPageInfoQueryParams.getSceneIds().get(0))) {
+                return new ListObjServiceResult(new ListObjResult()).asResult();
+            }
+        }
+
+        listPageInfoQueryParams.setSceneIds(csceneCommonService.translateSceneIds(listPageInfoQueryParams.getSceneIds()));
+        ListObjServiceResult<SystemUser> listResult = scenePluginCollectionSceneService.listPageSystemUserEvents(listPageInfoQueryParams).asResult();
         return listResult;
     }
 

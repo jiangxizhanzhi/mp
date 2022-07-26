@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
@@ -134,6 +135,8 @@ public class DataCollectionService extends CollectionBaseService {
     public static final String CACHE_KEY_NET_CONN = "net_conn";
 
     public static final String CACHE_KEY_PROCESS = "process";
+
+    public static final String CACHE_KEY_USERS = "users";
 
     public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
 
@@ -574,7 +577,8 @@ public class DataCollectionService extends CollectionBaseService {
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
-        JSONArray arr = processBaseChangeOutput(response);
+        JSONObject jsonObject = processBaseChangeOutput(response);
+        JSONArray arr = jsonObject.getJSONArray("values");
         if (Objects.isNull(arr)) {
             return Collections.emptyList();
         }
@@ -602,7 +606,8 @@ public class DataCollectionService extends CollectionBaseService {
         // 只取一条数据，做假分页处理
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
-        JSONArray arr = processBaseChangeOutput(response);
+        JSONObject jsonObject = processBaseChangeOutput(response);
+        JSONArray arr = jsonObject.getJSONArray("values");
         if (Objects.isNull(arr)) {
             return Collections.emptyList();
         }
@@ -616,7 +621,33 @@ public class DataCollectionService extends CollectionBaseService {
         return list;
     }
 
+    /**
+     * 查询用户变更事件
+     * @param
+     * @return
+     */
+    @Cacheable(value = CACHE_KEY_USERS)
+    public List<WazuhSystemUserModel> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
+        if (isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+            return Collections.emptyList();
+        }
+        // 只取一条数据，做假分页处理
+        wazuhMonitorEventsRequest.setPageSize(1);
+        SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
+        JSONObject jsonObject = processBaseChangeOutput(response);
+        JSONArray arr = jsonObject.getJSONArray("modified");
+        if (Objects.isNull(arr)) {
+            return Collections.emptyList();
+        }
+        List<WazuhSystemUserModel> list = new ArrayList<>();
+        for (int i = 0; i < arr.size(); i++) {
+            JSONObject data = arr.getJSONObject(i);
+            WazuhSystemUserModel userModel = JSONObject.toJavaObject(data, WazuhSystemUserModel.class);
+            list.add(userModel);
+        }
 
+        return list;
+    }
 
     /**
      * 一段时间内的环境变量数变动
@@ -724,7 +755,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @param response
      * @return
      */
-    public JSONArray processBaseChangeOutput(SearchResponse response) {
+    public JSONObject processBaseChangeOutput(SearchResponse response) {
         List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSONObject.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
@@ -742,9 +773,7 @@ public class DataCollectionService extends CollectionBaseService {
                 byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
-
-                JSONArray arr = jsonObject.getJSONArray("values");
-                return arr;
+                return jsonObject;
             }
         }
 
