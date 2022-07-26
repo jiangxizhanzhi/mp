@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneCommonConfigModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneCommonConfigMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -28,6 +29,8 @@ public class CsceneInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        SceneInstanceLinkCacheUtil.init();
+
         int count = csceneService.getActiveVirtualDeviceCount();
         NodeLimitUtils.addLimitedNodeCount(count);
 
