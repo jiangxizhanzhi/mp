@@ -53,7 +53,7 @@ public class CommandUtils {
     /**
      * linux 添加执行权限
      */
-    public static final String LINUX_CHMOD_X = "chmod +x %s";
+    public static final String LINUX_CHMOD_X = "chmod -R +x %s";
 
     /**
      * linux sh执行

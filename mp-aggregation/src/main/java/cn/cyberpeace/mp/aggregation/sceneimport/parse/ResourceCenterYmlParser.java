@@ -24,9 +24,16 @@ public final class ResourceCenterYmlParser {
     private static Logger log = LoggerFactory.getLogger(ResourceCenterYmlParser.class);
 
     public static YmlParseResult parseTopoYml(String filePath) {
-        return new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+        YmlParseResult result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+        if (CollectionUtils.isNotEmpty(result.getNodes())) {
+            result.getNodes().forEach(node -> {
+                if (StringUtils.isNotEmpty(node.getFile())) {
+                    node.setFile(filePath + FILE_PATH_SEPARATOR + node.getFile());
+                }
+            });
+        }
+        return result;
     }
-
 
     public static List<ImageParseResult> parseImageServicesYml(String filePath, String imageFilePath) {
         List<ImageParseResult> results = new ArrayList<>();

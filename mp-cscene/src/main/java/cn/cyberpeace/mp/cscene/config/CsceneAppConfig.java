@@ -72,6 +72,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.cron-job-expression:* 0/15 * * * ?}")
     private String cronJobExpression;
 
+    @Value("${mp.cscene.access-mode-ip:}")
+    private String accessModeIp;
+
     @Autowired
     private MessageSource messageSource;
 

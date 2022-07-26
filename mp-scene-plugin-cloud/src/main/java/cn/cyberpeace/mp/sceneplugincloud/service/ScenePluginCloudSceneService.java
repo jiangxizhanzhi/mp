@@ -742,52 +742,20 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId) {
-        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
-        if (CollectionUtils.isEmpty(listSnapshot)) {
-            return new ServiceResult<>(true);
-        }
-        var snapshot = listSnapshot.stream()
-                .filter(s -> StringUtils.equals(s.getSnapshotUuid(), snapshotId))
-                .findFirst().get();
-        if (snapshot == null) {
-            return new ServiceResult<>(true);
-        }
-        var configCondition = new HumanCondition().link(SceneConfigModel.class, CloudPluginSceneConfigElementModel.class)
-                .filterLink(SceneConfigModel.class, SceneConfigModel::getId,
-                        CloudPluginSceneConfigElementModel.class, CloudPluginSceneConfigElementModel::getScene)
-                .currentLink(SceneConfigModel.class)
-                .filterEqual(SceneConfigModel::getDeleted, false)
-                .currentLink(CloudPluginSceneConfigElementModel.class)
-                .filterEqual(CloudPluginSceneConfigElementModel::getImage, snapshot.getAddress());
-        var configUsed = configElementMapper.list(configCondition);
-        if (CollectionUtils.isNotEmpty(configUsed)) {
-            throw new MpRuntimeException(CloudErrorCode.SNAPSHOT_BE_USED);
-        }
-        var instanceCondition = new HumanCondition().link(SceneModel.class, CloudPluginSceneElementModel.class)
-                .filterLink(SceneModel.class, SceneModel::getId,
-                        CloudPluginSceneElementModel.class, CloudPluginSceneElementModel::getScene)
-                .currentLink(SceneModel.class)
-                .filterEqual(SceneModel::getDeleted, false)
-                .currentLink(CloudPluginSceneElementModel.class)
-                .filterEqual(CloudPluginSceneElementModel::getImage, snapshot.getAddress());
-        var instanceUsed = elementMapper.list(instanceCondition);
-        if (CollectionUtils.isNotEmpty(instanceUsed)) {
-            throw new MpRuntimeException(CloudErrorCode.SNAPSHOT_BE_USED);
-        }
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
         if (node != null) {
             SnapshotDeleteParams params = new SnapshotDeleteParams();
-            params.setSnapshotName(snapshot.getName());
-            params.setSnapshotUuid(snapshot.getSnapshotUuid());
+            params.setSnapshotName(snapshotName);
+            params.setSnapshotUuid(snapshotUuid);
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
             // todo
             var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
-            sceneService.deleteElementSnapshot(snapshot.getId());
+            sceneService.deleteElementSnapshot(snapshotId);
         }
         return new ServiceResult<>(true);
     }
