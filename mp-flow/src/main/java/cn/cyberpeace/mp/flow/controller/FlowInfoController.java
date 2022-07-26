@@ -12,13 +12,14 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
-import cn.cyberpeace.mp.flow.enums.FlowCategoryEnum;
+import cn.cyberpeace.mp.flow.model.FlowCategoryModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
+import cn.cyberpeace.mp.flow.service.FlowCategoryService;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.flow.vo.FlowCategoryVO;
@@ -53,6 +54,8 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         setModelService(flowInfoService);
     }
 
+    @Autowired
+    private FlowCategoryService flowCategoryService;
     /**
      * 删除流量信息
      * @param id
@@ -83,14 +86,17 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
     public ServiceResult<FlowCategoryVO> flowCategories() {
-        FlowCategoryEnum[] flowCategoryEnums = FlowCategoryEnum.values();
+        List<FlowCategoryModel> models = flowCategoryService.findAll();
         List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
-        for (FlowCategoryEnum flowCategoryEnum : flowCategoryEnums) {
-            String name = MessageCommon.get(FLOW_CATEGORY_PREFIX + "." + flowCategoryEnum.getName());
-            int code = flowCategoryEnum.getCode();
-            FlowCategoryVO flowCategoryVO = FlowCategoryVO.builder().name(name).code(code).build();
-            flowCategoryVos.add(flowCategoryVO);
-
+        for (FlowCategoryModel model : models) {
+            String name = MessageCommon.get(FLOW_CATEGORY_PREFIX + "." + model.getName());
+            int code = model.getCode();
+            flowCategoryVos.add(
+                    FlowCategoryVO.builder()
+                            .name(name)
+                            .code(code)
+                            .build()
+            );
         }
         return ServiceResult.success(flowCategoryVos);
     }

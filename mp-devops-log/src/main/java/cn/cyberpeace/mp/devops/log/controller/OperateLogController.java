@@ -5,13 +5,18 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnum;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnum;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.devops.log.model.OpModuleModel;
+import cn.cyberpeace.mp.devops.log.model.OpTypeModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
+import cn.cyberpeace.mp.devops.log.service.OpModuleService;
+import cn.cyberpeace.mp.devops.log.service.OpTypeService;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import cn.cyberpeace.mp.devops.log.vo.OpModuleVO;
@@ -44,6 +49,12 @@ import java.util.Objects;
 public class OperateLogController {
 
     private OperateLogServiceFactory operateLogServiceFactory;
+
+    @Autowired
+    private OpModuleService opModuleService;
+
+    @Autowired
+    private OpTypeService opTypeService;
 
     @Autowired
     public OperateLogController(OperateLogServiceFactory operateLogServiceFactory) {
@@ -88,9 +99,16 @@ public class OperateLogController {
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<OpModuleVO> getModules() {
         List<OpModuleVO> opModuleVOList = new ArrayList<>();
-        for (OpModuleEnum moduleEnum : OpModuleEnum.values()) {
-            String name = MessageCommon.get(moduleEnum.getName());
-            opModuleVOList.add(OpModuleVO.builder().name(name).code(moduleEnum.getCode()).build());
+        List<OpModuleModel> models = opModuleService.findAll();
+        for (OpModuleModel model : models) {
+            String name = MessageCommon.get(LogConstant.LOG_OP_MODULE_PREFIX + "." + model.getName());
+            int code = model.getCode();
+            opModuleVOList.add(
+                    OpModuleVO.builder().
+                            name(name).
+                            code(code)
+                            .build()
+            );
         }
         return ServiceResult.success(opModuleVOList);
     }
@@ -99,9 +117,16 @@ public class OperateLogController {
     @ApiOperation(value = "查询审计日志操作类型")
     public ServiceResult<OpTypeVO> getTypes() {
         List<OpTypeVO> opTypeVOList = new ArrayList<>();
-        for (OpTypeEnum opTypeEnum : OpTypeEnum.values()) {
-            String name = MessageCommon.get(opTypeEnum.getName());
-            opTypeVOList.add(OpTypeVO.builder().name(name).code(opTypeEnum.getCode()).build());
+        List<OpTypeModel> models = opTypeService.findAll();
+        for (OpTypeModel model : models) {
+            String name = MessageCommon.get(LogConstant.LOG_OP_TYPE_PREFIX + "." + model.getName());
+            int code = model.getCode();
+            opTypeVOList.add(
+                    OpTypeVO.builder().
+                            name(name).
+                            code(code)
+                            .build()
+            );
         }
         return ServiceResult.success(opTypeVOList);
     }

@@ -9,13 +9,16 @@ import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.constant.ControllerConstant;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.dto.validate.AddGroup;
 import cn.cyberpeace.mp.front.admin.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.front.admin.enums.NoticeTypeEnum;
+import cn.cyberpeace.mp.front.admin.model.NoticeTypeModel;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
+import cn.cyberpeace.mp.front.admin.service.NoticeTypeService;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.cyberpeace.mp.front.admin.vo.NoticeTypeVO;
@@ -55,6 +58,9 @@ public class SysNoticeController {
 
     @Autowired
     private SysNoticeService noticeService;
+
+    @Autowired
+    private NoticeTypeService noticeTypeService;
 
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
@@ -155,12 +161,14 @@ public class SysNoticeController {
     @ApiOperation(value = "查询系统公告类型")
     public ServiceResult<NoticeTypeVO> getTypes() {
         List<NoticeTypeVO> typeVOList = new ArrayList<>();
-        for (NoticeTypeEnum typeEnum : NoticeTypeEnum.values()) {
-            String name = MessageCommon.get(typeEnum.getName());
+        List<NoticeTypeModel> models = noticeTypeService.findAll();
+
+        for (NoticeTypeModel model : models) {
+            String name = MessageCommon.get(ControllerConstant.SYS_NOTICE_TYPE_PREFIX + "." + model.getName());
             typeVOList.add(
                     NoticeTypeVO.builder()
                             .name(name)
-                            .code(typeEnum.getCode())
+                            .code(model.getCode())
                             .build()
             );
         }
