@@ -117,7 +117,6 @@ public class SysActivationService {
 
         // 自定义信息
         Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
-        log.info("info:{}", infoMap);
         verifyInfo.setInfo(infoMap);
 
         String verifyStr = JSON.toJSONString(verifyInfo);
@@ -126,12 +125,10 @@ public class SysActivationService {
         // 校验激活码和激活配置项，是否匹配
         boolean success = licenseService.verify(verifyStr, verifyCode);
 
-        log.info("activationDir:{}", activationConfig.getLicenseDir());
         if (success) {
             // 校验通过，生成加密文件存储磁盘
             ACTIVATION_CONTENT = null;
             generateEncryptedFile(activationRequest);
-            log.info("encrypted file generated success!");
 
             // 更新数据库激活限制配置
             processActivCtlAfterActivationSuccess(activationRequest);
@@ -166,7 +163,6 @@ public class SysActivationService {
 
 
     public String getValueByKey(String key) {
-        log.info(key);
         ActivationResponse activationResponse = status();
         if (Objects.isNull(activationResponse) || !Objects.equals(AdminConstant.STATUS_ACTIVITED, activationResponse.getIsActived())) {
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
@@ -323,12 +319,10 @@ public class SysActivationService {
         String salt = RandomUtil.randomString(8);
         String jsonStr = JSON.toJSONString(activationResponse);
         String content = salt + jsonStr;
-        log.info("salt:{}", salt);
 
         MD5 md5 = MD5.create();
         md5.setSalt(salt.getBytes());
         String md5Str = md5.digestHex(content);
-        log.info("md5Str:{}", md5Str);
 
         String encryptedContent = EncryptUtils.desEncrypt(content);
         String finalContent = salt + encryptedContent;

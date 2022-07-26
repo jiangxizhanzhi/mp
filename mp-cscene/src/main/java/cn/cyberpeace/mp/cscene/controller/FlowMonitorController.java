@@ -65,8 +65,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "模拟流量")
     @GetMapping("/simulation")
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
-        log.info("FlowSceneSimulationRequest:{}", request);
-
         flowMonitorService.simulation(request);
 
         return ServiceResult.successful();
@@ -83,7 +81,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "场景流量趋势图")
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
-        log.info("flowTrendRequest:{}", flowTrendRequest);
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
         return ServiceResult.success(flowTrends);
@@ -97,7 +94,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "场景受攻击端口")
     @GetMapping("/scene_attacked_port")
     public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
-        log.info("FlowCommonRequest:{}", request);
         List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
 
         return ServiceResult.success(list);
@@ -111,7 +107,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "场景主机状态")
     @GetMapping("/scene_target_status")
     public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
-        log.info("FlowCommonRequest:{}", request);
         List<FlowGroupByDestinationIpAndSeverityVO> list = flowMonitorService.groupByDestinationIpAndSeverity(request);
 
         return ServiceResult.success(list);
@@ -125,7 +120,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "节点流量趋势图")
     @GetMapping("/element_trend")
     public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendRequest flowTrendRequest) {
-        log.info("flowTrendRequest:{}", flowTrendRequest);
         List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
 
         return ServiceResult.success(flowTrends);

@@ -5,34 +5,19 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFileActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
-import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.enums.CsceneStatusEnum;
-import cn.cyberpeace.mp.cscene.enums.CsceneTypeEnum;
+import cn.cyberpeace.mp.cscene.model.CsceneStatusModel;
+import cn.cyberpeace.mp.cscene.model.CsceneTypeModel;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.cscene.service.CsceneStatusService;
+import cn.cyberpeace.mp.cscene.service.CsceneTypeService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
@@ -58,13 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -81,6 +60,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneInstanceService modelService;
 
     private CsceneSpecialService csceneSpecialService;
+
+    @Autowired
+    private CsceneTypeService csceneTypeService;
+
+    @Autowired
+    private CsceneStatusService csceneStatusService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -689,12 +674,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例状态")
     public ServiceResult<CsceneStatusVO> getSceneStatus() {
         List<CsceneStatusVO> statusVOList = new ArrayList<>();
-        for (CsceneStatusEnum statusEnum : CsceneStatusEnum.values()) {
-            String name = MessageCommon.get(statusEnum.getName());
+        List<CsceneStatusModel> models = csceneStatusService.findAll();
+
+        for (CsceneStatusModel model : models) {
+            String name = MessageCommon.get(ControllerConstant.CSCENE_INSTANCE_STATUS_PREFIX + "." + model.getName());
             statusVOList.add(
                     CsceneStatusVO.builder()
                             .name(name)
-                            .code(statusEnum.getCode())
+                            .code(model.getCode())
                             .build()
             );
         }
@@ -705,12 +692,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<CsceneTypeVO> getSceneType() {
         List<CsceneTypeVO> typeVOList = new ArrayList<>();
-        for (CsceneTypeEnum typeEnum : CsceneTypeEnum.values()) {
-            String name = MessageCommon.get(typeEnum.getName());
+        List<CsceneTypeModel> models = csceneTypeService.findAll();
+
+        for (CsceneTypeModel model : models) {
+            String name = MessageCommon.get(ControllerConstant.CSCENE_INSTANCE_TYPE_PREFIX + "." + model.getName());
             typeVOList.add(
                     CsceneTypeVO.builder()
                             .name(name)
-                            .code(typeEnum.getCode())
+                            .code(model.getCode())
                             .build()
             );
         }

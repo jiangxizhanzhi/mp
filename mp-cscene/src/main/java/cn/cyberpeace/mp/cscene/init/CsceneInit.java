@@ -31,10 +31,11 @@ public class CsceneInit implements ApplicationRunner {
         int count = csceneService.getActiveVirtualDeviceCount();
         NodeLimitUtils.addLimitedNodeCount(count);
 
-        var list = commonConfigMapper
-                .list(new HumanCondition().filterEqual(CsceneCommonConfigModel::getKey, CloudMessageConvertUtil.configKey));
-        if (list != null && list.size() > 0) {
-            CloudMessageConvertUtil.init(list.get(0).getContent());
+        var config = commonConfigMapper
+                .list(new HumanCondition().filterEqual(CsceneCommonConfigModel::getKey, CloudMessageConvertUtil.configKey))
+                .stream().findFirst();
+        if (config.isPresent()) {
+            CloudMessageConvertUtil.init(config.get().getContent());
         }
     }
 }

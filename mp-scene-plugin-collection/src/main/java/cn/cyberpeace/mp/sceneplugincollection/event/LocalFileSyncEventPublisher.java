@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.event;
+package cn.cyberpeace.mp.sceneplugincollection.event;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;

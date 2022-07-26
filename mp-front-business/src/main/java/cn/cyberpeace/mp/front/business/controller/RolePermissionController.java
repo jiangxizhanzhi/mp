@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -38,7 +39,7 @@ public class RolePermissionController {
     @ApiOperation(value = "查询角色权限", notes = "")
     @GetMapping("/byrole")
     public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
-        List<TargetModel> targets = rolePermissionModelService.listTargetsByRoleId(roleId);
+        List<TargetModel> targets = rolePermissionModelService.listTargetsByRoleIds(Arrays.asList(roleId));
 
         return ServiceResult.success(targets);
     }

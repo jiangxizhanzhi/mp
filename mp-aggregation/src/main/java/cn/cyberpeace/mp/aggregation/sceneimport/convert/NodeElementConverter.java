@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.AclsInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -16,6 +17,8 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.IpVersion;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.hutool.core.io.FileUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -28,7 +31,11 @@ import java.util.stream.Collectors;
  * @Author maojun
  * @Date 2021/10/12
  */
+@Slf4j
 class NodeElementConverter implements IConverter {
+
+    private static String FDFS_SCENE_FILEPATH_FORMAT = "%s?filename=%s";
+
     private List<NodeElementParseResult> parseResult;
 
     public NodeElementConverter(List<NodeElementParseResult> parseResult) {
@@ -67,6 +74,18 @@ class NodeElementConverter implements IConverter {
         }
         List<SceneConfigElementPortBO> portBOS = new ArrayList<>();
         sceneConfigElementBO.setPorts(portBOS);
+        // 处理节点附件
+        if (StringUtils.isNotEmpty(node.getFile())) {
+            // 处理附件
+            if (FileUtil.exist(node.getFile())) {
+                String fdfsPath = FsCommon.upload(node.getFile());
+                String fileName = FileUtil.getName(node.getFile());
+                String nodeFilePath = String.format(FDFS_SCENE_FILEPATH_FORMAT, fdfsPath, fileName);
+                sceneConfigElementBO.setFile(nodeFilePath);
+            } else {
+                log.info("import scene , no scene file for path {}", node.getFile());
+            }
+        }
 
         // 插件表
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();

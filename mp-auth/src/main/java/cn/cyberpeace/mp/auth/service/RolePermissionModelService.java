@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -14,8 +15,9 @@ import java.util.List;
  */
 public interface RolePermissionModelService extends BaseModelService<RolePermissionModel, QueryParams> {
 
-    List<TargetModel> listTargetsByRoleId(String roleId);
+    List<TargetModel> listTargetsByRoleIds(List<String> roleIds);
 
+    List<TargetRoleDto> listTargetRoleDtosByRoleIds(List<String> roleIds);
 
     boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets);
 

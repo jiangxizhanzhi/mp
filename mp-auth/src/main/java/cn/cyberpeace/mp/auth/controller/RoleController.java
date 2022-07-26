@@ -103,7 +103,7 @@ public class RoleController {
 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
-    @PostMapping("modify")
+    @PostMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {

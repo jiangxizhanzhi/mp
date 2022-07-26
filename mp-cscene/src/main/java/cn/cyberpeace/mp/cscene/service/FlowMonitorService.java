@@ -98,7 +98,6 @@ public class FlowMonitorService {
      * @return
      */
     public List<FlowTrend> getElementFlowTrend(FlowTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
@@ -114,7 +113,6 @@ public class FlowMonitorService {
      * @return
      */
     public List<FlowTrend> getSceneFlowTrend(FlowTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(trendRequest.getSceneId(), ","));
@@ -130,9 +128,6 @@ public class FlowMonitorService {
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
-
-
-        // todo 转好
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowSimulationParams params = new FlowSimulationParams();
@@ -160,12 +155,9 @@ public class FlowMonitorService {
         BaseRequestUtil.checkBaseRequestWithSceneId(request);
         // 逗号分割
         List<String> sceneIds = CollectionUtil.toList(StringUtils.split(request.getSceneId(), ","));
-
         LocalDateTime endTime = request.getEndTime();
-
         LocalDateTime startTime = request.getStartTime();
 
-        // todo 转好
         List<String> sceneIdList = csceneCommonService.translateSceneIds(sceneIds);
 
         FlowGroupByDestinationPortParams params = new FlowGroupByDestinationPortParams();

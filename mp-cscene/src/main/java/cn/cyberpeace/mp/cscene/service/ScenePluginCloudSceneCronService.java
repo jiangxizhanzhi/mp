@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.cscene.SceneCronService;
-import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
+import cn.cyberpeace.mp.cscene.SceneCorrectService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -22,21 +20,15 @@ public class ScenePluginCloudSceneCronService {
     private CsceneService csceneService;
 
     @Resource
-    private SceneCronService cronService;
-
-    @Resource
-    private CsceneAppConfig csceneAppConfig;
+    private SceneCorrectService sceneCorrectService;
 
     @Resource
     private ClearService clearService;
 
     public void action() {
-        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableSceneCronJob())) {
-            log.info("scene cron job is not enable");
-            return;
-        }
-        log.info("start cloud plugin scene cron job");
+        log.info("start cloud plugin scene correct job");
 
+        // 内存和数据库中节点数量保持同步
         try {
             int count = csceneService.getActiveVirtualDeviceCount();
             NodeLimitUtils.refreshCount(count);
@@ -44,13 +36,15 @@ public class ScenePluginCloudSceneCronService {
             log.error("failed to refresh node limit count", e);
         }
 
+        // 启动耗时很长的场景,状态置为异常
         try {
-            cronService.correctErrorStatusScene();
+            sceneCorrectService.correctErrorStatusScene();
         } catch (Exception e) {
             log.error("failed to correct error status scene", e);
         }
 
+        // 清理未正常释放的资源
         clearService.clearUselessResource();
-        log.info("end cloud plugin scene cron job");
+        log.info("end cloud plugin scene correct job");
     }
 }

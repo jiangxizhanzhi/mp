@@ -8,7 +8,6 @@ ip:
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
   mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
-  redis: ${REDIS_IP:10.100.7.1}
 port:
   self-callback: ${MP_SELF_PORT:8080}
 server:
@@ -22,11 +21,6 @@ spring:
     username: ${MP_DB_USERNAME:root}
     password: ${MP_DB_PASSWORD:root}
     driver-class-name: org.mariadb.jdbc.Driver
-  redis:
-    host: ${ip.redis}
-    port: 9379
-    password: ${REDIS_PWD:MzhhMzU4NDQzNzU}
-    database: 0
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   flyway:
@@ -55,6 +49,7 @@ logging:
   file:
     path: ${user.home}/logs
     max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:1GB}
+    max-row-length: ${LOG_FILE_MAX_ROW_LENGTH:2000}
   logback:
     rollingpolicy:
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}
@@ -202,8 +197,10 @@ mp:
     enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
     enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:* 0/15 * * * ?}
+    access-mode-ip: ${MP_ACCESS_MODE_IP:}
   scene:
     gateway_types: ${GATEWAY_TYPES:2,3}
+    access-mode-ip: ${MP_ACCESS_MODE_IP:}
 
 management:
   endpoints:

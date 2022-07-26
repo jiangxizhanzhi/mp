@@ -99,10 +99,9 @@ public class UserPermissionServiceImpl
         }
 
         // 角色绑定的target
-        roles.forEach((r) -> {
-            List<TargetModel> roleTargets = rolePermissionService.listTargetsByRoleId(r.getId());
-            authorizedTargetsSet.addAll(roleTargets);
-        });
+        List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
+        List<TargetModel> roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
+        authorizedTargetsSet.addAll(roleTargets);
 
         // 用户直接绑定的target
         //List<TargetModel> userTargets = getModelMapper().listTargetsByUserId(userId);

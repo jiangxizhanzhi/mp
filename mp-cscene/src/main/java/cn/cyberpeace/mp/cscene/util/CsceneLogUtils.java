@@ -63,12 +63,12 @@ public class CsceneLogUtils {
     public static String SCENE_UNPAUSE = "scene_unpause";
 
     public static void recordSceneConfigLog(CsceneBO csceneBO, OpTypeEnums opType, String desc, CsceneContextBO context) {
+        if (csceneBO == null) {
+            log.info("cscene bo is null");
+            return;
+        }
+        CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
         try {
-            if (csceneBO == null) {
-                log.info("cscene bo is null");
-                return;
-            }
-            CsceneLogService csceneLogService = BeanCommon.getBean(CsceneLogService.class);
             CsceneLogService.LogDetail detail = csceneLogService.getLogDetail(csceneBO.getId(), true);
             OperationLogRequest logModel = getOperationLogRequest(opType, detail.getTarget(), detail.getContent(), desc, context);
             if (logModel == null) {

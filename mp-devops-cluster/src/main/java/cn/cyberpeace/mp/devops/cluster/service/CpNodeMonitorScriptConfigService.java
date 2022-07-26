@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.devops.cluster.service;
 
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
-import cn.cyberpeace.mp.base.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devops.cluster.constant.MonitorConstant;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -52,9 +50,8 @@ public class CpNodeMonitorScriptConfigService {
     @Autowired
     private MonitorConfig monitorConfig;
 
-    @EventListener
-    public void init(LocalFileSyncSuccessEvent syncSuccessEvent) {
-        scriptInstallationCheck(syncSuccessEvent);
+    public void init(List<LocalFileMappingModel> mappings) {
+        scriptInstallationCheck(mappings);
     }
 
     // 定时调度，查询脚本是否安装成功
@@ -97,10 +94,9 @@ public class CpNodeMonitorScriptConfigService {
     }
 
 
-    private void scriptInstallationCheck(LocalFileSyncSuccessEvent syncSuccessEvent) {
+    private void scriptInstallationCheck(List<LocalFileMappingModel> mappings) {
         BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 1));
 
-        List<LocalFileMappingModel> mappings = (List<LocalFileMappingModel>) syncSuccessEvent.getSource();
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
 

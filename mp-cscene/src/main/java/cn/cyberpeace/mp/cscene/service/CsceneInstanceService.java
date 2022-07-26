@@ -71,6 +71,8 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -79,11 +81,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,6 +94,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -142,9 +143,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Autowired
     private LogFileService logFileService;
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
     @Resource
     private SceneService sceneService;
 
@@ -156,6 +154,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneMapper csceneMapper;
+
+    // expires in 30 minutes
+    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -212,14 +214,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                                                             Map<String, Map<String, String>> nodeId2ProbeNameMap,
                                                                             String probeId, HostEventQueryParams queryParams) {
         String scrollId = null;
-        String redisKey = null;
+        String cacheKey = null;
         boolean isScrollRequest = false;
         if (StringUtils.isNotBlank(requestId)) {
             isScrollRequest = true;
-            redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
-            String redisValue = redisTemplate.opsForValue().get(redisKey);
-            if (StringUtils.isNotEmpty(redisValue)) {
-                scrollId = redisValue;
+            cacheKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
+            String cacheValue = TIMED_CACHE.get(cacheKey, false);
+            if (StringUtils.isNotEmpty(cacheValue)) {
+                scrollId = cacheValue;
             }
         }
 
@@ -355,8 +357,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
             }
 
-            if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(redisKey)) {
-                redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
+            if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(cacheKey)) {
+                TIMED_CACHE.put(cacheKey, scrollId);
             }
 
             res.forEach(r -> {
@@ -1022,10 +1024,51 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
         // todo 合成一次查询
         String sceneId = getSceneId(csceneId);
-        String sceneConfigId = getSceneConfigId(csceneId);
         if (StringUtils.isEmpty(sceneId)) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshotId);
+
+        String sceneConfigId = getSceneConfigId(csceneId);
+        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
+        if (CollectionUtils.isEmpty(listSnapshot)) {
+            return new ServiceResult<>(true);
+        }
+
+        var filteredSnapshots = listSnapshot.stream()
+                .filter(s -> StringUtils.equals(s.getSnapshotUuid(), snapshotId))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(filteredSnapshots)) {
+            return new ServiceResult<>(true);
+        }
+
+        var snapshot = filteredSnapshots.get(0);
+        String image = snapshot.getAddress();
+
+        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
+        var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
+        if (CollectionUtils.isNotEmpty(configNames)) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(configNames, ",")));
+        }
+
+        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image }).getSource();
+        var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
+        if (CollectionUtils.isNotEmpty(instanceNames)) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(instanceNames, ",")));
+        }
+
+        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName());
+    }
+
+    private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
+        if (CollectionUtils.isEmpty(usingList)) {
+            return null;
+        }
+        Set<String> names = new HashSet<>();
+        for (var used : usingList) {
+            if (names.size() < nameSize) {
+                names.add(getName.apply(used));
+            }
+        }
+        return new ArrayList<>(names);
     }
 }

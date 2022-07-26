@@ -215,7 +215,7 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
-        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(35L));
+        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
         log.info("elasticsearch scroll query, scrollId:\n{}", scrollId);
@@ -254,7 +254,7 @@ public class DataCollectionService extends CollectionBaseService {
 
         // 构造查询条件
         buildFileEventBoolQueryBuilder(wazuhEventRequest, boolQueryBuilder, null);
-        if (!CollUtil.isEmpty(probeIds)) {
+        if (CollUtil.isNotEmpty(probeIds)) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery(CUSTOM_PROBE_ID_PATH, probeIds));
         }
         // 按时间降序

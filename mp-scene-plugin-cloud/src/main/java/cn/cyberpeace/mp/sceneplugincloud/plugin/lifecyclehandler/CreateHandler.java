@@ -409,6 +409,9 @@ public class CreateHandler extends HandlerCommon {
         CloudPluginSceneElementPortBO sampleCloudPort = getPluginHandler().getPort(samplePort.getId());
         var virtualNic = new VirtualNic();
         virtualNic.setNetworkId(network.getResourceId());
+        if (StringUtils.isNotEmpty(sampleCloudPort.getConnectMode())) {
+            virtualNic.setVlanMode(sampleCloudPort.getConnectMode());
+        }
         virtualNic.setFixedIp(TextUtils.emptyNull(samplePort.getIp()));
         virtualNic.setMacAddress(TextUtils.emptyNull(samplePort.getMacAddr()));
         List<VirtualNic.QosRule> qosRules = new ArrayList<>();
@@ -612,11 +615,16 @@ public class CreateHandler extends HandlerCommon {
         var srcScene = getPluginHandler().getSrcScene();
         var sceneId = srcScene.getEid();
 
-        // 准备容器的unzip工具，容器本身可能自带，所以忽略失败
+        // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
         try {
             ContainerFileUtils.prepareUnzip(containerClient, containerId);
         } catch (Exception e) {
             log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
+        }
+        try {
+            ContainerFileUtils.prepareApkUnzip(containerClient, containerId);
+        } catch (Exception e) {
+            log.warn("Scene({}) cloud container({}) element prepare unzip.apk failed: ", sceneId, containerId, e);
         }
 
         var sceneFileUrl = srcScene.getFile();
@@ -992,10 +1000,19 @@ public class CreateHandler extends HandlerCommon {
     public void create() {
         prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
 
+        long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
+        long gatewayTasks = getPluginHandler().getGatewayElementMap().values().stream().count();
+        long firewallTasks = getPluginHandler().getFirewallElementMap().values().stream().count();
+        long terminalTasks = getPluginHandler().getTerminalElementMap().values().stream().count();
+        int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
+
         // 先创建辅助网络(包含虚拟交换机)
         var createAuxiliaryNetworkTasks = getPluginHandler().getElementMap().values().stream()
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
-                .map(cloudElement -> (Runnable) () -> createAuxiliaryNetworkProcess(cloudElement))
+                .map(cloudElement -> (Runnable) () -> {
+                    createAuxiliaryNetworkProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                })
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_AUXILIARY_NETWORKS, () -> runTasks(createAuxiliaryNetworkTasks));
@@ -1003,21 +1020,30 @@ public class CreateHandler extends HandlerCommon {
 
         // 再创建网关
         var createGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                }).collect(Collectors.toList());
         if (!createGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks));
         }
 
         // 再创建防火墙
         var createFirewallTasks = getPluginHandler().getFirewallElementMap().values().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                }).collect(Collectors.toList());
         if (!createFirewallTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_FIREWALLS, () -> runTasks(createFirewallTasks));
         }
 
         // 再创建终端
         var createTerminalTasks = getPluginHandler().getTerminalElementMap().values().stream()
-                .map(cloudElement -> (Runnable) () -> createElementProcess(cloudElement)).collect(Collectors.toList());
+                .map(cloudElement -> (Runnable) () -> {
+                    createElementProcess(cloudElement);
+                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                }).collect(Collectors.toList());
         if (!createTerminalTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_TERMINALS, () -> runTasks(createTerminalTasks));
         }

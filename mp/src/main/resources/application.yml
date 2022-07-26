@@ -8,7 +8,6 @@ ip:
   es: 10.100.0.101                 # MP新中台ES地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
   mp: 10.100.1.12:8001                       # MP中台地址
-  redis: 10.100.7.1
 port:
   self-callback: 8080
 server:
@@ -22,11 +21,6 @@ spring:
     username: root
     password: root
     driver-class-name: org.mariadb.jdbc.Driver
-  redis:
-    host: ${ip.redis}
-    port: 9379
-    password: MzhhMzU4NDQzNzU
-    database: 0
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
   flyway:
@@ -55,6 +49,7 @@ logging:
   file:
     path: ${user.home}/logs
     max-total-size: 1GB
+    max-row-length: 2000
   logback:
     rollingpolicy:
       max-history: 15

@@ -66,7 +66,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
         req.ensure();
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserId(), req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
 
         List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlined(null);
@@ -118,16 +118,15 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
     @Override
-    public List<UserOnlineRecordModel> listCurrentOnlined(String userId) {
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(DEFAULT_MINUTES);
+    public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
+        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, DEFAULT_MINUTES);
         return onlineList;
     }
 
     @Override
-    public List<UserOnlineRecordModel> listCurrentOfflined(String userId) {
+    public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
         // 默认超过5分钟没有更新end_time既判定为离线
-        LocalDateTime deadline = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
-        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userId, deadline);
+        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds, DEFAULT_MINUTES);
         return list;
     }
 

@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  */
 @Service
 @Slf4j
-public class SceneCronService {
+public class SceneCorrectService {
 
     @Resource
     private SceneMapper sceneMapper;

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
@@ -334,8 +335,8 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
-        if (baseResult.isSuccess()) {
-            return ServiceResult.success(baseResult.isSuccess());
+        if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
+            return ServiceResult.success(true);
         } else {
             return ServiceResult.fail(baseResult.getMessage());
         }

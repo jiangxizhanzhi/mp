@@ -5,8 +5,14 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
 
@@ -37,13 +43,17 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
 
         ServiceResult result = null;
         if(exception instanceof BadCredentialsException) {
-            logger.info("login failed, bad credentials!");
+            response.setStatus(HttpServletResponse.SC_OK);
+            result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
+        }
+
+        if(exception instanceof UsernameNotFoundException) {
             response.setStatus(HttpServletResponse.SC_OK);
             result = ServiceResult.builder().serviceCode(AuthErrorCode.BAD_CREDENTIALS).build().asResult();
         }
 
         // 弃用，因为无法控制异常状态顺序：状态优先级 禁用 > 过期 > 待审核
-        /*if(exception instanceof AccountStatusException) {
+        if(exception instanceof AccountStatusException) {
             response.setStatus(HttpServletResponse.SC_OK);
 
             if(exception instanceof DisabledException) {
@@ -51,13 +61,17 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             }
 
             if(exception instanceof AccountExpiredException) {
+                result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_CREDENTIALS_EXPIRED).build().asResult();
+            }
+
+            if(exception instanceof CredentialsExpiredException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_EXPIRED).build().asResult();
             }
 
             if(exception instanceof LockedException) {
                 result = ServiceResult.builder().serviceCode(AuthErrorCode.ACCOUNT_NOT_AUDITED).build().asResult();
             }
-        }*/
+        }
 
         if (Objects.isNull(result)) {
             logger.info("authentication failed!");

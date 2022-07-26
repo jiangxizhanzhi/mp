@@ -18,6 +18,7 @@ public class NodeElementParseResult {
     private String name;
     private String image;
     private String images;
+    private String file;
     private List<NetElementParseResult> net;
     private List<StaticRoutesResult> staticRoutes;
     private List<InitCommandParseResult> initCommands;

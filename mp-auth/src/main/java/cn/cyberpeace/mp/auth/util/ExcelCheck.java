@@ -52,7 +52,6 @@ public class ExcelCheck {
 
 
         long size = file.getSize();
-        log.info("size:{}", size);
         if (size > MAX_SIZE) {
             log.error("over size, size:{}", size);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_EXCEED_SIZE);

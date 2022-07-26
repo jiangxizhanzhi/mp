@@ -234,7 +234,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         OrgDto orgDto = new OrgDto();
         BeanUtils.copyProperties(parentOrg, orgDto);
-        log.warn("queryChildOrgOperation:{}", queryChildOrgDtoOperation);
         orgDto.execute(queryChildOrgDtoOperation);
 
         return CollectionUtil.toList(orgDto);

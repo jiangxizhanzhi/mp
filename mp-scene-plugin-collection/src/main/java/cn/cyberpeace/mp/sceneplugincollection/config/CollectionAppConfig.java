@@ -49,6 +49,9 @@ public class CollectionAppConfig {
     @Value("${mp.sceneplugincollection.wazuh_agent_installer_dir:}")
     private String wazuhAgentInstallerDir;
 
+    @Value("${mp.sceneplugincollection.biz_scripts_installer_dir:}")
+    private String bizScriptsInstallerDir;
+
     @Value("${mp.sceneplugincollection.wazuh_api_server:http://127.0.0.1:55000}")
     private String wazuhApiServer;
 
@@ -108,5 +111,16 @@ public class CollectionAppConfig {
         wazuhAgentInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
                 baseAppConfig.getResourcesDir(), "scene_plugin_collection/wazuh_agent");
         return wazuhAgentInstallerDir;
+    }
+
+
+    public String getBizScriptsInstallerDir() {
+        if (!StringUtils.isEmpty(bizScriptsInstallerDir)) {
+            return bizScriptsInstallerDir;
+        }
+
+        bizScriptsInstallerDir = StringUtils.joinWith(FileUtil.FILE_SEPARATOR,
+                baseAppConfig.getResourcesDir(), "scene_plugin_collection/biz_scripts");
+        return bizScriptsInstallerDir;
     }
 }

@@ -3,11 +3,18 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.dto.element.*;
+import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
+import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorRequest;
+import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
+import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.SceneElementMonitorService;
@@ -87,7 +94,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点网络连接状态")
     @GetMapping("/connection_state")
     public ListObjServiceResult<ConnectionState> pageConnectionStates(BaseSceneElementPageRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         return sceneElementMonitorService.pageNetworkConnections(pageRequest);
@@ -99,7 +105,6 @@ public class ElementMonitorController {
     })
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.FILE_MODIFY_GROUP, path).asResult();
@@ -122,7 +127,6 @@ public class ElementMonitorController {
     })
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
@@ -142,7 +146,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞Top10")
     @GetMapping("/get_service_vulnerability")
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
@@ -152,7 +155,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞饼状图")
     @GetMapping("/get_vulnerability_pie_chart")
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
@@ -162,7 +164,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞列表")
     @GetMapping("/get_vulnerability_list")
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);

@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.auth.dto.user;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -12,8 +11,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 创建或者更新用户在线记录
@@ -23,61 +23,60 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Slf4j
 public class UserOnlineRecordTask implements Runnable {
 
-    private String userId;
-
-    private CopyOnWriteArrayList<LocalDateTime> timestampList;
+    private Map<UserModel, LocalDateTime> userModel2LastTsMap;
 
     private ApplicationContext applicationContext;
 
-    public UserOnlineRecordTask(String userId, CopyOnWriteArrayList<LocalDateTime> timestampList, ApplicationContext applicationContext) {
-        this.userId = userId;
-        this.timestampList = timestampList;
+    public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap, ApplicationContext applicationContext) {
+        this.userModel2LastTsMap = userModel2LastTsMap;
         this.applicationContext = applicationContext;
     }
 
     @Override
     public void run() {
-        log.info("create or update UserOnlineRecord...");
         // 更新用户在线记录信息
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time
         UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
-        List<UserOnlineRecordModel> onlinedRecordList = userOnlineRecordService.listCurrentOnlined(userId);
+
+        List<UserModel> userModels = userModel2LastTsMap.keySet().stream().collect(Collectors.toList());
+        List<String> userIds = userModels.stream().map(UserModel::getId).collect(Collectors.toList());
+        List<UserOnlineRecordModel> onlinedRecordList = userOnlineRecordService.listCurrentOnlined(userIds);
+        List<String> onlinedRecordedUserIds = onlinedRecordList.stream().map(UserOnlineRecordModel::getUser).collect(Collectors.toList());
+        List<UserModel> notRecordedUserModels = userModels.stream().filter(model -> !onlinedRecordedUserIds.contains(model.getId())).collect(Collectors.toList());
+
 
         // 存在当前用户的在线记录，直接更新
         if (CollectionUtil.isNotEmpty(onlinedRecordList)) {
-            log.info("UserOnlineRecord existed, updating...");
             List<UserOnlineRecordModel> bulkUpdateList = new ArrayList<>();
-            for (UserOnlineRecordModel model : onlinedRecordList) {
-                LocalDateTime startTime = model.getStartTime();
+            for (UserOnlineRecordModel recordModel : onlinedRecordList) {
+                LocalDateTime startTime = recordModel.getStartTime();
                 LocalDateTime endTime = LocalDateTime.now();
                 Duration duration = Duration.between(startTime, endTime);
                 long durationMinutes = duration.toMinutes();
                 Integer durationMin = Integer.valueOf(String.valueOf(durationMinutes));
 
                 UserOnlineRecordModel updateRecord = UserOnlineRecordModel.builder()
-                        .id(model.getId())
+                        .id(recordModel.getId())
                         .durationMinutes(durationMin)
                         .endTime(endTime)
                         .build();
 
                 bulkUpdateList.add(updateRecord);
             }
+
             userOnlineRecordService.bulkUpdate(bulkUpdateList);
+        }
 
-        } else {
+
+        if (CollectionUtil.isNotEmpty(notRecordedUserModels)) {
             // 不存在当前用户的在线记录，新增一个新的记录
-            log.info("UserOnlineRecord not exist, creating...");
-            UserService userService = applicationContext.getBean(UserService.class);
-            var source = userService.get(userId).getSource();
-            UserModel user = Objects.isNull(source) ? null : source.getObj();
-
-            if (Objects.nonNull(user)) {
-//                UserDto userDto =  userService.doModel2Dto(user, true, false);
+            List<UserOnlineRecordModel> bulkList = new ArrayList<>();
+            for (UserModel userModel : notRecordedUserModels) {
 //                String orgpaths = userDto.getOrgs().stream().map(OrgModel::getPath).collect(Collectors.joining(","));
 
                 // 如果存在第一次心跳时间，则startTime=第一次心跳时间
                 LocalDateTime startTime = null;
-                LocalDateTime firstTime = timestampList.get(0);
+                LocalDateTime firstTime = userModel2LastTsMap.get(userModel);
                 if (Objects.nonNull(firstTime)) {
                     startTime = firstTime;
                 } else {
@@ -92,15 +91,17 @@ public class UserOnlineRecordTask implements Runnable {
                 durationMin = durationMin < 1 ? 1 : durationMin;
 
                 UserOnlineRecordModel onlineRecordModel = UserOnlineRecordModel.builder()
-                        .user(userId)
-                        .username(user.getUsername())
-                        .name(user.getName())
+                        .user(userModel.getId())
+                        .username(userModel.getUsername())
+                        .name(userModel.getName())
                         .durationMinutes(durationMin)
                         .startTime(startTime).build();
 
-                userOnlineRecordService.create(onlineRecordModel);
+                bulkList.add(onlineRecordModel);
             }
-
+            if (CollectionUtil.isNotEmpty(bulkList)) {
+                userOnlineRecordService.bulkCreate(bulkList);
+            }
         }
 
     }

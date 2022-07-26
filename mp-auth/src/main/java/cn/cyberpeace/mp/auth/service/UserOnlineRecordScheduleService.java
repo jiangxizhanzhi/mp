@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +36,10 @@ public class UserOnlineRecordScheduleService {
     // 每2分钟统计一次
     public static final long REFRESH_RATE = 2;
 
-    //    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
-//    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
+    // 两分钟内，心跳次数大于1
     public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
+
+    public static final int BATCH_TASK_USER_SIZE = 10;
 
     private static ExecutorService threadPool = null;
 
@@ -54,26 +59,33 @@ public class UserOnlineRecordScheduleService {
         }
         log.info("start online record task...");
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
+        List<Map<UserModel, LocalDateTime>> userModel2LastTsMapList = new ArrayList<>();
+        int i = 0;
+        Map<UserModel, LocalDateTime> map = null;
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             UserModel userModel = entry.getKey();
-            String userId = userModel.getId();
             CopyOnWriteArrayList<LocalDateTime> timestampList = entry.getValue();
             if (timestampList.size() >= HEARTBEAT_COUNT_THRESHOLD) {
                 // 一段时间内，心跳次数超过阈值，更新在线记录表
-                UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userId, timestampList, applicationContext);
+                if (i % BATCH_TASK_USER_SIZE == 0) {
+                    map = new HashMap<>();
+                    userModel2LastTsMapList.add(map);
+                }
+                map.put(userModel, timestampList.get(0));
+                i++;
+            }
+        }
+
+        if (CollectionUtil.isNotEmpty(userModel2LastTsMapList)) {
+            for (Map<UserModel, LocalDateTime> userModel2LastTsMap : userModel2LastTsMapList) {
+                UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userModel2LastTsMap, applicationContext);
                 threadPool.submit(recordTask);
-                heartbeatMap.remove(userModel);
             }
         }
 
         log.info("finish online record task...");
-        log.info("heartbeatMap.size:{} after...", heartbeatMap.size());
     }
 
-
-    public int getOlUserCnt() {
-        return heartbeatService.getHeartbeatMap().size();
-    }
 
     /**
      * 检查状态是否过期，过期状态更新
@@ -83,11 +95,8 @@ public class UserOnlineRecordScheduleService {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-        log.info("start online record status check task...");
-
         UserOnlineRecordStatusCheckTask recordStatusCheckTask = new UserOnlineRecordStatusCheckTask(applicationContext);
         threadPool.submit(recordStatusCheckTask);
-        log.info("finish online record status check task...");
     }
 
     /**
@@ -101,7 +110,7 @@ public class UserOnlineRecordScheduleService {
 
     private static class ThreadPoolHolder {
         static ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("online-report-pool-%d").build();
-        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(30, 200, 180, TimeUnit.SECONDS,
+        private static ExecutorService threadPoolExecutor = new ThreadPoolExecutor(5, 100, 30, TimeUnit.SECONDS,
                 new ArrayBlockingQueue(10000), namedThreadFactory, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 

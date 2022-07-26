@@ -7,18 +7,17 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.model.OsTypeModel;
+import cn.cyberpeace.mp.situationaware.model.ProbeTypeModel;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeVO;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.situationaware.model.enums.OsTypeEnum;
-import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
-import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
-import cn.cyberpeace.mp.situationaware.service.ProbeService;
+import cn.cyberpeace.mp.situationaware.service.*;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.cyberpeace.mp.situationaware.vo.OsTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
@@ -59,30 +58,47 @@ public class ProbeManagerController {
     @Autowired
     private ProbeScriptService probeScriptService;
 
+    @Autowired
+    private OsTypeService osTypeService;
+
+    @Autowired
+    private ProbeTypeService probeTypeService;
 
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
-    public ServiceResult<ProbeTypeEnum> probeTypes() {
-        ProbeTypeEnum[] typeEnums = ProbeTypeEnum.values();
-        List<ProbeTypeVO> typeVOS = new ArrayList<>();
-        for (ProbeTypeEnum typeEnum : typeEnums) {
-            String name = MessageCommon.get(typeEnum.getName());
-            int code = typeEnum.getCode();
-            ProbeTypeVO vo = ProbeTypeVO.builder().name(name).code(code).build();
-            typeVOS.add(vo);
+    public ServiceResult<ProbeTypeVO> probeTypes() {
+        List<ProbeTypeVO> typeVOs = new ArrayList<>();
+        List<ProbeTypeModel> models = probeTypeService.findAll();
+
+        for (ProbeTypeModel model : models) {
+            String name = MessageCommon.get(SituationalAwareConstant.PROBE_TYPE_PREFIX + "." + model.getName());
+            int code = model.getCode();
+            typeVOs.add(
+                    ProbeTypeVO.builder()
+                            .name(name)
+                            .code(code)
+                            .build()
+            );
 
         }
-        return ServiceResult.success(typeVOS);
+        return ServiceResult.success(typeVOs);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
     public ServiceResult<OsTypeVO> osTypes() {
         List<OsTypeVO> osTypeVOs = new ArrayList<>();
-        for (OsTypeEnum osTypeEnum : OsTypeEnum.values()) {
-            String name = MessageCommon.get(osTypeEnum.getName());
-            int code = osTypeEnum.getCode();
-            osTypeVOs.add(OsTypeVO.builder().name(name).code(code).build());
+        List<OsTypeModel> models = osTypeService.findAll();
+
+        for (OsTypeModel model : models) {
+            String name = MessageCommon.get(SituationalAwareConstant.OS_TYPE_PREFIX + "." + model.getName());
+            int code = model.getCode();
+            osTypeVOs.add(
+                    OsTypeVO.builder()
+                            .name(name)
+                            .code(code)
+                            .build()
+            );
         }
         return ServiceResult.success(osTypeVOs);
     }
