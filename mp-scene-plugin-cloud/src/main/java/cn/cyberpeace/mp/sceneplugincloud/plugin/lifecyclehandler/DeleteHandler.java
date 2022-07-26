@@ -29,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -362,6 +363,8 @@ public class DeleteHandler extends HandlerCommon {
         if (!deleteAuxiliaryNetworkTasks.isEmpty()) {
             runSceneProgress(SceneProcess.DELETE_AUXILIARY_NETWORKS, () -> runTasks(deleteAuxiliaryNetworkTasks));
         }
+
+        SceneInstanceLinkCacheUtil.clear(getPluginHandler().getSourceSceneId());
     }
 
     private void deleteNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
