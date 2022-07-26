@@ -106,7 +106,6 @@ public class CollectionTemplateService {
      * @return
      */
     public List<CollectionTemplateDto> listByIds(String[] ids) {
-        log.info("ids:{}", ids);
         CollectionTemplateSearchCondition condition = new CollectionTemplateSearchCondition();
         condition.setIds(ids);
         List<CollectionTemplatePageItemDto> templatePageItemDtos = templateMapper.listTemplateItemDtos(condition);

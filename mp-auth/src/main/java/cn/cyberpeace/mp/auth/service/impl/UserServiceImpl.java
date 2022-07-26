@@ -678,8 +678,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public void importUsers(List<ImportUser> list) {
-        log.info("Now import users from excel...");
-
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<OrgUserModel> orgUserModels = new ArrayList<>();

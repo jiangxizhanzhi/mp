@@ -56,7 +56,6 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
                               OperateUserPermissionService opUserPermCheckService, AuthBizConfig authBizConfig) {
-        log.info("New UploadDataListener Instance...");
         this.userService = userService;
         this.roleService = roleService;
         this.orgService = orgService;

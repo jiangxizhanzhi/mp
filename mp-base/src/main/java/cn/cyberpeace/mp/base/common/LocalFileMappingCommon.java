@@ -1,16 +1,12 @@
 package cn.cyberpeace.mp.base.common;
 
-import cn.cyberpeace.mp.base.event.LocalFileSyncEventPublisher;
-import cn.cyberpeace.mp.base.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.LocalFileMappingService;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,16 +17,6 @@ import java.util.Map;
 public class LocalFileMappingCommon {
 
     public static LocalFileMappingService localFileMappingService;
-
-    public static LocalFileSyncEventPublisher eventPublisher;
-
-    @Autowired
-    private LocalFileSyncEventPublisher publisher;
-
-    @PostConstruct
-    public void init() {
-        eventPublisher = this.publisher;
-    }
 
     private LocalFileMappingCommon(LocalFileMappingService localFileMappingService) {
         LocalFileMappingCommon.localFileMappingService = localFileMappingService;
@@ -65,9 +51,7 @@ public class LocalFileMappingCommon {
         fileNames.forEach(fileName -> {
             namePathMap.put(fileName, StringUtils.joinWith(FileUtil.FILE_SEPARATOR, localDir, fileName));
         });
-        List<LocalFileMappingModel> mappings = syncMap(group, namePathMap);
-        eventPublisher.publishEvent(new LocalFileSyncSuccessEvent(mappings));
-        return mappings;
+        return syncMap(group, namePathMap);
     }
 
     public static int deleteMappings(String group) {

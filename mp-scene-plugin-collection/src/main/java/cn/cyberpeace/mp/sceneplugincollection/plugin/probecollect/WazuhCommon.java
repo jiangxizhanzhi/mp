@@ -35,6 +35,8 @@ public class WazuhCommon {
 
     public static final String WAZUH_AGENT_GROUP = "wazuh_agent_installer";
 
+    public static final String BIZ_SCRIPTS_GROUP = "biz_scripts_installer";
+
     public static final String WAZUH_AGENT_WINDOWS_FILE_NAME = "agent-windows.zip";
 
     public static final String WAZUH_AGENT_LINUX_FILE_NAME = "agent-linux.zip";
