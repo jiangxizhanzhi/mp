@@ -136,10 +136,13 @@ public class UserModel extends BaseModel implements Serializable {
     @DefaultStr
     private String thirdToken;
 
+    @ApiModelProperty(value = "第三方用户id")
+    @DefaultStr
+    private String thirdUserId;
 
 
     @Builder
-    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String res, String thirdToken) {
+    public UserModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String tenant, String identifier, String username, String password, String tokenSecret, String name, String nickname, String avatar, LocalDate birthday, String email, String mobile, String idCard, String address, Integer initCheck, String description, Integer isEnabled, Integer isAudited, LocalDateTime dateJoined, LocalDateTime expiredTime, LocalDateTime lastLogin, String res, String thirdToken, String thirdUserId) {
         super(id, createTime, updateTime);
         this.tenant = tenant;
         this.identifier = identifier;
@@ -163,6 +166,7 @@ public class UserModel extends BaseModel implements Serializable {
         this.lastLogin = lastLogin;
         this.res = res;
         this.thirdToken = thirdToken;
+        this.thirdUserId = thirdUserId;
     }
 
     public static class Status {

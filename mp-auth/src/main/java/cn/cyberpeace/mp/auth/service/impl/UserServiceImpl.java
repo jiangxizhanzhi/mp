@@ -352,6 +352,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return userModel;
     }
 
+    @Override
+    public UserModel getByThirdUserId(String thirdUserId) {
+        log.info("getByThirdUserId thirdUserId:{}", thirdUserId);
+        UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("thirdUserId", thirdUserId));
+        return userModel;
+    }
+
 
     @Override
     public List<UserModel> listByUserName(List<String> userNames) {
@@ -935,12 +942,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
-        UserModel user = this.getByUserName(thirdUser.getUserName());
+        UserModel user = this.getByThirdUserId(thirdUser.getUserId());
+//        UserModel user = this.getByUserName(thirdUser.getUserName());
         if (Objects.isNull(user)) {
             // 新增用户、角色、组织信息
             user = this.addUserRoleOrgInfo(thirdUser, token);
         } else {
+            // 用户存在，同时更新用户姓名和token
             user.setThirdToken(token);
+            user.setUsername(thirdUser.getUserName());
             this.update(user);
         }
 
@@ -969,6 +979,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 .nickname(thirdUser.getChineseName())
                 .name(thirdUser.getUserName())
                 .thirdToken(token)
+                .thirdUserId(thirdUser.getUserId())
                 .build();
         user.initDefault("tokenSecret");
         // 给新增用户分配默认头像
@@ -1020,7 +1031,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         if (CollectionUtil.isEmpty(roleModelList)) {
-            log.info("");
+            log.info("add user with default role");
             // 默认作为学员角色
             RoleModel roleModel = roleService.getByName(RoleNameEnum.STUDENT.toString());
             UserRoleModel userRoleModel = new UserRoleModel();

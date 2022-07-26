@@ -44,6 +44,9 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     boolean resetPwd(String userId, String newPwd);
 
+    UserModel getByThirdUserId(String thirdUserId);
+
+
     /**
      * 禁用
      * @param userId
