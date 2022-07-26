@@ -19,7 +19,7 @@
     </select>
 
     <select id="batchGetThirdUserInfos" resultType="cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto">
-        select u.id as userId, u.username as userName, u.third_token as thirdToken
+        select u.id as userId, u.username as userName, u.third_token as thirdToken, u.third_user_id as thirdUserId
         from mp_auth_user u
         where
             u.third_token is not null

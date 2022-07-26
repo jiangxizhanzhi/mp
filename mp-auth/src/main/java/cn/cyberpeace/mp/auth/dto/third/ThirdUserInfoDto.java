@@ -25,4 +25,7 @@ public class ThirdUserInfoDto {
     @ApiModelProperty(value = "是否是管理员 1：是 0：否")
     private int isAdmin;
 
+    @ApiModelProperty(value = "第三方用户id")
+    private String thirdUserId;
+
 }
