@@ -34,7 +34,6 @@ public class UserOnlineRecordTask implements Runnable {
 
     @Override
     public void run() {
-        log.info("create or update UserOnlineRecord...");
         // 更新用户在线记录信息
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time
         UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
@@ -42,8 +41,8 @@ public class UserOnlineRecordTask implements Runnable {
         List<UserModel> userModels = userModel2LastTsMap.keySet().stream().collect(Collectors.toList());
         List<String> userIds = userModels.stream().map(UserModel::getId).collect(Collectors.toList());
         List<UserOnlineRecordModel> onlinedRecordList = userOnlineRecordService.listCurrentOnlined(userIds);
-        List<String> recordedUserIds = onlinedRecordList.stream().map(UserOnlineRecordModel::getUser).collect(Collectors.toList());
-        List<UserModel> notRecordedUserModels = userModels.stream().filter(model -> !recordedUserIds.contains(model.getId())).collect(Collectors.toList());
+        List<String> onlinedRecordedUserIds = onlinedRecordList.stream().map(UserOnlineRecordModel::getUser).collect(Collectors.toList());
+        List<UserModel> notRecordedUserModels = userModels.stream().filter(model -> !onlinedRecordedUserIds.contains(model.getId())).collect(Collectors.toList());
 
 
         // 存在当前用户的在线记录，直接更新
@@ -64,22 +63,20 @@ public class UserOnlineRecordTask implements Runnable {
 
                 bulkUpdateList.add(updateRecord);
             }
+
             userOnlineRecordService.bulkUpdate(bulkUpdateList);
         }
 
 
         if (CollectionUtil.isNotEmpty(notRecordedUserModels)) {
             // 不存在当前用户的在线记录，新增一个新的记录
-            log.info("UserOnlineRecord not exist, creating...");
-            //String[] userIdArray = notRecordedUserModels.toArray(new String[notRecordedUserModels.size()]);
-            //List<UserDto> userDtos = userService.listByUserIds(userIdArray);
             List<UserOnlineRecordModel> bulkList = new ArrayList<>();
             for (UserModel userModel : notRecordedUserModels) {
 //                String orgpaths = userDto.getOrgs().stream().map(OrgModel::getPath).collect(Collectors.joining(","));
 
                 // 如果存在第一次心跳时间，则startTime=第一次心跳时间
                 LocalDateTime startTime = null;
-                LocalDateTime firstTime = userModel2LastTsMap.get(userModel.getId());
+                LocalDateTime firstTime = userModel2LastTsMap.get(userModel);
                 if (Objects.nonNull(firstTime)) {
                     startTime = firstTime;
                 } else {

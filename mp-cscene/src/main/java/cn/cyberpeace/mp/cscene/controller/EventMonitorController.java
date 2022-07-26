@@ -45,7 +45,6 @@ public class EventMonitorController {
     @ApiOperation(value = "查询一定时间范围内的事件总数")
     @GetMapping("/sum")
     public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
-        log.info("{}", baseRequest);
         Long sum = eventMonitorService.sumEvent(baseRequest);
         return ServiceResult.success(sum);
     }
@@ -60,8 +59,6 @@ public class EventMonitorController {
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
     @GetMapping("/aggr_top")
     public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
-        log.info("{}", eventPercentRequest);
-
         List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
 
         if (Objects.isNull(eventPercentRequest.getTopCount()) || eventPercentRequest.getTopCount() < 0) {
@@ -82,7 +79,6 @@ public class EventMonitorController {
     @ApiOperation(value = "根据事件类型，统计饼图")
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
-        log.info("baseRequest:{}", baseRequest);
         EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
 //        EventAggr eventAggr = mockEventAggr();
 

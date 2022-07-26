@@ -166,7 +166,6 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getElementHostStateTrend(HostStateTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
         List<String> nodeIds = CollectionUtil.toList(trendRequest.getElementIds().get(0));
@@ -182,7 +181,6 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getSceneHostStateTrend(HostStateTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(trendRequest);
         List<String> sceneIds = CollectionUtil.toList(trendRequest.getSceneId());
 
@@ -197,7 +195,6 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
-        log.info("{}", trendRequest);
         if (StringUtils.isBlank(cpCloudConfig.getCpIP())) {
             log.error("cp cloud ip is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
@@ -269,7 +266,6 @@ public class HostStateService {
      */
     // todo 老方法，待优化
     public List<HostState> listHostStates(BaseSceneElementPageRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
         BaseRequestUtil.checkBaseRequestWithSceneIdAndElementIds(pageRequest);
         String sceneId = pageRequest.getSceneId();

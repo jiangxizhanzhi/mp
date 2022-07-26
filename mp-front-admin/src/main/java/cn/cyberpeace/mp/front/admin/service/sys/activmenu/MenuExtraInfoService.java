@@ -27,7 +27,7 @@ public class MenuExtraInfoService {
 
     public boolean bulkCreate(List<MenuExtraInfoModel> menuExtraInfoModels) {
         int result = menuExtraInfoMapper.bulkCreate(menuExtraInfoModels);
-        log.info("inserted {} menu extra info rows", result);
+        log.info("added {} menu extra info rows", result);
         return true;
     }
 
@@ -37,7 +37,6 @@ public class MenuExtraInfoService {
 
     public boolean deleteAll() {
         int result = menuExtraInfoMapper.deleteAll();
-        log.info("deleted {} rows", result);
         return true;
     }
 

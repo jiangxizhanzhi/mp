@@ -127,7 +127,6 @@ public class ElementMonitorController {
     })
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         return sceneElementMonitorService.getModifyData(pageRequest, CsceneBizConstant.REGISTRY_MODIFY_GROUP, path).asResult();
@@ -147,7 +146,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞Top10")
     @GetMapping("/get_service_vulnerability")
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityCountInfo(pageRequest);
@@ -157,7 +155,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞饼状图")
     @GetMapping("/get_vulnerability_pie_chart")
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityPieChartInfo(pageRequest);
@@ -167,7 +164,6 @@ public class ElementMonitorController {
     @ApiOperation(value = "查询节点服务漏洞列表")
     @GetMapping("/get_vulnerability_list")
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
-        log.info("{}", pageRequest);
         pageRequest.ensure();
 
         var result = sceneElementMonitorService.getVulnerabilityInfo(pageRequest);

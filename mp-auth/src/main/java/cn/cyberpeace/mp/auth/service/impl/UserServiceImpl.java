@@ -421,14 +421,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public UserModel getByIdent(String ident) {
-        log.info("ident:{}", ident);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
         return userModel;
     }
 
     @Override
     public UserModel getByMobile(String mobile) {
-        log.info("mobile:{}", mobile);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
         return userModel;
     }

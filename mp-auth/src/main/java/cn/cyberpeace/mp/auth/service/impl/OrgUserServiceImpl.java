@@ -111,8 +111,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public List<UserModel> listUsersByOrgAndUname(String orgId, String uname, List<String> userIds) {
-        log.info("orgId:{}, uname:{}", orgId, uname);
-
         // 默认查出orgId下所有子组织的用户
         List<String> orgIds = new ArrayList<>();
         // 先添加父级id

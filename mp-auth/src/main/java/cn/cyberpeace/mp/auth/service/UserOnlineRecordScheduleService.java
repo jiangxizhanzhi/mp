@@ -36,8 +36,7 @@ public class UserOnlineRecordScheduleService {
     // 每2分钟统计一次
     public static final long REFRESH_RATE = 2;
 
-    //    // 每次间隔的次数(每分钟一次，15分钟就是15次，80% 就是12次）
-//    public static final double HEARTBEAT_PER_RATE = 0.8 * 15;
+    // 两分钟内，心跳次数大于1
     public static final int HEARTBEAT_COUNT_THRESHOLD = 1;
 
     public static final int BATCH_TASK_USER_SIZE = 10;
@@ -68,9 +67,6 @@ public class UserOnlineRecordScheduleService {
             CopyOnWriteArrayList<LocalDateTime> timestampList = entry.getValue();
             if (timestampList.size() >= HEARTBEAT_COUNT_THRESHOLD) {
                 // 一段时间内，心跳次数超过阈值，更新在线记录表
-                //UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userId, timestampList, applicationContext);
-                //threadPool.submit(recordTask);
-                //heartbeatMap.remove(userModel);
                 if (i % BATCH_TASK_USER_SIZE == 0) {
                     map = new HashMap<>();
                     userModel2LastTsMapList.add(map);
@@ -88,7 +84,6 @@ public class UserOnlineRecordScheduleService {
         }
 
         log.info("finish online record task...");
-        log.info("heartbeatMap.size:{} after...", heartbeatMap.size());
     }
 
 
@@ -100,11 +95,8 @@ public class UserOnlineRecordScheduleService {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-        log.info("start online record status check task...");
-
         UserOnlineRecordStatusCheckTask recordStatusCheckTask = new UserOnlineRecordStatusCheckTask(applicationContext);
         threadPool.submit(recordStatusCheckTask);
-        log.info("finish online record status check task...");
     }
 
     /**
