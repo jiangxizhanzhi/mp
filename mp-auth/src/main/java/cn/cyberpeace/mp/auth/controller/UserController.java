@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.GetTokenRequest;
+import cn.cyberpeace.mp.auth.dto.ListThirdUserIdsRequest;
+import cn.cyberpeace.mp.auth.dto.ListThirdUsersRequest;
 import cn.cyberpeace.mp.auth.dto.UserTokenRequest;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
@@ -209,5 +211,24 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         log.info("get third user infos result: {}", thirdUserInfoDtos);
         return ServiceResult.success(thirdUserInfoDtos);
     }
+
+    @ApiOperation(value = "批量获取第三方用户id", notes = "批量获取第三方用户id")
+    @PostMapping("/list/third_user_ids")
+    public ServiceResult<List<UserModel>> listThirdUserIds(@Validated @RequestBody ListThirdUserIdsRequest request) {
+        log.info("listThirdUserIds request: {}", request);
+        List<UserModel> userModels = getModelService().listUserInfos(request.getUserIds());
+        log.info("listThirdUserIds response: {}", userModels);
+        return ServiceResult.success(userModels);
+    }
+
+    @ApiOperation(value = "批量获取第三方用户信息", notes = "批量获取第三方用户信息")
+    @PostMapping("/list/third_user_infos")
+    public ServiceResult<List<UserModel>> listThirdUserInfos(@Validated @RequestBody ListThirdUsersRequest request) {
+        log.info("listThirdUserInfos request: {}", request);
+        List<UserModel> userModels = getModelService().listThirdUserInfos(request);
+        log.info("listThirdUserInfos response: {}", userModels);
+        return ServiceResult.success(userModels);
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.ListThirdUsersRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -100,6 +101,10 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     List<UserModel> listNotAudited();
 
     List<UserDto> listByUserIds(String[] userIds);
+
+    List<UserModel> listThirdUserInfos(ListThirdUsersRequest request);
+
+    List<UserModel> listUserInfos(List<String> userIds);
 
     int totalUserCnt();
 

@@ -4,12 +4,14 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.dto.ListThirdUsersRequest;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.third.ThirdUser;
 import cn.cyberpeace.mp.auth.dto.third.ThirdUserInfoDto;
+import cn.cyberpeace.mp.auth.dto.user.ListThirdUserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.enums.RoleNameEnum;
@@ -38,6 +40,7 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import com.alibaba.excel.util.CollectionUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -799,6 +802,78 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public List<UserModel> listUserInfos(List<String> userIds) {
+        if (CollectionUtils.isEmpty(userIds)) {
+            return new ArrayList<>();
+        }
+        return getModelMapper().list(new HumanCondition().filterIn("id", userIds.toArray()).orderBy("pk"));
+    }
+
+    @Override
+    public List<UserModel> listThirdUserInfos(ListThirdUsersRequest request) {
+        List<ListThirdUserDto> listThirdUserDtos = request.getListThirdUserDtos();
+        List<String> thirdUserIds = listThirdUserDtos.stream().map(ListThirdUserDto::getThirdUserId).distinct().collect(Collectors.toList());
+        List<String> originThirdUserIds = listThirdUserDtos.stream().map(ListThirdUserDto::getThirdUserId).distinct().collect(Collectors.toList());
+        List<String> addThirdUserIds;
+        List<UserModel> userModels = null;
+        if (CollectionUtil.isNotEmpty(thirdUserIds)) {
+            userModels = getModelMapper().list(new HumanCondition().filterIn("thirdUserId", thirdUserIds.toArray()).orderBy("pk"));
+        }
+        if (CollectionUtil.isNotEmpty(userModels)) {
+            List<UserModel> updateUserModels = new ArrayList<>();
+            userModels.forEach(userModel -> listThirdUserDtos.forEach(thirdUserDto -> {
+                if (userModel.getThirdUserId().equals(thirdUserDto.getThirdUserId()) && !userModel.getUsername().equals(thirdUserDto.getThirdUserName())) {
+                    // 用户名和第三方用户名不匹配的，用第三方用户名更新
+                    userModel.setUsername(thirdUserDto.getThirdUserName());
+                    userModel.setUpdateTime(LocalDateTime.now());
+                    updateUserModels.add(userModel);
+                }
+            }));
+            if (CollectionUtil.isNotEmpty(updateUserModels)) {
+                getModelMapper().bulkUpdate(updateUserModels);
+            }
+
+            List<String> existThirdUserIds = userModels.stream().map(UserModel::getThirdUserId).collect(Collectors.toList());
+            thirdUserIds.removeAll(existThirdUserIds);
+            addThirdUserIds = thirdUserIds;
+        } else {
+            addThirdUserIds = thirdUserIds;
+        }
+
+        if (CollectionUtil.isNotEmpty(addThirdUserIds)) {
+            List<String> addIds = addThirdUserIds;
+            List<String> thirdUserNames = listThirdUserDtos.stream().map(ListThirdUserDto::getThirdUserName).collect(Collectors.toList());
+            List<UserModel> existUserModels = this.listByUserName(thirdUserNames);
+
+            listThirdUserDtos.forEach(thirdUserDto -> {
+                if (addIds.contains(thirdUserDto.getThirdUserId())) {
+                    if (CollectionUtil.isNotEmpty(existUserModels)) {
+                        List<String> existNames =
+                                existUserModels.stream().map(UserModel::getUsername).collect(Collectors.toList());
+                        if (existNames.contains(thirdUserDto.getThirdUserName())) {
+                            log.error("third user name: {} is already exist", thirdUserDto.getThirdUserName());
+                        } else {
+                            ThirdUser thirdUser = new ThirdUser();
+                            thirdUser.setUserId(thirdUserDto.getThirdUserId());
+                            thirdUser.setUserName(thirdUserDto.getThirdUserName());
+                            // 新增用户信息
+                            this.addUserRoleOrgInfo(thirdUser, StringUtils.EMPTY);
+                        }
+                    }
+                }
+            });
+        }
+
+        // 重新查询所有用户信息并返回
+        if (CollectionUtil.isNotEmpty(originThirdUserIds)) {
+            return getModelMapper().list(new HumanCondition().filterIn("thirdUserId", originThirdUserIds.toArray()).orderBy("pk"));
+        } else {
+            return new ArrayList<>();
+        }
+    }
+
+
+    @Override
     public int totalUserCnt() {
         return getModelMapper().getUserCnt();
     }
@@ -993,43 +1068,45 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         // 用户关联角色列表
         List<UserRoleModel> roleModelList = new ArrayList<>();
-        try {
-            Map<String,String> headerMap = new HashMap<>();
-            headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
-            // 根据token查询用户角色信息
-            String strRoleRsp = HttpUtils.sendGet(authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/role/list", headerMap);
-            log.info("================get role list rsp: {}", strRoleRsp);
+        if (StringUtils.isNotBlank(token)) {
+            try {
+                Map<String,String> headerMap = new HashMap<>();
+                headerMap.put(AuthConstant.JWT_HEADER_KEY, token);
+                // 根据token查询用户角色信息
+                String strRoleRsp = HttpUtils.sendGet(authServerUrl + AuthConstant.THIRD_AUTH_URL_PREFIX + "/role/list", headerMap);
+                log.info("================get role list rsp: {}", strRoleRsp);
 
-            // 结果解析
-            JSONObject objRoleRsp = JSONObject.parseObject(strRoleRsp);
-            if (Objects.nonNull(objRoleRsp.getInteger(AuthConstant.STR_STATUS)) && (0 == objRoleRsp.getInteger(AuthConstant.STR_STATUS))) {
-                JSONArray roleArray = objRoleRsp.getJSONArray(AuthConstant.STR_DATA);
-                if (CollectionUtil.isNotEmpty(roleArray)) {
-                    for (int i = 0; i < roleArray.size(); i++) {
-                        JSONObject roleObj = roleArray.getJSONObject(i);
-                        String thirdRoleName = roleObj.getString("roleName");
-                        Arrays.stream(RoleNameEnum.values()).forEach(
-                            roleName -> {
-                                if (thirdRoleName.contains(roleName.toString())) {
-                                    RoleModel roleModel = roleService.getByName(roleName.toString());
-                                    UserRoleModel userRoleModel = new UserRoleModel();
-                                    userRoleModel.setUser(user.getId());
-                                    userRoleModel.setRole(roleModel.getId());
-                                    roleModelList.add(userRoleModel);
-                                }
-                            }
-                        );
+                // 结果解析
+                JSONObject objRoleRsp = JSONObject.parseObject(strRoleRsp);
+                if (Objects.nonNull(objRoleRsp.getInteger(AuthConstant.STR_STATUS)) && (0 == objRoleRsp.getInteger(AuthConstant.STR_STATUS))) {
+                    JSONArray roleArray = objRoleRsp.getJSONArray(AuthConstant.STR_DATA);
+                    if (CollectionUtil.isNotEmpty(roleArray)) {
+                        for (int i = 0; i < roleArray.size(); i++) {
+                            JSONObject roleObj = roleArray.getJSONObject(i);
+                            String thirdRoleName = roleObj.getString("roleName");
+                            Arrays.stream(RoleNameEnum.values()).forEach(
+                                    roleName -> {
+                                        if (thirdRoleName.contains(roleName.toString())) {
+                                            RoleModel roleModel = roleService.getByName(roleName.toString());
+                                            UserRoleModel userRoleModel = new UserRoleModel();
+                                            userRoleModel.setUser(user.getId());
+                                            userRoleModel.setRole(roleModel.getId());
+                                            roleModelList.add(userRoleModel);
+                                        }
+                                    }
+                            );
+                        }
+                    } else {
+                        log.error("get role list is empty");
                     }
                 } else {
-                    log.error("get role list is empty");
+                    log.error("get token detail error");
+                    throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
                 }
-            } else {
-                log.error("get token detail error");
+            } catch (Exception e) {
+                log.error("get user info by token error", e);
                 throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
             }
-        } catch (Exception e) {
-            log.error("get user info by token error", e);
-            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
         if (CollectionUtil.isEmpty(roleModelList)) {
