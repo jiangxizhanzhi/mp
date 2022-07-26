@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -20,7 +21,9 @@ import java.util.List;
 @ModelClass(RolePermissionModel.class)
 public interface RolePermissionMapper extends BaseModelMapper<RolePermissionModel> {
 
-    List<TargetModel> listTargetsByRoleId(@Param("tenant") String tenant, @Param("roleId") String roleId);
+    List<TargetModel> listTargetsByRoleIds(@Param("tenant") String tenant, @Param("roleIds") List<String> roleIds);
+
+    List<TargetRoleDto> listTargetRoleDtos(@Param("roleIds") List<String> roleIds);
 
     int deleteByOwner(@Param("owner") String owner);
 

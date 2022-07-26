@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,12 +46,21 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     }
 
     @Override
-    public List<TargetModel> listTargetsByRoleId(String roleId) {
-        ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
-
-        List<TargetModel> targets = getModelMapper().listTargetsByRoleId(AuthConstant.DEFAULT_TENANT, roleId);
+    public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
+        if (CollectionUtil.isEmpty(roleIds)) {
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
+        }
+        List<TargetModel> targets = getModelMapper().listTargetsByRoleIds(AuthConstant.DEFAULT_TENANT, roleIds);
         return targets;
+    }
+
+    @Override
+    public List<TargetRoleDto> listTargetRoleDtosByRoleIds(List<String> roleIds) {
+        if (CollectionUtil.isEmpty(roleIds)) {
+            throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
+        }
+        List<TargetRoleDto> targetRoleDtos = getModelMapper().listTargetRoleDtos(roleIds);
+        return targetRoleDtos;
     }
 
 
@@ -57,7 +69,6 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Transactional(rollbackFor = Exception.class)
     public boolean bindRoleTargets(String roleId, List<String> targetIds, boolean cleanOldTargets) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
 
         var result = roleService.get(roleId);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.ROLE_NOT_EXISTED);
@@ -76,18 +87,18 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         }
 
         // 添加角色权限
+        List<RolePermissionModel> rolePerms = new ArrayList<>();
         targetIds.forEach(tid -> {
             // todo 校验权限是否存在
             RolePermissionModel rolePerm = new RolePermissionModel();
             rolePerm.setOwner(roleId);
             rolePerm.setTarget(tid);
             rolePerm.setTenant(AuthConstant.DEFAULT_TENANT);
-            var re = create(rolePerm);
-            ResultUtils.throwExceptionIfError(re, AuthErrorCode.ROLE_TARGET_ADD_ERROR);
+            rolePerms.add(rolePerm);
         });
 
+        var re = bulkCreate(rolePerms);
         return true;
-
     }
 
     @Override

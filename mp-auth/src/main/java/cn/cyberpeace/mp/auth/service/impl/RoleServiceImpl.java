@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
+import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -42,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -174,15 +177,36 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
         List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
         PageInfo pageInfo = new PageInfo(roleDtos);
+        List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
 
         roleDtos.forEach(r -> {
             if (r.getId().equals(AuthConstant.ROLE_ADMIN_ID)) {
-                r.setTargets(targetService.listAll(AuthConstant.DEFAULT_TENANT, null));
-            } else {
-                List<TargetModel> targetModels = rolePermissionService.listTargetsByRoleId(r.getId());
-                r.setTargets(targetModels);
+                r.setTargets(allTargets);
             }
         });
+
+        List<String> roleIds =
+        roleDtos.stream().map(r -> {
+            if (CollectionUtil.isEmpty(r.getTargets())) {
+                return r.getId();
+            }
+            return null;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
+
+        List<TargetRoleDto> targetRoleDtos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
+        if (CollectionUtil.isNotEmpty(targetRoleDtos)) {
+            roleDtos.forEach(r -> {
+                List<TargetModel> targetModels = targetRoleDtos.stream().map(tr -> {
+                    if (Objects.equals(tr.getRoleId(), r.getId())) {
+                        TargetModel targetModel = new TargetModel();
+                        BeanUtils.copyProperties(tr, targetModel);
+                        return targetModel;
+                    }
+                    return null;
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+                r.setTargets(targetModels);
+            });
+        }
 
         return pageInfo;
     }
@@ -335,7 +359,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             // 管理员特殊处理 直接查询该租户下所有权限返回
             targets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
         } else {
-            targets = rolePermissionService.listTargetsByRoleId(roleModel.getId());
+            targets = rolePermissionService.listTargetsByRoleIds(Arrays.asList(roleModel.getId()));
         }
         return targets;
     }
