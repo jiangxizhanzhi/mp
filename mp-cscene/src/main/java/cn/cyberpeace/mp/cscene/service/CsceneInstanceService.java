@@ -71,6 +71,8 @@ import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollUtil;
 import com.google.common.collect.Lists;
 import lombok.Data;
@@ -79,11 +81,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,9 +143,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Autowired
     private LogFileService logFileService;
 
-    @Autowired
-    private StringRedisTemplate redisTemplate;
-
     @Resource
     private SceneService sceneService;
 
@@ -157,6 +154,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneMapper csceneMapper;
+
+    // expires in 30 minutes
+    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+
 
     private final CsceneReportTaskPool csceneReportTaskPool = CsceneReportTaskPool.getInstance();
 
@@ -213,14 +214,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                                                                             Map<String, Map<String, String>> nodeId2ProbeNameMap,
                                                                             String probeId, HostEventQueryParams queryParams) {
         String scrollId = null;
-        String redisKey = null;
+        String cacheKey = null;
         boolean isScrollRequest = false;
         if (StringUtils.isNotBlank(requestId)) {
             isScrollRequest = true;
-            redisKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
-            String redisValue = redisTemplate.opsForValue().get(redisKey);
-            if (StringUtils.isNotEmpty(redisValue)) {
-                scrollId = redisValue;
+            cacheKey = PROBE_COLLECTION_DATA_REQUEST_ID + requestId;
+            String cacheValue = TIMED_CACHE.get(cacheKey, false);
+            if (StringUtils.isNotEmpty(cacheValue)) {
+                scrollId = cacheValue;
             }
         }
 
@@ -356,8 +357,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 }
             }
 
-            if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(redisKey)) {
-                redisTemplate.opsForValue().set(redisKey, scrollId, Duration.ofMinutes(30));
+            if (StringUtils.isNotBlank(scrollId) && StringUtils.isNotBlank(cacheKey)) {
+                TIMED_CACHE.put(cacheKey, scrollId);
             }
 
             res.forEach(r -> {
