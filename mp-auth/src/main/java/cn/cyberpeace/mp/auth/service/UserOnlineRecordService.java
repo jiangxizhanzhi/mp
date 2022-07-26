@@ -26,7 +26,7 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      *
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlined(String userId);
+    List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds);
 
     /**
      * 判断离线的依据:
@@ -34,7 +34,7 @@ public interface UserOnlineRecordService extends BaseModelService<UserOnlineReco
      *
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOfflined(String userId);
+    List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds);
 
 
     /**

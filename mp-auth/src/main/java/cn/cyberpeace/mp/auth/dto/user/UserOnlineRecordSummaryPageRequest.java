@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @Description:
@@ -14,8 +15,8 @@ import java.time.LocalDateTime;
 @Data
 public class UserOnlineRecordSummaryPageRequest extends PageRequest {
 
-    @ApiModelProperty(value = "userId")
-    private String userId;
+    @ApiModelProperty(value = "userIds")
+    private List<String> userIds;
 
     @ApiModelProperty(value = "开始时间")
     private LocalDateTime startTime;

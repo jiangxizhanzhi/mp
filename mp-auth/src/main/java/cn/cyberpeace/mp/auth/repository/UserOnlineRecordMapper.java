@@ -21,7 +21,7 @@ import java.util.List;
 @ModelClass(UserOnlineRecordModel.class)
 public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecordModel> {
 
-    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userId") String userId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userIds") List<String> userIds, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     /**
      * 判断在线的依据：
@@ -29,16 +29,16 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      *
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlined(int minutes);
+    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userIds") List<String> userIds, @Param("minutes") int minutes);
 
     /**
      * 判断离线的依据:
      * end_time <= (now() - 5m) && status = 0
      *
-     * @param deadline
+     * @param
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userId") String userId, @Param("deadline") LocalDateTime deadline);
+    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userIds") List<String> userIds, @Param("minutes") int minutes);
 
 
     /**

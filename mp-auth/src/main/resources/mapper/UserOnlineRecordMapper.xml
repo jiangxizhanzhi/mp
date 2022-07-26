@@ -6,8 +6,11 @@
         select user, username, name, sum(duration_minutes) total_online_minutes
         from mp_auth_user_online_record
         <where>
-            <if test="userId != null and userId != ''">
-                AND user = #{userId}
+            <if test="userIds != null and userIds.size() > 0">
+                AND user IN
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
             </if>
         </where>
         group by user
@@ -16,8 +19,11 @@
     <select id="listCurrentOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select * from mp_auth_user_online_record
         <where>
-            <if test="userId != null and userId != ''">
-                AND user = #{userId}
+            <if test="userIds != null and userIds.size() > 0">
+                AND user IN
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
             </if>
             <if test="minutes != null">
                 AND end_time &gt; NOW() - INTERVAL #{minutes} MINUTE
@@ -29,8 +35,11 @@
     <select id="listCurrentOfflined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select * from mp_auth_user_online_record
         <where>
-            <if test="userId != null and userId != ''">
-                AND user = #{userId}
+            <if test="userIds != null and userIds.size() > 0">
+                AND user IN
+                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                    #{userId}
+                </foreach>
             </if>
             <if test="minutes != null">
                 AND end_time &lt; NOW() - INTERVAL #{minutes} MINUTE
