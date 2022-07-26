@@ -736,7 +736,18 @@ public class SceneHandler extends BaseSceneHandler<
         return sceneDataBO;
     }
 
-    // TODO
+    public synchronized int addProgressPercentage(int newProcess) {
+        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
+        int result = progressPercentage + newProcess;
+        if (result >= 100) {
+            progressPercentageMap.put(getSceneId(), 95);
+            return 95;
+        } else {
+            progressPercentageMap.put(getSceneId(), result);
+            return result;
+        }
+    }
+
     private Integer calculateProgressPercentage() {
         if (CollectionUtils.isEmpty(this.getElementMap().values())) {
             progressPercentageMap.remove(getSceneId());
@@ -745,10 +756,14 @@ public class SceneHandler extends BaseSceneHandler<
             if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
                 progressPercentageMap.remove(getSceneId());
                 return 100;
+            }else {
+                var percentage = progressPercentageMap.get(getSceneId());
+                if (percentage == null) {
+                    return 5;
+                } else {
+                    return percentage;
+                }
             }
-            // mock 一个进度
-            int newProcess = Math.abs(new Random().nextInt(10));
-            return this.addProgressPercentage(newProcess);
         }
     }
 
@@ -767,18 +782,6 @@ public class SceneHandler extends BaseSceneHandler<
             this.add(SceneModel.Event.RESUME);
         }};
         return terminateStates.contains(state);
-    }
-
-    private synchronized int addProgressPercentage(int newProcess) {
-        Integer progressPercentage = progressPercentageMap.getOrDefault(getSceneId(), 0);
-        int result = progressPercentage + newProcess;
-        if (result >= 100) {
-            progressPercentageMap.put(getSceneId(), 99);
-            return 99;
-        } else {
-            progressPercentageMap.put(getSceneId(), result);
-            return result;
-        }
     }
 
     private CollectedSceneStatusBO getCollectedSceneStatusBO() {
