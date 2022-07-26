@@ -942,15 +942,17 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
+//        thirdUser.setUserId("thirdId111");
         UserModel user = this.getByThirdUserId(thirdUser.getUserId());
-//        UserModel user = this.getByUserName(thirdUser.getUserName());
         if (Objects.isNull(user)) {
             // 新增用户、角色、组织信息
             user = this.addUserRoleOrgInfo(thirdUser, token);
         } else {
             // 用户存在，同时更新用户姓名和token
             user.setThirdToken(token);
-            user.setUsername(thirdUser.getUserName());
+            if (StringUtils.isNotBlank(thirdUser.getUserName())) {
+                user.setUsername(thirdUser.getUserName());
+            }
             this.update(user);
         }
 
