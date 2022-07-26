@@ -134,15 +134,21 @@ public class SnapshotConverter {
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(referStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE);
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateMap.forEach((k, v) -> {
+                var stat = v.get(0);
+                throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_REFERENCED_SCENE.format(stat.getName()));
+            });
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstancesByPrefix(uuids);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(useStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_USED_SCENE);
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateMap.forEach((k, v) -> {
+                var stat = v.get(0);
+                throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_SNAPSHOT_USED_SCENE.format(stat.getName()));
+            });
         }
     }
 }

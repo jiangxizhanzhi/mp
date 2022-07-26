@@ -119,15 +119,23 @@ public class TargetConverter{
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
         Map<String, List<DeviceReferCsceneStat>> referStateMap = referStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(referStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE);
+        if (MapUtils.isNotEmpty(referStateMap)) {
+            referStateMap.forEach((k, v) -> {
+                var stat = v.get(0);
+                throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_REFERENCED_SCENE.format(stat.getReferenceImage(),
+                        stat.getName()));
+            });
         }
         //使用
-        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>>  useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
+        ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> useStateServiceResult = csceneSpecialService.statDeviceReferCsceneInstances(imageNames);
         Map<String, List<DeviceReferCsceneInstanceStat>> useStateMap = useStateServiceResult.getSource();
 
-        if (MapUtils.isNotEmpty(useStateMap)){
-            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE);
+        if (MapUtils.isNotEmpty(useStateMap)) {
+            useStateMap.forEach((k, v) -> {
+                var stat = v.get(0);
+                throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE.format(stat.getReferenceImage(),
+                        stat.getName()));
+            });
         }
     }
 
