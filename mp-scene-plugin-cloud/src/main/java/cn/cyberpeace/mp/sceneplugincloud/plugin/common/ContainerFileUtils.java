@@ -8,8 +8,10 @@ import cn.cyberpeace.mp.scene.util.SceneFileUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.URLUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+@Slf4j
 public class ContainerFileUtils {
 
     public static final String CONTAINER_HELP_INSTALLER_GROUP = "container_installer";
@@ -18,9 +20,13 @@ public class ContainerFileUtils {
 
     public static final String UNZIP_EXECUTOR_NAME = "unzip";
 
+    public static final String APK_UNZIP_EXECUTOR_NAME = "unzip.apk";
+
     public static final String CONTAINER_COPY_FILE_PREFIX = "container_copy_file:";
 
     public static String unzipLocalFilepath = null;
+
+    public static String apkUnzipLocalFilepath = null;
 
     public static String getUnzipLocalFilepath() {
         if (!StringUtils.isEmpty(unzipLocalFilepath)) {
@@ -32,6 +38,17 @@ public class ContainerFileUtils {
         return unzipLocalFilepath;
     }
 
+    public static String getApkUnzipLocalFilepath() {
+        if (!StringUtils.isEmpty(apkUnzipLocalFilepath)) {
+            return apkUnzipLocalFilepath;
+        }
+
+        LocalFileMappingModel mapping = LocalFileMappingCommon.getMapping(CONTAINER_HELP_INSTALLER_GROUP, APK_UNZIP_EXECUTOR_NAME);
+        unzipLocalFilepath = mapping != null ? mapping.getLocalFile() : null;
+        return unzipLocalFilepath;
+    }
+
+
     public static boolean prepareUnzip(Container containerClient, String containerId) {
         var unzipLocalFilepath = getUnzipLocalFilepath();
         if (StringUtils.isEmpty(unzipLocalFilepath)) {
@@ -39,6 +56,16 @@ public class ContainerFileUtils {
         }
         var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
         containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
+        return flag;
+    }
+
+    public static boolean prepareApkUnzip(Container containerClient, String containerId) {
+        var apkUnzipLocalFilepath = getApkUnzipLocalFilepath();
+        if (StringUtils.isEmpty(apkUnzipLocalFilepath)) {
+            return false;
+        }
+        var flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
+        containerClient.executeCommand(containerId, String.format("apk add %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
         return flag;
     }
 
