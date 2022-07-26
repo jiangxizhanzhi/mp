@@ -12,8 +12,19 @@ public class LfsCommon {
 
     public static LfsClient lfsClient;
 
+    public static BaseAppConfig baseAppConfig;
+
     private LfsCommon(BaseAppConfig baseAppConfig) {
         LfsCommon.lfsClient = new LfsClient(baseAppConfig.getFileServerDir());
+        LfsCommon.baseAppConfig = baseAppConfig;
+    }
+
+    public static String genHttpUrl(String fileKey) {
+        return String.format(baseAppConfig.getLfsOuterHttpUrlTemplate(), fileKey);
+    }
+
+    public static String genInnerHttpUrl(String fileKey) {
+        return String.format(baseAppConfig.getLfsInnerHttpUrlTemplate(), fileKey);
     }
 
     public static String uploadContent(String content) {

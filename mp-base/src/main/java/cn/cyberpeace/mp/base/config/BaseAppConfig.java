@@ -52,11 +52,20 @@ public class BaseAppConfig {
     @Value("${mp.base.fdfs-tracker-servers:127.0.0.1:11211}")
     private List<String> fdfsTrackerServers;
 
-    @Value("${mp.base.fdfs-inner-http-server:127.0.0.1:8888}")
+    @Value("${mp.base.fdfs-inner-http-server:http://127.0.0.1:8888}")
     private String fdfsInnerHttpServer;
 
-    @Value("${mp.base.fdfs-outer-http-server:127.0.0.1:8888}")
+    @Value("${mp.base.fdfs-outer-http-server:http://127.0.0.1:8888}")
     private String fdfsOuterHttpServer;
+
+    @Value("${mp.base.lfs-url-pattern:/file/**}")
+    private String lfsUrlPattern;
+
+    @Value("${mp.base.lfs-inner-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    private String lfsInnerHttpUrlTemplate;
+
+    @Value("${mp.base.lfs-outer-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    private String lfsOuterHttpUrlTemplate;
 
     @Value("${mp.base.home-dir:}")
     private String homeDir;

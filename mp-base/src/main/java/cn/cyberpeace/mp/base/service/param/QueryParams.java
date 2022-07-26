@@ -44,6 +44,7 @@ public class QueryParams implements IdsQueryParams, SearchQueryParams, OrderQuer
     @ApiModelProperty(value = "排序字段(兼容)")
     private String[] sort;
 
+    @Override
     public void ensure() {
         CompatiblePageQueryParams.ensureCompatible(this);
         CompatibleOrderQueryParams.ensureCompatible(this);
