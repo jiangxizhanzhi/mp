@@ -16,14 +16,14 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.enums.EquipmentPositionStatusEnum;
-import cn.cyberpeace.mp.devops.cluster.enums.EquipmentUseStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.*;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
+import cn.cyberpeace.mp.devops.cluster.service.EquipmentPositionStatusService;
+import cn.cyberpeace.mp.devops.cluster.service.EquipmentUseStatusService;
 import cn.cyberpeace.mp.devops.cluster.vo.*;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -59,6 +60,12 @@ public class RealEquipmentController {
     private final RealEquipmentService realEquipmentService;
 
     private final TypeConverter typeConverter;
+
+    @Autowired
+    private EquipmentPositionStatusService equipmentPositionStatusService;
+
+    @Autowired
+    private EquipmentUseStatusService equipmentUseStatusService;
 
     /**
      * 分页查询
@@ -378,12 +385,13 @@ public class RealEquipmentController {
     @ApiOperation(value = "查询实装设备的在位状态")
     public ServiceResult<EquipmentPositionStatusVO> getPositionStatus() {
         List<EquipmentPositionStatusVO> equipmentPositionStatusVOList = new ArrayList<>();
-        for (EquipmentPositionStatusEnum positionStatusEnum : EquipmentPositionStatusEnum.values()) {
-            String name = MessageCommon.get(positionStatusEnum.getName());
+        List<EquipmentPositionStatusModel> models = equipmentPositionStatusService.findAll();
+        for (EquipmentPositionStatusModel model : models) {
+            String name = MessageCommon.get(ControllerConstant.REAL_EQUIPMENT_POSITION_STATUS_PREFIX + "." + model.getName());
             equipmentPositionStatusVOList.add(
                     EquipmentPositionStatusVO.builder()
                             .name(name)
-                            .code(positionStatusEnum.getCode())
+                            .code(model.getCode())
                             .build()
             );
         }
@@ -394,12 +402,14 @@ public class RealEquipmentController {
     @ApiOperation(value = "实装设备的使用状态")
     public ServiceResult<EquipmentUseStatusVO> getUseStatus() {
         List<EquipmentUseStatusVO> equipmentUseStatusVOList = new ArrayList<>();
-        for (EquipmentUseStatusEnum useStatusEnum : EquipmentUseStatusEnum.values()) {
-            String name = MessageCommon.get(useStatusEnum.getName());
+        List<EquipmentUseStatusModel> models = equipmentUseStatusService.findAll();
+
+        for (EquipmentUseStatusModel model : models) {
+            String name = MessageCommon.get(ControllerConstant.REAL_EQUIPMENT_USE_STATUS_PREFIX + "." + model.getName());
             equipmentUseStatusVOList.add(
                     EquipmentUseStatusVO.builder()
                             .name(name)
-                            .code(useStatusEnum.getCode())
+                            .code(model.getCode())
                             .build()
             );
         }
