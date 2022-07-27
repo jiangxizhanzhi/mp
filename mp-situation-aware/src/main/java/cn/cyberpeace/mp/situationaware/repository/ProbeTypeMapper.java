@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.situationaware.model.OsTypeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeTypeModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,11 +16,6 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface ProbeTypeMapper {
-
-    /**
-     * 查询所有探针类型
-     * @return
-     */
-    List<ProbeTypeModel> selectAll();
+@ModelClass(ProbeTypeModel.class)
+public interface ProbeTypeMapper extends BaseModelMapper<ProbeTypeModel> {
 }

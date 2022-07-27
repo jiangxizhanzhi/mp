@@ -17,5 +17,6 @@ import lombok.NoArgsConstructor;
 @Table("mp_devops_cluster_equipment_position")
 public class EquipmentPositionStatusModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }

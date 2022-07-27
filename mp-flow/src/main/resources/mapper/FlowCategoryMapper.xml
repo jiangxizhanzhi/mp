@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowCategoryMapper">
 
-    <select id="selectAll" resultType="cn.cyberpeace.mp.flow.model.FlowCategoryModel">
-        select code, name from mp_flow_category
-    </select>
+<!--    <select id="selectAll" resultType="cn.cyberpeace.mp.flow.model.FlowCategoryModel">-->
+<!--        select code, name from mp_flow_category-->
+<!--    </select>-->
 </mapper>

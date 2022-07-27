@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.CsceneTypeModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -13,9 +15,6 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface CsceneTypeMapper {
-    /** 查询所有靶场类型
-     * @return
-     */
-    List<CsceneTypeModel> selectAll();
+@ModelClass(CsceneTypeModel.class)
+public interface CsceneTypeMapper extends BaseModelMapper<CsceneTypeModel> {
 }

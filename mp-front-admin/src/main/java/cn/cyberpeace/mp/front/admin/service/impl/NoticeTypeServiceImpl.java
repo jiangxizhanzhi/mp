@@ -13,7 +13,7 @@ import java.util.List;
  * @author: shgang
  * @Date: 2022/7/26
  */
-@Service
+//@Service
 public class NoticeTypeServiceImpl implements NoticeTypeService {
 
     @Autowired

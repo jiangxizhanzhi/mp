@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Table("mp_situation_probe_type")
 public class ProbeTypeModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }
 

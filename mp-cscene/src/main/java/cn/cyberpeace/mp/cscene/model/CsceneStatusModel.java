@@ -17,5 +17,6 @@ import lombok.NoArgsConstructor;
 @Table("mp_cscene_status")
 public class CsceneStatusModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }

@@ -43,12 +43,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -675,9 +673,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<CsceneStatusVO> getSceneStatus() {
         List<CsceneStatusVO> statusVOList = new ArrayList<>();
         List<CsceneStatusModel> models = csceneStatusService.findAll();
-
+        Locale locale = LocaleContextHolder.getLocale();
         for (CsceneStatusModel model : models) {
-            String name = MessageCommon.get(ControllerConstant.CSCENE_INSTANCE_STATUS_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             statusVOList.add(
                     CsceneStatusVO.builder()
                             .name(name)
@@ -693,9 +696,14 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<CsceneTypeVO> getSceneType() {
         List<CsceneTypeVO> typeVOList = new ArrayList<>();
         List<CsceneTypeModel> models = csceneTypeService.findAll();
-
+        Locale locale = LocaleContextHolder.getLocale();
         for (CsceneTypeModel model : models) {
-            String name = MessageCommon.get(ControllerConstant.CSCENE_INSTANCE_TYPE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             typeVOList.add(
                     CsceneTypeVO.builder()
                             .name(name)

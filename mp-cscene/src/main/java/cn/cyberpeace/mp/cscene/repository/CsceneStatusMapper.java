@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.cscene.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.cscene.model.CsceneStatusModel;
 import cn.cyberpeace.mp.cscene.model.CsceneTypeModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,9 +16,6 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface CsceneStatusMapper {
-    /** 查询所有实例状态
-     * @return
-     */
-    List<CsceneStatusModel> selectAll();
+@ModelClass(CsceneStatusModel.class)
+public interface CsceneStatusMapper extends BaseModelMapper<CsceneStatusModel> {
 }
