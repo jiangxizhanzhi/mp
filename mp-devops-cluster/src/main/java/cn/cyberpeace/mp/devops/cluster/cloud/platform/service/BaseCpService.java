@@ -300,6 +300,13 @@ public class BaseCpService {
      * @return
      */
     private <T extends BaseModel> T buildSnakeObject(String result, Class<T> tClass){
-        return JsonUtils.toSnakeObject(result, tClass);
+        T toSnakeObject;
+        try {
+            toSnakeObject = JsonUtils.toSnakeObject(result, tClass);
+        } catch (Exception e) {
+            log.error("cp service result toSnakeObject error:", e);
+            throw new MpRuntimeException(DevopsClusterErrorCode.CP_SERVICE_ERROR);
+        }
+        return toSnakeObject;
     }
 }

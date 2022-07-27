@@ -15,6 +15,8 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
  * @author：Geek Wang
  * @date: 2022/6/15
  */
+@Slf4j
 @Service
 public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileService {
 
@@ -57,7 +60,13 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
 
     @Override
     public List<LogReportDTO> list(String type) {
-        CloudPlatformItemsResult t = super.sendPost(LIST_URL,JSONObject.toJSONString(new LogListParams()), CloudPlatformItemsResult.class);
+        CloudPlatformItemsResult t = null;
+        try {
+            t = super.sendPost(LIST_URL, JSONObject.toJSONString(new LogListParams()), CloudPlatformItemsResult.class);
+        } catch (Exception e) {
+            log.error("list cp log error", e);
+            throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
+        }
         if (Objects.isNull(t) || !t.isSuccess() ){
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format(t.getMessage()));
         }
@@ -85,37 +94,47 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         jsonObject.put("filename",downloadDTO.getFileName());
         jsonObject.put("path",downloadDTO.getPath());
         jsonObject.put("hostname",downloadDTO.getHostname());
-        final cn.hutool.http.HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
-        String disposition = httpResponse.header(cn.hutool.http.Header.CONTENT_DISPOSITION);
-        String fileName = "";
-        if (StrUtil.isNotBlank(disposition)) {
-            fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
-            if (StrUtil.isBlank(fileName)) {
-                fileName = StrUtil.subAfter(disposition, "filename=", true);
-                final int lastIndexOf = fileName.lastIndexOf(";");
-                if (lastIndexOf > 0) {
-                    fileName = fileName.substring(0, lastIndexOf);
+        String downLoadFileName = null;
+        ByteArrayOutputStream bos = null;
+        InputStream inputStream = null;
+        try {
+            final cn.hutool.http.HttpResponse httpResponse = super.downLoad(DOWNLOAD_URL, jsonObject.toJSONString());
+            String disposition = httpResponse.header(cn.hutool.http.Header.CONTENT_DISPOSITION);
+            String fileName = "";
+            if (StrUtil.isNotBlank(disposition)) {
+                fileName = ReUtil.get("filename=\"(.*?)\"", disposition, 1);
+                if (StrUtil.isBlank(fileName)) {
+                    fileName = StrUtil.subAfter(disposition, "filename=", true);
+                    final int lastIndexOf = fileName.lastIndexOf(";");
+                    if (lastIndexOf > 0) {
+                        fileName = fileName.substring(0, lastIndexOf);
+                    }
                 }
             }
+            downLoadFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
+            if (!downLoadFileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
+                downLoadFileName = LogReportTypeEnum.CP.getPrefix() + downLoadFileName;
+            }
+            int index = downLoadFileName.indexOf(".log");
+            if (index != -1) {
+                StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
+                downLoadFileName = nameBuffer.insert(index, "_" + cpUrl).toString();
+            }
+            bos = new ByteArrayOutputStream();
+
+            inputStream = httpResponse.bodyStream();
+            byte[] tmp = new byte[4 * 1024];
+            int size = 0;
+            while ((size = inputStream.read(tmp)) != -1) {
+                bos.write(tmp, 0, size);
+            }
+            bos.flush();
+        } catch (IOException e) {
+            log.error("download cp log error", e);
+            throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
+        } finally {
+            IOUtils.closeQuietly(inputStream);
         }
-        String downLoadFileName = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
-        if (!downLoadFileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
-            downLoadFileName = LogReportTypeEnum.CP.getPrefix() + downLoadFileName;
-        }
-        int index = downLoadFileName.indexOf(".log");
-        if (index != -1) {
-            StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
-            downLoadFileName = nameBuffer.insert(index, "_" + cpUrl).toString();
-        }
-        var bos = new ByteArrayOutputStream();
-        InputStream inputStream = httpResponse.bodyStream();
-        byte[] tmp = new byte[4 * 1024];
-        int size = 0;
-        while ((size = inputStream.read(tmp)) != -1) {
-            bos.write(tmp, 0, size);
-        }
-        bos.flush();
-        inputStream.close();
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();
     }
 
