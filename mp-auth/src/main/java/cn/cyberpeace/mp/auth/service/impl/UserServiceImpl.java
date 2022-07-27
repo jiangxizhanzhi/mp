@@ -859,6 +859,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                             // 新增用户信息
                             this.addUserRoleOrgInfo(thirdUser, StringUtils.EMPTY);
                         }
+                    } else {
+                        ThirdUser thirdUser = new ThirdUser();
+                        thirdUser.setUserId(thirdUserDto.getThirdUserId());
+                        thirdUser.setUserName(thirdUserDto.getThirdUserName());
+                        // 新增用户信息
+                        this.addUserRoleOrgInfo(thirdUser, StringUtils.EMPTY);
                     }
                 }
             });
