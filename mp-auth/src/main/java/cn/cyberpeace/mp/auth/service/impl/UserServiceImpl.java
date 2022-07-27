@@ -36,7 +36,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -1057,7 +1056,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = UserModel.builder()
                 .id(thirdUser.getUserId())
                 .username(thirdUser.getUserName())
-                .password(PasswordUtils.encode(TextUtils.uuid().substring(26)))
+                .password(PasswordUtils.encode("Abc123#"))
                 .mobile(thirdUser.getPhone())
                 .nickname(thirdUser.getChineseName())
                 .name(thirdUser.getUserName())
