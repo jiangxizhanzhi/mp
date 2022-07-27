@@ -126,9 +126,7 @@ public class HostStateService {
         request.setEndTime(endTime);
 
         // 执行查询
-        log.info("dataCollection query start");
         List<WazuhHostStateModel> result = dataCollectionService.queryHostStateEventsWithTimeRange(request);
-        log.info("dataCollection query end");
         List<CollectionHostStateBO> hostStateBOs = result.stream().map(srcHostState -> {
             CollectionHostStateBO hostStateBO = new CollectionHostStateBO();
             hostStateBO.setCpuCount(srcHostState.getCpuCount());

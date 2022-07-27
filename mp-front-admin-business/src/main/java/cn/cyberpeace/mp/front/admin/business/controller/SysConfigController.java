@@ -89,7 +89,6 @@ public class SysConfigController {
     @PostMapping("/updateall")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
-        log.info("configs:{}", configs);
         // 更新规则，如果key存在，就修改value值，如果key不存在，就忽略不改
         checkService.updateCheck(configs);
 
