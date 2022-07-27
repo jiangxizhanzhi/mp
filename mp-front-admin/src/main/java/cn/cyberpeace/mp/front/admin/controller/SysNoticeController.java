@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.Model2VoUtil;
+import cn.cyberpeace.mp.common.vo.ApiVo;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -19,7 +20,6 @@ import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
 import cn.cyberpeace.mp.front.admin.service.sys.NoticeTypeService;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
-import cn.cyberpeace.mp.front.admin.vo.NoticeTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -28,11 +28,12 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 系统公告管理接口
@@ -148,26 +149,10 @@ public class SysNoticeController {
 
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<NoticeTypeVO> getTypes1() {
-        List<NoticeTypeVO> typeVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getTypes1() {
         List<NoticeTypeModel> models = noticeTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (NoticeTypeModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            typeVOList.add(
-                    NoticeTypeVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(typeVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
 }

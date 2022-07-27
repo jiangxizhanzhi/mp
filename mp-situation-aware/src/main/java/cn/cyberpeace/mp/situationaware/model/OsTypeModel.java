@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.common.model.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,11 +15,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 @Table("mp_situation_os_type")
-public class OsTypeModel extends BaseModel {
-    private Integer code;
-    private String chName;
-    private String enName;
+public class OsTypeModel extends ApiModel {
 }

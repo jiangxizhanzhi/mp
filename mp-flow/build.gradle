@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':mp-base')
+    implementation project(':mp-common')
     implementation project(':mp-devops-log')
 
     task wrapper() {}

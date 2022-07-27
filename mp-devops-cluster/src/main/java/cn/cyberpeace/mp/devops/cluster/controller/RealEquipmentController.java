@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.Model2VoUtil;
+import cn.cyberpeace.mp.common.vo.ApiVo;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
@@ -41,12 +42,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -385,49 +383,17 @@ public class RealEquipmentController {
 
     @GetMapping("/position")
     @ApiOperation(value = "查询实装设备的在位状态")
-    public ServiceResult<EquipmentPositionStatusVO> getPositionStatus() {
-        List<EquipmentPositionStatusVO> equipmentPositionStatusVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getPositionStatus() {
         List<EquipmentPositionStatusModel> models = equipmentPositionStatusService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (EquipmentPositionStatusModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            equipmentPositionStatusVOList.add(
-                    EquipmentPositionStatusVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(equipmentPositionStatusVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
     @GetMapping("/use")
     @ApiOperation(value = "实装设备的使用状态")
-    public ServiceResult<EquipmentUseStatusVO> getUseStatus() {
-        List<EquipmentUseStatusVO> equipmentUseStatusVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getUseStatus() {
         List<EquipmentUseStatusModel> models = equipmentUseStatusService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (EquipmentUseStatusModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            equipmentUseStatusVOList.add(
-                    EquipmentUseStatusVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(equipmentUseStatusVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 }

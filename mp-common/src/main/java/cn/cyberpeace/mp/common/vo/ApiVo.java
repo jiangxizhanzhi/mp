@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.devops.log.vo;
+package cn.cyberpeace.mp.common.vo;
 
 import lombok.Builder;
 import lombok.Data;
@@ -6,12 +6,11 @@ import lombok.Data;
 /**
  * @Description
  * @author: shgang
- * @Date: 2022/7/20
+ * @Date: 2022/7/27
  */
 @Data
 @Builder
-public class OpModuleVO {
-
+public class ApiVo {
     private Integer code;
     private String name;
 }

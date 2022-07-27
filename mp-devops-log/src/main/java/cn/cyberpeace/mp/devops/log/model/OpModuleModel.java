@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.devops.log.model;
 
-import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
-import lombok.AllArgsConstructor;
+import cn.cyberpeace.mp.common.model.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,10 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table("mp_devops_log_module")
-public class OpModuleModel extends BaseModel {
-    private Integer code;
-    private String chName;
-    private String enName;
+public class OpModuleModel extends ApiModel {
+
 }

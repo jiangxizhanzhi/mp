@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.flow.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.Model2VoUtil;
+import cn.cyberpeace.mp.common.vo.ApiVo;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -22,18 +23,14 @@ import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowCategoryService;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
-import cn.cyberpeace.mp.flow.vo.FlowCategoryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -87,27 +84,10 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
-    public ServiceResult<FlowCategoryVO> flowCategories() {
+    public ServiceResult<ApiVo> flowCategories() {
         List<FlowCategoryModel> models = flowCategoryService.findAll();
-        List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (FlowCategoryModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            int code = model.getCode();
-            flowCategoryVos.add(
-                    FlowCategoryVO.builder()
-                            .name(name)
-                            .code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(flowCategoryVos);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
     /**

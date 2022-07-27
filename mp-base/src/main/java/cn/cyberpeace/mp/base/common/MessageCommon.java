@@ -48,8 +48,4 @@ public class MessageCommon {
             return msgKey;
         }
     }
-
-    public static String get(String chName, String enName, Locale locale) {
-        return Objects.equals(locale, Locale.US) ? enName : chName;
-    }
 }

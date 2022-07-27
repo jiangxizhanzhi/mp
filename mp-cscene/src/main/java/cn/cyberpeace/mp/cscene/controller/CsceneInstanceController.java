@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.cscene.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.Model2VoUtil;
+import cn.cyberpeace.mp.common.vo.ApiVo;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
@@ -21,8 +22,6 @@ import cn.cyberpeace.mp.cscene.service.CsceneTypeService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.cscene.vo.CsceneStatusVO;
-import cn.cyberpeace.mp.cscene.vo.CsceneTypeVO;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -43,10 +42,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 @Api(value = "场景实例", tags = "CSCENE-场景实例")
 @Slf4j
@@ -670,49 +670,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @GetMapping("/status")
     @ApiOperation(value = "查询靶场监控的场景实例状态")
-    public ServiceResult<CsceneStatusVO> getSceneStatus() {
-        List<CsceneStatusVO> statusVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getSceneStatus() {
         List<CsceneStatusModel> models = csceneStatusService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (CsceneStatusModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            statusVOList.add(
-                    CsceneStatusVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(statusVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
-    public ServiceResult<CsceneTypeVO> getSceneType() {
-        List<CsceneTypeVO> typeVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getSceneType() {
         List<CsceneTypeModel> models = csceneTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (CsceneTypeModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            typeVOList.add(
-                    CsceneTypeVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(typeVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 }

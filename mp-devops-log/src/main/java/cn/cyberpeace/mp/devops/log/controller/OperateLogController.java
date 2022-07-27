@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.devops.log.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.util.Model2VoUtil;
+import cn.cyberpeace.mp.common.vo.ApiVo;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.model.OpModuleModel;
@@ -17,8 +17,6 @@ import cn.cyberpeace.mp.devops.log.service.OpModuleService;
 import cn.cyberpeace.mp.devops.log.service.OpTypeService;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import cn.cyberpeace.mp.devops.log.vo.OpModuleVO;
-import cn.cyberpeace.mp.devops.log.vo.OpTypeVO;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -95,52 +93,18 @@ public class OperateLogController {
 
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
-    public ServiceResult<OpModuleVO> getModules() {
-        List<OpModuleVO> opModuleVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getModules() {
         List<OpModuleModel> models = opModuleService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (OpModuleModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            int code = model.getCode();
-            opModuleVOList.add(
-                    OpModuleVO.builder().
-                            name(name).
-                            code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(opModuleVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
-    public ServiceResult<OpTypeVO> getTypes() {
-        List<OpTypeVO> opTypeVOList = new ArrayList<>();
+    public ServiceResult<ApiVo> getTypes() {
         List<OpTypeModel> models = opTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (OpTypeModel model : models) {
-            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
-//            String name = null;
-//            if (Objects.equals(locale, Locale.US)) {
-//                name = model.getEnName();
-//            } else {
-//                name = model.getChName();
-//            }
-            int code = model.getCode();
-            opTypeVOList.add(
-                    OpTypeVO.builder().
-                            name(name).
-                            code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(opTypeVOList);
+        List<ApiVo> voList = Model2VoUtil.getVoList(models);
+        return ServiceResult.success(voList);
     }
 
 

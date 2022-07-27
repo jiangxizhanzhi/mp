@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devops.cluster.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
+import cn.cyberpeace.mp.common.model.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +14,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table("mp_devops_cluster_equipment_use")
-public class EquipmentUseStatusModel extends BaseModel {
-    private Integer code;
-    private String chName;
-    private String enName;
+public class EquipmentUseStatusModel extends ApiModel {
 }
