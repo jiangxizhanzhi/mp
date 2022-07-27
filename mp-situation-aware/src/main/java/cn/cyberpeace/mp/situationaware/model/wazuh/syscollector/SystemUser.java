@@ -4,6 +4,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @ApiModel("系统用户信息")
 public class SystemUser {
@@ -29,4 +31,9 @@ public class SystemUser {
     @ApiModelProperty(value = "home目录")
     private String dir;
 
+    @ApiModelProperty(value = "时间")
+    private LocalDateTime time;
+
+    @ApiModelProperty(value = "描述")
+    private String description;
 }
