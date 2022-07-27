@@ -1,12 +1,15 @@
 package cn.cyberpeace.mp.devops.log.service.impl;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devops.log.bo.LogFileDownloadBO;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.constant.LogErrorCode;
 import cn.cyberpeace.mp.devops.log.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devops.log.service.LogFileService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -76,30 +79,41 @@ public class MpLogFileServiceImpl implements LogFileService {
         List<File> fileList = Arrays.stream(Objects.requireNonNull(logFile.listFiles())).filter(File::isFile).collect(Collectors.toList());
         List<File> downloadFiles = fileList.stream().filter(file -> fileName.equals(file.getName())).collect(Collectors.toList());
 
-        var zout = new ZipOutputStream(bos);
-        for (File file : downloadFiles) {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            ZipEntry zipFile = new ZipEntry(file.getName());
-            zout.putNextEntry(zipFile);
+        if (CollectionUtils.isEmpty(downloadFiles)) {
+            log.error("download file is empty for {}", fileName);
+            throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
+        }
+
+        if (!fileName.endsWith(".zip")) {
+            var zout = new ZipOutputStream(bos);
+            for (File file : downloadFiles) {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                ZipEntry zipFile = new ZipEntry(file.getName());
+                zout.putNextEntry(zipFile);
+                byte[] tmp = new byte[4 * 1024];
+                int size = 0;
+                while ((size = fileInputStream.read(tmp)) != -1) {
+                    zout.write(tmp, 0, size);
+                }
+                zout.flush();
+                zout.closeEntry();
+                fileInputStream.close();
+            }
+            zout.finish();
+        } else {
+            InputStream inputStream = new FileInputStream(downloadFiles.get(0));
             byte[] tmp = new byte[4 * 1024];
             int size = 0;
-            while ((size = fileInputStream.read(tmp)) != -1) {
-                zout.write(tmp, 0, size);
+            while ((size = inputStream.read(tmp)) != -1) {
+                bos.write(tmp, 0, size);
             }
-            zout.flush();
-            zout.closeEntry();
-
-            fileInputStream.close();
+            bos.flush();
+            inputStream.close();
         }
-        zout.finish();
+
         String downLoadFileName = !fileName.endsWith(".zip") ? fileName.concat(".zip") : fileName;
         if (!downLoadFileName.startsWith(LogReportTypeEnum.MP.getPrefix())) {
             downLoadFileName = LogReportTypeEnum.MP.getPrefix() + downLoadFileName;
-        }
-        int index = downLoadFileName.indexOf(".log");
-        if (index != -1) {
-            StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
-            downLoadFileName = nameBuffer.insert(index, "_" + mpUrl.split(":")[0]).toString();
         }
 
         return LogFileDownloadBO.builder().inputStream(new ByteArrayInputStream(bos.toByteArray())).downLoadFileName(downLoadFileName).build();

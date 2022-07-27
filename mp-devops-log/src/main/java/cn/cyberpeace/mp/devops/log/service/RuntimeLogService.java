@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,12 +39,15 @@ public class RuntimeLogService {
         List<LogReportDTO> mpAndCpLogList = logFileServiceFactory.listAll(basePageRequest);
         allLogReportDTOList.addAll(mpAndCpLogList);
         // 时间过滤
-        if (CollectionUtil.isNotEmpty(allLogReportDTOList) && Objects.nonNull(basePageRequest.getStartDate())
-                && Objects.nonNull(basePageRequest.getEndDate())) {
-            allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
-                    logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
-                            && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime()))
-                    .collect(Collectors.toList());
+        if (CollectionUtil.isNotEmpty(allLogReportDTOList)) {
+            if (Objects.nonNull(basePageRequest.getStartDate()) && Objects.nonNull(basePageRequest.getEndDate())) {
+                allLogReportDTOList = allLogReportDTOList.stream().filter(logReportDTO ->
+                        logReportDTO.getUpdateTime().isAfter(basePageRequest.getStartDate())
+                                && basePageRequest.getEndDate().isAfter(logReportDTO.getUpdateTime()))
+                        .collect(Collectors.toList());
+            }
+
+            allLogReportDTOList.sort(Comparator.comparing(LogReportDTO::getLogReportTypeEnum).thenComparing(LogReportDTO::getUpdateTime).reversed());
         }
 
         List<RunTimeLogDTO> runTimeLogDTOS = runTimeLogDTOConverter.targetToSource(allLogReportDTOList);

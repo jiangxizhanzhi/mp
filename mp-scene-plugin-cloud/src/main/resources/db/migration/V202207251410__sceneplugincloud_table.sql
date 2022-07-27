@@ -1,0 +1,2 @@
+alter table mp_sceneplugincloud_scene_element_port add column `connect_mode` varchar(32) NOT NULL COMMENT '组网连接模式' ;
+alter table mp_sceneplugincloud_scene_config_element_port add column `connect_mode` varchar(32) NOT NULL COMMENT '组网连接模式' ;
