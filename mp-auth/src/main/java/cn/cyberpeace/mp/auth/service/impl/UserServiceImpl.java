@@ -1056,7 +1056,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel user = UserModel.builder()
                 .id(thirdUser.getUserId())
                 .username(thirdUser.getUserName())
-                .password(PasswordUtils.encode("Abc123#"))
+                .password("Abc123#")
                 .mobile(thirdUser.getPhone())
                 .nickname(thirdUser.getChineseName())
                 .name(thirdUser.getUserName())
