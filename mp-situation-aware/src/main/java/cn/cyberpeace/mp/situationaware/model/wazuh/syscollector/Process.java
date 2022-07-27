@@ -5,6 +5,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -106,5 +108,9 @@ public class Process {
     @JSONField(name = "agent_id")
     private String agentId;
 
+    @ApiModelProperty(value = "描述")
+    private String description;
 
+    @ApiModelProperty(value = "时间")
+    private LocalDateTime time;
 }

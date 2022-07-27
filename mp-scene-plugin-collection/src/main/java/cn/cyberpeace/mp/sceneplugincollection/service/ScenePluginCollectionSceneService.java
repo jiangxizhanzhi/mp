@@ -1615,6 +1615,8 @@ public class ScenePluginCollectionSceneService {
         process.setCmd(wazuhProcess.getCommand());
         process.setEuser(wazuhProcess.getUsername());
         process.setName(wazuhProcess.getName());
+        process.setDescription(wazuhProcess.getDescription());
+        process.setTime(wazuhProcess.getTime());
         return process;
     }
 
