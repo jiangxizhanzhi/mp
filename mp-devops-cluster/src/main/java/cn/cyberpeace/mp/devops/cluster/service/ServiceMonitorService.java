@@ -100,9 +100,9 @@ public class ServiceMonitorService {
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
-            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size());
+            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size()).asResult();
         } else {
-            return new ListObjResult<>(Lists.newArrayList(), serviceMonitorDtos.size());
+            return new ListObjResult<ServiceMonitorDto>(Lists.newArrayList(), serviceMonitorDtos.size()).asResult();
         }
     }
 
