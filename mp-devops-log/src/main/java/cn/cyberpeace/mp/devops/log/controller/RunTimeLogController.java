@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devops.log.service.RuntimeLogService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  **/
 @RestController
+@Slf4j
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/runtime_log")
 @Api(value = "日志模块", tags = "日志模块")
 @RequiredArgsConstructor
@@ -55,6 +57,7 @@ public class RunTimeLogController {
             bo = logFileServiceFactory.downLoad(new LogDownloadDTO(request));
             resource = new InputStreamResource(bo.getInputStream());
         } catch (Exception e) {
+            log.error("download log error", e);
             throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
         }
 

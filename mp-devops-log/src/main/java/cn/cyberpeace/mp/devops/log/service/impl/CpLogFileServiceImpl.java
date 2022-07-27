@@ -115,11 +115,6 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             if (!downLoadFileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
                 downLoadFileName = LogReportTypeEnum.CP.getPrefix() + downLoadFileName;
             }
-            int index = downLoadFileName.indexOf(".log");
-            if (index != -1) {
-                StringBuffer nameBuffer = new StringBuffer(downLoadFileName);
-                downLoadFileName = nameBuffer.insert(index, "_" + cpUrl).toString();
-            }
             bos = new ByteArrayOutputStream();
 
             inputStream = httpResponse.bodyStream();
