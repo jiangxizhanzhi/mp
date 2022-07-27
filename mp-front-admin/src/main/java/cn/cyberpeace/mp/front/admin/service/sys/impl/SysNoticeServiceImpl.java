@@ -282,7 +282,6 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 管理员，查看所有公告消息
         if (isAdmin) {
-            log.info("current user is admin!");
             PageHelper.startPage(req.getPage(), req.getPageSize());
             List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(userModel.getId());
             PageInfo pageInfo = new PageInfo(notices);
@@ -290,7 +289,6 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             return pageInfo;
         }
 
-        log.info("current user is not admin!");
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 
@@ -342,12 +340,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 管理员，查看所有公告消息
         if (isAdmin) {
-            log.info("current user is admin!");
             int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(userModel.getId());
             return totalCnt;
         }
 
-        log.info("current user is not admin!");
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
 

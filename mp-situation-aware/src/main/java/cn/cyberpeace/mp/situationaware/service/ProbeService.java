@@ -65,7 +65,6 @@ public class ProbeService {
      */
     @Transactional(rollbackFor = Exception.class)
     public String addProbe(ProbeRequest probeRequest) {
-        log.info("probeRequest:{}", probeRequest);
         addProbeCheck(probeRequest);
         ProbeModel probeModel = new ProbeModel();
         BeanUtils.copyProperties(probeRequest, probeModel);
@@ -77,7 +76,6 @@ public class ProbeService {
         probeModel.setCreator(UserUtils.getLoginUser() != null ? UserUtils.getLoginUser().getUsername() : "");
 
         String probeId = TextUtils.uuid();
-        log.info("generated probeId is {}", probeId);
         probeModel.setId(probeId);
         if (StringUtils.isBlank(probeModel.getOutputFormat())) {
             probeModel.setOutputFormat(null);
@@ -144,7 +142,6 @@ public class ProbeService {
 
     @Transactional(rollbackFor = Exception.class)
     public void modifyProbe(ProbeRequest probeRequest) {
-        log.info("probeRequest:{}", probeRequest);
         modifyProbeCheck(probeRequest);
         String probeId = probeRequest.getId();
         ProbeModel probeModel = probeMapper.get(probeId);
@@ -226,7 +223,6 @@ public class ProbeService {
 
 
     public ProbeDto getById(String id) {
-        log.info("id:{}", id);
         ProbeDto probeDto = probeMapper.getById(id);
         processProbeDtoOsTypes(probeDto);
         processProbeDtoParams(probeDto);
@@ -235,7 +231,6 @@ public class ProbeService {
 
 
     public boolean delete(String id) {
-        log.info("id:{}", id);
         return probeMapper.delete(id);
     }
 
@@ -245,7 +240,6 @@ public class ProbeService {
      * @return
      */
     public PageInfo<ProbeDto> page(ProbePageQueryRequest pageQueryRequest) {
-        log.info("pageQueryRequest:{}", pageQueryRequest);
         pageQueryRequest.ensure();
 
         ProbeSearchCondition condition = new ProbeSearchCondition();
@@ -268,7 +262,6 @@ public class ProbeService {
      * @return
      */
     public List<ProbeDto> listByIds(List<String> ids) {
-        log.info("ids:{}", ids);
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setIds(ids.toArray(new String[0]));
         condition.setNeedScriptContent(true);
@@ -284,7 +277,6 @@ public class ProbeService {
 
 
     public List<ProbeDto> listByCondition(ProbeSearchCondition condition) {
-        log.info("condition:{}", condition);
         List<ProbeDto> probeDtos = probeMapper.listProbeDtos(condition);
         probeDtos.forEach(p -> {
             processProbeDtoOsTypes(p);
@@ -301,7 +293,6 @@ public class ProbeService {
      * @return
      */
     public int deleteByIds(List<String> ids) {
-        log.info("ids:{}", ids);
         List<ProbeModel> probesToUpdate =
             ids.stream().map(id -> {
                 ProbeModel probeModel = new ProbeModel();

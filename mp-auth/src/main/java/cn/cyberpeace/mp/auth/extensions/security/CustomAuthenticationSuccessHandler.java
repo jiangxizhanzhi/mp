@@ -128,10 +128,11 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
                 if (user.getInitCheck() == UserModel.INT_CHECK_YES) {
                     result = ServiceResult.builder().source(loginResp).serviceCode(AuthErrorCode.NEED_UPDATE_CREDENTIALS).build();
                 }
+
+                log.info("Login success! {}", user.getUsername());
             }
         }
 
-        log.info("Login success! {}", user.getUsername());
         PrintWriter writer = response.getWriter();
         mapper.writeValue(writer, result.asResult());
         writer.flush();

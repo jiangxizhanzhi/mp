@@ -65,7 +65,7 @@ public class SceneMonitorService {
      * @return
      */
     public SceneMonitorInfo getSceneMonitorInfo(String sceneId) {
-        log.info("sceneId:{}", sceneId);
+        log.info("query scene monitor info, sceneId:{}", sceneId);
         var result = csceneInstanceService.getById(sceneId, null);
         var csceneInstanceBO = result.getSource();
 
