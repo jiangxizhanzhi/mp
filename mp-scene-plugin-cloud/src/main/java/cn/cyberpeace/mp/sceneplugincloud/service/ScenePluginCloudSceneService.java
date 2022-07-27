@@ -435,7 +435,7 @@ public class ScenePluginCloudSceneService {
             var virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 String url = CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId());
-                String formatUrl = formatUrl(url, accessModeInfo, BeanCommon.getBean(CloudAppConfig.class));
+                String formatUrl = formatUrl(url, accessModeInfo, CloudSingleton.cloudAppConfig);
                 nodeConnection.setConnectionUrl(formatUrl);
                 return new ServiceResult<>(nodeConnection);
             }
@@ -464,7 +464,7 @@ public class ScenePluginCloudSceneService {
 
         nodeConnection.setConnectionId(sceneConnection.getConnectionId());
         String url = sceneConnection.getConnectionUrl();
-        String formatUrl = formatUrl(url, accessModeInfo, BeanCommon.getBean(CloudAppConfig.class));
+        String formatUrl = formatUrl(url, accessModeInfo, CloudSingleton.cloudAppConfig);
         nodeConnection.setConnectionUrl(formatUrl);
 
         if (cloudScene != null && Boolean.TRUE.equals(cloudScene.getEnableRecording())
