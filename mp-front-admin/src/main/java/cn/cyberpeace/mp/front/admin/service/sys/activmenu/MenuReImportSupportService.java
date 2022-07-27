@@ -60,7 +60,6 @@ public class MenuReImportSupportService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean rebuildAllMenus(List<TargetModel> targets) {
-        log.info("targets:{}", targets);
         // step1. clean menus, keymenus, editionmenus
         boolean cleanSuccess = cleanAllMenus();
         boolean reImportSuccess = false;
@@ -77,7 +76,6 @@ public class MenuReImportSupportService {
      * @return
      */
     private boolean cleanAllMenus() {
-        log.info("now clean all menus...");
         boolean re1 = targetService.deleteAll();
         if (re1) {
             log.info("clean all menus success!");
@@ -94,9 +92,7 @@ public class MenuReImportSupportService {
      * @return
      */
     private boolean reInsertAllMenus(List<TargetModel> targets) {
-        log.info("now reimport menus infos...");
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
-        log.info("inserted {} target rows.", result.getSource());
         if (Objects.nonNull(result.getSource()) && result.getSource() > 0) {
             log.info("rebuild all menus success!");
             return true;
@@ -111,7 +107,6 @@ public class MenuReImportSupportService {
      * @return
      */
     private boolean cleanAllMenusAndExtraInfos() {
-        log.info("now clean all menus and menu extra infos...");
         boolean re1 = targetService.deleteAll();
         boolean re2 = menuExtraInfoService.deleteAll();
         if (re1 && re2) {
@@ -130,7 +125,6 @@ public class MenuReImportSupportService {
      * @return
      */
     private boolean reInsertAllMenusAndExtraInfos(List<TargetModel> targets, List<MenuExtraInfoModel> menuExtraInfoModels) {
-        log.info("now reimport menus and menu extra infos...");
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
         log.info("inserted {} target rows.", result.getSource());
         boolean re1 = menuExtraInfoService.bulkCreate(menuExtraInfoModels);

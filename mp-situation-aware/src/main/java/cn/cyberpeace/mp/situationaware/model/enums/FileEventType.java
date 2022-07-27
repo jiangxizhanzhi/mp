@@ -4,7 +4,8 @@ package cn.cyberpeace.mp.situationaware.model.enums;
  * 文件预警类型
  */
 public enum FileEventType {
-    FILE("FILE"), REGISTRY("REGISTRY");
+    FILE("FILE"), REGISTRY("REGISTRY"), PROCESS("PROCESS"), PORT("PORT"), INTERNET_CONNECTION("INTERNET_CONNECTION"),
+    USERS("USERS");
 
     private final String type;
 

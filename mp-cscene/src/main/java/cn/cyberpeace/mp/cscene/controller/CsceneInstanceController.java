@@ -477,7 +477,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                                                                               @RequestParam(required = false) String probeId,
                                                                               HostEventQueryParams queryParams) {
         handleQueryParams("getProbeCollectionData", queryParams);
-        return modelService.getProbeCollectionData(requestId, id, probeId, queryParams).asResult();
+        return modelService.getProbeCollectionData(requestId, id, probeId, queryParams, null).asResult();
     }
 
     @ApiOperation("统计靶标对应引用该靶标的场景实例")

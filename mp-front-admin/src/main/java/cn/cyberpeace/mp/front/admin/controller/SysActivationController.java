@@ -41,28 +41,6 @@ public class SysActivationController {
         return ServiceResult.successful();
     }
 
-    /*
-    @ApiIgnore
-    @ApiOperation("(生成校验码之前)查询授权信息，包括机器码，自定义授权信息，授权月数")
-    @PostMapping("/verifyinfo")
-    public ServiceResult getVerifyInfo(@RequestBody @Validated VerifyInfoRequest verifyInfoRequest) {
-        log.info("{}", verifyInfoRequest);
-        String customizedVerifyJSONInfo = activationService.generateCustomizedVerifyJSONInfo(verifyInfoRequest.getModuleItems(), verifyInfoRequest.getResourceItems());
-        String sysUUID = activationService.querySysUUID();
-        Integer deadline = verifyInfoRequest.getDeadline();
-
-        VerifyInfoResponse verifyInfoResponse = VerifyInfoResponse.builder()
-                .verifyInfo(customizedVerifyJSONInfo)
-                .deadline(deadline)
-                .machineCode(sysUUID)
-                .edition(verifyInfoRequest.getEdition())
-                .build();
-
-        log.info("verifyInfoResponse:{}", verifyInfoResponse);
-
-        return ServiceResult.success(verifyInfoResponse);
-    }
-    */
 
     @ApiOperation("查询激活状态")
     @GetMapping("/status")
@@ -92,7 +70,6 @@ public class SysActivationController {
     @GetMapping("/machinecode")
     public ServiceResult getMachineCode() {
         String code = activationService.querySysUUID();
-        log.info("code:{}", code);
         return ServiceResult.success(code);
     }
 

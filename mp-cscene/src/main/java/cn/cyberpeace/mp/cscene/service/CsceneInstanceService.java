@@ -50,6 +50,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
@@ -68,6 +69,7 @@ import cn.cyberpeace.mp.scenepluginflow.plugin.params.FlowIdWithSourceIp;
 import cn.cyberpeace.mp.scenepluginflow.service.ScenePluginFlowSceneService;
 import cn.cyberpeace.mp.scenepluginflow.service.response.SceneFlowRecordsResponse;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
+import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
@@ -155,7 +157,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     @Resource
     private CsceneMapper csceneMapper;
 
-    // expires in 30 minutes
+    // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
 
 
@@ -212,7 +214,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private ListObjServiceResult<CollectionHostEventBO> getProbeCollectData(String sceneInstanceId, String sceneId, String requestId,
                                                                             List<String> nodeIds, SceneHandler sceneHandler,
                                                                             Map<String, Map<String, String>> nodeId2ProbeNameMap,
-                                                                            String probeId, HostEventQueryParams queryParams) {
+                                                                            String probeId, HostEventQueryParams queryParams,
+                                                                            CloudScenePluginHandler cloudPluginHandler,
+                                                                            String type) {
         String scrollId = null;
         String cacheKey = null;
         boolean isScrollRequest = false;
@@ -231,6 +235,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         List<CollectionHostEventBO> result = new ArrayList<>();
         for (String nodeId : nodeIds) {
             var element = sceneHandler.getElement(nodeId);
+            var cloudElement = cloudPluginHandler.getElement(nodeId);
             Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
             List<?> res = null;
             if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
@@ -264,7 +269,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     total = res.size() + total;
                 }
             } else if (ProbeConstant.ProbeId.NETWORK_INTERFACE_INFO.equals(probeId) || ProbeConstant.ProbeId.PORT_INFO.equals(probeId) ||
-                    ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
+                    ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId) || ProbeConstant.ProbeId.USERS_MODIFY.equals(probeId)) {
                 ListPageInfoQueryParams params = new ListPageInfoQueryParams();
                 params.setSceneIds(CollUtil.toList(sceneInstanceId));
                 params.setNodeIds(CollUtil.toList(nodeId));
@@ -285,9 +290,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
                     }
-                } else {
+                } else if (ProbeConstant.ProbeId.PROCESS_INFO.equals(probeId)) {
                     // 进程信息
                     var r = hostStateService.pageProcesses(params);
+                    if (r.getSource() != null) {
+                        res = r.getSource().getObjs();
+                        total = r.getSource().getTotal() + total;
+                    }
+                } else {
+                    // 用户变更信息
+                    var r = hostStateService.pageSystemUserEvents(params);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
@@ -367,14 +379,32 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 hostEventBO.setNodeId(nodeId);
                 hostEventBO.setNodeName(element.getName());
                 hostEventBO.setProbeId(probeId);
+                hostEventBO.setVirtualType(cloudElement.getVirtualType());
+                hostEventBO.setSystemType(element.getSystemType());
+                hostEventBO.setSystemTypeName(SystemTypeUtils.getStandardSystemType(element.getSystemType()));
+                hostEventBO.setType(type);
                 hostEventBO.setProbeName(probeId2Name.get(probeId));
                 Map<String, Object> map = JsonCommon.beanToMap(r);
+                var time = map.get("time");
+                if (Objects.nonNull(time)) {
+                    hostEventBO.setTime(TimeUtils.stringToLocalDateTime(time.toString()));
+                } else {
+                    hostEventBO.setTime(LocalDateTime.now());
+                }
+                var description = map.get("description");
+                if (Objects.nonNull(description)) {
+                    hostEventBO.setDescription(description.toString());
+                } else {
+                    hostEventBO.setDescription("CMD LAUNCH LOG");
+                }
                 map.put("scrollId", null);
                 hostEventBO.setContent(map);
                 result.add(hostEventBO);
             });
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(result, total));
+        // 多节点分页大小处理
+        var newRes = result.stream().limit(queryParams.getPageSize()).collect(Collectors.toList());
+        return new ListObjServiceResult<>(new ListObjResult<>(newRes, total));
     }
 
     private ListObjServiceResult<CollectionHostEventBO> getCustomProbeCollectData(String sceneInstanceId, String sceneId,
@@ -678,6 +708,38 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
 
+        // 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
+        if (Objects.nonNull(queryParams.getType())) {
+            // 传入的sceneId不需要提前转
+            if (queryParams.getType().equals(1)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PROCESS_INFO,
+                        queryParams, FileEventType.PROCESS.name());
+            }
+
+            if (queryParams.getType().equals(2)) {
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
+                        FileEventType.PORT.name());
+            }
+
+            if (queryParams.getType().equals(3)) {
+                // 网络连接同端口
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
+                        FileEventType.INTERNET_CONNECTION.name());
+            }
+
+            if (queryParams.getType().equals(4)) {
+                // 文件变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.FILE_MODIFY, queryParams,
+                        FileEventType.FILE.name());
+            }
+
+            if (queryParams.getType().equals(5)) {
+                // 用户变动
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.USERS_MODIFY, queryParams,
+                        FileEventType.USERS.name());
+            }
+        }
+
         return scenePluginCollectionSceneService.listHostEvents(sceneId, queryParams);
     }
 
@@ -697,7 +759,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return scenePluginCollectionSceneService.scrollHostEvents(sceneId, scrollId, queryParams);
     }
 
-    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId, String probeId, HostEventQueryParams queryParams) {
+    public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(String requestId, String sceneInstanceId,
+                                                                              String probeId, HostEventQueryParams queryParams,
+                                                                              String type) {
         var sceneId = getSceneId(sceneInstanceId);
         if (StringUtils.isEmpty(sceneId)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -741,7 +805,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (probeId != null) {
             // 有探针id，查询指定探针采集数据
             return getProbeCollectData(sceneInstanceId, sceneId, requestId, newNodeIds, sceneHandler, nodeId2ProbeNameMap,
-                    probeId, queryParams);
+                    probeId, queryParams, cloudPluginHandler, type);
         } else {
             // 无探针id，查询所有自定义探针采集数据
             return getCustomProbeCollectData(sceneInstanceId, sceneId, newNodeIds, pluginHandler, nodeId2ProbeNameMap, queryParams);

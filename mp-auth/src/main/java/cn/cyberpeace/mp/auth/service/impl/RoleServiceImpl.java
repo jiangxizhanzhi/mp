@@ -9,7 +9,6 @@ import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
 import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
 import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
@@ -285,7 +284,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         String roleId = modifyRequest.getId();
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
 
-        log.info("roleid:{}", roleId);
+        log.info("modify roleid:{}", roleId);
         if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleId)) {
             log.error("ADMIN ROLE can not update！");
             throw new MpRuntimeException("ADMIN ROLE can not update!");

@@ -8,6 +8,8 @@ public enum DefaultImgDirEnum  {
 
     AVATAR("/avatar"),
 
+    SYS_LOGO("/sys-logo"),
+
     APPLICATION_SYSTEM("/application-system"),
 
     NETWORK_EQUIPMENT("/network-equipment"),

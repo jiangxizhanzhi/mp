@@ -27,7 +27,6 @@ public class ActivEditionMenuService {
 
     public boolean bulkCreate(List<ActivEditionMenuModel> editionMenuModels) {
         int result = editionMenuMapper.bulkCreate(editionMenuModels);
-        log.info("inserted {} rows", result);
         return true;
     }
 
@@ -37,7 +36,6 @@ public class ActivEditionMenuService {
 
     public boolean deleteAll() {
         int result = editionMenuMapper.deleteAll();
-        log.info("delete {} rows", result);
         return true;
     }
 
