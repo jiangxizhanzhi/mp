@@ -48,6 +48,12 @@ public abstract class BaseSceneElementPortBO<M extends BaseSceneElementPortModel
     private Integer order;
     @ApiModelProperty(value = "是否辅助端口")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "开启外网代理")
+    private Boolean publicNetProxy;
+    @ApiModelProperty(value = "外网代理ip")
+    private String publicNetProxyIp;
+    @ApiModelProperty(value = "外网代理端口")
+    private String publicNetProxyPort;
 
     @JsonIgnore
     private E element;
