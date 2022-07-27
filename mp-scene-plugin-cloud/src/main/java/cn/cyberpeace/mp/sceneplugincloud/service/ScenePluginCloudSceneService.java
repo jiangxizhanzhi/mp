@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -10,6 +11,8 @@ import cn.cyberpeace.mp.base.util.basic.FloatUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
@@ -19,6 +22,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -36,6 +40,7 @@ import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMa
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.hutool.core.util.URLUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -400,7 +405,9 @@ public class ScenePluginCloudSceneService {
         if (accessMode.getProtocol().equals(AccessMode.Protocol.CONSOLE)) {
             var virtualType = accessModeInfo.getCloudElement().getVirtualType();
             if (virtualType != null && virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
-                nodeConnection.setConnectionUrl(CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId()));
+                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(accessModeInfo.getCloudElement().getResourceId());
+                String formatUrl = formatUrl(url, accessModeInfo, BeanCommon.getBean(CloudAppConfig.class));
+                nodeConnection.setConnectionUrl(formatUrl);
                 return new ServiceResult<>(nodeConnection);
             }
         }
@@ -427,7 +434,9 @@ public class ScenePluginCloudSceneService {
         }
 
         nodeConnection.setConnectionId(sceneConnection.getConnectionId());
-        nodeConnection.setConnectionUrl(sceneConnection.getConnectionUrl());
+        String url = sceneConnection.getConnectionUrl();
+        String formatUrl = formatUrl(url, accessModeInfo, BeanCommon.getBean(CloudAppConfig.class));
+        nodeConnection.setConnectionUrl(formatUrl);
 
         if (cloudScene != null && Boolean.TRUE.equals(cloudScene.getEnableRecording())
                 && !Boolean.TRUE.equals(sceneConnection.getConnectionEnableRecording())) {
@@ -444,6 +453,32 @@ public class ScenePluginCloudSceneService {
         }
 
         return new ServiceResult<>(nodeConnection);
+    }
+
+    private String formatUrl(String inputUrl, AccessModeLinkInfo modeLinkInfo, CloudAppConfig config) {
+        CloudAccessMode accessMode = modeLinkInfo.getAccessMode();
+        SceneElementPortBO port = modeLinkInfo.getCloudPort().getSrcPort();
+        SceneElementBO element = modeLinkInfo.getCloudElement().getSrcElement();
+        SceneBO scene = modeLinkInfo.getSrcScene();
+        var u = URLUtil.url(inputUrl);
+        String formatUrl = inputUrl;
+        if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
+            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), accessMode.getPublicNetProxyIp());
+            formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), accessMode.getPublicNetProxyPort());
+        } else if (Boolean.TRUE.equals(port.getPublicNetProxy())) {
+            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), port.getPublicNetProxyIp());
+            formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), port.getPublicNetProxyPort());
+        } else if (Boolean.TRUE.equals(element.getPublicNetProxy())) {
+            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), element.getPublicNetProxyIp());
+            formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), element.getPublicNetProxyPort());
+        } else if (Boolean.TRUE.equals(scene.getPublicNetProxy())) {
+            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), element.getPublicNetProxyIp());
+            formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), element.getPublicNetProxyPort());
+        } else if (config.getPublicNetProxy()) {
+            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+            formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), StringUtils.isNotEmpty(config.getPublicNetProxyPort()) ? config.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        }
+        return formatUrl;
     }
 
     /**

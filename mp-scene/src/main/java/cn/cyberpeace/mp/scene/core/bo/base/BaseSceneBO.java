@@ -18,4 +18,10 @@ public abstract class BaseSceneBO<M extends BaseSceneModel, T extends BaseSceneB
     private String displayContext;
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
+    @ApiModelProperty(value = "开启外网代理")
+    private Boolean publicNetProxy;
+    @ApiModelProperty(value = "外网代理ip")
+    private String publicNetProxyIp;
+    @ApiModelProperty(value = "外网代理端口")
+    private String publicNetProxyPort;
 }

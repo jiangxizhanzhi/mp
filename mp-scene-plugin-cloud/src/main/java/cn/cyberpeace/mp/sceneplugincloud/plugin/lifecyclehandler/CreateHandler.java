@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
@@ -736,6 +738,9 @@ public class CreateHandler extends HandlerCommon {
                             accessMode.setAccessIp(accessModeData.getIpAddress());
                             accessMode.setAccessPort(accessModeData.getPort());
                         }
+                        if (StringUtils.isNotEmpty(accessMode.getAccessIp())) {
+                            this.setPublicNetProxy(accessMode, cloudPort, cloudElement);
+                        }
                     });
                 }
             });
@@ -791,6 +796,9 @@ public class CreateHandler extends HandlerCommon {
                     }
                     if (StringUtils.isNotEmpty(accessModeData.getIpAddress()) && cloudPort.getSrcPort() != null) {
                         cloudPort.getSrcPort().setIp(accessModeData.getIpAddress());
+                    }
+                    if (StringUtils.isNotEmpty(accessMode.getAccessIp())) {
+                        this.setPublicNetProxy(accessMode, cloudPort, cloudElement);
                     }
                 });
             }
@@ -1143,6 +1151,36 @@ public class CreateHandler extends HandlerCommon {
         try {
             Thread.sleep(millSeconds);
         } catch (InterruptedException e) {
+        }
+    }
+
+    private void setPublicNetProxy(CloudAccessMode accessMode, CloudPluginSceneElementPortBO cloudPort, CloudPluginSceneElementBO cloudElement) {
+        CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+        if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
+            accessMode.setPublicNetProxy(true);
+            accessMode.setPublicNetProxyIp(accessMode.getPublicNetProxyIp());
+            accessMode.setPublicNetProxyPort(StringUtils.isNotEmpty(accessMode.getPublicNetProxyPort()) ? accessMode.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        } else if (Boolean.TRUE.equals(cloudPort.getSrcPort().getPublicNetProxy())) {
+            accessMode.setPublicNetProxy(true);
+            accessMode.setPublicNetProxyIp(cloudPort.getSrcPort().getPublicNetProxyIp());
+            accessMode.setPublicNetProxyPort(StringUtils.isNotEmpty(cloudPort.getSrcPort().getPublicNetProxyPort()) ? cloudPort.getSrcPort().getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        } else if (Boolean.TRUE.equals(cloudElement.getSrcElement().getPublicNetProxy())) {
+            accessMode.setPublicNetProxy(true);
+            accessMode.setPublicNetProxyIp(cloudElement.getSrcElement().getPublicNetProxyIp());
+            accessMode.setPublicNetProxyPort(StringUtils.isNotEmpty(cloudElement.getSrcElement().getPublicNetProxyPort()) ? cloudElement.getSrcElement().getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        } else if (Boolean.TRUE.equals(getPluginHandler().getScene().getSrcScene().getPublicNetProxy())) {
+            var scene = getPluginHandler().getScene().getSrcScene();
+            accessMode.setPublicNetProxy(true);
+            accessMode.setPublicNetProxyIp(scene.getPublicNetProxyIp());
+            accessMode.setPublicNetProxyPort(StringUtils.isNotEmpty(scene.getPublicNetProxyPort()) ? scene.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        } else if (Boolean.TRUE.equals(config.getPublicNetProxy())) {
+            accessMode.setPublicNetProxy(true);
+            accessMode.setPublicNetProxyIp(config.getPublicNetProxyIp());
+            accessMode.setPublicNetProxyPort(StringUtils.isNotEmpty(config.getPublicNetProxyPort()) ? config.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort()));
+        } else {
+            accessMode.setPublicNetProxy(false);
+            accessMode.setPublicNetProxyIp(null);
+            accessMode.setPublicNetProxyPort(null);
         }
     }
 }
