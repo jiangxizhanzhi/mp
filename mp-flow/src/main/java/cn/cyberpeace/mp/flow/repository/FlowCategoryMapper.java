@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.flow.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.flow.model.FlowCategoryModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
@@ -13,9 +15,6 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface FlowCategoryMapper {
-    /** 查询所有流量分类
-     * @return
-     */
-    List<FlowCategoryModel> selectAll();
+@ModelClass(FlowCategoryModel.class)
+public interface FlowCategoryMapper extends BaseModelMapper<FlowCategoryModel> {
 }

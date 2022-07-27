@@ -98,8 +98,14 @@ public class OperateLogController {
     public ServiceResult<OpModuleVO> getModules() {
         List<OpModuleVO> opModuleVOList = new ArrayList<>();
         List<OpModuleModel> models = opModuleService.findAll();
+        Locale locale = LocaleContextHolder.getLocale();
         for (OpModuleModel model : models) {
-            String name = MessageCommon.get(LogConstant.LOG_OP_MODULE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             int code = model.getCode();
             opModuleVOList.add(
                     OpModuleVO.builder().
@@ -116,8 +122,14 @@ public class OperateLogController {
     public ServiceResult<OpTypeVO> getTypes() {
         List<OpTypeVO> opTypeVOList = new ArrayList<>();
         List<OpTypeModel> models = opTypeService.findAll();
+        Locale locale = LocaleContextHolder.getLocale();
         for (OpTypeModel model : models) {
-            String name = MessageCommon.get(LogConstant.LOG_OP_TYPE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             int code = model.getCode();
             opTypeVOList.add(
                     OpTypeVO.builder().

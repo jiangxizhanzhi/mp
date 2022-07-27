@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,10 +41,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Description: 系统公告管理接口
@@ -59,8 +57,11 @@ public class SysNoticeController {
     @Autowired
     private SysNoticeService noticeService;
 
+//    @Autowired
+//    private NoticeTypeService noticeTypeService;
+
     @Autowired
-    private NoticeTypeService noticeTypeService;
+    private cn.cyberpeace.mp.front.admin.service.sys.NoticeTypeService noticeTypeService1;
 
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
@@ -157,14 +158,36 @@ public class SysNoticeController {
         return ServiceResult.success(result.getSource());
     }
 
-    @GetMapping("/types")
+//    @GetMapping("/types")
+//    @ApiOperation(value = "查询系统公告类型")
+//    public ServiceResult<NoticeTypeVO> getTypes() {
+//        List<NoticeTypeVO> typeVOList = new ArrayList<>();
+//        List<NoticeTypeModel> models = noticeTypeService.findAll();
+//
+//        for (NoticeTypeModel model : models) {
+//            String name = MessageCommon.get(ControllerConstant.SYS_NOTICE_TYPE_PREFIX + "." + model.getName());
+//            typeVOList.add(
+//                    NoticeTypeVO.builder()
+//                            .name(name)
+//                            .code(model.getCode())
+//                            .build()
+//            );
+//        }
+//        return ServiceResult.success(typeVOList);
+//    }
+    @GetMapping("/types1")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<NoticeTypeVO> getTypes() {
+    public ServiceResult<NoticeTypeVO> getTypes1() {
         List<NoticeTypeVO> typeVOList = new ArrayList<>();
-        List<NoticeTypeModel> models = noticeTypeService.findAll();
-
+        List<NoticeTypeModel> models = noticeTypeService1.findAll();
+        Locale locale = LocaleContextHolder.getLocale();
         for (NoticeTypeModel model : models) {
-            String name = MessageCommon.get(ControllerConstant.SYS_NOTICE_TYPE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             typeVOList.add(
                     NoticeTypeVO.builder()
                             .name(name)

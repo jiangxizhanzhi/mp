@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devops.log.repository;
 
+import cn.cyberpeace.mp.base.repository.BaseModelMapper;
+import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devops.log.model.OpModuleModel;
 import cn.cyberpeace.mp.devops.log.model.OpTypeModel;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,9 +16,6 @@ import java.util.List;
  */
 @Mapper
 @Repository
-public interface OpTypeMapper {
-    /** 查询所有操作类型
-     * @return
-     */
-    List<OpTypeModel> selectAll();
+@ModelClass(OpTypeModel.class)
+public interface OpTypeMapper extends BaseModelMapper<OpTypeModel> {
 }

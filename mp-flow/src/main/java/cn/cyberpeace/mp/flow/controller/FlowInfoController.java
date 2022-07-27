@@ -27,11 +27,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -88,8 +90,14 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     public ServiceResult<FlowCategoryVO> flowCategories() {
         List<FlowCategoryModel> models = flowCategoryService.findAll();
         List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
+        Locale locale = LocaleContextHolder.getLocale();
         for (FlowCategoryModel model : models) {
-            String name = MessageCommon.get(FLOW_CATEGORY_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             int code = model.getCode();
             flowCategoryVos.add(
                     FlowCategoryVO.builder()

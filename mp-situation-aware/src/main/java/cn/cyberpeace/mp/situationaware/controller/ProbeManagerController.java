@@ -27,6 +27,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,10 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/probes")
@@ -69,9 +67,14 @@ public class ProbeManagerController {
     public ServiceResult<ProbeTypeVO> probeTypes() {
         List<ProbeTypeVO> typeVOs = new ArrayList<>();
         List<ProbeTypeModel> models = probeTypeService.findAll();
-
+        Locale locale = LocaleContextHolder.getLocale();
         for (ProbeTypeModel model : models) {
-            String name = MessageCommon.get(SituationalAwareConstant.PROBE_TYPE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             int code = model.getCode();
             typeVOs.add(
                     ProbeTypeVO.builder()
@@ -79,7 +82,6 @@ public class ProbeManagerController {
                             .code(code)
                             .build()
             );
-
         }
         return ServiceResult.success(typeVOs);
     }
@@ -89,9 +91,14 @@ public class ProbeManagerController {
     public ServiceResult<OsTypeVO> osTypes() {
         List<OsTypeVO> osTypeVOs = new ArrayList<>();
         List<OsTypeModel> models = osTypeService.findAll();
-
+        Locale locale = LocaleContextHolder.getLocale();
         for (OsTypeModel model : models) {
-            String name = MessageCommon.get(SituationalAwareConstant.OS_TYPE_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             int code = model.getCode();
             osTypeVOs.add(
                     OsTypeVO.builder()

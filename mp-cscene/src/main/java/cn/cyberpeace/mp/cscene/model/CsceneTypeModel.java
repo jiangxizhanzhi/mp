@@ -17,5 +17,6 @@ import lombok.NoArgsConstructor;
 @Table("mp_cscene_type")
 public class CsceneTypeModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }

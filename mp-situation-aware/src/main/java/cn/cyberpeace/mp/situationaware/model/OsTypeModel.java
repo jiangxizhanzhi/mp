@@ -19,5 +19,6 @@ import lombok.NoArgsConstructor;
 @Table("mp_situation_os_type")
 public class OsTypeModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }

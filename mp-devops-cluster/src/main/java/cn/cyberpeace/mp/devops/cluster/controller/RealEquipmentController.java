@@ -41,10 +41,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -386,8 +388,14 @@ public class RealEquipmentController {
     public ServiceResult<EquipmentPositionStatusVO> getPositionStatus() {
         List<EquipmentPositionStatusVO> equipmentPositionStatusVOList = new ArrayList<>();
         List<EquipmentPositionStatusModel> models = equipmentPositionStatusService.findAll();
+        Locale locale = LocaleContextHolder.getLocale();
         for (EquipmentPositionStatusModel model : models) {
-            String name = MessageCommon.get(ControllerConstant.REAL_EQUIPMENT_POSITION_STATUS_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             equipmentPositionStatusVOList.add(
                     EquipmentPositionStatusVO.builder()
                             .name(name)
@@ -403,9 +411,14 @@ public class RealEquipmentController {
     public ServiceResult<EquipmentUseStatusVO> getUseStatus() {
         List<EquipmentUseStatusVO> equipmentUseStatusVOList = new ArrayList<>();
         List<EquipmentUseStatusModel> models = equipmentUseStatusService.findAll();
-
+        Locale locale = LocaleContextHolder.getLocale();
         for (EquipmentUseStatusModel model : models) {
-            String name = MessageCommon.get(ControllerConstant.REAL_EQUIPMENT_USE_STATUS_PREFIX + "." + model.getName());
+            String name = null;
+            if (Objects.equals(locale, Locale.US)) {
+                name = model.getEnName();
+            } else {
+                name = model.getChName();
+            }
             equipmentUseStatusVOList.add(
                     EquipmentUseStatusVO.builder()
                             .name(name)

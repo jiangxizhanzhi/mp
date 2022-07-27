@@ -17,5 +17,6 @@ import lombok.NoArgsConstructor;
 @Table("mp_flow_category")
 public class FlowCategoryModel extends BaseModel {
     private Integer code;
-    private String name;
+    private String chName;
+    private String enName;
 }
