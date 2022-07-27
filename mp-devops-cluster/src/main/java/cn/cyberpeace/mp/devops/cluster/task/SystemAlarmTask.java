@@ -41,7 +41,7 @@ public class SystemAlarmTask {
     private final AlarmStatisticsService alarmStatisticsService;
 
     // 默认持续时间
-    private static final Integer RUNNING_TIME = 10;
+    private static final Integer RUNNING_TIME = 0;
 
     /**
      * 生成告警信息
