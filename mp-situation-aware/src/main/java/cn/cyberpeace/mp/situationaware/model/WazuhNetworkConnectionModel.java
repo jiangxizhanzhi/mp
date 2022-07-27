@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -32,4 +34,8 @@ public class WazuhNetworkConnectionModel {
 
     @JSONField(name = "raddr_port")
     private String raddrPort;
+
+    private String description;
+
+    private LocalDateTime time;
 }

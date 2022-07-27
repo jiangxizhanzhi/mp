@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -53,5 +55,9 @@ public class WazuhProcessModel {
 
     @JSONField(name = "name")
     private String name;
+
+    private String description;
+
+    private LocalDateTime time;
 
 }

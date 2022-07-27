@@ -93,6 +93,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -586,6 +587,8 @@ public class DataCollectionService extends CollectionBaseService {
         for (int i = 0; i < arr.size(); i++) {
             JSONObject data = arr.getJSONObject(i);
             WazuhNetworkConnectionModel netConnModel = JSONObject.toJavaObject(data, WazuhNetworkConnectionModel.class);
+            netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
+            netConnModel.setDescription("CMD LAUNCH LOG");
             list.add(netConnModel);
         }
 
@@ -615,6 +618,8 @@ public class DataCollectionService extends CollectionBaseService {
         for (int i = 0; i < arr.size(); i++) {
             JSONObject data = arr.getJSONObject(i);
             WazuhProcessModel processModel = JSONObject.toJavaObject(data, WazuhProcessModel.class);
+            processModel.setTime((LocalDateTime) jsonObject.get("time"));
+            processModel.setDescription("PROCESS");
             list.add(processModel);
         }
 
@@ -643,6 +648,8 @@ public class DataCollectionService extends CollectionBaseService {
         for (int i = 0; i < arr.size(); i++) {
             JSONObject data = arr.getJSONObject(i);
             WazuhSystemUserModel userModel = JSONObject.toJavaObject(data, WazuhSystemUserModel.class);
+            userModel.setTime((LocalDateTime) jsonObject.get("time"));
+            userModel.setDescription("USER MODIFIED");
             list.add(userModel);
         }
 
@@ -773,6 +780,11 @@ public class DataCollectionService extends CollectionBaseService {
                 byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
                 String output = TextUtils.decompress(raw);
                 JSONObject jsonObject = JSONObject.parseObject(output);
+
+                Date date = launchModel.getTimestamp();
+                if (Objects.nonNull(date)) {
+                    jsonObject.put("time", date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                }
                 return jsonObject;
             }
         }
