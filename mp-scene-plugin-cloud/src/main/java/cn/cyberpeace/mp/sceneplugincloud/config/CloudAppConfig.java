@@ -144,6 +144,15 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.link_status_cache_seconds:600}")
     private Integer linkStatusCacheSeconds;
 
+    @Value("${mp.sceneplugincloud.public-net-proxy:false}")
+    private Boolean publicNetProxy;
+
+    @Value("${mp.sceneplugincloud.public-net-proxy-ip:}")
+    private String publicNetProxyIp;
+
+    @Value("${mp.sceneplugincloud.public-net-proxy-port:}")
+    private String publicNetProxyPort;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

@@ -45,6 +45,12 @@ public abstract class BaseSceneElementBO<M extends BaseSceneElementModel, P exte
     private String nodeCommand;
     @ApiModelProperty(value = "是否辅助节点")
     private Boolean isAuxiliary;
+    @ApiModelProperty(value = "开启外网代理")
+    private Boolean publicNetProxy;
+    @ApiModelProperty(value = "外网代理ip")
+    private String publicNetProxyIp;
+    @ApiModelProperty(value = "外网代理端口")
+    private String publicNetProxyPort;
 
     @Override
     public void fromModel(M obj, String... ignoreFields) {
