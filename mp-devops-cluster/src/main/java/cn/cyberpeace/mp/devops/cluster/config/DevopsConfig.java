@@ -19,4 +19,9 @@ public class DevopsConfig {
      */
     private String cpUrl;
 
+    private Boolean publicNetProxy;
+
+    private String publicNetProxyIp;
+
+    private String publicNetProxyPort;
 }

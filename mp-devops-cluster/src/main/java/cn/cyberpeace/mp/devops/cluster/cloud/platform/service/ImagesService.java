@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtDocker;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtImageInfo;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -119,7 +121,21 @@ public class ImagesService extends BaseCpService {
     public CloudPlatformPageResult<TargetConnection> connection(String deviceUuid){
         CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + NORMAL + "/connection?device_uuid=" + deviceUuid + "&user_id=" + (Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""),CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
-        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
+        List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TargetConnection.class);
+        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        if (config.getPublicNetProxy()) {
+            list.forEach(l -> {
+                if (l.getProtocol().equals("console")) {
+                    return;
+                }
+                if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                    l.setIpAddress(config.getPublicNetProxyIp());
+                }
+                if (StringUtils.isNotEmpty(config.getPublicNetProxyPort())) {
+                    l.setPort(Integer.parseInt(config.getPublicNetProxyPort()));
+                }
+            });
+        }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
