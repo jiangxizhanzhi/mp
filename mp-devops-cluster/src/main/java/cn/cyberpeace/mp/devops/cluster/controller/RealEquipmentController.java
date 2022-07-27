@@ -390,12 +390,13 @@ public class RealEquipmentController {
         List<EquipmentPositionStatusModel> models = equipmentPositionStatusService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (EquipmentPositionStatusModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             equipmentPositionStatusVOList.add(
                     EquipmentPositionStatusVO.builder()
                             .name(name)
@@ -413,12 +414,13 @@ public class RealEquipmentController {
         List<EquipmentUseStatusModel> models = equipmentUseStatusService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (EquipmentUseStatusModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             equipmentUseStatusVOList.add(
                     EquipmentUseStatusVO.builder()
                             .name(name)

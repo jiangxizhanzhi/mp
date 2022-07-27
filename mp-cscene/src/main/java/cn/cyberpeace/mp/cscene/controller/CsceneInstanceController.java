@@ -675,12 +675,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         List<CsceneStatusModel> models = csceneStatusService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (CsceneStatusModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             statusVOList.add(
                     CsceneStatusVO.builder()
                             .name(name)
@@ -698,12 +699,13 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
         List<CsceneTypeModel> models = csceneTypeService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (CsceneTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             typeVOList.add(
                     CsceneTypeVO.builder()
                             .name(name)

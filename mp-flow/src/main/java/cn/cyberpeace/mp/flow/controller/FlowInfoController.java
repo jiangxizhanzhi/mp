@@ -92,12 +92,13 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
         Locale locale = LocaleContextHolder.getLocale();
         for (FlowCategoryModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             int code = model.getCode();
             flowCategoryVos.add(
                     FlowCategoryVO.builder()

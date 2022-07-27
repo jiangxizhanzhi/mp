@@ -69,12 +69,13 @@ public class ProbeManagerController {
         List<ProbeTypeModel> models = probeTypeService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (ProbeTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             int code = model.getCode();
             typeVOs.add(
                     ProbeTypeVO.builder()
@@ -93,12 +94,13 @@ public class ProbeManagerController {
         List<OsTypeModel> models = osTypeService.findAll();
         Locale locale = LocaleContextHolder.getLocale();
         for (OsTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
+            String name = MessageCommon.get(model.getChName(), model.getEnName(), locale);
+//            String name = null;
+//            if (Objects.equals(locale, Locale.US)) {
+//                name = model.getEnName();
+//            } else {
+//                name = model.getChName();
+//            }
             int code = model.getCode();
             osTypeVOs.add(
                     OsTypeVO.builder()
