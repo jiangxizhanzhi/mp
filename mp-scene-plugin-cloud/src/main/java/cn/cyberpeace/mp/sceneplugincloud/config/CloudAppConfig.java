@@ -93,6 +93,12 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.delete_hold_size:200000}")
     private Integer deleteHoldSize;
 
+    @Value("${mp.sceneplugincloud.link_status_pool_size:10}")
+    private Integer linkStatusPoolSize;
+
+    @Value("${mp.sceneplugincloud.link_status_hold_size:200}")
+    private Integer linkStatusHoldSize;
+
     @Value("${mp.sceneplugincloud.external_net_id:}")
     private String externalNetId;
 
@@ -131,6 +137,12 @@ public class CloudAppConfig {
 
     @Value("${mp.sceneplugincloud.enable_force_delete:true}")
     private Boolean enableForceDelete;
+
+    @Value("${mp.sceneplugincloud.link_status_refresh_period:5}")
+    private Integer linkStatusRefreshPeriod;
+
+    @Value("${mp.sceneplugincloud.link_status_cache_seconds:600}")
+    private Integer linkStatusCacheSeconds;
 
     @Autowired
     private BaseAppConfig baseAppConfig;

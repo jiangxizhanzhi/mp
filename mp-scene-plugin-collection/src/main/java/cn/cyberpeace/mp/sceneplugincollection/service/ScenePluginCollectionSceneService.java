@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
@@ -52,12 +53,14 @@ import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
+import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
 import cn.cyberpeace.mp.situationaware.model.enums.AggregationTypeEnum;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.SystemUser;
 import cn.cyberpeace.mp.situationaware.request.FlowAnalysisRequest;
 import cn.cyberpeace.mp.situationaware.request.FlowSimulationRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
@@ -133,7 +136,8 @@ public class ScenePluginCollectionSceneService {
     private CollectionPluginWazuhRuleMapper collectionPluginWazuhRuleMapper;
 
     @Autowired
-    private CollectionAppConfig collectionAppConfig ;
+    private CollectionAppConfig collectionAppConfig;
+
 
     public ListObjServiceResult<CollectionFlowBO> listFlows(List<String> sceneIds, FlowQueryParams queryParams) {
         BatchSceneHandler batchSceneHandler = new BatchSceneHandler(sceneIds, queryParams.getNodeIds());
@@ -402,14 +406,6 @@ public class ScenePluginCollectionSceneService {
 
         if (Objects.nonNull(queryParams.getScroll()) && queryParams.getScroll()) {
             request.setScroll(true);
-        }
-
-
-        // todo 查询事件类型，暂时只支持所有，文件两种类型。用户，进程，端口，网络连接事件暂不支持 0:所有 1:进程 2:端口 3:网络连接 4:文件 5:用户
-        if (Objects.nonNull(queryParams.getType())) {
-            if (queryParams.getType().equals(1) || queryParams.getType().equals(2) || queryParams.getType().equals(3) || queryParams.getType().equals(5)) {
-                return new ListObjServiceResult<>(new ListObjResult<>(Collections.emptyList(), 0));
-            }
         }
 
         var result = dataCollectionService.queryFileEvents(request);
@@ -1271,6 +1267,42 @@ public class ScenePluginCollectionSceneService {
         List<Process> processes = resultList.stream().map(p -> convertWazuhProcess2Process(p)).collect(Collectors.toList());
 
         return new ListObjServiceResult<>(new ListObjResult<>(processes, totalList.size()).asResult()).asResult();
+    }
+
+
+    public ListObjServiceResult<SystemUser> listPageSystemUserEvents(ListPageInfoQueryParams listPageInfoQueryParams) {
+
+        BatchSceneHandler batchSceneHandler = new BatchSceneHandler(listPageInfoQueryParams.getSceneIds(), null);
+        Map<String, String> nodeId2Eidmap = batchSceneHandler.getProbeEnabledNodeId2EidMap();
+
+        int pageSize = listPageInfoQueryParams.getPageSize() == null ? 10 : listPageInfoQueryParams.getPageSize();
+        int page = listPageInfoQueryParams.getPage() == null ? 1 : listPageInfoQueryParams.getPage();
+
+        WazuhMonitorEventsRequest wazuhRequest = new WazuhMonitorEventsRequest();
+        wazuhRequest.setAgentNames(Lists.newArrayList(nodeId2Eidmap.get(listPageInfoQueryParams.getNodeIds().get(0))));
+        wazuhRequest.setPageSize(1);
+        // 默认24小时
+        LocalDateTime endTime = LocalDateTime.now();
+        wazuhRequest.setStartTime(endTime.minusHours(collectionAppConfig.getHoursRange()));
+        wazuhRequest.setEndTime(endTime);
+
+        if (wazuhRequest.getAgentNames().contains(null)) {
+            return new ListObjServiceResult(new ListObjResult<>(Collections.emptyList(), 0).asResult()).asResult();
+        }
+
+        List<WazuhSystemUserModel> totalList = dataCollectionService.queryUserChangeEventWithTimeRange(wazuhRequest);
+
+        int skip = (page - 1) * pageSize;
+        log.info("skip:{}, limit:{}", skip, pageSize);
+        List<WazuhSystemUserModel> resultList = totalList.stream().filter(Objects::nonNull).skip(skip).limit(pageSize).collect(Collectors.toList());
+
+        List<SystemUser> systemUsers = resultList.stream().map(u -> {
+            SystemUser systemUser = new SystemUser();
+            BeanUtils.copyProperties(u, systemUser);
+            return systemUser;
+        }).collect(Collectors.toList());
+
+        return new ListObjServiceResult<>(new ListObjResult<>(systemUsers, totalList.size()).asResult()).asResult();
     }
 
 

@@ -40,6 +40,8 @@ public class ProbeConstant {
         String SECURITY_LOG = "010";
         //日志文件
         String LOG_FILE = "011";
+        //用户变更
+        String USERS_MODIFY = "012";
     }
 
     public ProbeConstant() {
