@@ -153,7 +153,7 @@ public class ServiceMonitorService {
             // 业务服务监控
             List<ServiceMonitorDto> bizMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
             if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
-                cloudPlatformMonitorVO.setCloudPlatformMonitors(bizMonitorDtos);
+                bizServiceMonitorVO.setBizServiceMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
                 int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState())).count();
                 cloudPlatformMonitorVO.setTotalCount(bizTotalCount);
