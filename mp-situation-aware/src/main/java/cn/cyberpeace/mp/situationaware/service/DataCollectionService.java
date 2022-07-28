@@ -591,7 +591,7 @@ public class DataCollectionService extends CollectionBaseService {
             JSONObject data = arr.getJSONObject(i);
             WazuhNetworkConnectionModel netConnModel = JSONObject.toJavaObject(data, WazuhNetworkConnectionModel.class);
             netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
-            netConnModel.setDescription("CMD LAUNCH LOG");
+            netConnModel.setDescription("INTERNET CONNECTION");
             list.add(netConnModel);
         }
 

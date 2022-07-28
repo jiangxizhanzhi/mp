@@ -53,6 +53,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
@@ -117,6 +118,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Autowired
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
+
+    @Autowired
+    private ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService;
 
     @Autowired
     private ScenePluginFlowSceneService scenePluginFlowSceneService;
@@ -241,7 +245,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             var cloudElement = cloudPluginHandler.getElement(nodeId);
             Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
             List<?> res = null;
-            if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+            if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId) ||
+                    ProbeConstant.ProbeId.INTERNET_CONNECTION.equals(probeId)) {
                 BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
                 request.setSceneId(sceneInstanceId);
                 request.setElementIds(CollUtil.toList(element.getId()));
@@ -253,13 +258,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }
-                } else {
+                } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
                     // 原始日志信息
                     request.setFetchIfSceneInstanceShutdown(true);
                     var r = logFileService.pageByElementId(request);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
+                    }
+                } else {
+                    // 网络连接
+                    request.setFetchIfSceneInstanceShutdown(true);
+                    var r = sceneElementMonitorService.pageNetworkConnections(request);
+                    if (r.getData() != null) {
+                        res = r.getData().getList();
+                        total = r.getData().getTotal() + total;
                     }
                 }
             } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
@@ -725,8 +738,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
 
             if (queryParams.getType().equals(3)) {
-                // 网络连接同端口
-                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
+                // 网络连接
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
                         FileEventType.INTERNET_CONNECTION.name());
             }
 
@@ -1050,13 +1063,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         ElementTaskPool.getInstance().executeTask(() -> {
-            String sceneConfigId = this.getSceneConfigId(id);
-            boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
-            if (result) {
-                var list = sceneConfigService.getElementSnapshots(sceneConfigId, nodeId).getSource();
-                if (CollectionUtils.isNotEmpty(list)) {
-                    var csceneInstance = this.get(id).asResult().getData();
-                    csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
+            var sceneInfo = this.getSceneInfo(id);
+            if (StringUtils.isNotEmpty(sceneInfo.getSceneId()) && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
+                boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneInfo.getSceneConfigId());
+                if (result) {
+                    var list = sceneConfigService.getElementSnapshots(sceneInfo.getSceneConfigId(), nodeId).getSource();
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(list.get(0).getAddress()).getImageName());
+                    }
                 }
             }
         });
@@ -1088,7 +1102,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
-        // todo 合成一次查询
         SceneInfo sceneInfo = this.getSceneInfo(csceneId);
         if (sceneInfo == null || StringUtils.isEmpty(sceneInfo.getSceneId()) || StringUtils.isEmpty(sceneInfo.getSceneConfigId())) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
