@@ -3,6 +3,8 @@ package cn.cyberpeace.mp.cscene.dto.element;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -34,4 +36,9 @@ public class ConnectionState {
     @ApiModelProperty("状态")
     private String state;
 
+    @ApiModelProperty("描述")
+    private String description;
+
+    @ApiModelProperty("时间")
+    private LocalDateTime time;
 }
