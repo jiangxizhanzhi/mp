@@ -3,9 +3,10 @@ package cn.cyberpeace.mp.devops.log.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.DropdownBO;
-import cn.cyberpeace.mp.common.service.DropdownService;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
@@ -43,7 +44,7 @@ public class OperateLogController {
     private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
-    private DropdownService dropdownService;
+    private OptionService optionService;
 
     @Autowired
     public OperateLogController(OperateLogServiceFactory operateLogServiceFactory) {
@@ -86,16 +87,16 @@ public class OperateLogController {
 
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
-    public ServiceResult<DropdownBO> getModules() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_LOG_OP_MODULE);
+    public ServiceResult<OptionBO> getModules() {
+        List<OptionBO> boList = optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE);
         return ServiceResult.success(boList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
-    public ServiceResult<DropdownBO> getTypes() {
-        List<DropdownBO> boList =
-                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_LOG_OP_TYPE);
+    public ServiceResult<OptionBO> getTypes() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE);
         return ServiceResult.success(boList);
     }
 

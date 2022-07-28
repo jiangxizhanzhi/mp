@@ -29,4 +29,7 @@ public class SituationalAwareConstant {
     public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
+
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "2";
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "3";
 }

@@ -4,10 +4,11 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.DropdownBO;
-import cn.cyberpeace.mp.common.service.DropdownService;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
@@ -56,7 +57,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     @Autowired
-    private DropdownService dropdownService;
+    private OptionService optionService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -663,16 +664,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @GetMapping("/status")
     @ApiOperation(value = "查询靶场监控的场景实例状态")
-    public ServiceResult<DropdownBO> getSceneStatus() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_CSCENE_INSTANCE_STATUS);
+    public ServiceResult<OptionBO> getSceneStatus() {
+        List<OptionBO> boList = optionService.getOptionsByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
         return ServiceResult.success(boList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
-    public ServiceResult<DropdownBO> getSceneType() {
-        List<DropdownBO> boList =
-                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_CSCENE_INSTANCE_TYPE);
+    public ServiceResult<OptionBO> getSceneType() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
         return ServiceResult.success(boList);
     }
 }

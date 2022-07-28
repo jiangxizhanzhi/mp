@@ -2,13 +2,13 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.DropdownBO;
-import cn.cyberpeace.mp.common.service.DropdownService;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.situationaware.constant.ControllerConstant;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
@@ -49,19 +49,20 @@ public class ProbeManagerController {
     private ProbeScriptService probeScriptService;
 
     @Autowired
-    private DropdownService dropdownService;
+    private OptionService optionService;
 
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
-    public ServiceResult<DropdownBO> probeTypes() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_SITUATION_PROBE_TYPE);
+    public ServiceResult<OptionBO> probeTypes() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
         return ServiceResult.success(boList);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
-    public ServiceResult<DropdownBO> osTypes() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_SITUATION_OS_TYPE);
+    public ServiceResult<OptionBO> osTypes() {
+        List<OptionBO> boList = optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
         return ServiceResult.success(boList);
     }
 

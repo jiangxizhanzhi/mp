@@ -3,14 +3,14 @@ package cn.cyberpeace.mp.front.admin.controller;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.DropdownBO;
-import cn.cyberpeace.mp.common.service.DropdownService;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.front.admin.constant.ControllerConstant;
+import cn.cyberpeace.mp.front.admin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
@@ -49,7 +49,7 @@ public class SysNoticeController {
     private SysNoticeService noticeService;
 
     @Autowired
-    private DropdownService dropdownService;
+    private OptionService optionService;
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
@@ -147,8 +147,8 @@ public class SysNoticeController {
 
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<DropdownBO> getTypes() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+    public ServiceResult<OptionBO> getTypes() {
+        List<OptionBO> boList = optionService.getOptionsByType(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
         return ServiceResult.success(boList);
     }
 

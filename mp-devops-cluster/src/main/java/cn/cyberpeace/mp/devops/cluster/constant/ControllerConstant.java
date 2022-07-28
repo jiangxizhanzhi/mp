@@ -13,9 +13,4 @@ public final class ControllerConstant {
     public static final String BASE_API_PATH = "/devops/cluster";
 
     public static final String ERROR_CODE_PREFIX = "devops.error_code.";
-
-
-    public static final int MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_POSITION = 6;
-    public static final int MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_USE = 7;
-
 }

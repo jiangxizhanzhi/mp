@@ -14,7 +14,5 @@ public class ControllerConstant {
 
     public static final String SYS_NOTICE_TYPE_PREFIX = "sys.notice.type";
 
-    public static final int MP_COMMON_DROPDOWN_TYPE_FRONT_ADMIN_NOTICE_TYPE = 10;
-
     private ControllerConstant() {}
 }

@@ -3,12 +3,13 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.bo.DropdownBO;
-import cn.cyberpeace.mp.common.service.DropdownService;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
+import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.TypeConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.RealEquipmentBO;
@@ -63,7 +64,7 @@ public class RealEquipmentController {
     private final TypeConverter typeConverter;
 
     @Autowired
-    private DropdownService dropdownService;
+    private OptionService optionService;
 
     /**
      * 分页查询
@@ -381,16 +382,16 @@ public class RealEquipmentController {
 
     @GetMapping("/position")
     @ApiOperation(value = "查询实装设备的在位状态")
-    public ServiceResult<DropdownBO> getPositionStatus() {
-        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_POSITION);
+    public ServiceResult<OptionBO> getPositionStatus() {
+        List<OptionBO> boList = optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_POSITION);
         return ServiceResult.success(boList);
     }
 
     @GetMapping("/use")
     @ApiOperation(value = "实装设备的使用状态")
-    public ServiceResult<DropdownBO> getUseStatus() {
-        List<DropdownBO> boList =
-                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_USE);
+    public ServiceResult<OptionBO> getUseStatus() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE);
         return ServiceResult.success(boList);
     }
 }
