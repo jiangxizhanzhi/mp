@@ -229,14 +229,6 @@ public class SceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId, String nodeId) {
-        var list = sceneElementSnapshotMapper.list(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
-                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
-                .reverseOrderBy(SceneElementSnapshotModel::getPk));
-        return new ServiceResult<>(list);
-    }
-
     public ServiceResult<Boolean> deleteElementSnapshot(String id) {
         var result = sceneElementSnapshotMapper.delete(id);
         return new ServiceResult<>(result);

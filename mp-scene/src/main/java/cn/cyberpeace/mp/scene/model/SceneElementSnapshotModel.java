@@ -20,5 +20,4 @@ public class SceneElementSnapshotModel extends BaseModel {
     @DefaultStr
     private String description;
     private String address;
-    private String snapshotUuid;
 }
