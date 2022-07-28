@@ -99,4 +99,14 @@ public class SceneConfigService {
         return new ServiceResult<>(model);
     }
 
+    public ServiceResult<Boolean> deleteElementSnapshot(String id, String snapshotId) {
+        var result = snapshotMapper.first(new HumanCondition().filterEqual(SceneElementSnapshotModel::getSceneConfig, id));
+        if (result != null && result.getId().equals(snapshotId)) {
+            boolean deleted = snapshotMapper.delete(snapshotId);
+            return new ServiceResult<>(deleted);
+        } else {
+            return new ServiceResult<>(false);
+        }
+    }
+
 }
