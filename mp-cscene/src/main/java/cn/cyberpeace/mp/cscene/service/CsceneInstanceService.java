@@ -27,11 +27,13 @@ import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.dto.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountByReferenceTypeModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceRoleModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.base.BaseCsceneModel;
 import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
@@ -43,7 +45,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.scene.service.SceneConfigService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -53,6 +55,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;
+import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostEventBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionHostStateBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
@@ -146,7 +149,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private LogFileService logFileService;
 
     @Resource
-    private SceneService sceneService;
+    private SceneConfigService sceneConfigService;
 
     @Resource
     private CsceneService csceneService;
@@ -1050,8 +1053,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             String sceneConfigId = this.getSceneConfigId(id);
             boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
             if (result) {
-                String sceneId = this.getSceneId(id);
-                var list = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
+                var list = sceneConfigService.getElementSnapshots(sceneConfigId, nodeId).getSource();
                 if (CollectionUtils.isNotEmpty(list)) {
                     var csceneInstance = this.get(id).asResult().getData();
                     csceneService.updateElementImage(csceneInstance.getCscene(), nodeId, list.get(0).getAddress());
@@ -1087,27 +1089,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
         // todo 合成一次查询
-        String sceneId = getSceneId(csceneId);
-        if (StringUtils.isEmpty(sceneId)) {
+        SceneInfo sceneInfo = this.getSceneInfo(csceneId);
+        if (sceneInfo == null || StringUtils.isEmpty(sceneInfo.getSceneId()) || StringUtils.isEmpty(sceneInfo.getSceneConfigId())) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        String sceneConfigId = getSceneConfigId(csceneId);
-        var listSnapshot = sceneService.getElementSnapshots(sceneConfigId, nodeId).getSource();
-        if (CollectionUtils.isEmpty(listSnapshot)) {
+        String sceneId = sceneInfo.getSceneId();
+        String sceneConfigId = sceneInfo.getSceneConfigId();
+        var snapshot = sceneConfigService.getElementSnapshot(sceneConfigId, nodeId, snapshotId).getSource();
+        if (snapshot == null) {
             return new ServiceResult<>(true);
         }
 
-        var filteredSnapshots = listSnapshot.stream()
-                .filter(s -> StringUtils.equals(s.getSnapshotUuid(), snapshotId))
-                .collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(filteredSnapshots)) {
-            return new ServiceResult<>(true);
-        }
-
-        var snapshot = filteredSnapshots.get(0);
-        String image = snapshot.getAddress();
-
+        String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
         var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
         if (CollectionUtils.isNotEmpty(configNames)) {
@@ -1135,4 +1129,21 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
         return new ArrayList<>(names);
     }
+
+    private SceneInfo getSceneInfo(String csceneInstanceId) {
+        var condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene, CsceneModel.class, CsceneModel::getId)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getId, csceneInstanceId)
+                .selectAs(CsceneInstanceModel::getScene, SceneInfo::getSceneId)
+                .currentLink(CsceneModel.class)
+                .selectAs(CsceneModel::getSceneConfig, SceneInfo::getSceneConfigId);
+        var list = getModelMapper().list(condition, SceneInfo.class);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.get(0);
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -1,20 +1,28 @@
 package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 @Service
 public class SceneConfigService {
+
+    @Resource
+    private SceneElementSnapshotMapper snapshotMapper ;
 
     public ServiceResult<SceneConfigDataBO> get(String id, boolean isAreaMode, String areaId,
                                                 SceneConfigContextBO context) {
@@ -72,6 +80,23 @@ public class SceneConfigService {
         } else {
             return new ServiceResult<>(result);
         }
+    }
+
+    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId, String nodeId) {
+        var list = snapshotMapper.list(new HumanCondition()
+                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
+                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
+                .reverseOrderBy(SceneElementSnapshotModel::getPk));
+        return new ServiceResult<>(list);
+    }
+
+    public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String sceneConfigId, String nodeId, String addressContent) {
+        var model = snapshotMapper.first(new HumanCondition()
+                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
+                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
+                .filterContains(SceneElementSnapshotModel::getAddress, addressContent)
+                .reverseOrderBy(SceneElementSnapshotModel::getPk));
+        return new ServiceResult<>(model);
     }
 
 }

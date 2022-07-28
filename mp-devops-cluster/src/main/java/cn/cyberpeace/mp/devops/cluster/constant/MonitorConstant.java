@@ -15,7 +15,7 @@ public class MonitorConstant {
 
     public static final String BIN_TOOLS_DIR = "/var/ossec/bin/tools";
 
-    // 系统告警定时任务运行间隔
-    public static final Integer ALARM_TASK_RATE = 1000 * 60 * 5;
+    // 系统告警定时任务运行间隔 单位s
+    public static final Integer ALARM_TASK_RATE = 60 * 5;
 
 }

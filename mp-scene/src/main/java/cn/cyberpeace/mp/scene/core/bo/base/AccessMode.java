@@ -41,6 +41,15 @@ public class AccessMode {
     @ApiModelProperty(value = "开启代理")
     private Boolean proxy;
 
+    @ApiModelProperty(value = "开启外网代理")
+    private Boolean publicNetProxy;
+
+    @ApiModelProperty(value = "外网代理ip")
+    private String publicNetProxyIp;
+
+    @ApiModelProperty(value = "外网代理端口")
+    private String publicNetProxyPort;
+
     public static class Protocol {
         public static final String PING = "ping";
         public static final String CONSOLE = "console";

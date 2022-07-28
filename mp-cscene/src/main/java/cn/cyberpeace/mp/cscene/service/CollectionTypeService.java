@@ -228,7 +228,7 @@ public class CollectionTypeService {
 
         CollectionType av = CollectionType.builder().name("AV").code(code + "01").type(type).build();
         CollectionType fw = CollectionType.builder().name("FW").code(code + "02").type(type).build();
-        CollectionType ds_ips = CollectionType.builder().name("DS/IPS").code(code + "03").type(type).build();
+        CollectionType ds_ips = CollectionType.builder().name("IDS/IPS").code(code + "03").type(type).build();
         CollectionType vpn = CollectionType.builder().name("VPN").code(code + "04").type(type).build();
         CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
 
