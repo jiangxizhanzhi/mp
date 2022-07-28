@@ -228,9 +228,4 @@ public class SceneService {
         sceneHandler.snapshotElement(nodeId, snapshotName, description, sceneConfigId);
         return new ServiceResult<>(true);
     }
-
-    public ServiceResult<Boolean> deleteElementSnapshot(String id) {
-        var result = sceneElementSnapshotMapper.delete(id);
-        return new ServiceResult<>(result);
-    }
 }

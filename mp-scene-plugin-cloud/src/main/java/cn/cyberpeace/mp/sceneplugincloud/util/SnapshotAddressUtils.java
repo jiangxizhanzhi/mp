@@ -19,10 +19,10 @@ public final class SnapshotAddressUtils {
         String[] infos = StringUtils.split(address, ",");
         SnapshotAddressInfo result = new SnapshotAddressInfo();
         if (infos != null) {
-            if (infos.length == 1) {
+            if (infos.length >= 1) {
                 result.setImageName(infos[0]);
             }
-            if (infos.length == 2) {
+            if (infos.length >= 2) {
                 result.setSnapshotUuid(infos[1]);
             }
         }
