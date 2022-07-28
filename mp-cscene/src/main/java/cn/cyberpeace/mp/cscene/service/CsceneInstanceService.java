@@ -45,7 +45,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
@@ -153,9 +153,6 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private LogFileService logFileService;
 
     @Resource
-    private SceneConfigService sceneConfigService;
-
-    @Resource
     private CsceneService csceneService;
 
     @Resource
@@ -163,6 +160,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
     @Resource
     private CsceneMapper csceneMapper;
+
+    @Resource
+    private SceneSnapshotService sceneSnapshotService ;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1067,7 +1067,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             if (StringUtils.isNotEmpty(sceneInfo.getSceneId()) && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
                 boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneInfo.getSceneConfigId());
                 if (result) {
-                    var list = sceneConfigService.getElementSnapshots(sceneInfo.getSceneConfigId(), nodeId).getSource();
+                    var list = sceneSnapshotService.getElementSnapshots(sceneInfo.getSceneConfigId(), nodeId).getSource();
                     if (CollectionUtils.isNotEmpty(list)) {
                         scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(list.get(0).getAddress()).getImageName());
                     }
@@ -1109,7 +1109,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         String sceneId = sceneInfo.getSceneId();
         String sceneConfigId = sceneInfo.getSceneConfigId();
-        var snapshot = sceneConfigService.getElementSnapshot(sceneConfigId, nodeId, snapshotId).getSource();
+        var snapshot = sceneSnapshotService.getElementSnapshot(sceneConfigId, nodeId, snapshotId).getSource();
         if (snapshot == null) {
             return new ServiceResult<>(true);
         }

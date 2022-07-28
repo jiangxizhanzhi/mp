@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -26,14 +27,19 @@ import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
-import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
+import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -45,9 +51,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -65,6 +76,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
     private ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService;
+
+    private SceneSnapshotService sceneSnapshotService;
+
+    private CsceneSpecialService csceneSpecialService ;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -170,6 +185,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneAppConfig csceneAppConfig,
                          ScenePluginCloudSceneService scenePluginCloudSceneService,
                          ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
+                         SceneSnapshotService sceneSnapshotService,
+                         CsceneSpecialService csceneSpecialService,
                          CsceneModelFields csceneModelFields) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
@@ -178,6 +195,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setScenePluginCloudSceneService(scenePluginCloudSceneService);
         setScenePluginCloudSceneConfigService(scenePluginCloudSceneConfigService);
         setCsceneInstanceMapper(csceneInstanceMapper);
+        setSceneSnapshotService(sceneSnapshotService);
+        setCsceneSpecialService(csceneSpecialService);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
@@ -286,7 +305,71 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     public ServiceResult<Boolean> deleteById(String id, boolean logic, boolean withInstance, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
         var flag = csceneHandler.delete(logic, withInstance);
+        if (flag) {
+            // 尝试该场景模板建立的快照
+            TaskCommon.executeTask(() -> {
+                String configId = getSceneConfigId(id);
+                this.deleteSceneSnapshots(configId);
+            });
+        }
         return new ServiceResult<>(flag);
+    }
+
+    private void deleteSceneSnapshots(String sceneConfigId) {
+        var snapshots = sceneSnapshotService.getElementSnapshots(sceneConfigId).getSource();
+        if (CollectionUtils.isNotEmpty(snapshots)) {
+            Set<String> names = new HashSet<>();
+            Set<String> sourceNames = new HashSet<>();
+            Map<String, SceneElementSnapshotModel> name2Model = new HashMap<>();
+            snapshots.forEach(s -> {
+                names.add(s.getName());
+                sourceNames.add(s.getSourceName());
+                name2Model.put(s.getName(), s);
+            });
+            Queue<SceneElementSnapshotModel> queue = new LinkedList<>();
+            snapshots.forEach(s -> {
+                if (!sourceNames.contains(s.getName())) {
+                    queue.add(s);
+                }
+            });
+            int times = 0;
+            while (!queue.isEmpty()) {
+                if (times > snapshots.size()) {
+                    break;
+                } else {
+                    times++;
+                    var snapshot = queue.poll();
+                    try {
+                        String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
+                        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
+                        var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
+                        if (CollectionUtils.isNotEmpty(configNames)) {
+                            continue;
+                        }
+
+                        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image }).getSource();
+                        var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
+                        if (CollectionUtils.isNotEmpty(instanceNames)) {
+                            continue;
+                        }
+
+                        SnapshotDeleteParams params = new SnapshotDeleteParams();
+                        params.setSnapshotName(snapshot.getName());
+                        var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
+                        params.setDeviceUuid(StringUtils.replaceOnce(info.getImageName(), snapshot.getName(), StringUtils.EMPTY));
+                        params.setSnapshotUuid(info.getSnapshotUuid());
+                        new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+                        }, true);
+                        sceneSnapshotService.deleteElementSnapshot(snapshot.getId());
+                        if (name2Model.containsKey(snapshot.getSourceName())) {
+                            queue.add(name2Model.get(snapshot.getSourceName()));
+                        }
+                    } catch (Exception e) {
+                        log.error("faild to delete snapshot , id is {}", snapshot.getId(), e);
+                    }
+                }
+            }
+        }
     }
 
     public ServiceResult<Integer> bulkDeleteByIds(String[] ids, boolean logic, boolean withInstance,
@@ -460,5 +543,18 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 scenePluginDataBO.setScene(cpcloudPluginScene);
             }
         }
+    }
+
+    private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
+        if (CollectionUtils.isEmpty(usingList)) {
+            return null;
+        }
+        Set<String> names = new HashSet<>();
+        for (var used : usingList) {
+            if (names.size() < nameSize) {
+                names.add(getName.apply(used));
+            }
+        }
+        return new ArrayList<>(names);
     }
 }
