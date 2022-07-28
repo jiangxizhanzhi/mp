@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -111,6 +112,9 @@ public class ScenePluginCloudSceneService {
 
     @Resource
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+
+    @Resource
+    private SceneSnapshotService sceneSnapshotService ;
 
     @Data
     @AllArgsConstructor
@@ -730,7 +734,7 @@ public class ScenePluginCloudSceneService {
             params.setDeviceUuid(node.getImageUuid());
             new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
-            sceneConfigService.deleteElementSnapshot(sceneConfigId, snapshotId);
+            sceneSnapshotService.deleteElementSnapshot(snapshotId);
         }
         return new ServiceResult<>(true);
     }
