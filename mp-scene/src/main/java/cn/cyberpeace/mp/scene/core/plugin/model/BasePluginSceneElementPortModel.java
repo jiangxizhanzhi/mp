@@ -11,10 +11,4 @@ public class BasePluginSceneElementPortModel extends BaseModel {
     private String scene;
     @DefaultStr
     private String sceneElementPort;
-    @DefaultBool
-    private Boolean publicNetProxy;
-    @DefaultStr
-    private String publicNetProxyIp;
-    @DefaultStr
-    private String publicNetProxyPort;
 }
