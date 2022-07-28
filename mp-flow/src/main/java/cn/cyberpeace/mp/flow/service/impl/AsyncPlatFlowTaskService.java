@@ -244,8 +244,6 @@ public class AsyncPlatFlowTaskService {
             return flowTaskModelList;
         }
 
-        // 攻击流量网口：攻击流量网口一个网段只需要一个
-        FlowPortModel attackPortModel = null;
         // 遍历封装所有流量任务
         for (AddFlowTaskRequest request : addTaskRequestList) {
             FlowTaskModel flowTaskModel = request;
@@ -285,27 +283,25 @@ public class AsyncPlatFlowTaskService {
             }
 
             String thirdTaskId = "";
+            // 获取网口信息
+            FlowPortModel flowPortModel = null;
+            List<FlowPortModel> flowPorts =
+                    flowPortMapper.list(new HumanCondition()
+                            .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
+                            .filterEqual(FlowPortModel::getActuatorId, actuatorId));
+            if (CollectionUtils.isNotEmpty(flowPorts)) {
+                flowPortModel = flowPorts.get(0);
+            } else {
+                log.error("batch get flow port info error");
+                throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
+            }
+            // 设置网口id
+            flowTaskModel.setFlowPortId(flowPortModel.getId());
+
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
-                // 获取网口信息
-                FlowPortModel flowPortModel = null;
-                // 新增时，根据目标ip查询网口信息
-                List<FlowPortModel> backFlowPorts =
-                        flowPortMapper.list(new HumanCondition().filterEqual(FlowPortModel::getClientGateway,
-                                flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH)[0])
-                                .filterEqual(FlowPortModel::getActuatorId, actuatorId)
-                                .filterEqual(FlowPortModel::getPortType, PortTypeEnum.PCAP.toValue()));
-                if (CollectionUtils.isEmpty(backFlowPorts)) {
-                    log.error("get background flow port info error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                }
-                flowPortModel = backFlowPorts.get(0);
-                // 设置网口id
-                flowTaskModel.setFlowPortId(flowPortModel.getId());
-
                 // 构建保存背景任务请求
-                AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
-
                 try {
+                    AddAppTaskRequest appTaskRequest = new AddAppTaskRequest(flowTaskModel, flowPortModel);
                     String saveAppTaskRsp = null;
                     // 新增
                     saveAppTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/app",
@@ -324,25 +320,10 @@ public class AsyncPlatFlowTaskService {
                     log.error("save background task error", e);
                 }
             } else {
-                if (Objects.isNull(attackPortModel)) {
-                    List<FlowPortModel> attackFlowPorts =
-                            flowPortMapper.list(new HumanCondition()
-                                    .filterEqual(FlowPortModel::getNetworkId, request.getNetworkId())
-                                    .filterEqual(FlowPortModel::getActuatorId, actuatorId));
-                    if (CollectionUtils.isNotEmpty(attackFlowPorts)) {
-                        attackPortModel = attackFlowPorts.get(0);
-                    } else {
-                        log.error("batch get flow port info error");
-                        throw new MpRuntimeException(FlowErrorCode.ADD_TASK_ERROR);
-                    }
-                }
-                // 设置网口id
-                flowTaskModel.setFlowPortId(attackPortModel.getId());
-
                 try {
                     // 封装请求参数
                     AddStandardsTaskRequest standTaskRequest = new AddStandardsTaskRequest(flowTaskModel);
-                    standTaskRequest.setPort(attackPortModel.getServerMac());
+                    standTaskRequest.setPort(flowPortModel.getServerMac());
                     String saveStandTaskRsp = null;
                     saveStandTaskRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/standards",
                             JsonUtils.snakeStringify(standTaskRequest));
@@ -555,90 +536,6 @@ public class AsyncPlatFlowTaskService {
         log.info("================ Add vm instance end ==================");
     }
 
-    /**
-     * 新增网口
-     * @param targetIp
-     * @param flowActuatorModel
-     * @param resourceType
-     * @param networkId
-     * @return
-     */
-    private FlowPortModel createPort(String targetIp, FlowActuatorModel flowActuatorModel, int resourceType, String networkId) {
-        FlowPortModel flowPortModel = null;
-        try {
-            JSONObject addPortReq = new JSONObject();
-            addPortReq.put("network_id", networkId);
-
-            String serverMac = "";
-            String serverIp = "";
-            String serverPortId = "";
-
-            String clientMac = "";
-            String clientIp = "";
-            String clientPortId = "";
-            // 默认背景流量网口类型
-            int portType = PortTypeEnum.PCAP.toValue();
-            if (ResourceTypeEnum.PACP.toValue() == resourceType) {
-                // pcap需要给trex虚拟机添加client网口
-                String addTrexClientPortRsp =
-                        HttpUtils.sendPost(cpUrl + "/v1/instances/" + flowActuatorModel.getInstanceId() + "/interfaces"
-                                , addPortReq.toJSONString());
-                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
-                log.info("add trex client port response:{}", addTrexClientObj.toJSONString());
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                    clientMac = clientDataObj.getString("mac_address");
-                    clientIp = clientDataObj.getString("fixed_ip");
-                    clientPortId = clientDataObj.getString("port_id");
-
-                    // pcap使用无状态模式，客户端和服务端共用一个网口
-                    serverMac = clientMac;
-                    serverIp = clientIp;
-                    serverPortId = clientPortId;
-                } else {
-                    log.error("add trex client port error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                }
-            } else {
-                // 攻击流量网口类型
-                portType = PortTypeEnum.SCRIPT.toValue();
-                // 给trex虚拟机添加server网口
-                String addTrexServerPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
-                        flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
-                JSONObject addTrexServerObj = JSONObject.parseObject(addTrexServerPortRsp);
-                log.info("add trex server port response:{}", addTrexServerObj.toJSONString());
-
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexServerObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject serverDataObj = addTrexServerObj.getJSONObject(BaseConstants.STR_DATA);
-                    serverMac = serverDataObj.getString("mac_address");
-                    serverIp = serverDataObj.getString("fixed_ip");
-                    serverPortId = serverDataObj.getString("port_id");
-                } else {
-                    log.error("add trex server port error");
-                    throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
-                }
-            }
-
-            flowPortModel = FlowPortModel.builder()
-                    .serverIp(serverIp)
-                    .serverMac(serverMac)
-                    .serverPortId(serverPortId)
-                    .serverGateway(targetIp) // 目标ip作为网关地址
-                    .clientIp(clientIp)
-                    .clientMac(clientMac)
-                    .clientPortId(clientPortId)
-                    .clientGateway(targetIp) // 目标ip作为网关地址
-                    .networkId(networkId)
-                    .actuatorId(flowActuatorModel.getId())
-                    .portType(portType)
-                    .build();
-            flowPortMapper.create(flowPortModel);
-        } catch (IOException e) {
-            log.error("add flow port error", e);
-        }
-
-        return flowPortModel;
-    }
 
     /**
      * 删除网口信息
