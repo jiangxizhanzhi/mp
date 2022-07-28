@@ -75,6 +75,7 @@ public class SnapshotHandler extends HandlerCommon {
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, desc, extInfo);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setName(snapshotName);
+        snapshotBO.setSourceName(SnapshotAddressUtils.parseImageName(element.getImage(), element.getImageUuid()));
         snapshotBO.setAddress(SnapshotAddressUtils.buildAddress(result.getImageName(), result.getUuid()));
         snapshotBO.setDescription(desc);
         element.setImage(result.getImageName());
