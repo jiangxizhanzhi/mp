@@ -156,8 +156,8 @@ public class ServiceMonitorService {
                 bizServiceMonitorVO.setBizServiceMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
                 int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState())).count();
-                cloudPlatformMonitorVO.setTotalCount(bizTotalCount);
-                cloudPlatformMonitorVO.setErrorCount(bizErrorCount);
+                bizServiceMonitorVO.setTotalCount(bizTotalCount);
+                bizServiceMonitorVO.setErrorCount(bizErrorCount);
             }
         }
 
