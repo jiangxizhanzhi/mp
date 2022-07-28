@@ -29,6 +29,13 @@ public final class SnapshotAddressUtils {
         return result;
     }
 
+    public static String parseImageName(String imageName, String imageUuid) {
+        if (StringUtils.startsWith(imageName, imageUuid)) {
+            return StringUtils.replaceOnce(imageName, imageUuid, StringUtils.EMPTY);
+        }
+        return imageName;
+    }
+
     @Getter
     @Setter
     public static class SnapshotAddressInfo {

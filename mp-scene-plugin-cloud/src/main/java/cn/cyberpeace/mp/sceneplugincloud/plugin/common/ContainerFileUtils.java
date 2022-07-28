@@ -44,8 +44,8 @@ public class ContainerFileUtils {
         }
 
         LocalFileMappingModel mapping = LocalFileMappingCommon.getMapping(CONTAINER_HELP_INSTALLER_GROUP, APK_UNZIP_EXECUTOR_NAME);
-        unzipLocalFilepath = mapping != null ? mapping.getLocalFile() : null;
-        return unzipLocalFilepath;
+        apkUnzipLocalFilepath = mapping != null ? mapping.getLocalFile() : null;
+        return apkUnzipLocalFilepath;
     }
 
 
