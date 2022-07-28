@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.ResumeTaskPool;
+import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -74,7 +75,7 @@ public class SnapshotHandler extends HandlerCommon {
         var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, desc, extInfo);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setName(snapshotName);
-        snapshotBO.setAddress(result.getImageName());
+        snapshotBO.setAddress(SnapshotAddressUtils.buildAddress(result.getImageName(), result.getUuid()));
         snapshotBO.setDescription(desc);
         element.setImage(result.getImageName());
         getPluginHandler().updateElements(element.getSrcElement().getId());
@@ -82,7 +83,6 @@ public class SnapshotHandler extends HandlerCommon {
         model.setSceneConfig(sceneConfigId);
         model.setScene(getPluginHandler().getSourceSceneId());
         model.setSceneElement(element.getSrcElement().getId());
-        model.setSnapshotUuid(result.getUuid());
         var snapshotMapper = BeanCommon.getBean(SceneElementSnapshotMapper.class);
         snapshotMapper.save(model);
         this.setSnapshotNum(element);
