@@ -147,7 +147,7 @@ public class SysNoticeController {
 
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<DropdownBO> getTypes1() {
+    public ServiceResult<DropdownBO> getTypes() {
         List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_FRONT_ADMIN_NOTICE_TYPE);
         return ServiceResult.success(boList);
     }
