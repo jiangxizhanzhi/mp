@@ -241,7 +241,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             var cloudElement = cloudPluginHandler.getElement(nodeId);
             Map<String, String> probeId2Name = nodeId2ProbeNameMap.get(nodeId);
             List<?> res = null;
-            if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
+            if (ProbeConstant.ProbeId.HARDWARE_INFO.equals(probeId) || ProbeConstant.ProbeId.LOG_FILE.equals(probeId) ||
+                    ProbeConstant.ProbeId.INTERNET_CONNECTION.equals(probeId)) {
                 BaseSceneElementPageRequest request = new BaseSceneElementPageRequest();
                 request.setSceneId(sceneInstanceId);
                 request.setElementIds(CollUtil.toList(element.getId()));
@@ -253,13 +254,20 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                     if (!CollUtil.isEmpty(res)) {
                         total = res.size() + total;
                     }
-                } else {
+                } else if (ProbeConstant.ProbeId.LOG_FILE.equals(probeId)) {
                     // 原始日志信息
                     request.setFetchIfSceneInstanceShutdown(true);
                     var r = logFileService.pageByElementId(request);
                     if (r.getSource() != null) {
                         res = r.getSource().getObjs();
                         total = r.getSource().getTotal() + total;
+                    }
+                } else {
+                    request.setFetchIfSceneInstanceShutdown(true);
+                    var r = sceneElementMonitorService.pageNetworkConnections(request);
+                    if (r.getData() != null) {
+                        res = r.getData().getList();
+                        total = r.getData().getTotal() + total;
                     }
                 }
             } else if (ProbeConstant.ProbeId.OS_INFO.equals(probeId)) {
@@ -726,7 +734,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
             if (queryParams.getType().equals(3)) {
                 // 网络连接同端口
-                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.PORT_INFO, queryParams,
+                return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
                         FileEventType.INTERNET_CONNECTION.name());
             }
 
