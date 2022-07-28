@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
@@ -33,10 +34,9 @@ public class BizServiceMonitorController {
      */
     @ApiOperation("业务服务监控")
     @GetMapping("/page")
-    public ListObjResult<ServiceMonitorDto> page(BizServicePageRequest request){
-        return serviceMonitorService.bizServicePage(request);
+    public ServiceResult<ListObjResult<ServiceMonitorDto>> page(BizServicePageRequest request){
+        ListObjResult<ServiceMonitorDto> result = serviceMonitorService.bizServicePage(request);
+        return ServiceResult.success(result);
     }
-
-
 
 }

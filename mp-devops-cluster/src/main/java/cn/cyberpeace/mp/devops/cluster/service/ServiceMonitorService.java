@@ -69,9 +69,9 @@ public class ServiceMonitorService {
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
-            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size());
+            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size()).asResult();
         } else {
-            return new ListObjResult<>(Lists.newArrayList(), serviceMonitorDtos.size());
+            return new ListObjResult<ServiceMonitorDto>(Lists.newArrayList(), serviceMonitorDtos.size()).asResult();
         }
     }
 
@@ -100,9 +100,9 @@ public class ServiceMonitorService {
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
-            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size());
+            return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size()).asResult();
         } else {
-            return new ListObjResult<>(Lists.newArrayList(), serviceMonitorDtos.size());
+            return new ListObjResult<ServiceMonitorDto>(Lists.newArrayList(), serviceMonitorDtos.size()).asResult();
         }
     }
 
@@ -153,11 +153,11 @@ public class ServiceMonitorService {
             // 业务服务监控
             List<ServiceMonitorDto> bizMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
             if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
-                cloudPlatformMonitorVO.setCloudPlatformMonitors(bizMonitorDtos);
+                bizServiceMonitorVO.setBizServiceMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
                 int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState())).count();
-                cloudPlatformMonitorVO.setTotalCount(bizTotalCount);
-                cloudPlatformMonitorVO.setErrorCount(bizErrorCount);
+                bizServiceMonitorVO.setTotalCount(bizTotalCount);
+                bizServiceMonitorVO.setErrorCount(bizErrorCount);
             }
         }
 

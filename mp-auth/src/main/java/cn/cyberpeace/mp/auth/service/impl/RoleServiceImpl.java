@@ -192,19 +192,21 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        List<TargetRoleDto> targetRoleDtos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
-        if (CollectionUtil.isNotEmpty(targetRoleDtos)) {
-            roleDtos.forEach(r -> {
-                List<TargetModel> targetModels = targetRoleDtos.stream().map(tr -> {
-                    if (Objects.equals(tr.getRoleId(), r.getId())) {
-                        TargetModel targetModel = new TargetModel();
-                        BeanUtils.copyProperties(tr, targetModel);
-                        return targetModel;
-                    }
-                    return null;
-                }).filter(Objects::nonNull).collect(Collectors.toList());
-                r.setTargets(targetModels);
-            });
+        if (CollectionUtil.isNotEmpty(roleIds)) {
+            List<TargetRoleDto> targetRoleDtos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
+            if (CollectionUtil.isNotEmpty(targetRoleDtos)) {
+                roleDtos.forEach(r -> {
+                    List<TargetModel> targetModels = targetRoleDtos.stream().map(tr -> {
+                        if (Objects.equals(tr.getRoleId(), r.getId())) {
+                            TargetModel targetModel = new TargetModel();
+                            BeanUtils.copyProperties(tr, targetModel);
+                            return targetModel;
+                        }
+                        return null;
+                    }).filter(Objects::nonNull).collect(Collectors.toList());
+                    r.setTargets(targetModels);
+                });
+            }
         }
 
         return pageInfo;

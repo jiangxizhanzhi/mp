@@ -165,7 +165,7 @@ public class CpNodeMonitorScriptConfigService {
         String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
         probeParam.setScriptUrl(url);
         probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
-        probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_JSON);
+        probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_NONE);
         probeParam.setInterval(monitorProbe.getInterval());
 
         String[] params = {MonitorConstant.OP_STATUS, monitorProbe.getServiceList()};

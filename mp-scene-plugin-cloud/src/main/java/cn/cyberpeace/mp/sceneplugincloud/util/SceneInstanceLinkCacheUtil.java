@@ -45,6 +45,8 @@ public class SceneInstanceLinkCacheUtil {
 
     private static ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
+    private static ScheduledThreadPoolExecutor refreshExecutor = new ScheduledThreadPoolExecutor(1);
+
     private static LinkStatusTaskPool taskPool;
 
     public static void init() {
@@ -82,6 +84,10 @@ public class SceneInstanceLinkCacheUtil {
 
     public static void refresh(String sceneId) {
         cache.refresh(sceneId);
+        // 10s之后再刷一次缓存 避免并发刷新时刷到旧的数据
+        refreshExecutor.schedule(() -> {
+            cache.refresh(sceneId);
+        }, 10, TimeUnit.SECONDS);
     }
 
     public static void tryStartCronRefresh() {

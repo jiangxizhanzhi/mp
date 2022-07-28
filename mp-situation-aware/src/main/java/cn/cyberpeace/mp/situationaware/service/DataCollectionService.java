@@ -579,6 +579,9 @@ public class DataCollectionService extends CollectionBaseService {
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
         JSONObject jsonObject = processBaseChangeOutput(response);
+        if (Objects.isNull(jsonObject)) {
+            return Collections.emptyList();
+        }
         JSONArray arr = jsonObject.getJSONArray("values");
         if (Objects.isNull(arr)) {
             return Collections.emptyList();
@@ -610,6 +613,9 @@ public class DataCollectionService extends CollectionBaseService {
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
         JSONObject jsonObject = processBaseChangeOutput(response);
+        if (Objects.isNull(jsonObject)) {
+            return Collections.emptyList();
+        }
         JSONArray arr = jsonObject.getJSONArray("values");
         if (Objects.isNull(arr)) {
             return Collections.emptyList();
@@ -640,6 +646,9 @@ public class DataCollectionService extends CollectionBaseService {
         wazuhMonitorEventsRequest.setPageSize(1);
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
         JSONObject jsonObject = processBaseChangeOutput(response);
+        if (Objects.isNull(jsonObject)) {
+            return Collections.emptyList();
+        }
         JSONArray arr = jsonObject.getJSONArray("modified");
         if (Objects.isNull(arr)) {
             return Collections.emptyList();

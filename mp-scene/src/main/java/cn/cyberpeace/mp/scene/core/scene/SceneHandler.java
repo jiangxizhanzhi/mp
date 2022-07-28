@@ -327,19 +327,7 @@ public class SceneHandler extends BaseSceneHandler<
                     var portId = sceneElementPort.getId();
                     var pluginPort = plugin.getPort(portId);
                     if (pluginPort != null) {
-                        Map<String, Object> mapPluginPort = JsonCommon.beanToSnakeMap(pluginPort);
-                        if (mapPluginPort.get("access_modes") != null) {
-                            SceneAppConfig sceneAppConfig = BeanCommon.getBean(SceneAppConfig.class);
-                            if (StringUtils.isNotEmpty(sceneAppConfig.getAccessModeIp())) {
-                                List<Map> accessModes = (List<Map>) mapPluginPort.get("access_modes");
-                                accessModes.forEach(accessMode -> {
-                                    if (accessMode.get("access_ip") != null) {
-                                        accessMode.put("access_ip", sceneAppConfig.getAccessModeIp());
-                                    }
-                                });
-                            }
-                        }
-                        pluginPorts.put(portId, mapPluginPort);
+                        pluginPorts.put(portId, pluginPort);
                     }
                 });
                 portPluginData.put(plugin.getKey(), pluginPorts);

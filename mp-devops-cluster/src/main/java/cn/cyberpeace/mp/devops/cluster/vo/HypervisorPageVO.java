@@ -140,17 +140,31 @@ public class HypervisorPageVO extends BaseVO {
 
 
     public BigDecimal getRamPercent() {
-        return Objects.isNull(this.ram) || Objects.isNull(this.ramUsed) ?
-                BigDecimal.ZERO : BigDecimal.valueOf(this.ramUsed).divide(BigDecimal.valueOf(this.ram),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        if (Objects.isNull(ramPercent)) {
+            return Objects.isNull(this.ram) || Objects.isNull(this.ramUsed) ?
+                    BigDecimal.ZERO : BigDecimal.valueOf(this.ramUsed).divide(BigDecimal.valueOf(this.ram),2, RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        } else {
+            return ramPercent;
+        }
+
     }
 
     public BigDecimal getCpuPercent() {
-        return Objects.isNull(this.cpu) || Objects.isNull(this.cpuUsed) ?
-                BigDecimal.ZERO : BigDecimal.valueOf(this.cpuUsed).divide(BigDecimal.valueOf(this.cpu),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        if (Objects.isNull(cpuPercent)) {
+            return Objects.isNull(this.cpu) || Objects.isNull(this.cpuUsed) ?
+                    BigDecimal.ZERO : BigDecimal.valueOf(this.cpuUsed).divide(BigDecimal.valueOf(this.cpu),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+
+        } else {
+            return cpuPercent;
+        }
     }
 
     public BigDecimal getDiskPercent() {
-        return Objects.isNull(this.disk) || Objects.isNull(this.diskUsed) ?
-                BigDecimal.ZERO : BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        if (Objects.isNull(diskPercent)) {
+            return Objects.isNull(this.disk) || Objects.isNull(this.diskUsed) ?
+                    BigDecimal.ZERO : BigDecimal.valueOf(this.diskUsed).divide(BigDecimal.valueOf(this.disk),2,RoundingMode.DOWN).multiply(BigDecimal.valueOf(100));
+        } else {
+            return diskPercent;
+        }
     }
 }
