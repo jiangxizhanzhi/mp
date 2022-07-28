@@ -1185,7 +1185,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     private void setPublicNetProxy(CloudAccessMode accessMode, CloudPluginSceneElementPortBO cloudPort, CloudPluginSceneElementBO cloudElement) {
-        CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+        CloudAppConfig config = CloudSingleton.cloudAppConfig;
         if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
             accessMode.setPublicNetProxy(true);
             accessMode.setPublicNetProxyIp(accessMode.getPublicNetProxyIp());

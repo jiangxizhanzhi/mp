@@ -401,33 +401,6 @@ public class CsceneDataModifier {
         handlerNodeCommand(csceneInstanceBO.getScene());
         handlerHiddenElement(csceneInstanceBO.getScene());
         csceneInstanceBO.setEnableRecording(getOutputEnableRecording(csceneInstanceBO.getScene()));
-        changePortAccessIp(csceneInstanceBO);
-    }
-
-    public static void changePortAccessIp(CsceneInstanceBO csceneInstanceBO) {
-        if (csceneInstanceBO == null) {
-            return;
-        }
-        if (csceneInstanceBO.getScene() == null || csceneInstanceBO.getScene().getPlugins() == null || csceneInstanceBO.getScene().getPlugins().isEmpty()) {
-            return;
-        }
-        var cloudPlugin = csceneInstanceBO.getScene().getPlugins().get(PluginConstant.PLUGIN_KEY);
-        if (cloudPlugin == null || cloudPlugin.getElementPorts() == null || cloudPlugin.getElementPorts().isEmpty()) {
-            return;
-        }
-        CsceneAppConfig csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
-        if (StringUtils.isNotEmpty(csceneAppConfig.getAccessModeIp())) {
-            cloudPlugin.getElementPorts().values().forEach(p -> {
-                if (p.get("access_modes") != null) {
-                    List<Map> accessModes = (List<Map>) p.get("access_modes");
-                    accessModes.forEach(accessMode -> {
-                        if (accessMode.get("access_ip") != null) {
-                            accessMode.put("access_ip", csceneAppConfig.getAccessModeIp());
-                        }
-                    });
-                }
-            });
-        }
     }
 
     /**
