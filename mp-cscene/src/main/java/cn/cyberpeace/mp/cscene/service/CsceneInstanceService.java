@@ -263,6 +263,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                         total = r.getSource().getTotal() + total;
                     }
                 } else {
+                    // 网络连接
                     request.setFetchIfSceneInstanceShutdown(true);
                     var r = sceneElementMonitorService.pageNetworkConnections(request);
                     if (r.getData() != null) {
@@ -733,7 +734,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
 
             if (queryParams.getType().equals(3)) {
-                // 网络连接同端口
+                // 网络连接
                 return getProbeCollectionData(null, id, ProbeConstant.ProbeId.INTERNET_CONNECTION, queryParams,
                         FileEventType.INTERNET_CONNECTION.name());
             }
