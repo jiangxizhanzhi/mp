@@ -29,6 +29,12 @@ public class BaseSceneElementModel extends BaseSceneNodeModel {
     private Integer maxPortNumber;
     @DefaultBool
     private Boolean isAuxiliary;
+    @DefaultBool
+    private Boolean publicNetProxy;
+    @DefaultStr
+    private String publicNetProxyIp;
+    @DefaultStr
+    private String publicNetProxyPort;
 
     public static class Type {
         public static final int OTHER = 0;

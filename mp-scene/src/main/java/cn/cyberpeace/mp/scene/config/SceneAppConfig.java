@@ -49,9 +49,6 @@ public class SceneAppConfig {
     @Value("${mp.scene.gateway_types:2,3}")
     private String gatewayTypes;
 
-    @Value("${mp.scene.access-mode-ip:}")
-    private String accessModeIp;
-
     @Autowired
     private BaseAppConfig baseAppConfig;
 
