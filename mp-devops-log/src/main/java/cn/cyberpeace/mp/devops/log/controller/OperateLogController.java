@@ -3,18 +3,14 @@ package cn.cyberpeace.mp.devops.log.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devops.log.model.OpModuleModel;
-import cn.cyberpeace.mp.devops.log.model.OpTypeModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
-import cn.cyberpeace.mp.devops.log.service.OpModuleService;
-import cn.cyberpeace.mp.devops.log.service.OpTypeService;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
@@ -47,10 +43,7 @@ public class OperateLogController {
     private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
-    private OpModuleService opModuleService;
-
-    @Autowired
-    private OpTypeService opTypeService;
+    private DropdownService dropdownService;
 
     @Autowired
     public OperateLogController(OperateLogServiceFactory operateLogServiceFactory) {
@@ -93,18 +86,17 @@ public class OperateLogController {
 
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
-    public ServiceResult<ApiVo> getModules() {
-        List<OpModuleModel> models = opModuleService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getModules() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_LOG_OP_MODULE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
-    public ServiceResult<ApiVo> getTypes() {
-        List<OpTypeModel> models = opTypeService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getTypes() {
+        List<DropdownBO> boList =
+                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_LOG_OP_TYPE);
+        return ServiceResult.success(boList);
     }
 
 

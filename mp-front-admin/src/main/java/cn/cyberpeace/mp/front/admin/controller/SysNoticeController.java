@@ -3,21 +3,20 @@ package cn.cyberpeace.mp.front.admin.controller;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.constant.ControllerConstant;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.dto.validate.AddGroup;
 import cn.cyberpeace.mp.front.admin.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.front.admin.model.NoticeTypeModel;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
-import cn.cyberpeace.mp.front.admin.service.sys.NoticeTypeService;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -50,8 +49,7 @@ public class SysNoticeController {
     private SysNoticeService noticeService;
 
     @Autowired
-    private NoticeTypeService noticeTypeService;
-
+    private DropdownService dropdownService;
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
@@ -149,10 +147,9 @@ public class SysNoticeController {
 
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<ApiVo> getTypes1() {
-        List<NoticeTypeModel> models = noticeTypeService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getTypes1() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+        return ServiceResult.success(boList);
     }
 
 }

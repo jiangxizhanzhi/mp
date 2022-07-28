@@ -2,21 +2,22 @@ package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.situationaware.model.OsTypeModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeTypeModel;
+import cn.cyberpeace.mp.situationaware.constant.ControllerConstant;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.situationaware.service.*;
+import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
+import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
+import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -48,25 +49,20 @@ public class ProbeManagerController {
     private ProbeScriptService probeScriptService;
 
     @Autowired
-    private OsTypeService osTypeService;
-
-    @Autowired
-    private ProbeTypeService probeTypeService;
+    private DropdownService dropdownService;
 
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
-    public ServiceResult<ApiVo> probeTypes() {
-        List<ProbeTypeModel> models = probeTypeService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> probeTypes() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_SITUATION_PROBE_TYPE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
-    public ServiceResult<ApiVo> osTypes() {
-        List<OsTypeModel> models = osTypeService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> osTypes() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_SITUATION_OS_TYPE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/page")

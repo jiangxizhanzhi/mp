@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.flow.controller;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
@@ -13,14 +13,12 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
-import cn.cyberpeace.mp.flow.model.FlowCategoryModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
-import cn.cyberpeace.mp.flow.service.FlowCategoryService;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
 import io.swagger.annotations.Api;
@@ -54,7 +52,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     }
 
     @Autowired
-    private FlowCategoryService flowCategoryService;
+    private DropdownService dropdownService;
     /**
      * 删除流量信息
      * @param id
@@ -84,10 +82,8 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
-    public ServiceResult<ApiVo> flowCategories() {
-        List<FlowCategoryModel> models = flowCategoryService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> flowCategories() {
+        return ServiceResult.success(dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_FLOW_CATEGORY));
     }
 
     /**

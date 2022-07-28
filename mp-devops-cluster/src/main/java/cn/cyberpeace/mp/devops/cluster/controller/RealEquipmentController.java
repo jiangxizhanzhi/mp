@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.devops.cluster.controller;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
@@ -23,9 +23,10 @@ import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentRequest;
-import cn.cyberpeace.mp.devops.cluster.service.EquipmentPositionStatusService;
-import cn.cyberpeace.mp.devops.cluster.service.EquipmentUseStatusService;
-import cn.cyberpeace.mp.devops.cluster.vo.*;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentByIdVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentDevopsDetailVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentNetworkCardPageVO;
+import cn.cyberpeace.mp.devops.cluster.vo.RealEquipmentPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devops.cluster.vo.common.Result;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -62,10 +63,7 @@ public class RealEquipmentController {
     private final TypeConverter typeConverter;
 
     @Autowired
-    private EquipmentPositionStatusService equipmentPositionStatusService;
-
-    @Autowired
-    private EquipmentUseStatusService equipmentUseStatusService;
+    private DropdownService dropdownService;
 
     /**
      * 分页查询
@@ -383,17 +381,16 @@ public class RealEquipmentController {
 
     @GetMapping("/position")
     @ApiOperation(value = "查询实装设备的在位状态")
-    public ServiceResult<ApiVo> getPositionStatus() {
-        List<EquipmentPositionStatusModel> models = equipmentPositionStatusService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getPositionStatus() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_POSITION);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/use")
     @ApiOperation(value = "实装设备的使用状态")
-    public ServiceResult<ApiVo> getUseStatus() {
-        List<EquipmentUseStatusModel> models = equipmentUseStatusService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getUseStatus() {
+        List<DropdownBO> boList =
+                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_DEVOPS_CLUSTER_USE);
+        return ServiceResult.success(boList);
     }
 }

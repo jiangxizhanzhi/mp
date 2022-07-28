@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.util.Model2VoUtil;
-import cn.cyberpeace.mp.common.vo.ApiVo;
+import cn.cyberpeace.mp.common.bo.DropdownBO;
+import cn.cyberpeace.mp.common.service.DropdownService;
 import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.*;
@@ -13,12 +13,8 @@ import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
-import cn.cyberpeace.mp.cscene.model.CsceneStatusModel;
-import cn.cyberpeace.mp.cscene.model.CsceneTypeModel;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.cscene.service.CsceneStatusService;
-import cn.cyberpeace.mp.cscene.service.CsceneTypeService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
@@ -60,10 +56,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneSpecialService csceneSpecialService;
 
     @Autowired
-    private CsceneTypeService csceneTypeService;
-
-    @Autowired
-    private CsceneStatusService csceneStatusService;
+    private DropdownService dropdownService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {
         if (request == null) {
@@ -670,17 +663,16 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @GetMapping("/status")
     @ApiOperation(value = "查询靶场监控的场景实例状态")
-    public ServiceResult<ApiVo> getSceneStatus() {
-        List<CsceneStatusModel> models = csceneStatusService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getSceneStatus() {
+        List<DropdownBO> boList = dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_CSCENE_INSTANCE_STATUS);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
-    public ServiceResult<ApiVo> getSceneType() {
-        List<CsceneTypeModel> models = csceneTypeService.findAll();
-        List<ApiVo> voList = Model2VoUtil.getVoList(models);
-        return ServiceResult.success(voList);
+    public ServiceResult<DropdownBO> getSceneType() {
+        List<DropdownBO> boList =
+                dropdownService.getOptionsByType(ControllerConstant.MP_COMMON_DROPDOWN_TYPE_CSCENE_INSTANCE_TYPE);
+        return ServiceResult.success(boList);
     }
 }
