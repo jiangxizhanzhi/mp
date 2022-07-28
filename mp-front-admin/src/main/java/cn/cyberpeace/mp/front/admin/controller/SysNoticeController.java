@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -9,16 +8,13 @@ import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.front.admin.constant.ControllerConstant;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.dto.validate.AddGroup;
 import cn.cyberpeace.mp.front.admin.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.front.admin.enums.NoticeTypeEnum;
 import cn.cyberpeace.mp.front.admin.model.NoticeTypeModel;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
-import cn.cyberpeace.mp.front.admin.service.NoticeTypeService;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
 import cn.cyberpeace.mp.front.admin.vo.NoticeTypeVO;
@@ -41,7 +37,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * @Description: 系统公告管理接口
@@ -175,7 +175,7 @@ public class SysNoticeController {
 //        }
 //        return ServiceResult.success(typeVOList);
 //    }
-    @GetMapping("/types1")
+    @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
     public ServiceResult<NoticeTypeVO> getTypes1() {
         List<NoticeTypeVO> typeVOList = new ArrayList<>();
