@@ -30,6 +30,6 @@ public class SituationalAwareConstant {
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 
-    public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "2";
-    public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "3";
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "os_type";
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
 }

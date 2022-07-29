@@ -6,5 +6,5 @@ package cn.cyberpeace.mp.front.admin.constant;
  * @Date: 2022/7/28
  */
 public class FrontAdminConstant {
-    public static final String MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE = "10";
+    public static final String MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE = "notice_type";
 }

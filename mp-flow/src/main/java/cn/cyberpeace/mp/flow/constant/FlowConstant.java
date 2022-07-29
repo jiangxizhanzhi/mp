@@ -6,5 +6,5 @@ package cn.cyberpeace.mp.flow.constant;
  * @Date: 2022/7/28
  */
 public class FlowConstant {
-    public static final String MP_COMMON_OPTION_TYPE_FLOW_CATEGORY = "1";
+    public static final String MP_COMMON_OPTION_TYPE_FLOW_CATEGORY = "flow_category";
 }

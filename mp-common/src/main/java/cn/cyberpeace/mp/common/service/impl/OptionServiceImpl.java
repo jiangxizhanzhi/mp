@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.fields.DropdownFields;
+import cn.cyberpeace.mp.common.fields.OptionFields;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.service.OptionService;
@@ -21,7 +21,7 @@ import java.util.Locale;
  * @Date: 2022/7/28
  */
 @Service
-public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, DropdownFields, QueryParams>
+public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionMapper, OptionFields, QueryParams>
         implements OptionService {
 
     public OptionServiceImpl(OptionMapper optionMapper) {

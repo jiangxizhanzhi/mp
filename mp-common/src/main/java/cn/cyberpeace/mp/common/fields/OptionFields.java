@@ -9,5 +9,5 @@ import org.springframework.stereotype.Component;
  * @Date: 2022/7/28
  */
 @Component
-public class DropdownFields extends BaseModelFields {
+public class OptionFields extends BaseModelFields {
 }
