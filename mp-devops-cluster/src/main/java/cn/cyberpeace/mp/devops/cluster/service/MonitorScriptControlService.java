@@ -9,12 +9,16 @@ import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.ServiceRestartStatusDto;
+import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CpNodeMonitorScriptConfigModel;
 import cn.cyberpeace.mp.devops.cluster.repository.CpNodeMonitorScriptConfigMapper;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -23,10 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -36,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class CpNodeMonitorScriptConfigService {
+public class MonitorScriptControlService {
 
     @Autowired
     private CpNodeMonitorScriptConfigMapper monitorScriptConfigMapper;
@@ -49,6 +55,11 @@ public class CpNodeMonitorScriptConfigService {
 
     @Autowired
     private MonitorConfig monitorConfig;
+
+
+    // expires in 20 minutes
+    private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
+
 
     public void init(List<LocalFileMappingModel> mappings) {
         scriptInstallationCheck(mappings);
@@ -70,6 +81,19 @@ public class CpNodeMonitorScriptConfigService {
 
 
     public void restart(String hostname, List<String> serviceList) {
+        // 如果某个服务的状态还在重启中，则忽略该服务的重启
+        TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
+        for (String srv : serviceList) {
+            ServiceRestartStatusDto statusDto = timedCache.get(srv);
+            if (Objects.nonNull(statusDto)) {
+                serviceList.remove(srv);
+            }
+        }
+
+        if (CollectionUtil.isEmpty(serviceList)) {
+            return;
+        }
+
         List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
         List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
 
@@ -84,13 +108,20 @@ public class CpNodeMonitorScriptConfigService {
 
         for (String launchId : launchIds) {
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py restart " + srvs;
-            log.info("hostname:{}, cmd:{}" + hostname, cmd);
+            log.info("hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
             runCommandItem.setCommand(cmd);
             WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
         }
+
+        // 保存服务重启中的状态一段时间，等到下一次查询的时候再考虑是否删除该状态
+        for (String srv : serviceList) {
+            ServiceRestartStatusDto statusDto = ServiceRestartStatusDto.builder().restartTime(LocalDateTime.now()).status(MonitorStateEnum.RESTARTING.getDesc()).build();
+            timedCache.put(srv, statusDto);
+        }
+
     }
 
 
@@ -174,7 +205,7 @@ public class CpNodeMonitorScriptConfigService {
     }
 
     private void updateScriptConfigByHostName(String hostName) {
-        log.info("hotName:{}", hostName);
+        log.info("hostName:{}", hostName);
         List<CpNodeMonitorScriptConfigModel> scriptConfigModelList = listByAgentName(hostName);
         if (CollectionUtil.isEmpty(scriptConfigModelList)) {
             CpNodeMonitorScriptConfigModel configModel = new CpNodeMonitorScriptConfigModel();
@@ -184,6 +215,11 @@ public class CpNodeMonitorScriptConfigService {
             configModel.setStatus(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED);
             monitorScriptConfigMapper.save(configModel);
         }
+    }
+
+
+    public TimedCache<String, ServiceRestartStatusDto> getStatusCache() {
+        return SRV_STATUS_CACHE;
     }
 
 }

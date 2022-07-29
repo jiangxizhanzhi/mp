@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -27,9 +29,12 @@ public class ServiceMonitorDto {
     // 运行时长（秒）
     private Long uptime;
 
-    // ERROR, DOWN, RUNNING
+    // ERROR, DOWN, RUNNING, RESTARTING
     private String state;
 
     private String ip;
+
+    // 采集时间
+    private LocalDateTime scanTime;
 
 }

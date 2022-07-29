@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
-import cn.cyberpeace.mp.devops.cluster.service.CpNodeMonitorScriptConfigService;
+import cn.cyberpeace.mp.devops.cluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     private InitRegisterService initRegisterService;
 
     @Autowired
-    private CpNodeMonitorScriptConfigService cpNodeMonitorScriptConfigService;
+    private MonitorScriptControlService monitorScriptControlService;
 
     @Autowired
     private IpAddressConfig ipAddressConfig;
@@ -50,7 +50,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
                 List<LocalFileMappingModel> mappings =
                         LocalFileMappingCommon.syncDir(WazuhCommon.BIZ_SCRIPTS_GROUP,
                                 collectionAppConfig.getBizScriptsInstallerDir());
-                cpNodeMonitorScriptConfigService.init(mappings);
+                monitorScriptControlService.init(mappings);
                 log.info("syncDir do ScenePluginCollectionInit end");
             });
 

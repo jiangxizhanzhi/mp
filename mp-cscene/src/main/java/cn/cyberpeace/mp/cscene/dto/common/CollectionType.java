@@ -33,7 +33,7 @@ public class CollectionType {
     @ApiModelProperty(value = "编码")
     private String code;
 
-    @ApiModelProperty(value = "0:文件变更 1:注册表变更 2:原始日志 3:日志事件 4:自定义采集")
+    @ApiModelProperty(value = "-1:父级类别 0:文件变更 1:注册表变更 2:原始日志 3:日志事件 4:自定义采集")
     private Integer type;
 
     @ApiModelProperty(value = "描述")

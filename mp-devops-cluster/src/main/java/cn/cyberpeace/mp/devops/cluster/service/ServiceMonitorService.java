@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.ServiceRestartStatusDto;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
@@ -19,15 +20,19 @@ import cn.cyberpeace.mp.devops.cluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
+import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @Description: 服务监控服务类
@@ -43,6 +48,9 @@ public class ServiceMonitorService {
     private final ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
 
     private final SystemAlarmMapper systemAlarmMapper;
+
+    @Autowired
+    private MonitorScriptControlService monitorScriptControlService;
 
     /**
      * 分页查询业务服务监控数据
@@ -65,6 +73,9 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
+        // 处理重启状态
+        processRestartingStatus(serviceMonitorDtos);
+
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
@@ -96,6 +107,9 @@ public class ServiceMonitorService {
         }
 
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
+        // 处理重启状态
+        processRestartingStatus(serviceMonitorDtos);
+
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
@@ -142,26 +156,59 @@ public class ServiceMonitorService {
 
             // 云平台服务监控
             List<ServiceMonitorDto> cpMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
+            processRestartingStatus(cpMonitorDtos);
+
             if (CollectionUtils.isNotEmpty(cpMonitorDtos)) {
                 cloudPlatformMonitorVO.setCloudPlatformMonitors(cpMonitorDtos);
                 int cpTotalCount = cpMonitorDtos.size();
-                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !MonitorStateEnum.RUNNING.getDesc().equals(cpDto.getState())).count();
+                int cpErrorCount = (int) cpMonitorDtos.stream().filter(cpDto -> !MonitorStateEnum.RUNNING.getDesc().equals(cpDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(cpDto.getState())).count();
                 cloudPlatformMonitorVO.setTotalCount(cpTotalCount);
                 cloudPlatformMonitorVO.setErrorCount(cpErrorCount);
             }
 
             // 业务服务监控
             List<ServiceMonitorDto> bizMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
+            processRestartingStatus(bizMonitorDtos);
+
             if (CollectionUtils.isNotEmpty(bizMonitorDtos)) {
                 bizServiceMonitorVO.setBizServiceMonitors(bizMonitorDtos);
                 int bizTotalCount = bizMonitorDtos.size();
-                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState())).count();
+                int bizErrorCount = (int) bizMonitorDtos.stream().filter(bizDto -> !MonitorStateEnum.RUNNING.getDesc().equals(bizDto.getState()) && !MonitorStateEnum.RESTARTING.getDesc().equals(bizDto.getState())).count();
                 bizServiceMonitorVO.setTotalCount(bizTotalCount);
                 bizServiceMonitorVO.setErrorCount(bizErrorCount);
             }
         }
 
         return new SystemAlarmVO(cloudPlatformMonitorVO, bizServiceMonitorVO, serverMonitorVO);
+    }
+
+
+    /**
+     * 如果在重启有效期内，状态为不正常的状态的，统一替换为重启状态
+     * @param serviceMonitorDtos
+     */
+    private void processRestartingStatus(List<ServiceMonitorDto> serviceMonitorDtos) {
+        TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
+        if (CollectionUtil.isEmpty(timedCache)) {
+            return;
+        }
+
+        for (ServiceMonitorDto dto : serviceMonitorDtos) {
+            ServiceRestartStatusDto statusDto = timedCache.get(dto.getName());
+            if (Objects.isNull(statusDto)) {
+                continue;
+            }
+            if (Objects.nonNull(dto.getScanTime()) && Objects.nonNull(statusDto.getRestartTime())) {
+
+                if (dto.getScanTime().isAfter(statusDto.getRestartTime().plusSeconds(5)) && Objects.equals(dto.getState(), MonitorStateEnum.RUNNING.getDesc())) {
+                    // 重启之后的状态（重启时间延迟5秒，给脚本反应时间），且为RUNNING状态，则清除缓存
+                    timedCache.remove(dto.getName());
+                } else {
+                    // 否则替换状态为RESTARTING
+                    dto.setState(MonitorStateEnum.RESTARTING.getDesc());
+                }
+            }
+        }
     }
 
 }
