@@ -1,24 +1,19 @@
 package cn.cyberpeace.mp.devops.log.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.log.constant.LogConstant;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devops.log.model.OpModuleModel;
-import cn.cyberpeace.mp.devops.log.model.OpTypeModel;
 import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devops.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
-import cn.cyberpeace.mp.devops.log.service.OpModuleService;
-import cn.cyberpeace.mp.devops.log.service.OpTypeService;
 import cn.cyberpeace.mp.devops.log.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devops.log.utils.SnUtils;
-import cn.cyberpeace.mp.devops.log.vo.OpModuleVO;
-import cn.cyberpeace.mp.devops.log.vo.OpTypeVO;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,10 +44,7 @@ public class OperateLogController {
     private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
-    private OpModuleService opModuleService;
-
-    @Autowired
-    private OpTypeService opTypeService;
+    private OptionService optionService;
 
     @Autowired
     public OperateLogController(OperateLogServiceFactory operateLogServiceFactory) {
@@ -95,50 +87,17 @@ public class OperateLogController {
 
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
-    public ServiceResult<OpModuleVO> getModules() {
-        List<OpModuleVO> opModuleVOList = new ArrayList<>();
-        List<OpModuleModel> models = opModuleService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (OpModuleModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            int code = model.getCode();
-            opModuleVOList.add(
-                    OpModuleVO.builder().
-                            name(name).
-                            code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(opModuleVOList);
+    public ServiceResult<OptionBO> getModules() {
+        List<OptionBO> boList = optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
-    public ServiceResult<OpTypeVO> getTypes() {
-        List<OpTypeVO> opTypeVOList = new ArrayList<>();
-        List<OpTypeModel> models = opTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (OpTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            int code = model.getCode();
-            opTypeVOList.add(
-                    OpTypeVO.builder().
-                            name(name).
-                            code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(opTypeVOList);
+    public ServiceResult<OptionBO> getTypes() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE);
+        return ServiceResult.success(boList);
     }
 
 

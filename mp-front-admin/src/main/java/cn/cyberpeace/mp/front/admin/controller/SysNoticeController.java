@@ -3,21 +3,22 @@ package cn.cyberpeace.mp.front.admin.controller;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.front.admin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.dto.validate.AddGroup;
 import cn.cyberpeace.mp.front.admin.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.front.admin.model.NoticeTypeModel;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.front.admin.util.ResultUtils;
-import cn.cyberpeace.mp.front.admin.vo.NoticeTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -26,21 +27,11 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -57,12 +48,8 @@ public class SysNoticeController {
     @Autowired
     private SysNoticeService noticeService;
 
-//    @Autowired
-//    private NoticeTypeService noticeTypeService;
-
     @Autowired
-    private cn.cyberpeace.mp.front.admin.service.sys.NoticeTypeService noticeTypeService1;
-
+    private OptionService optionService;
     @ApiOperation("查询单个公告")
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
@@ -158,44 +145,11 @@ public class SysNoticeController {
         return ServiceResult.success(result.getSource());
     }
 
-//    @GetMapping("/types")
-//    @ApiOperation(value = "查询系统公告类型")
-//    public ServiceResult<NoticeTypeVO> getTypes() {
-//        List<NoticeTypeVO> typeVOList = new ArrayList<>();
-//        List<NoticeTypeModel> models = noticeTypeService.findAll();
-//
-//        for (NoticeTypeModel model : models) {
-//            String name = MessageCommon.get(ControllerConstant.SYS_NOTICE_TYPE_PREFIX + "." + model.getName());
-//            typeVOList.add(
-//                    NoticeTypeVO.builder()
-//                            .name(name)
-//                            .code(model.getCode())
-//                            .build()
-//            );
-//        }
-//        return ServiceResult.success(typeVOList);
-//    }
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
-    public ServiceResult<NoticeTypeVO> getTypes1() {
-        List<NoticeTypeVO> typeVOList = new ArrayList<>();
-        List<NoticeTypeModel> models = noticeTypeService1.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (NoticeTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            typeVOList.add(
-                    NoticeTypeVO.builder()
-                            .name(name)
-                            .code(model.getCode())
-                            .build()
-            );
-        }
-        return ServiceResult.success(typeVOList);
+    public ServiceResult<OptionBO> getTypes() {
+        List<OptionBO> boList = optionService.getOptionsByType(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+        return ServiceResult.success(boList);
     }
 
 }

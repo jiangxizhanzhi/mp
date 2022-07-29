@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.devops.cluster.service.impl;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.devops.cluster.constant.MonitorConstant;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
 import cn.cyberpeace.mp.devops.cluster.repository.SystemAlarmMapper;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,9 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                         if (systemAlarmModel.getServername().equals(enabledAlarm.getServername())
                                 && Objects.equals(systemAlarmModel.getAlarmType(), enabledAlarm.getAlarmType())) {
                             // 已存在告警，更新告警时间
-                            enabledAlarm.setRunningTime(enabledAlarm.getRunningTime() + MonitorConstant.ALARM_TASK_RATE);
+                            Duration duration = Duration.between(enabledAlarm.getCreateTime(), LocalDateTime.now());
+                            int runningTime = Long.valueOf(duration.toMillis() / 1000).intValue();
+                            enabledAlarm.setRunningTime(runningTime);
                             enabledAlarm.setUpdateTime(LocalDateTime.now());
                             this.getModelMapper().update(enabledAlarm);
                             updateAlarmList.add(enabledAlarm);

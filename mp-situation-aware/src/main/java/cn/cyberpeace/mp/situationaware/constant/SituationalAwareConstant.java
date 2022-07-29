@@ -28,10 +28,8 @@ public class SituationalAwareConstant {
 
     public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
 
-    public static String PROBE_TYPES_CODE_PREFIX = "situationaware.probe.type.";
-
-    public static String PROBE_TYPE_PREFIX = "situationaware.probe.type";
-    public static String OS_TYPE_PREFIX = "situationaware.os.type";
-
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
+
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "os_type";
+    public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
 }

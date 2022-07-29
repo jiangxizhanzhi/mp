@@ -62,6 +62,9 @@ public class MpLogFileServiceImpl implements LogFileService {
             dto.setHostIp(mpUrl.split(":")[0]);
             try {
                 dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                if (fileName.endsWith(".zip")) {
+                    dto.setUpdateTime(dto.getUpdateTime().minusDays(1L).withHour(23).withMinute(59));
+                }
             } catch (IOException e) {
                 dto.setUpdateTime(LocalDateTime.now());
             }

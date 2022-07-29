@@ -1,5 +1,6 @@
 dependencies {
     implementation project(':mp-base')
+    implementation project(':mp-common')
     implementation project(':mp-auth')
     implementation project(':mp-devops-log')
     implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
