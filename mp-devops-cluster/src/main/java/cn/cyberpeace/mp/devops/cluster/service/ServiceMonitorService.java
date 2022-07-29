@@ -3,13 +3,16 @@ package cn.cyberpeace.mp.devops.cluster.service;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devops.cluster.repository.SystemAlarmMapper;
 import cn.cyberpeace.mp.devops.cluster.request.BizServicePageRequest;
 import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
@@ -43,6 +46,8 @@ public class ServiceMonitorService {
     private final ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
 
     private final SystemAlarmMapper systemAlarmMapper;
+
+    private final ImagesConverter imagesConverter;
 
     /**
      * 分页查询业务服务监控数据
@@ -132,10 +137,21 @@ public class ServiceMonitorService {
         List<String> hostNameList = new ArrayList<>();
         BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
         if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-            modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
+            // 获取所有物理主机服务状态
+            CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
+            modelPage.getList().forEach(model -> {
+                hostNameList.add(model.getName());
+                if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
+                    serviceStatusModel.getList().forEach(serviceModel -> {
+                        if (model.getName().equals(serviceModel.getHost())) {
+                            model.setServiceStatus(serviceModel.isStatus());
+                        }
+                    });
+                }
+            });
 
             int totalCount = modelPage.getTotal();
-            int errorCount = (int )modelPage.getList().stream().filter(model -> !"up".equals(model.getState()) || !"enabled".equals(model.getStatus())).count();
+            int errorCount = (int )modelPage.getList().stream().filter(model -> !model.isServiceStatus()).count();
             serverMonitorVO.setServerMonitors(modelPage.getList());
             serverMonitorVO.setErrorCount(errorCount);
             serverMonitorVO.setTotalCount(totalCount);
