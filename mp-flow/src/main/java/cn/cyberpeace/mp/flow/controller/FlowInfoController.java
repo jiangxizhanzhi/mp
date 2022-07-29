@@ -1,39 +1,31 @@
 package cn.cyberpeace.mp.flow.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.flow.constant.BaseConstants;
-import cn.cyberpeace.mp.flow.constant.ControllerConstant;
-import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
-import cn.cyberpeace.mp.flow.model.FlowCategoryModel;
+import cn.cyberpeace.mp.flow.constant.*;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
-import cn.cyberpeace.mp.flow.service.FlowCategoryService;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
-import cn.cyberpeace.mp.flow.vo.FlowCategoryVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -57,7 +49,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     }
 
     @Autowired
-    private FlowCategoryService flowCategoryService;
+    private OptionService optionService;
     /**
      * 删除流量信息
      * @param id
@@ -87,26 +79,8 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
-    public ServiceResult<FlowCategoryVO> flowCategories() {
-        List<FlowCategoryModel> models = flowCategoryService.findAll();
-        List<FlowCategoryVO> flowCategoryVos = new ArrayList<>();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (FlowCategoryModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            int code = model.getCode();
-            flowCategoryVos.add(
-                    FlowCategoryVO.builder()
-                            .name(name)
-                            .code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(flowCategoryVos);
+    public ServiceResult<OptionBO> flowCategories() {
+        return ServiceResult.success(optionService.getOptionsByType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY));
     }
 
     /**

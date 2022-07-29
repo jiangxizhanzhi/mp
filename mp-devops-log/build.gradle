@@ -3,5 +3,7 @@ dependencies {
 
     implementation 'org.mapstruct:mapstruct:1.4.2.Final'
 
+    implementation project(':mp-common')
+
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
 }

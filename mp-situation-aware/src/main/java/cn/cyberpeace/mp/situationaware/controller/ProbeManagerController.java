@@ -1,25 +1,24 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.OsTypeModel;
-import cn.cyberpeace.mp.situationaware.model.ProbeTypeModel;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeTypeVO;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
-import cn.cyberpeace.mp.situationaware.service.*;
+import cn.cyberpeace.mp.situationaware.service.ProbeAbilityService;
+import cn.cyberpeace.mp.situationaware.service.ProbeScriptService;
+import cn.cyberpeace.mp.situationaware.service.ProbeService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
-import cn.cyberpeace.mp.situationaware.vo.OsTypeVO;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.github.pagehelper.PageInfo;
@@ -27,20 +26,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/probes")
@@ -57,57 +49,21 @@ public class ProbeManagerController {
     private ProbeScriptService probeScriptService;
 
     @Autowired
-    private OsTypeService osTypeService;
-
-    @Autowired
-    private ProbeTypeService probeTypeService;
+    private OptionService optionService;
 
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
-    public ServiceResult<ProbeTypeVO> probeTypes() {
-        List<ProbeTypeVO> typeVOs = new ArrayList<>();
-        List<ProbeTypeModel> models = probeTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (ProbeTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            int code = model.getCode();
-            typeVOs.add(
-                    ProbeTypeVO.builder()
-                            .name(name)
-                            .code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(typeVOs);
+    public ServiceResult<OptionBO> probeTypes() {
+        List<OptionBO> boList =
+                optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
-    public ServiceResult<OsTypeVO> osTypes() {
-        List<OsTypeVO> osTypeVOs = new ArrayList<>();
-        List<OsTypeModel> models = osTypeService.findAll();
-        Locale locale = LocaleContextHolder.getLocale();
-        for (OsTypeModel model : models) {
-            String name = null;
-            if (Objects.equals(locale, Locale.US)) {
-                name = model.getEnName();
-            } else {
-                name = model.getChName();
-            }
-            int code = model.getCode();
-            osTypeVOs.add(
-                    OsTypeVO.builder()
-                            .name(name)
-                            .code(code)
-                            .build()
-            );
-        }
-        return ServiceResult.success(osTypeVOs);
+    public ServiceResult<OptionBO> osTypes() {
+        List<OptionBO> boList = optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
+        return ServiceResult.success(boList);
     }
 
     @GetMapping("/page")

@@ -17,4 +17,8 @@ public class LogConstant {
     public static final String LOG_OP_TYPE_PREFIX = "devops.log.op.type";
 
     public static final String LOG_OP_TARGET_PREFIX = "devops.log.op.target";
+
+
+    public static final String MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE = "op_type";
+    public static final String MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE = "op_module";
 }
