@@ -97,4 +97,9 @@ public class HypervisorBO {
      * 虚拟机数量限制
      */
     private Integer maxInstances;
+
+    /**
+     * 服务状态
+     */
+    private boolean serviceStatus;
 }

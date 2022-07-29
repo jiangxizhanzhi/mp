@@ -684,6 +684,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, scriptParamModels);
             response.setCode(modifyRequest.getCode());
         } else {
+            if (ResourceTypeEnum.PACP.toValue() != oldServiceResult.getSource().getObj().getResourceType()) {
+                // 脚本文件更新为pcap文件，判断pcap是否上传了
+                if (Objects.isNull(modifyRequest.getPcapFile())) {
+                    return ServiceResult.fail("pcapFile can not be empty");
+                }
+            }
             if (Objects.nonNull(modifyRequest.getPcapFile())) {
                 // 文件后缀校验
                 String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
