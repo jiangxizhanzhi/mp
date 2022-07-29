@@ -1025,8 +1025,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 //        thirdUser.setUserId("thirdId111");
         UserModel user = this.getByThirdUserId(thirdUser.getUserId());
         if (Objects.isNull(user)) {
-            // 新增用户、角色、组织信息
-            user = this.addUserRoleOrgInfo(thirdUser, token);
+            user = this.getByUserName(thirdUser.getUserName());
+            if (Objects.isNull(user)) {
+                // 新增用户、角色、组织信息
+                user = this.addUserRoleOrgInfo(thirdUser, token);
+            } else {
+                user.setThirdUserId(thirdUser.getUserId());
+                user.setThirdToken(token);
+                this.update(user);
+            }
         } else {
             // 用户存在，同时更新用户姓名和token
             user.setThirdToken(token);
