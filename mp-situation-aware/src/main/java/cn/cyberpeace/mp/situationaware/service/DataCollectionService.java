@@ -593,7 +593,7 @@ public class DataCollectionService extends CollectionBaseService {
             if (Objects.nonNull(jsonObject.get("time"))) {
                 netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
             }
-            netConnModel.setDescription("INTERNET CONNECTION");
+            netConnModel.setDescription("CMD LAUNCH LOG");
             list.add(netConnModel);
         }
 
