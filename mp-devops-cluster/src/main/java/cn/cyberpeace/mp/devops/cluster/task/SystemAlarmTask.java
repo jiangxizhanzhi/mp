@@ -125,13 +125,15 @@ public class SystemAlarmTask {
             log.info("no systemAlarm info to process");
         }
 
+        // 生成告警统计信息
+        this.genAlarmStatistics();
+
         log.info("====>>>>>>get systemAlarm info task end<<<<<========");
     }
 
     /**
      * 生成告警统计信息
      */
-    @Scheduled(fixedRate = 1000 * 60 * 5)
     private void genAlarmStatistics() {
         log.info("====>>>>>>gen alarmStatistics info task start<<<<<========");
         // 当前告警信息
@@ -153,7 +155,7 @@ public class SystemAlarmTask {
             if (CollectionUtils.isNotEmpty(updateAlarmCountVOs)) {
                 List<AlarmStatisticsModel> updateAlarmStatisticsVOs = new ArrayList<>();
                 alarmStatisticsModels.forEach(alarmStatisticsModel -> updateAlarmCountVOs.forEach(updateAlarmCountVO -> {
-                    if (alarmStatisticsModel.getAlarmType() == updateAlarmCountVO.getAlarmType()) {
+                    if (alarmStatisticsModel.getAlarmType().equals(updateAlarmCountVO.getAlarmType())) {
                         alarmStatisticsModel.setAlarmCount(updateAlarmCountVO.getAlarmCount());
                         alarmStatisticsModel.setUpdateTime(LocalDateTime.now());
                         updateAlarmStatisticsVOs.add(alarmStatisticsModel);
