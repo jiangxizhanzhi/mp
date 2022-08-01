@@ -139,10 +139,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
 
         String nodeName = element.getSrcElement().getName();
         CloudPluginSceneElementBO cloudElement = (CloudPluginSceneElementBO) element;
-        String code = CloudMessageConvertUtil.getCode(message);
         String[] params = new String[]{ nodeName, cloudElement.getImage() };
-        if (code != null) {
-            MpRuntimeException resultException = new MpRuntimeException(MessageCommon.get(code, params));
+        String convertMessage = CloudMessageConvertUtil.getMessage(message, params);
+        if (convertMessage != null) {
+            MpRuntimeException resultException = new MpRuntimeException(convertMessage);
             return resultException;
         } else {
             return null;
