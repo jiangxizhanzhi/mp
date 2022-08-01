@@ -4,9 +4,12 @@ import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @Description
@@ -31,11 +34,11 @@ public class CloudMessageConvertUtil {
         }
     }
 
-    public static String getCode(String target) {
+    public static String getMessage(String target, String... params) {
         String formatMessage = target.toLowerCase();
         for (var convert : converts) {
             if (convert.hit(formatMessage)) {
-                return convert.getCode();
+                return convert.getMessage(params);
             }
         }
         return null;
@@ -44,8 +47,9 @@ public class CloudMessageConvertUtil {
     @Setter
     @Getter
     private static class Convert {
-        private String code;
         private List<ConvertRule> rules;
+        private List<Message> messages;
+
 
         public boolean hit(String target) {
             for (ConvertRule rule : rules) {
@@ -55,5 +59,32 @@ public class CloudMessageConvertUtil {
             }
             return true;
         }
+
+        public String getMessage(String... params) {
+            Locale locale = LocaleContextHolder.getLocale();
+            for (Message message : messages) {
+                if (locale.getLanguage().equals(message.locale)) {
+                    return this.formatMessage(message.getMessage(), params);
+                }
+            }
+            return null;
+        }
+
+        private String formatMessage(String message, String... params) {
+            String formatMessage = message;
+            if (params != null && params.length > 0) {
+                for (int i = 0; i < params.length; i++) {
+                    formatMessage = StringUtils.replaceOnce(formatMessage, "{" + i + "}", params[i]);
+                }
+            }
+            return formatMessage;
+        }
+    }
+
+    @Getter
+    @Setter
+    private static class Message {
+        private String locale;
+        private String message;
     }
 }
