@@ -82,21 +82,4 @@ public class SceneConfigService {
         }
     }
 
-    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId, String nodeId) {
-        var list = snapshotMapper.list(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
-                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
-                .reverseOrderBy(SceneElementSnapshotModel::getPk));
-        return new ServiceResult<>(list);
-    }
-
-    public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String sceneConfigId, String nodeId, String addressContent) {
-        var model = snapshotMapper.first(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
-                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
-                .filterContains(SceneElementSnapshotModel::getAddress, addressContent)
-                .reverseOrderBy(SceneElementSnapshotModel::getPk));
-        return new ServiceResult<>(model);
-    }
-
 }

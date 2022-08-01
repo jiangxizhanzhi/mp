@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.scene.core.bo;
 
 import cn.cyberpeace.mp.base.bo.ModelBO;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,6 +14,8 @@ public class SceneElementSnapshotBO extends ModelBO<SceneElementSnapshotModel, S
     private String id;
     @ApiModelProperty(value = "名称")
     private String name;
+    @ApiModelProperty(value = "源快照名称")
+    private String sourceName;
     @ApiModelProperty(value = "描述")
     private String description;
     @ApiModelProperty(value = "快照地址")

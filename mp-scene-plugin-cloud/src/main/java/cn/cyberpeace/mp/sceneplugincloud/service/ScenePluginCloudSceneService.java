@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.BaseCommon;
-import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -17,7 +16,8 @@ import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
-import cn.cyberpeace.mp.scene.service.SceneService;
+import cn.cyberpeace.mp.scene.service.SceneConfigService;
+import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -49,7 +49,6 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineExe
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachinePrivateOperateData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualMachineUploadFileData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.SystemTypeUtils;
-import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConfigElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneConnectionCommon;
 import cn.cyberpeace.mp.sceneplugincloud.service.common.CloudSceneStatCommon;
@@ -63,9 +62,9 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -105,15 +104,17 @@ public class ScenePluginCloudSceneService {
             )
     );
 
-    private SceneService sceneService;
+    @Resource
+    private SceneConfigService sceneConfigService ;
 
-    private CloudPluginSceneConfigElementMapper configElementMapper;
-
-    private CloudPluginSceneConfigElementMapper elementMapper;
-
+    @Resource
     private CloudSceneStatCommon cloudSceneStatCommon;
 
+    @Resource
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
+
+    @Resource
+    private SceneSnapshotService sceneSnapshotService ;
 
     @Data
     @AllArgsConstructor
@@ -259,19 +260,6 @@ public class ScenePluginCloudSceneService {
             var remoteClient = new Remote();
             remoteClient.deleteRecords(recordingNames);
         }
-    }
-
-    @Autowired
-    public ScenePluginCloudSceneService(CloudSceneStatCommon cloudSceneStatCommon,
-                                        CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper,
-                                        SceneService sceneService,
-                                        CloudPluginSceneConfigElementMapper configElementMapper,
-                                        CloudPluginSceneConfigElementMapper elementMapper) {
-        this.cloudSceneStatCommon = cloudSceneStatCommon;
-        this.cloudPluginSceneConnectionMapper = cloudPluginSceneConnectionMapper;
-        this.sceneService = sceneService;
-        this.configElementMapper = configElementMapper;
-        this.elementMapper = elementMapper;
     }
 
     public ServiceResult<List<NodeSessionBO>> getSceneRemoteSessions(List<String> sceneIds, List<String> nodeIds,
@@ -744,10 +732,9 @@ public class ScenePluginCloudSceneService {
             params.setSnapshotUuid(snapshotUuid);
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
-            // todo
-            var result = new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
-            sceneService.deleteElementSnapshot(snapshotId);
+            sceneSnapshotService.deleteElementSnapshot(snapshotId);
         }
         return new ServiceResult<>(true);
     }

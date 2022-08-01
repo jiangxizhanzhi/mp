@@ -100,6 +100,7 @@ public class RealEquipmentConverter implements BaseConverter{
         }).collect(Collectors.toList());
 
         convertModel.setList(modelList);
+        convertModel.setTotal(total);
         return convertModel;
     }
 

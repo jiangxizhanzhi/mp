@@ -18,6 +18,8 @@ public class SceneElementSnapshotModel extends BaseModel {
     @DefaultStr
     private String name;
     @DefaultStr
+    private String sourceName;
+    @DefaultStr
     private String description;
     private String address;
 }

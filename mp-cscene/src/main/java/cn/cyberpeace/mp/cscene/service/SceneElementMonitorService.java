@@ -612,6 +612,9 @@ public class SceneElementMonitorService {
         connectionState.setForeignAddress(model.getRaddrIp());
         connectionState.setForeignPort(model.getRaddrPort());
 
+        connectionState.setDescription(model.getDescription());
+        connectionState.setTime(model.getTime());
+
         return connectionState;
     }
 

@@ -104,7 +104,7 @@ public class SystemAlarmTask {
         if (CollectionUtils.isNotEmpty(crMonitors)) {
             crMonitors.forEach(crMonitor -> {
                 if (!MonitorStateEnum.RUNNING.getDesc().equals(crMonitor.getState())) {
-                    // 添加云平台服务告警信息
+                    // 添加业务服务告警信息
                     SystemAlarmModel crAlarmModel = SystemAlarmModel.builder()
                             .alarmMsg(String.format("%s status is error", crMonitor.getName()))
                             .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
@@ -118,12 +118,10 @@ public class SystemAlarmTask {
             });
         }
 
-        if (CollectionUtils.isNotEmpty(alarmModels)) {
-            // 更新告警信息
-            systemAlarmService.processSystemAlarm(alarmModels);
-        } else {
-            log.info("no systemAlarm info to process");
-        }
+        systemAlarmService.processSystemAlarm(alarmModels);
+
+        // 生成告警统计信息
+        this.genAlarmStatistics();
 
         log.info("====>>>>>>get systemAlarm info task end<<<<<========");
     }
@@ -131,7 +129,6 @@ public class SystemAlarmTask {
     /**
      * 生成告警统计信息
      */
-    @Scheduled(fixedRate = 1000 * 60 * 5)
     private void genAlarmStatistics() {
         log.info("====>>>>>>gen alarmStatistics info task start<<<<<========");
         // 当前告警信息
@@ -153,7 +150,7 @@ public class SystemAlarmTask {
             if (CollectionUtils.isNotEmpty(updateAlarmCountVOs)) {
                 List<AlarmStatisticsModel> updateAlarmStatisticsVOs = new ArrayList<>();
                 alarmStatisticsModels.forEach(alarmStatisticsModel -> updateAlarmCountVOs.forEach(updateAlarmCountVO -> {
-                    if (alarmStatisticsModel.getAlarmType() == updateAlarmCountVO.getAlarmType()) {
+                    if (alarmStatisticsModel.getAlarmType().equals(updateAlarmCountVO.getAlarmType())) {
                         alarmStatisticsModel.setAlarmCount(updateAlarmCountVO.getAlarmCount());
                         alarmStatisticsModel.setUpdateTime(LocalDateTime.now());
                         updateAlarmStatisticsVOs.add(alarmStatisticsModel);
