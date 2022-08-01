@@ -228,6 +228,11 @@
             <include refid="commonTargetAuthWhere"/>
         </if>
         ) as i
+        <where>
+            <if test="vmStarted != null and vmStarted == true">
+                and i.instance_state in (1,2,3)
+            </if>
+        </where>
     </select>
 
     <select id="page" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO" resultMap="BaseResultMap">
