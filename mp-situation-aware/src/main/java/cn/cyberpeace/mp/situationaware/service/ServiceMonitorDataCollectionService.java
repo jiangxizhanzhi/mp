@@ -73,9 +73,6 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
             return Collections.emptyList();
         }
 
-        //List<MonitorConfig.MonitorProbe> cpMonitorProbes = monitorConfig.getCpSrvMonitors();
-
-        // 只取一条数据，做假分页处理
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String launchId : launchIds) {
             wazuhMonitorEventsRequest.setPageSize(1);
@@ -106,17 +103,38 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     private List<ServiceMonitorDto> jsonObj2ServiceMonitorDtos(JSONObject jsonObject, String launchId) {
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         if (Objects.nonNull(jsonObject)) {
+
+            LocalDateTime scanTime = null;
+            if (Objects.nonNull(jsonObject.get("time"))) {
+                scanTime = (LocalDateTime) jsonObject.get("time");
+            }
+
             for (String name : jsonObject.keySet()) {
+                if (Objects.equals(name, "time")) {
+                    continue;
+                }
                 JSONObject subObj = jsonObject.getJSONObject(name);
-                String uptime = subObj.getString("uptime_timestamp");
                 String ip = subObj.getString("ip");
                 String status = subObj.getString("status");
-                uptime = StringUtils.substringBefore(uptime, ".");
+
                 Long uptimeSec = 0L;
+                String uptime = subObj.getString("uptime_timestamp");
                 if (StringUtils.isNotBlank(uptime)) {
-                    uptimeSec = Long.valueOf(uptime);
+                    uptime = StringUtils.substringBefore(uptime, ".");
+                    if (StringUtils.isNotBlank(uptime)) {
+                        uptimeSec = Long.valueOf(uptime);
+                    }
                 }
-                ServiceMonitorDto dto = ServiceMonitorDto.builder().name(name).launchId(launchId).uptime(uptimeSec).ip(ip).state(status).build();
+
+                ServiceMonitorDto dto = ServiceMonitorDto.builder()
+                        .name(name)
+                        .launchId(launchId)
+                        .uptime(uptimeSec)
+                        .ip(ip)
+                        .state(status)
+                        .scanTime(scanTime)
+                        .build();
+
                 dtos.add(dto);
             }
         }

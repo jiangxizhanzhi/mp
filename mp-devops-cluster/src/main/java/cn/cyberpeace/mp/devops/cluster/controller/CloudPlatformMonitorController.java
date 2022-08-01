@@ -10,19 +10,36 @@ import cn.cyberpeace.mp.cscene.dto.request.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devops.cluster.converter.*;
+import cn.cyberpeace.mp.devops.cluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.FirewallConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.NpcConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.RouterConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.SwitchConverter;
+import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
-import cn.cyberpeace.mp.devops.cluster.dto.*;
+import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.ContainerPageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.HypervisorActionDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.HypervisorWeightAndMaxInstanceDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.InstancePageDTO;
+import cn.cyberpeace.mp.devops.cluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devops.cluster.request.*;
-import cn.cyberpeace.mp.devops.cluster.service.CpNodeMonitorScriptConfigService;
+import cn.cyberpeace.mp.devops.cluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.CloudPlatformPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.HypervisorRequest;
+import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devops.cluster.request.ServerRestartRequest;
+import cn.cyberpeace.mp.devops.cluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorPageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.HypervisorServiceStateVO;
@@ -41,7 +58,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -83,7 +104,7 @@ public class CloudPlatformMonitorController {
 
     private final ServiceMonitorService serviceMonitorService;
 
-    private final CpNodeMonitorScriptConfigService cpNodeMonitorScriptConfigService;
+    private final MonitorScriptControlService monitorScriptControlService;
 
     private final HostStateService hostStateService;
 
@@ -257,7 +278,7 @@ public class CloudPlatformMonitorController {
     @ApiOperation("服务重启")
     @PostMapping("/restart")
     public ServiceResult<Boolean> restartServer(@RequestBody @Validated ServerRestartRequest serverRestartRequest) {
-        cpNodeMonitorScriptConfigService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());
+        monitorScriptControlService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());
         return new ServiceResult<>(true);
     }
 

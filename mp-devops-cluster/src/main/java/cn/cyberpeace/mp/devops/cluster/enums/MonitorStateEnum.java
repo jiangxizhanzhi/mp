@@ -11,7 +11,9 @@ public enum MonitorStateEnum {
 
     DOWN("DOWN"),
 
-    RUNNING("RUNNING");
+    RUNNING("RUNNING"),
+
+    RESTARTING("RESTARTING");
 
     private String desc;
 

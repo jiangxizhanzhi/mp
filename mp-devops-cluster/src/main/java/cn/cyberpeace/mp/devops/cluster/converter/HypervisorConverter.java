@@ -76,6 +76,7 @@ public class HypervisorConverter implements BaseConverter {
                         .ip(hypervisor.getHostIp()).status(hypervisor.getStatus()).state(hypervisor.getState())
                         .cpu(hypervisor.getCpu()).ram(hypervisor.getRam()).disk(hypervisor.getDisk())
                         .cpuUsed(hypervisor.getCpuUsed()).ramUsed(hypervisor.getRamUsed()).totalInstances(hypervisor.getRunningVms())
+                        .serviceStatus(false)
                         .diskUsed(hypervisor.getDiskUsed()).build()
         ).collect(Collectors.toList());
 
