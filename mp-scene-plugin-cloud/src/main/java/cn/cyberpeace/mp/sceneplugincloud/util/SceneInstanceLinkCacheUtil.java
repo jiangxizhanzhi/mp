@@ -159,17 +159,22 @@ public class SceneInstanceLinkCacheUtil {
                         LinkStatusParams params = new LinkStatusParams();
                         params.setInstanceId(n.getResourceId());
                         params.setNetworkId(p.getNetworkId());
-                        try {
-                            var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
-                            }, true);
-                            if (result.isSuccess()) {
-                                n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
-                                p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
-                            } else {
-                                log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                        if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
+                            try {
+                                var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                }, true);
+                                if (result.isSuccess()) {
+                                    n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
+                                    p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? 1 : 0);
+                                } else {
+                                    log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                                }
+                            } catch (Exception e) {
+                                log.error("failed to get link status , sceneId is {} ", e);
                             }
-                        }catch (Exception e){
-                            log.error("failed to get link status , sceneId is {} ", e);
+                        } else {
+                            n.setStatus(1);
+                            p.setStatus(1);
                         }
                     });
                 }
@@ -178,16 +183,20 @@ public class SceneInstanceLinkCacheUtil {
                     LinkStatusParams params = new LinkStatusParams();
                     params.setInstanceId(n.getResourceId());
                     params.setNetworkId(n.getDefaultNetworkId());
-                    try {
-                        var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
-                        }, true);
-                        if (result.isSuccess()) {
-                            n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
-                        } else {
-                            log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                    if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
+                        try {
+                            var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                            }, true);
+                            if (result.isSuccess()) {
+                                n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? 1 : 0);
+                            } else {
+                                log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                            }
+                        } catch (Exception e) {
+                            log.error("failed to get link status , sceneId is {} ", e);
                         }
-                    } catch (Exception e) {
-                        log.error("failed to get link status , sceneId is {} ", e);
+                    } else {
+                        n.setStatus(1);
                     }
                 });
             }

@@ -123,6 +123,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.ignore_delete_exception:true}")
     private Boolean ignoreDeleteException;
 
+    @Value("${mp.sceneplugincloud.link_status_enabled:true}")
+    private Boolean linkStatusEnabled;
+
     @Value("${mp.sceneplugincloud.link_status_refresh_period:5}")
     private Integer linkStatusRefreshPeriod;
 
