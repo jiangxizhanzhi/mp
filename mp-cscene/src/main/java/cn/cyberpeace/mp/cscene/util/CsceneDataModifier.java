@@ -498,7 +498,7 @@ public class CsceneDataModifier {
         }
     }
 
-    public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene) {
+    public static void correctName(String csceneId, String referenceMetaData, CsceneInstanceBO csceneInstance, CsceneBO cscene, CsceneBO dbCscene) {
         if (StringUtils.isEmpty(referenceMetaData) || csceneInstance == null) {
             return;
         }
@@ -508,6 +508,8 @@ public class CsceneDataModifier {
                 // 竞赛
                 if (cscene != null && cscene.getSceneConfig() != null && cscene.getSceneConfig().getTopology() != null && cscene.getSceneConfig().getTopology().getScene() != null) {
                     csceneInstance.setName(cscene.getSceneConfig().getTopology().getScene().getName());
+                } else if (dbCscene != null && dbCscene.getSceneConfig() != null && dbCscene.getSceneConfig().getTopology() != null && dbCscene.getSceneConfig().getTopology().getScene() != null) {
+                    csceneInstance.setName(dbCscene.getSceneConfig().getTopology().getScene().getName());
                 }
             } else {
                 // 靶场和实训
