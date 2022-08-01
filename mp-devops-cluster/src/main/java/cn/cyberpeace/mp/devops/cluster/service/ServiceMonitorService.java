@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
@@ -82,6 +83,7 @@ public class ServiceMonitorService {
         processRestartingStatus(serviceMonitorDtos);
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
+        this.changeServiceName(serviceMonitorDtos);
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -116,12 +118,24 @@ public class ServiceMonitorService {
         processRestartingStatus(serviceMonitorDtos);
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
+        this.changeServiceName(serviceMonitorDtos);
+
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
             return new ListObjResult<>(serviceMonitorDtos.subList(offset, toIndex), serviceMonitorDtos.size()).asResult();
         } else {
             return new ListObjResult<ServiceMonitorDto>(Lists.newArrayList(), serviceMonitorDtos.size()).asResult();
+        }
+    }
+
+    /**
+     * 替换服务名称
+     * @param serviceMonitorDtos
+     */
+    private void changeServiceName(List<ServiceMonitorDto> serviceMonitorDtos) {
+        if (CollectionUtils.isNotEmpty(serviceMonitorDtos)) {
+            serviceMonitorDtos.forEach(dto -> dto.setName(MessageCommon.get(dto.getName())));
         }
     }
 
