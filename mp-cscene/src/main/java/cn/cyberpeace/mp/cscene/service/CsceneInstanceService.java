@@ -1054,6 +1054,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
+        if (StringUtils.isEmpty(snapshotName)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        if (snapshotName.length() > 255) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_TOO_LONG);
+        }
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         ElementTaskPool.getInstance().executeTask(() -> {
             var sceneInfo = this.getSceneInfo(id);
