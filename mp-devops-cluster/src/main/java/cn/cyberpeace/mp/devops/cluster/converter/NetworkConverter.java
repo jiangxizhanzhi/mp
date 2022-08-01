@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.model.common.NetworkModel;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -52,6 +53,17 @@ public class NetworkConverter implements BaseConverter{
         convertModel.setList(list);
         convertModel.setTotal(model.getTotal());
         return convertModel;
+    }
+
+
+    /**
+     * 获取网络总数
+     * @return
+     */
+    public Integer getTotalNetwork(NetworkPageDTO dto) {
+        dto.setLimit(NumberUtils.INTEGER_ONE);
+        BasePageBO<NetworkBO> page = this.page(dto, this.getTotalPageIgnoreField());
+        return page.getTotal();
     }
 
 }
