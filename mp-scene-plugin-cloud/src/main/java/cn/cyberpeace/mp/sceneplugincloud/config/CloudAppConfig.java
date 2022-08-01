@@ -129,6 +129,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.enable_reallocate_ip_ports:false}")
     private Boolean enableReallocateIpPorts;
 
+    @Value("${mp.sceneplugincloud.public-net-proxy-server:false}")
+    private Boolean publicNetProxyServer;
+
     @Value("${mp.sceneplugincloud.public-net-proxy:false}")
     private Boolean publicNetProxy;
 

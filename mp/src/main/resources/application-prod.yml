@@ -190,6 +190,7 @@ mp:
     delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
     default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
     enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
+    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}

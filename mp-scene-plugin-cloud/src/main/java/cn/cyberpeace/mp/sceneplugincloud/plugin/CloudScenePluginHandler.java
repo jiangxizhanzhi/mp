@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -409,5 +410,34 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         this.getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(pluginPort));
         // 处理辅助变量
         this.getSceneHandler().addPort(portId, srcPort.getElement());
+    }
+
+    @Override
+    public void correctData() {
+        super.correctData();
+        // 连接外部网络,而且开启公网映射,就打开端口映射
+        if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
+            getElementMap().forEach((id, element) -> {
+                if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
+                    element.getSrcElement().getPorts().forEach(p -> {
+                        var connectedElement = getPortConnectedSrcElement(p.getId());
+                        if (connectedElement != null) {
+                            var connectCloudElement = getElement(connectedElement.getId());
+                            if (connectCloudElement.getRole() != null &&
+                                    BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == connectCloudElement.getRole()) {
+                                if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                                    p.getAccessModes().forEach(mode -> {
+                                        boolean publicNetProxy = mode.getPublicNetProxy() != null ? mode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
+                                        if (publicNetProxy) {
+                                            mode.setProxy(true);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
     }
 }
