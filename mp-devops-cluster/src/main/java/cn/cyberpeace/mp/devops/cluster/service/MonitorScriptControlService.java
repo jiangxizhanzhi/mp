@@ -84,7 +84,8 @@ public class MonitorScriptControlService {
         // 如果某个服务的状态还在重启中，则忽略该服务的重启
         TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
         for (String srv : serviceList) {
-            ServiceRestartStatusDto statusDto = timedCache.get(srv);
+            String cacheKey = hostname + "_" + srv;
+            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
             if (Objects.nonNull(statusDto)) {
                 serviceList.remove(srv);
             }
@@ -118,8 +119,9 @@ public class MonitorScriptControlService {
 
         // 保存服务重启中的状态一段时间，等到下一次查询的时候再考虑是否删除该状态
         for (String srv : serviceList) {
+            String cacheKey = hostname + "_" + srv;
             ServiceRestartStatusDto statusDto = ServiceRestartStatusDto.builder().restartTime(LocalDateTime.now()).status(MonitorStateEnum.RESTARTING.getDesc()).build();
-            timedCache.put(srv, statusDto);
+            timedCache.put(cacheKey, statusDto);
         }
 
     }

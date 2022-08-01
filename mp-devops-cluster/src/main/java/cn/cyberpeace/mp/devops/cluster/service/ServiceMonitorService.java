@@ -210,7 +210,8 @@ public class ServiceMonitorService {
         }
 
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
-            ServiceRestartStatusDto statusDto = timedCache.get(dto.getName());
+            String cacheKey = dto.getHostname() + "_" + dto.getName();
+            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
             if (Objects.isNull(statusDto)) {
                 continue;
             }
