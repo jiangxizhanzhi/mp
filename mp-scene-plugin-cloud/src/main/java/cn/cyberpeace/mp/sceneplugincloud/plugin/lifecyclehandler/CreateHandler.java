@@ -1156,7 +1156,7 @@ public class CreateHandler extends HandlerCommon {
         boolean publicNetProxy = accessMode.getPublicNetProxy() != null ? accessMode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
         if (publicNetProxy) {
             String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
-            String port = StringUtils.isNotEmpty(accessMode.getPublicNetProxyPort()) ? accessMode.getPublicNetProxyPort() : CloudSingleton.cloudAppConfig.getPublicNetProxyPort();
+            String port = StringUtils.isNotEmpty(accessMode.getPublicNetProxyPort()) ? accessMode.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort());
             accessMode.setPublicNetProxy(true);
             accessMode.setPublicNetProxyIp(ip);
             accessMode.setPublicNetProxyPort(port);
