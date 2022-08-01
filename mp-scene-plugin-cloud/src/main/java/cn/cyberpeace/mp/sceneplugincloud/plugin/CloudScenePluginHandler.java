@@ -426,12 +426,26 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                             if (connectCloudElement.getRole() != null &&
                                     BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == connectCloudElement.getRole()) {
                                 if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                                    Set<String> setedModes = new HashSet<>();
                                     p.getAccessModes().forEach(mode -> {
-                                        boolean publicNetProxy = mode.getPublicNetProxy() != null ? mode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
-                                        if (publicNetProxy) {
-                                            mode.setProxy(true);
+                                        if (!AccessMode.Protocol.CONSOLE.equals(mode.getProtocol())) {
+                                            boolean publicNetProxy = mode.getPublicNetProxy() != null ? mode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
+                                            if (publicNetProxy) {
+                                                String modeKey = this.getModeKey(mode.getProtocol(), String.valueOf(mode.getPort()), mode.getUsername(), mode.getPassword());
+                                                setedModes.add(modeKey);
+                                                mode.setProxy(true);
+                                            }
                                         }
                                     });
+                                    var cloudPort = getPort(p.getId());
+                                    if (cloudPort != null && CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
+                                        cloudPort.getAccessModes().forEach(mode -> {
+                                            String modeKey = this.getModeKey(mode.getProtocol(), String.valueOf(mode.getPort()), mode.getUsername(), mode.getPassword());
+                                            if (setedModes.contains(modeKey)) {
+                                                mode.setProxy(true);
+                                            }
+                                        });
+                                    }
                                 }
                             }
                         }
@@ -439,5 +453,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 }
             });
         }
+    }
+
+    private String getModeKey(String protocol, String port, String user, String password) {
+        return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, user, password);
     }
 }
