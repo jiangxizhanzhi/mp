@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * @Description
@@ -34,60 +36,16 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return getModelMapper().list(condition);
     }
 
-    private List<OptionBO> flat2Tree(List<OptionModel> models, Locale locale) {
-        List<OptionBO> boList = new ArrayList<>();
-        // parentMap 记录已经加入到嵌套结构中的节点，key为code，value为OptionBO对象
-        // 用于子级节点根据parentCode查找父级节点
-        Map<String, OptionBO> parentMap = new HashMap<>(models.size());
-        // codeSet 记录所有节点的code，用于校验parentCode合法性
-        Set<String> codeSet = new HashSet<>();
-        List<OptionModel> nextLevelModels = new ArrayList<>();
-        for (OptionModel model : models) {
-            String code = model.getCode();
-
-            OptionBO optionBO = new OptionBO();
-            optionBO.fromModel(model, locale);
-            codeSet.add(code);
-            if (model.getParentCode() == null) {
-                boList.add(optionBO);
-                parentMap.put(code, optionBO);
-            } else {
-                nextLevelModels.add(model);
-            }
-        }
-        while (!nextLevelModels.isEmpty()) {
-            List<OptionModel> tmpList = new ArrayList<>();
-            for (OptionModel model : nextLevelModels) {
-                if (!codeSet.contains(model.getParentCode())) {
-                    throw new RuntimeException("没有上一级选项");
-                }
-
-                if (parentMap.containsKey(model.getParentCode())) {
-                    OptionBO parent = parentMap.get(model.getParentCode());
-                    if (parent.getChildren() == null) {
-                        parent.setChildren(new ArrayList<>());
-                    }
-                    OptionBO optionBO = new OptionBO();
-                    optionBO.fromModel(model, locale);
-                    parent.getChildren().add(optionBO);
-                    parentMap.put(model.getCode(), optionBO);
-                } else {
-                    tmpList.add(model);
-                }
-            }
-            // 判断剩下的节点是否成环
-            if (tmpList.size() == nextLevelModels.size()) {
-                throw new RuntimeException("存在环");
-            }
-            nextLevelModels = new ArrayList<>(tmpList);
-        }
-        return boList;
-    }
-
     @Override
     public List<OptionBO> getOptionsByType(String type) {
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionModel> models = findByType(type);
-        return flat2Tree(models, locale);
+        List<OptionBO> boList = new ArrayList<>();
+        for (OptionModel model : models) {
+            OptionBO optionBO = new OptionBO();
+            optionBO.fromModel(model, locale);
+            boList.add(optionBO);
+        }
+        return boList;
     }
 }

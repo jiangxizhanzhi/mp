@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -20,7 +19,6 @@ import java.util.Objects;
 public class OptionBO {
     private String code;
     private String name;
-    private List<OptionBO> children;
 
     public void fromModel(OptionModel model, Locale locale) {
         String name = Objects.equals(locale, Locale.US) ? model.getEnName() : model.getZhName();
