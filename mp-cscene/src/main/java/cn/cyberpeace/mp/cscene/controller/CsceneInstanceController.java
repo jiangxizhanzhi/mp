@@ -6,14 +6,31 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.service.CsceneFileService;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
@@ -39,8 +56,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +80,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     private CsceneInstanceService modelService;
 
     private CsceneSpecialService csceneSpecialService;
+
+    private CsceneFileService csceneFileService;
 
     @Autowired
     private OptionService optionService;
@@ -159,9 +186,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @Autowired
     public CsceneInstanceController(CsceneInstanceService csceneInstanceService,
-                                    CsceneSpecialService csceneSpecialService) {
+                                    CsceneSpecialService csceneSpecialService,
+                                    CsceneFileService csceneFileService
+    ) {
         setModelService(csceneInstanceService);
         setCsceneSpecialService(csceneSpecialService);
+        setCsceneFileService(csceneFileService);
     }
 
     @ApiOperation("获取分页数据")
@@ -658,8 +688,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("节点文件上传")
     @PostMapping("/upload_element_file")
-    public ServiceResult<Boolean> uploadElementFile(@RequestBody CsceneInstanceNodeFileActionRequest request) {
-        return modelService.uploadElementFile(request.getId(), request.getNodeId(), request.getFilePath(), request.getFilename(), request.getDestPath(), request.getContext()).asResult();
+    public ServiceResult<Boolean> uploadElementFile(
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "node_id") String nodeId,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "file_path", required = false) String filePath,
+            @RequestParam(value = "filename") String filename,
+            @RequestParam(value = "dest_path") String destPath) throws IOException {
+        if (file != null && !file.isEmpty()) {
+            String fdfs = csceneFileService.upload(file.getInputStream()).getSource();
+            return modelService.uploadElementFile(id, nodeId, fdfs, filename, destPath, null).asResult();
+        } else {
+            return modelService.uploadElementFile(id, nodeId, filePath, filename, destPath, null).asResult();
+        }
     }
 
     @GetMapping("/status")
