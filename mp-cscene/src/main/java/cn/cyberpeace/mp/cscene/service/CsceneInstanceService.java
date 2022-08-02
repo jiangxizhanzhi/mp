@@ -1060,6 +1060,9 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (snapshotName.length() > 255) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_TOO_LONG);
         }
+        if (snapshotName.length() > 1024) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_DESC_TOO_LONG);
+        }
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         ElementTaskPool.getInstance().executeTask(() -> {
             var sceneInfo = this.getSceneInfo(id);

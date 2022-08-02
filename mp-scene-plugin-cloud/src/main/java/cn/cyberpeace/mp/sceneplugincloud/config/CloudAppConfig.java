@@ -138,11 +138,17 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.enable_force_delete:true}")
     private Boolean enableForceDelete;
 
+    @Value("${mp.sceneplugincloud.link_status_enabled:true}")
+    private Boolean linkStatusEnabled;
+
     @Value("${mp.sceneplugincloud.link_status_refresh_period:5}")
     private Integer linkStatusRefreshPeriod;
 
     @Value("${mp.sceneplugincloud.link_status_cache_seconds:600}")
     private Integer linkStatusCacheSeconds;
+
+    @Value("${mp.sceneplugincloud.public-net-proxy-server:false}")
+    private Boolean publicNetProxyServer;
 
     @Value("${mp.sceneplugincloud.public-net-proxy:false}")
     private Boolean publicNetProxy;
