@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -64,7 +65,10 @@ public class InitRegisterService extends BaseCpService {
             log.error("get init target error: {}", ExceptionUtils.getStackTrace(e));
         }
         Integer res = NumberUtils.INTEGER_ZERO;
-        List<Device> deviceList = JSONObject.parseArray(JSONObject.toJSONString(result.getItems()), Device.class);
+        if (CollectionUtils.isEmpty(result.getItems())) {
+            return res;
+        }
+        List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
         List<String> uuids = deviceList.stream().map(device -> device.getUuid()).collect(Collectors.toList());
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
         List<String> existedUuids = deviceTargetPOS.stream().map(p -> p.getUuid()).collect(Collectors.toList());
