@@ -752,7 +752,7 @@ public class AsyncPlatFlowTaskService {
                         } else {
                             // 运行失败，更新任务状态为已停止，调用失败回调方法
                             String errMsg = rows.getJSONObject(0).getString("result_detail");
-                            log.info("flow [{}] execute error for:{}", flowTaskModel.getId(), errMsg);
+                            log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
                             taskJobStoppedCallback(flowTaskModel.getId(), errorCallback);
                         }
 
