@@ -138,6 +138,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.enable_force_delete:true}")
     private Boolean enableForceDelete;
 
+    @Value("${mp.sceneplugincloud.link_status_enabled:true}")
+    private Boolean linkStatusEnabled;
+
     @Value("${mp.sceneplugincloud.link_status_refresh_period:5}")
     private Integer linkStatusRefreshPeriod;
 

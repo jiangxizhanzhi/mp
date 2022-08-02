@@ -185,6 +185,7 @@ mp:
     delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
     default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
     enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
+    link_status_enabled: ${MP_LINK_STATUS_ENABLED:true}
     link_status_refresh_period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
     link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
     link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
