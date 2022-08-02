@@ -19,12 +19,6 @@ public class BaseSceneModel extends BaseModel {
     private String displayContext;
     @DefaultBool
     private Boolean deleted;
-    @DefaultBool
-    private Boolean publicNetProxy;
-    @DefaultStr
-    private String publicNetProxyIp;
-    @DefaultStr
-    private String publicNetProxyPort;
 
     @Override
     public boolean hasDeleted() {

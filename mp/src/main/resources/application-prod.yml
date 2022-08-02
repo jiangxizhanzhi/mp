@@ -189,6 +189,7 @@ mp:
     link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
     link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
     link_status_hold_size: ${MP_LINK_STATUS_HOLD_SIZE:200}
+    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
