@@ -17,7 +17,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -49,9 +48,6 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
 
     private static final String DOWNLOAD_URL = CPCLOUD_URL + "/logger_app/v1/download_logfiles";
 
-    @Value("${ip.cp}")
-    private String cpUrl;
-
     @Override
     public String logReportType() {
         return LogReportTypeEnum.CP.toValue();
@@ -77,12 +73,12 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             if (!fileName.startsWith(LogReportTypeEnum.CP.getPrefix())) {
                 fileName = LogReportTypeEnum.CP.getPrefix() + fileName;
             }
+            dto.setHostIp(v.getHostIp());
             dto.setFileName(fileName);
             dto.setFileSize(v.getFileSize());
             dto.setUpdateTime(v.getUpdatetime());
             dto.setLogReportTypeEnum(LogReportTypeEnum.CP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?hostname=" + v.getHostname() + "&path=" + v.getPath() + "&fileName=" + v.getFilename() + "&type=" + LogReportTypeEnum.CP.toValue());
-            dto.setHostIp(cpUrl);
             return dto;
         }).collect(Collectors.toList());
         return reportDTOList;
