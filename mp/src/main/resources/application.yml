@@ -95,6 +95,7 @@ mp:
     public-net-proxy: false #公网开关
     public-net-proxy-ip: ${ip.cp} #公网ip
     public-net-proxy-port: 11111 #公网端口
+    public-net-proxy-server: false
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
   situationaware:

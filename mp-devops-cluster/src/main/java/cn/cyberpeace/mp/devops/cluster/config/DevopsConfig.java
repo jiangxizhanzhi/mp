@@ -26,4 +26,6 @@ public class DevopsConfig {
     private String publicNetProxyIp;
 
     private String publicNetProxyPort;
+
+    private Boolean publicNetProxyServer;
 }
