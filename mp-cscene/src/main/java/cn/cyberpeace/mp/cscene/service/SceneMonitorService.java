@@ -80,9 +80,16 @@ public class SceneMonitorService {
         LocalDateTime createTime = csceneInstanceBO.getCreateTime();
         if (Objects.nonNull(createTime)) {
             sceneMonitorInfo.setCreateTime(createTime);
-            Duration duration = Duration.between(createTime, now);
-            Long minutes = duration.toMinutes();
-            sceneMonitorInfo.setRunMinutes(minutes);
+            var instanceModel = csceneInstanceService.get(sceneId).getSource().getObj();
+            if (Boolean.TRUE.equals(instanceModel.getDeleted())) {
+                Duration duration = Duration.between(createTime, instanceModel.getUpdateTime());
+                Long minutes = duration.toMinutes();
+                sceneMonitorInfo.setRunMinutes(minutes);
+            } else {
+                Duration duration = Duration.between(createTime, now);
+                Long minutes = duration.toMinutes();
+                sceneMonitorInfo.setRunMinutes(minutes);
+            }
         }
 
         if (Objects.isNull(csceneInstanceBO)
