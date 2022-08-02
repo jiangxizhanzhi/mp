@@ -35,6 +35,11 @@ public class SceneCorrectService {
     private SceneElementMapper sceneElementMapper;
 
     public void correctErrorStatusScene() {
+        correctStartErrorStatusScene();
+        correctDeleteErrorStatusScene();
+    }
+
+    private void correctStartErrorStatusScene() {
         HumanCondition humanCondition = new HumanCondition()
                 .filterOrStart()
                 .orAndStart()
@@ -68,6 +73,46 @@ public class SceneCorrectService {
                             creatingScene.setProcessStatus(ProcessStatus.ABNORMAL);
                             creatingScene.setProcessMessage(MessageCommon.get("cscene.error.scene_create_timeout"));
                             sceneMapper.update(creatingScene);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("failed to correct error status scene , scene id is {}", creatingScene.getId(), e);
+                }
+            }
+        }
+    }
+
+    private void correctDeleteErrorStatusScene() {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(SceneModel::getEvent, SceneModel.Event.DELETE)
+                .filterIn(SceneModel::getEventStatus, new Integer[]{
+                        EventStatus.INITIAL, EventStatus.START, EventStatus.IN_PROGRESS, EventStatus.PAUSE
+                });
+        var creatingScenes = sceneMapper.list(humanCondition);
+        if (CollectionUtils.isNotEmpty(creatingScenes)) {
+            LocalDateTime now = LocalDateTime.now();
+            log.info("current local date time is {}", now);
+            for (var creatingScene : creatingScenes) {
+                try {
+                    var createTime = creatingScene.getCreateTime();
+                    if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
+                        // 超过预留时间未删除完成
+                        int counts = sceneElementMapper.total(new HumanCondition()
+                                .filterEqual(SceneElementModel::getScene, creatingScene.getId())
+                        );
+                        long finalTimes = csceneAppConfig.getSceneErrorCreatingSeconds() + counts * csceneAppConfig.getElementErrorCreatingSeconds();
+                        log.info("check scene is delete before {} seconds ago", finalTimes);
+                        if (createTime.plusSeconds(finalTimes).isBefore(now)) {
+                            log.info("scene {} is delete before {} seconds ago , and will be set over status", creatingScene.getId(), finalTimes);
+                            creatingScene.setEventStatus(EventStatus.OVER);
+                            creatingScene.setProcessStatus(ProcessStatus.OVER);
+                            sceneMapper.update(creatingScene);
+                            SceneElementModel updateElement = new SceneElementModel();
+                            updateElement.setEventStatus(EventStatus.OVER);
+                            updateElement.setProcessStatus(ProcessStatus.OVER);
+                            sceneElementMapper.filterUpdate(updateElement, new HumanCondition()
+                                    .filterEqual(SceneElementModel::getScene, creatingScene.getId())
+                            );
                         }
                     }
                 } catch (Exception e) {
