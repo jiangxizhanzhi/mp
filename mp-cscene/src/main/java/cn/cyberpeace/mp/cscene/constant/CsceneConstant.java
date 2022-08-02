@@ -15,5 +15,4 @@ public class CsceneConstant {
      */
     public static final String MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE = "cscene_instance_type";
 
-    public static final String MP_COMMON_OPTION_TYPE_CSCENE_MY_SCENE = "cscene_my_scene";
 }
