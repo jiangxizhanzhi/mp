@@ -162,7 +162,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private CsceneMapper csceneMapper;
 
     @Resource
-    private SceneSnapshotService sceneSnapshotService ;
+    private SceneSnapshotService sceneSnapshotService;
+
+    @Resource
+    private CsceneSnapshotService csceneSnapshotService;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1063,15 +1066,19 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (snapshotName.length() > 1024) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_DESC_TOO_LONG);
         }
+        var csceneInstance = this.get(id).getSource().getObj();
+        String snapshotId = csceneSnapshotService.saveCsceneSnapshot(csceneInstance.getCscene(), csceneInstance.getId(), nodeId, snapshotName).getSource();
         CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
         ElementTaskPool.getInstance().executeTask(() -> {
             var sceneInfo = this.getSceneInfo(id);
             if (StringUtils.isNotEmpty(sceneInfo.getSceneId()) && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
-                boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneInfo.getSceneConfigId());
+                boolean result = instanceHandler.snapshotElement(nodeId, snapshotId, snapshotName, description, sceneInfo.getSceneConfigId());
                 if (result) {
-                    var list = sceneSnapshotService.getElementSnapshots(sceneInfo.getSceneConfigId(), nodeId).getSource();
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(list.get(0).getAddress()).getImageName());
+                    var model = sceneSnapshotService.getElementSnapshot(snapshotId).getSource();
+                    if (model != null) {
+                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(model.getAddress()).getImageName());
+                        var parseResult = SnapshotAddressUtils.parseAddress(model.getAddress());
+                        csceneSnapshotService.updateCsceneSnapshotResourceId(snapshotId, parseResult.getSnapshotUuid(), model.getSourceName());
                     }
                 }
             }
@@ -1111,9 +1118,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
 
         String sceneId = sceneInfo.getSceneId();
         String sceneConfigId = sceneInfo.getSceneConfigId();
-        var snapshot = sceneSnapshotService.getElementSnapshot(sceneConfigId, nodeId, snapshotId).getSource();
+
+        var csceneInstance = this.get(csceneId).getSource().getObj();
+        var csceneSnapshot = csceneSnapshotService.getCsceneSnapshot(csceneInstance.getCscene(), nodeId, snapshotId).getSource();
+        if (csceneSnapshot == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NOT_CURRENT_SCENE);
+        }
+        var snapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
         if (snapshot == null) {
-            return new ServiceResult<>(true);
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NOT_CURRENT_SCENE);
         }
 
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
@@ -1129,7 +1142,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(instanceNames, ",")));
         }
 
-        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName());
+        var result = scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName()).getSource();
+        if (result) {
+            csceneSnapshotService.deleteByCscene(csceneInstance.getCscene(), nodeId, snapshotId);
+        }
+        return new ServiceResult<>(result);
     }
 
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {

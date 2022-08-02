@@ -208,12 +208,12 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         return this.sceneService.resumeElement(sceneId, nodeId, generateSceneContext()).getSource();
     }
 
-    public boolean snapshotElement(String nodeId, String snapshotName,String description,String sceneConfigId) {
+    public boolean snapshotElement(String nodeId,String snapshotId, String snapshotName,String description,String sceneConfigId) {
         String sceneId = this.getSceneId();
         if (sceneId == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        return this.sceneService.snapshotElementSync(sceneId, nodeId, snapshotName,description, generateSceneContext(),sceneConfigId).getSource();
+        return this.sceneService.snapshotElementSync(sceneId, nodeId,snapshotId, snapshotName,description, generateSceneContext(),sceneConfigId).getSource();
     }
 
     private String getSceneId() {
