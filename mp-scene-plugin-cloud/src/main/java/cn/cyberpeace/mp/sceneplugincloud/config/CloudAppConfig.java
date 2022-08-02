@@ -139,7 +139,7 @@ public class CloudAppConfig {
     private String publicNetProxyIp;
 
     @Value("${mp.sceneplugincloud.public-net-proxy-port:}")
-    private String publicNetProxyPort;
+    private Integer publicNetProxyPort;
 
     @Autowired
     private BaseAppConfig baseAppConfig;

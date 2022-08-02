@@ -131,8 +131,8 @@ public class ImagesService extends BaseCpService {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                     l.setIpAddress(config.getPublicNetProxyIp());
                 }
-                if (StringUtils.isNotEmpty(config.getPublicNetProxyPort())) {
-                    l.setPort(Integer.parseInt(config.getPublicNetProxyPort()));
+                if (config.getPublicNetProxyPort() != null) {
+                    l.setPort(config.getPublicNetProxyPort());
                 }
             });
         }

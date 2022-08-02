@@ -48,7 +48,7 @@ public class AccessMode {
     private String publicNetProxyIp;
 
     @ApiModelProperty(value = "外网代理端口")
-    private String publicNetProxyPort;
+    private Integer publicNetProxyPort;
 
     public static class Protocol {
         public static final String PING = "ping";
