@@ -390,9 +390,6 @@ public class InitiateHandler extends HandlerCommon {
             }
             existIps.add(network.getGateway());
             existIps.add(IpUtils.nextIp(network.getGateway()));
-            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
-                connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
-            }
 
             Set<String> portIps = new HashSet<>();
             int requireCount = 0;
@@ -445,6 +442,9 @@ public class InitiateHandler extends HandlerCommon {
             network.getExcloudIps().addAll(existIps);
             network.getExcloudIps().addAll(ipPool);
             network.setIpPool(ipPool);
+            if (element.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                connectedNetwork.getFromPorts().forEach(port -> port.setIp(network.getGateway()));
+            }
         });
     }
 

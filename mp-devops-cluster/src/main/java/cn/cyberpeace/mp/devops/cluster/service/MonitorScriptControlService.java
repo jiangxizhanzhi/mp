@@ -30,6 +30,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -83,10 +84,12 @@ public class MonitorScriptControlService {
     public void restart(String hostname, List<String> serviceList) {
         // 如果某个服务的状态还在重启中，则忽略该服务的重启
         TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
-        for (String srv : serviceList) {
-            ServiceRestartStatusDto statusDto = timedCache.get(srv);
+        Iterator<String> iterator = serviceList.iterator();
+        while (iterator.hasNext()) {
+            String cacheKey = hostname + "_" + iterator.next();
+            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
             if (Objects.nonNull(statusDto)) {
-                serviceList.remove(srv);
+                iterator.remove();
             }
         }
 
@@ -118,8 +121,9 @@ public class MonitorScriptControlService {
 
         // 保存服务重启中的状态一段时间，等到下一次查询的时候再考虑是否删除该状态
         for (String srv : serviceList) {
+            String cacheKey = hostname + "_" + srv;
             ServiceRestartStatusDto statusDto = ServiceRestartStatusDto.builder().restartTime(LocalDateTime.now()).status(MonitorStateEnum.RESTARTING.getDesc()).build();
-            timedCache.put(srv, statusDto);
+            timedCache.put(cacheKey, statusDto);
         }
 
     }

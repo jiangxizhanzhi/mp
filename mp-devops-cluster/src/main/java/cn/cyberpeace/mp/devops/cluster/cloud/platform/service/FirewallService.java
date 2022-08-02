@@ -28,4 +28,6 @@ public class FirewallService extends BaseCpService {
     public CloudPlatformPageResult<Firewall> page(String getParams) {
         return super.page(URL_VERSION + "/firewalls" + getParams, Firewall.class);
     }
+
+
 }

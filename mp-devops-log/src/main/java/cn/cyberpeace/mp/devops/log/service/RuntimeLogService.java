@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.devops.log.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.devops.log.converter.RunTimeLogDTOConverter;
 import cn.cyberpeace.mp.devops.log.dto.LogReportDTO;
 import cn.cyberpeace.mp.devops.log.dto.RunTimeLogDTO;
 import cn.cyberpeace.mp.devops.log.request.BasePageRequest;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +54,7 @@ public class RuntimeLogService {
         // 添加临时返回id
         if (CollectionUtil.isNotEmpty(runTimeLogDTOS)) {
             runTimeLogDTOS.forEach(dto -> {
-                String md5Id = DigestUtil.md5Hex(dto.getLogReportTypeEnum().name().concat(dto.getLogName()));
-                dto.setId(md5Id);
+                dto.setId(TextUtils.uuid());
             });
         }
 
