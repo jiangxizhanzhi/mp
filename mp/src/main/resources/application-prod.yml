@@ -96,6 +96,7 @@ mp:
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:} #公网端口
+    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
