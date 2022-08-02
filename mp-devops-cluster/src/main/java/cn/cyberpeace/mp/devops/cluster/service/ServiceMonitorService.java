@@ -153,7 +153,7 @@ public class ServiceMonitorService {
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
             modelPage.getList().forEach(model -> {
                 // 忽略DOWN状态的节点查询
-                if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getStatus())) {
+                if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getState())) {
                     hostNameList.add(model.getName());
                 }
                 if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
@@ -224,6 +224,7 @@ public class ServiceMonitorService {
                 } else {
                     // 否则替换状态为RESTARTING
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
+                    dto.setUptime(0L);
                 }
             }
         }
