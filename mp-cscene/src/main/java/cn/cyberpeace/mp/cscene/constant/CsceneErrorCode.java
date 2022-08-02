@@ -10,6 +10,8 @@ public enum CsceneErrorCode implements ErrorCode {
     SNAPSHOT_IN_USE("MP-110204", "snapshot_in_use"),
     SNAPSHOT_NAME_TOO_LONG("MP-110205", "snapshot_name_too_long"),
     SNAPSHOT_DESC_TOO_LONG("MP-110206", "snapshot_desc_too_long"),
+    SNAPSHOT_NAME_DUPLICATED("MP-110207", "snapshot_name_duplicated"),
+    SNAPSHOT_NOT_CURRENT_SCENE("MP-110208", "snapshot_not_current_scene"),
 
 
 

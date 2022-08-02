@@ -72,6 +72,11 @@ public class ImageConvertModel extends BasePageConvertModel{
     private Boolean isInternal;
 
     /**
+     * 是否初始靶标
+     */
+    private Boolean isInit;
+
+    /**
      * 系统信息
      */
     private ExtSystemInfo extSystemInfo;
