@@ -66,13 +66,22 @@ public class InstancePageVO extends BaseVO {
      * 运行时间
      */
     @ApiModelProperty("运行时间")
-    private Long runningTime;;
+    private Long runningTime;
 
+    @ApiModelProperty(value = "引用类型")
     private Integer referenceType;
 
+    @ApiModelProperty(value = "场景事件")
     private Integer event;
 
+    @ApiModelProperty(value = "场景事件状态")
     private Integer eventStatus;
+
+    @ApiModelProperty(value = "场景实例状态")
+    private Integer sceneStatus;
+
+    @ApiModelProperty(value = "场景实例状态描述")
+    private String sceneStatusDesc;
 
     private String processMessage;
 

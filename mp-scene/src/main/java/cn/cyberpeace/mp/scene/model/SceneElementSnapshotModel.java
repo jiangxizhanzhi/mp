@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Table("mp_scene_scene_element_snapshot")
 public class SceneElementSnapshotModel extends BaseModel {
-    private String sceneConfig;
     private String scene;
     private String sceneElement;
     @DefaultStr

@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneConfigElementModel;
 import cn.cyberpeace.mp.scene.model.SceneConfigModel;
@@ -351,6 +352,10 @@ public class CsceneSpecialService {
                         // 未删除场景的运行时间=当前时刻 - 创建时刻
                         s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
                     }
+                    // 转换场景实例状态
+                    var status = SceneStatusUtil.getSceneStatus(s.getEvent(), s.getEventStatus());
+                    s.setSceneStatus(status.getSceneStatus());
+                    s.setSceneStatusDesc(status.getSceneStatusDesc());
                 });
             }
             total = csceneInstanceMapper.total(humanCondition);
@@ -658,6 +663,10 @@ public class CsceneSpecialService {
         }
         Map<String, CsceneNodeInfoBO> result = new HashMap<>();
         infos.forEach(info -> {
+            // 转换场景实例状态
+            var status = SceneStatusUtil.getSceneStatus(info.getEvent(), info.getEventStatus());
+            info.setSceneStatus(status.getSceneStatus());
+            info.setSceneStatusDesc(status.getSceneStatusDesc());
             result.put(info.getResourceName(), info);
         });
         return new ServiceResult<>(result);
@@ -783,6 +792,7 @@ public class CsceneSpecialService {
             info.setName(model.getName());
             info.setCreateUser(model.getCreateUser());
             info.setId(model.getId());
+            info.setCsceneId(model.getCscene());
             result.put(model.getScene(), info);
         }
         return new ServiceResult<>(result);

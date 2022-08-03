@@ -76,6 +76,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String launchId : launchIds) {
             wazuhMonitorEventsRequest.setPageSize(1);
+            wazuhMonitorEventsRequest.setStartTime(LocalDateTime.now().minusMinutes(10));
             SearchResponse response = dataCollectionService.querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, launchId);
             JSONObject jsonObject = dataCollectionService.processBaseRawOutput(response);
             if (Objects.isNull(jsonObject)) {
@@ -128,6 +129,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
                 ServiceMonitorDto dto = ServiceMonitorDto.builder()
                         .name(name)
+                        .serviceName(name)
                         .launchId(launchId)
                         .uptime(uptimeSec)
                         .ip(ip)

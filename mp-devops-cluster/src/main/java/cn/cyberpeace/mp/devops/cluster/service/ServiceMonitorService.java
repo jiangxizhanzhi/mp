@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ServiceRestartStatusDto;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
@@ -22,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.vo.BizServiceMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
+import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
@@ -30,13 +32,13 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 服务监控服务类
@@ -53,8 +55,9 @@ public class ServiceMonitorService {
 
     private final SystemAlarmMapper systemAlarmMapper;
 
-    @Autowired
-    private MonitorScriptControlService monitorScriptControlService;
+    private final MonitorScriptControlService monitorScriptControlService;
+
+    private final MonitorConfig monitorConfig;
 
     private final ImagesConverter imagesConverter;
 
@@ -64,16 +67,7 @@ public class ServiceMonitorService {
      * @return
      */
     public ListObjResult<ServiceMonitorDto> bizServicePage(BizServicePageRequest request) {
-        List<String> hostNameList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getHostName())) {
-            hostNameList.add(request.getHostName());
-        } else {
-            BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
-            if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-                modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
-            }
-        }
-
+        List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
             return new ListObjResult<>(Lists.newArrayList(), 0);
         }
@@ -81,6 +75,8 @@ public class ServiceMonitorService {
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
+        // 处理重启禁用状态
+        processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         this.changeServiceName(serviceMonitorDtos);
@@ -99,16 +95,7 @@ public class ServiceMonitorService {
      * @return
      */
     public ListObjResult<ServiceMonitorDto> cpPage(CloudPlatformPageRequest request) {
-        List<String> hostNameList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getHostName())) {
-            hostNameList.add(request.getHostName());
-        } else {
-            BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
-            if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-                modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
-            }
-        }
-
+        List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
             return new ListObjResult<>(Lists.newArrayList(), 0);
         }
@@ -116,10 +103,11 @@ public class ServiceMonitorService {
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
+        // 处理重启禁用状态
+        processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         this.changeServiceName(serviceMonitorDtos);
-
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -168,7 +156,10 @@ public class ServiceMonitorService {
             // 获取所有物理主机服务状态
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
             modelPage.getList().forEach(model -> {
-                hostNameList.add(model.getName());
+                // 忽略DOWN状态的节点查询
+                if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getState())) {
+                    hostNameList.add(model.getName());
+                }
                 if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
                     serviceStatusModel.getList().forEach(serviceModel -> {
                         if (model.getName().equals(serviceModel.getHost())) {
@@ -213,6 +204,7 @@ public class ServiceMonitorService {
     }
 
 
+
     /**
      * 如果在重启有效期内，状态为不正常的状态的，统一替换为重启状态
      * @param serviceMonitorDtos
@@ -224,7 +216,8 @@ public class ServiceMonitorService {
         }
 
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
-            ServiceRestartStatusDto statusDto = timedCache.get(dto.getName());
+            String cacheKey = dto.getHostname() + "_" + dto.getServiceName();
+            ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
             if (Objects.isNull(statusDto)) {
                 continue;
             }
@@ -236,6 +229,63 @@ public class ServiceMonitorService {
                 } else {
                     // 否则替换状态为RESTARTING
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
+                    dto.setUptime(0L);
+                }
+            }
+        }
+    }
+
+
+    private List<String> getActiveHostNameList(String hostName) {
+        List<String> hostNameList = new ArrayList<>();
+
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        // 忽略DOWN状态的节点查询
+        List<String> activeHostNames = modelPage.getList().stream()
+                .filter(m -> Objects.equals(CloudPlatformEnum.UP.getState(), m.getState()))
+                .map(HypervisorBO::getName)
+                .collect(Collectors.toList());
+
+        if (CollectionUtil.isNotEmpty(activeHostNames)) {
+            if (StringUtils.isNotBlank(hostName)) {
+                if (activeHostNames.contains(hostName)) {
+                    hostNameList.add(hostName);
+                }
+            } else {
+                hostNameList.addAll(activeHostNames);
+            }
+        }
+
+        return hostNameList;
+    }
+
+
+    /**
+     * 判断是否禁用重启按钮，该方法需要在processRestartingStatus()方法之后调用
+     * 如果某个服务在限制列表中，且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
+     * @param serviceMonitorDtos
+     * @param monitorProbes
+     */
+    private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<MonitorConfig.MonitorProbe> monitorProbes) {
+        List<String> allRestrictSrvs = new ArrayList<>();
+        monitorProbes.forEach(p -> {
+            if (CollectionUtil.isNotEmpty(p.getRestartRestrictList())) {
+                allRestrictSrvs.addAll(p.getRestartRestrictList());
+            }
+        });
+
+        for (ServiceMonitorDto dto : serviceMonitorDtos) {
+            dto.setDisableRestart(Boolean.FALSE);
+
+            if (Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), dto.getState())) {
+                // 重启中，重启按钮置灰
+                dto.setDisableRestart(Boolean.TRUE);
+            }
+
+            if (CollectionUtil.isNotEmpty(allRestrictSrvs)) {
+                if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) && allRestrictSrvs.contains(dto.getName())) {
+                    // 状态为RUNNING，且在限制列表中，则禁止重启，既disableRestart=true
+                    dto.setDisableRestart(Boolean.TRUE);
                 }
             }
         }

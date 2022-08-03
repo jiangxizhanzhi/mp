@@ -79,7 +79,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private SceneSnapshotService sceneSnapshotService;
 
-    private CsceneSpecialService csceneSpecialService ;
+    private CsceneSpecialService csceneSpecialService;
+
+    private CsceneSnapshotService csceneSnapshotService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -187,6 +189,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
                          SceneSnapshotService sceneSnapshotService,
                          CsceneSpecialService csceneSpecialService,
+                         CsceneSnapshotService csceneSnapshotService,
                          CsceneModelFields csceneModelFields) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
@@ -197,6 +200,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneInstanceMapper(csceneInstanceMapper);
         setSceneSnapshotService(sceneSnapshotService);
         setCsceneSpecialService(csceneSpecialService);
+        setCsceneSnapshotService(csceneSnapshotService);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
@@ -308,15 +312,19 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (flag) {
             // 尝试该场景模板建立的快照
             TaskCommon.executeTask(() -> {
-                String configId = getSceneConfigId(id);
-                this.deleteSceneSnapshots(configId);
+                this.deleteSceneSnapshots(id);
             });
         }
         return new ServiceResult<>(flag);
     }
 
-    private void deleteSceneSnapshots(String sceneConfigId) {
-        var snapshots = sceneSnapshotService.getElementSnapshots(sceneConfigId).getSource();
+    private void deleteSceneSnapshots(String csceneId) {
+        var csceneSnapshots = csceneSnapshotService.getCsceneSnapshot(csceneId).getSource();
+        if (CollectionUtils.isEmpty(csceneSnapshots)) {
+            return;
+        }
+        var snapshotIds = csceneSnapshots.stream().map(s -> s.getSnapshotId()).collect(Collectors.toList());
+        var snapshots = sceneSnapshotService.getElementSnapshots(snapshotIds).getSource();
         if (CollectionUtils.isNotEmpty(snapshots)) {
             Set<String> names = new HashSet<>();
             Set<String> sourceNames = new HashSet<>();
@@ -361,6 +369,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
                         }, true);
                         sceneSnapshotService.deleteElementSnapshot(snapshot.getId());
+                        csceneSnapshotService.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
                         if (name2Model.containsKey(snapshot.getSourceName())) {
                             queue.add(name2Model.get(snapshot.getSourceName()));
                         }
@@ -432,12 +441,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
-        if (createContext.getReferenceMetaData() != null) {
-            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
-        }
         if (createContext.getReferenceType() != null) {
             csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
+        if (createContext.getReferenceMetaData() != null) {
+            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
@@ -484,12 +493,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
-        if (createContext.getReferenceMetaData() != null) {
-            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene);
-        }
         if (createContext.getReferenceType() != null) {
             csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
+        if (createContext.getReferenceMetaData() != null) {
+            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }

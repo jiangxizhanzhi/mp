@@ -48,7 +48,8 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-    max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:1GB}
+    max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
+    max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
     max-row-length: ${LOG_FILE_MAX_ROW_LENGTH:2000}
   logback:
     rollingpolicy:
@@ -92,6 +93,7 @@ mp:
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:} #公网端口
+    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
@@ -102,15 +104,18 @@ mp:
           launch-id: 093f61683e1a4e3fbe80664e791ea001
           interval: 180s
           service-list: chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb.service,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd,openstack-nova-api,openstack-nova-scheduler,openstack-nova-conductor,openstack-nova-novncproxy,openstack-nova-serialproxy,openstack-nova-compute,neutron-server,neutron-openvswitch-agent,neutron-dhcp-agent,neutron-metadata-agent,neutron-l3-agent,openstack-glance-api,openstack-cinder-api,openstack-cinder-volume
+          restart-restrict-list: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST_1:chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd}
         - probe-name: monitor_cp_service.py
           launch-id: 093f6512519d49b2986819e29e4ba002
           interval: 180s
           service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql
+          restart-restrict-list: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST_2:docker,containerd,adaptation,fastdfs,mariadb-docker,rabbitmq,redis}
       biz_srv_monitors:
         - probe-name: monitor_biz_service.py
           launch-id: 093fc7abba264d38a022a4c143d6a003
           interval: 180s
-          service-list: mp,mp_es,wazuh-kibana,wazuh-manager,ad,bc,drm,PY-HOST
+          service-list: mp,mp_es,wazuh-manager,ad,bc,drm,PY-HOST
+          restart-restrict-list: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:mp,mp_es,wazuh-manager}
   situationaware:
     arkime:
       cpcloud-container-create-url: http://${ip.cp}:11111/v1
@@ -185,10 +190,12 @@ mp:
     delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
     default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
     enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
+    link_status_enabled: ${MP_LINK_STATUS_ENABLED:true}
     link_status_refresh_period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
     link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
     link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
     link_status_hold_size: ${MP_LINK_STATUS_HOLD_SIZE:200}
+    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}

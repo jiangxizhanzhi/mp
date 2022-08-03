@@ -23,6 +23,9 @@ public class CsceneCreateInstanceRequest extends CsceneActionRequest {
     @ApiModelProperty(value = "场景模板引用类型")
     private Integer referenceType;
 
+    @ApiModelProperty(value = "场景名称")
+    private String name;
+
     @ApiModelProperty(value = "场景模板数据")
     private CsceneBO cscene;
 
@@ -37,6 +40,7 @@ public class CsceneCreateInstanceRequest extends CsceneActionRequest {
         csceneInstanceCreateContextBO.setReferenceType(referenceType);
         csceneInstanceCreateContextBO.setCscene(cscene);
         csceneInstanceCreateContextBO.setContext(context);
+        csceneInstanceCreateContextBO.setName(name);
         return csceneInstanceCreateContextBO;
     }
 

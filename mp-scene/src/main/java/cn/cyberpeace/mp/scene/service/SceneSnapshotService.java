@@ -23,33 +23,21 @@ public class SceneSnapshotService {
         this.snapshotMapper = snapshotMapper;
     }
 
-    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId) {
+    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(List<String> ids) {
         var list = snapshotMapper.list(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
+                .filterIn(SceneElementSnapshotModel::getId, ids.toArray(new String[]{}))
                 .reverseOrderBy(SceneElementSnapshotModel::getPk));
         return new ServiceResult<>(list);
-    }
-
-    public ServiceResult<List<SceneElementSnapshotModel>> getElementSnapshots(String sceneConfigId, String nodeId) {
-        var list = snapshotMapper.list(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
-                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
-                .reverseOrderBy(SceneElementSnapshotModel::getPk));
-        return new ServiceResult<>(list);
-    }
-
-    public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String sceneConfigId, String nodeId, String addressContent) {
-        var model = snapshotMapper.first(new HumanCondition()
-                .filterEqual(SceneElementSnapshotModel::getSceneConfig, sceneConfigId)
-                .filterEqual(SceneElementSnapshotModel::getSceneElement, nodeId)
-                .filterContains(SceneElementSnapshotModel::getAddress, addressContent)
-                .reverseOrderBy(SceneElementSnapshotModel::getPk));
-        return new ServiceResult<>(model);
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String snapshotId) {
         boolean deleted = snapshotMapper.delete(snapshotId);
         return new ServiceResult<>(deleted);
+    }
+
+    public ServiceResult<SceneElementSnapshotModel> getElementSnapshot(String snapshotId) {
+        var result = snapshotMapper.get(snapshotId);
+        return new ServiceResult<>(result);
     }
 
 }

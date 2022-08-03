@@ -33,7 +33,15 @@ public class MonitorConfig {
 
         private String interval;
 
+        /**
+         * 服务列表
+         */
         private String serviceList;
+
+        /**
+         * 该列表中的服务：正常状态下不允许重启，异常状态下才允许重启
+         */
+        private List<String> restartRestrictList;
     }
 
 }

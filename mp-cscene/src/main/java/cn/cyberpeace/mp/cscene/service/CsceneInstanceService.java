@@ -162,7 +162,10 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     private CsceneMapper csceneMapper;
 
     @Resource
-    private SceneSnapshotService sceneSnapshotService ;
+    private SceneSnapshotService sceneSnapshotService;
+
+    @Resource
+    private CsceneSnapshotService csceneSnapshotService;
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
@@ -1054,15 +1057,48 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> snapshotElement(String id, String nodeId, String snapshotName, String description, CsceneContextBO context) {
-        CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+        // 校验快照名长度、是否重复等
+        if (StringUtils.isEmpty(snapshotName)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        if (snapshotName.length() > 255) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_TOO_LONG);
+        }
+        if (description != null && description.length() > 1024) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_DESC_TOO_LONG);
+        }
+        var queryInstance = this.get(id).getSource();
+        if (queryInstance == null || queryInstance.getObj() == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        var csceneInstance = queryInstance.getObj();
+        String csceneId = csceneInstance.getCscene();
+        String csceneInstanceId = csceneInstance.getId();
+        var checkNameDuplicated = csceneSnapshotService.checkSnapshotName(csceneId, csceneInstanceId, nodeId, snapshotName).getSource();
+        if (!Boolean.TRUE.equals(checkNameDuplicated)) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_DUPLICATED);
+        }
+
+        // 先保存cscene中的关联信息
+        String snapshotId = csceneSnapshotService.saveCsceneSnapshot(csceneId, csceneInstanceId, nodeId, snapshotName).getSource();
+
+        // 异步创建快照
         ElementTaskPool.getInstance().executeTask(() -> {
+            // 打快照
+            CsceneInstanceHandler instanceHandler = new CsceneInstanceHandler(id, context, true);
+            boolean result = instanceHandler.snapshotElement(nodeId, snapshotId, snapshotName, description);
+
+            // 更新场景模板靶标的快照、cscene中的关联信息
             var sceneInfo = this.getSceneInfo(id);
-            if (StringUtils.isNotEmpty(sceneInfo.getSceneId()) && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
-                boolean result = instanceHandler.snapshotElement(nodeId, snapshotName, description, sceneInfo.getSceneConfigId());
+            if (StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
                 if (result) {
-                    var list = sceneSnapshotService.getElementSnapshots(sceneInfo.getSceneConfigId(), nodeId).getSource();
-                    if (CollectionUtils.isNotEmpty(list)) {
-                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(list.get(0).getAddress()).getImageName());
+                    var model = sceneSnapshotService.getElementSnapshot(snapshotId).getSource();
+                    if (model != null) {
+                        scenePluginCloudSceneConfigService.updateElementImage(sceneInfo.getSceneConfigId(), nodeId, SnapshotAddressUtils.parseAddress(model.getAddress()).getImageName());
+                        var parseResult = SnapshotAddressUtils.parseAddress(model.getAddress());
+                        csceneSnapshotService.updateCsceneSnapshotRelativeInfo(snapshotId, parseResult.getSnapshotUuid(), model.getSourceName());
+                    } else {
+                        log.error("do not find snapshot from scene snapshot , id is {}", snapshotId);
                     }
                 }
             }
@@ -1095,18 +1131,26 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     public ServiceResult<Boolean> deleteElementSnapshot(String csceneId, String nodeId, String snapshotId) {
+        // 校验场景是否存在、快照是否在当前场景模板下
+        var queryInstance = this.get(csceneId).getSource();
+        if (queryInstance == null || queryInstance.getObj() == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        var csceneInstance = queryInstance.getObj();
+        var csceneSnapshot = csceneSnapshotService.getCsceneSnapshot(csceneInstance.getCscene(), nodeId, snapshotId).getSource();
+        if (csceneSnapshot == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NOT_CURRENT_SCENE);
+        }
+        var snapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
+        if (snapshot == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NOT_CURRENT_SCENE);
+        }
         SceneInfo sceneInfo = this.getSceneInfo(csceneId);
         if (sceneInfo == null || StringUtils.isEmpty(sceneInfo.getSceneId()) || StringUtils.isEmpty(sceneInfo.getSceneConfigId())) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        String sceneId = sceneInfo.getSceneId();
-        String sceneConfigId = sceneInfo.getSceneConfigId();
-        var snapshot = sceneSnapshotService.getElementSnapshot(sceneConfigId, nodeId, snapshotId).getSource();
-        if (snapshot == null) {
-            return new ServiceResult<>(true);
-        }
-
+        // 校验快照是否被场景和场景模板引用
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
         var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
@@ -1120,7 +1164,12 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_IN_USE.format(StringUtils.join(instanceNames, ",")));
         }
 
-        return scenePluginCloudSceneService.deleteElementSnapshot(sceneConfigId, sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName());
+        String sceneId = sceneInfo.getSceneId();
+        var result = scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName()).getSource();
+        if (result) {
+            csceneSnapshotService.deleteCsceneSnapshotRelativeInfo(csceneInstance.getCscene(), nodeId, snapshotId);
+        }
+        return new ServiceResult<>(result);
     }
 
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {

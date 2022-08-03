@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.devops.cluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -40,6 +41,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         try {
             initRegisterService.register(getUrl());
+            initRegisterService.initTarget();
             //
 
             TaskCommon.executeTask(() -> {
@@ -54,8 +56,8 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
                 log.info("syncDir do ScenePluginCollectionInit end");
             });
 
-        }catch (Exception e){
-            log.error("ServerConfigListener onApplicationEvent error : {} ",e);
+        } catch (Exception e) {
+            log.error("ServerConfigListener onApplicationEvent error : {} ", ExceptionUtils.getStackTrace(e));
         }
     }
 }

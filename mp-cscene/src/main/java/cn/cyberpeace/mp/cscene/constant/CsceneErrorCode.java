@@ -8,6 +8,10 @@ public enum CsceneErrorCode implements ErrorCode {
     SCENE_USING_NODE_LIMIT("MP-110202", "scene_using_node_limit"),
     ENTITY_HAS_BEEN_USED("MP-110203", "entity_has_been_used"),
     SNAPSHOT_IN_USE("MP-110204", "snapshot_in_use"),
+    SNAPSHOT_NAME_TOO_LONG("MP-110205", "snapshot_name_too_long"),
+    SNAPSHOT_DESC_TOO_LONG("MP-110206", "snapshot_desc_too_long"),
+    SNAPSHOT_NAME_DUPLICATED("MP-110207", "snapshot_name_duplicated"),
+    SNAPSHOT_NOT_CURRENT_SCENE("MP-110208", "snapshot_not_current_scene"),
 
 
 

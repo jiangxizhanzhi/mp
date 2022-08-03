@@ -103,6 +103,8 @@ public class ContainerController {
                     .referenceType(csceneNodeInfoBO.getReferenceType())
                     .event(csceneNodeInfoBO.getEvent())
                     .eventStatus(csceneNodeInfoBO.getEventStatus())
+                    .sceneStatus(csceneNodeInfoBO.getSceneStatus())
+                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(containerModel.getRunningTime())
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .vlanIdList(containerModel.getVlanIdList()).build();

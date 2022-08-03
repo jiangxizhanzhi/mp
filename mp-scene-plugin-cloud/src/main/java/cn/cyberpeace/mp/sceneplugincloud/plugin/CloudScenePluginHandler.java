@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -321,12 +322,12 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void snapshotElement(String nodeId, String snapshotName, String desc,String sceneConfigId) {
+    public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
         CloudPluginSceneElementBO element = getElement(nodeId);
         if (element == null) {
             throw new MpRuntimeException(SceneErrorCode.ELEMENT_NOT_EXIST);
         }
-        new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotName, desc, sceneConfigId);
+        new SnapshotHandler(this, getSceneHandler().getScene().getEvent()).snapshotElement(element, snapshotId, snapshotName, description);
     }
 
     public List<String> allocateOuterIps(String auxiliaryNetworkNodeId, int count) {
@@ -419,5 +420,52 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         this.getSceneHandler().addElementPortPlugin(PluginConstant.PLUGIN_KEY, portId, JsonCommon.beanToSnakeMap(pluginPort));
         // 处理辅助变量
         this.getSceneHandler().addPort(portId, srcPort.getElement());
+    }
+
+    @Override
+    public void correctData() {
+        super.correctData();
+        // 连接外部网络,而且开启公网映射,就打开端口映射
+        if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
+            getElementMap().forEach((id, element) -> {
+                if (CollectionUtils.isNotEmpty(element.getSrcElement().getPorts())) {
+                    element.getSrcElement().getPorts().forEach(p -> {
+                        var connectedElement = getPortConnectedSrcElement(p.getId());
+                        if (connectedElement != null) {
+                            var connectCloudElement = getElement(connectedElement.getId());
+                            if (connectCloudElement.getRole() != null &&
+                                    BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK == connectCloudElement.getRole()) {
+                                if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
+                                    Set<String> setedModes = new HashSet<>();
+                                    p.getAccessModes().forEach(mode -> {
+                                        if (!AccessMode.Protocol.CONSOLE.equals(mode.getProtocol())) {
+                                            boolean publicNetProxy = mode.getPublicNetProxy() != null ? mode.getPublicNetProxy() : CloudSingleton.cloudAppConfig.getPublicNetProxy();
+                                            if (publicNetProxy) {
+                                                String modeKey = this.getModeKey(mode.getProtocol(), String.valueOf(mode.getPort()), mode.getUsername(), mode.getPassword());
+                                                setedModes.add(modeKey);
+                                                mode.setProxy(true);
+                                            }
+                                        }
+                                    });
+                                    var cloudPort = getPort(p.getId());
+                                    if (cloudPort != null && CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
+                                        cloudPort.getAccessModes().forEach(mode -> {
+                                            String modeKey = this.getModeKey(mode.getProtocol(), String.valueOf(mode.getPort()), mode.getUsername(), mode.getPassword());
+                                            if (setedModes.contains(modeKey)) {
+                                                mode.setProxy(true);
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private String getModeKey(String protocol, String port, String user, String password) {
+        return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, user, password);
     }
 }
