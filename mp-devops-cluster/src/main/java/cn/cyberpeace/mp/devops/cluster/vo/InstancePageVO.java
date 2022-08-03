@@ -79,4 +79,7 @@ public class InstancePageVO extends BaseVO {
 
     @ApiModelProperty(value = "场景实例状态")
     private Integer sceneStatus;
+
+    @ApiModelProperty(value = "场景实例状态描述")
+    private String sceneStatusDesc;
 }

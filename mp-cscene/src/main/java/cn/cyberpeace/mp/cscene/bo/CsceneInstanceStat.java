@@ -53,6 +53,8 @@ public class CsceneInstanceStat {
     private Long sceneRunTime;
     @ApiModelProperty(value = "场景实例状态")
     private Integer sceneStatus;
+    @ApiModelProperty(value = "场景实例状态描述")
+    private String sceneStatusDesc;
 
     public String getEventMessage() {
         if (eventMessage != null && eventMessage.length() >= 1) {
