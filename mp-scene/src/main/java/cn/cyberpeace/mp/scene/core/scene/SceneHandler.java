@@ -702,13 +702,13 @@ public class SceneHandler extends BaseSceneHandler<
         overElementEvent(nodeId, SceneElementModel.Event.RESUME);
     }
 
-    public void snapshotElement(String nodeId,String snapshotId,String snapshotName,String description,String sceneConfigId) {
+    public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
         SceneElementBO element = getElement(nodeId);
         prepareElementEvent(element, SceneElementModel.Event.SNAPSHOT);
         startElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
         try {
             for (ScenePluginHandler plugin : getPlugins()) {
-                plugin.snapshotElement(nodeId,snapshotId, snapshotName, description,sceneConfigId);
+                plugin.snapshotElement(nodeId, snapshotId, snapshotName, description);
             }
         } catch (Exception e) {
             errorElement(nodeId, SceneElementModel.Event.SNAPSHOT, e.getMessage());
@@ -744,7 +744,7 @@ public class SceneHandler extends BaseSceneHandler<
             if (this.isTerminateEvent(getScene().getEvent()) && getScene().getEventStatus() == EventStatus.OVER) {
                 progressPercentageMap.remove(getSceneId());
                 return 100;
-            }else {
+            } else {
                 var percentage = progressPercentageMap.get(getSceneId());
                 if (percentage == null) {
                     return 5;

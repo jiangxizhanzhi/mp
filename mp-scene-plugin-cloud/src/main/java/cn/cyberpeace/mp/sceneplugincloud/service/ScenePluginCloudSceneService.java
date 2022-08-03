@@ -102,7 +102,7 @@ public class ScenePluginCloudSceneService {
     );
 
     @Resource
-    private SceneConfigService sceneConfigService ;
+    private SceneConfigService sceneConfigService;
 
     @Resource
     private CloudSceneStatCommon cloudSceneStatCommon;
@@ -111,7 +111,7 @@ public class ScenePluginCloudSceneService {
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
     @Resource
-    private SceneSnapshotService sceneSnapshotService ;
+    private SceneSnapshotService sceneSnapshotService;
 
     @Data
     @AllArgsConstructor
@@ -715,7 +715,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);
