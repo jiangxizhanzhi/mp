@@ -477,15 +477,19 @@ public class ScenePluginCloudSceneService {
             if (accessMode.getPublicNetProxy() != null) {
                 if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
                     String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
-                    String port = StringUtils.isNotEmpty(accessMode.getPublicNetProxyPort()) ? accessMode.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort());
+                    Integer port = accessMode.getPublicNetProxyPort() != null ? accessMode.getPublicNetProxyPort() : accessMode.getAccessPort();
                     formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), ip);
-                    formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), port);
+                    if (port != null) {
+                        formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
+                    }
                 }
             } else if (CloudSingleton.cloudAppConfig.getPublicNetProxy()) {
-                String port = StringUtils.isNotEmpty(CloudSingleton.cloudAppConfig.getPublicNetProxyPort()) ? CloudSingleton.cloudAppConfig.getPublicNetProxyPort()
-                        : String.valueOf(accessMode.getAccessPort());
                 formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), CloudSingleton.cloudAppConfig.getPublicNetProxyIp());
-                formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), port);
+                Integer port = CloudSingleton.cloudAppConfig.getPublicNetProxyPort() != null ? CloudSingleton.cloudAppConfig.getPublicNetProxyPort()
+                        : accessMode.getAccessPort();
+                if (port != null) {
+                    formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
+                }
             }
         }
         return formatUrl;

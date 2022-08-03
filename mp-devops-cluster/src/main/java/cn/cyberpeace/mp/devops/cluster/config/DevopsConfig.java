@@ -24,6 +24,8 @@ public class DevopsConfig {
      */
     private Integer diskAlarmPercent;
 
+    private Boolean publicNetProxyServer;
+
     /**
      * 公网开关
      */
@@ -37,5 +39,5 @@ public class DevopsConfig {
     /**
      * 公网端口
      */
-    private String publicNetProxyPort;
+    private Integer publicNetProxyPort;
 }

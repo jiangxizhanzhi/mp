@@ -64,6 +64,12 @@ public class SnapshotConvertModel extends BasePageConvertModel{
     @ApiModelProperty("场景名称")
     private String sceneName;
 
+    @ApiModelProperty("场景源模板id")
+    private String csceneId;
+
+    @ApiModelProperty("场景业务实例id")
+    private String csceneInstaceId;
+
     @ApiModelProperty("快速构建参数")
     private List<QuickCreateParam> quickCreateParams;
 
