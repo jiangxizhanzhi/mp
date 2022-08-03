@@ -518,9 +518,10 @@ public class AsyncPlatFlowTaskService {
                         .build();
                 flowPortMapper.create(flowPortModel);
 
+                String extNetId = externalNetId;
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
