@@ -298,6 +298,8 @@ public class ImagesController {
                 if (sceneInfo != null) {
                     m.setSceneName(sceneInfo.getName());
                     m.setSceneId(sceneInfo.getId());
+                    m.setCsceneInstaceId(sceneInfo.getId());
+                    m.setCsceneId(sceneInfo.getCsceneId());
                 } else {
                     m.setSceneId(null);
                 }

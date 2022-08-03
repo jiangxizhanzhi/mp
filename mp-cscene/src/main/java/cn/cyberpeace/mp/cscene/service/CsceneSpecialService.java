@@ -783,6 +783,7 @@ public class CsceneSpecialService {
             info.setName(model.getName());
             info.setCreateUser(model.getCreateUser());
             info.setId(model.getId());
+            info.setCsceneId(model.getCscene());
             result.put(model.getScene(), info);
         }
         return new ServiceResult<>(result);

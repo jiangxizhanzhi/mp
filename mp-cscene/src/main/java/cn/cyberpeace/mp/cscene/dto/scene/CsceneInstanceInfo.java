@@ -14,4 +14,5 @@ public class CsceneInstanceInfo {
     private String id;
     private String name;
     private String createUser;
+    private String csceneId;
 }
