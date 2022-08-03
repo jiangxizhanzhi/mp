@@ -80,6 +80,20 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listResult.getSource().getTotal())).asResult();
     }
 
+    @ApiOperation("新增流量集合信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
+    @PostMapping("/add")
+    public ServiceResult<FlowCollectionModel> add(@RequestBody @Validated FlowCollectionModel model) {
+        return flowCollectionService.addCollection(model);
+    }
+
+    @ApiOperation("更新流量集合信息")
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
+    @PatchMapping("/update")
+    public ServiceResult<FlowCollectionModel> update(@RequestBody @Validated FlowCollectionModel model) {
+        return flowCollectionService.updateCollection(model);
+    }
+
     @ApiOperation("根据集合id查询流量信息")
     @GetMapping("/detail/page")
     public ListObjServiceResult<FlowInfoModel> getByCollectionId(FlowCollectionRelQueryParams queryParams) {
@@ -96,14 +110,14 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("新增集合关联信息")
-    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量管理", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/collection_rel")
     public ServiceResult<Integer> addCollectionRel(@RequestBody @Validated AddFlowCollectionRelRequest request) {
         return flowCollectionService.addCollectionRel(request);
     }
 
     @ApiOperation("删除集合关联信息")
-    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
+    @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新流量管理", target = OpTargetEnums.FLOW_COLLECTION)
     @DeleteMapping("/collection_rel")
     public ServiceResult<Integer> delCollectionRel(@RequestBody @Validated DelFlowCollectionRelRequest request) {
         return flowCollectionService.delCollectionRel(request);
