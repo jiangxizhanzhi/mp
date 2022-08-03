@@ -52,9 +52,10 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
      * 异步批量新增网口
      * @param networkInfos
      * @param flowActuatorModel
+     * @param externalNetId
      */
     @Async
-    public void batchCreatePorts(List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel) {
+    public void batchCreatePorts(List<FlowNetworkInfo> networkInfos, FlowActuatorModel flowActuatorModel, String externalNetId) {
         log.info("=========== batch create ports start =============");
         if (CollectionUtils.isEmpty(networkInfos)) {
             log.error("【{}】batch create ports error for networkInfos is empty", flowActuatorModel.getTitle());
@@ -64,60 +65,64 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
         List<FlowNetworkInfo> createNetworkinfos = networkInfos.stream().collect(
                 Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(
                         Comparator.comparing(FlowNetworkInfo::getNetworkId))), ArrayList::new));
+//        // 过滤外部网络id
+//        createNetworkinfos = createNetworkinfos.stream().filter(networkInfo -> !networkInfo.getNetworkId().equals(externalNetId)).collect(Collectors.toList());
 
         List<FlowPortModel> flowPortModels = new ArrayList<>();
         createNetworkinfos.forEach(networkInfo -> {
             String networkId = networkInfo.getNetworkId();
-            try {
-                JSONObject addPortReq = new JSONObject();
-                addPortReq.put("network_id", networkId);
+            if (!externalNetId.equals(networkId)) {
+                try {
+                    JSONObject addPortReq = new JSONObject();
+                    addPortReq.put("network_id", networkId);
 
-                String serverMac = "";
-                String serverIp = "";
-                String serverPortId = "";
+                    String serverMac = "";
+                    String serverIp = "";
+                    String serverPortId = "";
 
-                String clientMac = "";
-                String clientIp = "";
-                String clientPortId = "";
+                    String clientMac = "";
+                    String clientIp = "";
+                    String clientPortId = "";
 
-                // pcap需要给trex虚拟机添加client网口
-                String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
-                                flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
-                JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
-                log.info("add client port response:{}", addTrexClientObj.toJSONString());
-                if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
-                    JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
-                    clientMac = clientDataObj.getString("mac_address");
-                    clientIp = clientDataObj.getString("fixed_ip");
-                    clientPortId = clientDataObj.getString("port_id");
+                    // pcap需要给trex虚拟机添加client网口
+                    String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
+                            flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
+                    JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
+                    log.info("add client port response:{}", addTrexClientObj.toJSONString());
+                    if (BaseConstants.SUCCESS_ZERO.equals(addTrexClientObj.getString(BaseConstants.STR_CODE))) {
+                        JSONObject clientDataObj = addTrexClientObj.getJSONObject(BaseConstants.STR_DATA);
+                        clientMac = clientDataObj.getString("mac_address");
+                        clientIp = clientDataObj.getString("fixed_ip");
+                        clientPortId = clientDataObj.getString("port_id");
 
-                    // 客户端和服务端共用一个网口
-                    serverMac = clientMac;
-                    serverIp = clientIp;
-                    serverPortId = clientPortId;
-                    networkInfo.setMac(clientMac);
-                } else {
-                    log.error("【{}】add client port error for networkId: {}", flowActuatorModel.getTitle(), networkId);
+                        // 客户端和服务端共用一个网口
+                        serverMac = clientMac;
+                        serverIp = clientIp;
+                        serverPortId = clientPortId;
+                        networkInfo.setMac(clientMac);
+                    } else {
+                        log.error("【{}】add client port error for networkId: {}", flowActuatorModel.getTitle(), networkId);
+                        throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
+                    }
+
+                    FlowPortModel flowPortModel = FlowPortModel.builder()
+                            .serverIp(serverIp)
+                            .serverMac(serverMac)
+                            .serverPortId(serverPortId)
+                            .serverGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .clientIp(clientIp)
+                            .clientMac(clientMac)
+                            .clientPortId(clientPortId)
+                            .clientGateway(networkInfo.getIp()) // 目标ip作为网关地址
+                            .networkId(networkId)
+                            .actuatorId(flowActuatorModel.getId())
+                            .build();
+
+                    flowPortModels.add(flowPortModel);
+                } catch (IOException e) {
+                    log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), networkId, e);
                     throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
                 }
-
-                FlowPortModel flowPortModel = FlowPortModel.builder()
-                        .serverIp(serverIp)
-                        .serverMac(serverMac)
-                        .serverPortId(serverPortId)
-                        .serverGateway(networkInfo.getIp()) // 目标ip作为网关地址
-                        .clientIp(clientIp)
-                        .clientMac(clientMac)
-                        .clientPortId(clientPortId)
-                        .clientGateway(networkInfo.getIp()) // 目标ip作为网关地址
-                        .networkId(networkId)
-                        .actuatorId(flowActuatorModel.getId())
-                        .build();
-
-                flowPortModels.add(flowPortModel);
-            } catch (IOException e) {
-                log.error("【{}】add flow port error for networkId: {}", flowActuatorModel.getTitle(), networkId, e);
-                throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
             }
         });
 
