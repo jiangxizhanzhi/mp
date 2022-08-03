@@ -49,7 +49,7 @@ logging:
   file:
     path: ${user.home}/logs
     max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
-    max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:950MB}
+    max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
     max-row-length: ${LOG_FILE_MAX_ROW_LENGTH:2000}
   logback:
     rollingpolicy:
