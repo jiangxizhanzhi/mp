@@ -102,7 +102,7 @@ public class ScenePluginCloudSceneService {
     );
 
     @Resource
-    private SceneConfigService sceneConfigService ;
+    private SceneConfigService sceneConfigService;
 
     @Resource
     private CloudSceneStatCommon cloudSceneStatCommon;
@@ -111,7 +111,7 @@ public class ScenePluginCloudSceneService {
     private CloudPluginSceneConnectionMapper cloudPluginSceneConnectionMapper;
 
     @Resource
-    private SceneSnapshotService sceneSnapshotService ;
+    private SceneSnapshotService sceneSnapshotService;
 
     @Data
     @AllArgsConstructor
@@ -477,15 +477,19 @@ public class ScenePluginCloudSceneService {
             if (accessMode.getPublicNetProxy() != null) {
                 if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
                     String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
-                    String port = StringUtils.isNotEmpty(accessMode.getPublicNetProxyPort()) ? accessMode.getPublicNetProxyPort() : String.valueOf(accessMode.getAccessPort());
+                    Integer port = accessMode.getPublicNetProxyPort() != null ? accessMode.getPublicNetProxyPort() : accessMode.getAccessPort();
                     formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), ip);
-                    formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), port);
+                    if (port != null) {
+                        formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
+                    }
                 }
             } else if (CloudSingleton.cloudAppConfig.getPublicNetProxy()) {
-                String port = StringUtils.isNotEmpty(CloudSingleton.cloudAppConfig.getPublicNetProxyPort()) ? CloudSingleton.cloudAppConfig.getPublicNetProxyPort()
-                        : String.valueOf(accessMode.getAccessPort());
                 formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), CloudSingleton.cloudAppConfig.getPublicNetProxyIp());
-                formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), port);
+                Integer port = CloudSingleton.cloudAppConfig.getPublicNetProxyPort() != null ? CloudSingleton.cloudAppConfig.getPublicNetProxyPort()
+                        : accessMode.getAccessPort();
+                if (port != null) {
+                    formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
+                }
             }
         }
         return formatUrl;
@@ -715,7 +719,7 @@ public class ScenePluginCloudSceneService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteElementSnapshot(String sceneConfigId, String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
+    public ServiceResult<Boolean> deleteElementSnapshot(String sceneId, String nodeId, String snapshotId, String snapshotUuid, String snapshotName) {
         var sceneHandler = new SceneHandler(sceneId, null, false, null);
         CloudScenePluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
         var node = pluginHandler.getElement(nodeId);

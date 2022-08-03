@@ -298,6 +298,8 @@ public class ImagesController {
                 if (sceneInfo != null) {
                     m.setSceneName(sceneInfo.getName());
                     m.setSceneId(sceneInfo.getId());
+                    m.setCsceneInstaceId(sceneInfo.getId());
+                    m.setCsceneId(sceneInfo.getCsceneId());
                 } else {
                     m.setSceneId(null);
                 }
@@ -337,6 +339,7 @@ public class ImagesController {
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
         if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
+
             return ServiceResult.success(true);
         } else {
             return ServiceResult.fail(baseResult.getMessage());

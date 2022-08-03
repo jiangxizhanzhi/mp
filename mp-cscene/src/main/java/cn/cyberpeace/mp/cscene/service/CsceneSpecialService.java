@@ -351,6 +351,8 @@ public class CsceneSpecialService {
                         // 未删除场景的运行时间=当前时刻 - 创建时刻
                         s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
                     }
+                    // 转换场景实例状态
+                    s.setSceneStatus(eventStatus2SceneStatus(s.getEvent(), s.getEventStatus()));
                 });
             }
             total = csceneInstanceMapper.total(humanCondition);
@@ -360,6 +362,56 @@ public class CsceneSpecialService {
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(data, total));
+    }
+
+    /**
+     * 转换场景实例状态
+     * @param event
+     * @param eventStatus
+     * @return 场景实例状态
+     */
+    public Integer eventStatus2SceneStatus(Integer event, Integer eventStatus) {
+        if (EventStatus.ABNORMAL == eventStatus) {
+            return CsceneInstanceStatQueryParams.SceneStatus.ERROR;
+        }
+        if (SceneModel.Event.INITIATE == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.CREATING;
+        }
+        if ((SceneModel.Event.CREATE == event && (EventStatus.START == eventStatus || EventStatus.IN_PROGRESS == eventStatus))) {
+            return CsceneInstanceStatQueryParams.SceneStatus.CREATING;
+        }
+        if (SceneModel.Event.DEFAULT == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.QUEUE;
+        }
+        if (SceneModel.Event.CREATE == event && EventStatus.OVER == eventStatus) {
+            return CsceneInstanceStatQueryParams.SceneStatus.RUNNING;
+        }
+        if (SceneModel.Event.UNPAUSE == event && EventStatus.OVER == eventStatus) {
+            return CsceneInstanceStatQueryParams.SceneStatus.RUNNING;
+        }
+        if (SceneModel.Event.RESUME == event && EventStatus.OVER == eventStatus) {
+            return CsceneInstanceStatQueryParams.SceneStatus.RUNNING;
+        }
+        if (SceneModel.Event.START == event || SceneModel.Event.RESTART == event || SceneModel.Event.SNAPSHOT == event ||
+                SceneModel.Event.MODIFY == event || SceneModel.Event.STOP == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.RUNNING;
+        }
+        if (SceneModel.Event.PAUSE == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.PAUSE;
+        }
+        if (SceneModel.Event.UNPAUSE == event && (EventStatus.START == eventStatus || EventStatus.IN_PROGRESS == eventStatus)) {
+            return CsceneInstanceStatQueryParams.SceneStatus.PAUSE;
+        }
+        if (SceneModel.Event.SUSPEND == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.SUSPEND;
+        }
+        if (SceneModel.Event.RESUME == event && (EventStatus.START == eventStatus || EventStatus.IN_PROGRESS == eventStatus)) {
+            return CsceneInstanceStatQueryParams.SceneStatus.SUSPEND;
+        }
+        if (SceneModel.Event.DELETE == event) {
+            return CsceneInstanceStatQueryParams.SceneStatus.DELETED;
+        }
+        return null;
     }
 
     /**
@@ -658,6 +710,8 @@ public class CsceneSpecialService {
         }
         Map<String, CsceneNodeInfoBO> result = new HashMap<>();
         infos.forEach(info -> {
+            // 转换场景实例状态
+            info.setSceneStatus(eventStatus2SceneStatus(info.getEvent(), info.getEventStatus()));
             result.put(info.getResourceName(), info);
         });
         return new ServiceResult<>(result);
@@ -783,6 +837,7 @@ public class CsceneSpecialService {
             info.setName(model.getName());
             info.setCreateUser(model.getCreateUser());
             info.setId(model.getId());
+            info.setCsceneId(model.getCscene());
             result.put(model.getScene(), info);
         }
         return new ServiceResult<>(result);

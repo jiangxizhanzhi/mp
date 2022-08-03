@@ -369,7 +369,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                         new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
                         }, true);
                         sceneSnapshotService.deleteElementSnapshot(snapshot.getId());
-                        csceneSnapshotService.deleteByCscene(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+                        csceneSnapshotService.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
                         if (name2Model.containsKey(snapshot.getSourceName())) {
                             queue.add(name2Model.get(snapshot.getSourceName()));
                         }
