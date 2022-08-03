@@ -106,6 +106,7 @@ public class ContainerController {
                     .sceneStatus(csceneNodeInfoBO.getSceneStatus())
                     .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(containerModel.getRunningTime())
+                    .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .vlanIdList(containerModel.getVlanIdList()).build();
         }).collect(Collectors.toList());
     }
