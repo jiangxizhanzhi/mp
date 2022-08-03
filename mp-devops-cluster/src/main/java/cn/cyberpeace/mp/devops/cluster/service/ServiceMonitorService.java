@@ -274,16 +274,17 @@ public class ServiceMonitorService {
             }
         });
 
-        if (CollectionUtil.isEmpty(allRestrictSrvs)) {
-            return;
-        }
-
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
             dto.setDisableRestart(Boolean.FALSE);
-            if (allRestrictSrvs.contains(dto.getName())) {
-                // 在限制列表中
-                if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) || Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), dto.getState())) {
-                    // 且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
+
+            if (Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), dto.getState())) {
+                // 重启中，重启按钮置灰
+                dto.setDisableRestart(Boolean.TRUE);
+            }
+
+            if (CollectionUtil.isNotEmpty(allRestrictSrvs)) {
+                if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) && allRestrictSrvs.contains(dto.getName())) {
+                    // 状态为RUNNING，且在限制列表中，则禁止重启，既disableRestart=true
                     dto.setDisableRestart(Boolean.TRUE);
                 }
             }
