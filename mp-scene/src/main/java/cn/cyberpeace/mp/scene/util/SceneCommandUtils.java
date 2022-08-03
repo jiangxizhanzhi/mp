@@ -66,7 +66,7 @@ public class SceneCommandUtils {
                 parsedCommands.add(CommandUtils.linuxCdDir(nodeFileDir));
                 parsedCommands.add(relativeCommand);
 
-                parsedCommands.addAll(parseDirCommands(command, CommandUtils.LINUX_PATH_DELIMITER));
+                parsedCommands.addAll(parseDirCommands(relativeCommand, CommandUtils.LINUX_PATH_DELIMITER));
             }
         } else {
             parsedCommands.add(command);
@@ -83,7 +83,7 @@ public class SceneCommandUtils {
         String[] commands = StringUtils.split(command, pathDelimiter);
         for (int i = 0; i < commands.length; i++) {
             if (i == commands.length - 1) {
-                result.add(commands[i]);
+                result.add("./" + commands[i]);
             } else {
                 result.add(CommandUtils.linuxCdDir(commands[i]));
             }
