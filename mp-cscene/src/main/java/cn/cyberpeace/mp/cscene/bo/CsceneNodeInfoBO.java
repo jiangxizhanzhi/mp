@@ -25,4 +25,5 @@ public class CsceneNodeInfoBO {
     private Integer eventStatus;
     private String userId;
     private String processMessage;
+    private Integer sceneStatus;
 }
