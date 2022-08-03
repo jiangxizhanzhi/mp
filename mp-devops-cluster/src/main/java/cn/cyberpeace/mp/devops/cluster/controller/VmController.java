@@ -102,6 +102,7 @@ public class VmController {
                     .event(csceneNodeInfoBO.getEvent())
                     .eventStatus(csceneNodeInfoBO.getEventStatus())
                     .sceneStatus(csceneNodeInfoBO.getSceneStatus())
+                    .sceneStatusDesc(csceneNodeInfoBO.getSceneStatusDesc())
                     .runningTime(instanceModel.getRunningTime())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
