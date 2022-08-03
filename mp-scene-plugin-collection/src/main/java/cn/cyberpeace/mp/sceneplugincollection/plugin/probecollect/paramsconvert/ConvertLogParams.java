@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert
 
 import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.ProbeConstant;
-import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneLogProbeLocationModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 
 import java.util.ArrayList;
@@ -21,11 +21,11 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
 
     private String systemType;
 
-    private Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap;
+    private Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap;
 
     private static final String LOG_FORMAT_SYSLOG = "syslog";
 
-    public ConvertLogParams(Probe probe, String systemType, Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
+    public ConvertLogParams(Probe probe, String systemType, Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
         this.probe = probe;
         this.systemType = SystemTypeCommandUtils.getOsType(systemType);
         this.locationMap = locationMap;
@@ -55,17 +55,19 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
         } else {
             // 探针id和系统类型组成key取日志探针参数
             String key = probe.getId() + "_" + systemType;
-            List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMap.get(key);
-            if (locationModels == null || locationModels.isEmpty()) {
+            List<WazuhLogProbeLocationConfig.ProbeLocation> locations = locationMap.get(key);
+            if (locations == null || locations.isEmpty()) {
                 return new ArrayList<>();
             }
-            for (CollectionPluginSceneLogProbeLocationModel locationModel : locationModels) {
+            for (WazuhLogProbeLocationConfig.ProbeLocation location : locations) {
                 WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
                 logParam.setId(probe.getId() + "_" + i++);
                 logParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-                logParam.setLogFormat(locationModel.getLogFormat());
-                logParam.setLocation(locationModel.getLocation());
-                logParams.add(logParam);
+                logParam.setLogFormat(location.getLogFormat());
+                for (String l : location.getLocation()) {
+                    logParam.setLocation(l);
+                    logParams.add(logParam);
+                }
             }
         }
         return logParams;

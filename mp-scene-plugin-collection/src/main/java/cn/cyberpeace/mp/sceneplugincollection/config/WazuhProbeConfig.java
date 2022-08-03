@@ -13,7 +13,7 @@ import java.util.List;
  * @Date： 2022.3.23 15:49
  */
 @Component
-@ConfigurationProperties(prefix = "mp.collection")
+@ConfigurationProperties(prefix = "mp.collection.probe")
 @Slf4j
 @Data
 public class WazuhProbeConfig {

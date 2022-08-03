@@ -2,10 +2,8 @@ package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
-import cn.cyberpeace.mp.scene.util.SystemTypeCommandUtils;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.HostRoute;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -15,9 +13,9 @@ import cn.cyberpeace.mp.sceneplugincloud.util.IpUtils;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincollection.bo.base.Probe;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.constant.PluginConstant;
-import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneLogProbeLocationModel;
 import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRouterPortModel;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertFileParams;
@@ -26,7 +24,6 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.paramsconvert.ConvertScriptParams;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
-import cn.cyberpeace.mp.sceneplugincollection.repository.CollectionPluginSceneLogProbeLocationMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -39,6 +36,8 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class InitiateHandler extends HandlerCommon {
+
+    private static WazuhLogProbeLocationConfig locationConfig;
 
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
@@ -172,7 +171,7 @@ public class InitiateHandler extends HandlerCommon {
             // 初始化安装探针脚本
             var collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
-                Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = this.getLocationMap();
+                Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap = this.getLocationMap();
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                         .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 probeCollectionElements.forEach(collectionElement -> {
@@ -211,7 +210,7 @@ public class InitiateHandler extends HandlerCommon {
      * @return 探针采集参数
      */
     private WazuhControl.ControlConfigParam getControlConfigParam(List<Probe> probes, String agentName, String systemType
-            , Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap) {
+            , Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap) {
         List<WazuhControl.ControlProbeParam> customProbeParams = new ArrayList<>();
         List<WazuhControl.ControlRegistryModifyParam> registryParams = new ArrayList<>();
         List<WazuhControl.ControlFileModifyParam> fileParams = new ArrayList<>();
@@ -255,24 +254,25 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     /**
-     * 获取日志采集探针Map
+     * 获取日志采集探针参数Map
      *
      * @return 日志采集探针参数Map
      */
-    private Map<String, List<CollectionPluginSceneLogProbeLocationModel>> getLocationMap() {
-        var locationMapper = BeanCommon.getBean(CollectionPluginSceneLogProbeLocationMapper.class);
-        List<CollectionPluginSceneLogProbeLocationModel> locationModels = locationMapper.list(new HumanCondition());
-        if (locationModels == null || locationModels.isEmpty()) {
+    private Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> getLocationMap() {
+        if (locationConfig == null) {
+            locationConfig = BeanCommon.getBean(WazuhLogProbeLocationConfig.class);
+        }
+        if (CollectionUtils.isEmpty(locationConfig.getLocations())) {
             return new HashMap<>();
         }
-        Map<String, List<CollectionPluginSceneLogProbeLocationModel>> locationMap = new HashMap<>();
+        Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap = new HashMap<>();
         // 探针id和系统类型为key，探针参数为value
-        locationModels.forEach(locationModel -> {
-            String key = locationModel.getProbeId() + "_" + locationModel.getOsType();
+        locationConfig.getLocations().forEach(location -> {
+            String key = location.getProbeId() + "_" + location.getOsType();
             if (!locationMap.containsKey(key)) {
                 locationMap.put(key, new ArrayList<>());
             }
-            locationMap.get(key).add(locationModel);
+            locationMap.get(key).add(location);
         });
         return locationMap;
     }
