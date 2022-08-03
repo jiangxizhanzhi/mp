@@ -4,11 +4,19 @@ import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
 @ModelClass(FlowCollectionModel.class)
 public interface FlowCollectionMapper extends BaseModelMapper<FlowCollectionModel> {
+
+    /**
+     * 根据名称查询
+     * @param title
+     * @return
+     */
+    FlowCollectionModel selectByTitle(@Param("title") String title);
 
 }
