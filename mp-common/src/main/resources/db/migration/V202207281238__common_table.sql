@@ -3,6 +3,7 @@ CREATE TABLE mp_common_option (
     `pk` int NOT NULL AUTO_INCREMENT COMMENT '主键',
     `id` varchar(64) NOT NULL COMMENT 'id',
     `code` varchar(255) NOT NULL COMMENT '选项编码',
+    `parent_code` varchar(255) NOT NULL DEFAULT '' COMMENT '父级选项编码',
     `zh_name` varchar(255) NOT NULL COMMENT '选项中文名称',
     `en_name` varchar(255) NOT NULL COMMENT '选项英文名称',
     `sort` int(10) NOT NULL COMMENT '排序字段',

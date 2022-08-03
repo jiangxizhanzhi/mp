@@ -382,16 +382,13 @@ public class RealEquipmentController {
 
     @GetMapping("/position")
     @ApiOperation(value = "查询实装设备的在位状态")
-    public ServiceResult<OptionBO> getPositionStatus() {
-        List<OptionBO> boList = optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_POSITION);
-        return ServiceResult.success(boList);
+    public ServiceResult<List<OptionBO>> getPositionStatus() {
+        return optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_POSITION);
     }
 
     @GetMapping("/use")
     @ApiOperation(value = "实装设备的使用状态")
-    public ServiceResult<OptionBO> getUseStatus() {
-        List<OptionBO> boList =
-                optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE);
-        return ServiceResult.success(boList);
+    public ServiceResult<List<OptionBO>> getUseStatus() {
+        return optionService.getOptionsByType(DevopsClusterConstant.MP_COMMON_OPTION_TYPE_DEVOPS_CLUSTER_USE);
     }
 }
