@@ -2,4 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.flow.repository.FlowCollectionMapper">
 
+    <select id="selectByTitle" resultType="cn.cyberpeace.mp.flow.model.FlowCollectionModel">
+        select f.* from mp_flow_collection f
+        <where>
+            f.title = #{title}
+        </where>
+    </select>
+
 </mapper>
