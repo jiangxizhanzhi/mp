@@ -129,6 +129,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
 
                 ServiceMonitorDto dto = ServiceMonitorDto.builder()
                         .name(name)
+                        .serviceName(name)
                         .launchId(launchId)
                         .uptime(uptimeSec)
                         .ip(ip)

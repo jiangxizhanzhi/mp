@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.vo.BizServiceMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
+import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
@@ -31,7 +32,6 @@ import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -55,8 +55,9 @@ public class ServiceMonitorService {
 
     private final SystemAlarmMapper systemAlarmMapper;
 
-    @Autowired
-    private MonitorScriptControlService monitorScriptControlService;
+    private final MonitorScriptControlService monitorScriptControlService;
+
+    private final MonitorConfig monitorConfig;
 
     private final ImagesConverter imagesConverter;
 
@@ -74,6 +75,8 @@ public class ServiceMonitorService {
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryBizServiceMonitorData(hostNameList);
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
+        // 处理重启禁用状态
+        processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         this.changeServiceName(serviceMonitorDtos);
@@ -100,10 +103,11 @@ public class ServiceMonitorService {
         List<ServiceMonitorDto> serviceMonitorDtos = serviceMonitorDataCollectionService.queryCPServiceMonitorData(hostNameList);
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
+        // 处理重启禁用状态
+        processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
         this.changeServiceName(serviceMonitorDtos);
-
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -200,6 +204,7 @@ public class ServiceMonitorService {
     }
 
 
+
     /**
      * 如果在重启有效期内，状态为不正常的状态的，统一替换为重启状态
      * @param serviceMonitorDtos
@@ -211,7 +216,7 @@ public class ServiceMonitorService {
         }
 
         for (ServiceMonitorDto dto : serviceMonitorDtos) {
-            String cacheKey = dto.getHostname() + "_" + dto.getName();
+            String cacheKey = dto.getHostname() + "_" + dto.getServiceName();
             ServiceRestartStatusDto statusDto = timedCache.get(cacheKey);
             if (Objects.isNull(statusDto)) {
                 continue;
@@ -252,6 +257,37 @@ public class ServiceMonitorService {
         }
 
         return hostNameList;
+    }
+
+
+    /**
+     * 判断是否禁用重启按钮，该方法需要在processRestartingStatus()方法之后调用
+     * 如果某个服务在限制列表中，且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
+     * @param serviceMonitorDtos
+     * @param monitorProbes
+     */
+    private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<MonitorConfig.MonitorProbe> monitorProbes) {
+        List<String> allRestrictSrvs = new ArrayList<>();
+        monitorProbes.forEach(p -> {
+            if (CollectionUtil.isNotEmpty(p.getRestartRestrictList())) {
+                allRestrictSrvs.addAll(p.getRestartRestrictList());
+            }
+        });
+
+        if (CollectionUtil.isEmpty(allRestrictSrvs)) {
+            return;
+        }
+
+        for (ServiceMonitorDto dto : serviceMonitorDtos) {
+            dto.setDisableRestart(Boolean.FALSE);
+            if (allRestrictSrvs.contains(dto.getName())) {
+                // 在限制列表中
+                if (Objects.equals(MonitorStateEnum.RUNNING.getDesc(), dto.getState()) || Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), dto.getState())) {
+                    // 且状态为RUNNING或者RESTARTING，则禁止重启，既disableRestart=true
+                    dto.setDisableRestart(Boolean.TRUE);
+                }
+            }
+        }
     }
 
 }
