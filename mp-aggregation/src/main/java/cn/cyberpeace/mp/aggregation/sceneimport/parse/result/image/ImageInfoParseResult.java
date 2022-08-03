@@ -47,6 +47,10 @@ public class ImageInfoParseResult {
         return this.接入方式;
     }
 
+    public List<AccessModeParseResult> getManageAccessModes() {
+        return this.管理接入;
+    }
+
     public List<String> getInitCommands() {
         return Arrays.asList(this.自定义命令);
     }

@@ -441,12 +441,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
-        if (createContext.getReferenceMetaData() != null) {
-            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene());
-        }
         if (createContext.getReferenceType() != null) {
             csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
+        if (createContext.getReferenceMetaData() != null) {
+            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createTestInstance(unique, csceneInstance));
     }
@@ -493,12 +493,12 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
-        if (createContext.getReferenceMetaData() != null) {
-            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
-            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene());
-        }
         if (createContext.getReferenceType() != null) {
             csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
+        if (createContext.getReferenceMetaData() != null) {
+            csceneInstance.setReferenceMetaData(createContext.getReferenceMetaData());
+            CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
     }
