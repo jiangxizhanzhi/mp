@@ -742,7 +742,7 @@ public class ScenePluginCloudSceneService {
             for (var port : ports) {
                 if (CollectionUtils.isNotEmpty(port.getAccessModes())) {
                     for (var mode : port.getAccessModes()) {
-                        if (AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
+                        if (Boolean.TRUE.equals(mode.getManageMode()) && AccessMode.Protocol.SSH.equals(mode.getProtocol())) {
                             String networkId = pluginHandler.getPort(port.getId()).getAuxiliaryNetworkId();
                             if (StringUtils.isNotEmpty(networkId)) {
                                 VirtualMachinePrivateOperateData result = new VirtualMachineUploadFileData();

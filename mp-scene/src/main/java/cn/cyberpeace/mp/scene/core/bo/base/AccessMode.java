@@ -50,6 +50,9 @@ public class AccessMode {
     @ApiModelProperty(value = "外网代理端口")
     private Integer publicNetProxyPort;
 
+    @ApiModelProperty(value = "是否是管理接入")
+    private Boolean manageMode;
+
     public static class Protocol {
         public static final String PING = "ping";
         public static final String CONSOLE = "console";
