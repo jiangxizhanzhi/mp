@@ -110,6 +110,11 @@ public class Device extends BaseCloudPlatformResult {
     private Boolean isInternal;
 
     /**
+     * 是否初始靶标
+     */
+    private Boolean isInit;
+
+    /**
      * 实体信息
      */
     private ExtEntity extEntity;

@@ -518,9 +518,10 @@ public class AsyncPlatFlowTaskService {
                         .build();
                 flowPortMapper.create(flowPortModel);
 
+                String extNetId = externalNetId;
                 // 轮询流量发生器端口，直到端口可访问才返回（轮询10分钟）
                 NetworkUtils.probePort(fixedIp, 5001, 1000, 1000, 1000 * 60 * 10,
-                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
+                        null, 0, () -> flowPortService.batchCreatePorts(networkInfos, flowActuatorModel, extNetId), () -> log.error("Trex vm start error:{}", addVmRequest.getName()));
             } else {
                 log.error("add trex vm error");
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
@@ -751,7 +752,8 @@ public class AsyncPlatFlowTaskService {
                             result = true;
                         } else {
                             // 运行失败，更新任务状态为已停止，调用失败回调方法
-                            log.info("flow execute error:[{}]", flowTaskModel.getId());
+                            String errMsg = rows.getJSONObject(0).getString("result_detail");
+                            log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
                             taskJobStoppedCallback(flowTaskModel.getId(), errorCallback);
                         }
 

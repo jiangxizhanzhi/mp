@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.dto.ServiceRestartStatusDto;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
+import cn.cyberpeace.mp.devops.cluster.enums.CloudPlatformEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
 import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description: 服务监控服务类
@@ -64,16 +66,7 @@ public class ServiceMonitorService {
      * @return
      */
     public ListObjResult<ServiceMonitorDto> bizServicePage(BizServicePageRequest request) {
-        List<String> hostNameList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getHostName())) {
-            hostNameList.add(request.getHostName());
-        } else {
-            BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
-            if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-                modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
-            }
-        }
-
+        List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
             return new ListObjResult<>(Lists.newArrayList(), 0);
         }
@@ -99,16 +92,7 @@ public class ServiceMonitorService {
      * @return
      */
     public ListObjResult<ServiceMonitorDto> cpPage(CloudPlatformPageRequest request) {
-        List<String> hostNameList = new ArrayList<>();
-        if (StringUtils.isNotBlank(request.getHostName())) {
-            hostNameList.add(request.getHostName());
-        } else {
-            BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
-            if (CollectionUtils.isNotEmpty(modelPage.getList())) {
-                modelPage.getList().forEach(model -> hostNameList.add(model.getName()));
-            }
-        }
-
+        List<String> hostNameList = getActiveHostNameList(request.getHostName());
         if (CollectionUtils.isEmpty(hostNameList)) {
             return new ListObjResult<>(Lists.newArrayList(), 0);
         }
@@ -168,7 +152,10 @@ public class ServiceMonitorService {
             // 获取所有物理主机服务状态
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
             modelPage.getList().forEach(model -> {
-                hostNameList.add(model.getName());
+                // 忽略DOWN状态的节点查询
+                if (Objects.equals(CloudPlatformEnum.UP.getState(), model.getState())) {
+                    hostNameList.add(model.getName());
+                }
                 if (CollectionUtils.isNotEmpty(serviceStatusModel.getList())) {
                     serviceStatusModel.getList().forEach(serviceModel -> {
                         if (model.getName().equals(serviceModel.getHost())) {
@@ -237,9 +224,34 @@ public class ServiceMonitorService {
                 } else {
                     // 否则替换状态为RESTARTING
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
+                    dto.setUptime(0L);
                 }
             }
         }
+    }
+
+
+    private List<String> getActiveHostNameList(String hostName) {
+        List<String> hostNameList = new ArrayList<>();
+
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        // 忽略DOWN状态的节点查询
+        List<String> activeHostNames = modelPage.getList().stream()
+                .filter(m -> Objects.equals(CloudPlatformEnum.UP.getState(), m.getState()))
+                .map(HypervisorBO::getName)
+                .collect(Collectors.toList());
+
+        if (CollectionUtil.isNotEmpty(activeHostNames)) {
+            if (StringUtils.isNotBlank(hostName)) {
+                if (activeHostNames.contains(hostName)) {
+                    hostNameList.add(hostName);
+                }
+            } else {
+                hostNameList.addAll(activeHostNames);
+            }
+        }
+
+        return hostNameList;
     }
 
 }

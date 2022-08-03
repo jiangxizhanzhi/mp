@@ -154,7 +154,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     public void unpauseElement(String nodeId) {
     }
 
-    public void snapshotElement(String nodeId,String snapshotName,String desc,String sceneConfigId) {
+    public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
 
     }
 }

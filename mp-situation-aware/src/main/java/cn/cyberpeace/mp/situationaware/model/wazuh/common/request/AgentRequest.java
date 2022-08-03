@@ -24,4 +24,7 @@ public class AgentRequest extends BasePageRequest {
     @ApiModelProperty(value = "IP")
     private String ip;
 
+    @ApiModelProperty(value = "状态")
+    private String status;
+
 }

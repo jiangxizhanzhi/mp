@@ -123,7 +123,7 @@ public class ImagesService extends BaseCpService {
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()), TargetConnection.class);
         DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
-        if (config.getPublicNetProxy()) {
+        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             list.forEach(l -> {
                 if (l.getProtocol().equals("console")) {
                     return;
@@ -131,8 +131,8 @@ public class ImagesService extends BaseCpService {
                 if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                     l.setIpAddress(config.getPublicNetProxyIp());
                 }
-                if (StringUtils.isNotEmpty(config.getPublicNetProxyPort())) {
-                    l.setPort(Integer.parseInt(config.getPublicNetProxyPort()));
+                if (config.getPublicNetProxyPort() != null) {
+                    l.setPort(config.getPublicNetProxyPort());
                 }
             });
         }

@@ -48,7 +48,8 @@ logging:
     root: INFO
   file:
     path: ${user.home}/logs
-    max-total-size: 1GB
+    max-file-size: 300MB
+    max-total-size: 950MB
     max-row-length: 2000
   logback:
     rollingpolicy:

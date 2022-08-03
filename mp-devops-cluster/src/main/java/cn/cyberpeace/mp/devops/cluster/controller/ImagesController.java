@@ -145,7 +145,7 @@ public class ImagesController {
      */
     @ApiOperation("根据UUID查询")
     @GetMapping("/search/{uuid}")
-    public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid){
+    public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
         ImagesByIdVO imagesByIdVO = new ImagesByIdVO();
         imagesByIdVO.setUuid(model.getUuid());
@@ -156,11 +156,12 @@ public class ImagesController {
         imagesByIdVO.setRole(model.getRole());
         imagesByIdVO.setLogo(model.getLogo());
         imagesByIdVO.setIsInternal(model.getIsInternal());
+        imagesByIdVO.setIsInit(model.getIsInit());
         imagesByIdVO.setIsImport(model.getIsImport());
         ExtVm extVm = model.getExtVm();
         imagesByIdVO.setAccessProtocolList(Objects.nonNull(extVm) ? extVm.getAccessProtocols() : null);
         ExtDocker extDocker = model.getExtDocker();
-        if (model.getImageType().equals("container")){
+        if (model.getImageType().equals("container")) {
             imagesByIdVO.setAccessProtocolList(Objects.nonNull(extDocker) ? extDocker.getAccessProtocols() : null);
         }
         imagesByIdVO.setImageType(model.getImageType());
@@ -297,6 +298,8 @@ public class ImagesController {
                 if (sceneInfo != null) {
                     m.setSceneName(sceneInfo.getName());
                     m.setSceneId(sceneInfo.getId());
+                    m.setCsceneInstaceId(sceneInfo.getId());
+                    m.setCsceneId(sceneInfo.getCsceneId());
                 } else {
                     m.setSceneId(null);
                 }
@@ -336,6 +339,7 @@ public class ImagesController {
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
         if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
+
             return ServiceResult.success(true);
         } else {
             return ServiceResult.fail(baseResult.getMessage());

@@ -86,6 +86,13 @@ public class ImagesByIdVO extends BaseVO {
     @ApiModelProperty(value = "是否默认靶标")
     private Boolean isInternal;
 
+
+    /**
+     * 是否初始靶标
+     */
+    @ApiModelProperty(value = "是否初始靶标")
+    private Boolean isInit;
+
     /**
      * 接入方式
      */

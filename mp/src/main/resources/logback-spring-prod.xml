@@ -33,7 +33,8 @@
     <!--日志最大天数-->
     <springProperty scope="context" name="LOG_FILE_MAX_HISTORY" source="logging.logback.rollingpolicy.max-history" defaultValue="15"/>
     <!--日志最大容量-->
-    <springProperty scope="context" name="LOG_FILE_TOTAL_SIZE" source="logging.file.max-total-size" defaultValue="1GB"/>
+    <springProperty scope="context" name="LOG_FILE_MAX_SIZE" source="logging.file.max-file-size" defaultValue="300MB"/>
+    <springProperty scope="context" name="LOG_FILE_TOTAL_SIZE" source="logging.file.max-total-size" defaultValue="950MB"/>
     <springProperty scope="context" name="LOG_FILE_MAX_ROW_LENGTH" source="logging.file.max-row-length" defaultValue="2000"/>
 
     <!-- 控制台日志 -->
@@ -45,6 +46,7 @@
 
     <property name="LOG_HOME" value="${LOG_FILE_PATH}"/>
     <property name="LOG_LEVEL" value="${LOG_LEVEL_ROOT}"/>
+    <property name="LOG_FILE_MAX_SIZE" value="${LOG_FILE_MAX_SIZE}"/>
     <property name="LOG_FILE_TOTAL_SIZE" value="${LOG_FILE_TOTAL_SIZE}"/>
     <property name="LOG_FILE_MAX_HISTORY" value="${LOG_FILE_MAX_HISTORY}"/>
 
@@ -60,11 +62,12 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_HOME}/mp.log</file>
         <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- 日志归档 -->
-            <fileNamePattern>${LOG_HOME}/mp_%d{yyyy-MM-dd}.log.zip</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/mp_%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
             <!--日志文件保留天数-->
             <maxHistory>${LOG_FILE_MAX_HISTORY}</maxHistory>
+            <maxFileSize>${LOG_FILE_MAX_SIZE}</maxFileSize>
             <totalSizeCap>${LOG_FILE_TOTAL_SIZE}</totalSizeCap>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
