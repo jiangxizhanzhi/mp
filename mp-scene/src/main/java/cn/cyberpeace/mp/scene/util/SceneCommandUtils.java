@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.scene.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +56,8 @@ public class SceneCommandUtils {
                 parsedCommands.add(CommandUtils.windowsCdDir(nodeFileDir));
                 // 确保call执行不退出
                 parsedCommands.add(String.format(WINDOWS_CALL_TEMPLATE, relativeCommand));
+
+                parsedCommands.addAll(parseDirCommands(command, CommandUtils.WINDOWS_PATH_DELIMITER));
             } else {
                 // 对于linux节点文件内命令，先执行一遍绝对路径，再执行相对路径
                 var absoluteCommand = SystemTypeCommandUtils.joinPath(systemType, nodeFileDir, relativeCommand);
@@ -61,6 +65,8 @@ public class SceneCommandUtils {
 
                 parsedCommands.add(CommandUtils.linuxCdDir(nodeFileDir));
                 parsedCommands.add(relativeCommand);
+
+                parsedCommands.addAll(parseDirCommands(command, CommandUtils.LINUX_PATH_DELIMITER));
             }
         } else {
             parsedCommands.add(command);
@@ -69,4 +75,19 @@ public class SceneCommandUtils {
         return parsedCommands;
     }
 
+    private static List<String> parseDirCommands(String command, String pathDelimiter) {
+        if (!command.contains(pathDelimiter)) {
+            return new ArrayList<>();
+        }
+        List<String> result = new ArrayList<>();
+        String[] commands = StringUtils.split(command, pathDelimiter);
+        for (int i = 0; i < commands.length; i++) {
+            if (i == commands.length - 1) {
+                result.add(commands[i]);
+            } else {
+                result.add(CommandUtils.linuxCdDir(commands[i]));
+            }
+        }
+        return result;
+    }
 }
