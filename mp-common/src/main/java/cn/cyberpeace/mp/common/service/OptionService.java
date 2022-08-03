@@ -16,7 +16,7 @@ import java.util.List;
 public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
 
     /**
-     * 根据类型将选项转成 DropdownBO
+     * 根据类型将选项转成 OptionBO
      * @param type
      * @return
      */
