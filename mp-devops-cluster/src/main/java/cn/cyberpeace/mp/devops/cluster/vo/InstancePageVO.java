@@ -74,4 +74,6 @@ public class InstancePageVO extends BaseVO {
 
     private Integer eventStatus;
 
+    private String processMessage;
+
 }

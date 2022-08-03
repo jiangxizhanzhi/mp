@@ -82,4 +82,6 @@ public class ContainerPageVO extends BaseVO {
     private Integer event;
 
     private Integer eventStatus;
+
+    private String processMessage;
 }
