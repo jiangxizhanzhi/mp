@@ -24,6 +24,9 @@ public class CsceneInstanceCreateContextBO {
     @ApiModelProperty(value = "场景模板引用类型")
     private Integer referenceType;
 
+    @ApiModelProperty(value = "场景名称")
+    private String name;
+
     @ApiModelProperty(value = "场景模板数据")
     private CsceneBO cscene;
 

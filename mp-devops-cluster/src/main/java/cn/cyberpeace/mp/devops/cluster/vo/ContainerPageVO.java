@@ -88,4 +88,10 @@ public class ContainerPageVO extends BaseVO {
 
     @ApiModelProperty(value = "场景实例状态")
     private Integer sceneStatus;
+
+    @ApiModelProperty(value = "场景实例状态描述")
+    private String sceneStatusDesc;
+
+    @ApiModelProperty(value = "状态信息")
+    private String processMessage;
 }

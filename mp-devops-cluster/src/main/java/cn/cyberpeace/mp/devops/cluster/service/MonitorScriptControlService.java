@@ -110,7 +110,7 @@ public class MonitorScriptControlService {
         List<String> launchIds = Arrays.asList(cpLaunchId, bizLaunchId);
 
         for (String launchId : launchIds) {
-            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py restart " + srvs;
+            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py " + MonitorConstant.OP_RESTART + " " + srvs;
             log.info("hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setAgentName(hostname);

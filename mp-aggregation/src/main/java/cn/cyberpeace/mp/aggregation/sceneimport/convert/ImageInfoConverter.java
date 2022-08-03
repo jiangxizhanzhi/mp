@@ -105,6 +105,7 @@ class ImageInfoConverter implements IConverter {
                 }
                 SceneConfigElementPortBO portBO = element.getPorts().get(0);
                 portBO.setAccessModes(this.getAccessModes(imageInfo.getAccessModes()));
+                portBO.getAccessModes().addAll(this.getManageAccessModes(imageInfo.getManageAccessModes()));
                 portBO.getAccessModes().forEach(mode -> {
                     if (mode.getProxy() == null) {
                         mode.setProxy(true);
@@ -113,6 +114,7 @@ class ImageInfoConverter implements IConverter {
                 CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(portBO.getId());
                 pluginPort.setNat(imageInfo.getNat());
                 pluginPort.setAccessModes(this.getCloudAccessModes(imageInfo.getAccessModes()));
+                pluginPort.getAccessModes().addAll(this.getManageCloudAccessModes(imageInfo.getManageAccessModes()));
                 pluginPort.getAccessModes().forEach(mode -> {
                     if (mode.getProxy() == null) {
                         mode.setProxy(true);
@@ -120,6 +122,12 @@ class ImageInfoConverter implements IConverter {
                 });
             }
         }
+    }
+
+    private List<AccessMode> getManageAccessModes(List<AccessModeParseResult> results) {
+        var result = getAccessModes(results);
+        result.forEach(r -> r.setManageMode(true));
+        return result;
     }
 
     private List<AccessMode> getAccessModes(List<AccessModeParseResult> results) {
@@ -132,6 +140,12 @@ class ImageInfoConverter implements IConverter {
                     this.loadAccessModeInfo(accessMode, result);
                     return accessMode;
                 }).collect(Collectors.toList());
+    }
+
+    private List<CloudAccessMode> getManageCloudAccessModes(List<AccessModeParseResult> results) {
+        var result = getCloudAccessModes(results);
+        result.forEach(r -> r.setManageMode(true));
+        return result;
     }
 
     private List<CloudAccessMode> getCloudAccessModes(List<AccessModeParseResult> results) {
