@@ -34,6 +34,11 @@ public class CpCloudLogPO {
      */
     private String path;
 
+    /**
+     * 节点ip
+     */
+    private String hostIp;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatetime;
 }

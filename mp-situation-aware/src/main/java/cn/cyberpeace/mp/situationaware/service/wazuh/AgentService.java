@@ -156,8 +156,11 @@ public class AgentService extends RequestProcessor {
             params.add(new BasicNameValuePair("ip", agentRequest.getIp()));
         }
 
-        return params;
+        if (StringUtils.isNotBlank(agentRequest.getStatus())) {
+            params.add(new BasicNameValuePair("status", agentRequest.getStatus()));
+        }
 
+        return params;
     }
 
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -62,7 +63,19 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         queryParams.setSearchFields(new String[]{"alarmStatus"});
         queryParams.setSearch(String.valueOf(AlarmStatusEnum.ENABLED.toValue()));
         ListObjServiceResult<SystemAlarmModel> listResult = getModelService().list(queryParams).asResult();
+        List<SystemAlarmModel> systemAlarmModels = listResult.getData().getList();
+        this.changeServiceName(systemAlarmModels);
         return listResult;
+    }
+
+    /**
+     * 替换服务名称
+     * @param systemAlarmModels
+     */
+    private void changeServiceName(List<SystemAlarmModel> systemAlarmModels) {
+        if (CollectionUtils.isNotEmpty(systemAlarmModels)) {
+            systemAlarmModels.forEach(model -> model.setServername(MessageCommon.get(model.getServername())));
+        }
     }
 
     /**

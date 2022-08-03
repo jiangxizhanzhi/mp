@@ -1,7 +1,13 @@
 package cn.cyberpeace.mp.devops.cluster.task;
 
+import cn.cyberpeace.mp.cscene.dto.element.HostState;
+import cn.cyberpeace.mp.cscene.dto.request.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devops.cluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
+import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
+import cn.cyberpeace.mp.devops.cluster.dto.BasePageDTO;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.AlarmTypeEnum;
 import cn.cyberpeace.mp.devops.cluster.enums.MonitorStateEnum;
@@ -10,19 +16,23 @@ import cn.cyberpeace.mp.devops.cluster.model.SystemAlarmModel;
 import cn.cyberpeace.mp.devops.cluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devops.cluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devops.cluster.service.SystemAlarmService;
-import cn.cyberpeace.mp.devops.cluster.vo.*;
+import cn.cyberpeace.mp.devops.cluster.vo.AlarmCountVO;
+import cn.cyberpeace.mp.devops.cluster.vo.BizServiceMonitorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.CloudPlatformMonitorVO;
+import cn.cyberpeace.mp.devops.cluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
+import cn.hutool.core.collection.CollectionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -40,41 +50,39 @@ public class SystemAlarmTask {
 
     private final AlarmStatisticsService alarmStatisticsService;
 
+    private final HostStateService hostStateService;
+
+    private final HypervisorConverter hypervisorConverter;
+
     // 默认持续时间
     private static final Integer RUNNING_TIME = 0;
 
     /**
      * 生成告警信息
      */
-    @Scheduled(fixedRate = 1000 * 60 * 5)
+    @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
     private void getSystemAlarm() {
         log.info("====>>>>>>get systemAlarm info task start<<<<<========");
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();
 
         // 服务器监控
-        ServerMonitorVO serverMonitorVO = systemAlarmVO.getServerMonitorVO();
-        List<HypervisorBO> serverMonitors = serverMonitorVO.getServerMonitors();
-        if (CollectionUtils.isNotEmpty(serverMonitors)) {
-            serverMonitors.forEach(serverMonitor -> {
-                if (Objects.nonNull(serverMonitor.getDisk()) && Objects.nonNull(serverMonitor.getDiskUsed())) {
-                    BigDecimal diskPercent = BigDecimal.valueOf(serverMonitor.getDiskUsed())
-                            .divide(BigDecimal.valueOf(serverMonitor.getDisk()),2, RoundingMode.DOWN)
-                            .multiply(BigDecimal.valueOf(100));
+        List<HostState> allcpNodesHostStates = listAllCPNodeHostStates();
 
-                    if (diskPercent.intValue() > devopsConfig.getDiskAlarmPercent()) {
+        if (CollectionUtils.isNotEmpty(allcpNodesHostStates)) {
+            allcpNodesHostStates.forEach(hostState -> {
+                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent().intValue() > devopsConfig.getDiskAlarmPercent()) {
                         // 磁盘使用率大于80%，添加告警
                         SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
-                                .alarmMsg(String.format("%s disk usage is over %s%%", serverMonitor.getName(), devopsConfig.getDiskAlarmPercent()))
+                                .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsConfig.getDiskAlarmPercent()))
                                 .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
                                 .alarmType(AlarmTypeEnum.SERVER.toValue())
-                                .hostname(serverMonitor.getName())
-                                .servername(serverMonitor.getName())
+                                .hostname(hostState.getAgentName())
+                                .servername(hostState.getAgentName())
                                 .runningTime(RUNNING_TIME)
                                 .build();
                         alarmModels.add(serverAlarmModel);
                     }
-                }
             });
         }
 
@@ -190,6 +198,28 @@ public class SystemAlarmTask {
         if (CollectionUtils.isNotEmpty(addModelList)) {
             alarmStatisticsService.bulkCreate(addModelList);
         }
+    }
+
+
+    private List<HostState> listAllCPNodeHostStates() {
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        List<String> hostNames = modelPage.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
+        if (CollectionUtil.isEmpty(hostNames)) {
+            return Collections.emptyList();
+        }
+        List<HostState> allHostStates = new ArrayList<>();
+        for (String hostName : hostNames) {
+            AgentNameBasedRequest request = new AgentNameBasedRequest();
+            request.setPage(1);
+            request.setPageSize(1);
+            request.setAgentNames(Arrays.asList(hostName));
+            List<HostState> hostStates  = hostStateService.listHostStatesByAgentName(request);
+            if (CollectionUtil.isNotEmpty(hostStates)) {
+                allHostStates.add(hostStates.get(0));
+            }
+        }
+
+        return allHostStates;
     }
 }
 

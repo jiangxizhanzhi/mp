@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.HypervisorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.NetworkService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SwitchService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.VmService;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsCacheConfig;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
@@ -26,6 +27,8 @@ import cn.cyberpeace.mp.devops.cluster.vo.common.ListResult;
 import com.alibaba.fastjson.JSONObject;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -39,6 +42,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
+@CacheConfig(cacheManager = DevopsCacheConfig.CACHE_MANAGER_20S)
 public class HypervisorConverter implements BaseConverter {
 
     private final HypervisorService hypervisorService;
@@ -48,6 +52,9 @@ public class HypervisorConverter implements BaseConverter {
     private final NetworkService networkService;
 
     private final VmService vmService;
+
+    public static final String CACHE_VALUE_HYPERVISOR_PAGE = "HYPERVISOR_PAGE";
+
 
     /**
      * 资源统计
@@ -67,6 +74,7 @@ public class HypervisorConverter implements BaseConverter {
      * @param ignoreFields 不需要传递给云平台接口的参数,默认过滤page与perPage,此参数已转化成limit与offset这两个参数
      * @return
      */
+    @Cacheable(value = CACHE_VALUE_HYPERVISOR_PAGE)
     public BasePageBO<HypervisorBO> page(BasePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
         String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
