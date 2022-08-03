@@ -27,12 +27,21 @@ public class CsceneInit implements ApplicationRunner {
     @Resource
     private CsceneCommonConfigMapper commonConfigMapper;
 
+    private static volatile boolean needRun = true;
+
     @Override
     public void run(ApplicationArguments args) {
+        this.init();
+    }
+
+    public void init() {
         SceneInstanceLinkCacheUtil.init();
 
-        int count = csceneService.getActiveVirtualDeviceCount();
-        NodeLimitUtils.addLimitedNodeCount(count);
+        if (needRun) {
+            int count = csceneService.getActiveVirtualDeviceCount();
+            NodeLimitUtils.addLimitedNodeCount(count);
+            needRun = false;
+        }
 
         var config = commonConfigMapper
                 .list(new HumanCondition().filterEqual(CsceneCommonConfigModel::getKey, CloudMessageConvertUtil.configKey))

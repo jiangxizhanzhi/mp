@@ -20,17 +20,28 @@ public class ScenePluginCloudInit implements ApplicationRunner {
     @Autowired
     private CloudAppConfig cloudAppConfig;
 
+    private static volatile boolean needRun = true;
+
     @Override
     public void run(ApplicationArguments args) {
+        this.init();
+    }
+
+    public void init() {
         // 本地开发环境不运行资源的更新和删除
-        if (!baseAppConfig.isRunInit()) {
+        if (!baseAppConfig.isRunInit() || !needRun) {
             return;
         }
-        FileUtil.mkdir(cloudAppConfig.getContainerHelpInstallerDir());
-        TaskCommon.executeTask(() -> {
-            LocalFileMappingCommon.syncDir(ContainerFileUtils.CONTAINER_HELP_INSTALLER_GROUP,
-                    cloudAppConfig.getContainerHelpInstallerDir());
-        });
+        try {
+            FileUtil.mkdir(cloudAppConfig.getContainerHelpInstallerDir());
+            TaskCommon.executeTask(() -> {
+                LocalFileMappingCommon.syncDir(ContainerFileUtils.CONTAINER_HELP_INSTALLER_GROUP,
+                        cloudAppConfig.getContainerHelpInstallerDir());
+            });
+            needRun = false;
+        } catch (Exception e) {
+            needRun = true;
+        }
     }
 
 }

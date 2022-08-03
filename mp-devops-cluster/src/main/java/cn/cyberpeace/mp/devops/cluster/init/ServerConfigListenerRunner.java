@@ -33,31 +33,40 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     @Autowired
     private CollectionAppConfig collectionAppConfig;
 
+    private static volatile boolean needRun = true;
+
     public String getUrl() {
         return "http://" + ipAddressConfig.getMp();
     }
 
     @Override
     public void run(ApplicationArguments args) {
+        this.init();
+    }
+
+    public void init() {
         try {
-            initRegisterService.register(getUrl());
-            initRegisterService.initTarget();
-            //
+            if (needRun) {
+                initRegisterService.register(getUrl());
+                initRegisterService.initTarget();
+                //
 
-            TaskCommon.executeTask(() -> {
-                if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
-                    return;
-                }
-                log.info("syncDir do ScenePluginCollectionInit start");
-                List<LocalFileMappingModel> mappings =
-                        LocalFileMappingCommon.syncDir(WazuhCommon.BIZ_SCRIPTS_GROUP,
-                                collectionAppConfig.getBizScriptsInstallerDir());
-                monitorScriptControlService.init(mappings);
-                log.info("syncDir do ScenePluginCollectionInit end");
-            });
-
+                TaskCommon.executeTask(() -> {
+                    if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
+                        return;
+                    }
+                    log.info("syncDir do ScenePluginCollectionInit start");
+                    List<LocalFileMappingModel> mappings =
+                            LocalFileMappingCommon.syncDir(WazuhCommon.BIZ_SCRIPTS_GROUP,
+                                    collectionAppConfig.getBizScriptsInstallerDir());
+                    monitorScriptControlService.init(mappings);
+                    log.info("syncDir do ScenePluginCollectionInit end");
+                });
+                needRun = false;
+            }
         } catch (Exception e) {
             log.error("ServerConfigListener onApplicationEvent error : {} ", ExceptionUtils.getStackTrace(e));
+            needRun = true;
         }
     }
 }

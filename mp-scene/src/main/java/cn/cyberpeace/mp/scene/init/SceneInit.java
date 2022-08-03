@@ -16,17 +16,27 @@ public class SceneInit implements ApplicationRunner {
     @Autowired
     private SceneAppConfig sceneAppConfig;
 
+    private static volatile boolean needRun = true;
+
     @Override
     public void run(ApplicationArguments args) {
-        // 本地开发环境不运行资源的更新和删除
-        if (!sceneAppConfig.getBaseAppConfig().isRunInit()) {
-            return;
-        }
-        FileUtil.mkdir(sceneAppConfig.getWindowsHelpInstallerDir());
-        TaskCommon.executeTask(() -> {
-            LocalFileMappingCommon.syncDir(InstallerUtils.WINDOWS_HELP_INSTALLER_GROUP,
-                    sceneAppConfig.getWindowsHelpInstallerDir());
-        });
+        this.init();
     }
 
+    public void init() {
+        // 本地开发环境不运行资源的更新和删除
+        if (!sceneAppConfig.getBaseAppConfig().isRunInit() || !needRun) {
+            return;
+        }
+        try {
+            FileUtil.mkdir(sceneAppConfig.getWindowsHelpInstallerDir());
+            TaskCommon.executeTask(() -> {
+                LocalFileMappingCommon.syncDir(InstallerUtils.WINDOWS_HELP_INSTALLER_GROUP,
+                        sceneAppConfig.getWindowsHelpInstallerDir());
+            });
+            needRun = false;
+        } catch (Exception e) {
+            needRun = true;
+        }
+    }
 }

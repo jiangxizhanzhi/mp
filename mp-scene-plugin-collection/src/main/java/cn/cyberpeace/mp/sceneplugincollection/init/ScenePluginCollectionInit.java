@@ -26,21 +26,32 @@ public class ScenePluginCollectionInit implements ApplicationRunner {
     @Autowired
     private LocalFileSyncEventPublisher eventPublisher;
 
+    private static volatile boolean needRun = true;
+
     @Override
     public void run(ApplicationArguments args) {
-        // 本地开发环境不运行资源的更新和删除
-        if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
-            return;
-        }
-        FileUtil.mkdir(collectionAppConfig.getWazuhAgentInstallerDir());
-        TaskCommon.executeTask(() -> {
-            log.info("syncDir do ScenePluginCollectionInit start");
-            List<LocalFileMappingModel> mappings =
-                    LocalFileMappingCommon.syncDir(WazuhCommon.WAZUH_AGENT_GROUP,
-                    collectionAppConfig.getWazuhAgentInstallerDir());
-            eventPublisher.publishEvent(new LocalFileSyncSuccessEvent(mappings));
-            log.info("syncDir do ScenePluginCollectionInit end");
-        });
+        this.init();
     }
 
+    public void init() {
+        // 本地开发环境不运行资源的更新和删除
+        if (!collectionAppConfig.getBaseAppConfig().isRunInit() || !needRun) {
+            return;
+        }
+        try {
+            FileUtil.mkdir(collectionAppConfig.getWazuhAgentInstallerDir());
+            TaskCommon.executeTask(() -> {
+                log.info("syncDir do ScenePluginCollectionInit start");
+                List<LocalFileMappingModel> mappings =
+                        LocalFileMappingCommon.syncDir(WazuhCommon.WAZUH_AGENT_GROUP,
+                                collectionAppConfig.getWazuhAgentInstallerDir());
+                eventPublisher.publishEvent(new LocalFileSyncSuccessEvent(mappings));
+                log.info("syncDir do ScenePluginCollectionInit end");
+            });
+            needRun = false;
+        } catch (Exception e) {
+            log.error("collection init error", e);
+            needRun = true;
+        }
+    }
 }
