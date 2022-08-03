@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
@@ -78,6 +79,17 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
             responseList.add(collectionResponse);
         });
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listResult.getSource().getTotal())).asResult();
+    }
+
+    @ApiOperation("查询指定id数据")
+    @GetMapping("/bulk")
+    public ServiceResult<FlowCollectionModel> get(@RequestParam String id) {
+        FlowCollectionModel model = new FlowCollectionModel();
+        ObjServiceResult<FlowCollectionModel> result = flowCollectionService.get(id);
+        if (Objects.nonNull(result.getSource())) {
+            model = result.getSource().asResult();
+        }
+        return ServiceResult.success(model);
     }
 
     @ApiOperation("新增流量集合信息")
