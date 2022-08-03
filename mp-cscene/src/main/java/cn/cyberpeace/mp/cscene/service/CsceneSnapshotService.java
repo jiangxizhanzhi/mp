@@ -27,15 +27,19 @@ public class CsceneSnapshotService {
         this.csceneSnapshotMapper = csceneSnapshotMapper;
     }
 
-    public ServiceResult<String> saveCsceneSnapshot(String csceneId, String csceneInstanceId, String nodeId, String name) {
+    public ServiceResult<Boolean> checkSnapshotName(String csceneId, String csceneInstanceId, String nodeId, String name) {
         var sameNameModel = csceneSnapshotMapper.first(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getName, name)
         );
         if (sameNameModel != null) {
-            throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_DUPLICATED);
+            return new ServiceResult<>(false);
         }
+        return new ServiceResult<>(true);
+    }
+
+    public ServiceResult<String> saveCsceneSnapshot(String csceneId, String csceneInstanceId, String nodeId, String name) {
         CsceneSnapshotModel model = new CsceneSnapshotModel();
         model.setCsceneId(csceneId);
         model.setCsceneInstanceId(csceneInstanceId);
@@ -46,7 +50,7 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(model.getSnapshotId());
     }
 
-    public ServiceResult<Boolean> updateCsceneSnapshotResourceId(String snapshotId, String snapshotResourceId, String sourceName) {
+    public ServiceResult<Boolean> updateCsceneSnapshotRelativeInfo(String snapshotId, String snapshotResourceId, String sourceName) {
         CsceneSnapshotModel snapshotModel = new CsceneSnapshotModel();
         snapshotModel.setSnapshotResourceId(snapshotResourceId);
         snapshotModel.setSourceName(sourceName);
@@ -75,7 +79,7 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> deleteByCscene(String csceneId, String nodeId, String snapshotResourceId) {
+    public ServiceResult<Boolean> deleteCsceneSnapshotRelativeInfo(String csceneId, String nodeId, String snapshotResourceId) {
         csceneSnapshotMapper.filterDelete(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
@@ -84,7 +88,7 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
-    public ServiceResult<Boolean> deleteByCscene(String csceneId) {
+    public ServiceResult<Boolean> deleteCsceneSnapshotRelativeInfo(String csceneId) {
         csceneSnapshotMapper.filterDelete(new HumanCondition().filterEqual(CsceneSnapshotModel::getCsceneId, csceneId));
         return new ServiceResult<>(true);
     }

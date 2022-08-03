@@ -336,6 +336,7 @@ public class ImagesController {
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
         if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
+
             return ServiceResult.success(true);
         } else {
             return ServiceResult.fail(baseResult.getMessage());
