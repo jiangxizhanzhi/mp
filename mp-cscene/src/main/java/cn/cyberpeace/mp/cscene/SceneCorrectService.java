@@ -94,7 +94,7 @@ public class SceneCorrectService {
             log.info("current local date time is {}", now);
             for (var creatingScene : creatingScenes) {
                 try {
-                    var createTime = creatingScene.getCreateTime();
+                    var createTime = creatingScene.getUpdateTime();
                     if (createTime.plusSeconds(csceneAppConfig.getSceneErrorCreatingSeconds()).isBefore(LocalDateTime.now())) {
                         // 超过预留时间未删除完成
                         int counts = sceneElementMapper.total(new HumanCondition()
