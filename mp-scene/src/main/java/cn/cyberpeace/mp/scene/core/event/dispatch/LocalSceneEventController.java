@@ -60,14 +60,14 @@ public class LocalSceneEventController implements SceneEventControl {
     }
 
     public boolean acquireEventLock(int event, int eventStatus) {
-        log.info("scene {} , event [{},{}] , try acquire scene event lock", sceneId, event, eventStatus);
+        log.debug("scene {} , event [{},{}] , try acquire scene event lock", sceneId, event, eventStatus);
         if (this.lock.tryLock()) {
             // 拿到锁
             if (this.latestEvent == null) {
                 // 没有新的事件 则继续执行即可
                 this.event = event;
                 this.eventStatus = eventStatus;
-                log.info("scene {} , event [{},{}] , acquire lock success and continue execute", sceneId, event, eventStatus);
+                log.debug("scene {} , event [{},{}] , acquire lock success and continue execute", sceneId, event, eventStatus);
                 return true;
             } else {
                 // 有新的事件 需要中断并执行下一个事件

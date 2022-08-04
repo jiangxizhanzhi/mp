@@ -103,7 +103,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
                         getTargetName(), event, eventStatus, process, processStatus, processMessage);
                 return EventFlag.SAVE_FAILED;
             } else {
-                log.info(processMessage);
+                logProcess(event, eventStatus, process, processStatus, processMessage);
                 return EventFlag.SUCCESS;
             }
         } else {
@@ -235,4 +235,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
                 formatProcessMessage(processMessage));
     }
 
+    protected void logProcess(int event, int eventStatus, String process, int processStatus, String processMessage) {
+        log.info(processMessage);
+    }
 }
