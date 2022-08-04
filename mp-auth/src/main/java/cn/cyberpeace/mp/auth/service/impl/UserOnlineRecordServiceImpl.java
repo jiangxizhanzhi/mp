@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
@@ -22,8 +23,11 @@ import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.core.Local;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -39,6 +43,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
 public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnlineRecordModel, UserOnlineRecordMapper, UserOnlineRecordFields, QueryParams> implements UserOnlineRecordService {
 
     @Autowired
@@ -53,7 +58,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     @Autowired
     private UserHeartbeatService heartbeatService;
 
+    public static final String CACHE_KEY_USER_OL_CNT = "USER_OL_CNT";
+
     private static final int DEFAULT_MINUTES = 5;
+
+
 
     @Autowired
     public UserOnlineRecordServiceImpl(UserOnlineRecordMapper modelMapper, UserOnlineRecordFields modelFields) {
@@ -163,8 +172,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
     @Override
+    @Cacheable(value = CACHE_KEY_USER_OL_CNT)
     public UserOnlineCntDto onlineUserCnt() {
-        int olcnt = heartbeatService.getHeartbeatMap().size();
+        LocalDateTime now = LocalDateTime.now();
+        int olcnt = 0;
+        int mapcnt = heartbeatService.getHeartbeatMap().size();
+        int dbcnt = getOnlinedUserCntByPeriod(now.minusMinutes(5), now);
+        olcnt = Math.max(mapcnt, dbcnt);
         int totalUser = userService.totalUserCnt();
 
         UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();

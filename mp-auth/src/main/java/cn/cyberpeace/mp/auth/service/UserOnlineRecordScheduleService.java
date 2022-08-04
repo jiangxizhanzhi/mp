@@ -3,9 +3,12 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.cglib.core.Local;
+import org.apache.lucene.analysis.bn.BengaliAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -54,6 +57,7 @@ public class UserOnlineRecordScheduleService {
      */
     @Scheduled(initialDelay = REFRESH_RATE, fixedRate = REFRESH_RATE, timeUnit = TimeUnit.MINUTES)
     public void scheduleUserOlRecord() {
+        LocalDateTime begin = LocalDateTime.now();
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
@@ -62,6 +66,7 @@ public class UserOnlineRecordScheduleService {
         List<Map<UserModel, LocalDateTime>> userModel2LastTsMapList = new ArrayList<>();
         int i = 0;
         Map<UserModel, LocalDateTime> map = null;
+        List<UserModel> removeList = new ArrayList<>();
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             UserModel userModel = entry.getKey();
             CopyOnWriteArrayList<LocalDateTime> timestampList = entry.getValue();
@@ -72,6 +77,7 @@ public class UserOnlineRecordScheduleService {
                     userModel2LastTsMapList.add(map);
                 }
                 map.put(userModel, timestampList.get(0));
+                removeList.add(userModel);
                 i++;
             }
         }
@@ -80,6 +86,17 @@ public class UserOnlineRecordScheduleService {
             for (Map<UserModel, LocalDateTime> userModel2LastTsMap : userModel2LastTsMapList) {
                 UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userModel2LastTsMap, applicationContext);
                 threadPool.submit(recordTask);
+            }
+        }
+
+        for (UserModel userModel : removeList) {
+            CopyOnWriteArrayList<LocalDateTime> beatList = heartbeatMap.get(userModel);
+            if (beatList.stream().anyMatch(t -> t.isAfter(begin))) {
+                CopyOnWriteArrayList timestampList = new CopyOnWriteArrayList();
+                timestampList.add(begin);
+                heartbeatMap.put(userModel, timestampList);
+            } else {
+                heartbeatMap.remove(userModel);
             }
         }
 

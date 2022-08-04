@@ -9,7 +9,9 @@ import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ClassFieldClasses({
@@ -47,5 +49,18 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
             targetName = getTarget().getId();
         }
         return MessageCommon.get(SceneEventHandler.EVENT_NAME_PREFIX + "scene_element", targetName);
+    }
+
+    @Override
+    protected void logProcess(int event, int eventStatus, String process, int processStatus, String processMessage) {
+        List<String> formatMessage = new ArrayList<>();
+        formatMessage.add(StringUtils.EMPTY);
+        formatMessage.add(getTarget().getEid());
+        formatMessage.add(getEventName());
+        formatMessage.add(String.valueOf(eventStatus));
+        formatMessage.add(process);
+        formatMessage.add(String.valueOf(processStatus));
+        String message = processMessage + " [" + StringUtils.join(formatMessage, ",") + "]";
+        super.logProcess(event, eventStatus, process, processStatus, message);
     }
 }

@@ -41,6 +41,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -450,7 +451,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param errorCallback 执行错误时回调方法
      * @return
      */
-    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Runnable errorCallback) {
+    public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Consumer<String> errorCallback) {
         log.info("=========== Start actuator flow:[{}] ===============", flowTaskId);
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
@@ -478,7 +479,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @param errorCallback 流量执行异常回调方法
      * @return
      */
-    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Runnable errorCallback) {
+    private ServiceResult<Boolean> actuatorTrex(FlowTaskModel flowTaskModel, int taskAction, Runnable callback, Consumer<String> errorCallback) {
         FlowInfoModel flowInfoModel = new FlowInfoModel();
         // 是否自定义流量
         boolean isCustom = false;

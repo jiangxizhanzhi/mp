@@ -8,8 +8,11 @@ import cn.cyberpeace.mp.scene.core.event.base.EventModel;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneEventControllerUtils;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ClassFieldClasses({
@@ -48,5 +51,18 @@ public class SceneEventHandler extends BaseEventHandler<SceneBO, EventModel> {
     protected boolean acquireEventLock(int event, int eventStatus, String process, int processStatus) {
         SceneEventControllerUtils.acquireEventLock(getTarget().getEid(), event, eventStatus);
         return true;
+    }
+
+    @Override
+    protected void logProcess(int event, int eventStatus, String process, int processStatus, String processMessage) {
+        List<String> formatMessage = new ArrayList<>();
+        formatMessage.add(getTarget().getEid());
+        formatMessage.add(StringUtils.EMPTY);
+        formatMessage.add(getEventName());
+        formatMessage.add(String.valueOf(eventStatus));
+        formatMessage.add(process);
+        formatMessage.add(String.valueOf(processStatus));
+        String message = processMessage + " [" + StringUtils.join(formatMessage, ",") + "]";
+        super.logProcess(event, eventStatus, process, processStatus, message);
     }
 }

@@ -45,12 +45,6 @@ public class BaseSceneElementPortModel extends BaseModel {
     private Integer order;
     @DefaultBool
     private Boolean isAuxiliary;
-    @DefaultBool
-    private Boolean publicNetProxy;
-    @DefaultStr
-    private String publicNetProxyIp;
-    @DefaultStr
-    private String publicNetProxyPort;
 
     public static class Type {
         public static final int IP_PORT = 1;

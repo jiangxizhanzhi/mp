@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -14,12 +13,8 @@ import com.alibaba.excel.exception.ExcelAnalysisException;
 import com.alibaba.excel.exception.ExcelCommonException;
 import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.alibaba.excel.exception.ExcelGenerateException;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -30,15 +25,15 @@ import java.io.IOException;
  * @Date：2022/5/19 17:59
  */
 @Slf4j
-@Controller
+//@Controller
 public class FrontBusinessTestController {
 
     @Autowired
     private UrlACService urlACService;
 
-    @ApiOperation(value = "导入AuthUrl", notes = "")
-    @PostMapping("/excel/importAuthUrl")
-    @ResponseBody
+    //@ApiOperation(value = "导入AuthUrl", notes = "")
+    //@PostMapping("/excel/importAuthUrl")
+    //@ResponseBody
     public ServiceResult importAuthUrls(MultipartFile file) throws IOException {
         ExcelCheck.check(file);
         try {
