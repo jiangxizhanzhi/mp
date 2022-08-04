@@ -1,1 +1,0 @@
-alter table `mp_scene_scene_element_snapshot` add column `scene` varchar(64) not null comment '所属场景id' ;
