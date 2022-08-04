@@ -66,6 +66,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             String parentCode = model.getParentCode();
             OptionBO parent = optionBoMap.get(parentCode);
             if (parent == null) {
+                log.warn("The node(code = {}) has wrong parent code!", model.getCode());
                 continue;
             }
             if (parent.getChildren() == null) {
