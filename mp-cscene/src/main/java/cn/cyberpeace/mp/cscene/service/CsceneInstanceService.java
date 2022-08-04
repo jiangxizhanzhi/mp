@@ -1064,7 +1064,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (snapshotName.length() > 255) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_TOO_LONG);
         }
-        if (description != null && description.length() > 1024) {
+        if (description != null && description.length() > 2048) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_DESC_TOO_LONG);
         }
         var queryInstance = this.get(id).getSource();
