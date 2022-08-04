@@ -62,19 +62,17 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             }
         }
 
-        if (!nextLevelModels.isEmpty()) {
-            for (OptionModel model : nextLevelModels) {
-                String parentCode = model.getParentCode();
-                OptionBO parent = optionBoMap.get(parentCode);
-                if (parent == null) {
-                    continue;
-                }
-                if (parent.getChildren() == null) {
-                    parent.setChildren(new ArrayList<>());
-                }
-                OptionBO optionBO = optionBoMap.get(model.getCode());
-                parent.getChildren().add(optionBO);
+        for (OptionModel model : nextLevelModels) {
+            String parentCode = model.getParentCode();
+            OptionBO parent = optionBoMap.get(parentCode);
+            if (parent == null) {
+                continue;
             }
+            if (parent.getChildren() == null) {
+                parent.setChildren(new ArrayList<>());
+            }
+            OptionBO optionBO = optionBoMap.get(model.getCode());
+            parent.getChildren().add(optionBO);
         }
         return rootBos;
     }
