@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.flow.repository.FlowCollectionMapper;
 import cn.cyberpeace.mp.flow.repository.FlowInfoMapper;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
+import cn.cyberpeace.mp.flow.request.ModifyCollectionRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.service.FlowCollectionService;
@@ -22,6 +23,7 @@ import cn.cyberpeace.mp.flow.service.field.FlowCollectionFields;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -192,13 +194,16 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
 
     /**
      * 更新流量集合
-     * @param flowCollectionModel
+     * @param request
      * @return
      */
-    public ServiceResult<FlowCollectionModel> updateCollection(FlowCollectionModel flowCollectionModel) {
-        if (!checkNameUnique(flowCollectionModel.getTitle(), flowCollectionModel.getId())) {
+    public ServiceResult<FlowCollectionModel> updateCollection(ModifyCollectionRequest request) {
+        if (StringUtils.isNotBlank(request.getTitle()) && !checkNameUnique(request.getTitle(), request.getId())) {
             return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
         }
+
+        FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
+        BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().update(flowCollectionModel);
         return ServiceResult.success(flowCollectionModel);
     }

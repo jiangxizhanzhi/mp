@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.flow.model.FlowCollectionModel;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import cn.cyberpeace.mp.flow.request.AddFlowCollectionRelRequest;
 import cn.cyberpeace.mp.flow.request.DelFlowCollectionRelRequest;
+import cn.cyberpeace.mp.flow.request.ModifyCollectionRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionQueryParams;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowCollectionRelQueryParams;
 import cn.cyberpeace.mp.flow.response.FlowCollectionResponse;
@@ -102,8 +103,8 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     @ApiOperation("更新流量集合信息")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PatchMapping("/bulk")
-    public ServiceResult<FlowCollectionModel> update(@RequestBody @Validated FlowCollectionModel model) {
-        return flowCollectionService.updateCollection(model);
+    public ServiceResult<FlowCollectionModel> update(@RequestBody @Validated ModifyCollectionRequest request) {
+        return flowCollectionService.updateCollection(request);
     }
 
     @ApiOperation("根据集合id查询流量信息")
