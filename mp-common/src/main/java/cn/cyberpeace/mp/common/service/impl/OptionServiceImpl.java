@@ -1,12 +1,10 @@
 package cn.cyberpeace.mp.common.service.impl;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.fields.OptionFields;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
@@ -69,7 +67,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
                 String parentCode = model.getParentCode();
                 OptionBO parent = optionBoMap.get(parentCode);
                 if (parent == null) {
-                    throw new MpRuntimeException(CommonErrorCode.NO_PARENT_CODE_ERROR);
+                    continue;
                 }
                 if (parent.getChildren() == null) {
                     parent.setChildren(new ArrayList<>());
