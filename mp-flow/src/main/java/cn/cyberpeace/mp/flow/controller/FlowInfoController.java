@@ -79,8 +79,8 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
 
     @GetMapping("/categories")
     @ApiOperation(value = "查询流量分类")
-    public ServiceResult<OptionBO> flowCategories() {
-        return ServiceResult.success(optionService.getOptionsByType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY));
+    public ServiceResult<List<OptionBO>> flowCategories() {
+        return optionService.getOptionsByType(FlowConstant.MP_COMMON_OPTION_TYPE_FLOW_CATEGORY);
     }
 
     /**

@@ -18,7 +18,12 @@ public class LogConstant {
 
     public static final String LOG_OP_TARGET_PREFIX = "devops.log.op.target";
 
-
+    /**
+     * 后台系统管理-系统管理-审计日志-类型
+     */
     public static final String MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE = "op_type";
+    /**
+     * 后台系统管理-系统管理-审计日志-模块
+     */
     public static final String MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE = "op_module";
 }

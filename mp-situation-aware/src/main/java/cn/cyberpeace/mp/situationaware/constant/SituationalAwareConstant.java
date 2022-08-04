@@ -30,6 +30,12 @@ public class SituationalAwareConstant {
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 
+    /**
+     * 后台系统管理-探针管理-自定义探针-系统类型
+     */
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "os_type";
+    /**
+     * 后台系统管理-探针管理-自定义探针-类型
+     */
     public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
 }
