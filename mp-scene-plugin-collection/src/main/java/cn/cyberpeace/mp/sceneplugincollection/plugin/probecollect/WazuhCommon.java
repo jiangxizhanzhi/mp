@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.hutool.core.collection.CollectionUtil;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -179,7 +180,7 @@ public class WazuhCommon {
     private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {
-        if (wazuhProbeConfig == null) {
+        if (wazuhProbeConfig == null || CollectionUtils.isEmpty(wazuhProbeConfig.getProbes())) {
             return new ArrayList<>();
         }
         List<WazuhControl.ControlProbeParam> defaultProbeParams = new ArrayList<>();
