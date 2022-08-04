@@ -60,7 +60,7 @@ public class SceneElementEventHandler extends BaseEventHandler<SceneElementBO, E
         formatMessage.add(String.valueOf(eventStatus));
         formatMessage.add(process);
         formatMessage.add(String.valueOf(processStatus));
-        String message = processMessage + " [" + StringUtils.join(formatMessage, ",") + "]";
+        String message = processMessage + " process[" + StringUtils.join(formatMessage, ",") + "]";
         super.logProcess(event, eventStatus, process, processStatus, message);
     }
 }

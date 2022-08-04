@@ -59,6 +59,7 @@ public class CsceneSnapshotService {
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getName, name)
+                .filterNotEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY)
         );
         if (sameNameModel != null) {
             return new ServiceResult<>(false);
