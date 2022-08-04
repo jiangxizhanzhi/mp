@@ -57,6 +57,17 @@ public class SceneHandlerUtils {
 
     private boolean startFlow(Flow flow, Runnable stopCallback) {
         var taskId = flow.getTaskId();
+
+        Consumer<String> formatStopCallback = new Consumer<String>() {
+            @Override
+            public void accept(String s) {
+                errorFLow(flow, s);
+                if (Objects.nonNull(stopCallback)) {
+                    stopCallback.run();
+                }
+            }
+        };
+
         try {
             log.info("start flow for taskId:[{}]", taskId);
             flowExecutor.startFlow(taskId, () -> {
@@ -64,12 +75,7 @@ public class SceneHandlerUtils {
                 if (stopCallback != null) {
                     stopCallback.run();
                 }
-            }, () -> {
-                errorFLow(flow, "Flow execute error");
-                if (Objects.nonNull(stopCallback)) {
-                    stopCallback.run();
-                }
-            });
+            }, formatStopCallback);
         } catch (Exception e) {
             log.error("start flow for taskId:[{}] error", taskId, e);
             errorFLow(flow, e.getMessage());

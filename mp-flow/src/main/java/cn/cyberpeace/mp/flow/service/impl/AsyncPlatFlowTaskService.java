@@ -622,7 +622,7 @@ public class AsyncPlatFlowTaskService {
      * @param errorCallback
      * @throws InterruptedException
      */
-    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Runnable errorCallback) {
+    public void refreshTaskStatus(String taskId, FlowActuatorModel flowActuatorModel, Runnable callback, Consumer<String> errorCallback) {
         String host = flowActuatorModel.getIp();
         FlowTaskModel flowTaskModel = flowTaskMapper.get(taskId);
         if (Objects.isNull(flowTaskModel)) {
@@ -711,13 +711,58 @@ public class AsyncPlatFlowTaskService {
     }
 
     /**
+     * 流量任务停止时回调方法
+     * @param taskId
+     * @param call
+     */
+    private void jobStoppedCallback(String taskId, Consumer<String> call, String errMsg) {
+        FlowTaskModel oldFlowTaskModel = flowTaskMapper.get(taskId);
+        if (Objects.isNull(oldFlowTaskModel)) {
+            log.info("flowTaskModel is empty for taskId:{}", taskId);
+            return;
+        }
+
+        FlowTaskModel flowTaskModel = new FlowTaskModel();
+        flowTaskModel.setId(taskId);
+        flowTaskModel.setTaskStatus(TaskStatusEnum.STOPED.toValue());
+        flowTaskModel.setUpdateTime(LocalDateTime.now());
+
+        // 更新本地任务状态
+        flowTaskMapper.updateTaskInfo(flowTaskModel);
+
+        // 执行回调通知方法
+        if (Objects.nonNull(call)) {
+            log.info("start to run callback function");
+            call.accept(errMsg);
+        }
+
+        if (Objects.equals(CustomFlagEnum.YES.toValue(), oldFlowTaskModel.getCustomFlag())) {
+            // 自定义流量，运行后直接删除网口
+            String actuatorId = oldFlowTaskModel.getActuatorId();
+            FlowActuatorModel flowActuatorModel = this.getFlowActuatorModel(actuatorId);
+            if (Objects.isNull(flowActuatorModel)) {
+                log.error("del ports failed for actuator is empty");
+                return;
+            }
+
+            List<String> flowPortIds = Collections.singletonList(oldFlowTaskModel.getFlowPortId());
+            this.delPorts(flowActuatorModel, flowPortIds);
+
+            flowTaskModel.setFlowPortId(Strings.EMPTY);
+            // 删除任务关联网口
+            flowTaskMapper.updateTaskInfo(flowTaskModel);
+        }
+
+    }
+
+    /**
      * 校验任务状态是否已停止
      * @param flowTaskModel
      * @param hostUrl
      * @param errorCallback
      * @return
      */
-    private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Runnable errorCallback) {
+    private Boolean checkTaskJobStopped(FlowTaskModel flowTaskModel, String hostUrl, Consumer<String> errorCallback) {
         Boolean result = false;
         if (StringUtils.isBlank(flowTaskModel.getThirdTaskId())) {
             log.warn("no thirdTaskIds to query");
@@ -754,7 +799,7 @@ public class AsyncPlatFlowTaskService {
                             // 运行失败，更新任务状态为已停止，调用失败回调方法
                             String errMsg = rows.getJSONObject(0).getString("result_detail");
                             log.error("flow [{}] execute error for: {}", flowTaskModel.getId(), errMsg);
-                            taskJobStoppedCallback(flowTaskModel.getId(), errorCallback);
+                            jobStoppedCallback(flowTaskModel.getId(), errorCallback, errMsg);
                         }
 
                     }
