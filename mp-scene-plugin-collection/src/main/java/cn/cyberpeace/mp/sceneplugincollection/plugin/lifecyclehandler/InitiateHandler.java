@@ -39,6 +39,8 @@ public class InitiateHandler extends HandlerCommon {
 
     private static WazuhLogProbeLocationConfig locationConfig;
 
+    private static Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap;
+
     public static class SceneProcess {
         public static final EventProcess INITIATE_FLOW_COLLECTION = new EventProcess("initiate_flow_collection", "sceneplugincollection.event.initiate_flow_collection");
         public static final EventProcess INITIATE_PROBE_COLLECTION = new EventProcess("initiate_probe_collection", "sceneplugincollection.event.initiate_probe_collection");
@@ -171,7 +173,6 @@ public class InitiateHandler extends HandlerCommon {
             // 初始化安装探针脚本
             var collectionId = getPluginHandler().getScene().getProbeCollector();
             runSceneProgress(SceneProcess.INITIATE_PROBES, () -> {
-                Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap = this.getLocationMap();
                 CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                         .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
                 probeCollectionElements.forEach(collectionElement -> {
@@ -182,7 +183,7 @@ public class InitiateHandler extends HandlerCommon {
                     String systemType = SystemTypeUtils.getStandardSystemType(srcElement.getSystemType());
                     if (collectionElement.getProbes() != null && !collectionElement.getProbes().isEmpty()) {
                         controlParam = this.getControlConfigParam(collectionElement.getProbes(), srcElement.getEid(),
-                                systemType, locationMap);
+                                systemType, this.getLocationMap());
                     }
                     var probeInstallScript = getProbeCollector().generateProbeInstallScript(systemType,
                             srcElement.getEid(), collectionId, controlParam, isContainer);
@@ -259,21 +260,23 @@ public class InitiateHandler extends HandlerCommon {
      * @return 日志采集探针参数Map
      */
     private Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> getLocationMap() {
-        if (locationConfig == null) {
-            locationConfig = BeanCommon.getBean(WazuhLogProbeLocationConfig.class);
-        }
-        if (CollectionUtils.isEmpty(locationConfig.getLocations())) {
-            return new HashMap<>();
-        }
-        Map<String, List<WazuhLogProbeLocationConfig.ProbeLocation>> locationMap = new HashMap<>();
-        // 探针id和系统类型为key，探针参数为value
-        locationConfig.getLocations().forEach(location -> {
-            String key = location.getProbeId() + "_" + location.getOsType();
-            if (!locationMap.containsKey(key)) {
-                locationMap.put(key, new ArrayList<>());
+        if (locationMap == null) {
+            locationMap = new HashMap<>();
+            if (locationConfig == null) {
+                locationConfig = BeanCommon.getBean(WazuhLogProbeLocationConfig.class);
             }
-            locationMap.get(key).add(location);
-        });
+            if (CollectionUtils.isEmpty(locationConfig.getLocations())) {
+                return locationMap;
+            }
+            // 探针id和系统类型为key，探针参数为value
+            locationConfig.getLocations().forEach(location -> {
+                String key = location.getProbeId() + "_" + location.getOsType();
+                if (!locationMap.containsKey(key)) {
+                    locationMap.put(key, new ArrayList<>());
+                }
+                locationMap.get(key).add(location);
+            });
+        }
         return locationMap;
     }
 }
