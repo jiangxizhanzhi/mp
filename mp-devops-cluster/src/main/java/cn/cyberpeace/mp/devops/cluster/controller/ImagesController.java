@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
@@ -84,6 +85,8 @@ public class ImagesController {
     private final ImagesService imagesService;
 
     private final SnapshotService snapshotService;
+
+    private final CsceneSnapshotService csceneSnapshotService;
 
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
@@ -331,7 +334,7 @@ public class ImagesController {
     }
 
     /**
-     * 合并快照历史
+     * 删除快照
      */
     @ApiOperation("删除快照")
     @PostMapping("/snapshot/delete")
@@ -339,7 +342,7 @@ public class ImagesController {
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
         if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
-
+            csceneSnapshotService.deleteSnapshotRelativeInfoByResource(request.getSnapshotUuid());
             return ServiceResult.success(true);
         } else {
             return ServiceResult.fail(baseResult.getMessage());
