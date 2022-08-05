@@ -159,6 +159,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.public-net-proxy-port:}")
     private Integer publicNetProxyPort;
 
+    @Value("${mp.sceneplugincloud.gateway_types:2,3}")
+    private String gatewayTypes;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

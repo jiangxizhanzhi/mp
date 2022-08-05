@@ -227,6 +227,7 @@ mp:
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
+    gateway_types: ${GATEWAY_TYPES:2,3}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
     wazuh-api-server: http://${ip.wazuh}:15500
@@ -244,7 +245,6 @@ mp:
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:* 0/15 * * * ?}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
   scene:
-    gateway_types: ${GATEWAY_TYPES:2,3}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
 
 management:
