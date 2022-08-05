@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.cscene.init;
 
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.cscene.model.CsceneCommonConfigModel;
-import cn.cyberpeace.mp.cscene.repository.CsceneCommonConfigMapper;
+import cn.cyberpeace.mp.cscene.service.CommonConfigService;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
@@ -25,20 +23,19 @@ public class CsceneInit implements ApplicationRunner {
     private CsceneService csceneService;
 
     @Resource
-    private CsceneCommonConfigMapper commonConfigMapper;
+    private CommonConfigService commonConfigService;
 
     @Override
     public void run(ApplicationArguments args) {
+
+        // 初始化场景链路状态的线程池和更新周期
         SceneInstanceLinkCacheUtil.init();
 
+        // 初始化场景使用的节点数量
         int count = csceneService.getActiveVirtualDeviceCount();
         NodeLimitUtils.addLimitedNodeCount(count);
 
-        var config = commonConfigMapper
-                .list(new HumanCondition().filterEqual(CsceneCommonConfigModel::getKey, CloudMessageConvertUtil.configKey))
-                .stream().findFirst();
-        if (config.isPresent()) {
-            CloudMessageConvertUtil.init(config.get().getContent());
-        }
+        // 初始化云平台错误码转换的配置
+        CloudMessageConvertUtil.init(commonConfigService.getCloudMessageConvert().getSource());
     }
 }
