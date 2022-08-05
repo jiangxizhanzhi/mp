@@ -358,5 +358,23 @@
         "relation": "contains"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Duplicate name"
+      },
+      {
+        "locale": "zh",
+        "message": "名称重复"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "name duplicated",
+        "relation": "contains"
+      }
+    ]
   }
 ]
