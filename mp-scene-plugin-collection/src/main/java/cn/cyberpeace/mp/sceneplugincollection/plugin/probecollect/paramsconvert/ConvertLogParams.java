@@ -60,11 +60,11 @@ public class ConvertLogParams implements WazuhParamsConvert<WazuhControl.Control
                 return new ArrayList<>();
             }
             for (WazuhLogProbeLocationConfig.ProbeLocation location : locations) {
-                WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
-                logParam.setId(probe.getId() + "_" + i++);
-                logParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
-                logParam.setLogFormat(location.getLogFormat());
                 for (String l : location.getLocation()) {
+                    WazuhControl.ControlLogCollectParam logParam = new WazuhControl.ControlLogCollectParam();
+                    logParam.setId(probe.getId() + "_" + i++);
+                    logParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
+                    logParam.setLogFormat(location.getLogFormat());
                     logParam.setLocation(l);
                     logParams.add(logParam);
                 }
