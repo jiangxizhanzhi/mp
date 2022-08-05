@@ -42,6 +42,7 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -59,6 +60,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -508,7 +510,7 @@ public class ImagesController {
             ExtSystemInfo extSystemInfo = v.getExtSystemInfo();
             ExtVm extVm = v.getExtVm();
             ExtImageInfo extImageInfo = v.getExtImageInfo();
-            return ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
+            var vo = ImagesPageVO.builder().uuid(v.getUuid()).name(v.getName())
                     .logo(v.getLogo())
                     .mainCategory(v.getMainCategory()).subCategory(v.getSubCategory()).thirdCategory(v.getThirdCategory())
                     .imageType(v.getImageType())
@@ -519,6 +521,25 @@ public class ImagesController {
                     .description(v.getDescription()).imageStatus(Objects.nonNull(extImageInfo) ? extImageInfo.getImageStatus() : null)
                     .authTotal(v.getAuthTotal()).isPublic(v.getIsPublic()).extSystemInfo(v.getExtSystemInfo())
                     .extGateway(v.getExtGateway()).extVm(v.getExtVm()).extImageInfo(v.getExtImageInfo()).extDocker(v.getExtDocker()).build();
+            if (vo.getExtDocker() != null && vo.getExtDocker().getExtInfo() != null && vo.getExtDocker().getExtInfo() instanceof Map) {
+                Map map = (Map) vo.getExtDocker().getExtInfo();
+                if (map.containsKey("message")) {
+                    var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                    if (result != null) {
+                        map.put("message", result);
+                    }
+                }
+            }
+            if (vo.getExtVm() != null && vo.getExtVm().getExtInfo() != null && vo.getExtVm().getExtInfo() instanceof Map) {
+                Map map = (Map) vo.getExtVm().getExtInfo();
+                if (map.containsKey("message")) {
+                    var result = CloudMessageConvertUtil.getMessage(String.valueOf(map.get("message")));
+                    if (result != null) {
+                        map.put("message", result);
+                    }
+                }
+            }
+            return vo;
         }).collect(Collectors.toList());
     }
 }

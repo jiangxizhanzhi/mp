@@ -38,7 +38,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return new ServiceResult(flatModels2NestedBos(models)).asResult();
     }
 
-    private List<OptionModel> findByType(String type) {
+    public List<OptionModel> findByType(String type) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(OptionModel::getType, type);
         condition.orderBy(OptionModel::getSort);

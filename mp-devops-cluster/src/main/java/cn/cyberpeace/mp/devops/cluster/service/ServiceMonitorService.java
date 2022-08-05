@@ -79,6 +79,7 @@ public class ServiceMonitorService {
         processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
+        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
         this.changeServiceName(serviceMonitorDtos);
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
@@ -107,6 +108,7 @@ public class ServiceMonitorService {
         processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
 
         serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
+        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
         this.changeServiceName(serviceMonitorDtos);
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
