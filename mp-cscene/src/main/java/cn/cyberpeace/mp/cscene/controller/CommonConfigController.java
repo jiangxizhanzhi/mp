@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.service.CommonConfigService;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.Data;
@@ -22,12 +22,12 @@ import java.util.Map;
 public class CommonConfigController {
 
     @Resource
-    private CommonConfigService commonConfigService;
+    private CloudCommonConfigService cloudCommonConfigService;
 
     @ApiOperation("查询靶标对应的探针系统分类")
     @GetMapping("/system_type_to_agent_support")
     public ServiceResult<Map<String, Object>> getSystemTypeToAgentSupport() {
-        return commonConfigService.getSystemTypeToAgentSupport().asResult();
+        return cloudCommonConfigService.getSystemTypeToAgentSupport().asResult();
     }
 
 }

@@ -1,12 +1,7 @@
 package cn.cyberpeace.mp.cscene.init;
 
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
-import cn.cyberpeace.mp.cscene.model.CsceneCommonConfigModel;
-import cn.cyberpeace.mp.cscene.repository.CsceneCommonConfigMapper;
-import cn.cyberpeace.mp.cscene.service.CsceneService;
-import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
-import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
-import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
+import cn.cyberpeace.mp.cscene.init.jobs.SceneNodeNumInitJob;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -18,27 +13,19 @@ import javax.annotation.Resource;
  * @Author maojun
  * @Date 2022/2/11
  */
+@Slf4j
 @Component
 public class CsceneInit implements ApplicationRunner {
 
     @Resource
-    private CsceneService csceneService;
-
-    @Resource
-    private CsceneCommonConfigMapper commonConfigMapper;
+    private SceneNodeNumInitJob sceneNodeNumInitJob;
 
     @Override
     public void run(ApplicationArguments args) {
-        SceneInstanceLinkCacheUtil.init();
-
-        int count = csceneService.getActiveVirtualDeviceCount();
-        NodeLimitUtils.addLimitedNodeCount(count);
-
-        var config = commonConfigMapper
-                .list(new HumanCondition().filterEqual(CsceneCommonConfigModel::getKey, CloudMessageConvertUtil.configKey))
-                .stream().findFirst();
-        if (config.isPresent()) {
-            CloudMessageConvertUtil.init(config.get().getContent());
+        try {
+            sceneNodeNumInitJob.executed();
+        } catch (Exception e) {
+            log.error("failed to execute job : {}", sceneNodeNumInitJob.getClass().getName(), e);
         }
     }
 }
