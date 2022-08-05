@@ -1,35 +1,56 @@
 package cn.cyberpeace.mp.sceneplugincloud.init;
 
-import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
-import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.common.ContainerFileUtils;
+import cn.cyberpeace.mp.sceneplugincloud.init.jobs.AbstractInitJob;
+import cn.cyberpeace.mp.sceneplugincloud.init.jobs.CloudLocalFileMappingInitJob;
+import cn.cyberpeace.mp.sceneplugincloud.init.jobs.CloudMessageConvertInitJob;
+import cn.cyberpeace.mp.sceneplugincloud.init.jobs.CloudInstanceLinkInitJob;
 import cn.hutool.core.io.FileUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
+
+@Slf4j
 @Component
 public class ScenePluginCloudInit implements ApplicationRunner {
 
-    @Autowired
-    private BaseAppConfig baseAppConfig;
-
-    @Autowired
+    @Resource
     private CloudAppConfig cloudAppConfig;
+
+    @Resource
+    private CloudLocalFileMappingInitJob cloudLocalFileMappingInitJob;
+
+    @Resource
+    private CloudMessageConvertInitJob cloudMessageConvertInitJob;
+
+    @Resource
+    private CloudInstanceLinkInitJob cloudInstanceLinkInitJob;
 
     @Override
     public void run(ApplicationArguments args) {
-        // 本地开发环境不运行资源的更新和删除
-        if (!baseAppConfig.isRunInit()) {
-            return;
+
+        // 可串行执行的任务
+        List<AbstractInitJob> syncJobs = new ArrayList<>();
+        syncJobs.add(cloudMessageConvertInitJob);
+        syncJobs.add(cloudInstanceLinkInitJob);
+        for (var job : syncJobs) {
+            try {
+                job.executed();
+            } catch (Exception e) {
+                log.error("failed to execute job : {}", job.getClass().getName(), e);
+            }
         }
+
+        // 异步触发的任务
         FileUtil.mkdir(cloudAppConfig.getContainerHelpInstallerDir());
         TaskCommon.executeTask(() -> {
-            LocalFileMappingCommon.syncDir(ContainerFileUtils.CONTAINER_HELP_INSTALLER_GROUP,
-                    cloudAppConfig.getContainerHelpInstallerDir());
+            cloudLocalFileMappingInitJob.executed();
         });
     }
 

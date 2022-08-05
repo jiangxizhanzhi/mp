@@ -20,17 +20,15 @@ import java.util.Locale;
 @Setter
 @Slf4j
 public class CloudMessageConvertUtil {
-    public static final String configKey = "cloud_message_convert";
-
     private static List<Convert> converts = new ArrayList<>();
 
-    public static void init(String config) {
+    public static void init(String content) {
         try {
             converts.clear();
-            List<Convert> result = JSON.parseArray(config, Convert.class);
+            List<Convert> result = JSON.parseArray(content, Convert.class);
             converts.addAll(result);
         } catch (Exception e) {
-            log.error("failed to init cloud message convert");
+            log.error("failed to init cloud message convert,content is {}", content);
         }
     }
 

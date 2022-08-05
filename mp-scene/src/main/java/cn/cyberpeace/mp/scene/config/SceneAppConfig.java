@@ -46,9 +46,6 @@ public class SceneAppConfig {
     @Value("${mp.scene.windows_help_installer_dir:}")
     private String windowsHelpInstallerDir;
 
-    @Value("${mp.scene.gateway_types:2,3}")
-    private String gatewayTypes;
-
     @Autowired
     private BaseAppConfig baseAppConfig;
 

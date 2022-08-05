@@ -313,7 +313,7 @@ public class InitiateHandler extends HandlerCommon {
         if (this.isRouter(coreType, virtualType)) {
             return true;
         } else if (type != null) {
-            String gatewayTypes = SceneSingleton.sceneAppConfig.getGatewayTypes();
+            String gatewayTypes = CloudSingleton.cloudAppConfig.getGatewayTypes();
             if (StringUtils.isNotEmpty(gatewayTypes)) {
                 String[] gatewayTypeStr = gatewayTypes.split(",");
                 for (String gatewayType : gatewayTypeStr) {

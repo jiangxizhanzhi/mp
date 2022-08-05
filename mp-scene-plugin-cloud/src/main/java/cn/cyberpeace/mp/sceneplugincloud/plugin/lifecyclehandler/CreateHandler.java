@@ -721,8 +721,10 @@ public class CreateHandler extends HandlerCommon {
 
                 var accessModesData = virtualNic.getAccessModes();
                 if (accessModesData != null && !accessModesData.isEmpty()) {
-                    Map<String, VirtualNic.AccessMode> accessModeDataMap = accessModesData.stream()
-                            .collect(Collectors.toMap(this::genAccessModeKey, accessMode -> accessMode));
+                    Map<String, VirtualNic.AccessMode> accessModeDataMap = new HashMap<>();
+                    for (var accessMode : accessModesData) {
+                        accessModeDataMap.put(this.genAccessModeKey(accessMode), accessMode);
+                    }
                     cloudPort.getAccessModes().forEach(accessMode -> {
                         var accessModeData = accessModeDataMap.getOrDefault(genAccessModeKey(accessMode), null);
                         if (accessModeData == null) {

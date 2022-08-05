@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlDto;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileDownloadUrlRequest;
 import cn.cyberpeace.mp.cscene.dto.log.LogFileVO;
+import cn.cyberpeace.mp.sceneplugincloud.service.CloudCommonConfigService;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
 import cn.cyberpeace.mp.sceneplugincollection.constant.CollectionSingleton;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
@@ -53,7 +54,7 @@ public class LogFileService {
     private CsceneCommonService csceneCommonService;
 
     @Autowired
-    private CommonConfigService commonConfigService;
+    private CloudCommonConfigService cloudCommonConfigService;
 
     @Autowired
     private SceneElementMonitorService sceneElementMonitorService;
@@ -146,7 +147,7 @@ public class LogFileService {
      * @return
      */
     private String getOsType(String systemType) {
-        ServiceResult<Map<String, Object>> result = commonConfigService.getSystemTypeToAgentSupport();
+        ServiceResult<Map<String, Object>> result = cloudCommonConfigService.getSystemTypeToAgentSupport();
         Map<String, Object> map = result.getSource();
         Object osTypeCode = map.get(systemType);
         String osType = ProbeOSType.getByCode(Integer.valueOf(osTypeCode.toString()));
