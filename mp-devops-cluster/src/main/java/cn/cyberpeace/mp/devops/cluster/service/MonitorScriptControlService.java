@@ -84,6 +84,7 @@ public class MonitorScriptControlService {
     public void restart(String hostname, List<String> serviceList) {
         // 如果某个服务的状态还在重启中，则忽略该服务的重启
         TimedCache<String, ServiceRestartStatusDto> timedCache = getStatusCache();
+        log.info("restart serviceList:{}, timedCache keySet:{}", serviceList, timedCache.keySet());
         Iterator<String> iterator = serviceList.iterator();
         while (iterator.hasNext()) {
             String cacheKey = hostname + "_" + iterator.next();

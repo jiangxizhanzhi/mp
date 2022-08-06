@@ -231,7 +231,7 @@ public class ServiceMonitorService {
 
                 if (dto.getScanTime().isAfter(statusDto.getRestartTime().plusSeconds(5)) && Objects.equals(dto.getState(), MonitorStateEnum.RUNNING.getDesc())) {
                     // 重启之后的状态（重启时间延迟5秒，给脚本反应时间），且为RUNNING状态，则清除缓存
-                    timedCache.remove(dto.getName());
+                    timedCache.remove(cacheKey);
                 } else {
                     // 否则替换状态为RESTARTING
                     dto.setState(MonitorStateEnum.RESTARTING.getDesc());
