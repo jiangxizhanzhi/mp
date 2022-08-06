@@ -51,7 +51,7 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                             int runningTime = Long.valueOf(duration.toMillis() / 1000).intValue();
                             enabledAlarm.setRunningTime(runningTime);
                             enabledAlarm.setUpdateTime(LocalDateTime.now());
-                            this.getModelMapper().update(enabledAlarm);
+                            enabledAlarm.setAlarmMsg(systemAlarmModel.getAlarmMsg());
                             updateAlarmList.add(enabledAlarm);
                             isExist = true;
                         }
@@ -61,6 +61,12 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
                         addAlarmList.add(systemAlarmModel);
                     }
                 });
+
+                // 本次更新告警
+                if (CollectionUtils.isNotEmpty(updateAlarmList)) {
+                    this.getModelMapper().bulkUpdate(updateAlarmList);
+                }
+
                 // 本次新增告警信息
                 if (CollectionUtils.isNotEmpty(addAlarmList)) {
                     this.getModelMapper().bulkCreate(addAlarmList);
