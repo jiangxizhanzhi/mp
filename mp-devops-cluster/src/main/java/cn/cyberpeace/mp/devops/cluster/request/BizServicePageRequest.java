@@ -21,4 +21,9 @@ public class BizServicePageRequest extends BasePageRequest implements Serializab
      */
     private String hostName;
 
+    /**
+     * 如 +runtime or -runtime
+     */
+    private String sort;
+
 }

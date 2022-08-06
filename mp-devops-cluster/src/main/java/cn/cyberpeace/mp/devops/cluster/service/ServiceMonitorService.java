@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -49,6 +50,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ServiceMonitorService {
 
+    private static final List<String> CUSTOM_SORT_ARR = Arrays.asList("uptime", "+uptime", "-uptime", "name", "+name", "-name", "state", "+state", "-state");
+
     private final HypervisorConverter hypervisorConverter;
 
     private final ServiceMonitorDataCollectionService serviceMonitorDataCollectionService;
@@ -60,6 +63,7 @@ public class ServiceMonitorService {
     private final MonitorConfig monitorConfig;
 
     private final ImagesConverter imagesConverter;
+
 
     /**
      * 分页查询业务服务监控数据
@@ -77,10 +81,10 @@ public class ServiceMonitorService {
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
         processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
-
-        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
-        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
         this.changeServiceName(serviceMonitorDtos);
+
+        sortMonitorDtos(serviceMonitorDtos, request.getSort());
+
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -106,10 +110,10 @@ public class ServiceMonitorService {
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
         processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
-
-        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getState));
-        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
         this.changeServiceName(serviceMonitorDtos);
+
+        sortMonitorDtos(serviceMonitorDtos, request.getSort());
+
         int offset = (request.getPage() - 1) * request.getPerPage();
         if (offset < serviceMonitorDtos.size()) {
             int toIndex = Math.min(offset + request.getPerPage(), serviceMonitorDtos.size());
@@ -292,5 +296,136 @@ public class ServiceMonitorService {
             }
         }
     }
+
+    private void sortMonitorDtos(List<ServiceMonitorDto> serviceMonitorDtos, String sort) {
+        if (StringUtils.isBlank(sort)) {
+            normalSort(serviceMonitorDtos);
+        } else {
+            //customSort(serviceMonitorDtos, sort);
+        }
+    }
+
+    /**
+     * 普通排序
+     * @param serviceMonitorDtos
+     */
+    private void normalSort(List<ServiceMonitorDto> serviceMonitorDtos) {
+        // 1. 不能重启的置后
+        serviceMonitorDtos.sort(Comparator.comparing(ServiceMonitorDto::getDisableRestart));
+
+        // 2. 状态为重启的置前
+        serviceMonitorDtos.sort(new Comparator<ServiceMonitorDto>() {
+            @Override
+            public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
+                return MonitorStateEnum.valueOf(o1.getState()).ordinal() - MonitorStateEnum.valueOf(o2.getState()).ordinal() ;
+            }
+        });
+
+        // 3. 如果同样是重启状态，则后重启的置前
+        serviceMonitorDtos.sort(new Comparator<ServiceMonitorDto>() {
+            @Override
+            public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
+                if (Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), o1.getState()) && Objects.equals(MonitorStateEnum.RESTARTING.getDesc(), o2.getState())) {
+                    TimedCache<String, ServiceRestartStatusDto> timedCache = monitorScriptControlService.getStatusCache();
+                    String o1CacheKey = o1.getHostname() + "_" + o1.getServiceName();
+                    String o2CacheKey = o2.getHostname() + "_" + o2.getServiceName();
+                    ServiceRestartStatusDto o1StatusDto = timedCache.get(o1CacheKey);
+                    ServiceRestartStatusDto o2StatusDto = timedCache.get(o2CacheKey);
+                    if (Objects.nonNull(o1StatusDto) && Objects.nonNull(o2StatusDto)) {
+                        if (o1StatusDto.getRestartTime().isBefore(o2StatusDto.getRestartTime())) {
+                            return 1;
+                        } else if (o1StatusDto.getRestartTime().isAfter(o2StatusDto.getRestartTime())) {
+                            return -1;
+                        }
+                    }
+                }
+                return 0;
+            }
+        });
+    }
+
+
+    private void customSort(List<ServiceMonitorDto> serviceMonitorDtos, String sort) {
+        if (StringUtils.isBlank(sort)) {
+            return;
+        }
+
+        if (!CUSTOM_SORT_ARR.contains(sort)) {
+            return;
+        }
+
+        Comparator comparator = null;
+
+        if (sort.contains("uptime")) {
+            comparator = new Comparator<ServiceMonitorDto>() {
+                @Override
+                public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
+                    if (Objects.nonNull(o1.getUptime()) && Objects.nonNull(o1.getUptime())) {
+                        if (o1.getUptime() > o2.getUptime()) {
+                            return 1;
+                        } else if (o1.getUptime() < o2.getUptime()) {
+                            return -1;
+                        }
+                    }
+                    return 0;
+                }
+            };
+
+            if (isReversed(sort, "uptime")) {
+                comparator.reversed();
+            }
+        }
+
+
+        if (sort.contains("name")) {
+            comparator = new Comparator<ServiceMonitorDto>() {
+                @Override
+                public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
+                    if (StringUtils.isNotBlank(o1.getName()) && StringUtils.isNotBlank(o2.getName())) {
+                        return o1.getName().compareTo(o2.getName());
+                    } else {
+                        return 0;
+                    }
+                }
+            };
+
+            if (isReversed(sort, "name")) {
+                comparator.reversed();
+            }
+        }
+
+
+        if (sort.contains("state")) {
+            comparator = new Comparator<ServiceMonitorDto>() {
+                @Override
+                public int compare(ServiceMonitorDto o1, ServiceMonitorDto o2) {
+                    if (StringUtils.isNotBlank(o1.getState()) && StringUtils.isNotBlank(o2.getState())) {
+                        return o1.getState().compareTo(o2.getState());
+                    } else {
+                        return 0;
+                    }
+                }
+            };
+
+            if (isReversed(sort, "state")) {
+                comparator.reversed();
+            }
+        }
+
+        if (Objects.nonNull(comparator)) {
+            serviceMonitorDtos.sort(comparator);
+        }
+    }
+
+
+    private boolean isReversed(String sortStr, String sortField) {
+        String symbol = StringUtils.substringBefore(sortStr, sortField);
+        if (Objects.equals("-", symbol)) {
+            return false;
+        }
+
+        return true;
+    }
+
 
 }
