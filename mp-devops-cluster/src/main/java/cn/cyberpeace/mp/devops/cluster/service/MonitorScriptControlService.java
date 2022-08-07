@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
@@ -20,6 +21,7 @@ import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollectionUtil;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +32,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +60,6 @@ public class MonitorScriptControlService {
     @Autowired
     private MonitorConfig monitorConfig;
 
-
     // expires in 20 minutes
     private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
 
@@ -76,8 +78,8 @@ public class MonitorScriptControlService {
     }
 
 
-    public List<CpNodeMonitorScriptConfigModel> listByAgentName(String agentName) {
-        return monitorScriptConfigMapper.listByAgentName(agentName);
+    public CpNodeMonitorScriptConfigModel getByAgentName(String agentName) {
+        return monitorScriptConfigMapper.getByAgentName(agentName);
     }
 
 
@@ -131,37 +133,49 @@ public class MonitorScriptControlService {
 
 
     private void scriptInstallationCheck(List<LocalFileMappingModel> mappings) {
-        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(100, 1));
+        BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO(9999, 1));
 
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
 
-        if (CollectionUtils.isNotEmpty(model.getList())) {
+        if (CollectionUtils.isNotEmpty(hypervisorBOBasePageBO.getList())) {
 
-            List<CpNodeMonitorScriptConfigModel> configModelList = listAll();
-            // 检查每个节点，是否安装了脚本
-            List<String> hostNames = model.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
-            List<String> notInstalledHosts = new ArrayList<>();
+            List<CpNodeMonitorScriptConfigModel> configedNodeList = listAll();
+            List<String> hostNameList = hypervisorBOBasePageBO.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
+            if (CollectionUtil.isEmpty(hostNameList)) {
+                return;
+            }
 
-            if (CollectionUtils.isEmpty(configModelList)) {
-                notInstalledHosts = hostNames;
+            List<String> toInstallList = new ArrayList<>();
+            // todo 判断节点是否需要安装（重装）脚本，比如增加了计算节点，修改了节点hostName，再比如yaml配置有变化（interval，scriptUrl等）
+            // 检查每个节点，是否安装了脚本，以及脚本的配置是否发生了变化，如interval采集间隔是否有变化
+            if (CollectionUtils.isEmpty(configedNodeList)) {
+                toInstallList = hostNameList;
             } else {
-                for (String nodeName : hostNames) {
-                    for (CpNodeMonitorScriptConfigModel config : configModelList) {
-                        if (config.getHostname().equals(nodeName)) {
-                            if (!config.getStatus().equals(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED)) {
-                                notInstalledHosts.add(nodeName);
+                // 本次新增或者节点名称修改了的节点
+                List<String> configedNodeNames = configedNodeList.stream().map(CpNodeMonitorScriptConfigModel::getAgentName).collect(Collectors.toList());
+                List<String> newAddedNodes = hostNameList.stream().filter(host -> !configedNodeNames.contains(host)).collect(Collectors.toList());
+                log.info("newAddedNodes:{}", newAddedNodes);
+                toInstallList.addAll(newAddedNodes);
+
+                // 上次脚本安装失败，或者配置有变更的节点
+                for (String nodeName : hostNameList) {
+                    for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
+                        if (configedNodeModel.getAgentName().equals(nodeName)) {
+                            if (!Objects.equals(configedNodeModel.getStatus(), CpNodeMonitorScriptConfigModel.STATUS_INSTALLED) || isConfigChanged(configedNodeModel.getConfig(), nameFileMap)) {
+                                toInstallList.add(nodeName);
                             }
                         }
                     }
                 }
             }
 
-            if (CollectionUtils.isNotEmpty(notInstalledHosts)) {
+            if (CollectionUtils.isNotEmpty(toInstallList)) {
+                log.info("toInstallList:{}", toInstallList);
                 // 发送安装指令
-                notInstalledHosts.forEach(hostName -> {
+                toInstallList.forEach(hostName -> {
                     sendScriptInstallCmd(hostName, nameFileMap);
-                    updateScriptConfigByHostName(hostName);
+                    addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
                 });
             }
 
@@ -170,7 +184,6 @@ public class MonitorScriptControlService {
 
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
-
 
         List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
         List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
@@ -209,22 +222,89 @@ public class MonitorScriptControlService {
         return probeParam;
     }
 
-    private void updateScriptConfigByHostName(String hostName) {
-        log.info("hostName:{}", hostName);
-        List<CpNodeMonitorScriptConfigModel> scriptConfigModelList = listByAgentName(hostName);
-        if (CollectionUtil.isEmpty(scriptConfigModelList)) {
-            CpNodeMonitorScriptConfigModel configModel = new CpNodeMonitorScriptConfigModel();
-            configModel.setAgentName(hostName);
-            configModel.setHostname(hostName);
-            // todo status installed
-            configModel.setStatus(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED);
-            monitorScriptConfigMapper.save(configModel);
+    private void addOrUpdateNodeConfigByHostName(String hostName, Map<String, String> nameFileMap) {
+        List<CpNodeMonitorScriptConfigModel.ParamConfig> paramConfigs = getConfigFromYaml(nameFileMap);
+        String configStr = JsonCommon.stringify(paramConfigs);
+
+        CpNodeMonitorScriptConfigModel scriptConfigModel = getByAgentName(hostName);
+        if (Objects.isNull(scriptConfigModel)) {
+            // create
+            CpNodeMonitorScriptConfigModel toAdd = new CpNodeMonitorScriptConfigModel();
+            toAdd.setAgentName(hostName);
+            toAdd.setHostname(hostName);
+            toAdd.setStatus(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED);
+            toAdd.setConfig(configStr);
+            monitorScriptConfigMapper.save(toAdd);
+        } else {
+            // update
+            CpNodeMonitorScriptConfigModel toUpdate = new CpNodeMonitorScriptConfigModel();
+            toUpdate.setId(scriptConfigModel.getId());
+            toUpdate.setAgentName(hostName);
+            toUpdate.setHostname(hostName);
+            toUpdate.setStatus(CpNodeMonitorScriptConfigModel.STATUS_INSTALLED);
+            toUpdate.setConfig(configStr);
+            toUpdate.setUpdateTime(LocalDateTime.now());
+            monitorScriptConfigMapper.update(toUpdate);
         }
     }
 
 
     public TimedCache<String, ServiceRestartStatusDto> getStatusCache() {
         return SRV_STATUS_CACHE;
+    }
+
+    /**
+     * 查看yaml或者scriptUrl中的配置，跟已保存到数据库中的配置，是否有变化
+     * 如果有，则需要重新发送安装指令，重新安装监控脚本
+     * @param configFromDB
+     * @param nameFileMap
+     * @return
+     */
+    private boolean isConfigChanged(String configFromDB, Map<String, String> nameFileMap) {
+        if (StringUtils.isBlank(configFromDB)) {
+            return true;
+        }
+        List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromYaml = getConfigFromYaml(nameFileMap);
+        List<CpNodeMonitorScriptConfigModel.ParamConfig> configsFromDB = JsonCommon.parse(configFromDB, new TypeReference<List<CpNodeMonitorScriptConfigModel.ParamConfig>>() {});
+
+        if (CollectionUtil.isEmpty(configsFromYaml) || CollectionUtil.isEmpty(configsFromDB)) {
+            return true;
+        }
+
+        configsFromYaml.sort(Comparator.comparing(CpNodeMonitorScriptConfigModel.ParamConfig::getId));
+        configsFromDB.sort(Comparator.comparing(CpNodeMonitorScriptConfigModel.ParamConfig::getId));
+
+        return !CollectionUtil.isEqualList(configsFromYaml, configsFromDB);
+    }
+
+    private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
+        List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
+        allSrvs.addAll(monitorConfig.getCpSrvMonitors());
+        allSrvs.addAll(monitorConfig.getBizSrvMonitors());
+
+        if (CollectionUtil.isNotEmpty(allSrvs)) {
+            allSrvs.sort(new Comparator<MonitorConfig.MonitorProbe>() {
+                @Override
+                public int compare(MonitorConfig.MonitorProbe o1, MonitorConfig.MonitorProbe o2) {
+                    return o1.getProbeName().compareTo(o2.getProbeName());
+                }
+            });
+        }
+
+        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT); 
+
+        List<CpNodeMonitorScriptConfigModel.ParamConfig> configs = new ArrayList<>();
+        for (MonitorConfig.MonitorProbe monitorProbe : allSrvs) {
+            String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
+
+            CpNodeMonitorScriptConfigModel.ParamConfig config = new CpNodeMonitorScriptConfigModel.ParamConfig();
+            config.setId(monitorProbe.getLaunchId());
+            config.setScriptUrl(url);
+            config.setInterval(monitorProbe.getInterval());
+            configs.add(config);
+        }
+        //String jsonStr = JsonCommon.stringify(configs);
+        return configs;
     }
 
 }

@@ -157,7 +157,7 @@ public class ServiceMonitorService {
 
         // 服务器监控
         List<String> hostNameList = new ArrayList<>();
-        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(9999, 1));
         if (CollectionUtils.isNotEmpty(modelPage.getList())) {
             // 获取所有物理主机服务状态
             CloudPlatformPageResult<ServiceStatus> serviceStatusModel = imagesConverter.listServiceStatus();
@@ -245,7 +245,7 @@ public class ServiceMonitorService {
     private List<String> getActiveHostNameList(String hostName) {
         List<String> hostNameList = new ArrayList<>();
 
-        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(100, 1));
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(9999, 1));
         // 忽略DOWN状态的节点查询
         List<String> activeHostNames = modelPage.getList().stream()
                 .filter(m -> Objects.equals(CloudPlatformEnum.UP.getState(), m.getState()))
