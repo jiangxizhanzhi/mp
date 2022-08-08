@@ -376,5 +376,23 @@
         "relation": "contains"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "System info not assigned"
+      },
+      {
+        "locale": "zh",
+        "message": "未分配系统信息"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "System info not assigned",
+        "relation": "contains"
+      }
+    ]
   }
 ]
