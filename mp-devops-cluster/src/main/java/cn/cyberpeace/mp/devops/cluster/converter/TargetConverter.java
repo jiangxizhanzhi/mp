@@ -114,6 +114,11 @@ public class TargetConverter{
     public void validTargetCanDelete(List<String> uuids){
 
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
+        deviceTargetPOS.forEach(deviceTargetPO -> {
+            if (Boolean.TRUE.equals(deviceTargetPO.getIsInit())) {
+                throw new MpRuntimeException(DevopsClusterErrorCode.INIT_TARGET_CAN_NOT_DELETE.format(deviceTargetPO.getName()));
+            }
+        });
         String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
         //引用
         ServiceResult<Map<String, List<DeviceReferCsceneStat>>> referStateServiceResult = csceneSpecialService.statDeviceReferCscenes(imageNames);
@@ -130,7 +135,6 @@ public class TargetConverter{
             throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_USED_SCENE);
         }
     }
-
 
 
     /**
