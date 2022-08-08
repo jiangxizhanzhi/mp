@@ -148,6 +148,7 @@ public class DevopsTargetService {
         deviceTargetPO.setThirdCategory(device.getL3Category());
         deviceTargetPO.setImageType(device.getImageType());
         deviceTargetPO.setIsHide(Objects.nonNull(device.getIsHide()) ? device.getIsHide() : Boolean.FALSE);
+        deviceTargetPO.setIsInit(Objects.nonNull(device.getIsInit()) ? device.getIsInit() : Boolean.FALSE);
         String imageType = device.getImageType();
         deviceTargetPO.setIsImport(device.getIsImport());
         ExtVm extVm = device.getExtVm();

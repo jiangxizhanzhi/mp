@@ -20,7 +20,8 @@ public enum DevopsClusterErrorCode implements ErrorCode {
     IMAGE_SNAPSHOT_REFERENCED_SCENE("MP-110608", "image_snapshot_referenced_scene"),
     IMAGE_SNAPSHOT_USED_SCENE("MP-110609", "image_snapshot_used_scene"),
     IMAGE_SNAPSHOT_REFERENCED_SCENE_WITH_NAME("MP-110610", "image_snapshot_referenced_scene_with_name"),
-    CP_SERVICE_ERROR("MP-110611", "cp_service_error");
+    CP_SERVICE_ERROR("MP-110611", "cp_service_error"),
+    INIT_TARGET_CAN_NOT_DELETE("MP-110612", "init_target_can_not_delete");
 
     DevopsClusterErrorCode(String code, String message) {
         setCode(code, ControllerConstant.ERROR_CODE_PREFIX + message);
