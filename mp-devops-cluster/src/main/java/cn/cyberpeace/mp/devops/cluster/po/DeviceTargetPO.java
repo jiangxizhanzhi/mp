@@ -131,6 +131,11 @@ public class DeviceTargetPO extends BaseModel {
     private Boolean isHide = Boolean.FALSE;
 
     /**
+     * 是否初始靶标
+     */
+    private Boolean isInit = Boolean.FALSE;
+
+    /**
      * 镜像状态 0:没有实例，1：创建中，2创建成功，3创建失败
      */
     @DefaultInt

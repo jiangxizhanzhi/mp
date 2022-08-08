@@ -204,7 +204,7 @@
 
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-        i.in_position,i.reference_status,i.use_status,i.create_time
+        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
@@ -370,6 +370,9 @@
             <if test="instanceState != null">
                 instance_state = #{instanceState},
             </if>
+            <if test="isInit != null">
+                is_init = #{isInit},
+            </if>
         </set>
         where uuid = #{uuid}
     </update>
@@ -408,22 +411,24 @@
 
     <insert id="batchInsert" parameterType="java.util.List">
         insert into mp_devops_target( id, uuid, name,logo, main_category,sub_category,third_category,
-                                     role, image_type,is_public, quick_create_support,
-                                     create_time, update_time, in_position,use_status,reference_status,parent_system_type,
-                                     system_type,system_architecure, language,image_status,base_image_support,
-                                     init_support,image_source,is_import,is_hide)
+        role, image_type,is_public, quick_create_support,
+        create_time, update_time, in_position,use_status,reference_status,parent_system_type,
+        system_type,system_architecure, language,image_status,base_image_support,
+        init_support,image_source,is_import,is_hide,is_init)
         VALUES
-        <foreach collection="list" item="item" index="index"  separator=",">
-        (
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
             #{item.id},#{item.uuid},#{item.name},#{item.logo},#{item.mainCategory},#{item.subCategory},
             #{item.thirdCategory}, #{item.role},
             #{item.imageType},#{item.isPublic,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.quickCreateSupport}, #{item.createTime},
             #{item.updateTime},#{item.inPosition,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
             #{item.useStatus,jdbcType=TINYINT,typeHandler=org.apache.ibatis.type.EnumOrdinalTypeHandler},
-            #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType}, #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
-            #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport}, #{item.isHide}
-        )
+            #{item.referenceStatus},#{item.parentSystemType}, #{item.systemType},
+            #{item.systemArchitecure},#{item.language}, #{item.imageStatus},
+            #{item.baseImageSupport}, #{item.initSupport}, #{item.imageSource}, #{item.isImport},
+            #{item.isHide},#{item.isInit}
+            )
         </foreach>
     </insert>
 
