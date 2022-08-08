@@ -159,7 +159,7 @@ public class MonitorScriptControlService {
         for (MonitorConfig.MonitorProbe monitor : allSrvs) {
             String srvs = StringUtils.join(monitor.getServiceList(), ",");
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
-            log.info("hostname:{}, cmd:{}", hostname, cmd);
+            log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
