@@ -153,10 +153,7 @@ public class CsceneSnapshotService {
                     continue;
                 }
                 try {
-                    boolean result = this.correctCsceneSnapshotResourceId(csceneSnapshot);
-                    if (result) {
-
-                    }
+                    this.correctCsceneSnapshotResourceId(csceneSnapshot);
                 } catch (Exception e) {
                     log.error("failed to correct snapshot data , cscene snapshot id is {}", csceneSnapshot.getId(), e);
                 }
@@ -281,6 +278,7 @@ public class CsceneSnapshotService {
             }, true);
         } catch (Exception e) {
             // 删除时已不存在的异常 直接任务删除成功
+            log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
         }
         this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         return true;
