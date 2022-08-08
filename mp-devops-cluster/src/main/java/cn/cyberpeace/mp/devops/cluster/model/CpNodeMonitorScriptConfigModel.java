@@ -28,12 +28,6 @@ public class CpNodeMonitorScriptConfigModel extends BaseModel {
     private String agentName;
 
     /**
-     * 脚本名称
-     */
-    @DefaultStr
-    private String scriptName;
-
-    /**
      * 主机名称
      */
     private String hostname;

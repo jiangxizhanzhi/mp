@@ -18,6 +18,9 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhCon
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
+import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
+import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.collection.CollectionUtil;
@@ -59,6 +62,9 @@ public class MonitorScriptControlService {
 
     @Autowired
     private MonitorConfig monitorConfig;
+
+    @Autowired
+    private AgentService agentService;
 
     // expires in 20 minutes
     private TimedCache<String, ServiceRestartStatusDto> SRV_STATUS_CACHE = CacheUtil.newTimedCache(20 * 60 * 1000);
@@ -174,8 +180,17 @@ public class MonitorScriptControlService {
                 log.info("toInstallList:{}", toInstallList);
                 // 发送安装指令
                 toInstallList.forEach(hostName -> {
-                    sendScriptInstallCmd(hostName, nameFileMap);
-                    addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
+                    // 未安装探针的节点，或者探针不是active的节点不发送指令
+                    AgentRequest agentRequest = new AgentRequest();
+                    agentRequest.setName(hostName);
+                    agentRequest.setStatus("active");
+                    List<Agent> agents = agentService.listAgents(agentRequest);
+                    if (!CollectionUtil.isEmpty(agents)) {
+                        sendScriptInstallCmd(hostName, nameFileMap);
+                        addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
+                    } else {
+                        log.info("host:{} not found active wazuh agent!", hostName);
+                    }
                 });
             }
 
