@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OptionBO {
-    private String code;
+    private Integer code;
     private String name;
     private List<OptionBO> children;
 

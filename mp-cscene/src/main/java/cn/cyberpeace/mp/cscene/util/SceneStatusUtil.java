@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.cscene.util;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.common.service.impl.OptionServiceImpl;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -26,10 +26,10 @@ public class SceneStatusUtil {
         if (en == null || zh == null) {
             en = new HashMap<>();
             zh = new HashMap<>();
-            var optionService = BeanCommon.getBean(OptionServiceImpl.class);
+            var optionService = BeanCommon.getBean(OptionService.class);
             var optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
             optionModels.forEach(optionModel -> {
-                Integer status = Integer.parseInt(optionModel.getCode());
+                Integer status = optionModel.getCode();
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
             });

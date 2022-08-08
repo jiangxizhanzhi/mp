@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.service.OptionService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,6 +37,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return new ServiceResult(flatModels2NestedBos(models)).asResult();
     }
 
+    @Override
     public List<OptionModel> findByType(String type) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(OptionModel::getType, type);
@@ -49,13 +49,13 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionBO> rootBos = new ArrayList<>();
 
-        Map<String, OptionBO> optionBoMap = new HashMap<>(models.size());
+        Map<Integer, OptionBO> optionBoMap = new HashMap<>(models.size());
         List<OptionModel> nextLevelModels = new ArrayList<>();
         for (OptionModel model : models) {
             OptionBO optionBO = new OptionBO();
             optionBO.fromModel(model, locale);
             optionBoMap.put(model.getCode(), optionBO);
-            if (StringUtils.isBlank(model.getParentCode())) {
+            if (model.getParentCode() == null) {
                 rootBos.add(optionBO);
             } else {
                 nextLevelModels.add(model);
@@ -63,7 +63,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         }
 
         for (OptionModel model : nextLevelModels) {
-            String parentCode = model.getParentCode();
+            Integer parentCode = model.getParentCode();
             OptionBO parent = optionBoMap.get(parentCode);
             if (parent == null) {
                 log.warn("The node(code = {}) has wrong parent code!", model.getCode());
