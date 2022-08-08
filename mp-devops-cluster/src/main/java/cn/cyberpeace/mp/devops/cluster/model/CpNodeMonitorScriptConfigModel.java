@@ -49,6 +49,22 @@ public class CpNodeMonitorScriptConfigModel extends BaseModel {
      */
     private Integer status;
 
+    /**
+     * 脚本配置JSON字符串，包括launchid, interval，url
+     */
+    private String config;
+
     private static final long serialVersionUID = 1L;
+
+
+    @Data
+    public static class ParamConfig {
+
+        private String id;
+
+        private String scriptUrl;
+
+        private String interval;
+    }
 
 }

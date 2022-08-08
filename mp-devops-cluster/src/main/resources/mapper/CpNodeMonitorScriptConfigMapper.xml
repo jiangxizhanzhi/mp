@@ -23,7 +23,7 @@
   </select>
 
 
-  <select id="listByAgentName" resultMap="BaseResultMap">
+  <select id="getByAgentName" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List" />
     from mp_devops_cpnode_monitor_script_config

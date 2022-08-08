@@ -21,4 +21,9 @@ public class CloudPlatformPageRequest extends BasePageRequest implements Seriali
      */
     private String hostName;
 
+    /**
+     * 如 +runtime or -runtime
+     */
+    private String sort;
+
 }
