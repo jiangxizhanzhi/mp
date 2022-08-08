@@ -138,6 +138,38 @@ public class MonitorScriptControlService {
     }
 
 
+
+    public void statusManually(String hostname) {
+        List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
+        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
+        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+
+        if (CollectionUtil.isNotEmpty(cpSrvs)) {
+            allSrvs.addAll(cpSrvs);
+        }
+
+        if (CollectionUtil.isNotEmpty(bizSrvs)) {
+            allSrvs.addAll(bizSrvs);
+        }
+
+        if (CollectionUtil.isEmpty(allSrvs)) {
+            return;
+        }
+
+        for (MonitorConfig.MonitorProbe monitor : allSrvs) {
+            String srvs = StringUtils.join(monitor.getServiceList(), ",");
+            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
+            log.info("hostname:{}, cmd:{}", hostname, cmd);
+            var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setAgentName(hostname);
+            runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
+            runCommandItem.setCommand(cmd);
+            WazuhControlCommon.wazuhControl.getWazuhLauncher().runCommand(List.of(runCommandItem));
+        }
+
+    }
+
+
     private void scriptInstallationCheck(List<LocalFileMappingModel> mappings) {
         BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO(9999, 1));
 
@@ -192,6 +224,12 @@ public class MonitorScriptControlService {
                         log.info("host:{} not found active wazuh agent!", hostName);
                     }
                 });
+            }
+
+
+            // 给所有服务发送status命令
+            for (String hostName : hostNameList) {
+                statusManually(hostName);
             }
 
         }
