@@ -15,6 +15,6 @@ public interface CpNodeMonitorScriptConfigMapper extends BaseModelMapper<CpNodeM
 
     List<CpNodeMonitorScriptConfigModel> listAll();
 
-    List<CpNodeMonitorScriptConfigModel> listByAgentName(String agentName);
+    CpNodeMonitorScriptConfigModel getByAgentName(String agentName);
 
 }

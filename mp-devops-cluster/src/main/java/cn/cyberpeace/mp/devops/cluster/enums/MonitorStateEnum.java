@@ -7,13 +7,14 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public enum MonitorStateEnum {
 
+    RESTARTING("RESTARTING"),
+
     ERROR("ERROR"),
 
     DOWN("DOWN"),
 
-    RUNNING("RUNNING"),
+    RUNNING("RUNNING");
 
-    RESTARTING("RESTARTING");
 
     private String desc;
 
