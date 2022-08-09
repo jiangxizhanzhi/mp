@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         List<OptionModel> optionModels = getModelMapper().list(condition);
 
         List<OptionModel> toUpdateList = new ArrayList<>();
+        LocalDateTime updatime = LocalDateTime.now();
 
         for (OptionModel optionModel : optionModels) {
             String metaStr = optionModel.getMeta();
@@ -100,6 +102,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             BeanUtils.copyProperties(optionModel, toUpdateOptionModel);
             String toUpdateMetaStr = JsonCommon.stringify(metaModel);
             toUpdateOptionModel.setMeta(toUpdateMetaStr);
+            toUpdateOptionModel.setUpdateTime(updatime);
             toUpdateList.add(toUpdateOptionModel);
         }
 
