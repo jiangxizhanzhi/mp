@@ -88,8 +88,6 @@ public class ImagesController {
 
     private final SnapshotService snapshotService;
 
-    private final CsceneSnapshotService csceneSnapshotService;
-
     @Qualifier("fastDfsFileServiceImpl")
     @Autowired
     private FileService fileService;
@@ -342,13 +340,8 @@ public class ImagesController {
     @PostMapping("/snapshot/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
-        BaseCloudPlatformResult baseResult = snapshotService.deleteSnapshot(request);
-        if (BaseCloudPlatformConstant.CODE.equals(baseResult.getCode())) {
-            csceneSnapshotService.deleteSnapshotRelativeInfoByResource(request.getSnapshotUuid());
-            return ServiceResult.success(true);
-        } else {
-            return ServiceResult.fail(baseResult.getMessage());
-        }
+        snapshotService.deleteSnapshot(request);
+        return ServiceResult.success(true);
     }
 
     /**

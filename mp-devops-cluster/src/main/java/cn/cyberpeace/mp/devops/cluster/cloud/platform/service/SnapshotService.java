@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.service.CsceneSnapshotService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
@@ -19,9 +20,11 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +45,9 @@ public class SnapshotService extends BaseCpService {
 
     @Autowired
     private CsceneSpecialService csceneSpecialService;
+
+    @Resource
+    private CsceneSnapshotService csceneSnapshotService;
 
     public SnapshotService(DevopsConfig devopsConfig) {
         super(devopsConfig);
@@ -100,6 +106,11 @@ public class SnapshotService extends BaseCpService {
         jsonObject.put("snapshot_uuid", request.getSnapshotUuid());
         jsonObject.put("snapshot_name", request.getSnapshotName());
         BaseCloudPlatformResult model = super.sendDelete(URL_VERSION + DEVICE_SNAPSHOT, JSONObject.toJSONString(jsonObject), BaseCloudPlatformResult.class);
+        if (StringUtils.isNotEmpty(model.getMessage()) && model.getMessage().equals("snapshot not exists")) {
+            csceneSnapshotService.deleteSnapshotRelativeInfoByResource(request.getSnapshotUuid());
+        } else {
+            super.checkResult(model);
+        }
         return model;
     }
 
