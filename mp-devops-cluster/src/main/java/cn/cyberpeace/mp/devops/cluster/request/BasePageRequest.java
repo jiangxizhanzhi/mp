@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 基础的分页参数
@@ -48,5 +49,17 @@ public class BasePageRequest extends BaseRequest implements Serializable {
 
     public Integer getOffset() {
         return page;
+    }
+
+    public void ensure() {
+        // 默认值
+        if (Objects.isNull(page) || page <= 1) {
+            page = 1;
+        }
+
+        if (Objects.isNull(perPage)) {
+            perPage = 10;
+        }
+
     }
 }
