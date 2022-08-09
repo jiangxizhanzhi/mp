@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
-import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -143,9 +143,9 @@ public class CsceneSnapshotService {
     }
 
     public ServiceResult<Boolean> correctSnapshotRelativeInfo() {
-        // 异常数据1: cscene_snapshot 存在, 无resourceId
+        // 异常数据: cscene_snapshot 存在, 无resourceId
         var noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
-                .filterNotEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY));
+                .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY));
         if (CollectionUtils.isNotEmpty(noResourceIds)) {
             LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-30);
             for (CsceneSnapshotModel csceneSnapshot : noResourceIds) {
@@ -155,7 +155,7 @@ public class CsceneSnapshotService {
                 try {
                     this.correctCsceneSnapshotResourceId(csceneSnapshot);
                 } catch (Exception e) {
-                    log.error("failed to correct snapshot data , cscene snapshot id is {}", csceneSnapshot.getId(), e);
+                    log.error("failed to correct snapshot data , cscene snapshot id is {}", csceneSnapshot.getId());
                 }
             }
         }
@@ -172,9 +172,9 @@ public class CsceneSnapshotService {
         } else {
             // 如果不存在,则查看云平台是否存在该快照
             SceneInfo sceneInfo = this.getSceneInfo(csceneSnapshot.getCsceneInstanceId());
-            if (sceneInfo != null && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
-                SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneInfo.getSceneConfigId(), null, false, null);
-                CloudScenePluginHandler cloudPlugin = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+            if (sceneInfo != null && StringUtils.isNotEmpty(sceneInfo.getSceneId())) {
+                SceneHandler sceneHandler = new SceneHandler(sceneInfo.getSceneId(), null, false, null);
+                CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
                 if (cloudPlugin != null) {
                     var node = cloudPlugin.getElement(csceneSnapshot.getNodeId());
                     if (node != null && StringUtils.isNotEmpty(node.getImageUuid())) {
@@ -229,9 +229,11 @@ public class CsceneSnapshotService {
                 name2Model.put(s.getName(), s);
             });
             Queue<SceneElementSnapshotModel> queue = new LinkedList<>();
+            Set<String> queueAdded = new HashSet<>();
             snapshots.forEach(s -> {
                 if (!sourceNames.contains(s.getName())) {
                     queue.add(s);
+                    queueAdded.add(s.getId());
                 }
             });
             int times = 0;
@@ -241,13 +243,18 @@ public class CsceneSnapshotService {
                 } else {
                     times++;
                     var snapshot = queue.poll();
+                    boolean deleteResult = false;
                     try {
-                        this.deleteOneSnapshot(csceneId, snapshot);
-                        if (name2Model.containsKey(snapshot.getSourceName())) {
-                            queue.add(name2Model.get(snapshot.getSourceName()));
-                        }
+                        deleteResult = this.deleteOneSnapshot(csceneId, snapshot);
                     } catch (Exception e) {
                         log.error("faild to delete snapshot , id is {}", snapshot.getId(), e);
+                    }
+                    if (deleteResult) {
+                        var model = name2Model.get(snapshot.getSourceName());
+                        if (model != null && !queueAdded.contains(model.getId())) {
+                            queue.add(model);
+                            queueAdded.add(model.getId());
+                        }
                     }
                 }
             }
@@ -268,6 +275,7 @@ public class CsceneSnapshotService {
             return false;
         }
 
+        // 快照没有被其他场景模板或场景实例引用 则需要删除云平台快照
         SnapshotDeleteParams params = new SnapshotDeleteParams();
         params.setSnapshotName(snapshot.getName());
         var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
@@ -277,7 +285,6 @@ public class CsceneSnapshotService {
             new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
         } catch (Exception e) {
-            // 删除时已不存在的异常 直接任务删除成功
             log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
         }
         this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
