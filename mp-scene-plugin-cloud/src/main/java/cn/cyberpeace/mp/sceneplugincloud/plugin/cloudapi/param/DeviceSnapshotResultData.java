@@ -36,5 +36,6 @@ public class DeviceSnapshotResultData implements CloudHttpData {
         private String name;
         private String description;
         private String imageName;
+        private Boolean deleted;
     }
 }

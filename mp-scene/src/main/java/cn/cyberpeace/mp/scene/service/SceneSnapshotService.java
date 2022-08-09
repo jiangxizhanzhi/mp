@@ -40,4 +40,17 @@ public class SceneSnapshotService {
         return new ServiceResult<>(result);
     }
 
+    public ServiceResult<Boolean> addSnapshot(String id, String sceneId, String nodeId, String address, String name, String sourceName, String description) {
+        SceneElementSnapshotModel elementSnapshotModel = new SceneElementSnapshotModel();
+        elementSnapshotModel.setScene(sceneId);
+        elementSnapshotModel.setSceneElement(nodeId);
+        elementSnapshotModel.setName(name);
+        elementSnapshotModel.setDescription(description);
+        elementSnapshotModel.setSourceName(sourceName);
+        elementSnapshotModel.setId(id);
+        elementSnapshotModel.setAddress(address);
+        snapshotMapper.create(elementSnapshotModel);
+        return new ServiceResult<>(true);
+    }
+
 }

@@ -26,4 +26,7 @@ public class LogConstant {
      * 后台系统管理-系统管理-审计日志-模块
      */
     public static final String MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE = "op_module";
+
+
+    public static final String MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE = "runtime_log_type";
 }

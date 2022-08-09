@@ -3,12 +3,21 @@ package cn.cyberpeace.mp.cscene.service;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
+import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
+import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotParam;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.DeviceSnapshotResultData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.SnapshotDeleteParams;
 import cn.cyberpeace.mp.sceneplugincloud.util.SnapshotAddressUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -20,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,12 +56,14 @@ public class CsceneSnapshotService {
 
     private CsceneSpecialService csceneSpecialService;
 
+    private CsceneInstanceMapper csceneInstanceMapper;
 
     @Autowired
-    public CsceneSnapshotService(CsceneSnapshotMapper csceneSnapshotMapper, SceneSnapshotService sceneSnapshotService, CsceneSpecialService csceneSpecialService) {
+    public CsceneSnapshotService(CsceneSnapshotMapper csceneSnapshotMapper, SceneSnapshotService sceneSnapshotService, CsceneSpecialService csceneSpecialService, CsceneInstanceMapper csceneInstanceMapper) {
         this.csceneSnapshotMapper = csceneSnapshotMapper;
         this.sceneSnapshotService = sceneSnapshotService;
         this.csceneSpecialService = csceneSpecialService;
+        this.csceneInstanceMapper = csceneInstanceMapper;
     }
 
     public ServiceResult<Boolean> checkSnapshotName(String csceneId, String csceneInstanceId, String nodeId, String name) {
@@ -130,6 +142,76 @@ public class CsceneSnapshotService {
         return new ServiceResult<>(true);
     }
 
+    public ServiceResult<Boolean> correctSnapshotRelativeInfo() {
+        // 异常数据1: cscene_snapshot 存在, 无resourceId
+        var noResourceIds = csceneSnapshotMapper.list(new HumanCondition()
+                .filterNotEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY));
+        if (CollectionUtils.isNotEmpty(noResourceIds)) {
+            LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-30);
+            for (CsceneSnapshotModel csceneSnapshot : noResourceIds) {
+                if (csceneSnapshot.getCreateTime().isAfter(localDateTime)) {
+                    continue;
+                }
+                try {
+                    this.correctCsceneSnapshotResourceId(csceneSnapshot);
+                } catch (Exception e) {
+                    log.error("failed to correct snapshot data , cscene snapshot id is {}", csceneSnapshot.getId(), e);
+                }
+            }
+        }
+        return new ServiceResult<>(true);
+    }
+
+    private boolean correctCsceneSnapshotResourceId(CsceneSnapshotModel csceneSnapshot) {
+        var result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
+        if (result != null) {
+            // 如果scene_snapshot存在, name补充resourceId字段
+            String resourceId = SnapshotAddressUtils.parseAddress(result.getAddress()).getSnapshotUuid();
+            this.updateCsceneSnapshotRelativeInfo(csceneSnapshot.getSnapshotId(), resourceId, result.getSourceName());
+            return true;
+        } else {
+            // 如果不存在,则查看云平台是否存在该快照
+            SceneInfo sceneInfo = this.getSceneInfo(csceneSnapshot.getCsceneInstanceId());
+            if (sceneInfo != null && StringUtils.isNotEmpty(sceneInfo.getSceneConfigId())) {
+                SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneInfo.getSceneConfigId(), null, false, null);
+                CloudScenePluginHandler cloudPlugin = sceneConfigHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+                if (cloudPlugin != null) {
+                    var node = cloudPlugin.getElement(csceneSnapshot.getNodeId());
+                    if (node != null && StringUtils.isNotEmpty(node.getImageUuid())) {
+                        // 查询云平台的快照列表
+                        DeviceSnapshotParam param = new DeviceSnapshotParam();
+                        param.setDeviceUuid(node.getImageUuid());
+                        var snapShotResult = new Remote().getHttpClient().get(CloudUrlConstant.SNAPSHOT_LIST, param, DeviceSnapshotResultData.class);
+                        DeviceSnapshotResultData.Snapshot cloudSnapshot = null;
+                        if (snapShotResult != null && CollectionUtils.isNotEmpty(snapShotResult.getItems())) {
+                            for (var m : snapShotResult.getItems()) {
+                                if (csceneSnapshot.getName().equals(m.getName()) && !Boolean.TRUE.equals(m.getDeleted())) {
+                                    cloudSnapshot = m;
+                                }
+                            }
+                        }
+                        if (cloudSnapshot != null) {
+                            // 如果存在 则修正数据
+                            String snapshotId = csceneSnapshot.getSnapshotId();
+                            String sceneId = sceneInfo.getSceneId();
+                            String nodeId = csceneSnapshot.getNodeId();
+                            String address = SnapshotAddressUtils.buildAddress(cloudSnapshot.getDeviceUuid() + cloudSnapshot.getName(), cloudSnapshot.getUuid());
+                            String name = cloudSnapshot.getName();
+                            String sourceName = cloudSnapshot.getImageName();
+                            String description = cloudSnapshot.getDescription();
+                            sceneSnapshotService.addSnapshot(snapshotId, sceneId, nodeId, address, name, sourceName, description);
+                            this.updateCsceneSnapshotRelativeInfo(snapshotId, cloudSnapshot.getUuid(), sourceName);
+                        } else {
+                            // 如果不存在 则删除数据
+                            csceneSnapshotMapper.delete(csceneSnapshot.getId());
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public void deleteSceneSnapshots(String csceneId) {
         var csceneSnapshots = this.getCsceneSnapshot(csceneId).getSource();
         if (CollectionUtils.isEmpty(csceneSnapshots)) {
@@ -196,6 +278,7 @@ public class CsceneSnapshotService {
             }, true);
         } catch (Exception e) {
             // 删除时已不存在的异常 直接任务删除成功
+            log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
         }
         this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         return true;
@@ -212,5 +295,21 @@ public class CsceneSnapshotService {
             }
         }
         return new ArrayList<>(names);
+    }
+
+    private SceneInfo getSceneInfo(String csceneInstanceId) {
+        var condition = new HumanCondition().link(CsceneInstanceModel.class, CsceneModel.class)
+                .filterLink(CsceneInstanceModel.class, CsceneInstanceModel::getCscene, CsceneModel.class, CsceneModel::getId)
+                .currentLink(CsceneInstanceModel.class)
+                .filterEqual(CsceneInstanceModel::getId, csceneInstanceId)
+                .selectAs(CsceneInstanceModel::getScene, SceneInfo::getSceneId)
+                .currentLink(CsceneModel.class)
+                .selectAs(CsceneModel::getSceneConfig, SceneInfo::getSceneConfigId);
+        var list = csceneInstanceMapper.list(condition, SceneInfo.class);
+        if (CollectionUtils.isNotEmpty(list)) {
+            return list.get(0);
+        } else {
+            return null;
+        }
     }
 }

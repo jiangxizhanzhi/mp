@@ -28,6 +28,7 @@ public class ActivationLocalCallService {
         log.info("local-call resetMenus");
         ActivationResponse activationResponse = sysActivationService.status();
         activMenuService.resetMenusVisibility(activationResponse);
+        activMenuService.resetOptionsVisibility(activationResponse);
         log.info("local-call resetMenus success!");
     }
 }
