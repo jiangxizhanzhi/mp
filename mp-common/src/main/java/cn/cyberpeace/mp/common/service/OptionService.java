@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description
@@ -17,15 +16,27 @@ import java.util.Map;
 public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
 
     /**
-     * 根据类型将选项转成 OptionBO
+     * 根据类型查询选项
+     *
      * @param type
      * @return
      */
-    ServiceResult<List<OptionBO>> getOptionsByType(String type);
+    List<OptionModel> findByType(String type);
 
     /**
-     * 根据激活配置项重置所有类型可见属性
-     * @param activeItemMap
+     * 获取 bo 的 code 字段为字符串类型
+     *
+     * @param type
+     * @return
      */
-    void resetMeta(Map<String, String> activeItemMap);
+    ServiceResult<List<OptionBO>> getStrOptions(String type);
+
+    /**
+     * 获取 bo 的 code 字段为 int 类型
+     *
+     * @param type
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getIntOptions(String type);
+
 }
