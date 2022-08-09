@@ -14,7 +14,6 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -68,7 +67,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
 
         List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
         HumanCondition condition = new HumanCondition();
-        condition.setLimit(9999);
+        condition.setLimit(999);
         List<OptionModel> optionModels = getModelMapper().list(condition);
 
         List<OptionModel> toUpdateList = new ArrayList<>();
@@ -99,7 +98,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             }
 
             OptionModel toUpdateOptionModel = new OptionModel();
-            BeanUtils.copyProperties(optionModel, toUpdateOptionModel);
+            toUpdateOptionModel.setId(optionModel.getId());
             String toUpdateMetaStr = JsonCommon.stringify(metaModel);
             toUpdateOptionModel.setMeta(toUpdateMetaStr);
             toUpdateOptionModel.setUpdateTime(updatime);
