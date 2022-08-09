@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +58,8 @@ public class DashboardService {
 
     private CsceneInstanceMapper csceneInstanceMapper;
 
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
@@ -65,12 +68,14 @@ public class DashboardService {
                             CsceneInstanceService csceneInstanceService,
                             CsceneSpecialService csceneSpecialService,
                             CsceneInstanceMapper csceneInstanceMapper,
+                            CloudPluginSceneElementMapper cloudPluginSceneElementMapper,
                             ScenePluginCloudSceneService scenePluginCloudSceneService,
                             DevopsTargetService devopsTargetService) {
         this.deviceService = deviceService;
         this.csceneInstanceService = csceneInstanceService;
         this.csceneSpecialService = csceneSpecialService;
         this.csceneInstanceMapper = csceneInstanceMapper;
+        this.cloudPluginSceneElementMapper = cloudPluginSceneElementMapper;
         this.scenePluginCloudSceneService = scenePluginCloudSceneService;
         this.devopsTargetService = devopsTargetService;
     }
@@ -196,7 +201,23 @@ public class DashboardService {
         sceneBusinessSummary.setNpcCount(this.groupSummary(SceneBusinessSummary.npcType(), result));
         sceneBusinessSummary.setSwitchCount(this.groupSummary(SceneBusinessSummary.switchType(), result));
         sceneBusinessSummary.setRouterCount(this.groupSummary(SceneBusinessSummary.routerType(), result));
+        // todo 快速统计出各类虚拟资源的数量
+        sceneBusinessSummary.setVmCount(this.countByVirtualTypeAndRole(sceneIds,
+                List.of(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
+        sceneBusinessSummary.setContainerCount(this.countByVirtualTypeAndRole(sceneIds,
+                List.of(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
         return new ServiceResult<>(sceneBusinessSummary);
+    }
+
+    private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
+        var condition = new HumanCondition()
+                .filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray())
+                .filterIn(CloudPluginSceneElementModel::getVirtualType, virtualTypes.toArray())
+                .filterIn(CloudPluginSceneElementModel::getRole, roles.toArray());
+        List<CloudPluginSceneElementModel> cloudElements = cloudPluginSceneElementMapper.list(condition);
+        return cloudElements.size();
     }
 
     private int groupSummary(List<Integer> roleType, Map<Object, Long> result) {
