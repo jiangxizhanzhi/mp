@@ -120,7 +120,7 @@ public class MonitorScriptControlService {
 
         for (String launchId : launchIds) {
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + launchId + ".py " + MonitorConstant.OP_RESTART + " " + srvs;
-            log.info("hostname:{}, cmd:{}", hostname, cmd);
+            log.info("restart hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
@@ -157,7 +157,7 @@ public class MonitorScriptControlService {
         }
 
         for (MonitorConfig.MonitorProbe monitor : allSrvs) {
-            String srvs = StringUtils.join(monitor.getServiceList(), ",");
+            String srvs = monitor.getServiceList();
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
@@ -221,7 +221,7 @@ public class MonitorScriptControlService {
                         sendScriptInstallCmd(hostName, nameFileMap);
                         addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
                     } else {
-                        log.info("host:{} not found active wazuh agent!", hostName);
+                        log.info("install host:{} not found active wazuh agent!", hostName);
                     }
                 });
             }
