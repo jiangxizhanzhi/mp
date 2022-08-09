@@ -201,6 +201,7 @@ public class DashboardService {
         sceneBusinessSummary.setNpcCount(this.groupSummary(SceneBusinessSummary.npcType(), result));
         sceneBusinessSummary.setSwitchCount(this.groupSummary(SceneBusinessSummary.switchType(), result));
         sceneBusinessSummary.setRouterCount(this.groupSummary(SceneBusinessSummary.routerType(), result));
+        // todo 快速统计出各类虚拟资源的数量
         sceneBusinessSummary.setVmCount(this.countByVirtualTypeAndRole(sceneIds,
                 List.of(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
                 List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
