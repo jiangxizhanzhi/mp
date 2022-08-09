@@ -33,8 +33,14 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         setModelMapper(optionMapper);
     }
 
-    @Override
-    public ServiceResult<List<OptionBO>> getOptionsByType(String type, boolean intFlag) {
+
+    /**
+     *
+     * @param type
+     * @param intFlag bo中code字段是否转为int类型
+     * @return
+     */
+    private List<OptionBO> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
         if (intFlag) {
@@ -42,7 +48,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         } else {
             function = s -> s;
         }
-        return new ServiceResult(flatModels2NestedBos(models, function)).asResult();
+        return flatModels2NestedBos(models, function);
     }
 
     @Override
@@ -51,6 +57,16 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         condition.filterEqual(OptionModel::getType, type);
         condition.orderBy(OptionModel::getSort);
         return getModelMapper().list(condition);
+    }
+
+    @Override
+    public ServiceResult<List<OptionBO>> getStrOptions(String type) {
+        return new ServiceResult<>(getOptionsByType(type, false)).asResult();
+    }
+
+    @Override
+    public ServiceResult<List<OptionBO>> getIntOptions(String type) {
+        return new ServiceResult<>(getOptionsByType(type, true)).asResult();
     }
 
     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {

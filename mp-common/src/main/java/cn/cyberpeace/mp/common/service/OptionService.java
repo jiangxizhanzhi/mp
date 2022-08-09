@@ -24,11 +24,19 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
     List<OptionModel> findByType(String type);
 
     /**
-     * 根据类型将选项转成 OptionBO
+     * 获取 bo 的 code 字段为字符串类型
      *
      * @param type
-     * @param intFlag
      * @return
      */
-    ServiceResult<List<OptionBO>> getOptionsByType(String type, boolean intFlag);
+    ServiceResult<List<OptionBO>> getStrOptions(String type);
+
+    /**
+     * 获取 bo 的 code 字段为 int 类型
+     *
+     * @param type
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getIntOptions(String type);
+
 }

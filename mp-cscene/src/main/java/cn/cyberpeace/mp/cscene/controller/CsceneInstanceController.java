@@ -706,12 +706,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/status")
     @ApiOperation(value = "查询靶场监控的场景实例状态")
     public ServiceResult<List<OptionBO>> getSceneStatus() {
-        return optionService.getOptionsByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS, true);
+        return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询靶场监控的场景实例类型")
     public ServiceResult<List<OptionBO>> getSceneType() {
-        return optionService.getOptionsByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE, true);
+        return optionService.getIntOptions(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_TYPE);
     }
 }

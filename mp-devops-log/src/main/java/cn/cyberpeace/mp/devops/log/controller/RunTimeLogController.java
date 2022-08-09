@@ -81,6 +81,6 @@ public class RunTimeLogController {
     @GetMapping("/types")
     @ApiOperation(value = "查询运行日志类型")
     public ServiceResult<List<OptionBO>> getTypes() {
-        return optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE, true);
+        return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
     }
 }

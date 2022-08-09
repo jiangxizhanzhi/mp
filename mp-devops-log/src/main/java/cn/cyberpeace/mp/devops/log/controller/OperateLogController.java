@@ -88,13 +88,13 @@ public class OperateLogController {
     @GetMapping("/modules")
     @ApiOperation(value = "查询审计日志操作模块")
     public ServiceResult<List<OptionBO>> getModules() {
-        return optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE, true);
+        return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_MODULE);
     }
 
     @GetMapping("/types")
     @ApiOperation(value = "查询审计日志操作类型")
     public ServiceResult<List<OptionBO>> getTypes() {
-        return optionService.getOptionsByType(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE, true);
+        return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_DEVOPS_LOG_OP_TYPE);
     }
 
 

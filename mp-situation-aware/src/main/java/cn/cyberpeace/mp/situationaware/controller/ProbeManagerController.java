@@ -54,13 +54,13 @@ public class ProbeManagerController {
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
     public ServiceResult<List<OptionBO>> probeTypes() {
-        return optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE, true);
+        return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
     public ServiceResult<List<OptionBO>> osTypes() {
-        return optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE, true);
+        return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
     }
 
     @GetMapping("/page")
