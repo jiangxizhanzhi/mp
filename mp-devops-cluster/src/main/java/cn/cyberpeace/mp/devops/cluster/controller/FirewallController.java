@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -46,14 +45,6 @@ public class FirewallController {
         BasePageBO<Firewall> model = firewallConverter.page(new BasePageDTO(9999, 1));
         List<FirewallPageVO> list = convertBOToPageVO(model);
 
-        // 只保留MP_SCENE_*开头的
-        Iterator<FirewallPageVO> itr = list.iterator();
-        while (itr.hasNext()) {
-            FirewallPageVO vo = itr.next();
-            if (StringUtils.isBlank(vo.getName()) || !vo.getName().startsWith("MP_SCENE_")) {
-                itr.remove();
-            }
-        }
         int total = list.size();
         int skip = (request.getPage() - 1) * request.getPerPage();
         List<FirewallPageVO> firewallList = list.stream().skip(skip).limit(request.getPerPage()).collect(Collectors.toList());
@@ -63,16 +54,21 @@ public class FirewallController {
 
     /**
      * 转换BO to VO
+     * 只保留MP_SCENE_*开头的 http://10.10.10.10/biz/bug-view-10043.html
      * @param model
      * @return
      */
     private List<FirewallPageVO> convertBOToPageVO(BasePageBO<Firewall> model){
-        return model.getList().stream().map(firewall ->
-                new FirewallPageVO(firewall.getName(),
+        return model.getList().stream().map(firewall -> {
+            if (StringUtils.isNotBlank(firewall.getName()) && firewall.getName().startsWith("MP_SCENE_")) {
+                return new FirewallPageVO(firewall.getName(),
                         Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
                         Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
-                        firewall.getDescription(),firewall.getStatus())
-        ).collect(Collectors.toList());
+                        firewall.getDescription(),firewall.getStatus());
+            } else {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
 }
