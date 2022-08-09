@@ -136,6 +136,7 @@ public class SysActivationService {
             ACTIVATION_CONTENT = status();
             log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
             activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+            activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
         } else {
             log.error("license verify failed！");
             throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);

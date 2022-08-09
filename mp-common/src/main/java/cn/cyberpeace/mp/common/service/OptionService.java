@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description
@@ -21,4 +22,10 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      * @return
      */
     ServiceResult<List<OptionBO>> getOptionsByType(String type);
+
+    /**
+     * 根据激活配置项重置所有类型可见属性
+     * @param activeItemMap
+     */
+    void resetMeta(Map<String, String> activeItemMap);
 }

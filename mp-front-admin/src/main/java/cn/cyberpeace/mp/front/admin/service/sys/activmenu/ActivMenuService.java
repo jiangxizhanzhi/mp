@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.ActivMenuDTO;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
@@ -28,7 +29,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,6 +59,10 @@ public class ActivMenuService {
 
     @Autowired
     private UserCacheService userCacheService;
+
+    @Autowired
+    private OptionService optionService;
+
 
     /**
      * 适用场景：重新导入menu.json
@@ -115,6 +122,27 @@ public class ActivMenuService {
         boolean success = reImportSupportService.rebuildAllMenus(allTargets);
         evictCache();
         return success;
+    }
+
+
+    /**
+     *
+     * 重新设置所有option的visible属性
+     *
+     * @return
+     */
+    public void resetOptionsVisibility(ActivationResponse content) {
+        log.info("resetOptionsVisibility...");
+        if (Objects.isNull(content)) {
+            return;
+        }
+
+        Map<String, String> activeItemMap = new HashMap<>();
+        for (ActivationItem item : content.getItems()) {
+            activeItemMap.put(item.getKey(), item.getValue());
+        }
+
+        optionService.resetMeta(activeItemMap);
     }
 
     /**
