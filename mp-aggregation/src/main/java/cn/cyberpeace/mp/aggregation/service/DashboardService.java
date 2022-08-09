@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.service;
 
+import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
 import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
@@ -174,6 +175,38 @@ public class DashboardService {
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
         return new ServiceResult<>(userResource);
+    }
+
+    public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
+        var condition = new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getDeleted, false);
+        List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(condition);
+        if (csceneInstances.isEmpty()) {
+            return new ServiceResult<>(new SceneBusinessSummary());
+        }
+        List<String> sceneIds = csceneInstances.stream()
+                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
+                .map(csceneInstance -> csceneInstance.getScene())
+                .collect(Collectors.toList());
+        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getRole);
+        var result = scenePluginCloudSceneService
+                .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
+        SceneBusinessSummary sceneBusinessSummary = new SceneBusinessSummary();
+        sceneBusinessSummary.setFirewallCount(this.groupSummary(SceneBusinessSummary.firewallType(), result));
+        sceneBusinessSummary.setNpcCount(this.groupSummary(SceneBusinessSummary.npcType(), result));
+        sceneBusinessSummary.setSwitchCount(this.groupSummary(SceneBusinessSummary.switchType(), result));
+        sceneBusinessSummary.setRouterCount(this.groupSummary(SceneBusinessSummary.routerType(), result));
+        return new ServiceResult<>(sceneBusinessSummary);
+    }
+
+    private int groupSummary(List<Integer> roleType, Map<Object, Long> result) {
+        int sum = 0;
+        for (var role : roleType) {
+            if (result.containsKey(role)) {
+                sum += result.get(role);
+            }
+        }
+        return sum;
     }
 
 }
