@@ -15,7 +15,6 @@ import java.util.List;
  * @Date：2021/9/13 11:09
  */
 @Data
-@Builder
 @ApiModel("用户资源")
 public class SceneBusinessSummary {
 
