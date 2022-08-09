@@ -27,7 +27,8 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      * 根据类型将选项转成 OptionBO
      *
      * @param type
+     * @param intFlag
      * @return
      */
-    ServiceResult<List<OptionBO>> getOptionsByType(String type);
+    ServiceResult<List<OptionBO>> getOptionsByType(String type, boolean intFlag);
 }

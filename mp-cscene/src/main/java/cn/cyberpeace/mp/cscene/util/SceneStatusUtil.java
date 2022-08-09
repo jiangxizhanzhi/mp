@@ -29,7 +29,7 @@ public class SceneStatusUtil {
             var optionService = BeanCommon.getBean(OptionService.class);
             var optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
             optionModels.forEach(optionModel -> {
-                Integer status = optionModel.getCode();
+                Integer status = Integer.parseInt(optionModel.getCode());
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
             });

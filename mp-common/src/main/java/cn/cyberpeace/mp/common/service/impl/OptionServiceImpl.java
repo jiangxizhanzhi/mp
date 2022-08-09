@@ -10,11 +10,13 @@ import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.service.OptionService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * @Description
@@ -32,9 +34,15 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     }
 
     @Override
-    public ServiceResult<List<OptionBO>> getOptionsByType(String type) {
+    public ServiceResult<List<OptionBO>> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
-        return new ServiceResult(flatModels2NestedBos(models)).asResult();
+        Function<String, ?> function = null;
+        if (intFlag) {
+            function = Integer::parseInt;
+        } else {
+            function = s -> s;
+        }
+        return new ServiceResult(flatModels2NestedBos(models, function)).asResult();
     }
 
     @Override
@@ -45,17 +53,16 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return getModelMapper().list(condition);
     }
 
-    private List<OptionBO> flatModels2NestedBos(List<OptionModel> models) {
+    private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionBO> rootBos = new ArrayList<>();
-
-        Map<Integer, OptionBO> optionBoMap = new HashMap<>(models.size());
+        Map<String, OptionBO> optionBoMap = new HashMap<>(models.size());
         List<OptionModel> nextLevelModels = new ArrayList<>();
         for (OptionModel model : models) {
             OptionBO optionBO = new OptionBO();
-            optionBO.fromModel(model, locale);
+            optionBO.fromModel(model, locale, function);
             optionBoMap.put(model.getCode(), optionBO);
-            if (model.getParentCode() == null) {
+            if (StringUtils.isBlank(model.getParentCode())) {
                 rootBos.add(optionBO);
             } else {
                 nextLevelModels.add(model);
@@ -63,7 +70,7 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         }
 
         for (OptionModel model : nextLevelModels) {
-            Integer parentCode = model.getParentCode();
+            String parentCode = model.getParentCode();
             OptionBO parent = optionBoMap.get(parentCode);
             if (parent == null) {
                 log.warn("The node(code = {}) has wrong parent code!", model.getCode());

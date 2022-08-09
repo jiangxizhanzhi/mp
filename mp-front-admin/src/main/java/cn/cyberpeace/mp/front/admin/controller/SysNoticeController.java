@@ -148,7 +148,7 @@ public class SysNoticeController {
     @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
     public ServiceResult<List<OptionBO>> getTypes() {
-        return optionService.getOptionsByType(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
+        return optionService.getOptionsByType(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE, true);
     }
 
 }

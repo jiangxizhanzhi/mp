@@ -16,11 +16,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table("mp_common_option")
 public class OptionModel extends BaseModel {
-    private Integer code;
+    private String code;
     private String zhName;
     private String enName;
     private Integer sort;
     private String type;
-    private Integer parentCode;
+    private String parentCode;
 }
 
