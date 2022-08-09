@@ -65,6 +65,9 @@ public final class NodeLimitUtils {
     }
 
     public synchronized static void refreshCount(int count) {
+        if (csceneAppConfig == null) {
+            csceneAppConfig = BeanCommon.getBean(CsceneAppConfig.class);
+        }
         log.info("refresh node limit count , origin count: {} , {}", SCENE_USING_NODE_LIMIT, NODE_COUNT);
         SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
         NODE_COUNT = count;

@@ -16,6 +16,7 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 
 /**
  * @Description
@@ -32,12 +33,25 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         setModelMapper(optionMapper);
     }
 
-    @Override
-    public ServiceResult<List<OptionBO>> getOptionsByType(String type) {
+
+    /**
+     *
+     * @param type
+     * @param intFlag bo中code字段是否转为int类型
+     * @return
+     */
+    private List<OptionBO> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
-        return new ServiceResult(flatModels2NestedBos(models)).asResult();
+        Function<String, ?> function = null;
+        if (intFlag) {
+            function = Integer::parseInt;
+        } else {
+            function = s -> s;
+        }
+        return flatModels2NestedBos(models, function);
     }
 
+    @Override
     public List<OptionModel> findByType(String type) {
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(OptionModel::getType, type);
@@ -45,15 +59,24 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return getModelMapper().list(condition);
     }
 
-    private List<OptionBO> flatModels2NestedBos(List<OptionModel> models) {
+    @Override
+    public ServiceResult<List<OptionBO>> getStrOptions(String type) {
+        return new ServiceResult<>(getOptionsByType(type, false)).asResult();
+    }
+
+    @Override
+    public ServiceResult<List<OptionBO>> getIntOptions(String type) {
+        return new ServiceResult<>(getOptionsByType(type, true)).asResult();
+    }
+
+    private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {
         Locale locale = LocaleContextHolder.getLocale();
         List<OptionBO> rootBos = new ArrayList<>();
-
         Map<String, OptionBO> optionBoMap = new HashMap<>(models.size());
         List<OptionModel> nextLevelModels = new ArrayList<>();
         for (OptionModel model : models) {
             OptionBO optionBO = new OptionBO();
-            optionBO.fromModel(model, locale);
+            optionBO.fromModel(model, locale, function);
             optionBoMap.put(model.getCode(), optionBO);
             if (StringUtils.isBlank(model.getParentCode())) {
                 rootBos.add(optionBO);

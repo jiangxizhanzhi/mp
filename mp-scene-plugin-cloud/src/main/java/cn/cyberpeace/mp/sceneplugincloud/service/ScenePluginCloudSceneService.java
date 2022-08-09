@@ -78,7 +78,8 @@ public class ScenePluginCloudSceneService {
     public static final List<String> COUNT_ELEMENT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
                     CloudPluginSceneElementModel::getHost,
-                    CloudPluginSceneElementModel::getVirtualType
+                    CloudPluginSceneElementModel::getVirtualType,
+                    CloudPluginSceneElementModel::getRole
             )
     );
 
