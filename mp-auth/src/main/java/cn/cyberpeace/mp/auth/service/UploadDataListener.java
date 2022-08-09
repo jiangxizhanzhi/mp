@@ -297,7 +297,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
                 // 组织路径不存在，默认都存一级组织
                 // 组织为空则默认一级组织
                 user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
-                return;
+                continue;
             }
 
             user.setOrgIdList(new ArrayList<>());

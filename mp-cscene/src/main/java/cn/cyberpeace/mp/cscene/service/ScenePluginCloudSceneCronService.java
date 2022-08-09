@@ -25,6 +25,9 @@ public class ScenePluginCloudSceneCronService {
     @Resource
     private ClearService clearService;
 
+    @Resource
+    private CsceneSnapshotService csceneSnapshotService;
+
     public void action() {
         log.info("start cloud plugin scene correct job");
 
@@ -41,6 +44,13 @@ public class ScenePluginCloudSceneCronService {
             sceneCorrectService.correctErrorStatusScene();
         } catch (Exception e) {
             log.error("failed to correct error status scene", e);
+        }
+
+        // 纠正cscene和scene快照表的数据
+        try {
+            csceneSnapshotService.correctSnapshotRelativeInfo();
+        } catch (Exception e) {
+            log.error("failed to corrcet snapshot relative info", e);
         }
 
         // 清理未正常释放的资源
