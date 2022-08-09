@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,8 +54,11 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         HumanCondition condition = new HumanCondition();
         condition.filterEqual(OptionModel::getType, type);
         condition.orderBy(OptionModel::getSort);
-        return getModelMapper().list(condition);
+        List<OptionModel> optionModels = getModelMapper().list(condition);
+        filterByVisibility(optionModels);
+        return optionModels;
     }
+
 
     public void resetMeta(Map<String, String> activeItemMap) {
         if (CollectionUtil.isEmpty(activeItemMap)) {
@@ -74,17 +78,17 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
             if (StringUtils.isEmpty(metaModel.getActivKeys())) {
                 continue;
             }
-            String[] activeKeys = metaModel.getActivKeys().split(",");
-            for (String activeKey : activeKeys) {
-                if (Objects.equals(activeKey, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)) {
-                    continue;
-                }
+            String[] metaActiveKeyArr = metaModel.getActivKeys().split(",");
+            List<String> metaActiveKeyList = Arrays.asList(metaActiveKeyArr);
+            boolean isNoAuth = metaActiveKeyList.stream().filter(key -> Objects.equals(key, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)).findAny().isPresent();
+            if (isNoAuth) {
+                continue;
             }
 
             if (CollectionUtil.isEmpty(activedKeys)) {
                 metaModel.setVisible(0);
             } else {
-                boolean isVisible = Arrays.stream(activeKeys).filter(key -> activedKeys.contains(key)).findAny().isPresent();
+                boolean isVisible = metaActiveKeyList.stream().filter(key -> activedKeys.contains(key)).findAny().isPresent();
                 if (isVisible) {
                     metaModel.setVisible(1);
                 } else {
@@ -101,6 +105,17 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
 
         if (CollectionUtil.isNotEmpty(toUpdateList)) {
             getModelMapper().bulkUpdate(toUpdateList);
+        }
+    }
+
+    private void filterByVisibility(List<OptionModel> optionModels) {
+        Iterator<OptionModel> iter = optionModels.iterator();
+        while (iter.hasNext()) {
+            String metaStr = iter.next().getMeta();
+            OptionModel.MetaModel metaModel = JsonCommon.parse(metaStr, OptionModel.MetaModel.class);
+            if (Objects.equals(0, metaModel.getVisible())) {
+                iter.remove();
+            }
         }
     }
 
