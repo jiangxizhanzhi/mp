@@ -71,7 +71,7 @@ public class MonitorScriptControlService {
 
 
     public void init(List<LocalFileMappingModel> mappings) {
-        scriptInstallationCheck(mappings);
+        serviceMonitorScriptInit(mappings);
     }
 
     // 定时调度，查询脚本是否安装成功
@@ -140,27 +140,28 @@ public class MonitorScriptControlService {
 
 
     public void statusManually(String hostname) {
-        List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
+        List<MonitorConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
         List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
         List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
 
         if (CollectionUtil.isNotEmpty(cpSrvs)) {
-            allSrvs.addAll(cpSrvs);
+            allSrvMonitors.addAll(cpSrvs);
         }
 
         if (CollectionUtil.isNotEmpty(bizSrvs)) {
-            allSrvs.addAll(bizSrvs);
+            allSrvMonitors.addAll(bizSrvs);
         }
 
-        if (CollectionUtil.isEmpty(allSrvs)) {
+        if (CollectionUtil.isEmpty(allSrvMonitors)) {
             return;
         }
 
-        for (MonitorConfig.MonitorProbe monitor : allSrvs) {
+        for (MonitorConfig.MonitorProbe monitor : allSrvMonitors) {
             String srvs = monitor.getServiceList();
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
+            runCommandItem.setRunId(monitor.getLaunchId());
             runCommandItem.setAgentName(hostname);
             runCommandItem.setOsType(MonitorConstant.OS_TYPE_LINUX);
             runCommandItem.setCommand(cmd);
@@ -170,69 +171,67 @@ public class MonitorScriptControlService {
     }
 
 
-    private void scriptInstallationCheck(List<LocalFileMappingModel> mappings) {
+    private void serviceMonitorScriptInit(List<LocalFileMappingModel> mappings) {
         BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO(9999, 1));
+        List<HypervisorBO> hypervisorBOs = hypervisorBOBasePageBO.getList();
+
+        if (CollectionUtils.isEmpty(hypervisorBOs)) {
+            return;
+        }
 
         Map<String, String> nameFileMap = mappings.stream().collect(Collectors.toMap(BaseObjMappingModel::getName,
                 LocalFileMappingModel::getRemoteFile));
+        List<CpNodeMonitorScriptConfigModel> configedNodeList = listAll();
+        List<String> hostNameList = hypervisorBOs.stream().map(HypervisorBO::getName).collect(Collectors.toList());
 
-        if (CollectionUtils.isNotEmpty(hypervisorBOBasePageBO.getList())) {
+        List<String> toInstallList = new ArrayList<>();
+        // 判断节点是否需要安装（重装）脚本，比如增加了计算节点，修改了节点hostName，再比如yaml配置有变化（interval，scriptUrl等）
+        if (CollectionUtils.isEmpty(configedNodeList)) {
+            toInstallList = hostNameList;
+        } else {
+            // 本次新增或者节点名称修改了的节点
+            List<String> configedNodeNames = configedNodeList.stream().map(CpNodeMonitorScriptConfigModel::getAgentName).collect(Collectors.toList());
+            List<String> newAddedNodes = hostNameList.stream().filter(host -> !configedNodeNames.contains(host)).collect(Collectors.toList());
+            log.info("newAddedNodes:{}", newAddedNodes);
+            toInstallList.addAll(newAddedNodes);
 
-            List<CpNodeMonitorScriptConfigModel> configedNodeList = listAll();
-            List<String> hostNameList = hypervisorBOBasePageBO.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
-            if (CollectionUtil.isEmpty(hostNameList)) {
-                return;
-            }
-
-            List<String> toInstallList = new ArrayList<>();
-            // todo 判断节点是否需要安装（重装）脚本，比如增加了计算节点，修改了节点hostName，再比如yaml配置有变化（interval，scriptUrl等）
-            // 检查每个节点，是否安装了脚本，以及脚本的配置是否发生了变化，如interval采集间隔是否有变化
-            if (CollectionUtils.isEmpty(configedNodeList)) {
-                toInstallList = hostNameList;
-            } else {
-                // 本次新增或者节点名称修改了的节点
-                List<String> configedNodeNames = configedNodeList.stream().map(CpNodeMonitorScriptConfigModel::getAgentName).collect(Collectors.toList());
-                List<String> newAddedNodes = hostNameList.stream().filter(host -> !configedNodeNames.contains(host)).collect(Collectors.toList());
-                log.info("newAddedNodes:{}", newAddedNodes);
-                toInstallList.addAll(newAddedNodes);
-
-                // 上次脚本安装失败，或者配置有变更的节点
-                for (String nodeName : hostNameList) {
-                    for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
-                        if (configedNodeModel.getAgentName().equals(nodeName)) {
-                            if (!Objects.equals(configedNodeModel.getStatus(), CpNodeMonitorScriptConfigModel.STATUS_INSTALLED) || isConfigChanged(configedNodeModel.getConfig(), nameFileMap)) {
-                                toInstallList.add(nodeName);
-                            }
+            // 上次脚本安装失败，或者配置有变更的节点
+            for (String nodeName : hostNameList) {
+                for (CpNodeMonitorScriptConfigModel configedNodeModel : configedNodeList) {
+                    if (configedNodeModel.getAgentName().equals(nodeName)) {
+                        if (!Objects.equals(configedNodeModel.getStatus(), CpNodeMonitorScriptConfigModel.STATUS_INSTALLED) || isConfigChanged(configedNodeModel.getConfig(), nameFileMap)) {
+                            toInstallList.add(nodeName);
                         }
                     }
                 }
             }
+        }
 
-            if (CollectionUtils.isNotEmpty(toInstallList)) {
-                log.info("toInstallList:{}", toInstallList);
-                // 发送安装指令
-                toInstallList.forEach(hostName -> {
-                    // 未安装探针的节点，或者探针不是active的节点不发送指令
-                    AgentRequest agentRequest = new AgentRequest();
-                    agentRequest.setName(hostName);
-                    agentRequest.setStatus("active");
-                    List<Agent> agents = agentService.listAgents(agentRequest);
-                    if (!CollectionUtil.isEmpty(agents)) {
-                        sendScriptInstallCmd(hostName, nameFileMap);
-                        addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
-                    } else {
-                        log.info("install host:{} not found active wazuh agent!", hostName);
-                    }
-                });
-            }
+        if (CollectionUtils.isNotEmpty(toInstallList)) {
+            log.info("toInstallList:{}", toInstallList);
+            // 发送安装指令
+            toInstallList.forEach(hostName -> {
+                // 未安装探针的节点，或者探针不是active的节点不发送指令
+                AgentRequest agentRequest = new AgentRequest();
+                agentRequest.setName(hostName);
+                agentRequest.setStatus("active");
+                List<Agent> agents = agentService.listAgents(agentRequest);
+                if (!CollectionUtil.isEmpty(agents)) {
+                    sendScriptInstallCmd(hostName, nameFileMap);
+                    addOrUpdateNodeConfigByHostName(hostName, nameFileMap);
+                } else {
+                    log.info("install host:{} not found active wazuh agent!", hostName);
+                }
+            });
+        }
 
-
-            // 给所有服务发送status命令
-            for (String hostName : hostNameList) {
+        // 给所有不在此次安装之列的服务发送status命令
+        for (String hostName : hostNameList) {
+            if (!toInstallList.contains(hostName)) {
                 statusManually(hostName);
             }
-
         }
+
     }
 
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
