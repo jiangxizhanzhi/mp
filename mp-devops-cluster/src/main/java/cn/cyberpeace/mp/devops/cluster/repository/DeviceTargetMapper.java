@@ -56,7 +56,7 @@ public interface DeviceTargetMapper extends BaseModelMapper<DeviceTargetPO> {
     List<DeviceTargetPO> findByIds(@Param("ids") List<String> ids);
 
     /**
-     * 根据ID更新信息
+     * 根据UUID更新信息
      * @param deviceTargetPO
      * @return
      */

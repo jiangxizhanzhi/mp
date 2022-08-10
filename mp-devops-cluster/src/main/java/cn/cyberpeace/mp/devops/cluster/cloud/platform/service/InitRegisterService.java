@@ -57,6 +57,10 @@ public class InitRegisterService extends BaseCpService {
         return pageResult;
     }
 
+    /**
+     * 同步云平台初始靶标
+     * @return
+     */
     public Integer initTarget() {
         var result = new CloudPlatformItemsPageResult();
         try {

@@ -204,7 +204,7 @@
 
     <sql id="commonTargetColumn">
         i.instance_state,i.pk,i.id,i.uuid,i.name,i.logo,i.main_category,i.sub_category,i.third_category,i.image_type,i.is_public,i.quick_create_support,
-        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init
+        i.in_position,i.reference_status,i.use_status,i.create_time,i.is_init,i.instance_create_user
     </sql>
 
     <select id="totalCount" parameterType="cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO"  resultType="java.lang.Integer">
@@ -372,6 +372,9 @@
             </if>
             <if test="isInit != null">
                 is_init = #{isInit},
+            </if>
+            <if test="createUser != null">
+                instance_create_user = #{instanceCreateUser}
             </if>
         </set>
         where uuid = #{uuid}
