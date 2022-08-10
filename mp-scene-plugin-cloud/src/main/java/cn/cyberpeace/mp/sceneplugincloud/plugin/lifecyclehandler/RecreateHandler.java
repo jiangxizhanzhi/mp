@@ -161,10 +161,28 @@ public class RecreateHandler extends HandlerCommon {
                         () -> createVirtualFirewall(cloudElement));
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_VIRTUAL_MACHINE,
-                        () -> createVirtualMachine(cloudElement));
+                        () -> {
+                            if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                    if (StringUtils.isEmpty(p.getIp())) {
+                                        p.setUsing(false);
+                                    }
+                                });
+                            }
+                            createVirtualMachine(cloudElement);
+                        });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_CONTAINER,
-                        () -> createContainer(cloudElement));
+                        () -> {
+                            if (cloudElement.getSrcElement() != null && CollectionUtils.isNotEmpty(cloudElement.getSrcElement().getPorts())) {
+                                cloudElement.getSrcElement().getPorts().forEach(p -> {
+                                    if (StringUtils.isEmpty(p.getIp())) {
+                                        p.setUsing(false);
+                                    }
+                                });
+                            }
+                            createContainer(cloudElement);
+                        });
             } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE)) {
                 runElementProgress(cloudElement.getSrcElement().getId(), RecreateHandler.ElementProcess.RECREATE_ENTITY_NODE,
                         () -> createEntityNode(cloudElement));
