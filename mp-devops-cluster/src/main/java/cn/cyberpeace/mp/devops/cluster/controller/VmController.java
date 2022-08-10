@@ -70,7 +70,7 @@ public class VmController {
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         List<UserDto> userDtoList = new ArrayList<>();
-        Map<String,String> uuid2UserId = new HashMap<>();
+        Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
@@ -83,7 +83,7 @@ public class VmController {
                 }
             }
         }
-        // 镜像管理的创建用户
+        // 镜像管理实例的创建用户
         if (CollectionUtils.isNotEmpty(devopsResult)) {
             List<String> userIdList = devopsResult.stream()
                     .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
@@ -97,7 +97,7 @@ public class VmController {
             }
         }
         List<UserDto> tmpUserDtoList = userDtoList;
-        Map<String,String> uuid2User = uuid2UserId;
+        Map<String, String> uuid2User = uuid2UserId;
         return instances.stream().map(instanceModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
             if (Objects.nonNull(source.get(instanceModel.getName()))) {
