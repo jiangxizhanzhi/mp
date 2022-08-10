@@ -242,7 +242,7 @@ mp:
     element-error-creating-seconds: ${MP_ELEMENT_ERROR_CREATING_SECONDS:300}
     enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
     enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
-    cron-job-expression: ${MP_CRON_JOB_EXPRESSION:* 0/15 * * * ?}
+    cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
   scene:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
