@@ -140,4 +140,9 @@ public class DeviceTargetPO extends BaseModel {
      */
     @DefaultInt
     private Integer instanceState;
+
+    /**
+     * 靶标实例创建用户
+     */
+    private String createUser;
 }

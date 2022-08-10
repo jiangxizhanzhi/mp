@@ -298,28 +298,32 @@ public class ImagesConverter implements BaseConverter{
     /**
      * 创建镜像机器
      * @param uuid
-     * @return
      */
     public void create(String uuid) {
-        if (StringUtils.isBlank(uuid)){
+        if (StringUtils.isBlank(uuid)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid,
-                Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : ""));
-        return;
+        String createUser = Objects.nonNull(UserUtils.getLoginUser()) ? UserUtils.getLoginUser().getId() : StringUtils.EMPTY;
+        scenariosService.create(new ImagesCreateInstanceCloudPlatform(uuid, createUser));
+        var updateTargetModel = new DeviceTargetPO();
+        updateTargetModel.setUuid(uuid);
+        updateTargetModel.setCreateUser(createUser);
+        deviceTargetMapper.updateById(updateTargetModel);
     }
 
     /**
      * 删除镜像机器
      * @param request
-     * @return
      */
     public void delete(ImagesDeleteInstanceRequest request) {
-        if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())){
+        if (StringUtils.isBlank(request.getUuid()) || StringUtils.isBlank(request.getImageType())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(),request.getImageType()));
-        return;
+        scenariosService.delete(new ImagesDeleteInstanceCloudPlatform(request.getUuid(), request.getImageType()));
+        var updateTargetModel = new DeviceTargetPO();
+        updateTargetModel.setUuid(request.getUuid());
+        updateTargetModel.setCreateUser(StringUtils.EMPTY);
+        deviceTargetMapper.updateById(updateTargetModel);
     }
 
     /**
