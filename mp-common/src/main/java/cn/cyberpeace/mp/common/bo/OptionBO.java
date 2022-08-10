@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @Description
@@ -17,14 +18,14 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OptionBO {
-    private String code;
+public class OptionBO<T> {
+    private T code;
     private String name;
-    private List<OptionBO> children;
+    private List<OptionBO<T>> children;
 
-    public void fromModel(OptionModel model, Locale locale) {
-        String name = Objects.equals(locale, Locale.US) ? model.getEnName() : model.getZhName();
-        this.setName(name);
-        this.setCode(model.getCode());
+    public void fromModel(OptionModel model, Locale locale, Function<String, T> function) {
+        String boName = Objects.equals(locale, Locale.US) ? model.getEnName() : model.getZhName();
+        this.setName(boName);
+        this.setCode(function.apply(model.getCode()));
     }
 }
