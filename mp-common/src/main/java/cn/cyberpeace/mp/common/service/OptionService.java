@@ -15,17 +15,33 @@ import java.util.Map;
  * @Date: 2022/7/28
  */
 public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
-
-    /**
-     * 根据类型将选项转成 OptionBO
-     * @param type
-     * @return
-     */
-    ServiceResult<List<OptionBO>> getOptionsByType(String type);
-
     /**
      * 根据激活配置项重置所有类型可见属性
      * @param activeItemMap
      */
     void resetMeta(Map<String, String> activeItemMap);
+
+    /**
+     * 根据类型查询选项
+     *
+     * @param type
+     * @return
+     */
+    List<OptionModel> findByType(String type);
+
+    /**
+     * 获取 bo 的 code 字段为字符串类型
+     *
+     * @param type
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getStrOptions(String type);
+
+    /**
+     * 获取 bo 的 code 字段为 int 类型
+     *
+     * @param type
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getIntOptions(String type);
 }
