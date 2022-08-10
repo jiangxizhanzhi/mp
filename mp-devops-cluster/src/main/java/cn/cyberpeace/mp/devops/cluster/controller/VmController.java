@@ -86,12 +86,12 @@ public class VmController {
         // 镜像管理的创建用户
         if (CollectionUtils.isNotEmpty(devopsResult)) {
             List<String> userIdList = devopsResult.stream()
-                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getCreateUser()))
-                    .map(DeviceTargetPO::getCreateUser)
+                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
+                    .map(DeviceTargetPO::getInstanceCreateUser)
                     .collect(Collectors.toList());
             uuid2UserId = devopsResult.stream()
-                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getCreateUser()))
-                    .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getCreateUser));
+                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
+                    .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));
             if (CollectionUtils.isNotEmpty(userIdList)) {
                 userDtoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
             }
