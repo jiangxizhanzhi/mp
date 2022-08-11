@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.config.FastDfsConfig;
 import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
 import cn.cyberpeace.mp.situationaware.utils.FileUtils;
 import cn.hutool.core.exceptions.ExceptionUtil;
@@ -43,6 +44,10 @@ public class ProbeScriptService {
 
     public String getScriptChecksumByProbeId(String probeId) {
         return probeScriptMapper.getChecksumByProbeId(probeId);
+    }
+
+    public ProbeScriptModel getScriptModelByProbeId(String probeId) {
+        return probeScriptMapper.getScriptModelByProbeId(probeId);
     }
 
     /**
