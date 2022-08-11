@@ -130,8 +130,8 @@ public class ImagesService extends BaseCpService {
                     return;
                 }
                 var u = URLUtil.url(l.getUrl());
-                StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp());
-                if (l.getProtocol().equals("console")) {
+                l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
+                if ("console".equals(l.getProtocol())) {
                     return;
                 }
                 l.setIpAddress(config.getPublicNetProxyIp());
