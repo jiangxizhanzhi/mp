@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devops.cluster.model.DeviceQuickCreateCloudPlatformModel;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -125,12 +126,15 @@ public class ImagesService extends BaseCpService {
         DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             list.forEach(l -> {
+                if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
+                    return;
+                }
+                var u = URLUtil.url(l.getUrl());
+                StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp());
                 if (l.getProtocol().equals("console")) {
                     return;
                 }
-                if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
-                    l.setIpAddress(config.getPublicNetProxyIp());
-                }
+                l.setIpAddress(config.getPublicNetProxyIp());
                 if (config.getPublicNetProxyPort() != null) {
                     l.setPort(config.getPublicNetProxyPort());
                 }
