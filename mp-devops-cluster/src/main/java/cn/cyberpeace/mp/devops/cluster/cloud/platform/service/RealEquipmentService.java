@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devops.cluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
@@ -10,8 +11,10 @@ import cn.cyberpeace.mp.devops.cluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.utils.JsonUtils;
+import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -150,6 +153,16 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/connection?device_uuid=" + deviceUuid,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<TargetConnection> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),TargetConnection.class);
+        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+            list.forEach(l -> {
+                if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
+                    return;
+                }
+                var u = URLUtil.url(l.getUrl());
+                StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp());
+            });
+        }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
