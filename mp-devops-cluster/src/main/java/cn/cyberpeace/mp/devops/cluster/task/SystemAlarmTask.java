@@ -71,7 +71,7 @@ public class SystemAlarmTask {
 
         if (CollectionUtils.isNotEmpty(allcpNodesHostStates)) {
             allcpNodesHostStates.forEach(hostState -> {
-                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent().intValue() > devopsConfig.getDiskAlarmPercent()) {
+                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsConfig.getDiskAlarmPercent()) {
                         // 磁盘使用率大于阈值，添加告警
                         SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
                                 .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsConfig.getDiskAlarmPercent()))
