@@ -160,7 +160,7 @@ public class RealEquipmentService extends BaseCpService {
                     return;
                 }
                 var u = URLUtil.url(l.getUrl());
-                StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp());
+                l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
             });
         }
         CloudPlatformPageResult<TargetConnection> model = new CloudPlatformPageResult<>();
