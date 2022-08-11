@@ -430,5 +430,23 @@
         "relation": "regx"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Container `{0}` stopped"
+      },
+      {
+        "locale": "zh",
+        "message": "容器`{0}`已停止"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^container (.*) has stopped$",
+        "relation": "regx"
+      }
+    ]
   }
 ]
