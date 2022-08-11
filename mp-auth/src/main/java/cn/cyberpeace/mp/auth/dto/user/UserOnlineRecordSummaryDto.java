@@ -22,7 +22,7 @@ public class UserOnlineRecordSummaryDto {
     @ApiModelProperty(value = "姓名")
     private String name;
 
-    @ApiModelProperty(value = "累计在线时长（小时）")
-    private Double totalOnlineHours;
+    @ApiModelProperty(value = "累计在线时长（分钟）")
+    private Long totalOnlineMinutes;
 
 }
