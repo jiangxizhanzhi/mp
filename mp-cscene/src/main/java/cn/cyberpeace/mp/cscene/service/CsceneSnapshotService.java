@@ -332,10 +332,12 @@ public class CsceneSnapshotService {
         params.setSnapshotName(snapshot.getName());
         params.setDeviceUuid(StringUtils.replaceOnce(info.getImageName(), snapshot.getName(), StringUtils.EMPTY));
         params.setSnapshotUuid(info.getSnapshotUuid());
+        // 先逻辑删除节点快照，再判断节点实例是否已删除
         this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         var elementModel = sceneElementMapper.list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, snapshot.getScene())
                 .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement())).get(0);
+        // 节点实例已删除再删除节点快照
         if (elementModel.getEvent() == SceneElementModel.Event.DELETE && elementModel.getEventStatus() == EventStatus.OVER) {
             try {
                 new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
