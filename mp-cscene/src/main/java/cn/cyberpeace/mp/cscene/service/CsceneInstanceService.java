@@ -1061,7 +1061,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         if (StringUtils.isEmpty(snapshotName)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
-        if (snapshotName.length() > 255) {
+        if (snapshotName.length() > 219) {
             throw new MpRuntimeException(CsceneErrorCode.SNAPSHOT_NAME_TOO_LONG);
         }
         if (description != null && description.length() > 2048) {
