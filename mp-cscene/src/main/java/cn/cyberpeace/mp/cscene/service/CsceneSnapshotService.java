@@ -72,7 +72,7 @@ public class CsceneSnapshotService {
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getName, name)
                 .filterNotEqual(CsceneSnapshotModel::getSnapshotResourceId, StringUtils.EMPTY)
-                .filterEqual(CsceneSnapshotModel::getDeleted,false)
+                .filterEqual(CsceneSnapshotModel::getDeleted, false)
         );
         if (sameNameModel != null) {
             return new ServiceResult<>(false);
@@ -103,7 +103,7 @@ public class CsceneSnapshotService {
         var result = csceneSnapshotMapper.first(
                 new HumanCondition()
                         .filterEqual(CsceneSnapshotModel::getSnapshotId, snapshotId)
-                        .filterEqual(CsceneSnapshotModel::getDeleted,false)
+                        .filterEqual(CsceneSnapshotModel::getDeleted, false)
         );
         return new ServiceResult<>(result);
     }
@@ -113,7 +113,7 @@ public class CsceneSnapshotService {
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
                 .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
                 .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceId)
-                .filterEqual(CsceneSnapshotModel::getDeleted,false)
+                .filterEqual(CsceneSnapshotModel::getDeleted, false)
         );
         return new ServiceResult<>(result);
     }
@@ -121,13 +121,19 @@ public class CsceneSnapshotService {
     public ServiceResult<List<CsceneSnapshotModel>> getCsceneSnapshot(String csceneId) {
         var result = csceneSnapshotMapper.list(new HumanCondition()
                 .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
-                .filterEqual(CsceneSnapshotModel::getDeleted,false)
+                .filterEqual(CsceneSnapshotModel::getDeleted, false)
         );
         return new ServiceResult<>(result);
     }
 
-    public ServiceResult<Boolean> logicDeleteCsceneSnapshot(String id) {
-        csceneSnapshotMapper.logicDelete(id);
+    public ServiceResult<Boolean> logicDeleteCsceneSnapshot(String csceneId, String nodeId, String snapshotResourceId) {
+        CsceneSnapshotModel model = new CsceneSnapshotModel();
+        model.setDeleted(true);
+        csceneSnapshotMapper.filterUpdate(model, new HumanCondition()
+                .filterEqual(CsceneSnapshotModel::getCsceneId, csceneId)
+                .filterEqual(CsceneSnapshotModel::getNodeId, nodeId)
+                .filterEqual(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceId)
+        );
         return new ServiceResult<>(true);
     }
 
@@ -172,8 +178,31 @@ public class CsceneSnapshotService {
                 }
             }
         }
+
+        // 异常数据: cscene_snapshot 为删除状态
+        var deletedSnapshots = csceneSnapshotMapper.list(new HumanCondition()
+                .filterEqual(CsceneSnapshotModel::getDeleted, true));
+        if (CollectionUtils.isNotEmpty(deletedSnapshots)) {
+            LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-5);
+            for (CsceneSnapshotModel csceneSnapshot : noResourceIds) {
+                if (csceneSnapshot.getCreateTime().isAfter(localDateTime)) {
+                    continue;
+                }
+                if (StringUtils.isNotEmpty(csceneSnapshot.getSnapshotId())) {
+                    try {
+                        var sceneSnapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
+                        if (sceneSnapshot != null) {
+                            this.deleteOneSnapshot(csceneSnapshot.getCsceneId(), sceneSnapshot);
+                        }
+                    } catch (Exception e) {
+                        log.error("failed to delete snapshot data , cscene snapshot id is {}", csceneSnapshot.getId());
+                    }
+                }
+            }
+        }
         return new ServiceResult<>(true);
     }
+
 
     private boolean correctCsceneSnapshotResourceId(CsceneSnapshotModel csceneSnapshot) {
         var result = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
@@ -295,11 +324,16 @@ public class CsceneSnapshotService {
         params.setDeviceUuid(StringUtils.replaceOnce(info.getImageName(), snapshot.getName(), StringUtils.EMPTY));
         params.setSnapshotUuid(info.getSnapshotUuid());
         try {
+            this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
             }, true);
             this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             return true;
         } catch (Exception e) {
+            if (StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().equals("snapshot not exists")) {
+                this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+                return true;
+            }
             log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
             return false;
         }
