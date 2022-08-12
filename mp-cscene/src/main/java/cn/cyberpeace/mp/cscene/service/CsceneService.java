@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
 import cn.cyberpeace.mp.cscene.service.filed.CsceneModelFields;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
+import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -294,7 +295,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var flag = csceneHandler.delete(logic, withInstance);
         if (flag) {
             // 尝试该场景模板建立的快照
-            TaskCommon.executeTask(() -> {
+            CsceneSnapshotDeleteTaskPool.getInstance().executeTask(() -> {
                 csceneSnapshotService.deleteSceneSnapshots(id);
             });
         }
