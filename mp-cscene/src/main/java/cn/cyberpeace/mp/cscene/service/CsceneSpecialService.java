@@ -22,8 +22,10 @@ import cn.cyberpeace.mp.cscene.dto.scene.SceneStateInfo;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceCountActivitySceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
+import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.SceneStatusUtil;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -50,9 +52,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -68,6 +72,9 @@ public class CsceneSpecialService {
 
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
+
+    @Autowired
+    private CsceneSnapshotMapper csceneSnapshotMapper;
 
     @Data
     public static class CsceneElementStat {
@@ -796,5 +803,26 @@ public class CsceneSpecialService {
             result.put(model.getScene(), info);
         }
         return new ServiceResult<>(result);
+    }
+
+    public ServiceResult<Set<String>> getDeletingSnapshots(List<String> snapshotResourceIds) {
+        if (CollectionUtils.isEmpty(snapshotResourceIds)) {
+            return new ServiceResult<>(new HashSet<>());
+        }
+        var list = csceneSnapshotMapper.list(new HumanCondition()
+                .filterIn(CsceneSnapshotModel::getSnapshotResourceId, snapshotResourceIds.toArray(new String[]{}))
+                .filterEqual(CsceneSnapshotModel::getDeleted, true)
+        );
+        if (CollectionUtils.isEmpty(list)) {
+            return new ServiceResult<>(new HashSet<>());
+        } else {
+            Set<String> set = new HashSet<>();
+            for (var c : list) {
+                if (StringUtils.isNotEmpty(c.getSnapshotResourceId())) {
+                    set.add(c.getSnapshotResourceId());
+                }
+            }
+            return new ServiceResult<>(set);
+        }
     }
 }

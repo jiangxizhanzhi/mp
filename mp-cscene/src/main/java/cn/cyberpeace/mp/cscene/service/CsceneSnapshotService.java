@@ -192,7 +192,7 @@ public class CsceneSnapshotService {
                 .filterEqual(CsceneSnapshotModel::getDeleted, true));
         if (CollectionUtils.isNotEmpty(deletedSnapshots)) {
             LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(-5);
-            for (CsceneSnapshotModel csceneSnapshot : noResourceIds) {
+            for (CsceneSnapshotModel csceneSnapshot : deletedSnapshots) {
                 if (csceneSnapshot.getCreateTime().isAfter(localDateTime)) {
                     continue;
                 }
