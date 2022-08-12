@@ -58,10 +58,12 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -296,8 +298,12 @@ public class ImagesController {
                     .filter(m -> m != null)
                     .collect(Collectors.toList());
             var nameMap = csceneSpecialService.getCsceneNameBySceneIds(sceneIds).getSource();
+            List<String> uuids = new ArrayList<>();
             for (var m : list) {
                 var sceneInfo = nameMap.get(m.getSceneId());
+                if(StringUtils.isNotEmpty(m.getUuid())){
+                    uuids.add(m.getUuid());
+                }
                 if (sceneInfo != null) {
                     m.setSceneName(sceneInfo.getName());
                     m.setSceneId(sceneInfo.getId());
@@ -307,6 +313,14 @@ public class ImagesController {
                     m.setSceneId(null);
                 }
             }
+            Set<String> deletingSnapshots = csceneSpecialService.getDeletingSnapshots(uuids).getSource();
+            List<SnapshotConvertModel> res = new ArrayList<>();
+            list.forEach(s -> {
+                if (!deletingSnapshots.contains(s.getUuid())) {
+                    res.add(s);
+                }
+            });
+            return new Result(res);
         }
         return new Result(list);
     }
