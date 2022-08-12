@@ -1165,6 +1165,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         }
 
         String sceneId = sceneInfo.getSceneId();
+        csceneSnapshotService.logicDeleteCsceneSnapshot(csceneSnapshot.getId());
         var result = scenePluginCloudSceneService.deleteElementSnapshot(sceneId, nodeId, snapshot.getId(), snapshotId, snapshot.getName()).getSource();
         if (result) {
             csceneSnapshotService.deleteCsceneSnapshotRelativeInfo(csceneInstance.getCscene(), nodeId, snapshotId);
