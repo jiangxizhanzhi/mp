@@ -342,8 +342,15 @@ public class CsceneSnapshotService {
                 .filterEqual(SceneElementModel::getScene, snapshot.getScene())
                 .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
         // 节点实例未删除完毕直接返回
+        boolean isDeleted = false;
+        if (CollectionUtils.isEmpty(elementModel)) {
+            isDeleted = true;
+        }
         if (CollectionUtils.isNotEmpty(elementModel) && elementModel.get(0).getEvent() == SceneElementModel.Event.DELETE &&
-                elementModel.get(0).getEventStatus() != EventStatus.OVER) {
+                elementModel.get(0).getEventStatus() == EventStatus.OVER) {
+            isDeleted = true;
+        }
+        if (!isDeleted) {
             return false;
         }
         try {
