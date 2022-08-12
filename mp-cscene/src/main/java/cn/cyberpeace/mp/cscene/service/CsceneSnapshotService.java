@@ -338,17 +338,28 @@ public class CsceneSnapshotService {
         params.setSnapshotUuid(info.getSnapshotUuid());
         // 先逻辑删除节点快照，再判断节点实例是否已删除
         this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
-        var elementModel = sceneElementMapper.list(new HumanCondition()
-                .filterEqual(SceneElementModel::getScene, snapshot.getScene())
-                .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
-        // 节点实例未删除完毕直接返回
         boolean isDeleted = false;
-        if (CollectionUtils.isEmpty(elementModel)) {
-            isDeleted = true;
-        }
-        if (CollectionUtils.isNotEmpty(elementModel) && elementModel.get(0).getEvent() == SceneElementModel.Event.DELETE &&
-                elementModel.get(0).getEventStatus() == EventStatus.OVER) {
-            isDeleted = true;
+        for (int i = 0; i < 3; i++) {
+            var elementModel = sceneElementMapper.list(new HumanCondition()
+                    .filterEqual(SceneElementModel::getScene, snapshot.getScene())
+                    .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
+            // 节点实例未删除完毕直接返回
+            if (CollectionUtils.isEmpty(elementModel)) {
+                isDeleted = true;
+            }
+            if (CollectionUtils.isNotEmpty(elementModel) && elementModel.get(0).getEvent() == SceneElementModel.Event.DELETE &&
+                    elementModel.get(0).getEventStatus() == EventStatus.OVER) {
+                isDeleted = true;
+            }
+            if (isDeleted) {
+                break;
+            } else {
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+
+                }
+            }
         }
         if (!isDeleted) {
             return false;
