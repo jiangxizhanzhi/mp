@@ -70,4 +70,7 @@ public class AccessProtocol implements Serializable {
     @ApiModelProperty("描述")
     private String description;
 
+    @ApiModelProperty("是否管理接入")
+    private Boolean manageMode;
+
 }
