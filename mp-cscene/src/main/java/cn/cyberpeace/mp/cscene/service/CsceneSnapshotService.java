@@ -9,8 +9,11 @@ import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneSnapshotModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneSnapshotMapper;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
@@ -58,12 +61,17 @@ public class CsceneSnapshotService {
 
     private CsceneInstanceMapper csceneInstanceMapper;
 
+    private SceneElementMapper sceneElementMapper;
+
     @Autowired
-    public CsceneSnapshotService(CsceneSnapshotMapper csceneSnapshotMapper, SceneSnapshotService sceneSnapshotService, CsceneSpecialService csceneSpecialService, CsceneInstanceMapper csceneInstanceMapper) {
+    public CsceneSnapshotService(CsceneSnapshotMapper csceneSnapshotMapper, SceneSnapshotService sceneSnapshotService,
+                                 CsceneSpecialService csceneSpecialService, CsceneInstanceMapper csceneInstanceMapper,
+                                 SceneElementMapper sceneElementMapper) {
         this.csceneSnapshotMapper = csceneSnapshotMapper;
         this.sceneSnapshotService = sceneSnapshotService;
         this.csceneSpecialService = csceneSpecialService;
         this.csceneInstanceMapper = csceneInstanceMapper;
+        this.sceneElementMapper = sceneElementMapper;
     }
 
     public ServiceResult<Boolean> checkSnapshotName(String csceneId, String csceneInstanceId, String nodeId, String name) {
@@ -192,7 +200,7 @@ public class CsceneSnapshotService {
                     try {
                         var sceneSnapshot = sceneSnapshotService.getElementSnapshot(csceneSnapshot.getSnapshotId()).getSource();
                         if (sceneSnapshot != null) {
-                            this.deleteOneSnapshot(csceneSnapshot.getCsceneId(), sceneSnapshot);
+                            this.deleteOneSnapshot(csceneSnapshot.getCsceneId(), sceneSnapshot, true);
                         }
                     } catch (Exception e) {
                         log.error("failed to delete snapshot data , cscene snapshot id is {}", csceneSnapshot.getId());
@@ -287,7 +295,7 @@ public class CsceneSnapshotService {
                     var snapshot = queue.poll();
                     boolean deleteResult = false;
                     try {
-                        deleteResult = this.deleteOneSnapshot(csceneId, snapshot);
+                        deleteResult = this.deleteOneSnapshot(csceneId, snapshot, false);
                     } catch (Exception e) {
                         log.error("faild to delete snapshot , id is {}", snapshot.getId(), e);
                     }
@@ -303,40 +311,47 @@ public class CsceneSnapshotService {
         }
     }
 
-    private boolean deleteOneSnapshot(String csceneId, SceneElementSnapshotModel snapshot) {
+    private boolean deleteOneSnapshot(String csceneId, SceneElementSnapshotModel snapshot, boolean correctMode) {
         String image = SnapshotAddressUtils.parseAddress(snapshot.getAddress()).getImageName();
-        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{ image }).getSource();
+        var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
-        if (CollectionUtils.isNotEmpty(configNames)) {
+        var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
+        if (CollectionUtils.isNotEmpty(configNames) && correctMode) {
+            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             return false;
         }
-
-        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{ image }).getSource();
+        var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image}).getSource();
         var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
-        if (CollectionUtils.isNotEmpty(instanceNames)) {
+        if (CollectionUtils.isNotEmpty(instanceNames) && correctMode) {
+            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
             return false;
         }
 
         // 快照没有被其他场景模板或场景实例引用 则需要删除云平台快照
         SnapshotDeleteParams params = new SnapshotDeleteParams();
         params.setSnapshotName(snapshot.getName());
-        var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
         params.setDeviceUuid(StringUtils.replaceOnce(info.getImageName(), snapshot.getName(), StringUtils.EMPTY));
         params.setSnapshotUuid(info.getSnapshotUuid());
-        try {
-            this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
-            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
-            return true;
-        } catch (Exception e) {
-            if (StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().equals("snapshot not exists")) {
+        this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+        var elementModel = sceneElementMapper.list(new HumanCondition()
+                .filterEqual(SceneElementModel::getScene, snapshot.getScene())
+                .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement())).get(0);
+        if (elementModel.getEvent() == SceneElementModel.Event.DELETE && elementModel.getEventStatus() == EventStatus.OVER) {
+            try {
+                new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+                }, true);
                 this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
                 return true;
+            } catch (Exception e) {
+                if (StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().equals("snapshot not exists")) {
+                    this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+                    return true;
+                }
+                log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
+                return false;
             }
-            log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
-            return false;
         }
+        return false;
     }
 
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
