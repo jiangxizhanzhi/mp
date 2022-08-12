@@ -316,14 +316,18 @@ public class CsceneSnapshotService {
         var configUsed = csceneSpecialService.statDeviceReferCscenes(new String[]{image}).getSource();
         var configNames = this.getReferCsceneNames(configUsed.get(image), (c) -> c.getName(), 3);
         var info = SnapshotAddressUtils.parseAddress(snapshot.getAddress());
-        if (CollectionUtils.isNotEmpty(configNames) && correctMode) {
-            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+        if (CollectionUtils.isNotEmpty(configNames)) {
+            if (correctMode) {
+                this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+            }
             return false;
         }
         var instanceUsed = csceneSpecialService.statDeviceReferCsceneInstances(new String[]{image}).getSource();
         var instanceNames = this.getReferCsceneNames(instanceUsed.get(image), (c) -> c.getName(), 3);
-        if (CollectionUtils.isNotEmpty(instanceNames) && correctMode) {
-            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+        if (CollectionUtils.isNotEmpty(instanceNames)) {
+            if (correctMode) {
+                this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+            }
             return false;
         }
 
@@ -336,24 +340,25 @@ public class CsceneSnapshotService {
         this.logicDeleteCsceneSnapshot(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
         var elementModel = sceneElementMapper.list(new HumanCondition()
                 .filterEqual(SceneElementModel::getScene, snapshot.getScene())
-                .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement())).get(0);
-        // 节点实例已删除再删除节点快照
-        if (elementModel.getEvent() == SceneElementModel.Event.DELETE && elementModel.getEventStatus() == EventStatus.OVER) {
-            try {
-                new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-                }, true);
+                .filterEqual(SceneElementModel::getNodeId, snapshot.getSceneElement()));
+        // 节点实例未删除完毕直接返回
+        if (CollectionUtils.isNotEmpty(elementModel) && elementModel.get(0).getEvent() == SceneElementModel.Event.DELETE &&
+                elementModel.get(0).getEventStatus() != EventStatus.OVER) {
+            return false;
+        }
+        try {
+            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+            }, true);
+            this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
+            return true;
+        } catch (Exception e) {
+            if (StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().equals("snapshot not exists")) {
                 this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
                 return true;
-            } catch (Exception e) {
-                if (StringUtils.isNotEmpty(e.getMessage()) && e.getMessage().equals("snapshot not exists")) {
-                    this.deleteCsceneSnapshotRelativeInfo(csceneId, snapshot.getSceneElement(), info.getSnapshotUuid());
-                    return true;
-                }
-                log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
-                return false;
             }
+            log.error("failed to delete cloud snapshot , resource info is {}", snapshot.getAddress(), e);
+            return false;
         }
-        return false;
     }
 
     private <T> List<String> getReferCsceneNames(List<T> usingList, Function<T, String> getName, int nameSize) {
