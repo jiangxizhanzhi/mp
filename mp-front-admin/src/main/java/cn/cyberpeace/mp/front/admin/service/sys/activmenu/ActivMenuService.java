@@ -5,11 +5,17 @@ import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.common.constant.CommonConstant;
+import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
 import cn.cyberpeace.mp.front.admin.dto.ActivMenuDTO;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.dto.option.OptionMetaModel;
 import cn.cyberpeace.mp.front.admin.model.MenuExtraInfoModel;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import cn.hutool.core.collection.CollectionUtil;
@@ -27,6 +33,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -142,7 +149,61 @@ public class ActivMenuService {
             activeItemMap.put(item.getKey(), item.getValue());
         }
 
-        optionService.resetMeta(activeItemMap);
+        doResetOptionsVisibility(activeItemMap);
+    }
+
+
+    /**
+     * 重置Option的meta属性，添加修改visible属性
+     * @param activeItemMap
+     */
+    public void doResetOptionsVisibility(Map<String, String> activeItemMap) {
+        if (CollectionUtil.isEmpty(activeItemMap)) {
+            return;
+        }
+
+        List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
+        QueryParams queryParams = new QueryParams();
+        ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
+        List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
+
+        List<OptionModel> toUpdateList = new ArrayList<>();
+        LocalDateTime updatime = LocalDateTime.now();
+
+        for (OptionModel optionModel : optionModels) {
+            String metaStr = optionModel.getMeta();
+            OptionMetaModel metaModel = JsonCommon.parse(metaStr, OptionMetaModel.class);
+            if (StringUtils.isEmpty(metaModel.getActivKeys())) {
+                continue;
+            }
+            String[] metaActiveKeyArr = metaModel.getActivKeys().split(",");
+            List<String> metaActiveKeyList = Arrays.asList(metaActiveKeyArr);
+            boolean isNoAuth = metaActiveKeyList.stream().filter(key -> Objects.equals(key, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)).findAny().isPresent();
+            if (isNoAuth) {
+                metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_YES);
+            } else {
+                if (CollectionUtil.isEmpty(activedKeys)) {
+                    metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_NO);
+                } else {
+                    boolean isVisible = metaActiveKeyList.stream().filter(key -> activedKeys.contains(key)).findAny().isPresent();
+                    if (isVisible) {
+                        metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_YES);
+                    } else {
+                        metaModel.setVisible(OptionMetaModel.OPTION_VISIBLE_NO);
+                    }
+                }
+            }
+            OptionModel toUpdateOptionModel = new OptionModel();
+            toUpdateOptionModel.setId(optionModel.getId());
+            String toUpdateMetaStr = JsonCommon.stringify(metaModel);
+            toUpdateOptionModel.setMeta(toUpdateMetaStr);
+            toUpdateOptionModel.setUpdateTime(updatime);
+            toUpdateList.add(toUpdateOptionModel);
+        }
+
+        if (CollectionUtil.isNotEmpty(toUpdateList)) {
+            optionService.bulkUpdate(toUpdateList);
+        }
     }
 
     /**

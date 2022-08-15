@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.model.OptionModel;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Description
@@ -15,11 +14,6 @@ import java.util.Map;
  * @Date: 2022/7/28
  */
 public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
-    /**
-     * 根据激活配置项重置所有类型可见属性
-     * @param activeItemMap
-     */
-    void resetMeta(Map<String, String> activeItemMap);
 
     /**
      * 根据类型查询选项
@@ -38,10 +32,26 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
     ServiceResult<List<OptionBO>> getStrOptions(String type);
 
     /**
+     * 获取所有option
+     * @param type 类型
+     * @param filterByMetaVisible 是否需要过滤不可见的option
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getStrOptions(String type, boolean filterByMetaVisible);
+
+    /**
      * 获取 bo 的 code 字段为 int 类型
      *
      * @param type
      * @return
      */
     ServiceResult<List<OptionBO>> getIntOptions(String type);
+
+    /**
+     * 获取所有option
+     * @param type 类型
+     * @param filterByMetaVisible 是否需要过滤不可见的option
+     * @return
+     */
+    ServiceResult<List<OptionBO>> getIntOptions(String type, boolean filterByMetaVisible);
 }
