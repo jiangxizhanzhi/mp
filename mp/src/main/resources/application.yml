@@ -1,6 +1,6 @@
 ip:
   self: mp                     # mp自身地址
-  mariadb: 10.100.0.101        # MP新中台mariadb数据库地址
+  mariadb: 10.100.1.12        # MP新中台mariadb数据库地址
   fdfs: 10.100.1.26             # FastDFS地址
   cp: 10.100.7.1                # 云平台适配层接口地址
   moloch: 10.100.0.101          # moloch的IP地址
@@ -17,9 +17,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${ip.mariadb}:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: root
-    password: root
+    url: jdbc:mysql://${ip.mariadb}:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: mp
+    password: bymsoSAGToyAcs9H
     driver-class-name: org.mariadb.jdbc.Driver
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -68,60 +68,7 @@ springfox:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
-  base:
-    # fastdfs配置
-    fastdfs:
-      max-storage-connection: 8   # 最大连接数
-      connect-timeout-in-seconds: 10
-      network-timeout-in-seconds: 30
-      charset: UTF-8
-      http-tracker-http-port: 80
-      groups:
-        # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
-        - group-name: DEFAULT    # 集群名称
-          tracker-servers: ${ip.fdfs}:22122
-          file-server-addr: /fdfs    # 外部文件服务器地址
-          inner-file-server-addr: http://${ip.fdfs}:8888   # 内部文件服务器地址
-    fdfs-tracker-servers:
-        - ${ip.fdfs}:22122
-    fdfs-inner-http-server: http://${ip.fdfs}:8888
-    fdfs-outer-http-server: /fdfs
-  devops:
-#    cp-url: http://10.100.7.1:111 #云平台地址
-    cp-url: http://${ip.cp}:11111 #云平台地址
-    public-net-proxy: false #公网开关
-    public-net-proxy-ip: ${ip.cp} #公网ip
-    public-net-proxy-port: 11111 #公网端口
-    hostname: controller  #主机名称
-    max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
-    disk-alarm-percent: 80 # 磁盘空间告警阈值
-    monitor:
-      cp_srv_monitors:
-        - probe-name: monitor_cp_service.py
-          launch-id: 093f61683e1a4e3fbe80664e791ea001
-          interval: 180s
-          service-list: chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb.service,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd,openstack-nova-api,openstack-nova-scheduler,openstack-nova-conductor,openstack-nova-novncproxy,openstack-nova-serialproxy,openstack-nova-compute,neutron-server,neutron-openvswitch-agent,neutron-dhcp-agent,neutron-metadata-agent,neutron-l3-agent,openstack-glance-api,openstack-cinder-api,openstack-cinder-volume
-          restart-restrict-list: chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd
-        - probe-name: monitor_cp_service.py
-          launch-id: 093f6512519d49b2986819e29e4ba002
-          interval: 180s
-          service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql
-          restart-restrict-list: docker,containerd,adaptation,fastdfs,mariadb-docker,rabbitmq,redis
-      biz_srv_monitors:
-        - probe-name: monitor_biz_service.py
-          launch-id: 093fc7abba264d38a022a4c143d6a003
-          interval: 180s
-          service-list: mp,mp_es,wazuh-manager,ad,bc,drm,PY-HOST
-          restart-restrict-list: mp,mp_es,wazuh-manager
   situationaware:
-    arkime:
-      cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
-      es-host: ${ip.moloch}
-      es-port: ${ARKIME_PORT:9205}
-      image-name: centos-arkime_arkime:v2
-      username: api
-      password: api
     #moloch es节点地址
     es-nodes: ${ip.moloch}:9205
     wazuh:
@@ -136,60 +83,6 @@ mp:
       agent-script-linux-path: /var/ossec/etc/shared/scripts/
       agent-script-windows-path: C:\ossec-agent\shared\scripts\
       task-enable: false
-  collection:
-    #自定义探针配置
-    probe:
-      default-interval: 180s
-      probes:
-        - probe-name: get_host_info.py
-          id: eda72998ba654c8d8625f61eaa918eb3
-          interval: 180s
-          outputFormat: plain
-        - probe-name: get_net_conns.py
-          id: 09ffcc4a67ef4accb407a1555629d0f8
-          interval: 180s
-          outputFormat: json
-        - probe-name: get_env_values.py
-          id: 32e9c4db9729440290e843bb6d80295b
-          interval: 300s
-          outputFormat: json
-        - probe-name: get_processes.py
-          id: 38949dcf3829489d8dd9e0e63cc66541
-          interval: 180s
-          outputFormat: json
-        - probe-name: get_system_users.py
-          id: 4894f48375ee4dd5b7a7bad7c1a78376
-          interval: 180s
-          outputFormat: json
-    #日志采集地址配置
-    location:
-      locations:
-        - probeId: '008'
-          log-format: eventchannel
-          location: Microsoft-Windows-PrintService/Operational,System,Microsoft-Windows-Sysmon/Operational
-          os-type: windows
-        - probeId: '008'
-          log-format: syslog
-          location: /var/log/syslog
-          os-type: linux
-        - probeId: '009'
-          log-format: syslog
-          location: /var/log/maillog,/var/log/httpd
-          os-type: linux
-        - probeId: '009'
-          log-format: eventchannel
-          location: Application,File Replication Service,Service Microsoft-Windows-TerminalServices-RemoteConnectionManager
-          os-type: windows
-        - probeId: '010'
-          log-format: eventchannel
-          location: Security,Microsoft-Windows-Windows Defender/Operational,Microsoft-Windows-Windows Firewall With Advanced Security/Firewall
-          os-type: windows
-        - probeId: '010'
-          log-format: syslog
-          location: /var/log/clamav.log,/var/log/secure
-          os-type: linux
-  cscene:
-    has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 
   log:
     es-nodes: ${ip.es}:9205

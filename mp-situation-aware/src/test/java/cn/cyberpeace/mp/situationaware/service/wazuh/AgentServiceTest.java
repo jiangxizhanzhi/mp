@@ -17,7 +17,7 @@ public class AgentServiceTest {
 
     @Test
     public void testListAgents() {
-        agentService.listAgents(new AgentRequest("windows_agent1"));
+        agentService.listAgents(new AgentRequest());
     }
 
 }

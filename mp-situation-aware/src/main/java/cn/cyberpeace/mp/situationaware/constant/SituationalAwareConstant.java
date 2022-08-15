@@ -30,12 +30,9 @@ public class SituationalAwareConstant {
 
     public static List<String> monitorRuleIds = Lists.newArrayList("5715", "5502");
 
-    /**
-     * 后台系统管理-探针管理-自定义探针-系统类型
-     */
-    public static final String MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE = "os_type";
-    /**
-     * 后台系统管理-探针管理-自定义探针-类型
-     */
-    public static final String MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE = "probe_type";
+    public static List<String> VULNERABILITY_GROUP = List.of("vulnerability-detector");
+
+    public static List<String> FILE_MODIFY_GROUP = List.of("syscheck_file");
+
+    public static List<String> REGISTRY_MODIFY_GROUP = List.of("syscheck_registry");
 }

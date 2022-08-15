@@ -1,4 +1,0 @@
-ALTER TABLE mp_sceneplugincloud_scene_element ADD COLUMN `image_uuid` varchar(64) NOT NULL COMMENT '靶标id';
-ALTER TABLE mp_sceneplugincloud_scene_config_element ADD COLUMN `image_uuid` varchar(64) NOT NULL COMMENT '靶标id';
-alter table mp_sceneplugincloud_scene_element_port add column `connect_mode` varchar(32) NOT NULL COMMENT '组网连接模式' ;
-alter table mp_sceneplugincloud_scene_config_element_port add column `connect_mode` varchar(32) NOT NULL COMMENT '组网连接模式' ;

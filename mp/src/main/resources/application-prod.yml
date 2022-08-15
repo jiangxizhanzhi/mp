@@ -69,62 +69,7 @@ mybatis:
 
 # 请求云平台组信息的url配置，必需填写
 mp:
-  base:
-    # fastdfs配置
-    fastdfs:
-      max-storage-connection: 8   # 最大连接数
-      connect-timeout-in-seconds: 10
-      network-timeout-in-seconds: 30
-      charset: UTF-8
-      http-tracker-http-port: ${FDFS_HTTP_TRACKER_HTTP_PORT:80}
-      groups:
-        # 集群配置：每增加一个集群，参考下例添加相应配置即可，同时在FdfsGroupEnum.java枚举类中添加该集群名称
-        - group-name: ${FDFS_GROUP_NAME:DEFAULT}    # 集群名称
-          tracker-servers: ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
-          file-server-addr: ${FDFS_FILE-SERVER-ADDR:/fdfs}    # 外部文件服务器地址
-          inner-file-server-addr: http://${ip.fdfs}:${FDFS_INNER_FILE_SERVER_PORT:8888}   # 内部文件服务器地址
-    fdfs-tracker-servers:
-      - ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
-    fdfs-inner-http-server: http://${ip.fdfs}:${FDFS_INNER_FILE_SERVER_PORT:8888}
-    fdfs-outer-http-server: ${FDFS_FILE-SERVER-ADDR:/fdfs}
-    run-init: true
-  devops:
-    cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
-    public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
-    public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
-    public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:} #公网端口
-    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
-    #    cr-url: http://${ip.cr} #
-    hostname: controller  #主机名称
-    max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
-    disk-alarm-percent: ${MP_DEVOPS_DISK_ALARM_PERCENT:80} # 磁盘空间告警阈值
-    monitor:
-      cp_srv_monitors:
-        - probe-name: monitor_cp_service.py
-          launch-id: 093f61683e1a4e3fbe80664e791ea001
-          interval: ${MP_MONITOR_CP_SRV_INTERVAL:180s}
-          service-list: chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb.service,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd,openstack-nova-api,openstack-nova-scheduler,openstack-nova-conductor,openstack-nova-novncproxy,openstack-nova-serialproxy,openstack-nova-compute,neutron-server,neutron-openvswitch-agent,neutron-dhcp-agent,neutron-metadata-agent,neutron-l3-agent,openstack-glance-api,openstack-cinder-api,openstack-cinder-volume
-          restart-restrict-list: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST_1:chronyd,dnsmasq,etcd,httpd,libvirtd,mariadb,memcached,nfs-server,nginx,openvswitch,kuryr-libnetwork,network,rabbitmq-server,rpcbind,supervisord,vsftpd}
-        - probe-name: monitor_cp_service.py
-          launch-id: 093f6512519d49b2986819e29e4ba002
-          interval: ${MP_MONITOR_CP_SRV_INTERVAL:180s}
-          service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql
-          restart-restrict-list: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST_2:docker,containerd,adaptation,fastdfs,mariadb-docker,rabbitmq,redis}
-      biz_srv_monitors:
-        - probe-name: monitor_biz_service.py
-          launch-id: 093fc7abba264d38a022a4c143d6a003
-          interval: ${MP_MONITOR_BIZ_SRV_INTERVAL:180s}
-          service-list: mp,mp_es,wazuh-manager,ad,bc,drm,PY-HOST
-          restart-restrict-list: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:mp,mp_es,wazuh-manager}
   situationaware:
-    arkime:
-      cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
-      es-host: ${ip.moloch}
-      es-port: ${ARKIME_PORT:9205}
-      image-name: centos-arkime_arkime:v2
-      username: api
-      password: api
     #moloch es节点地址
     es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
     wazuh:
@@ -138,58 +83,6 @@ mp:
       agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
       agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
       task-enable: true
-  collection:
-    #自定义探针配置
-    probe:
-      default-interval: 180s
-      probes:
-        - probe-name: get_host_info.py
-          id: eda72998ba654c8d8625f61eaa918eb3
-          interval: 180s
-          outputFormat: plain
-        - probe-name: get_net_conns.py
-          id: 09ffcc4a67ef4accb407a1555629d0f8
-          interval: 180s
-          outputFormat: json
-        - probe-name: get_env_values.py
-          id: 32e9c4db9729440290e843bb6d80295b
-          interval: 300s
-          outputFormat: json
-        - probe-name: get_processes.py
-          id: 38949dcf3829489d8dd9e0e63cc66541
-          interval: 180s
-          outputFormat: json
-        - probe-name: get_system_users.py
-          id: 4894f48375ee4dd5b7a7bad7c1a78376
-          interval: 180s
-          outputFormat: json
-    #日志采集地址配置
-    location:
-      locations:
-        - probeId: '008'
-          log-format: eventchannel
-          location: Microsoft-Windows-PrintService/Operational,System,Microsoft-Windows-Sysmon/Operational
-          os-type: windows
-        - probeId: '008'
-          log-format: syslog
-          location: /var/log/syslog
-          os-type: linux
-        - probeId: '009'
-          log-format: syslog
-          location: /var/log/maillog,/var/log/httpd
-          os-type: linux
-        - probeId: '009'
-          log-format: eventchannel
-          location: Application,File Replication Service,Service Microsoft-Windows-TerminalServices-RemoteConnectionManager
-          os-type: windows
-        - probeId: '010'
-          log-format: eventchannel
-          location: Security,Microsoft-Windows-Windows Defender/Operational,Microsoft-Windows-Windows Firewall With Advanced Security/Firewall
-          os-type: windows
-        - probeId: '010'
-          log-format: syslog
-          location: /var/log/clamav.log,/var/log/secure
-          os-type: linux
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
@@ -211,41 +104,6 @@ mp:
       jwt-secret: ${MP_AUTH_JWT_SECRET:}
       jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
       urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
-  flow:
-    trex-image: ${TREX_IMAGE:tgn-trex}
-  sceneplugincloud:
-    cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
-    delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
-    default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
-    enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
-    link_status_enabled: ${MP_LINK_STATUS_ENABLED:true}
-    link_status_refresh_period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
-    link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
-    link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
-    link_status_hold_size: ${MP_LINK_STATUS_HOLD_SIZE:200}
-    public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
-    public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
-    public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
-    public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
-    gateway_types: ${GATEWAY_TYPES:2,3}
-  sceneplugincollection:
-    wazuh-server-host: ${ip.wazuh}
-    wazuh-api-server: http://${ip.wazuh}:15500
-    wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://${ip.es}:9205
-    wazuh-godfs-server: http://${ip.wazuh}:11888
-    wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
-    wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
-  cscene:
-    has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
-    scene-error-creating-seconds: ${MP_SCENE_ERROR_CREATING_SECONDS:3600}
-    element-error-creating-seconds: ${MP_ELEMENT_ERROR_CREATING_SECONDS:300}
-    enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
-    enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
-    cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
-    access-mode-ip: ${MP_ACCESS_MODE_IP:}
-  scene:
-    access-mode-ip: ${MP_ACCESS_MODE_IP:}
 
 management:
   endpoints:

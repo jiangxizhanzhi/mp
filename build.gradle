@@ -6,8 +6,6 @@ plugins {
     id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
     id 'application'
-    id 'org.flywaydb.flyway' version '8.0.5'
-    id "com.thinkimi.gradle.MybatisGenerator" version "2.3"
 }
 
 
@@ -35,7 +33,6 @@ subprojects {
     apply plugin: 'org.asciidoctor.convert'
     apply plugin: 'java'
     apply plugin: 'application'
-    apply plugin: 'org.flywaydb.flyway'
 
 
     group = 'cn.cyberpeace.mp'
@@ -70,7 +67,6 @@ subprojects {
         implementation 'com.github.ben-manes.caffeine:caffeine'
         implementation 'org.elasticsearch:elasticsearch:7.14.2'
         implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.14.2'
-        implementation 'org.flywaydb:flyway-core:8.0.5'
         implementation 'com.google.guava:guava:30.1.1-jre'
         implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
         implementation 'org.apache.commons:commons-lang3:3.11'

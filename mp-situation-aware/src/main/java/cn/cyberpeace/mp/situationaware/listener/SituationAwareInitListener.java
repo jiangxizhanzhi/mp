@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SecurityService;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -25,8 +24,6 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
     @Autowired
     private SecurityService securityService;
 
-    @Autowired
-    private NetworkTrafficGroupService networkTrafficGroupService;
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
@@ -43,8 +40,6 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
                         return token;
                     }
                 });
-
-        networkTrafficGroupService.initArkimeNetwork();
     }
 
 

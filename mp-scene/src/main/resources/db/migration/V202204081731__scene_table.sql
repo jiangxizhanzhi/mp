@@ -1,2 +1,0 @@
-alter table mp_scene_scene_config_element_port modify column `access_modes` text NOT NULL COMMENT '接入信息列表';
-alter table mp_scene_scene_element_port modify column `access_modes` text NOT NULL COMMENT '接入信息列表';

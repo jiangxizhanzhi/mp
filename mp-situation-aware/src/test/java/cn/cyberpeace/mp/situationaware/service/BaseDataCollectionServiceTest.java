@@ -42,8 +42,6 @@ public class BaseDataCollectionServiceTest {
     @Resource(name = "wazuhRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
 
-    @Autowired
-    private DataCollectionFlowTableService dataCollectionFlowTableService;
 
     @Test
     public void testQueryFileEvents() {
@@ -123,12 +121,6 @@ public class BaseDataCollectionServiceTest {
         List<WazuhHostStateModel> wazuhHostStateModelList = dataCollectionService.queryHostStateEventsWithTimeRange(wazuhEventRequest);
         System.out.println(wazuhHostStateModelList);
     }
-
-    @Test
-    public void testCreateDataCollectionFlow() {
-        dataCollectionFlowTableService.createDataCollectionFlow(Lists.newArrayList("84702684-9e92-4e44-a84d-990191cf2442"));
-    }
-
 
     @Test
     public void testQueryMonitorEventsAgg() {

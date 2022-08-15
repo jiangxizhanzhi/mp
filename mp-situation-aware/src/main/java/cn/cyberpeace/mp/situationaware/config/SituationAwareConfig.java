@@ -7,13 +7,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class SituationAwareConfig {
-
-    @Value("${mp.situationaware.arkime.username}")
-    private String userName;
-
-    @Value("${mp.situationaware.arkime.password}")
-    private String password;
-
     @Value("${mp.situationaware.wazuh-probe-manager.url}")
     private String wazuhManagerUrl;
 
