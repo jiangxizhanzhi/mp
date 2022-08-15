@@ -238,6 +238,9 @@ public class CreateHandler extends HandlerCommon {
             var virtualSwitch = vsClient.create(createData);
             cloudElement.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
+            if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
+                cloudElement.setResourceId(virtualSwitch.getId());
+            }
             // 向端口回写网络id
             connectedNetwork.getFromPorts().forEach(p -> {
                 var pluginPort = getPluginHandler().getPort(p.getId());

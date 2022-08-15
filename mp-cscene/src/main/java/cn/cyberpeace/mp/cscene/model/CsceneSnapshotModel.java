@@ -27,4 +27,6 @@ public class CsceneSnapshotModel extends BaseModel {
     private String name;
     @DefaultStr
     private String sourceName;
+    @DefaultBool
+    private Boolean deleted;
 }

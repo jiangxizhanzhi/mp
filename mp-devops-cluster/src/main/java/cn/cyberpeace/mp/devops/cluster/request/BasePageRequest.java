@@ -52,6 +52,7 @@ public class BasePageRequest extends BaseRequest implements Serializable {
     }
 
     public void ensure() {
+
         // 默认值
         if (Objects.isNull(page) || page <= 1) {
             page = 1;

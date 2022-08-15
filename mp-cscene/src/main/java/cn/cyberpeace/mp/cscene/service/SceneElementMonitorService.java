@@ -497,6 +497,9 @@ public class SceneElementMonitorService {
         if (CollUtil.isEmpty(result)) {
             return new ArrayList<>();
         }
+        result = result.stream()
+                .filter(countModel -> !countModel.getFieldName().equals("-"))
+                .collect(Collectors.toList());
         long i = 0;
         for (WazuhVulnerabilityInfoCountModel countModel : result) {
             i = countModel.getCount() + i;

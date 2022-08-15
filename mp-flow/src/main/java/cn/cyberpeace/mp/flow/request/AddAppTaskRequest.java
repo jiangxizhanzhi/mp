@@ -101,8 +101,9 @@ public class AddAppTaskRequest {
         specifics.setSrcIpRange(srcIpRange);
         String[] targetIps = flowTaskModel.getTargetIps().split(BaseConstants.SHORT_DASH);
         String dstIpRange;
+        String targetIp = targetIps[0];
         if (targetIps.length < 2) {
-            dstIpRange = targetIps[0] + BaseConstants.SHORT_DASH + targetIps[0];
+            dstIpRange = targetIp + BaseConstants.SHORT_DASH + targetIp;
         } else {
             dstIpRange = flowTaskModel.getTargetIps();
         }
@@ -116,13 +117,13 @@ public class AddAppTaskRequest {
         client.setIp(flowPortModel.getClientIp());
         client.setPort(flowPortModel.getClientMac());
         // 目标ip作为客户端网关
-        client.setDefaultGw(flowPortModel.getClientGateway());
+        client.setDefaultGw(targetIp);
 
         AddAppTaskRequest.Server server = new AddAppTaskRequest.Server();
         server.setIp(flowPortModel.getServerIp());
         server.setPort(flowPortModel.getServerMac());
         // 目标ip作为服务端网关
-        server.setDefaultGw(flowPortModel.getServerGateway());
+        server.setDefaultGw(targetIp);
 
         AddAppTaskRequest.NetworkConfig networkConfig = new AddAppTaskRequest.NetworkConfig();
         networkConfig.setClient(Collections.singletonList(client));

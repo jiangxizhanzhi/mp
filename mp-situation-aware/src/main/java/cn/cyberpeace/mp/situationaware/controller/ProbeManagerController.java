@@ -122,13 +122,18 @@ public class ProbeManagerController {
     @ApiOperation(value = "修改自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        String oldMd5 = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
+        var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
+        String oldMd5 = oldScript.getChecksum();
+        Integer oldScriptType = oldScript.getScriptType();
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
         boolean contentChanged = false;
+        if (Objects.nonNull(probeRequest.getScriptType()) && !oldScriptType.equals(probeRequest.getScriptType())) {
+            contentChanged = true;
+        }
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
 
-            if (!Objects.equals(newMd5, oldMd5)) {
+            if (!Objects.equals(newMd5, oldMd5) || contentChanged) {
                 String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
                 probeRequest.setScriptChecksum(newMd5);
                 probeRequest.setScriptUrl(httpUrl);

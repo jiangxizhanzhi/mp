@@ -186,4 +186,7 @@
   <select id="getChecksumByProbeId" resultType="string">
     select checksum from mp_situation_probe_script where probe_id = #{probeId}
   </select>
+  <select id="getScriptModelByProbeId" resultType="cn.cyberpeace.mp.situationaware.model.ProbeScriptModel">
+    select * from mp_situation_probe_script where probe_id = #{probeId}
+  </select>
 </mapper>

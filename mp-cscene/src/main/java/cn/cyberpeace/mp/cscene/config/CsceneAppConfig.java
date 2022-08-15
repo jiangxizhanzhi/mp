@@ -69,7 +69,7 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable-command-change:false}")
     private Boolean enableCommandChange;
 
-    @Value("${mp.cscene.cron-job-expression:* 0/15 * * * ?}")
+    @Value("${mp.cscene.cron-job-expression:0 0/15 * * * ?}")
     private String cronJobExpression;
 
     @Autowired

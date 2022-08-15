@@ -95,7 +95,12 @@ class NetworkElementConverter implements IConverter {
         // TODO: 设置地址池
 //        pluginElement.setAllocationPools();
         if (!StringUtils.isEmpty(network.getDns())) {
-            pluginElement.setDnsNameservers(List.of(network.getDns()));
+            if (network.getDns().contains(",")) {
+                String[] dnsArray = StringUtils.split(network.getDns(), ",");
+                pluginElement.setDnsNameservers(List.of(dnsArray));
+            } else {
+                pluginElement.setDnsNameservers(List.of(network.getDns()));
+            }
         }
         pluginElement.setGateway(network.getGateway());
         if (network.getId().toLowerCase().startsWith("internet")) {

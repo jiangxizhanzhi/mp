@@ -54,20 +54,19 @@ public class FirewallController {
 
     /**
      * 转换BO to VO
-     * 只保留MP_SCENE_*开头的 http://10.10.10.10/biz/bug-view-10043.html
      * @param model
      * @return
      */
     private List<FirewallPageVO> convertBOToPageVO(BasePageBO<Firewall> model){
-        return model.getList().stream().map(firewall -> {
+        return model.getList().stream().map(firewall ->
+        {
             if (StringUtils.isNotBlank(firewall.getName()) && firewall.getName().startsWith("MP_SCENE_")) {
                 return new FirewallPageVO(firewall.getName(),
                         Objects.nonNull(firewall.getIngressFirewallPolicy()) ? firewall.getIngressFirewallPolicy().getName() : null,
                         Objects.nonNull(firewall.getEgressFirewallPolicy()) ? firewall.getEgressFirewallPolicy().getName() : null,
                         firewall.getDescription(),firewall.getStatus());
-            } else {
-                return null;
             }
+            return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 

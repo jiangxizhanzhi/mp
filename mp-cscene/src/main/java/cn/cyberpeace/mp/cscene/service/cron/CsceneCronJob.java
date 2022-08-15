@@ -42,7 +42,14 @@ public class CsceneCronJob implements SchedulingConfigurer {
             log.info("scene cron job is not enable");
             return;
         }
-        taskRegistrar.addTriggerTask(new TriggerTask(() -> scenePluginCloudSceneCronService.action(), triggerContext -> {
+        taskRegistrar.addTriggerTask(new TriggerTask(() -> {
+            try {
+                // 停一秒 避免定时任务太快不停的跑
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+            }
+            scenePluginCloudSceneCronService.action();
+        }, triggerContext -> {
             CronTrigger cronTrigger = new CronTrigger(cron);
             return cronTrigger.nextExecutionTime(triggerContext);
         }));

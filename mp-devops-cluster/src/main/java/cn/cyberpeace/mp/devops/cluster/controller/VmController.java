@@ -10,6 +10,8 @@ import cn.cyberpeace.mp.devops.cluster.converter.VmConverter;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.InstanceBO;
 import cn.cyberpeace.mp.devops.cluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devops.cluster.dto.InstancePageDTO;
+import cn.cyberpeace.mp.devops.cluster.po.DeviceTargetPO;
+import cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devops.cluster.request.InstancePageRequest;
 import cn.cyberpeace.mp.devops.cluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devops.cluster.vo.common.PageResult;
@@ -44,6 +46,8 @@ public class VmController {
 
     private final UserService userService;
 
+    private final DeviceTargetMapper deviceTargetMapper;
+
     /**
      * 分页查询虚拟机信息
      * @param request
@@ -66,7 +70,9 @@ public class VmController {
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
         List<UserDto> userDtoList = new ArrayList<>();
+        Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
+        var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
@@ -77,7 +83,21 @@ public class VmController {
                 }
             }
         }
+        // 镜像管理实例的创建用户
+        if (CollectionUtils.isNotEmpty(devopsResult)) {
+            List<String> userIdList = devopsResult.stream()
+                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
+                    .map(DeviceTargetPO::getInstanceCreateUser)
+                    .collect(Collectors.toList());
+            uuid2UserId = devopsResult.stream()
+                    .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
+                    .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));
+            if (CollectionUtils.isNotEmpty(userIdList)) {
+                userDtoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
+            }
+        }
         List<UserDto> tmpUserDtoList = userDtoList;
+        Map<String, String> uuid2User = uuid2UserId;
         return instances.stream().map(instanceModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
             if (Objects.nonNull(source.get(instanceModel.getName()))) {
@@ -88,6 +108,13 @@ public class VmController {
             if (StringUtils.isNotBlank(userId)) {
                 Optional<UserDto> optional =
                         tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
+                if (optional.isPresent()) {
+                    userName = optional.get().getUsername();
+                }
+            } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
+                String createUser = uuid2User.get(instanceModel.getName());
+                Optional<UserDto> optional =
+                        tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
                 }

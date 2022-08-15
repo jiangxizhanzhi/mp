@@ -730,9 +730,15 @@ public class ScenePluginCloudSceneService {
             params.setSnapshotUuid(snapshotUuid);
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
-            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            sceneSnapshotService.deleteElementSnapshot(snapshotId);
+            try {
+                new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+                }, true);
+                sceneSnapshotService.deleteElementSnapshot(snapshotId);
+            } catch (Exception e) {
+                if (!"snapshot not exists".equals(e.getMessage())) {
+                    throw e;
+                }
+            }
         }
         return new ServiceResult<>(true);
     }
