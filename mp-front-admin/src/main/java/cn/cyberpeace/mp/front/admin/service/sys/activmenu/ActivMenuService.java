@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -67,7 +68,7 @@ public class ActivMenuService {
     @Autowired
     private UserCacheService userCacheService;
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
 

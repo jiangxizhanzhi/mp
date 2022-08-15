@@ -31,13 +31,6 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      */
     ServiceResult<List<OptionBO>> getStrOptions(String type);
 
-    /**
-     * 获取所有option
-     * @param type 类型
-     * @param filterByMetaVisible 是否需要过滤不可见的option
-     * @return
-     */
-    ServiceResult<List<OptionBO>> getStrOptions(String type, boolean filterByMetaVisible);
 
     /**
      * 获取 bo 的 code 字段为 int 类型
@@ -47,11 +40,4 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      */
     ServiceResult<List<OptionBO>> getIntOptions(String type);
 
-    /**
-     * 获取所有option
-     * @param type 类型
-     * @param filterByMetaVisible 是否需要过滤不可见的option
-     * @return
-     */
-    ServiceResult<List<OptionBO>> getIntOptions(String type, boolean filterByMetaVisible);
 }

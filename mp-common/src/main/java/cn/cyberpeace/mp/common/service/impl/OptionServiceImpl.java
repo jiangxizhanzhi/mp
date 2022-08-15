@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.common.service.impl;
 
-import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -18,11 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -46,13 +43,9 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
      * @param intFlag bo中code字段是否转为int类型
      * @return
      */
-    private List<OptionBO> getOptionsByType(String type, boolean intFlag, boolean filterByMetaVisible) {
+    private List<OptionBO> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
-
-        if (filterByMetaVisible) {
-            filterByVisibility(models);
-        }
 
         if (intFlag) {
             function = Integer::parseInt;
@@ -69,41 +62,18 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         condition.filterEqual(OptionModel::getType, type);
         condition.orderBy(OptionModel::getSort);
         List<OptionModel> optionModels = getModelMapper().list(condition);
-        filterByVisibility(optionModels);
         return optionModels;
     }
 
     @Override
     public ServiceResult<List<OptionBO>> getStrOptions(String type) {
-        return new ServiceResult<>(getOptionsByType(type, false, true)).asResult();
+        return new ServiceResult<>(getOptionsByType(type, false)).asResult();
     }
 
-    @Override
-    public ServiceResult<List<OptionBO>> getStrOptions(String type, boolean filterByMetaVisible) {
-        return new ServiceResult<>(getOptionsByType(type, false, filterByMetaVisible)).asResult();
-    }
 
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
-        return new ServiceResult<>(getOptionsByType(type, true, true)).asResult();
-    }
-
-
-    @Override
-    public ServiceResult<List<OptionBO>> getIntOptions(String type, boolean filterByMetaVisible) {
-        return new ServiceResult<>(getOptionsByType(type, true, filterByMetaVisible)).asResult();
-    }
-
-
-    private void filterByVisibility(List<OptionModel> optionModels) {
-        Iterator<OptionModel> iter = optionModels.iterator();
-        while (iter.hasNext()) {
-            String metaStr = iter.next().getMeta();
-            Map<String, Object> metaMap = JsonCommon.parseMap(metaStr);
-            if (Objects.equals("0", String.valueOf(metaMap.get("visible")))) {
-                iter.remove();
-            }
-        }
+        return new ServiceResult<>(getOptionsByType(type, true)).asResult();
     }
 
     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {

@@ -9,9 +9,19 @@ import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
 import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.flow.constant.*;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import cn.cyberpeace.mp.flow.constant.ControllerConstant;
+import cn.cyberpeace.mp.flow.constant.FlowConstant;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
+import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.request.*;
+import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.CheckNamesRequest;
+import cn.cyberpeace.mp.flow.request.ImportFlowInfoRequest;
+import cn.cyberpeace.mp.flow.request.ListByCollectionIdsRequest;
+import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
+import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
@@ -23,8 +33,17 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,8 +67,9 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         setModelService(flowInfoService);
     }
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
+
     /**
      * 删除流量信息
      * @param id

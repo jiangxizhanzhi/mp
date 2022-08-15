@@ -5,7 +5,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.AccessProtocol;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntity;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtEntityAccess;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpConfig;
+import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.SnmpParams;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.RealEquipmentService;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
@@ -18,7 +23,12 @@ import cn.cyberpeace.mp.devops.cluster.converter.model.TypeAllConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeConvertModel;
 import cn.cyberpeace.mp.devops.cluster.converter.model.TypeIdStringConvertModel;
 import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
-import cn.cyberpeace.mp.devops.cluster.model.*;
+import cn.cyberpeace.mp.devops.cluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devops.cluster.model.RealEquipmentByParams;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpAuth;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpBaseAuth;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpCloudPlatform;
+import cn.cyberpeace.mp.devops.cluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devops.cluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentDeleteRequest;
 import cn.cyberpeace.mp.devops.cluster.request.RealEquipmentNetworkCardPageRequest;
@@ -43,9 +53,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -63,7 +81,7 @@ public class RealEquipmentController {
 
     private final TypeConverter typeConverter;
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     /**
