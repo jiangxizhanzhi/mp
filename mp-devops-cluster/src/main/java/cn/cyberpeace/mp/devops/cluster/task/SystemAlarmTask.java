@@ -202,7 +202,7 @@ public class SystemAlarmTask {
 
 
     private List<HostState> listAllCPNodeHostStates() {
-        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO(9999, 1));
+        BasePageBO<HypervisorBO> modelPage = hypervisorConverter.page(new BasePageDTO());
         List<String> hostNames = modelPage.getList().stream().map(HypervisorBO::getName).collect(Collectors.toList());
         if (CollectionUtil.isEmpty(hostNames)) {
             return Collections.emptyList();

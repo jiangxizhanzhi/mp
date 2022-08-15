@@ -42,7 +42,7 @@ public class FirewallController {
     @GetMapping("/page")
     public PageResult<FirewallPageVO> page(BasePageRequest request){
         request.ensure();
-        BasePageBO<Firewall> model = firewallConverter.page(new BasePageDTO(9999, 1));
+        BasePageBO<Firewall> model = firewallConverter.page(new BasePageDTO());
         List<FirewallPageVO> list = convertBOToPageVO(model);
 
         int total = list.size();
