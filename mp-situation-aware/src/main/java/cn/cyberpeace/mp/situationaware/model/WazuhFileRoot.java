@@ -267,7 +267,7 @@ public class WazuhFileRoot {
         @JSONField(name = "mtime_after")
         private Date mtimeAfter;
         @JSONField(name = "inode_before")
-        private int inodeBefore;
+        private long inodeBefore;
         @JSONField(name = "size_after")
         private String sizeAfter;
         @JSONField(name = "gid_after")
@@ -298,7 +298,7 @@ public class WazuhFileRoot {
         @JSONField(name = "sha256_after")
         private String sha256After;
         @JSONField(name = "inode_after")
-        private int inodeAfter;
+        private long inodeAfter;
 
         public void setSizeBefore(String sizeBefore) {
             this.sizeBefore = sizeBefore;
@@ -318,10 +318,10 @@ public class WazuhFileRoot {
         public Date getMtimeAfter() {
             return this.mtimeAfter;
         }
-        public void setInodeBefore(int inodeBefore) {
+        public void setInodeBefore(long inodeBefore) {
             this.inodeBefore = inodeBefore;
         }
-        public int getInodeBefore() {
+        public long getInodeBefore() {
             return this.inodeBefore;
         }
         public void setSizeAfter(String sizeAfter) {
@@ -420,10 +420,10 @@ public class WazuhFileRoot {
         public String getSha256After() {
             return this.sha256After;
         }
-        public void setInodeAfter(int inodeAfter) {
+        public void setInodeAfter(long inodeAfter) {
             this.inodeAfter = inodeAfter;
         }
-        public int getInodeAfter() {
+        public long getInodeAfter() {
             return this.inodeAfter;
         }
     }
