@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.service.wazuh.SysCollectorService;
+import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import lombok.extern.slf4j.Slf4j;
@@ -82,11 +83,11 @@ public class TestService {
             result = dataCollectionService.scrollFileEvents(scrollId);
         }
         TIMED_CACHE.put(requestId, result.getList().get(0).getScrollId());
-        return new ListObjServiceResult<>(result).asResult();
+        return new ListObjServiceResult<>(result.asResult()).asResult();
     }
 
     public ListObjServiceResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest request, List<String> probeIds) {
-        return new ListObjServiceResult<>(dataCollectionService.queryCustomProbeData(request, probeIds)).asResult();
+        return new ListObjServiceResult<>(dataCollectionService.queryCustomProbeData(request, probeIds).asResult()).asResult();
     }
 
     /**
@@ -96,7 +97,7 @@ public class TestService {
      */
     public ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest request) {
         request.setRuleGroups(SituationalAwareConstant.VULNERABILITY_GROUP);
-        return new ListObjServiceResult<>(dataCollectionService.queryVulnerabilityInfo(request, true)).asResult();
+        return new ListObjServiceResult<>(dataCollectionService.queryVulnerabilityInfo(request, true).asResult()).asResult();
     }
 
     /**
@@ -213,7 +214,7 @@ public class TestService {
      */
     public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest request) {
         var pagePorts = sysCollectorService.pagePorts(request);
-        return new ListObjServiceResult<>(new ListObjResult<>(pagePorts.getList(), (int) pagePorts.getTotal())).asResult();
+        return ResultUtils.pageInfo2ObjServiceResult(pagePorts);
     }
 
     /**
@@ -223,7 +224,7 @@ public class TestService {
      */
     public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest request) {
         var pageNetifaces = sysCollectorService.pageNetifaces(request);
-        return new ListObjServiceResult<>(new ListObjResult<>(pageNetifaces.getList(), (int) pageNetifaces.getTotal())).asResult();
+        return ResultUtils.pageInfo2ObjServiceResult(pageNetifaces);
     }
 
     /**

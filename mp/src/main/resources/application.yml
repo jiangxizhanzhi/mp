@@ -78,11 +78,6 @@ mp:
       username: wazuh
       password: Abcd123#
       flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
-    wazuh-probe-manager:
-      url: http://10.100.0.111:8002
-      agent-script-linux-path: /var/ossec/etc/shared/scripts/
-      agent-script-windows-path: C:\ossec-agent\shared\scripts\
-      task-enable: false
 
   log:
     es-nodes: ${ip.es}:9205
