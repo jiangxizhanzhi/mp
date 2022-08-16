@@ -71,7 +71,6 @@ public class FileUtils {
             final File file = new File(newTempDir,originalFilename.substring(0,index).concat(prefix));
             // MultipartFile to File
             multipartFile.transferTo(file);
-            file.deleteOnExit();
             fileList.add(file);
         }
         return fileList;

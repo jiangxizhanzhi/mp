@@ -110,6 +110,8 @@ public class ImagesService extends BaseCpService {
             return result;
         } catch (IOException e) {
             log.error("upload file error",e);
+        } finally {
+            fileList.forEach(File::delete);
         }
         return null;
     }
