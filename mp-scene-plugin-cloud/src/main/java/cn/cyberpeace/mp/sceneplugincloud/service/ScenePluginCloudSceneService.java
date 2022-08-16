@@ -356,6 +356,26 @@ public class ScenePluginCloudSceneService {
                     String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
             recording.setPlayUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                     String.format(CloudUrlConstant.RECORDING_PLAY_URL, rawRecording.getRecordingFile())));
+
+            CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+            if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                    if (StringUtils.isNotEmpty(recording.getFileUrl())) {
+                        String formatUrl = recording.getFileUrl();
+                        var u = URLUtil.url(formatUrl);
+                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        recording.setFileUrl(formatUrl);
+                    }
+                    if (StringUtils.isNotEmpty(recording.getPlayUrl())) {
+                        String formatUrl = recording.getPlayUrl();
+                        var u = URLUtil.url(formatUrl);
+                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        recording.setPlayUrl(formatUrl);
+                    }
+                }
+            }
+
+
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
