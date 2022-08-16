@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -16,6 +17,7 @@ import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.SnapshotService;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devops.cluster.converter.ImagesConverter;
@@ -43,6 +45,7 @@ import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
+import cn.hutool.core.util.URLUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
@@ -247,7 +250,14 @@ public class ImagesController {
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
-        String downloadUrl = imagesConverter.export(uuid,imageName);
+        String downloadUrl = imagesConverter.export(uuid, imageName);
+        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+            if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                var u = URLUtil.url(downloadUrl);
+                downloadUrl = StringUtils.replaceOnce(downloadUrl, u.getHost(), config.getPublicNetProxyIp());
+            }
+        }
         return new Result<>(downloadUrl);
     }
 
