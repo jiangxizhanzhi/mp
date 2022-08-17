@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.constant.AdminConstant;
-import cn.cyberpeace.mp.front.admin.dto.activation.ActivationRequest;
-import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.request.activation.ActivationRequest;
+import cn.cyberpeace.mp.front.admin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

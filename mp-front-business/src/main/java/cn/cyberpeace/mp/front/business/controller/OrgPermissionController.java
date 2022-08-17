@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.target.BindOrgTargetsRequest;
+import cn.cyberpeace.mp.auth.request.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;

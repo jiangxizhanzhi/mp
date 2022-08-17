@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.front.admin.filter;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.admin.config.ActivationConfig;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

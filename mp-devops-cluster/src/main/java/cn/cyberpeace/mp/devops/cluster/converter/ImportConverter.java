@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.devops.cluster.model.ImportDiskSpaceCloudPlatformResult;
 import cn.cyberpeace.mp.devops.cluster.vo.ImportDiskSpaceVO;
 import cn.cyberpeace.mp.front.admin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.front.admin.dto.activation.ActivationItem;
-import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

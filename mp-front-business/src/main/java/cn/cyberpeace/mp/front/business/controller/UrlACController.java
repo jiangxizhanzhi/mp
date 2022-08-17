@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.front.business.controller;
 
-import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
-import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.auth.request.validate.AddGroup;
+import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
-import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlRequest;
+import cn.cyberpeace.mp.front.business.request.urlac.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.front.business.service.UrlACService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

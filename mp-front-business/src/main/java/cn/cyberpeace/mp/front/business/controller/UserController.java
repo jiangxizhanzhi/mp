@@ -2,12 +2,12 @@ package cn.cyberpeace.mp.front.business.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.ResetPwdRequest;
-import cn.cyberpeace.mp.auth.dto.ResetSelfPwdRequest;
+import cn.cyberpeace.mp.auth.request.user.ResetPwdRequest;
+import cn.cyberpeace.mp.auth.request.user.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
-import cn.cyberpeace.mp.auth.dto.validate.UpdateGroup;
+import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.request.validate.AddGroup;
+import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;

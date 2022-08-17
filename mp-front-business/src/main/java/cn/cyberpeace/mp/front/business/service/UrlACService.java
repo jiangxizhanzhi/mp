@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.front.business.dto.ImportUrlAuth;
 import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto;
-import cn.cyberpeace.mp.front.business.dto.UrlAccessCtlRequest;
+import cn.cyberpeace.mp.front.business.request.urlac.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.front.business.mapper.UrlACMapper;
 import cn.cyberpeace.mp.front.business.mapper.UrlACTargetMapper;
 import cn.cyberpeace.mp.front.business.model.UrlACModel;

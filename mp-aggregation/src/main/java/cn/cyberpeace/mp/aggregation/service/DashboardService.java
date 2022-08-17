@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
-import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
-import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.front.admin.service.sys;
 
 import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeDto;
-import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticePageRequest;
-import cn.cyberpeace.mp.front.admin.dto.notice.SysNoticeRequest;
+import cn.cyberpeace.mp.front.admin.request.notice.SysNoticePageRequest;
+import cn.cyberpeace.mp.front.admin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.front.admin.model.SysNoticeModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;

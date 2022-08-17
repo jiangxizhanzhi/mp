@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.front.admin.service;
 
 import cn.cyberpeace.mp.base.annotation.LocalCallFunc;
 import cn.cyberpeace.mp.base.annotation.LocalCallServer;
-import cn.cyberpeace.mp.front.admin.dto.activation.ActivationResponse;
+import cn.cyberpeace.mp.front.admin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
 import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import lombok.extern.slf4j.Slf4j;

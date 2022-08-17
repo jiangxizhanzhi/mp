@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
-import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
-import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
+import cn.cyberpeace.mp.cscene.request.event.EventPercentRequest;
+import cn.cyberpeace.mp.cscene.request.event.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
