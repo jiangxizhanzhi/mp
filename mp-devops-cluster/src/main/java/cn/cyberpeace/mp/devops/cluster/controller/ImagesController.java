@@ -238,7 +238,7 @@ public class ImagesController {
         String downloadUrl = imagesConverter.export(uuid, imageName);
         DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
-            if (StringUtils.isEmpty(config.getPublicNetProxyIp())) {
+            if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                 var u = URLUtil.url(downloadUrl);
                 downloadUrl = StringUtils.replaceOnce(downloadUrl, u.getHost(), config.getPublicNetProxyIp());
             }
