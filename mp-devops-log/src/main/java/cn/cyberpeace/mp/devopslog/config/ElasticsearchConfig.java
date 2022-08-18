@@ -24,20 +24,10 @@ public class ElasticsearchConfig {
     @Value("${mp.log.es-nodes}")
     private String elasticsearchNodes;
 
-
-    @Autowired
-    private MessageSource messageSource;
-
     @Bean(name="logRestHighLevelClient")
     public RestHighLevelClient restHighLevelClient() {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
-//
-//    @PostConstruct
-//    public void addBaseNames() {
-//        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
-//        msgSrc.addBasenames("classpath:i18n/devops_log");
-//    }
 
     /**cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象

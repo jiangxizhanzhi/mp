@@ -75,12 +75,6 @@ public class CsceneAppConfig {
     @Autowired
     private MessageSource messageSource;
 
-    @PostConstruct
-    public void addBaseNames() {
-        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
-        msgSrc.addBasenames("classpath:i18n/cscene");
-    }
-
     public int getSceneEditNodeLimit() {
         String value = null;
         try {

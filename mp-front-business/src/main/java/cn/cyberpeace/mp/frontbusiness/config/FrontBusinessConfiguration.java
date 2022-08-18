@@ -38,13 +38,6 @@ public class FrontBusinessConfiguration {
     @Autowired
     private ObjectMapper mapper;
 
-    @PostConstruct
-    public void addBaseNames() {
-        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
-        msgSrc.addBasenames("classpath:i18n/front_business");
-    }
-
-
     @Bean
     public FilterRegistrationBean urlAuthFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
