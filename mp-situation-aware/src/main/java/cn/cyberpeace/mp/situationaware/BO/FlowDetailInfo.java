@@ -6,19 +6,19 @@ import java.time.LocalDateTime;
 @Data
 public class FlowDetailInfo {
 
-    @ApiModelProperty(value = "Á÷Á¿ÀàĞÍ")
-    private String Type;
+    @ApiModelProperty(value = "æµé‡ç±»å‹")
+    private String protocol;
 
-    @ApiModelProperty(value = "Ê±¼ä")
+    @ApiModelProperty(value = "æµé‡äº§ç”Ÿæ—¶é—´")
     private LocalDateTime time;
 
-    @ApiModelProperty(value = "Ô´ip")
+    @ApiModelProperty(value = "æºip")
     private String sourceIp;
 
-    @ApiModelProperty(value = "Ä¿µÄip")
+    @ApiModelProperty(value = "ç›®æ ‡ip")
     private String targetIp;
 
-    @ApiModelProperty(value = "Ô´¶Ë¿Ú")
+    @ApiModelProperty(value = "æºç«¯å£")
     private String sourcePort;
 
 }

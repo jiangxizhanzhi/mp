@@ -2,24 +2,28 @@ package cn.cyberpeace.mp.situationaware.BO;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.elasticsearch.client.license.LicensesStatus;
+
 import java.time.LocalDateTime;
 
 @Data
 public class TeamFlowInfo {
 
-    @ApiModelProperty(value = "Á÷Á¿ÀàĞÍ")
+    @ApiModelProperty(value = "æµé‡ç±»å‹")
     private String protocol;
 
-    @ApiModelProperty(value = "Ê±¼ä")
+    @ApiModelProperty(value = "æµé‡äº§ç”Ÿæ—¶é—´")
     private LocalDateTime time;
 
-    @ApiModelProperty(value = "Ô´ip")
+    @ApiModelProperty(value = "æºip")
     private String sourceIp;
 
-    @ApiModelProperty(value = "Ä¿µÄip")
+    @ApiModelProperty(value = "ç›®çš„ip")
     private String targetIp;
 
-    @ApiModelProperty(value = "Ô´¶Ë¿Ú")
+    @ApiModelProperty(value = "æºç«¯å£")
     private String sourcePort;
 
+    @ApiModelProperty(value = "æµé‡å¤§å°")
+    private Integer size;
 }

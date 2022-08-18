@@ -110,7 +110,7 @@ import java.util.stream.Collectors;
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
 
 /**
- * wazuh对接
+ *
  */
 @Service
 @Slf4j
@@ -133,7 +133,7 @@ public class FlowService extends CollectionBaseService {
 
 
     /**
-     * 根据条件来筛选
+     *
      *
      * @param pageFlowRequest
      * @return ListObjServiceResult<List<TeamFlowInfo>>
@@ -141,31 +141,25 @@ public class FlowService extends CollectionBaseService {
     @Cacheable(value = CACHE_KEY_FLOW_INFO)
     public ListObjServiceResult<List<TeamFlowInfo>> queryFlowPage(PageFlowRequest pageFlowRequest) {
         log.info("{}", pageFlowRequest);
-        //根据日期构造索引
-        String[] indexArray = buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
+        String[] indexArray = new String[]{"mj_test_sessions3-220818"};//buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
-        //构造查询条件
-        buildFileEventBoolQueryBuilder(pageFlowRequest, boolQueryBuilder, null);
-        // 按时间降序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
+        buildFileEventBoolQueryBuilder(pageFlowRequest, boolQueryBuilder);
+        sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
-        //配置索引为空
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        //处理分页
-        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
+//        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+//        processPageable(pageFlowRequest, indexArray, boolQueryBuilder, sourceBuilder);
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
         try {
             SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-            List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
-            List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((root -> this.getFileEventModel(root, null))).collect(Collectors.toList());
-
-            List<TeamFlowInfo> teamFlowInfos = Arrays.stream(response.getHits().getHits()).map().collect(Collectors.toList());
+            var result =  response.getHits();
+            int a = 1;
+            List<TeamFlowInfo> teamFlowInfos = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), TeamFlowInfo.class)).collect(Collectors.toList());
             long total = 0L;
             if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
                 total = response.getHits().getTotalHits().value;
@@ -177,19 +171,15 @@ public class FlowService extends CollectionBaseService {
         }
     }
 
-    private void buildFileEventBoolQueryBuilder(PageFlowRequest pageFlowRequest,
-                                                BoolQueryBuilder boolQueryBuilder, MultiValueMap<String, String> allAgentMacAddr) {
-        //构造查询条件
-        //源ip
-        if ((pageFlowRequest.getSourceIp() != null) && (pageFlowRequest.getSourceIp() != "")) {
-            buildRuleSourceIpQuery(pageFlowRequest.getSourceIp(), boolQueryBuilder);
+    private void buildFileEventBoolQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
+        if (!CollectionUtils.isEmpty(pageFlowRequest.getSourceIps())) {
+            buildRuleSourceIpQuery(pageFlowRequest.getSourceIps(), boolQueryBuilder);
         }
 
     }
 
     /**
-     * 处理分页
-     *
+     * 鍒嗛〉
      * @param pageFlowRequest
      * @param indexArray
      * @param boolQueryBuilder
@@ -220,60 +210,6 @@ public class FlowService extends CollectionBaseService {
         return total;
     }
 
-
-    /**
-     * 文件转换
-     *
-     * @param wazuhFileRoot
-     * @return
-     */
-    private FileEventModel getFileEventModel(WazuhFileRoot wazuhFileRoot, MultiValueMap<String, String> multiValueMap) {
-
-        FileEventModel.FileEventModelBuilder builder = FileEventModel.builder();
-        if (Objects.nonNull(wazuhFileRoot.getSyscheck())) {
-            builder.filePath(wazuhFileRoot.getSyscheck().getPath())
-                    .size(wazuhFileRoot.getSyscheck().getSizeAfter())
-                    .user(wazuhFileRoot.getSyscheck().getUnameAfter())
-                    .action(wazuhFileRoot.getSyscheck().getEvent())
-                    .md5Before(wazuhFileRoot.getSyscheck().getMd5Before())
-                    .md5After(wazuhFileRoot.getSyscheck().getMd5After());
-        }
-
-        if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getWin()) &&
-                Objects.nonNull(wazuhFileRoot.getData().getWin().getSystem())) {
-            builder.message(wazuhFileRoot.getData().getWin().getSystem().getMessage());
-        }
-
-        if (Objects.nonNull(wazuhFileRoot.getData()) && Objects.nonNull(wazuhFileRoot.getData().getSca())) {
-            builder.message(wazuhFileRoot.getData().getSca().getDescription());
-            if (Objects.nonNull(wazuhFileRoot.getData().getSca().getCheck())) {
-                builder.message(wazuhFileRoot.getData().getSca().getCheck().getDescription());
-            }
-        }
-
-//        if (Objects.nonNull(wazuhFileRoot.getAgent())) {
-//            builder.macIds(multiValueMap.get(wazuhFileRoot.getAgent().getId()))
-//                    .agentName(wazuhFileRoot.getAgent().getName())
-//                    .agentId(wazuhFileRoot.getAgent().getId());
-//        }
-        builder.agentName(wazuhFileRoot.getAgent().getName()).agentId(wazuhFileRoot.getAgent().getId());
-
-        if (Objects.nonNull(wazuhFileRoot.getRule())) {
-            //区分文件还是注册表
-            builder.description(wazuhFileRoot.getRule().getDescription())
-                    //  .catagory()
-                    .level(wazuhFileRoot.getRule().getLevel())
-                    .ruleId(wazuhFileRoot.getRule().getId());
-            if (CollectionUtil.isNotEmpty(wazuhFileRoot.getRule().getGroups())) {
-                builder.fileEventType(wazuhFileRoot.getRule().getGroups().stream().anyMatch("syscheck_registry"::equals) ? FileEventType.REGISTRY : FileEventType.FILE);
-            }
-        }
-
-        builder.content(processContent(wazuhFileRoot));
-
-        return builder.updateTime(TimeUtils.dateToLocalDateTime(wazuhFileRoot.getTimestamp())).build();
-    }
-
     private JSONObject processContent(WazuhFileRoot wazuhFileRoot) {
 
         JSONObject jsonObject = new JSONObject();
@@ -293,7 +229,7 @@ public class FlowService extends CollectionBaseService {
 
 
     /**
-     * 构造请求的索引
+     * 鏍规嵁鏃堕棿鍒涘缓绱㈠紩
      *
      * @param start
      * @param end
@@ -306,12 +242,12 @@ public class FlowService extends CollectionBaseService {
         return indexArray;
     }
 
-    private void buildRuleSourceIpQuery(String sourceIp, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.should(QueryBuilders.matchQuery("source.ip", sourceIp));
+    private void buildRuleSourceIpQuery(List<String> sourceIps, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("source.ip", sourceIps));
     }
 
     /**
-     * 查询count
+     *
      *
      * @param indexArray
      * @param boolQueryBuilder
@@ -332,7 +268,7 @@ public class FlowService extends CollectionBaseService {
     }
 
     /**
-     * 构造查询需要的索引
+     *
      *
      * @return List<IndexBoost>
      */
@@ -343,7 +279,7 @@ public class FlowService extends CollectionBaseService {
     }
 
     /**
-     * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串2021.05.01,2021.05.02,....
+     *
      *
      * @param startTime startTime
      * @param endTime endTime
@@ -363,12 +299,6 @@ public class FlowService extends CollectionBaseService {
         }
         log.info("dayList:{}", dayList);
         return dayList;
-    }
-
-    private Long string2Long(String val) {
-        Double doubleVal = Double.valueOf(val);
-        Long longVal = BigDecimal.valueOf(doubleVal).longValue();
-        return longVal;
     }
 
 }
