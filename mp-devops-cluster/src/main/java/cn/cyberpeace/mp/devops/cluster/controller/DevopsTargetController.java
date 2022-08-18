@@ -1,9 +1,11 @@
 package cn.cyberpeace.mp.devops.cluster.controller;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import cn.cyberpeace.mp.devops.cluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
@@ -34,12 +36,23 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -74,8 +87,15 @@ public class DevopsTargetController {
      */
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
-    public Result<String> getFtpAddress(){
-        return new Result<>(ipAddressConfig.getCp());
+    public Result<String> getFtpAddress() {
+        String formatUrl = ipAddressConfig.getCp();
+        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+            if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                formatUrl = config.getPublicNetProxyIp();
+            }
+        }
+        return new Result<>(formatUrl);
     }
 
     /**
