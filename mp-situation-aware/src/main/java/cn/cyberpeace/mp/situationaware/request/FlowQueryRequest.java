@@ -6,6 +6,6 @@ import java.util.List;
 
 @Data
 public class FlowQueryRequest {
-    @ApiModelProperty(value = "一条流量记录在ES中的id")
-    private String esDocId;
+    @ApiModelProperty(value = "一条流量记录的id")
+    private String dataId;
 }

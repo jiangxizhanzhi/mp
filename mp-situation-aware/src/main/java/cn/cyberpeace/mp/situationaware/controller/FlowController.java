@@ -6,8 +6,10 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.BO.*;
 import cn.cyberpeace.mp.situationaware.request.FlowQueryRequest;
 import cn.cyberpeace.mp.situationaware.request.PageFlowRequest;
+import cn.cyberpeace.mp.situationaware.service.FlowService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -19,37 +21,44 @@ import java.util.List;
 @Api(value = "", tags = "")
 public class FlowController {
 
+    @Autowired
+    private FlowService flowService;
     @GetMapping("/detail")
-    @ApiOperation(value = "≤È—Ø“ªÃı¡˜¡øº«¬ºµƒœÍœ∏–≈œ¢", notes = "")
+    @ApiOperation(value = "Êü•ËØ¢‰∏ÄÊù°ÊµÅÈáèÁöÑËØ¶ÁªÜ‰ø°ÊÅØ", notes = "")
     public ServiceResult<FlowDetailInfo> queryFlowDetailInfo(FlowQueryRequest flowQueryRequest) {
         FlowDetailInfo flowDetailInfo = new FlowDetailInfo();
 
         flowDetailInfo.setSourceIp("192.168.1.1");
         flowDetailInfo.setTargetIp("192.168.1.18");
         flowDetailInfo.setTime(LocalDateTime.of(2022,8,18,15,10,30));
-        flowDetailInfo.setType("ssh");
+        flowDetailInfo.setProtocol("ssh");
         flowDetailInfo.setSourcePort("8080");
 
         return new ServiceResult<>(flowDetailInfo).asResult();
     }
 
     @GetMapping("/page")
-    @ApiOperation(value = "…∏—°¡˜¡ø", notes = "")
-    public ListObjServiceResult<List<TeamFlowInfo>> queryFlowPageEvents(PageFlowRequest request) {
+    @ApiOperation(value = "Á≠õÈÄâÊàòÈòüÊµÅÈáè‰ø°ÊÅØ", notes = "")
+    public ListObjServiceResult<TeamFlowInfo> queryFlowPageEvents(PageFlowRequest request) {
         request.ensure();
         List<TeamFlowInfo> teamFlowInfos = new ArrayList<>();
         TeamFlowInfo teamFlowInfo = new TeamFlowInfo();
 
         teamFlowInfo.setSourceIp("192.168.1.1");
-        teamFlowInfo.setTargetIp("192.168.1.18");
+        teamFlowInfo.setTargetIp("192.168.1.2");
         teamFlowInfo.setTime(LocalDateTime.of(2022,8,18,15,10,30));
         teamFlowInfo.setProtocol("ssh");
         teamFlowInfo.setSourcePort("8080");
-
+        teamFlowInfo.setSize(800);
         for (int i= 0; i < 20; i ++) {
             teamFlowInfos.add(teamFlowInfo);
         }
-        return new ListObjServiceResult<>(new ListObjResult<>(List.of(teamFlowInfos),1)).asResult();
+        List<String> testIps = new ArrayList<>();
+        testIps.add("10.100.0.251");
+        testIps.add("192.168.5.152");
+        request.setSourceIps(testIps);
+        flowService.queryFlowPage(request);
+        return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos,20)).asResult();
     }
 
 }

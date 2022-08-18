@@ -10,19 +10,21 @@ import java.util.List;
 @Data
 public class PageFlowRequest extends BasePageRequest {
 
-    @ApiModelProperty(value = "Ô´ip")
-    private String sourceIp;
+    @ApiModelProperty(value = "æºip")
+    private List<String> sourceIps;
 
-    @ApiModelProperty(value = "Ä¿µÄip")
-    private String targetIp;
+    @ApiModelProperty(value = "ç›®æ ‡ip")
+    private List<String> targetIps;
 
-    @ApiModelProperty(value = "¿ªÊ¼Ê±¼ä")
+    @ApiModelProperty(value = "å¼€å§‹æ—¶é—´")
     private LocalDateTime startTime;
 
-    @ApiModelProperty(value = "½áÊøÊ±¼ä")
+    @ApiModelProperty(value = "ç»“æŸæ—¶é—´")
     private LocalDateTime endTime;
 
-    @ApiModelProperty(value = "¶Ë¿Ú")
+    @ApiModelProperty(value = "ç«¯å£")
     private String port;
 
+    @ApiModelProperty(value = "æµé‡ç±»å‹")
+    private String protocol;
 }
