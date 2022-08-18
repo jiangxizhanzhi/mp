@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
-import cn.cyberpeace.mp.auth.base.context.LoginUserContext;
+import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;

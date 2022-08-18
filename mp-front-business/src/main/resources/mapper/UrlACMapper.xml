@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.cyberpeace.mp.front.business.mapper.UrlACMapper">
+<mapper namespace="cn.cyberpeace.mp.frontbusiness.mapper.UrlACMapper">
 
-    <select id="getById" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+    <select id="getById" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT distinct ua.id,
                         ua.url,
                         ua.is_pattern,
@@ -15,7 +15,7 @@
         group by ua.id;
     </select>
 
-    <select id="listAllUrlAccessCtlDtos" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+    <select id="listAllUrlAccessCtlDtos" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
                distinct ua.id,
                ua.url,
@@ -30,7 +30,7 @@
     </select>
 
 
-    <select id="listAllUrlAccessCtlPatternDtos" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+    <select id="listAllUrlAccessCtlPatternDtos" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
             distinct ua.id,
                      ua.url,
@@ -45,7 +45,7 @@
     </select>
 
 
-    <select id="listByUrls" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+    <select id="listByUrls" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
             distinct ua.id,
             ua.url,
@@ -66,7 +66,7 @@
         group by ua.id
     </select>
 
-    <select id="listByTargetIds" resultType="cn.cyberpeace.mp.front.business.dto.UrlAccessCtlDto">
+    <select id="listByTargetIds" resultType="cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto">
         SELECT
             distinct ua.id,
             ua.url,

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.repository;
 
-import cn.cyberpeace.mp.auth.base.repository.BasePermissionMapper;
-import cn.cyberpeace.mp.auth.base.repository.stereotype.PermissionModelClass;
+import cn.cyberpeace.mp.authbase.repository.BasePermissionMapper;
+import cn.cyberpeace.mp.authbase.repository.stereotype.PermissionModelClass;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO;

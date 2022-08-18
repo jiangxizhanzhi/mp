@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.cyberpeace.mp.front.admin.repository.SysActivCtlMapper">
+<mapper namespace="cn.cyberpeace.mp.frontadmin.repository.SysActivCtlMapper">
     
-    <select id="selectAll" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
+    <select id="selectAll" resultType="cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel">
         select * from mp_front_admin_activ_ctl
     </select>
 
-    <select id="selectValid" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
+    <select id="selectValid" resultType="cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel">
         select * from mp_front_admin_activ_ctl where status = 1
     </select>
 
-    <select id="selectUnused" resultType="cn.cyberpeace.mp.front.admin.model.SysActivCtlModel">
+    <select id="selectUnused" resultType="cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel">
         select * from mp_front_admin_activ_ctl where status = 2
     </select>
 
