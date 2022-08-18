@@ -35,11 +35,6 @@ public class WazuhEventRequest {
     @ApiModelProperty("分页页码")
     private Integer pageNum = 1;
 
-    /**
-     * wazuh macIds
-     */
-    @ApiModelProperty(value = "macId集合", required = false)
-    private List<String> macIds;
 
     /**
      * agent names
@@ -88,5 +83,8 @@ public class WazuhEventRequest {
      */
     @ApiModelProperty(value = "是否是滚动分页请求")
     private boolean scroll = false;
+
+    @ApiModelProperty(value = "探针id")
+    private List<String> probeIds;
 
 }

@@ -20,32 +20,35 @@ public class Port {
 
     private Scan scan;
 
-     @ApiModelProperty(value = "inode")
+    @ApiModelProperty(value = "inode")
     private Integer inode;
 
-     @ApiModelProperty(value = "父进程ID")
+    @ApiModelProperty(value = "父进程ID")
     private Integer pid;
 
-     @ApiModelProperty(value = "接收队列中的数据包")
+    @ApiModelProperty(value = "接收队列中的数据包")
     @JSONField(name = "rx_queue")
     private Integer rxQueue;
 
-     @ApiModelProperty(value = "待传输的数据包")
+    @ApiModelProperty(value = "待传输的数据包")
     @JSONField(name = "tx_queue")
     private String txQueue;
 
-     @ApiModelProperty(value = "协议")
+    @ApiModelProperty(value = "协议")
     private String protocol;
 
-     @ApiModelProperty(value = "状态")
+    @ApiModelProperty(value = "状态")
     private String state;
 
-     @ApiModelProperty(value = "进程")
+    @ApiModelProperty(value = "进程")
     private String process;
 
-     @ApiModelProperty(value = "代理ID")
+    @ApiModelProperty(value = "代理ID")
     @JSONField(name = "agent_id")
     private String agentId;
+
+    @ApiModelProperty(value = "主机ip")
+    private String agentIp;
 
 
     @Data
