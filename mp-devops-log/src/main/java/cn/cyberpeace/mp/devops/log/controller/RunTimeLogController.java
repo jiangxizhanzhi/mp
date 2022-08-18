@@ -19,7 +19,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -46,7 +45,7 @@ public class RunTimeLogController {
 
     private final LogFileServiceFactory logFileServiceFactory;
 
-    @Autowired
+    @javax.annotation.Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @GetMapping("/logs")

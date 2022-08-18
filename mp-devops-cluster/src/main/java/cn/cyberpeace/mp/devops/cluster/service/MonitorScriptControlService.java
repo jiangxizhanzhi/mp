@@ -172,7 +172,7 @@ public class MonitorScriptControlService {
 
 
     private void serviceMonitorScriptInit(List<LocalFileMappingModel> mappings) {
-        BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO(9999, 1));
+        BasePageBO<HypervisorBO> hypervisorBOBasePageBO = hypervisorConverter.page(new BasePageDTO());
         List<HypervisorBO> hypervisorBOs = hypervisorBOBasePageBO.getList();
 
         if (CollectionUtils.isEmpty(hypervisorBOs)) {
