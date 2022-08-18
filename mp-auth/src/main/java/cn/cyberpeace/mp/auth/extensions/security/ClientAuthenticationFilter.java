@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

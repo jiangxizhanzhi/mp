@@ -1,0 +1,56 @@
+package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
+
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
+import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
+import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
+import cn.cyberpeace.mp.devopscluster.model.common.InstanceModel;
+import cn.cyberpeace.mp.devopscluster.model.common.InstanceOsServiceModel;
+import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+/**
+ * 虚拟机
+ * @author wanggang
+ */
+@Service
+@Slf4j
+public class VmService extends BaseCpService {
+
+    private static final String INSTANCES = "/instances";
+
+    public VmService(DevopsConfig devopsConfig) {
+        super(devopsConfig);
+    }
+
+    /**
+     * 分页查询虚拟机信息
+     * @param getParams
+     * @return
+     */
+    public CloudPlatformPageResult<InstanceModel> page(String getParams){
+        return super.page(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + getParams, InstanceModel.class);
+    }
+
+    /**
+     * 操作
+     * @param model
+     * @param uuid
+     * @return
+     */
+    public BaseCloudPlatformResult action(VmActionCloudPlatformModel model, String uuid){
+        BaseCloudPlatformResult result = super.sendPost(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + "/" + uuid  + "/action", JsonUtils.toUnderlineJSONString(model), BaseCloudPlatformResult.class);
+        super.checkResult(result);
+        return result;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public CloudPlatformPageResult<InstanceOsServiceModel> osServicesStateFromInstances(){
+        return super.page(BaseCloudPlatformConstant.URL_VERSION + INSTANCES + "/os-services", InstanceOsServiceModel.class);
+    }
+}
