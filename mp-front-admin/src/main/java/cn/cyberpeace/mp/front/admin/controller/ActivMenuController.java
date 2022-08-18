@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.front.admin.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
+import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.front.admin.service.sys.activmenu.ActivMenuService;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.cyberpeace.mp.devops.cluster.repository.DeviceTargetAuthMapper">
+<mapper namespace="cn.cyberpeace.mp.devopscluster.repository.DeviceTargetAuthMapper">
 
-    <select id="totalCount" resultType="cn.cyberpeace.mp.devops.cluster.model.ImageAuthTotalCount">
+    <select id="totalCount" resultType="cn.cyberpeace.mp.devopscluster.model.ImageAuthTotalCount">
         select
             a.target as target,
             count(a.pk) as total
@@ -19,7 +19,7 @@
         group by a.target
     </select>
 
-    <select id="findByTarget" parameterType="java.lang.String" resultType="cn.cyberpeace.mp.devops.cluster.po.DeviceTargetAuthPO">
+    <select id="findByTarget" parameterType="java.lang.String" resultType="cn.cyberpeace.mp.devopscluster.po.DeviceTargetAuthPO">
         select
             a.pk as pk,
             a.id as id,
