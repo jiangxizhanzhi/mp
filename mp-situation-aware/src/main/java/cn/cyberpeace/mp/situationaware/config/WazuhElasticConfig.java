@@ -65,10 +65,6 @@ public class WazuhElasticConfig {
         return new RestHighLevelClient(RestClient.builder(this.createHttpHost()));
     }
 
-    public RestHighLevelClient restHighLevelClient(String esAdress) {
-        return new RestHighLevelClient(RestClient.builder(this.createHttpHost(esAdress)));
-    }
-
     /**cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象
      *
@@ -77,20 +73,6 @@ public class WazuhElasticConfig {
     private HttpHost[] createHttpHost() {
         Asserts.check(!ObjectUtils.isEmpty(elasticsearchNodes), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = elasticsearchNodes.split(",");
-        var httpHosts = new HttpHost[ipArray.length];
-        for (int i = 0, len = ipArray.length; i < len; i++) {
-            var ipAddress = ipArray[i];
-            String[] values = ipAddress.split(":");
-            String ip = values[0];
-            var port = Integer.parseInt(values[1]);
-            httpHosts[i] = new HttpHost(ip, port, "http");
-        }
-        return httpHosts;
-    }
-
-    private HttpHost[] createHttpHost(String esAdress) {
-        Asserts.check(!ObjectUtils.isEmpty(esAdress), "ElasticSearch cluster ip address cannot empty");
-        String[] ipArray = esAdress.split(",");
         var httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
             var ipAddress = ipArray[i];

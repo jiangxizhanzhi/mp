@@ -34,9 +34,7 @@ import org.elasticsearch.search.Scroll;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -45,9 +43,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Component
 public class EsClient extends CollectionBaseService {
-    @Resource(name = "wazuhRestHighLevelClient")
+    public EsClient(String esAdress) {
+        this.restHighLevelClient = ElasticsearchUtils.restHighLevelClient(esAdress);
+    }
+
     private RestHighLevelClient restHighLevelClient;
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
