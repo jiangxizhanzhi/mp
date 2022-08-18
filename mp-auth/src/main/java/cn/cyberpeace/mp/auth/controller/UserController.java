@@ -77,7 +77,7 @@ public class UserController {
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
-    public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<UserDto> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = userService.getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
     }

@@ -1,6 +1,10 @@
 package cn.cyberpeace.mp.auth.request.org;
 
+import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.common.PageRequest;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.hutool.core.util.StrUtil;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 /**
@@ -38,7 +42,12 @@ public class OrgUserPageRequest extends PageRequest {
     public void ensure() {
         super.ensure();
         if (super.getOrders() == null || super.getOrders().length == 0) {
-            super.setOrders(new String[]{"-u.update_time", "u.username"});
+            String updateTime = BeanUtils.getBeanGetterFieldName(UserModel::getUpdateTime);
+            String username = BeanUtils.getBeanGetterFieldName(UserModel::getUsername);
+            updateTime = StrUtil.toUnderlineCase(updateTime);
+            username = StrUtil.toUnderlineCase(username);
+
+            super.setOrders(new String[]{"-u." + updateTime, "u." + username});
         }
     }
 }
