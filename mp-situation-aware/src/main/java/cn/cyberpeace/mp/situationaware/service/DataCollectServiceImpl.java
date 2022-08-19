@@ -16,10 +16,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@Service
 public class DataCollectServiceImpl implements DataCollectService {
     private EsClient esClient;
 
-    public DataCollectServiceImpl(String esNode) {
+    public DataCollectServiceImpl() {
         this.esClient = EsClientProxy.getInstance();
     }
 

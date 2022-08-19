@@ -12,19 +12,22 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.request.HostMonitorBaseRequest;
 import cn.cyberpeace.mp.situationaware.request.HostMonitorPageRequest;
 import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClient;
+import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClientProxy;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class HostMonitorServiceImpl implements HostMonitorService {
     private WazuhClient wazuhClient;
 
     private EsClient esClient;
 
-    public HostMonitorServiceImpl(String esNode, String wazuhUrl, String wazuhUsername, String wazuhPassword) {
+    public HostMonitorServiceImpl() {
         this.esClient = EsClientProxy.getInstance();
-        this.wazuhClient = new WazuhClient(wazuhUrl, wazuhUsername, wazuhPassword);
+        this.wazuhClient = WazuhClientProxy.getInstance();
     }
 
     @Override

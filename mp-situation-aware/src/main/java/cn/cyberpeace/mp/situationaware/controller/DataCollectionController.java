@@ -4,11 +4,11 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.situationaware.BO.HostBO;
 import cn.cyberpeace.mp.situationaware.BO.ProcessBO;
 import cn.cyberpeace.mp.situationaware.BO.SystemUserBO;
 import cn.cyberpeace.mp.situationaware.config.GroupConfig;
-import cn.cyberpeace.mp.situationaware.context.ContextHolder;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -20,12 +20,12 @@ import cn.cyberpeace.mp.situationaware.service.HostMonitorServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.ContentHandler;
+import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -35,16 +35,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/wazuh")
 @Api(value = "态势感知-事件查询接口", tags = "态势感知-事件查询接口")
 public class DataCollectionController {
-    @Value("${mp.situationaware.wazuh.username}")
-    private String wazuhUsername;
-
-    @Value("${mp.situationaware.wazuh.password}")
-    private String wazuhPassword;
-
     private static GroupConfig groupConfig;
 
+    @Resource
     private DataCollectServiceImpl dataCollectService;
 
+    @Resource
     private HostMonitorServiceImpl hostMonitorService;
 
     @GetMapping("/file_events")
@@ -54,12 +50,19 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         SyscheckEventRequest eventRequest = new SyscheckEventRequest();
         eventRequest.setPageNum(request.getPage());
         eventRequest.setPageSize(request.getPageSize());
         eventRequest.setAgentNames(request.getAgentNames());
+        if (Objects.nonNull(request.getStartTime())) {
+            eventRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+            if (Objects.nonNull(request.getEndTime())) {
+                eventRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+            } else {
+                eventRequest.setEndTime(LocalDateTime.now());
+            }
+        }
         return dataCollectService.queryFileModifyEvents(eventRequest).asResult();
     }
 
@@ -70,12 +73,19 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         HostMonitorPageRequest pageRequest = new HostMonitorPageRequest();
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
+        if (Objects.nonNull(request.getStartTime())) {
+            pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+            if (Objects.nonNull(request.getEndTime())) {
+                pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+            } else {
+                pageRequest.setEndTime(LocalDateTime.now());
+            }
+        }
         var result = hostMonitorService.queryProcessesWithTimeRange(pageRequest).getSource();
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -96,12 +106,19 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         HostMonitorPageRequest pageRequest = new HostMonitorPageRequest();
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
+        if (Objects.nonNull(request.getStartTime())) {
+            pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+            if (Objects.nonNull(request.getEndTime())) {
+                pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+            } else {
+                pageRequest.setEndTime(LocalDateTime.now());
+            }
+        }
         var result = hostMonitorService.queryHostStateEventsWithTimeRange(pageRequest).getSource();
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -126,7 +143,6 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         CollectorBaseRequest collectorBaseRequest = new CollectorBaseRequest();
         collectorBaseRequest.setPage(request.getPage());
@@ -147,13 +163,19 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        ContextHolder.setGroupId(group.getGroupId());
-        initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         HostMonitorPageRequest pageRequest = new HostMonitorPageRequest();
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
+        if (Objects.nonNull(request.getStartTime())) {
+            pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+            if (Objects.nonNull(request.getEndTime())) {
+                pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
+            } else {
+                pageRequest.setEndTime(LocalDateTime.now());
+            }
+        }
         var result = hostMonitorService.querySystemUserWithTimeRange(pageRequest).getSource();
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -165,11 +187,6 @@ public class DataCollectionController {
             res.add(systemUser);
         });
         return new ListObjServiceResult<>(new ListObjResult<>(res, result.getTotal())).asResult();
-    }
-
-    private void initService(String esNode, String wazuhUrl) {
-        this.dataCollectService = new DataCollectServiceImpl(esNode);
-        this.hostMonitorService = new HostMonitorServiceImpl(esNode, wazuhUrl, wazuhUsername, wazuhPassword);
     }
 
     private GroupConfig.Group getGroup(String groupId) {

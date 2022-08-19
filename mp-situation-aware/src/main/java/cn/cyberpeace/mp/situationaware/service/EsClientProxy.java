@@ -27,9 +27,7 @@ public class EsClientProxy implements MethodInterceptor {
         if (!init) {
             esClientMap = new ConcurrentHashMap<>();
             var group = BeanCommon.getBean(GroupConfig.class);
-            group.getGroups().forEach(g -> {
-                esClientMap.put(g.getGroupId(), new EsClient(g.getEsNode()));
-            });
+            group.getGroups().forEach(g -> esClientMap.put(g.getGroupId(), new EsClient(g.getEsNode())));
             init = true;
         }
     }
