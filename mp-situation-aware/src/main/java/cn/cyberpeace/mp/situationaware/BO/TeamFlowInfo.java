@@ -1,12 +1,18 @@
 package cn.cyberpeace.mp.situationaware.BO;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.elasticsearch.client.license.LicensesStatus;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TeamFlowInfo {
 
     @ApiModelProperty(value = "流量类型")
@@ -25,5 +31,8 @@ public class TeamFlowInfo {
     private String sourcePort;
 
     @ApiModelProperty(value = "流量大小")
-    private Integer size;
+    private Long size;
+
+    @ApiModelProperty(value = "数据id")
+    private String dataId;
 }

@@ -1,9 +1,16 @@
 package cn.cyberpeace.mp.situationaware.BO;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class FlowDetailInfo {
 
     @ApiModelProperty(value = "流量类型")
@@ -20,5 +27,17 @@ public class FlowDetailInfo {
 
     @ApiModelProperty(value = "源端口")
     private String sourcePort;
+
+    @ApiModelProperty(value = "目标端口")
+    private String targetPort;
+
+    @ApiModelProperty(value = "源mac")
+    private String sourceMac;
+
+    @ApiModelProperty(value = "目标mac")
+    private String targetMac;
+
+    @ApiModelProperty(value = "流量大小")
+    private Long size;
 
 }

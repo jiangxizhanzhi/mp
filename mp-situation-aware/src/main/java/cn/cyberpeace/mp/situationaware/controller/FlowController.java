@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.BO.*;
+
 import cn.cyberpeace.mp.situationaware.request.FlowQueryRequest;
 import cn.cyberpeace.mp.situationaware.request.PageFlowRequest;
 import cn.cyberpeace.mp.situationaware.service.FlowService;
@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/flow")
@@ -26,39 +24,23 @@ public class FlowController {
     @GetMapping("/detail")
     @ApiOperation(value = "查询一条流量的详细信息", notes = "")
     public ServiceResult<FlowDetailInfo> queryFlowDetailInfo(FlowQueryRequest flowQueryRequest) {
-        FlowDetailInfo flowDetailInfo = new FlowDetailInfo();
-
-        flowDetailInfo.setSourceIp("192.168.1.1");
-        flowDetailInfo.setTargetIp("192.168.1.18");
-        flowDetailInfo.setTime(LocalDateTime.of(2022,8,18,15,10,30));
-        flowDetailInfo.setProtocol("ssh");
-        flowDetailInfo.setSourcePort("8080");
-
-        return new ServiceResult<>(flowDetailInfo).asResult();
+//        FlowDetailInfo flowDetailInfo = new FlowDetailInfo();
+//        flowDetailInfo.setSourceIp("192.168.1.1");
+//        flowDetailInfo.setTargetIp("192.168.1.18");
+//        flowDetailInfo.setTime(LocalDateTime.of(2022,8,18,15,10,30));
+//        flowDetailInfo.setProtocol("ssh");
+//        flowDetailInfo.setSourcePort("8080");
+//        return new ServiceResult<>(flowDetailInfo).asResult();
+        ServiceResult<FlowDetailInfo> flowDetailInfo = flowService.queryFlowDetail(flowQueryRequest);
+        return flowDetailInfo;
     }
 
     @GetMapping("/page")
     @ApiOperation(value = "筛选战队流量信息", notes = "")
     public ListObjServiceResult<TeamFlowInfo> queryFlowPageEvents(PageFlowRequest request) {
         request.ensure();
-        List<TeamFlowInfo> teamFlowInfos = new ArrayList<>();
-        TeamFlowInfo teamFlowInfo = new TeamFlowInfo();
-
-        teamFlowInfo.setSourceIp("192.168.1.1");
-        teamFlowInfo.setTargetIp("192.168.1.2");
-        teamFlowInfo.setTime(LocalDateTime.of(2022,8,18,15,10,30));
-        teamFlowInfo.setProtocol("ssh");
-        teamFlowInfo.setSourcePort("8080");
-        teamFlowInfo.setSize(800);
-        for (int i= 0; i < 20; i ++) {
-            teamFlowInfos.add(teamFlowInfo);
-        }
-        List<String> testIps = new ArrayList<>();
-        testIps.add("10.100.0.251");
-        testIps.add("192.168.5.152");
-        request.setSourceIps(testIps);
-        flowService.queryFlowPage(request);
-        return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos,20)).asResult();
+        ListObjServiceResult<TeamFlowInfo> teamFlowInfos = flowService.queryFlowPage(request);
+        return teamFlowInfos;
     }
 
 }
