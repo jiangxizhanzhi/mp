@@ -390,10 +390,12 @@ public class EsClient extends CollectionBaseService {
         if (jsonObject.isEmpty()) {
             return Collections.emptyList();
         }
+        JSONArray values = jsonObject.getJSONArray("values");
         JSONArray modified = jsonObject.getJSONArray("modified");
         JSONArray deleted = jsonObject.getJSONArray("deleted_prev");
         JSONArray added = jsonObject.getJSONArray("added");
-        List<WazuhSystemUserModel> list = new ArrayList<>(processJSONArray(modified, jsonObject, "modify"));
+        List<WazuhSystemUserModel> list = new ArrayList<>(processJSONArray(values, jsonObject, StringUtils.EMPTY));
+        list.addAll(processJSONArray(modified, jsonObject, "modify"));
         list.addAll(processJSONArray(deleted, jsonObject, "delete"));
         list.addAll(processJSONArray(added, jsonObject, "add"));
 
