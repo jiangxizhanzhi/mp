@@ -84,6 +84,47 @@ public class WazuhHttpsUtils {
     }
 
     /**
+     * get 请求
+     * @param url
+     * @param params
+     * @param token wazuhtoken
+     * @return
+     */
+    public static String sendGetWithAuthToken(String url, List<NameValuePair> params, String token) {
+        CloseableHttpResponse response = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            httpClient = createIgnoreSSLHttpClient();
+
+            URIBuilder uriBuilder = new URIBuilder(url);
+            uriBuilder.setParameters(params);
+            HttpGet httpGet = new HttpGet(uriBuilder.build());
+
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+            response = httpClient.execute(httpGet);
+            StatusLine sl = response.getStatusLine();
+            if (sl.getStatusCode() == 401) {
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+                response = httpClient.execute(httpGet);
+            }
+
+            StatusLine sl2 = response.getStatusLine();
+            if (sl2.getStatusCode() != 200) {
+                log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
+                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            }
+
+            return EntityUtils.toString(response.getEntity(), "UTF-8");
+        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
+            log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+        } catch (Exception e) {
+            log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
+            throw new MpRuntimeException("wazuh api query error!");
+        }
+    }
+
+    /**
      * get请求
      *
      * @param url

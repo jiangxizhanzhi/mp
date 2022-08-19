@@ -7,7 +7,8 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseR
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
-import org.springframework.stereotype.Service;
+import cn.cyberpeace.mp.situationaware.request.HostMonitorBaseRequest;
+import cn.cyberpeace.mp.situationaware.request.HostMonitorPageRequest;
 
 import java.util.List;
 
@@ -32,64 +33,64 @@ public interface HostMonitorService {
 
     /**
      * 查询主机操作系统信息
-     * @param request
+     * @param agentName
      * @return
      */
-    ServiceResult<List<OS>> getOS(CollectorBaseRequest request);
+    ServiceResult<List<OS>> getOS(String agentName);
 
     /**
      * 查询主机状态信息
      * @param request
      * @return
      */
-    ServiceResult<List<WazuhHostStateModel>> queryHostStateEventsWithTimeRange(WazuhMonitorEventsRequest request);
+    ListObjServiceResult<WazuhHostStateModel> queryHostStateEventsWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机网络连接信息
      * @param request
      * @return
      */
-    ServiceResult<List<WazuhNetworkConnectionModel>> queryNetConnEventsWithTimeRange(WazuhMonitorEventsRequest request);
+    ListObjServiceResult<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机进程信息
      * @param request
      * @return
      */
-    ServiceResult<List<WazuhProcessModel>> queryProcessesWithTimeRange(WazuhMonitorEventsRequest request);
+    ListObjServiceResult<WazuhProcessModel> queryProcessesWithTimeRange(HostMonitorPageRequest request);
 
     /**
-     * 查询主机用户变更信息
+     * 查询主机系统用户信息
      * @param request
      * @return
      */
-    ServiceResult<List<WazuhSystemUserModel>> queryUserChangeEventWithTimeRange(WazuhMonitorEventsRequest request);
+    ListObjServiceResult<WazuhSystemUserModel> querySystemUserWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机环境变量变更数量
      * @param request
      * @return
      */
-    ServiceResult<Integer> sumEnvVarChangedCountByTimeRange(WazuhMonitorEventsRequest request);
+    ServiceResult<Integer> sumEnvVarChangedCountByTimeRange(HostMonitorBaseRequest request);
 
     /**
      * 查询主机系统用户变更数量
      * @param request
      * @return
      */
-    ServiceResult<Integer> sumSysUsersChangedCountByTimeRange(WazuhMonitorEventsRequest request);
+    ServiceResult<Integer> sumSysUsersChangedCountByTimeRange(HostMonitorBaseRequest request);
 
     /**
      * 查询主机进程变更数量
      * @param request
      * @return
      */
-    ServiceResult<Integer> sumProcessesChangedCountByTimeRange(WazuhMonitorEventsRequest request);
+    ServiceResult<Integer> sumProcessesChangedCountByTimeRange(HostMonitorBaseRequest request);
 
     /**
      * 查询主机网络连接变更数量
      * @param request
      * @return
      */
-    ServiceResult<Integer> sumNetConnsChangedCountByTimeRange(WazuhMonitorEventsRequest request);
+    ServiceResult<Integer> sumNetConnsChangedCountByTimeRange(HostMonitorBaseRequest request);
 }

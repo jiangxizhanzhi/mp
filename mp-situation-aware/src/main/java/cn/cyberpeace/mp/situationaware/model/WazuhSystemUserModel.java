@@ -38,4 +38,8 @@ public class WazuhSystemUserModel {
     private String description;
 
     private LocalDateTime time;
+
+    private String action;
+
+    private String agentIp;
 }

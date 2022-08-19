@@ -1,16 +1,16 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.service.wazuh.SecurityService;
+import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClient;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class SituationAwareInitListener implements ApplicationListener<ApplicationReadyEvent> {
 
-    @Autowired
-    private SecurityService securityService;
+    @Resource
+    private WazuhClient wazuhClient;
 
 
     @Override
@@ -36,7 +36,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
                 .build(new CacheLoader<String, String>() {
                     @Override
                     public String load(String key) {
-                        String token = securityService.authenticate();
+                        String token = wazuhClient.authenticate();
                         return token;
                     }
                 });

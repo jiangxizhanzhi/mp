@@ -60,4 +60,5 @@ public class WazuhProcessModel {
 
     private LocalDateTime time;
 
+    private String agentIp;
 }

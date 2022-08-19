@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.common.BasePageRequest;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -17,5 +18,5 @@ public class PageQueryRequest extends BasePageRequest {
     @ApiModelProperty(value = "主机ip")
     private List<String> agentIps;
     @ApiModelProperty(value = "agent名称")
-    private List<String> agentNames;
+    private List<String> agentNames = new ArrayList<>();
 }

@@ -2,8 +2,6 @@ package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.constant.WazuhUrlConstant;
@@ -17,10 +15,12 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,7 +28,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,18 +36,28 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-@Service
+@Component
+@NoArgsConstructor
 public class WazuhClient extends RequestProcessor{
-    @Value("${mp.situationaware.wazuh.base-url}")
-    private String wazuhUrl;
-
     @Value("${mp.situationaware.wazuh.username}")
     private String wazuhUsername;
 
     @Value("${mp.situationaware.wazuh.password}")
     private String wazuhPassword;
 
+    @Value("${mp.situationaware.wazuh.base-url}")
+    private String wazuhUrl;
+
+    public WazuhClient(String wazuhUrl, String wazuhUsername, String wazuhPassword) {
+        this.wazuhUrl = wazuhUrl;
+        this.wazuhUsername = wazuhUsername;
+        this.wazuhPassword = wazuhPassword;
+    }
+
     public static final String CACHE_KEY_AGENTS = "agents";
+
+    // expires in 14 minutes
+    private static TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(14 * 60 * 1000);
 
     /**
      * 查询wazuhToken防止token失效
@@ -64,16 +74,17 @@ public class WazuhClient extends RequestProcessor{
      * @return
      */
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
-    public ListObjServiceResult<Agent> pageAgents(AgentRequest agentRequest) {
+    public ListObjResult<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
         List<NameValuePair> params = this.processRequestParams(agentRequest);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        BaseResponse<Agent> result = JSONObject.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
+        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
+        BaseResponse<Agent> result = JSON.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
         });
         List<Agent> agents = result.getData().getAffectedItems();
 
-        return new ListObjServiceResult<>(new ListObjResult<>(agents, result.getData().getTotalAffectedItems()));
+        return new ListObjResult<>(agents, result.getData().getTotalAffectedItems());
     }
 
     /**
@@ -81,24 +92,24 @@ public class WazuhClient extends RequestProcessor{
      *
      * @return 端口列表
      */
-    public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
+    public ListObjResult<Port> pagePorts(CollectorBaseRequest collectorBaseRequest) {
         String agentId = this.getSingleAgentId(collectorBaseRequest.getAgentName());
-        if (StringUtils.isBlank(agentId)) {
+        if (StringUtils.isEmpty(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            return new ListObjResult<>(new ArrayList<>(), 0);
         }
         var requestUrl = wazuhUrl + String.format(WazuhUrlConstant.PORT_INFO_URL, agentId);
 
         List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
 
-        log.info("requestUrl:{}", requestUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        BaseResponse<Port> result = JSONObject.parseObject(res, new TypeReference<>() {
+        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
+        BaseResponse<Port> result = JSON.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
         List<Port> ports = result.getData().getAffectedItems();
 
-        return new ListObjServiceResult<>(new ListObjResult<>(ports, result.getData().getTotalAffectedItems()));
+        return new ListObjResult<>(ports, result.getData().getTotalAffectedItems());
     }
 
     /**
@@ -106,18 +117,18 @@ public class WazuhClient extends RequestProcessor{
      *
      * @return 网卡集合
      */
-    public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
+    public ListObjResult<Netiface> pageNetifaces(CollectorBaseRequest collectorBaseRequest) {
         String agentId = this.getSingleAgentId(collectorBaseRequest.getAgentName());
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", collectorBaseRequest.getAgentName());
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            return new ListObjResult<>(new ArrayList<>(), 0);
         }
         var requestUrl = wazuhUrl + String.format(WazuhUrlConstant.NETIFACE_INFO_URL, agentId);
 
         List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
 
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        BaseResponse<Netiface> result = JSONObject.parseObject(res, new TypeReference<>() {
+        BaseResponse<Netiface> result = JSON.parseObject(res, new TypeReference<>() {
         });
         List<Netiface> netifaces = result.getData().getAffectedItems();
 
@@ -128,7 +139,7 @@ public class WazuhClient extends RequestProcessor{
             }
         });
 
-        return new ListObjServiceResult<>(new ListObjResult<>(netifaces, result.getData().getTotalAffectedItems()));
+        return new ListObjResult<>(netifaces, result.getData().getTotalAffectedItems());
     }
 
     /**
@@ -136,21 +147,30 @@ public class WazuhClient extends RequestProcessor{
      * @param agentName
      * @return
      */
-    public ServiceResult<List<OS>> getOS(String agentName) {
+    public List<OS> getOS(String agentName) {
         String agentId = this.getSingleAgentId(agentName);
         if (StringUtils.isBlank(agentId)) {
             log.error("agentId is null, agentName:{}", agentName);
-            return new ServiceResult<>(new ArrayList<>());
+            return new ArrayList<>();
         }
 
         var requestUrl = wazuhUrl + String.format(WazuhUrlConstant.OS_INFO_URL, agentId);
 
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
-        BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
+        BaseResponse<OS> result = JSON.parseObject(res, new TypeReference<>() {
         });
         log.info("{}", result);
-        List<OS> oslist = result.getData().getAffectedItems();
-        return new ServiceResult<>(oslist);
+        return result.getData().getAffectedItems();
+    }
+
+    private String getWazuhTokenWithUrl(String wazuhUrl) {
+        if (Objects.isNull(TIMED_CACHE.get(wazuhUrl))) {
+            String wazuhToken = this.authenticate();
+            TIMED_CACHE.put(wazuhUrl, wazuhToken);
+            return wazuhToken;
+        } else {
+            return TIMED_CACHE.get(wazuhUrl);
+        }
     }
 
     /**
@@ -175,14 +195,12 @@ public class WazuhClient extends RequestProcessor{
         }
 
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
-        BaseResponse<NetAddr> result = JSONObject.parseObject(res, new TypeReference<>() {
+        BaseResponse<NetAddr> result = JSON.parseObject(res, new TypeReference<>() {
         });
-        if (Objects.isNull(result.getData()) || CollectionUtil.isEmpty(result.getData().getAffectedItems())) {
+        if (Objects.isNull(result.getData()) || CollectionUtils.isEmpty(result.getData().getAffectedItems())) {
             return Collections.emptyList();
         }
-        List<NetAddr> netAddrs = result.getData().getAffectedItems();
-
-        return netAddrs;
+        return result.getData().getAffectedItems();
     }
 
     /**
@@ -214,7 +232,7 @@ public class WazuhClient extends RequestProcessor{
 
     private List<Agent> listAgents(AgentRequest agentRequest) {
         var result = pageAgents(agentRequest);
-        return result.getSource().getList();
+        return result.getObjs();
     }
 
     private List<NameValuePair> processRequestParams(AgentRequest agentRequest) {

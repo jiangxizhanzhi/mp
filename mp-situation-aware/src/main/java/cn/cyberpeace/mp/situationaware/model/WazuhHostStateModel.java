@@ -70,11 +70,13 @@ public class WazuhHostStateModel {
     @ApiModelProperty("agentName")
     private String agentName;
 
+    @ApiModelProperty("主机ip")
+    private String agentIp;
+
     @ApiModelProperty("macId")
     private List<String> macIds;
 
     @JSONField(name = "timestamp")
     @ApiModelProperty("时间")
     private LocalDateTime time;
-
 }

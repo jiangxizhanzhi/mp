@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.BO;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -20,7 +21,13 @@ public class ProcessBO {
     private String parentId;
 
     @ApiModelProperty(value = "虚拟内存总大小")
-    private String vmSize;
+    private String vms;
+
+    @ApiModelProperty(name = "cwd")
+    private String cwd;
+
+    @ApiModelProperty(name = "rss")
+    private String rss;
 
     @ApiModelProperty(value = "优先级")
     private String priority;
@@ -29,10 +36,13 @@ public class ProcessBO {
     private String numThreads;
 
     @ApiModelProperty(value = "执行的命令")
-    private String cmd;
+    private String command;
+
+    @ApiModelProperty(name = "执行的文件")
+    private String exe;
 
     @ApiModelProperty(value = "有效用户")
-    private String euser;
+    private String username;
 
     @ApiModelProperty(value = "进程id")
     private String pid;

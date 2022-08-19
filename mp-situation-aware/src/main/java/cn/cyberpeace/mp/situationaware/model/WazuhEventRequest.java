@@ -87,4 +87,12 @@ public class WazuhEventRequest {
     @ApiModelProperty(value = "探针id")
     private List<String> probeIds;
 
+    @ApiModelProperty(value = "是否时间降序,默认true")
+    private boolean desc = true;
+
+    @ApiModelProperty(value = "查询总数是否需要超过1w，默认false")
+    private boolean trackTotalHits = false;
+
+    @ApiModelProperty(value = "查询前topSize条数据")
+    private Integer topSize;
 }

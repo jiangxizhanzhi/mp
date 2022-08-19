@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@ApiModel("系统监控事件变更查询条件")
-public class WazuhMonitorEventsRequest {
+@ApiModel("系统监控事件变更查询分页条件")
+public class WazuhHostMonitorPageRequest {
     /**
      * 查询条数默认限制
      */
@@ -21,12 +21,6 @@ public class WazuhMonitorEventsRequest {
      */
     @ApiModelProperty("分页页码")
     private Integer pageNum = 1;
-
-    /**
-     * wazuh macIds
-     */
-    @ApiModelProperty(value = "macId集合", required = false)
-    private List<String> macIds;
 
     @ApiModelProperty(value = "agentName列表", required = false)
     private List<String> agentNames;

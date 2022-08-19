@@ -1,57 +1,128 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.*;
+import cn.cyberpeace.mp.situationaware.request.*;
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.TimedCache;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-@Service
 public class DataCollectServiceImpl implements DataCollectService {
+    private EsClient esClient;
+
+    public DataCollectServiceImpl(String esNode) {
+        this.esClient = new EsClient(esNode);
+    }
+
+    // expires in 10 minutes
+    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+
     @Override
-    public ListObjServiceResult<FileEventModel> queryFileModifyEvents(WazuhEventRequest request) {
-        return null;
+    public ListObjServiceResult<FileEventModel> queryFileModifyEvents(SyscheckEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.FILE_MODIFY_GROUP);
+        var result = esClient.queryFileEvents(wazuhEventRequest);
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> queryRegistryModifyEvents(WazuhEventRequest request) {
-        return null;
+    public ListObjServiceResult<FileEventModel> queryRegistryModifyEvents(SyscheckEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.REGISTRY_MODIFY_GROUP);
+        var result = esClient.queryFileEvents(wazuhEventRequest);
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> queryFileEvents(WazuhEventRequest request) {
-        return null;
+    public ListObjServiceResult<FileEventModel> queryFileEvents(DataCollectEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.queryFileEvents(wazuhEventRequest);
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> scrollFileEvents(WazuhEventRequest request, String requestId) {
-        return null;
+    public ListObjServiceResult<FileEventModel> scrollFileEvents(DataCollectEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        ListObjResult<FileEventModel> result;
+        String requestId = request.getRequestId();
+        if (Objects.isNull(TIMED_CACHE.get(requestId))) {
+            result = esClient.queryFileEvents(wazuhEventRequest);
+            TIMED_CACHE.put(requestId, result.getObjs().get(0).getScrollId());
+        } else {
+            result = esClient.scrollFileEvents(TIMED_CACHE.get(requestId));
+        }
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest request, List<String> probeIds) {
-        return null;
+    public ListObjServiceResult<WazuhProbeCommonModel> queryCustomProbeData(CustomDataQueryRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.queryCustomProbeData(wazuhEventRequest);
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest request) {
-        return null;
+    public ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(VulnerabilityEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.VULNERABILITY_GROUP);
+        var result = esClient.queryVulnerabilityInfo(wazuhEventRequest);
+        return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ServiceResult<List<WazuhVulnerabilityInfoCountModel>> queryVulnerabilityCountInfo(WazuhEventRequest request, String filedName, String filedPath) {
-        return null;
+    public ServiceResult<List<WazuhVulnerabilityInfoCountModel>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.VULNERABILITY_GROUP);
+        var result = esClient.queryVulnerabilityCountInfo(wazuhEventRequest,
+                request.getFiledPath(), request.getFiledName());
+        return new ServiceResult<>(result);
     }
 
     @Override
-    public ServiceResult<Map<String, Long>> aggsCountByAgentNamesBucket(WazuhEventRequest request) {
-        return null;
+    public ServiceResult<Map<String, Long>> countByAgentNamesBucket(BaseEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.countByAgentNamesBucket(wazuhEventRequest);
+        return new ServiceResult<>(result);
     }
 
     @Override
-    public ServiceResult<Long> countByAgentNames(WazuhEventRequest request) {
-        return null;
+    public ServiceResult<Long> countByAgentNames(BaseEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.countByAgentNames(wazuhEventRequest);
+        return new ServiceResult<>(result);
+    }
+
+    @Override
+    public ServiceResult<Map<String, Long>> aggsRuleIdsByAgentName(BaseEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.aggsRuleIdsByAgentName(wazuhEventRequest);
+        return new ServiceResult<>(result);
+    }
+
+    @Override
+    public ServiceResult<Long> deleteDocByAgentNames(BaseEventRequest request) {
+        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, wazuhEventRequest);
+        var result = esClient.deleteDocByAgentNames(wazuhEventRequest);
+        return new ServiceResult<>(result);
     }
 }
