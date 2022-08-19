@@ -228,6 +228,13 @@ mp:
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
     gateway_types: ${GATEWAY_TYPES:2,3}
+    cploud_http_pool_size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
+    initiate_pool_size: ${MP_INITIATE_POOL_SIZE:10}
+    initiate_hold_size: ${MP_INITIATE_HOLD_SIZE:20000}
+    create_pool_size: ${MP_CREATE_POOL_SIZE:10}
+    create_hold_size: ${MP_CREATE_HOLD_SIZE:20000}
+    cloud_heavy_concurrent_delay_enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
+    cloud_heavy_concurrent_delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
     wazuh-api-server: http://${ip.wazuh}:15500
@@ -246,6 +253,10 @@ mp:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
   scene:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
+    scene_pool_size: ${MP_SCENE_POOL_SIZE:100}
+    scene_hold_size: ${MP_SCENE_HOLD_SIZE:10000}
+    element_pool_size: ${MP_ELEMENT_POOL_SIZE:100}
+    element_hold_size: ${MP_ELEMENT_HOLD_SIZE:10000}
 
 management:
   endpoints:
