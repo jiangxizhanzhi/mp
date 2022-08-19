@@ -58,6 +58,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class EsClient extends CollectionBaseService {
+    public EsClient() {
+
+    }
+
     public EsClient(String esNode) {
         this.restHighLevelClient = ElasticsearchUtils.restHighLevelClient(esNode);
     }
@@ -100,7 +104,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 查询采集事件分页
-     *
      * @param request
      * @return ListObjResult<FileEventModel>
      */
@@ -131,7 +134,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 滚动分页查询采集事件
-     *
      * @return ListObjResult<FileEventModel>
      */
     public ListObjResult<FileEventModel> scrollFileEvents(String scrollId) {
@@ -149,7 +151,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 查询自定义探针采集数据分页
-     *
      * @param request
      * @return ListObjResult<WazuhProbeCommonModel>
      */
@@ -192,7 +193,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 查询漏洞信息分页
-     *
      * @param request
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
@@ -232,7 +232,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 查询漏洞信息数量
-     *
      * @param request
      * @param fieldPath 字段所在路径
      * @param fieldName 字段名称
@@ -658,7 +657,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 构造请求的索引
-     *
      * @param start
      * @param end
      * @return
@@ -675,7 +673,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 构造查询需要的索引
-     *
      * @return List<IndexBoost>
      */
     private List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
@@ -685,9 +682,8 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 获取比如2021-05-01 到2021-05-20.所有的日期，方便构建所有的时间字符串2021.05.01,2021.05.02,....
-     *
      * @param startTime startTime
-     * @param endTime   endTime
+     * @param endTime endTime
      * @return List<String>
      */
     private List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
@@ -908,7 +904,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 处理分页
-     *
      * @param wazuhEventRequest
      * @param sourceBuilder
      * @return
@@ -942,7 +937,6 @@ public class EsClient extends CollectionBaseService {
 
     /**
      * 采集事件转换
-     *
      * @param wazuhFileRoot
      * @return
      */

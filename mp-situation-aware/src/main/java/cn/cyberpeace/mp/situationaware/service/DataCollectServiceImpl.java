@@ -20,7 +20,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     private EsClient esClient;
 
     public DataCollectServiceImpl(String esNode) {
-        this.esClient = new EsClient(esNode);
+        this.esClient = EsClientProxy.getInstance();
     }
 
     // expires in 10 minutes

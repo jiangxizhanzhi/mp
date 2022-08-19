@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.listener;
 
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.situationaware.service.EsClientProxy;
 import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClient;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -28,6 +29,8 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.info("prepare init actions for mp system");
+
+        EsClientProxy.init();
 
         //定时更新token初始化
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()

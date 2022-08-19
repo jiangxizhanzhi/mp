@@ -23,7 +23,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     private EsClient esClient;
 
     public HostMonitorServiceImpl(String esNode, String wazuhUrl, String wazuhUsername, String wazuhPassword) {
-        this.esClient = new EsClient(esNode);
+        this.esClient = EsClientProxy.getInstance();
         this.wazuhClient = new WazuhClient(wazuhUrl, wazuhUsername, wazuhPassword);
     }
 

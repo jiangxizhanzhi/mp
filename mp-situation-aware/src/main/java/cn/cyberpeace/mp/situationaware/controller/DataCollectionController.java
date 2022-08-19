@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.situationaware.BO.HostBO;
 import cn.cyberpeace.mp.situationaware.BO.ProcessBO;
 import cn.cyberpeace.mp.situationaware.BO.SystemUserBO;
 import cn.cyberpeace.mp.situationaware.config.GroupConfig;
+import cn.cyberpeace.mp.situationaware.context.ContextHolder;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.ContentHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -145,6 +147,7 @@ public class DataCollectionController {
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
+        ContextHolder.setGroupId(group.getGroupId());
         initService(group.getEsNode(), group.getWazuhUrl());
         processQueryRequest(request, group);
         HostMonitorPageRequest pageRequest = new HostMonitorPageRequest();

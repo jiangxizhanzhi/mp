@@ -88,6 +88,12 @@ mp:
               node-name: controller
             - node-ip: 192.168.1.60
               node-name: fd29005e599a4b419aa7a7ac5b2a1863
+        - group-id: "002"
+          es-node: 10.100.0.251:9205
+          wazuh-url: http://10.100.0.251:15500
+          nodes:
+            - node-ip: 10.100.0.251
+              node-name: test251
 
   log:
     es-nodes: ${ip.es}:9205
