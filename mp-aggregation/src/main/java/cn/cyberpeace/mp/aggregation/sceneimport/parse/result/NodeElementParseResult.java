@@ -21,6 +21,7 @@ public class NodeElementParseResult {
     private String file;
     private List<NetElementParseResult> net;
     private List<StaticRoutesResult> staticRoutes;
+    private List<StaticRoutesResult> staticRouters;
     private List<InitCommandParseResult> initCommands;
 
     public String getImage() {

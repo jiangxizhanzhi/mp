@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.MoundRequest;
+import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneExportRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -40,6 +41,11 @@ public class SceneImportController {
         }
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
         return ServiceResult.success(serviceResult.getSource().getId());
+    }
+
+    @PostMapping("/export_scene")
+    public ServiceResult<String> exportScene(@RequestBody SceneExportRequest request) {
+        return ServiceResult.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
     }
 
     @PostMapping("/mount")
