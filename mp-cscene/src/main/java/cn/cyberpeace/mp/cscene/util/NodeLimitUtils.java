@@ -75,9 +75,7 @@ public final class NodeLimitUtils {
     }
 
     private synchronized static UpdateResult updateElementCount(int count) {
-        if (SCENE_USING_NODE_LIMIT < 0) {
-            SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
-        }
+        SCENE_USING_NODE_LIMIT = csceneAppConfig.getSceneUsingNodeLimit();
         log.info("current node num {},update num {},limit num {}", NODE_COUNT, count, SCENE_USING_NODE_LIMIT);
         if (NODE_COUNT + count > SCENE_USING_NODE_LIMIT) {
             UpdateResult updateResult = new UpdateResult();

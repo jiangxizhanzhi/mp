@@ -35,6 +35,8 @@ public class ScenePluginCloudInit implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
 
+        cloudAppConfig.init();
+
         // 可串行执行的任务
         List<AbstractInitJob> syncJobs = new ArrayList<>();
         syncJobs.add(cloudMessageConvertInitJob);

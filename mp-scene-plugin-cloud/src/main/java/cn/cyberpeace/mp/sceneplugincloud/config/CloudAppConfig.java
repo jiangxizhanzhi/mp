@@ -168,11 +168,22 @@ public class CloudAppConfig {
     @Autowired
     private BaseAppConfig baseAppConfig;
 
+    private List<String> cachedCidrs;
+
+    public void init() {
+        this.getCidrPool();
+    }
+
     public List<String> getCidrPool() {
+        if (cachedCidrs == null) {
+            List<String> cidrPool = new ArrayList<>();
+            IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
+                    .forEach(cidrB -> IntStream.range(0, 255)
+                            .forEach(cidrC -> cidrPool.add(String.format("%d.%d.%d.0/24", cidrA, cidrB, cidrC)))));
+            cachedCidrs = cidrPool;
+        }
         List<String> cidrPool = new ArrayList<>();
-        IntStream.range(172, 173).forEach(cidrA -> IntStream.range(0, 255)
-                .forEach(cidrB -> IntStream.range(0, 255)
-                        .forEach(cidrC -> cidrPool.add(String.format("%d.%d.%d.0/24", cidrA, cidrB, cidrC)))));
+        cidrPool.addAll(cachedCidrs);
         return cidrPool;
     }
 
