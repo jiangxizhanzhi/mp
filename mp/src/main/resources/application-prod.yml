@@ -211,6 +211,9 @@ mp:
       jwt-secret: ${MP_AUTH_JWT_SECRET:}
       jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
       urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
+      encoder:
+        iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
+        hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:

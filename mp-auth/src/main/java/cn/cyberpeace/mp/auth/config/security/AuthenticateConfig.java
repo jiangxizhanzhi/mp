@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 /**
@@ -25,4 +26,13 @@ public class AuthenticateConfig {
     // 需要认证的url
     private List<String> urls;
 
+    private Encoder encoder;
+
+
+    @Data
+    public static class Encoder {
+        private Integer iterations;
+
+        private Integer hashWidth;
+    }
 }
