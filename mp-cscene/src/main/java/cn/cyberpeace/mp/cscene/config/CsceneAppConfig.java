@@ -72,6 +72,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.cron-job-expression:0 0/15 * * * ?}")
     private String cronJobExpression;
 
+    @Value("${mp.cscene.enable_node_limit_db_check:true}")
+    private Boolean enableNodeLimitDbCheck;
+
     @Autowired
     private MessageSource messageSource;
 
