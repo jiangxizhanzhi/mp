@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
 import cn.cyberpeace.mp.scene.config.SceneAppConfig;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedElementStatusBO;
 import cn.cyberpeace.mp.scene.core.bo.CollectedSceneBO;
@@ -427,7 +428,9 @@ public class SceneHandler extends BaseSceneHandler<
     public int overSceneProcess(int event) {
         var flag = getSceneEventHandler(event).overProcess();
         if (isTriggerEventSuccess(flag)) {
-            asyncAckSceneChanged(true, true);
+            boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime());
+            boolean withPlugins = forceSave;
+            asyncAckSceneChanged(forceSave, withPlugins);
         }
         return flag;
     }
@@ -436,7 +439,9 @@ public class SceneHandler extends BaseSceneHandler<
         var flag = getElementEventHandler(nodeId, event).overProcess();
         this.getScene().setProgressPercentage(this.calculateProgressPercentage());
         if (isTriggerEventSuccess(flag)) {
-            asyncAckElementChanged(nodeId, true, true);
+            boolean forceSave = Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getElementProcessSaveRealtime());
+            boolean withPlugins = forceSave;
+            asyncAckElementChanged(nodeId, forceSave, withPlugins);
         }
         return flag;
     }
