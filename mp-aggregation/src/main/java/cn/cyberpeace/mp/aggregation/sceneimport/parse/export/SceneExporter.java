@@ -77,7 +77,7 @@ public class SceneExporter {
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = FdfsCommon.downloadRawContent(logoUrl);
-                    this.createFile(content, currentImageDir + "/logo");
+                    this.createFile(content, currentImageDir + "/logo.png");
                 }
                 // 生成service.yml
                 var image = result.getData();
@@ -121,7 +121,7 @@ public class SceneExporter {
                 Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
-                this.createFile(content, currentImageDir + "/server.yml");
+                this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
                     break;
