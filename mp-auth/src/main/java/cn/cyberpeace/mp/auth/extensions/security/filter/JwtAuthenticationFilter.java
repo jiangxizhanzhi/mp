@@ -1,14 +1,13 @@
-package cn.cyberpeace.mp.auth.extensions.security;
+package cn.cyberpeace.mp.auth.extensions.security.filter;
 
-import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
-import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -36,7 +31,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @Description:
@@ -69,24 +63,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = JwtCommon.getToken(request);
             if (StringUtils.isNotBlank(token)) {
                 UserModel user = JwtCommon.verifyToken(token);
-                UsernamePasswordAuthenticationToken authenticationToken = null;
                 if (Objects.nonNull(user)) {
                     // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
                     UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
 
-                    // 暂时不用加载权限信息
-                    Set<GrantedAuthority> authoritySet = authUserDetailsService.loadAuthorities(user.getId());
-
-                    authenticationToken = new UsernamePasswordAuthenticationToken(new AuthUserDetails(user, authoritySet), token,
-                            authoritySet);
-                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                     LoginUserContext loginUserContext = new LoginUserContext();
                     loginUserContext.setValue(user.getId());
-
                     refreshToken(response, token, user);
                 }
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
 

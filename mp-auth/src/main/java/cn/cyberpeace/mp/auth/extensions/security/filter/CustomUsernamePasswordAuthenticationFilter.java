@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.extensions.security;
+package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
