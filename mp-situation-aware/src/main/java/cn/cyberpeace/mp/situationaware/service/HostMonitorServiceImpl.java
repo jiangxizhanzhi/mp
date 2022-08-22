@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.request.HostMonitorBaseRequest;
 import cn.cyberpeace.mp.situationaware.request.HostMonitorPageRequest;
-import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClient;
 import cn.cyberpeace.mp.situationaware.service.wazuh.WazuhClientProxy;
 import org.springframework.stereotype.Service;
 
@@ -21,29 +20,27 @@ import java.util.stream.Collectors;
 
 @Service
 public class HostMonitorServiceImpl implements HostMonitorService {
-    private WazuhClient wazuhClient;
-
+    @Resource
     private EsClient esClient;
 
-    public HostMonitorServiceImpl() {
-        this.esClient = EsClientProxy.getInstance();
-        this.wazuhClient = WazuhClientProxy.getInstance();
-    }
 
     @Override
     public ListObjServiceResult<Port> pagePorts(CollectorBaseRequest request) {
+        var wazuhClient = WazuhClientProxy.getInstance();
         var result = wazuhClient.pagePorts(request);
         return new ListObjServiceResult<>(new ListObjResult<>(result.getObjs(), result.getTotal()));
     }
 
     @Override
     public ListObjServiceResult<Netiface> pageNetifaces(CollectorBaseRequest request) {
+        var wazuhClient = WazuhClientProxy.getInstance();
         var result = wazuhClient.pageNetifaces(request);
         return new ListObjServiceResult<>(new ListObjResult<>(result.getObjs(), result.getTotal()));
     }
 
     @Override
     public ServiceResult<List<OS>> getOS(String agentName) {
+        var wazuhClient = WazuhClientProxy.getInstance();
         var result = wazuhClient.getOS(agentName);
         return new ServiceResult<>(result);
     }

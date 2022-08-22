@@ -18,11 +18,8 @@ import java.util.Objects;
 
 @Service
 public class DataCollectServiceImpl implements DataCollectService {
+    @Resource
     private EsClient esClient;
-
-    public DataCollectServiceImpl() {
-        this.esClient = EsClientProxy.getInstance();
-    }
 
     // expires in 10 minutes
     private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);

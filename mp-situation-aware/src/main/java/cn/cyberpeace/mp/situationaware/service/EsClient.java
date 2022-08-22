@@ -12,7 +12,6 @@ import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
 import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.situationaware.model.sic.Launch;
-import cn.cyberpeace.mp.situationaware.utils.ElasticsearchUtils;
 import cn.cyberpeace.mp.situationaware.utils.EsResponseParseUtils;
 import cn.hutool.core.util.NumberUtil;
 import com.alibaba.fastjson.JSON;
@@ -27,7 +26,6 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.core.TimeValue;
@@ -48,7 +46,9 @@ import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -57,16 +57,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class EsClient extends CollectionBaseService {
-    public EsClient() {
-
-    }
-
-    public EsClient(String esNode) {
-        this.restHighLevelClient = ElasticsearchUtils.restHighLevelClient(esNode);
-    }
-
-    private RestHighLevelClient restHighLevelClient;
+    @Resource(name = "restHighLevelClientImpl")
+    private IRestHighLevelClient restHighLevelClient;
 
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
@@ -116,7 +110,7 @@ public class EsClient extends CollectionBaseService {
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
 
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         var wazuhFileRootList = EsResponseParseUtils.parseResponse(response, WazuhFileRoot.class);
         List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((this::getFileEventModel)).collect(Collectors.toList());
 
@@ -140,7 +134,7 @@ public class EsClient extends CollectionBaseService {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
-        SearchResponse response = ElasticsearchUtils.elasticsearchScroll(restHighLevelClient, scrollRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchScroll(scrollRequest);
         var wazuhFileRootList = EsResponseParseUtils.parseResponse(response, WazuhFileRoot.class);
         List<FileEventModel> fileEventModelList = wazuhFileRootList.stream().map((this::getFileEventModel)).collect(Collectors.toList());
 
@@ -163,7 +157,7 @@ public class EsClient extends CollectionBaseService {
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
 
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         List<WazuhProbeCommonModel> wazuhModelList = new ArrayList<>();
         if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
             return new ListObjResult<>(wazuhModelList, 0);
@@ -204,7 +198,7 @@ public class EsClient extends CollectionBaseService {
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         List<WazuhVulnerabilityInfoModel> wazuhModelList = new ArrayList<>();
         for (var hit : response.getHits().getHits()) {
             WazuhMonitorRoot<WazuhVulnerabilityInfoModel> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
@@ -248,7 +242,7 @@ public class EsClient extends CollectionBaseService {
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
         List<WazuhVulnerabilityInfoCountModel> vulnerabilityInfoCounts;
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         long totalHits = response.getHits().getTotalHits().value;
         if (totalHits == 0) {
             return new ArrayList<>();
@@ -475,7 +469,7 @@ public class EsClient extends CollectionBaseService {
                 .field("agent.name");
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
             Terms terms = response.getAggregations().get(aggregationName);
             terms.getBuckets().forEach(b -> map.put(b.getKeyAsString(), b.getDocCount()));
@@ -503,7 +497,7 @@ public class EsClient extends CollectionBaseService {
                 .field("rule.id").size(100);
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
             Terms terms = response.getAggregations().get(aggregationName);
             terms.getBuckets().forEach(b -> map.put(b.getKeyAsString(), b.getDocCount()));
@@ -522,7 +516,7 @@ public class EsClient extends CollectionBaseService {
             return 0L;
         }
         CountRequest countRequest = buildCountRequest(request);
-        CountResponse response = ElasticsearchUtils.elasticsearchCount(restHighLevelClient, countRequest);
+        CountResponse response = restHighLevelClient.elasticsearchCount(countRequest);
         return response.getCount();
     }
 
@@ -535,7 +529,7 @@ public class EsClient extends CollectionBaseService {
             return 0L;
         }
         DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
-        BulkByScrollResponse response = ElasticsearchUtils.elasticsearchDelete(restHighLevelClient, deleteRequest);
+        BulkByScrollResponse response = restHighLevelClient.elasticsearchDelete(deleteRequest);
         return response.getUpdated();
     }
 
@@ -569,7 +563,7 @@ public class EsClient extends CollectionBaseService {
         sourceBuilder.size(0);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
         int changedCount = 0;
-        SearchResponse response = ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        SearchResponse response = restHighLevelClient.elasticsearchQuery(searchRequest);
         if (Objects.nonNull(response.getAggregations())) {
             ParsedNested nested = response.getAggregations().get(aggregationNested);
             ParsedSum sum = nested.getAggregations().get(aggregationSum);
@@ -627,7 +621,7 @@ public class EsClient extends CollectionBaseService {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
         }
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        return ElasticsearchUtils.elasticsearchQuery(restHighLevelClient, searchRequest);
+        return restHighLevelClient.elasticsearchQuery(searchRequest);
     }
 
     private List<WazuhSystemUserModel> processJSONArray(JSONArray jsonArray, JSONObject jsonObject, String acton) {

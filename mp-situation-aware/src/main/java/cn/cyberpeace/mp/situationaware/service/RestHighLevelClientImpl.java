@@ -1,8 +1,11 @@
-package cn.cyberpeace.mp.situationaware.utils;
+package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.situationaware.config.GroupConfig;
+import cn.cyberpeace.mp.situationaware.context.ContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
@@ -16,44 +19,71 @@ import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Component
 @Slf4j
-public class ElasticsearchUtils {
-    public static RestHighLevelClient restHighLevelClient(String esAdress) {
+public class RestHighLevelClientImpl implements IRestHighLevelClient{
+    private static Map<String,RestHighLevelClient> restHighLevelClientMap = new ConcurrentHashMap<>();
+
+    @Resource
+    private GroupConfig groupConfig;
+
+    @Autowired
+    public RestHighLevelClientImpl(GroupConfig groupConfig) {
+        this.groupConfig = groupConfig;
+        if (this.groupConfig != null && CollectionUtils.isNotEmpty(this.groupConfig.getGroups())) {
+            for (var group : this.groupConfig.getGroups()) {
+                restHighLevelClientMap.put(group.getGroupId(), this.restHighLevelClient(group.getEsNode()));
+            }
+        }
+    }
+
+    public RestHighLevelClient restHighLevelClient(String esAdress) {
         return new RestHighLevelClient(RestClient.builder(createHttpHost(esAdress)));
     }
 
-    public static SearchResponse elasticsearchQuery(RestHighLevelClient restHighLevelClient, SearchRequest searchRequest) {
+    @Override
+    public SearchResponse elasticsearchQuery(SearchRequest searchRequest) {
         try {
-            return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
-        } catch (Exception e) {
+            return restHighLevelClientMap.get(ContextHolder.getGroupId()).search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
             log.error("es query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
-    public static SearchResponse elasticsearchScroll(RestHighLevelClient restHighLevelClient, SearchScrollRequest scrollRequest) {
+    @Override
+    public SearchResponse elasticsearchScroll(SearchScrollRequest scrollRequest) {
         try {
-            return restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getGroupId()).scroll(scrollRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es scroll error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
-    public static CountResponse elasticsearchCount(RestHighLevelClient restHighLevelClient, CountRequest countRequest) {
+    @Override
+    public CountResponse elasticsearchCount(CountRequest countRequest) {
         try {
-            return restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getGroupId()).count(countRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es count error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
-    public static BulkByScrollResponse elasticsearchDelete(RestHighLevelClient restHighLevelClient, DeleteByQueryRequest deleteRequest) {
+    @Override
+    public BulkByScrollResponse elasticsearchDelete(DeleteByQueryRequest deleteRequest) {
         try {
-            return restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getGroupId()).deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es delete by query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
