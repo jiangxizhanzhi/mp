@@ -92,6 +92,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
 
+    public static final String CACHE_VAL_ORGDTOS_TO_USERDTOS = "ORGDTOS_TO_USERDTOS_CACHE";
+
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -814,8 +816,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return doModel2Dto(userModel, false, true);
     }
 
-
-
+    @Override
+    @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
     public List<UserDto> userOrgRoleDtos2UserDtos(List<UserOrgRoleDto> userOrgRoleDtos) {
         if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
             return Collections.emptyList();

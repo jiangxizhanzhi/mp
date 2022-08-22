@@ -19,15 +19,16 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class AuthCacheConfig {
 
-    // default 20s
+    // default 30s
     public static final String CACHE_MANAGER_NORMAL = "authCacheManager_normal";
 
-    // default 40s
+    // default 60s (normal + 30s)
     public static final String CACHE_MANAGER_MEDIUM = "authCacheManager_medium";
 
     // default 10m
     public static final String CACHE_MANAGER_LONG = "authCacheManager_long";
 
+    // default 6h
     public static final String CACHE_MANAGER_6H = "authCacheManager_6H";
 
     @Autowired
@@ -35,11 +36,11 @@ public class AuthCacheConfig {
 
 
     @Bean(name = CACHE_MANAGER_NORMAL)
-    public CacheManager authCacheManager20S() {
+    public CacheManager authCacheManagerNormal() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Integer seconds = authenticateConfig.getCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
-            seconds = 20;
+            seconds = 30;
         }
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(seconds, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
@@ -47,19 +48,19 @@ public class AuthCacheConfig {
     }
 
     @Bean(name = CACHE_MANAGER_MEDIUM)
-    public CacheManager authCacheManager45S() {
+    public CacheManager authCacheManagerMedium() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Integer seconds = authenticateConfig.getCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
-            seconds = 20;
+            seconds = 30;
         }
-        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(seconds * 2, TimeUnit.SECONDS).recordStats();
+        Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(seconds + 30, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);
         return caffeineCacheManager;
     }
 
     @Bean(name = CACHE_MANAGER_LONG)
-    public CacheManager authCacheManager10M() {
+    public CacheManager authCacheManagerLong() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -32,6 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,8 +50,11 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
 public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUserMapper, OrgUserFields, QueryParams>
         implements OrgUserService {
+
+    public static final String CACHE_VAL_ORGS_BY_USERID = "ORGS_BY_USERID";
 
     @Autowired
     private OrgService orgService;
@@ -73,9 +79,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Autowired
     private UserCacheService userCacheService;
-
-//    @Autowired
-//    private QueryChildOrgModelListOperation queryChildOrgModelListOperation;
 
     @Autowired
     public OrgUserServiceImpl(OrgUserMapper modelMapper, OrgUserFields modelFields) {
@@ -144,6 +147,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     }
 
     @Override
+    @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<OrgModel> listOrgsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
@@ -159,7 +163,6 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         orgs.forEach(o -> {
             OrgDto orgDto = new OrgDto();
             BeanUtils.copyProperties(o, orgDto);
-            log.warn("queryParentOrgOperation:{}", queryParentOrgOperation);
             orgDto.execute(queryParentOrgOperation);
             orgDtos.add(orgDto);
         });

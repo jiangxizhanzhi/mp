@@ -41,7 +41,6 @@ public class UserUtils {
 
     public static UserModel getUser(String id) {
         UserModel user;
-        // TODO 缓存获取
         ObjResult<UserModel> result = userService.get(id).getSource();
         user = result != null ? result.getObj() : null;
         return user;

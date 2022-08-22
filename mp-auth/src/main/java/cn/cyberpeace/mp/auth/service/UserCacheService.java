@@ -1,6 +1,9 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
+import cn.cyberpeace.mp.auth.service.impl.OrgUserServiceImpl;
+import cn.cyberpeace.mp.auth.service.impl.RolePermissionModelServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.TargetServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.UserPermissionServiceImpl;
 import cn.cyberpeace.mp.auth.service.impl.UserRoleServiceImpl;
@@ -23,23 +26,26 @@ import java.util.Objects;
 public class UserCacheService {
 
     public static final String[] USER_CACHE_VALUES = {
-            UserServiceImpl.CACHE_VAL_USERMODEL, UserServiceImpl.CACHE_VAL_USERDTO,
+            UserServiceImpl.CACHE_VAL_USERMODEL, UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
+            AuthUserDetailsService.CACHE_USER_AUTHORITIES,
+            OrgUserServiceImpl.CACHE_VAL_ORGS_BY_USERID,
             UserRoleServiceImpl.CACHE_VAL_ROLES,
             UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS};
 
     public static final String[] TARGET_CACHE_VALUES = {
-            TargetServiceImpl.CACHE_VAL_TARGETS};
+            TargetServiceImpl.CACHE_VAL_TARGETS,
+            RolePermissionModelServiceImpl.CACHE_TARGETS_BY_ROLES};
 
     @Resource(name = AuthCacheConfig.CACHE_MANAGER_NORMAL)
-    private CacheManager cacheManager20s;
+    private CacheManager cacheManagerNormal;
 
 
     @Resource(name = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
-    private CacheManager cacheManager45s;
+    private CacheManager cacheManagerMedium;
 
 
     @Resource(name = AuthCacheConfig.CACHE_MANAGER_LONG)
-    private CacheManager cacheManager10M;
+    private CacheManager cacheManagerLong;
 
     public void evictAllUserCache() {
         log.debug("evict user releated cache...");
@@ -56,21 +62,20 @@ public class UserCacheService {
     }
 
     private void clean(String cacheValue) {
-        Cache cache20s = cacheManager20s.getCache(cacheValue);
-        Cache cache45s = cacheManager45s.getCache(cacheValue);
-        Cache cache10M = cacheManager10M.getCache(cacheValue);
-        log.debug("cache20s:{}, cache45s:{}, cache10M:{}", cache20s, cache45s, cache10M);
+        Cache cacheNormal = cacheManagerNormal.getCache(cacheValue);
+        Cache cacheMedium = cacheManagerMedium.getCache(cacheValue);
+        Cache cacheLong = cacheManagerLong.getCache(cacheValue);
 
-        if (Objects.nonNull(cache20s)) {
-            cache20s.clear();
+        if (Objects.nonNull(cacheNormal)) {
+            cacheNormal.clear();
         }
 
-        if (Objects.nonNull(cache45s)) {
-            cache45s.clear();
+        if (Objects.nonNull(cacheMedium)) {
+            cacheMedium.clear();
         }
 
-        if (Objects.nonNull(cache10M)) {
-            cache10M.clear();
+        if (Objects.nonNull(cacheLong)) {
+            cacheLong.clear();
         }
     }
 
