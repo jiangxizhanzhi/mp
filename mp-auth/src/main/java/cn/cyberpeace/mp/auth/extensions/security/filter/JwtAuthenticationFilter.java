@@ -2,9 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security.filter;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
-import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.authbase.context.LoginUserContext;
@@ -12,7 +10,6 @@ import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
@@ -42,12 +39,6 @@ import java.util.Objects;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final MD5 MD5_ = MD5.create();
-
-    @Autowired
-    private UserPermissionService userPermissionService;
-
-    @Autowired
-    private AuthUserDetailsService authUserDetailsService;
 
     @Resource(name = "authCacheManager_6H")
     private CacheManager cacheManager;

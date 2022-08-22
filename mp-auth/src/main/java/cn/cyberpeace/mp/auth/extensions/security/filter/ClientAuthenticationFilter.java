@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.extensions.security.filter;
 
-import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -33,9 +32,6 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private ClientDetailsService clientDetailsService;
-
-    @Autowired
-    private AuthUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

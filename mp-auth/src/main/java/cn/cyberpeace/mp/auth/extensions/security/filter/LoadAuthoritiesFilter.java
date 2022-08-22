@@ -49,7 +49,7 @@ public class LoadAuthoritiesFilter extends OncePerRequestFilter {
         Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
 
         if (Objects.equals(userType, LogConstant.USER_TYPE_USER) && Objects.nonNull(userId)) {
-            // 账号密码登录
+            // 账号密码认证
             String uid = (String) userId;
             UserModel userModel = UserUtils.getUser(uid);
             if (Objects.nonNull(userModel)) {
@@ -62,6 +62,7 @@ public class LoadAuthoritiesFilter extends OncePerRequestFilter {
         }
 
         if (Objects.equals(userType, LogConstant.USER_TYPE_CLIENT)) {
+            // 客户端认证
             String clientId = request.getHeader(ClientAuthenticationFilter.CLIENT_ID_HEADER);
             String clientSecret = request.getHeader(ClientAuthenticationFilter.CLIENT_SECRET_HEADER);
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
