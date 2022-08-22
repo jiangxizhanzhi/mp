@@ -3,17 +3,17 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
+import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -47,38 +47,6 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    /*@Override
-    @ApiIgnore
-    @ApiOperation(value = "(弃用，建议用/api/mp/auth/org_users/page/byorg) 分页查询组织下的用户", notes = "")
-    @GetMapping
-    public ListObjServiceResult<UserModel> list(UserQueryParams queryParams) {
-        return super.list(queryParams);
-    }
-
-    @Override
-    @ApiIgnore
-    @ApiOperation(value = "(弃用，建议用/add) 创建数据", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
-    })
-    @PostMapping
-    public ObjServiceResult<UserModel> create(@RequestBody UserModel obj, @RequestParam(required = false) String[] fields) {
-        return super.create(obj, fields);
-    }
-
-    @Override
-    @ApiOperation(value = "(弃用，建议用/modify)更新指定id数据", notes = "")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
-            @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
-    })
-    @PatchMapping("/{id}")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改用户", target = OpTargetEnums.USER)
-    public ObjServiceResult<UserModel> update(@PathVariable String id, @RequestBody UserModel obj,
-                                              @RequestParam(required = false) String[] fields) {
-        return super.update(id, obj, fields);
-    }*/
-
     @ApiOperation("删除指定id用户")
     @ApiImplicitParams({
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class),
@@ -109,7 +77,7 @@ public class UserController {
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
-    public ObjServiceResult get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+    public ObjServiceResult<UserDto> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         UserDto userDto = userService.getUserDto(id);
         return ResultUtils.obj2ObjServiceResult(userDto);
     }

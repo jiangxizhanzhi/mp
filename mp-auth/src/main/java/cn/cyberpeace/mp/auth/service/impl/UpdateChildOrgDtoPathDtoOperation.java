@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.OrgDto;
+import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;

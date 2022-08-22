@@ -1,11 +1,17 @@
 package cn.cyberpeace.mp.auth.util;
 
+import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.service.UserService;
+import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.DES;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Field;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -16,13 +22,37 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PasswordUtils {
 
+    private static AuthenticateConfig authenticateConfig;
+
     private static Pbkdf2PasswordEncoder passwordEncoder;
 
     private static DES DES = SecureUtil.des(AuthConstant.PASSWORD_DES_KEY.getBytes());
 
     @SuppressWarnings({"java:S3010"})
-    private PasswordUtils() {
-        PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET);
+    private PasswordUtils(AuthenticateConfig authenticateConfig) {
+        PasswordUtils.authenticateConfig = authenticateConfig;
+
+        Integer iterations = null;
+        Integer hashWidth = null;
+        if (Objects.nonNull(authenticateConfig.getEncoder())) {
+            iterations = authenticateConfig.getEncoder().getIterations();
+            hashWidth = authenticateConfig.getEncoder().getHashWidth();
+        }
+        if (Objects.isNull(iterations) && Objects.isNull(hashWidth)) {
+            PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET);
+        } else {
+            if (Objects.isNull(iterations)) {
+                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_ITERATIONS");
+                Object value = ReflectUtil.getStaticFieldValue(field);
+                iterations = (Integer) value;
+            }
+            if (Objects.isNull(hashWidth)) {
+                Field field = ReflectUtil.getField(Pbkdf2PasswordEncoder.class, "DEFAULT_HASH_WIDTH");
+                Object value = ReflectUtil.getStaticFieldValue(field);
+                hashWidth = (Integer) value;
+            }
+            PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET, iterations, hashWidth);
+        }
     }
 
     public static Pbkdf2PasswordEncoder getPasswordEncoder() {
@@ -38,10 +68,8 @@ public class PasswordUtils {
         int score = PasswordStrengthChecker.checkPasswordStrength(password);
         var level = PasswordStrengthChecker.getPasswordLevel(password);
         boolean isLowLevel = score < 3;
-        log.info("password score:{}, level:{}", score, level);
         return isLowLevel;
     }
-
 
     public static String desEncrypt(String password) {
        return DES.encryptHex(password);
@@ -50,19 +78,5 @@ public class PasswordUtils {
     public static String desDecrypt(String encryptHex) {
         return DES.decryptStr(encryptHex);
     }
-
-
-    public static void main(String[] args) {
-        String context = "xctfoj01";
-        String strB64 = DES.encryptBase64(context);
-        String encryptHex = DES.encryptHex(context);
-        String encryptHexUtf8 = DES.encryptHex(context, "UTF-8");
-        String decrypt = DES.decryptStr(encryptHex);
-        System.out.println(strB64);
-        System.out.println(encryptHex);
-        System.out.println(encryptHexUtf8);
-        System.out.println(decrypt);
-    }
-
 
 }

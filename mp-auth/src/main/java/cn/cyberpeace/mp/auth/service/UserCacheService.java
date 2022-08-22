@@ -30,15 +30,15 @@ public class UserCacheService {
     public static final String[] TARGET_CACHE_VALUES = {
             TargetServiceImpl.CACHE_VAL_TARGETS};
 
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_20S)
+    @Resource(name = AuthCacheConfig.CACHE_MANAGER_NORMAL)
     private CacheManager cacheManager20s;
 
 
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_45S)
+    @Resource(name = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
     private CacheManager cacheManager45s;
 
 
-    @Resource(name = AuthCacheConfig.CACHE_MANAGER_10M)
+    @Resource(name = AuthCacheConfig.CACHE_MANAGER_LONG)
     private CacheManager cacheManager10M;
 
     public void evictAllUserCache() {

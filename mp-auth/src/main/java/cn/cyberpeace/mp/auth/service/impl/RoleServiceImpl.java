@@ -5,9 +5,9 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.dto.role.RolePageRequest;
+import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
-import cn.cyberpeace.mp.auth.dto.role.RoleRequest;
+import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
 import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper, RoleFields, QueryParams>
         implements RoleService {
 

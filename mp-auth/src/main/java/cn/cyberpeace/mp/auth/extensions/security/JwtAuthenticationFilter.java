@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
-import cn.cyberpeace.mp.auth.base.context.LoginUserContext;
+import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
@@ -9,7 +9,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -1,0 +1,97 @@
+package cn.cyberpeace.mp.devopscluster.vo;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+/**
+ * 容器分页返回信息
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@ApiModel(description = "容器分页返回信息")
+public class ContainerPageVO extends BaseVO {
+
+    /**
+     * 容器名称
+     */
+    @ApiModelProperty("容器名称")
+    private String name;
+
+    /**
+     * 场景名称
+     */
+    @ApiModelProperty("场景名称")
+    private String sceneName;
+
+    /**
+     * 镜像名称
+     */
+    @ApiModelProperty("镜像名称")
+    private String image;
+
+    /**
+     * 节点名称
+     */
+    @ApiModelProperty("节点名称")
+    private String node;
+
+    /**
+     * IP地址
+     */
+    @ApiModelProperty("IP地址")
+    private List<String> addressList;
+
+    @ApiModelProperty("Vlan ID集合")
+    private List<Integer> vlanIdList;
+
+    /**
+     * 状态
+     */
+    @ApiModelProperty("状态")
+    private String status;
+
+    /**
+     * 创建时间
+     */
+    @ApiModelProperty("创建时间")
+    private String createdAt;
+
+
+    /**
+     * 创建者
+     */
+    @ApiModelProperty("创建者")
+    private String userName;
+
+    /**
+     * 运行时间
+     */
+    @ApiModelProperty("运行时间")
+    private Long runningTime;
+
+    @ApiModelProperty(value = "引用类型")
+    private Integer referenceType;
+
+    @ApiModelProperty(value = "场景事件")
+    private Integer event;
+
+    @ApiModelProperty(value = "场景事件状态")
+    private Integer eventStatus;
+
+    @ApiModelProperty(value = "场景实例状态")
+    private Integer sceneStatus;
+
+    @ApiModelProperty(value = "场景实例状态描述")
+    private String sceneStatusDesc;
+
+    @ApiModelProperty(value = "状态信息")
+    private String processMessage;
+}

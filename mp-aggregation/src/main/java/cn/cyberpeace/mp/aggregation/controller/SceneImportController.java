@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
-import cn.cyberpeace.mp.aggregation.dto.sceneimport.MoundRequest;
-import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
+import cn.cyberpeace.mp.aggregation.request.sceneimport.MoundRequest;
+import cn.cyberpeace.mp.aggregation.request.sceneimport.SceneImportRequest;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;

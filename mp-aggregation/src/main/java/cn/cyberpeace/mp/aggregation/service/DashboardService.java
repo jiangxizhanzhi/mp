@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
-import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
-import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -18,8 +18,8 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;

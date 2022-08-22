@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.cyberpeace.mp.front.admin.repository.SysNoticeMapper">
+<mapper namespace="cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper">
 
-    <select id="listNotices" resultType="cn.cyberpeace.mp.front.admin.model.SysNoticeModel">
+    <select id="listNotices" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
     select distinct n.* from mp_sys_notice n
         left join mp_sys_notice_org no on n.id = no.notice_id
             left join mp_sys_notice_role nr on n.id = nr.notice_id
@@ -60,7 +60,7 @@
 
 
 
-    <select id="listCurrentUserNotices" resultType="cn.cyberpeace.mp.front.admin.model.SysNoticeModel">
+    <select id="listCurrentUserNotices" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
         select * from (
         select distinct n.* from mp_sys_notice n
         left join mp_sys_notice_org no on n.id = no.notice_id
@@ -130,7 +130,7 @@
     </select>
 
 
-    <select id="listNoticeMessageByCurrentAdminUser" resultType="cn.cyberpeace.mp.front.admin.model.SysNoticeModel">
+    <select id="listNoticeMessageByCurrentAdminUser" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
         select *
         from (
                  select distinct n.*
@@ -153,7 +153,7 @@
         ORDER BY tabA.pk desc
     </select>
 
-    <select id="listNoticeMessageByCurrentNormalUser" resultType="cn.cyberpeace.mp.front.admin.model.SysNoticeModel">
+    <select id="listNoticeMessageByCurrentNormalUser" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
         select * from (
         select distinct n.* from mp_sys_notice n
         left join mp_sys_notice_org no on n.id = no.notice_id

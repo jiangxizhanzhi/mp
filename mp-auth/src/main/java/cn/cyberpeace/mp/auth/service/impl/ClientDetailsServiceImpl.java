@@ -32,7 +32,7 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_CLIENTS)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_CLIENTS)
     public ClientDetailsModel getByClientId(String clientId) {
         return getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
     }

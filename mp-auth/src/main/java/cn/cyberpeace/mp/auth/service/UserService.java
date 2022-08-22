@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;

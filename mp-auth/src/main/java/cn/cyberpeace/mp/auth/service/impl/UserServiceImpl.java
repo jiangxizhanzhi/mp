@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.dto.user.UserRequest;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -84,7 +84,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
 
@@ -226,6 +226,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         return ret;
     }
 
+    @Override
     public ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs) {
         var ret = super.bulkCreate(objs);
         return ret;

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.register.RegisterRequest;
+import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
