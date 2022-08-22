@@ -148,6 +148,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
+        if (!Boolean.TRUE.equals(csceneAppConfig.getEnableNodeLimitDbCheck())) {
+            return;
+        }
         var elementCount = 0;
         if (cscene == null) {
             var sceneConfigId = getSceneConfigId(csceneId);
