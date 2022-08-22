@@ -10,13 +10,13 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
@@ -88,7 +88,9 @@ import java.util.stream.Collectors;
 public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper, UserFields, UserQueryParams>
         implements UserService {
 
-    public static final String CACHE_VAL_USERMODEL = "USERMODEL_CACHE";
+    public static final String CACHE_VAL_USERMODEL_BY_ID = "USERMODEL_BY_ID_CACHE";
+
+    public static final String CACHE_VAL_USERMODEL_BY_USERNAME = "USERMODEL_BY_USERNAME_CACHE";
 
     public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
 
@@ -146,7 +148,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(value = CACHE_VAL_USERMODEL)
+    @Cacheable(value = CACHE_VAL_USERMODEL_BY_ID)
     public ObjServiceResult<UserModel> get(String id) {
         return super.get(id);
     }
@@ -184,7 +186,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public ListObjServiceResult list(UserQueryParams queryParams) {
-        opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(queryParams.getIds()));
+        opUserPermCheckService.checkByTargetUserIdsForSearching(Objects.nonNull(queryParams.getIds()) ? Arrays.asList(queryParams.getIds()) : null);
         ListObjServiceResult<UserModel> listObjSrvResult = super.list(queryParams);
 
         if (Objects.isNull(listObjSrvResult.getSource()) || CollectionUtil.isEmpty(listObjSrvResult.getSource().getObjs())) {
@@ -408,7 +410,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    @Cacheable(value = CACHE_VAL_USERMODEL)
+    @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));

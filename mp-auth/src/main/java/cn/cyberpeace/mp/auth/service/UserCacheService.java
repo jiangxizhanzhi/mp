@@ -26,7 +26,8 @@ import java.util.Objects;
 public class UserCacheService {
 
     public static final String[] USER_CACHE_VALUES = {
-            UserServiceImpl.CACHE_VAL_USERMODEL, UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
+            UserServiceImpl.CACHE_VAL_USERMODEL_BY_ID, UserServiceImpl.CACHE_VAL_USERMODEL_BY_USERNAME,
+            UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
             AuthUserDetailsService.CACHE_USER_AUTHORITIES,
             OrgUserServiceImpl.CACHE_VAL_ORGS_BY_USERID,
             UserRoleServiceImpl.CACHE_VAL_ROLES,
