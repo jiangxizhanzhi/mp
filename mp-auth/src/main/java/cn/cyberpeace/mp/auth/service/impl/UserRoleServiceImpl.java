@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_45S)
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_MEDIUM)
 public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, UserRoleMapper, UserRoleFields, QueryParams>
         implements UserRoleService {
 

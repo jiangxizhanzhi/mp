@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M)
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG)
 public class UrlACService {
 
     public static final String CACHE_VAL_ALL_URLAC = "ALL_URLAC_DTOS";

@@ -17,6 +17,8 @@ import java.util.List;
 @ConfigurationProperties(prefix = "mp.auth.authenticate")
 public class AuthenticateConfig {
 
+    private Integer cacheTime;
+
     private Boolean useIndividualTokenSecret;
 
     private String jwtSecret;
@@ -35,4 +37,5 @@ public class AuthenticateConfig {
 
         private Integer hashWidth;
     }
+
 }
