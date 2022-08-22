@@ -65,7 +65,8 @@ public class AuthUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException(StringUtils.EMPTY);
         }
 
-        Set<GrantedAuthority> authoritySet = loadAuthorities(user.getId());
+        //Set<GrantedAuthority> authoritySet = loadAuthorities(user.getId());
+        Set<GrantedAuthority> authoritySet = new HashSet<>();
 
         return new AuthUserDetails(user, authoritySet);
     }
