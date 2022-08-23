@@ -42,7 +42,7 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
                                    @Param("selfUserId") String selfUserId,
                                    @Param("excludeRoleIds") List<String> excludeRoleIds,
                                    @Param("excludeUserIds") List<String> excludeUserIds,
-                                   @Param("currentDateTime")LocalDateTime currentDateTime
+                                   @Param("currentDateTime") LocalDateTime currentDateTime
                                    );
 
     Integer selectUserCnt(@Param("orgId") String orgId);
