@@ -22,8 +22,6 @@ public class FlowFileRoot {
 
     private String id;
 
-    private String teamId;
-
     public static class Source {
 
         private String ip;

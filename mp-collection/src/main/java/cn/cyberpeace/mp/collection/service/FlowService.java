@@ -78,7 +78,6 @@ public class FlowService {
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
         for (int i = 0; i < flowFileRoots.size(); i++) {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
-            flowFileRoots.get(i).setTeamId(pageFlowRequest.getTeamId());
         }
 
         List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(this::getTeamFlowModel).collect(Collectors.toList());
@@ -214,9 +213,6 @@ public class FlowService {
             builder.dataId(flowFileRoot.getId());
         }
 
-        if (!StringUtils.isEmpty(flowFileRoot.getTeamId())) {
-            builder.teamId(flowFileRoot.getTeamId());
-        }
         return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
     }
 
