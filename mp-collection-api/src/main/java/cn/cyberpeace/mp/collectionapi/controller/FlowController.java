@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collection.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
@@ -16,6 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,14 +27,14 @@ import java.util.Objects;
 @Api(value = "", tags = "")
 public class FlowController {
 
-    @Autowired
-    private FlowService flowService;
+    @Resource
+    private FlowInfoServiceImpl flowInfoService;
 
     @GetMapping("/detail")
     @ApiOperation(value = "查询一条流量的详细信息", notes = "")
     public ServiceResult<FlowDetailVO> queryFlowDetailInfo(FlowQueryRequest flowQueryRequest) {
 
-        var flowDetailInfo = flowService.queryFlowDetail(flowQueryRequest).getSource();
+        var flowDetailInfo = flowInfoService.queryFlowDetail(flowQueryRequest).getSource();
 
         if (Objects.isNull(flowDetailInfo)) {
             return new ServiceResult<>(new FlowDetailVO());
@@ -57,7 +59,7 @@ public class FlowController {
     public ListObjServiceResult<TeamFlowVO> queryFlowPageEvents(PageFlowRequest request) {
         request.ensure();
 
-        var teamFlowInfoListObjResult = flowService.queryFlowPage(request).getSource();
+        var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
 
         if (CollectionUtil.isEmpty(teamFlowInfoListObjResult.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
