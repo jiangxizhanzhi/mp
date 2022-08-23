@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.core.es.CollectionBaseService;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
+import cn.cyberpeace.mp.collection.core.es.RestHighLevelClientImpl;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
@@ -28,6 +29,7 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -72,7 +74,8 @@ public class FlowService extends CollectionBaseService {
     public ListObjServiceResult<TeamFlowInfo> queryFlowPage(PageFlowRequest pageFlowRequest) {
         log.info("{}", pageFlowRequest);
 
-        String[] indexArray = buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
+        //String[] indexArray = buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
+        String[] indexArray = buildEsIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -312,14 +315,17 @@ public class FlowService extends CollectionBaseService {
         return indexArray;
     }
 
-    public static String[] buildEsIndex(LocalDateTime start, LocalDateTime end, String teamId) {
+    public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
         if (Objects.nonNull(start) && Objects.nonNull(end)) {
             return buildRequestIndex(start, end);
         }
         if (Objects.isNull(start) || Objects.isNull(end)) {
             IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-
+            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
+            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+            String[] test = indices.getIndices();
+            return indices.getIndices();
         }
         return new String[]{};
     }
