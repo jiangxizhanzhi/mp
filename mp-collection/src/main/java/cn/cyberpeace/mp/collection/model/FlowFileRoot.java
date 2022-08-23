@@ -1,9 +1,12 @@
 package cn.cyberpeace.mp.collection.model;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import io.swagger.models.auth.In;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * json解析
@@ -21,6 +24,9 @@ public class FlowFileRoot {
     private Long timestamp;
 
     private String id;
+
+    @JSONField(name = "teamId")
+    private String teamId;
 
     public static class Source {
 
@@ -88,6 +94,7 @@ public class FlowFileRoot {
         private Integer packets;
 
         private List<String> mac;
+
         public List<String> getMac() {
             return mac;
         }

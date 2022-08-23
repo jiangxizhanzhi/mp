@@ -1,4 +1,5 @@
 package cn.cyberpeace.mp.collection.BO;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +13,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FlowDetailInfo {
+    @ApiModelProperty(value = "队伍id")
+    private String teamId;
 
     @ApiModelProperty(value = "流量类型")
     private String protocol;

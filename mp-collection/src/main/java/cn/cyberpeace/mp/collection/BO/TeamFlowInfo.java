@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class TeamFlowInfo {
 
+    @ApiModelProperty(value = "战队id")
+    private String teamId;
+
     @ApiModelProperty(value = "流量类型")
     private String protocol;
 
