@@ -78,27 +78,26 @@ mp:
       #wazuh 开放接口用户名密码
       username: ${WAZUH_USERNAME:wazuh}
       password: ${WAZUH_PASSWORD:Abcd123#}
+    team:
+      groups:
+        - group-id: "001"
+          es-node: 10.100.0.101:9205
+          wazuh-url: http://10.100.7.1:15500
+          nodes:
+            - node-ip: 10.100.7.1
+              node-name: controller
+            - node-ip: 192.168.1.60
+              node-name: fd29005e599a4b419aa7a7ac5b2a1863
+        - group-id: "002"
+          es-node: 10.100.0.251:9205
+          wazuh-url: http://10.100.0.251:15500
+          nodes:
+            - node-ip: 10.100.0.251
+              node-name: test251
   log:
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
     exclude-uri: /login
     exclude-method: OPTIONS
-  auth:
-    activation:
-      enable: true
-      licenseDir: /home/mp/config/license
-    url-ac-filter:
-      enabled: true
-      method-match: true
-      authority-match: true
-      ignore-if-not-defined: false
-    biz:
-      max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
-      logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
-    authenticate:
-      use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
-      jwt-secret: ${MP_AUTH_JWT_SECRET:}
-      jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-      urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
 
 management:
   endpoints:
