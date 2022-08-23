@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.collection.utils;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.collection.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.collection.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.collection.constant.CollectionConstant;
+import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
@@ -58,25 +58,25 @@ public class WazuhHttpsUtils {
             uriBuilder.setParameters(params);
             HttpGet httpGet = new HttpGet(uriBuilder.build());
 
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + CollectionConstant.wazuhToken.get("wazuhToken"));
             response = httpClient.execute(httpGet);
             StatusLine sl = response.getStatusLine();
             if (sl.getStatusCode() == 401) {
-                SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+                CollectionConstant.wazuhToken.invalidate("wazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + CollectionConstant.wazuhToken.get("wazuhToken"));
                 response = httpClient.execute(httpGet);
             }
 
             StatusLine sl2 = response.getStatusLine();
             if (sl2.getStatusCode() != 200) {
                 log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
-                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+                throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
             }
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("wazuh api query error!");
@@ -111,13 +111,13 @@ public class WazuhHttpsUtils {
             StatusLine sl2 = response.getStatusLine();
             if (sl2.getStatusCode() != 200) {
                 log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
-                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+                throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
             }
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
             throw new MpRuntimeException("wazuh api query error!");
@@ -138,25 +138,25 @@ public class WazuhHttpsUtils {
             httpClient = createIgnoreSSLHttpClient();
 
             HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+            httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + CollectionConstant.wazuhToken.get("wazuhToken"));
             response = httpClient.execute(httpGet);
             StatusLine sl = response.getStatusLine();
             if (sl.getStatusCode() == 401) {
-                SituationalAwareConstant.wazuhToken.invalidate("wazuhToken");
-                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + SituationalAwareConstant.wazuhToken.get("wazuhToken"));
+                CollectionConstant.wazuhToken.invalidate("wazuhToken");
+                httpGet.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + CollectionConstant.wazuhToken.get("wazuhToken"));
                 response = httpClient.execute(httpGet);
             }
 
             StatusLine sl2 = response.getStatusLine();
             if (sl2.getStatusCode() != 200) {
                 log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
-                throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+                throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
             }
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
 //            processException(e);
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
@@ -185,7 +185,7 @@ public class WazuhHttpsUtils {
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(SituationalAwareErrorCode.CONNECTION_FAIL);
+            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
         } catch (Exception e) {
 //            processException(e);
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));

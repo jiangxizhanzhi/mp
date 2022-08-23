@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.collection.config.SituationCacheConfig;
 import cn.cyberpeace.mp.collection.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.collection.model.*;
 import cn.cyberpeace.mp.collection.model.enums.FileEventType;
@@ -45,6 +46,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -58,6 +60,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@CacheConfig(cacheManager = SituationCacheConfig.CACHE_MANAGER)
 public class EsClient extends CollectionBaseService {
     @Resource(name = "restHighLevelClientImpl")
     private IRestHighLevelClient restHighLevelClient;

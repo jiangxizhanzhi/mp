@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collectionapi.BO;
+package cn.cyberpeace.mp.collectionapi.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class SystemUserBO {
+public class SystemUserVO {
     @ApiModelProperty(value = "comment")
     private String comment;
 

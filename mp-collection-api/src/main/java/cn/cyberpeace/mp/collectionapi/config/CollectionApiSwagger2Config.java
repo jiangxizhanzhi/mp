@@ -1,12 +1,14 @@
 package cn.cyberpeace.mp.collectionapi.config;
 
 import cn.cyberpeace.mp.base.config.Swagger2Config;
-import cn.cyberpeace.mp.collection.config.CollectionSwagger2Config;
 import cn.hutool.core.collection.CollectionUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.builders.RequestParameterBuilder;
+import springfox.documentation.service.ParameterType;
+import springfox.documentation.service.RequestParameter;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 
@@ -14,6 +16,15 @@ import javax.annotation.Resource;
 
 @Configuration
 public class CollectionApiSwagger2Config {
+
+    public static RequestParameter authParameter = new RequestParameterBuilder()
+            .name("Authorization")
+            .description("认证")
+            .in(ParameterType.HEADER)
+            .query(q -> q.allowEmptyValue(true))
+            .required(false)
+            .build();
+
     @Resource
     private Swagger2Config swagger2Config;
 
@@ -26,7 +37,7 @@ public class CollectionApiSwagger2Config {
                 .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.collectionapi"))
                 .paths(PathSelectors.any())
                 .build()
-                .globalRequestParameters(CollectionUtil.toList(CollectionSwagger2Config.authParameter))
+                .globalRequestParameters(CollectionUtil.toList(authParameter))
                 .groupName("collection-api");
     }
 

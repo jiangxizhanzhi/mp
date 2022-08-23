@@ -1,14 +1,14 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
-import cn.cyberpeace.mp.collectionapi.BO.HostBO;
-import cn.cyberpeace.mp.collectionapi.BO.ProcessBO;
-import cn.cyberpeace.mp.collectionapi.BO.SystemUserBO;
+import cn.cyberpeace.mp.collectionapi.vo.HostVO;
+import cn.cyberpeace.mp.collectionapi.vo.ProcessVO;
+import cn.cyberpeace.mp.collectionapi.vo.SystemUserVO;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.collection.config.GroupConfig;
+import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
 import cn.cyberpeace.mp.collection.model.FileEventModel;
 import cn.cyberpeace.mp.collection.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
@@ -68,7 +68,7 @@ public class DataCollectionController {
 
     @GetMapping("/process_info")
     @ApiOperation(value = "查询进程信息", notes = "")
-    public ListObjServiceResult<ProcessBO> queryProcessInfo(PageQueryRequest request) {
+    public ListObjServiceResult<ProcessVO> queryProcessInfo(PageQueryRequest request) {
         var group = getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -90,9 +90,9 @@ public class DataCollectionController {
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        List<ProcessBO> res = new ArrayList<>();
+        List<ProcessVO> res = new ArrayList<>();
         result.getObjs().forEach(wazuhProcessModel -> {
-            var process = new ProcessBO();
+            var process = new ProcessVO();
             BeanUtils.copyProperties(wazuhProcessModel, process);
             res.add(process);
         });
@@ -101,7 +101,7 @@ public class DataCollectionController {
 
     @GetMapping("/host_info")
     @ApiOperation(value = "查询主机信息", notes = "")
-    public ListObjServiceResult<HostBO> queryHostInfo(PageQueryRequest request) {
+    public ListObjServiceResult<HostVO> queryHostInfo(PageQueryRequest request) {
         var group = getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -123,9 +123,9 @@ public class DataCollectionController {
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        List<HostBO> res = new ArrayList<>();
+        List<HostVO> res = new ArrayList<>();
         result.getObjs().forEach(wazuhHostStateModel -> {
-            var host = new HostBO();
+            var host = new HostVO();
             host.setAgentIp(wazuhHostStateModel.getAgentIp());
             host.setMemoryUsePercent(wazuhHostStateModel.getMemoryPercent());
             host.setDiskUsePercent(wazuhHostStateModel.getDiskPercent());
@@ -158,7 +158,7 @@ public class DataCollectionController {
 
     @GetMapping("/system_user")
     @ApiOperation(value = "查询用户信息", notes = "")
-    public ListObjServiceResult<SystemUserBO> querySystemUser(PageQueryRequest request) {
+    public ListObjServiceResult<SystemUserVO> querySystemUser(PageQueryRequest request) {
         var group = getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
@@ -180,9 +180,9 @@ public class DataCollectionController {
         if (CollectionUtils.isEmpty(result.getObjs())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
         }
-        List<SystemUserBO> res = new ArrayList<>();
+        List<SystemUserVO> res = new ArrayList<>();
         result.getObjs().forEach(wazuhSystemUserModel -> {
-            var systemUser = new SystemUserBO();
+            var systemUser = new SystemUserVO();
             BeanUtils.copyProperties(wazuhSystemUserModel, systemUser);
             res.add(systemUser);
         });

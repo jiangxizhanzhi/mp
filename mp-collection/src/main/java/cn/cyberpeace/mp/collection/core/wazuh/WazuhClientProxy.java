@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.collection.core.wazuh;
 
-import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.collection.config.GroupConfig;
+import cn.cyberpeace.mp.collection.config.ClusterConfig;
 import cn.cyberpeace.mp.collection.context.ContextHolder;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
@@ -23,10 +23,10 @@ public class WazuhClientProxy implements MethodInterceptor {
     }
 
     public static void init(String wazuhUsername, String wazuhPassword) {
-        if (!init) {
+        if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
             wazuhClientMap = new ConcurrentHashMap<>();
-            var group = BeanCommon.getBean(GroupConfig.class);
-            group.getGroups().forEach(g -> wazuhClientMap.put(g.getGroupId(), new WazuhClient(g.getWazuhUrl(), wazuhUsername, wazuhPassword)));
+            ClusterConfig.nodes.forEach(node ->
+                    wazuhClientMap.put(node.getNodeId(), new WazuhClient(node.getWazuhUrl(), wazuhUsername, wazuhPassword)));
             init = true;
         }
     }

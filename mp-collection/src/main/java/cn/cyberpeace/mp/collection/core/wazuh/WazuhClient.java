@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.collection.core.wazuh;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.collection.config.SituationCacheConfig;
-import cn.cyberpeace.mp.collection.constant.SituationalAwareErrorCode;
+import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
 import cn.cyberpeace.mp.collection.constant.WazuhUrlConstant;
 import cn.cyberpeace.mp.collection.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseRequest;
@@ -221,7 +221,7 @@ public class WazuhClient extends RequestProcessor{
 
             if (agents.size() > 1) {
                 log.error("agentName:{} is not unique! {}", agentName, agents);
-                throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_ERROR);
+                throw new MpRuntimeException(CollectionErrorCode.WAZUH_AGENTS_QUERY_ERROR);
             }
 
             return agents.get(0).getId();
