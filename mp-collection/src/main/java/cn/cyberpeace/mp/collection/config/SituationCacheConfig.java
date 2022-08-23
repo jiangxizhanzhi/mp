@@ -16,10 +16,10 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class SituationCacheConfig {
 
-    public static final String CACHE_MANAGER = "situationCacheManager";
+    public static final String CACHE_MANAGER = "collectionCacheManager";
 
     @Bean(name = CACHE_MANAGER)
-    public CacheManager situationCacheManager() {
+    public CacheManager collectionCacheManager() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         Caffeine caffeine = Caffeine.newBuilder().expireAfterWrite(20, TimeUnit.SECONDS).recordStats();
         caffeineCacheManager.setCaffeine(caffeine);

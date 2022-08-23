@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.BO;
+package cn.cyberpeace.mp.collection.vo;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

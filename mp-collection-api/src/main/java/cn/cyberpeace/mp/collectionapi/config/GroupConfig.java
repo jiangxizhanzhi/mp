@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.config;
+package cn.cyberpeace.mp.collectionapi.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

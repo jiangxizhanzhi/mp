@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.collection.core.es;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.collection.config.GroupConfig;
+import cn.cyberpeace.mp.collection.config.ClusterConfig;
 import cn.cyberpeace.mp.collection.context.ContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,11 +21,9 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,22 +31,20 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Slf4j
 public class RestHighLevelClientImpl implements IRestHighLevelClient{
-    private static Map<String,RestHighLevelClient> restHighLevelClientMap = new ConcurrentHashMap<>();
+    private static volatile boolean init = false;
 
-    @Resource
-    private GroupConfig groupConfig;
+    private static Map<String, RestHighLevelClient> restHighLevelClientMap;
 
-    @Autowired
-    public RestHighLevelClientImpl(GroupConfig groupConfig) {
-        this.groupConfig = groupConfig;
-        if (this.groupConfig != null && CollectionUtils.isNotEmpty(this.groupConfig.getGroups())) {
-            for (var group : this.groupConfig.getGroups()) {
-                restHighLevelClientMap.put(group.getGroupId(), this.restHighLevelClient(group.getEsNode()));
-            }
+    public static void initClientMap() {
+        if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
+            restHighLevelClientMap = new ConcurrentHashMap<>();
+            ClusterConfig.nodes.forEach(node ->
+                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAdress())));
+            init = true;
         }
     }
 
-    public RestHighLevelClient restHighLevelClient(String esAdress) {
+    public static RestHighLevelClient restHighLevelClient(String esAdress) {
         return new RestHighLevelClient(RestClient.builder(createHttpHost(esAdress)));
     }
 

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.collection.constant.SituationalAwareConstant;
+import cn.cyberpeace.mp.collection.constant.CollectionConstant;
 import cn.cyberpeace.mp.collection.model.*;
 import cn.cyberpeace.mp.collection.request.*;
 import cn.cyberpeace.mp.collection.service.DataCollectService;
@@ -30,7 +30,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ListObjServiceResult<FileEventModel> queryFileModifyEvents(SyscheckEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.FILE_MODIFY_GROUP);
+        wazuhEventRequest.setRuleGroups(CollectionConstant.FILE_MODIFY_GROUP);
         var result = esClient.queryFileEvents(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
@@ -39,7 +39,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ListObjServiceResult<FileEventModel> queryRegistryModifyEvents(SyscheckEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.REGISTRY_MODIFY_GROUP);
+        wazuhEventRequest.setRuleGroups(CollectionConstant.REGISTRY_MODIFY_GROUP);
         var result = esClient.queryFileEvents(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
@@ -79,7 +79,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(VulnerabilityEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.VULNERABILITY_GROUP);
+        wazuhEventRequest.setRuleGroups(CollectionConstant.VULNERABILITY_GROUP);
         var result = esClient.queryVulnerabilityInfo(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
@@ -88,7 +88,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ServiceResult<List<WazuhVulnerabilityInfoCountModel>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        wazuhEventRequest.setRuleGroups(SituationalAwareConstant.VULNERABILITY_GROUP);
+        wazuhEventRequest.setRuleGroups(CollectionConstant.VULNERABILITY_GROUP);
         var result = esClient.queryVulnerabilityCountInfo(wazuhEventRequest,
                 request.getFiledPath(), request.getFiledName());
         return new ServiceResult<>(result);

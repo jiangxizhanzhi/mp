@@ -7,12 +7,10 @@ import java.util.List;
 /**
  * 态势感知全局缓存
  */
-public class SituationalAwareConstant {
+public class CollectionConstant {
     public static LoadingCache<String, String> wazuhToken;
 
-    public static Integer ES_DOC_MAXCOUNT = 10000;
-
-    public static String ERROR_CODE_PREFIX = "situationaware.error_code.";
+    public static String ERROR_CODE_PREFIX = "collection.error_code.";
 
     public static List<String> VULNERABILITY_GROUP = List.of("vulnerability-detector");
 

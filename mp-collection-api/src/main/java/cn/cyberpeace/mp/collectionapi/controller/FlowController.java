@@ -1,9 +1,9 @@
-package cn.cyberpeace.mp.situationaware.controller;
+package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
+import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
+import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.service.FlowService;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
@@ -11,8 +11,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/flow")
