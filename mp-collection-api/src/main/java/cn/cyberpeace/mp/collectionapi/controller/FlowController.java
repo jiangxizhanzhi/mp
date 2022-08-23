@@ -3,8 +3,6 @@ package cn.cyberpeace.mp.collectionapi.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.service.FlowService;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
