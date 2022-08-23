@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.collection.request.HostMonitorBaseRequest;
 import cn.cyberpeace.mp.collection.request.HostMonitorPageRequest;
 import cn.cyberpeace.mp.collection.service.HostMonitorService;
-import cn.cyberpeace.mp.collection.core.es.EsClient;
+import cn.cyberpeace.mp.collection.core.es.CollectionClient;
 import cn.cyberpeace.mp.collection.core.wazuh.WazuhClientProxy;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class HostMonitorServiceImpl implements HostMonitorService {
     @Resource
-    private EsClient esClient;
+    private CollectionClient collectionClient;
 
 
     @Override
@@ -51,7 +51,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ListObjServiceResult<WazuhHostStateModel> queryHostStateEventsWithTimeRange(HostMonitorPageRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.queryHostStateEventsWithTimeRange(pageRequest);
+        var result = collectionClient.queryHostStateEventsWithTimeRange(pageRequest);
         return new ListObjServiceResult<>(result);
     }
 
@@ -59,7 +59,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ListObjServiceResult<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(HostMonitorPageRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.queryNetConnEventsWithTimeRange(pageRequest);
+        var result = collectionClient.queryNetConnEventsWithTimeRange(pageRequest);
         // 分页处理
         int offset = (request.getPageNum() - 1) * request.getPageSize();
         int total = result.size();
@@ -71,7 +71,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ListObjServiceResult<WazuhProcessModel> queryProcessesWithTimeRange(HostMonitorPageRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.queryProcessesWithTimeRange(pageRequest);
+        var result = collectionClient.queryProcessesWithTimeRange(pageRequest);
         // 分页处理
         int offset = (request.getPageNum() - 1) * request.getPageSize();
         int total = result.size();
@@ -83,7 +83,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ListObjServiceResult<WazuhSystemUserModel> querySystemUserWithTimeRange(HostMonitorPageRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.querySystemUserWithTimeRange(pageRequest);
+        var result = collectionClient.querySystemUserWithTimeRange(pageRequest);
         // 分页处理
         int offset = (request.getPageNum() - 1) * request.getPageSize();
         int total = result.size();
@@ -95,7 +95,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ServiceResult<Integer> sumEnvVarChangedCountByTimeRange(HostMonitorBaseRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.sumEnvVarChangedCountByTimeRange(pageRequest);
+        var result = collectionClient.sumEnvVarChangedCountByTimeRange(pageRequest);
         return new ServiceResult<>(result);
     }
 
@@ -103,7 +103,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ServiceResult<Integer> sumSysUsersChangedCountByTimeRange(HostMonitorBaseRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.sumSysUsersChangedCountByTimeRange(pageRequest);
+        var result = collectionClient.sumSysUsersChangedCountByTimeRange(pageRequest);
         return new ServiceResult<>(result);
     }
 
@@ -111,7 +111,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ServiceResult<Integer> sumProcessesChangedCountByTimeRange(HostMonitorBaseRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.sumProcessesChangedCountByTimeRange(pageRequest);
+        var result = collectionClient.sumProcessesChangedCountByTimeRange(pageRequest);
         return new ServiceResult<>(result);
     }
 
@@ -119,7 +119,7 @@ public class HostMonitorServiceImpl implements HostMonitorService {
     public ServiceResult<Integer> sumNetConnsChangedCountByTimeRange(HostMonitorBaseRequest request) {
         WazuhHostMonitorPageRequest pageRequest = new WazuhHostMonitorPageRequest();
         BeanUtils.copyProperties(request, pageRequest);
-        var result = esClient.sumNetConnsChangedCountByTimeRange(pageRequest);
+        var result = collectionClient.sumNetConnsChangedCountByTimeRange(pageRequest);
         return new ServiceResult<>(result);
     }
 }

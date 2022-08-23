@@ -14,7 +14,7 @@ public class ClusterConfig {
     @Data
     public static class Node {
         private String nodeId;
-        private String esAdress;
+        private String esAddress;
         private String wazuhUrl;
     }
 }

@@ -39,19 +39,19 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
         if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
             restHighLevelClientMap = new ConcurrentHashMap<>();
             ClusterConfig.nodes.forEach(node ->
-                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAdress())));
+                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAddress())));
             init = true;
         }
     }
 
-    public static RestHighLevelClient restHighLevelClient(String esAdress) {
-        return new RestHighLevelClient(RestClient.builder(createHttpHost(esAdress)));
+    public static RestHighLevelClient restHighLevelClient(String esAddress) {
+        return new RestHighLevelClient(RestClient.builder(createHttpHost(esAddress)));
     }
 
     @Override
     public SearchResponse search(SearchRequest searchRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getGroupId()).search(searchRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             log.error("es query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -61,7 +61,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public SearchResponse scroll(SearchScrollRequest scrollRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getGroupId()).scroll(scrollRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).scroll(scrollRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es scroll error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -71,7 +71,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public CountResponse count(CountRequest countRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getGroupId()).count(countRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).count(countRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es count error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -81,7 +81,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public BulkByScrollResponse deleteByQuery(DeleteByQueryRequest deleteRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getGroupId()).deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es delete by query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -91,16 +91,16 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public GetIndexResponse getIndices(GetIndexRequest getIndexRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);
+            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es get indices error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
-    private static HttpHost[] createHttpHost(String esAdress) {
-        Asserts.check(!ObjectUtils.isEmpty(esAdress), "ElasticSearch cluster ip address cannot empty");
-        String[] ipArray = esAdress.split(",");
+    private static HttpHost[] createHttpHost(String esAddress) {
+        Asserts.check(!ObjectUtils.isEmpty(esAddress), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = esAddress.split(",");
         var httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
             var ipAddress = ipArray[i];

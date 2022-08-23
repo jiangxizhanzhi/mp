@@ -2,9 +2,8 @@ package cn.cyberpeace.mp.collection.core.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.collection.config.SituationCacheConfig;
+import cn.cyberpeace.mp.collection.config.CollectionCacheConfig;
 import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
-import cn.cyberpeace.mp.collection.constant.WazuhUrlConstant;
 import cn.cyberpeace.mp.collection.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseResponse;
@@ -14,7 +13,6 @@ import cn.cyberpeace.mp.collection.model.wazuh.syscollector.NetAddr;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
-import cn.cyberpeace.mp.collection.utils.WazuhHttpsUtils;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import cn.hutool.core.util.URLUtil;
@@ -73,7 +71,7 @@ public class WazuhClient extends RequestProcessor{
      * @param agentRequest
      * @return
      */
-    @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
+    @Cacheable(cacheManager = CollectionCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public ListObjResult<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;

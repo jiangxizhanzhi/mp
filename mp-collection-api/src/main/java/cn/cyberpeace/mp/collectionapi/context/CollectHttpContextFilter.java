@@ -18,7 +18,9 @@ public class CollectHttpContextFilter extends OncePerRequestFilter {
         try {
             var groupId = request.getParameter(TEAM_ID);
             if (StringUtils.isNotEmpty(groupId)) {
-                ContextHolder.setGroupId(groupId);
+                ContextHolder.ContextBo context = new ContextHolder.ContextBo();
+                context.setGroupId(groupId);
+                ContextHolder.setContext(context);
             }
             filterChain.doFilter(request, response);
         } catch (ServletException | IOException e) {

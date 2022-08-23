@@ -21,7 +21,7 @@ public class CollectionApiInit implements ApplicationRunner {
         if (CollectionUtils.isNotEmpty(groupConfig.getGroups())) {
             groupConfig.getGroups().forEach(group -> {
                 ClusterConfig.Node node = new ClusterConfig.Node();
-                node.setEsAdress(group.getEsNode());
+                node.setEsAddress(group.getEsNode());
                 node.setNodeId(group.getGroupId());
                 node.setWazuhUrl(group.getWazuhUrl());
                 ClusterConfig.nodes.add(node);

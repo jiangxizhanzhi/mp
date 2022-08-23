@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @Date：2022/4/8 10:33
  */
 @Configuration
-public class SituationCacheConfig {
+public class CollectionCacheConfig {
 
     public static final String CACHE_MANAGER = "collectionCacheManager";
 

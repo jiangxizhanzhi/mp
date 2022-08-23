@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
-import cn.cyberpeace.mp.collection.core.es.CollectionBaseService;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
@@ -44,7 +43,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @Component
-public class FlowService extends CollectionBaseService {
+public class FlowService {
     @Resource(name = "restHighLevelClientImpl")
     private IRestHighLevelClient restHighLevelClient;
     private static final String ARKIME_SESSIONS3_ = "arkime_sessions3-";

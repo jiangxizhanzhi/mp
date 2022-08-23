@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.utils;
+package cn.cyberpeace.mp.collection.core.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.collection.constant.CollectionConstant;
