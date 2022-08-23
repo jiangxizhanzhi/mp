@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.core.es.CollectionBaseService;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
-import cn.cyberpeace.mp.collection.core.es.RestHighLevelClientImpl;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
@@ -20,10 +19,6 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.core.CountRequest;
-import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -65,7 +60,6 @@ public class FlowService extends CollectionBaseService {
     public ListObjServiceResult<TeamFlowInfo> queryFlowPage(PageFlowRequest pageFlowRequest) {
         log.info("{}", pageFlowRequest);
 
-        //String[] indexArray = buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
         String[] indexArray = buildEsIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
@@ -99,7 +93,7 @@ public class FlowService extends CollectionBaseService {
 
     public ServiceResult<FlowDetailInfo> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
         log.info("{}", flowQueryRequest);
-        String[] indexArray = buildRequestIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
+        String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -146,18 +140,15 @@ public class FlowService extends CollectionBaseService {
             buildRuleProtocolQuery(pageFlowRequest.getProtocol(), boolQueryBuilder);
         }
 
-        Long starTimestamp = Objects.nonNull(pageFlowRequest.getStartTime()) ?
-                pageFlowRequest.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : 0L;
-        Long endTimestamp = Objects.nonNull(pageFlowRequest.getEndTime()) ?
-                pageFlowRequest.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : 0L;
-        if (Objects.nonNull(pageFlowRequest.getStartTime()) || Objects.nonNull(pageFlowRequest.getEndTime())) {
-            if ((starTimestamp > 0L) && (endTimestamp > 0L)) {
-                buildRuleStarEndTimeQuery(starTimestamp, endTimestamp, boolQueryBuilder);
-            } else if (starTimestamp > 0L) {
-                buildRuleStarTimeQuery(starTimestamp, boolQueryBuilder);
-            } else if (endTimestamp > 0L) {
-                buildRuleEndTimeQuery(endTimestamp, boolQueryBuilder);
-            }
+        if (Objects.nonNull(pageFlowRequest.getStartTime())) {
+            buildRuleStarTimeQuery(
+                    pageFlowRequest.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    boolQueryBuilder);
+        }
+        if (Objects.nonNull(pageFlowRequest.getEndTime())) {
+            buildRuleEndTimeQuery(
+                    pageFlowRequest.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    boolQueryBuilder);
         }
     }
 
@@ -183,9 +174,6 @@ public class FlowService extends CollectionBaseService {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("protocol", protocol));
     }
 
-    private void buildRuleStarEndTimeQuery(Long startTime, Long endTime, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").gte(startTime).lte(endTime));
-    }
 
     private void buildRuleStarTimeQuery(Long startTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").gte(startTime));
@@ -315,11 +303,11 @@ public class FlowService extends CollectionBaseService {
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
             GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
             GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-            String[] test = indices.getIndices();
             return indices.getIndices();
         }
         return new String[]{};
     }
+
     /**
      * @return List<IndexBoost>
      */
