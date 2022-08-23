@@ -33,7 +33,7 @@ public class WazuhClientProxy implements MethodInterceptor {
 
     @Override
     public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
-        var groupId = ContextHolder.getGroupId();
+        var groupId = ContextHolder.getContext().getGroupId();
         WazuhClient wazuhClient = wazuhClientMap.get(groupId);
         return method.invoke(wazuhClient, objects);
     }

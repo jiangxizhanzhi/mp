@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.constant;
+package cn.cyberpeace.mp.collection.core.wazuh;
 
 public class WazuhUrlConstant {
     public static final String AUTHENTICATE_URL = "/security/user/authenticate?raw=true";
