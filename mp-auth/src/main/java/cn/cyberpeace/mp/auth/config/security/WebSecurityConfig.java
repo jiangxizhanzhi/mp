@@ -1,13 +1,14 @@
 package cn.cyberpeace.mp.auth.config.security;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.extensions.security.ClientAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationFailureHandler;
 import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationSuccessHandler;
-import cn.cyberpeace.mp.auth.extensions.security.CustomUsernamePasswordAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.HttpAuthenticationEntryPoint;
 import cn.cyberpeace.mp.auth.extensions.security.HttpLogoutSuccessHandler;
-import cn.cyberpeace.mp.auth.extensions.security.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.filter.ClientAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.filter.CustomUsernamePasswordAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.filter.JwtAuthenticationFilter;
+import cn.cyberpeace.mp.auth.extensions.security.filter.LoadAuthoritiesFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationFilter;
 import cn.cyberpeace.mp.auth.extensions.security.mobile.MobilePasswordAuthenticationProvider;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
@@ -43,6 +44,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private CustomAuthenticationSuccessHandler authenticationSuccessHandler;
     private CustomAuthenticationFailureHandler authenticationFailureHandler;
     private ClientAuthenticationFilter clientAuthenticationFilter;
+    private LoadAuthoritiesFilter loadAuthoritiesFilter;
 
     @Autowired
     private AuthenticateConfig authenticateConfig;
@@ -54,7 +56,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                              JwtAuthenticationFilter jwtAuthenticationFilter,
                              CustomAuthenticationSuccessHandler authenticationSuccessHandler,
                              CustomAuthenticationFailureHandler authenticationFailureHandler,
-                             ClientAuthenticationFilter clientAuthenticationFilter) {
+                             ClientAuthenticationFilter clientAuthenticationFilter,
+                             LoadAuthoritiesFilter loadAuthoritiesFilter) {
         this.userDetailsService = userDetailsService;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.logoutSuccessHandler = logoutSuccessHandler;
@@ -62,6 +65,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         this.authenticationSuccessHandler = authenticationSuccessHandler;
         this.authenticationFailureHandler = authenticationFailureHandler;
         this.clientAuthenticationFilter = clientAuthenticationFilter;
+        this.loadAuthoritiesFilter = loadAuthoritiesFilter;
     }
 
     @Override
@@ -97,7 +101,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessHandler(logoutSuccessHandler)
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(clientAuthenticationFilter, JwtAuthenticationFilter.class)
+                .addFilterAfter(loadAuthoritiesFilter, JwtAuthenticationFilter.class);
 //                .addFilterBefore(licenseFilter, ClientAuthenticationFilter.class);
 
         // usernamePassword

@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
@@ -16,14 +16,13 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
-import cn.cyberpeace.mp.devops.log.request.OperationLogPageRequest;
-import cn.cyberpeace.mp.devops.log.response.OperationLogPageResponse;
+import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.cglib.core.Local;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -43,7 +42,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S)
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnlineRecordModel, UserOnlineRecordMapper, UserOnlineRecordFields, QueryParams> implements UserOnlineRecordService {
 
     @Autowired

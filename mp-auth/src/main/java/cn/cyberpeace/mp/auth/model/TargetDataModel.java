@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.model;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.validate.AddGroup;
+import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;

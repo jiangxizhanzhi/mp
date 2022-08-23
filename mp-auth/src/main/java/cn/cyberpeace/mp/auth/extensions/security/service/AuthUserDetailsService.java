@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security.service;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -9,6 +10,8 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,7 +30,10 @@ import java.util.Set;
  */
 @Slf4j
 @Service
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class AuthUserDetailsService implements UserDetailsService {
+
+    public static final String CACHE_USER_AUTHORITIES = "USER_AUTHORITIES_CACHE";
 
     private final UserService userService;
 
@@ -91,6 +97,7 @@ public class AuthUserDetailsService implements UserDetailsService {
      * @param userId
      * @return
      */
+    @Cacheable(value = CACHE_USER_AUTHORITIES)
     public Set<GrantedAuthority> loadAuthorities(String userId) {
         List<RoleModel> roles = userRoleService.listByUserId(userId);
         Set<GrantedAuthority> authoritySet = new HashSet<>();

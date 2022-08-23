@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -18,6 +19,8 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +33,15 @@ import java.util.List;
  * @Date：2021/8/31 11:13
  */
 @Service
+@CacheConfig(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL)
 public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePermissionModel, RolePermissionMapper, RolePermissionFields, QueryParams>
         implements RolePermissionModelService {
+
+    public static final String CACHE_TARGETS_BY_ROLES = "TARGETS_BY_ROLES";
 
     @Autowired
     private RoleService roleService;
 
-//    @Autowired
-//    private RolePermissionMapper rolePermissionMapper;
 
     @Autowired
     public RolePermissionModelServiceImpl(RolePermissionMapper modelMapper, RolePermissionFields modelFields) {
@@ -46,6 +50,7 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     }
 
     @Override
+    @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
         if (CollectionUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));

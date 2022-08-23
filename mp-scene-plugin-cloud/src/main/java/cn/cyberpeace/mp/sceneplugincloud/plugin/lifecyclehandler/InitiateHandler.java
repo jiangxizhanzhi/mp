@@ -423,11 +423,11 @@ public class InitiateHandler extends HandlerCommon {
                     portIps.add(port.getIp());
                 }
             }
-            if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
+            if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 gatewayCount++;
             }
             List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
-            if (connectedNetwork.network.getAuxiliaryNetworkRouterOn()) {
+            if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
                 connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
             }
             if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
@@ -712,6 +712,7 @@ public class InitiateHandler extends HandlerCommon {
             cloudElement.getDeriveNetworks().add(connectNetwork);
         } else if (Boolean.TRUE.equals(cloudElement.getExternal()) && role != null && role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
             CloudPluginSceneElementNetworkBO network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
+            this.loadProperties2Network(network, cloudElement);
             network.setExternal(true);
             network.setResourceId(cloudElement.getResourceId());
             var connectNetwork = new ConnectedNetworkBO(network, getHandlerUtils());

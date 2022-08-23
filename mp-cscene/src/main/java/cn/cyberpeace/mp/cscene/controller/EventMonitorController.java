@@ -2,12 +2,12 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.dto.common.BaseTimeRangeRequest;
+import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
-import cn.cyberpeace.mp.cscene.dto.request.EventPercentRequest;
-import cn.cyberpeace.mp.cscene.dto.request.EventTrendRequest;
+import cn.cyberpeace.mp.cscene.request.event.EventPercentRequest;
+import cn.cyberpeace.mp.cscene.request.event.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;

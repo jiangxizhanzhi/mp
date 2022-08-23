@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
-import cn.cyberpeace.mp.devops.log.constant.LogConstant;
+import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -41,7 +41,6 @@ public class UserUtils {
 
     public static UserModel getUser(String id) {
         UserModel user;
-        // TODO 缓存获取
         ObjResult<UserModel> result = userService.get(id).getSource();
         user = result != null ? result.getObj() : null;
         return user;

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
