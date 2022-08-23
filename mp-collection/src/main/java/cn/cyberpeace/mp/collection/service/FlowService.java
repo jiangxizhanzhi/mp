@@ -18,6 +18,8 @@ import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -57,7 +59,7 @@ public class FlowService {
     public ListObjServiceResult<TeamFlowInfo> queryFlowPage(PageFlowRequest pageFlowRequest) {
         log.info("{}", pageFlowRequest);
 
-        String[] indexArray = buildRequestIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
+        String[] indexArray = buildEsIndex(pageFlowRequest.getStartTime(), pageFlowRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -90,7 +92,7 @@ public class FlowService {
 
     public ServiceResult<FlowDetailInfo> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
         log.info("{}", flowQueryRequest);
-        String[] indexArray = buildRequestIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
+        String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
@@ -137,18 +139,15 @@ public class FlowService {
             buildRuleProtocolQuery(pageFlowRequest.getProtocol(), boolQueryBuilder);
         }
 
-        Long starTimestamp = Objects.nonNull(pageFlowRequest.getStartTime()) ?
-                pageFlowRequest.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : 0L;
-        Long endTimestamp = Objects.nonNull(pageFlowRequest.getEndTime()) ?
-                pageFlowRequest.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() : 0L;
-        if (Objects.nonNull(pageFlowRequest.getStartTime()) || Objects.nonNull(pageFlowRequest.getEndTime())) {
-            if ((starTimestamp > 0L) && (endTimestamp > 0L)) {
-                buildRuleStarEndTimeQuery(starTimestamp, endTimestamp, boolQueryBuilder);
-            } else if (starTimestamp > 0L) {
-                buildRuleStarTimeQuery(starTimestamp, boolQueryBuilder);
-            } else if (endTimestamp > 0L) {
-                buildRuleEndTimeQuery(endTimestamp, boolQueryBuilder);
-            }
+        if (Objects.nonNull(pageFlowRequest.getStartTime())) {
+            buildRuleStarTimeQuery(
+                    pageFlowRequest.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    boolQueryBuilder);
+        }
+        if (Objects.nonNull(pageFlowRequest.getEndTime())) {
+            buildRuleEndTimeQuery(
+                    pageFlowRequest.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                    boolQueryBuilder);
         }
     }
 
@@ -174,9 +173,6 @@ public class FlowService {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("protocol", protocol));
     }
 
-    private void buildRuleStarEndTimeQuery(Long startTime, Long endTime, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").gte(startTime).lte(endTime));
-    }
 
     private void buildRuleStarTimeQuery(Long startTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").gte(startTime));
@@ -297,17 +293,20 @@ public class FlowService {
         return indexArray;
     }
 
-    public static String[] buildEsIndex(LocalDateTime start, LocalDateTime end, String teamId) {
+    public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
         if (Objects.nonNull(start) && Objects.nonNull(end)) {
             return buildRequestIndex(start, end);
         }
         if (Objects.isNull(start) || Objects.isNull(end)) {
             IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-
+            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
+            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+            return indices.getIndices();
         }
         return new String[]{};
     }
+
     /**
      * @return List<IndexBoost>
      */
