@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.collection.config.SituationCacheConfig;
 import cn.cyberpeace.mp.collection.model.*;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
+import cn.cyberpeace.mp.collection.core.es.CollectionBaseService;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;

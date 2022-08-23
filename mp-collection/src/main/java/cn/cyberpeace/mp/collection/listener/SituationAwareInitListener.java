@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.collection.listener;
 
 import cn.cyberpeace.mp.collection.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.collection.service.wazuh.WazuhClient;
-import cn.cyberpeace.mp.collection.service.wazuh.WazuhClientProxy;
+import cn.cyberpeace.mp.collection.core.wazuh.WazuhClient;
+import cn.cyberpeace.mp.collection.core.wazuh.WazuhClientProxy;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import lombok.extern.slf4j.Slf4j;

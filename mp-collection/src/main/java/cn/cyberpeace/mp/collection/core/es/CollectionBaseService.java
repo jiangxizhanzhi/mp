@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.service;
+package cn.cyberpeace.mp.collection.core.es;
 
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;

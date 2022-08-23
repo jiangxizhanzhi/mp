@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.service;
+package cn.cyberpeace.mp.collection.core.es;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -17,6 +17,8 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +53,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     }
 
     @Override
-    public SearchResponse elasticsearchQuery(SearchRequest searchRequest) {
+    public SearchResponse search(SearchRequest searchRequest) {
         try {
             return restHighLevelClientMap.get(ContextHolder.getGroupId()).search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
@@ -61,7 +63,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     }
 
     @Override
-    public SearchResponse elasticsearchScroll(SearchScrollRequest scrollRequest) {
+    public SearchResponse scroll(SearchScrollRequest scrollRequest) {
         try {
             return restHighLevelClientMap.get(ContextHolder.getGroupId()).scroll(scrollRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
@@ -71,7 +73,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     }
 
     @Override
-    public CountResponse elasticsearchCount(CountRequest countRequest) {
+    public CountResponse count(CountRequest countRequest) {
         try {
             return restHighLevelClientMap.get(ContextHolder.getGroupId()).count(countRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
@@ -81,11 +83,21 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     }
 
     @Override
-    public BulkByScrollResponse elasticsearchDelete(DeleteByQueryRequest deleteRequest) {
+    public BulkByScrollResponse deleteByQuery(DeleteByQueryRequest deleteRequest) {
         try {
             return restHighLevelClientMap.get(ContextHolder.getGroupId()).deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es delete by query error: ", e);
+            throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    @Override
+    public GetIndexResponse getIndices(GetIndexRequest getIndexRequest) {
+        try {
+            return restHighLevelClientMap.get(ContextHolder.getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.error("es get indices error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }

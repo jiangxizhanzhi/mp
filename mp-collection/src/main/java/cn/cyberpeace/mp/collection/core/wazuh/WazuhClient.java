@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.service.wazuh;
+package cn.cyberpeace.mp.collection.core.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;

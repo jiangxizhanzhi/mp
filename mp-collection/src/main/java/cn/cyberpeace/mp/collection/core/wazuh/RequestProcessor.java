@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.service.wazuh;
+package cn.cyberpeace.mp.collection.core.wazuh;
 
 import cn.cyberpeace.mp.collection.model.wazuh.common.BasePageRequest;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseRequest;

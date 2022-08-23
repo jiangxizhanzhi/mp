@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.service;
+package cn.cyberpeace.mp.collection.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.collection.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.collection.request.HostMonitorBaseRequest;
 import cn.cyberpeace.mp.collection.request.HostMonitorPageRequest;
-import cn.cyberpeace.mp.collection.service.wazuh.WazuhClientProxy;
+import cn.cyberpeace.mp.collection.service.HostMonitorService;
+import cn.cyberpeace.mp.collection.core.es.EsClient;
+import cn.cyberpeace.mp.collection.core.wazuh.WazuhClientProxy;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

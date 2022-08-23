@@ -14,8 +14,8 @@ import cn.cyberpeace.mp.collection.model.wazuh.common.request.CollectorBaseReque
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.collection.request.HostMonitorPageRequest;
 import cn.cyberpeace.mp.collection.request.SyscheckEventRequest;
-import cn.cyberpeace.mp.collection.service.DataCollectServiceImpl;
-import cn.cyberpeace.mp.collection.service.HostMonitorServiceImpl;
+import cn.cyberpeace.mp.collection.service.impl.DataCollectServiceImpl;
+import cn.cyberpeace.mp.collection.service.impl.HostMonitorServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
