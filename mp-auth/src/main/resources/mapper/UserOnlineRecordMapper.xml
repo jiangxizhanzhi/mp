@@ -25,7 +25,7 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="minutes != null">
+            <if test="fromTime != null">
                 AND end_time &gt; #{fromTime}
             </if>
             AND status = 0
@@ -41,7 +41,7 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="minutes != null">
+            <if test="fromTime != null">
                 AND end_time &lt; #{fromTime}
             </if>
             AND status = 0
