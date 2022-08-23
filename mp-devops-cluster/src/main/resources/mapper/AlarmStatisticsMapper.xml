@@ -8,7 +8,7 @@
         FROM
             mp_devops_alarm_statistics
         WHERE
-            TO_DAYS( create_time ) = TO_DAYS(NOW())
+            TO_DAYS( create_time ) = TO_DAYS(#{currentTime})
     </select>
 
     <select id="serviceAlarmStatistics" resultType="cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO">
@@ -20,7 +20,7 @@
             mp_devops_alarm_statistics a
         WHERE
             a.alarm_type IN ( 0, 1 )
-            AND TO_DAYS(NOW()) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> 30
+            AND TO_DAYS((#{currentTime}) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> 30
         GROUP BY
             a.alarm_date
         ORDER BY
@@ -36,7 +36,7 @@
             mp_devops_alarm_statistics a
         WHERE
             a.alarm_type = 2
-          AND TO_DAYS(NOW()) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> 30
+          AND TO_DAYS(#{currentTime}) - TO_DAYS( a.create_time ) <![CDATA[ < ]]> 30
         GROUP BY
             a.alarm_date
         ORDER BY

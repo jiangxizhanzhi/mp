@@ -29,7 +29,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      *
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userIds") List<String> userIds, @Param("minutes") int minutes);
+    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userIds") List<String> userIds, @Param("fromTime") LocalDateTime fromTime);
 
     /**
      * 判断离线的依据:
@@ -38,7 +38,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      * @param
      * @return
      */
-    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userIds") List<String> userIds, @Param("minutes") int minutes);
+    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userIds") List<String> userIds, @Param("fromTime") LocalDateTime fromTime);
 
 
     /**

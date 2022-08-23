@@ -26,7 +26,7 @@
                 </foreach>
             </if>
             <if test="minutes != null">
-                AND end_time &gt; NOW() - INTERVAL #{minutes} MINUTE
+                AND end_time &gt; #{fromTime}
             </if>
             AND status = 0
         </where>
@@ -42,7 +42,7 @@
                 </foreach>
             </if>
             <if test="minutes != null">
-                AND end_time &lt; NOW() - INTERVAL #{minutes} MINUTE
+                AND end_time &lt; #{fromTime}
             </if>
             AND status = 0
         </where>

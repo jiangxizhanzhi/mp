@@ -84,10 +84,10 @@
                 AND u.is_audited = #{userCondition.isAudited}
             </if>
             <if test="userCondition.isExpired != null and userCondition.isExpired == 0">
-                AND u.expired_time > now()
+                AND u.expired_time > #{currentDateTime}
             </if>
             <if test="userCondition.isExpired != null and userCondition.isExpired != 0">
-                AND u.expired_time &lt;= now()
+                AND u.expired_time &lt;= #{currentDateTime}
             </if>
             <if test="userCondition.username != null and userCondition.username != ''">
                 AND ( u.username like CONCAT('%', #{userCondition.username}, '%') or u.name like CONCAT('%', #{userCondition.username}, '%'))
