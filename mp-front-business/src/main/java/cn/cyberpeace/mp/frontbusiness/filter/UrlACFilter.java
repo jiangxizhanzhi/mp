@@ -71,7 +71,6 @@ public class UrlACFilter extends OncePerRequestFilter {
         }
 
         ServiceResult<Object> result = null;
-
         if (!skip) {
             String requestUrl = request.getRequestURI();
             if (StringUtils.isNotBlank(requestUrl)) {
@@ -81,18 +80,15 @@ public class UrlACFilter extends OncePerRequestFilter {
                 }
             }
 
-            String method = request.getMethod().toLowerCase();
-
             // 方法拦截是否开启
-            if (Objects.nonNull(urlACFilterConfig.getMethodMatch()) && urlACFilterConfig.getMethodMatch()) {
-                boolean isMethodMatch = isMethodMatch(requestUrl, method);
-                if (!isMethodMatch) {
-                    // 请求方法不匹配
-                    log.warn("###URLACFILTER -> referer:{}, url:{}, method:{} not match!", request.getHeaders("referer"), requestUrl, method);
-                    //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
-                    //result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_REQUEST_METHOD_NOT_MATCH.format(requestUrl, method));
-                }
-            }
+            //if (Objects.nonNull(urlACFilterConfig.getMethodMatch()) && urlACFilterConfig.getMethodMatch()) {
+            //    String method = request.getMethod().toLowerCase();
+            //    boolean isMethodMatch = isMethodMatch(requestUrl, method);
+            //    if (!isMethodMatch) {
+            //        // 请求方法不匹配
+            //        log.warn("###URLACFILTER -> referer:{}, url:{}, method:{} not match!", request.getHeaders("referer"), requestUrl, method);
+            //    }
+            //}
 
             // 权限拦截是否开启
             if (Objects.nonNull(urlACFilterConfig.getAuthorityMatch()) && urlACFilterConfig.getAuthorityMatch()) {
@@ -101,7 +97,6 @@ public class UrlACFilter extends OncePerRequestFilter {
                 if (!isAuthoritiesMatch) {
                     // 权限不匹配
                     log.error("###URLACFILTER -> referer:{}, url:{} access denied!", request.getHeaders("referer"), requestUrl);
-                    //throw new MpRuntimeException(FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
                     result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));
                 }
             }
@@ -137,10 +132,6 @@ public class UrlACFilter extends OncePerRequestFilter {
         if(isPatternUrlMethodMatch) {
             return true;
         }
-
-        log.warn("isAccurateUrlMethodMatch:{}, isPatternUrlMethodMatch:{}", isAccurateUrlMethodMatch, isPatternUrlMethodMatch);
-        log.warn("url:{} is blocked for method:{} not match!", requestUrl, method);
-
         return false;
     }
 
@@ -161,10 +152,6 @@ public class UrlACFilter extends OncePerRequestFilter {
         if(isPatternUrlAuthoritiesMatch) {
             return true;
         }
-
-        log.warn("isAccurateUrlAuthoritiesMatch:{}, isPatternUrlAuthoritiesMatch:{}", isAccurateUrlAuthoritiesMatch, isPatternUrlAuthoritiesMatch);
-        log.warn("url:{} is blocked to current user:{} for not has specified url-authoritys:{}", requestUrl, currentUsername, urlTargetsMap.get(requestUrl));
-
         return false;
     }
 
