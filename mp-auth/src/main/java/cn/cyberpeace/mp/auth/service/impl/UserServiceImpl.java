@@ -215,6 +215,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
         obj.setUpdateTime(LocalDateTime.now());
         var ret = super.update(obj, fields);
         userCacheService.evictAllUserCache();
@@ -290,6 +293,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
         userModel.setId(null);
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 如果ident为空，设置为null
+            userModel.setIdentifier(null);
+        }
 
         createCheckService.check(userModel);
 
@@ -369,6 +376,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
         log.info("user has been modified id:{}", userId);
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
+            getModelMapper().updateIdentToNull(userId);
+        }
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {

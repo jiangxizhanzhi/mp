@@ -7,7 +7,9 @@ import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -123,6 +125,12 @@ public class UserController {
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = userService.modify(modifyRequest);
         return ServiceResult.success(userModel);
+    }
+
+    @GetMapping("/list")
+    public ServiceResult<UserModel> list() {
+        ListObjServiceResult<UserModel> list = userService.list(new UserQueryParams()).asResult();
+        return ServiceResult.success(list);
     }
 
 }
