@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -158,7 +159,20 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             // TODO 获取需要虚拟化的节点数量
             try {
-                elementCount = cscene.getSceneConfig().getTopology().getElements().size();
+                var plugin = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+                if (plugin != null) {
+                    for (var e : plugin.values()) {
+                        var virtualType = e.get("virtual_type");
+                        if (virtualType != null) {
+                            if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
+                            ) {
+                                elementCount++;
+                            }
+                        }
+                    }
+                }
             } catch (NullPointerException e) {
                 // do nothing
             } catch (Exception e) {
