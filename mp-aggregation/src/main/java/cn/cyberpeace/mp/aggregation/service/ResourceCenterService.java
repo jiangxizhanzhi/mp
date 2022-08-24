@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneExporter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
@@ -78,12 +79,12 @@ public class ResourceCenterService {
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }
 
-    public ServiceResult<Boolean> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath) {
+    public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath) {
         var cscene = csceneService.get(csceneId);
         if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
             throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
         }
-        Boolean result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath);
+        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath);
         return new ServiceResult<>(result);
     }
 

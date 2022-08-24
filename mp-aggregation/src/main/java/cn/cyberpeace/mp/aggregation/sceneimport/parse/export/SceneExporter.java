@@ -43,7 +43,7 @@ public class SceneExporter {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public Boolean export(String sceneId, String envPath, String imagePath, String singleImagePath) {
+    public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath) {
         SceneParseResourceCenter.Result parseResult = new SceneParseResourceCenter().parseAndLoadInfo(sceneId);
         // 生成topo.yml
         this.createSceneYml(parseResult.getYmlResult(), envPath);
@@ -51,7 +51,16 @@ public class SceneExporter {
         this.downloadNodeFile(envPath, parseResult.getFile2Download());
         // 生成server.yml与导出靶标
         this.createImageAndServiceYml(imagePath, singleImagePath, parseResult.getDevices());
-        return true;
+        ExportResult exportResult = new ExportResult();
+        List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
+        parseResult.getIdConvert().forEach((k, v) -> {
+            ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
+            convertInfo.setId(v);
+            convertInfo.setOriginId(k);
+            convertInfos.add(convertInfo);
+        });
+        exportResult.setConvertInfos(convertInfos);
+        return exportResult;
     }
 
     private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenter.Device> devices) {

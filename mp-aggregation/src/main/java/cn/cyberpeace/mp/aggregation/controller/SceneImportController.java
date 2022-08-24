@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.MoundRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneExportRequest;
 import cn.cyberpeace.mp.aggregation.dto.sceneimport.SceneImportRequest;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -44,7 +45,7 @@ public class SceneImportController {
     }
 
     @PostMapping("/export_scene")
-    public ServiceResult<String> exportScene(@RequestBody SceneExportRequest request) {
+    public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
         return ServiceResult.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
     }
 

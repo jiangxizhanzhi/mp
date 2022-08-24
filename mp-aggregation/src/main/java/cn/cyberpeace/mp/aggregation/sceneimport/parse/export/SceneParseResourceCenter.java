@@ -46,6 +46,14 @@ public class SceneParseResourceCenter {
         Map<String, NetworkElementParseResultV2> id2Network = new HashMap<>();
         Map<String, NodeElementParseResult> id2Node = new HashMap<>();
         this.parseNodeAndNet(sceneHandler, ymlParseResult.getNetworks(), ymlParseResult.getNodes(), id2Network, id2Node);
+        // 建立nodeId和转换成yml之后id的映射关系
+        Map<String, String> idConvert = new HashMap<>();
+        for (String nodeId : id2Network.keySet()) {
+            idConvert.put(nodeId, id2Network.get(nodeId).getId());
+        }
+        for (String nodeId : id2Node.keySet()) {
+            idConvert.put(nodeId, id2Node.get(nodeId).getId());
+        }
 
         // 处理连线
         this.addConnect(sceneHandler, id2Network, id2Node);
@@ -62,6 +70,7 @@ public class SceneParseResourceCenter {
         result.setYmlResult(ymlParseResult);
         result.setDevices(devices);
         result.setFile2Download(file2Download);
+        result.setIdConvert(idConvert);
         return result;
     }
 
@@ -279,6 +288,8 @@ public class SceneParseResourceCenter {
         private Map<String, String> file2Download = new HashMap<>();
 
         private List<Device> devices = new ArrayList<>();
+
+        private Map<String, String> idConvert = new HashMap<>();
     }
 
     @Setter
