@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -875,6 +876,8 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
                         String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
                         FlowInfoModel flowInfoModel = new FlowInfoModel();
+                        String flowId = DigestUtil.md5Hex(fileName);
+                        flowInfoModel.setId(flowId);
                         flowInfoModel.setTitle(fileName);
                         flowInfoModel.setFileName(flowFile.getName());
                         String fdfsPath = fastDFSClient.uploadFileWithFilepath(flowFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
