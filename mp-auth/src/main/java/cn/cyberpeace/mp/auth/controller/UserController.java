@@ -126,11 +126,4 @@ public class UserController {
         UserModel userModel = userService.modify(modifyRequest);
         return ServiceResult.success(userModel);
     }
-
-    @GetMapping("/list")
-    public ServiceResult<UserModel> list() {
-        ListObjServiceResult<UserModel> list = userService.list(new UserQueryParams()).asResult();
-        return ServiceResult.success(list);
-    }
-
 }
