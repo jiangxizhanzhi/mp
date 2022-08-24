@@ -22,5 +22,6 @@ public class OptionModel extends BaseModel {
     private Integer sort;
     private String type;
     private String parentCode;
+    private String meta;
 }
 

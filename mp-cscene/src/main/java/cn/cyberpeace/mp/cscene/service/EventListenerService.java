@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.extensions.security.event.UserLogoutEvent;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.front.admin.event.SysConfigUpdateEvent;
+import cn.cyberpeace.mp.frontadmin.event.SysConfigUpdateEvent;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,10 +4,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.devops.log.annotation.OperateLog;
-import cn.cyberpeace.mp.devops.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devops.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
+import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
+import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
@@ -27,9 +27,18 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -48,19 +57,19 @@ public class ProbeManagerController {
     @Autowired
     private ProbeScriptService probeScriptService;
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @GetMapping("/types")
     @ApiOperation(value = "分页查询探针类型")
     public ServiceResult<List<OptionBO>> probeTypes() {
-        return optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
+        return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_PROBE_TYPE);
     }
 
     @GetMapping("/os-types")
     @ApiOperation(value = "查询操作系统类型")
     public ServiceResult<List<OptionBO>> osTypes() {
-        return optionService.getOptionsByType(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
+        return optionService.getIntOptions(SituationalAwareConstant.MP_COMMON_OPTION_TYPE_SITUATION_OS_TYPE);
     }
 
     @GetMapping("/page")
@@ -122,13 +131,18 @@ public class ProbeManagerController {
     @ApiOperation(value = "修改自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
-        String oldMd5 = probeScriptService.getScriptChecksumByProbeId(probeRequest.getId());
+        var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
+        String oldMd5 = oldScript.getChecksum();
+        Integer oldScriptType = oldScript.getScriptType();
         // 判断脚本内容是否有变动，如无变动则不需要重新上传脚本
         boolean contentChanged = false;
+        if (Objects.nonNull(probeRequest.getScriptType()) && !oldScriptType.equals(probeRequest.getScriptType())) {
+            contentChanged = true;
+        }
         if (StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String newMd5 = DigestUtil.md5Hex(probeRequest.getScriptContent());
 
-            if (!Objects.equals(newMd5, oldMd5)) {
+            if (!Objects.equals(newMd5, oldMd5) || contentChanged) {
                 String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
                 probeRequest.setScriptChecksum(newMd5);
                 probeRequest.setScriptUrl(httpUrl);

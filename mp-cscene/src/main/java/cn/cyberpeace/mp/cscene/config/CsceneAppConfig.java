@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.cscene.config;
 
 import cn.cyberpeace.mp.base.util.basic.IntUtils;
-import cn.cyberpeace.mp.front.admin.service.sys.SysActivationService;
-import cn.cyberpeace.mp.front.admin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
@@ -69,17 +69,14 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.enable-command-change:false}")
     private Boolean enableCommandChange;
 
-    @Value("${mp.cscene.cron-job-expression:* 0/15 * * * ?}")
+    @Value("${mp.cscene.cron-job-expression:0 0/15 * * * ?}")
     private String cronJobExpression;
+
+    @Value("${mp.cscene.enable_node_limit_db_check:true}")
+    private Boolean enableNodeLimitDbCheck;
 
     @Autowired
     private MessageSource messageSource;
-
-    @PostConstruct
-    public void addBaseNames() {
-        ReloadableResourceBundleMessageSource msgSrc = (ReloadableResourceBundleMessageSource) messageSource;
-        msgSrc.addBasenames("classpath:i18n/cscene");
-    }
 
     public int getSceneEditNodeLimit() {
         String value = null;

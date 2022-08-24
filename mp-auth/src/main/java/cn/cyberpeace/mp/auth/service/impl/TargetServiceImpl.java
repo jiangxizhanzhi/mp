@@ -163,7 +163,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_10M, value = CACHE_VAL_TARGETS)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_TARGETS)
     public List<TargetModel> listAll(String tenant, Integer type) {
         List<TargetModel> targets = getModelMapper().listAll(tenant, type);
         return targets;

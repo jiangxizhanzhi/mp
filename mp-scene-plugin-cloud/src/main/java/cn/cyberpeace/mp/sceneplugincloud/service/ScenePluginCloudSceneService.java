@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.BaseCommon;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -26,6 +27,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
+import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudUrlConstant;
@@ -78,7 +80,8 @@ public class ScenePluginCloudSceneService {
     public static final List<String> COUNT_ELEMENT_FIELDS = Arrays.asList(
             BeanUtils.getBeanGetterFieldNames(
                     CloudPluginSceneElementModel::getHost,
-                    CloudPluginSceneElementModel::getVirtualType
+                    CloudPluginSceneElementModel::getVirtualType,
+                    CloudPluginSceneElementModel::getRole
             )
     );
 
@@ -279,7 +282,15 @@ public class ScenePluginCloudSceneService {
                 monitors.forEach((connectionId, monitorData) -> {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
-                    nodeSession.setMonitorUrl(monitorData.getMonitorUrl());
+                    String formatUrl = monitorData.getMonitorUrl() ;
+                    CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+                    if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                        if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                            var u = URLUtil.url(formatUrl);
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
+                    }
+                    nodeSession.setMonitorUrl(formatUrl);
                     nodeSession.setUser(monitorData.getUsername());
                     connectionIdSessionMap.put(connectionId, nodeSession);
                 });
@@ -292,7 +303,15 @@ public class ScenePluginCloudSceneService {
                 assistances.forEach((connectionId, assistanceData) -> {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
-                    nodeSession.setAssistanceUrl(assistanceData.getAssistanceUrl());
+                    String formatUrl = assistanceData.getAssistanceUrl();
+                    CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+                    if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                        if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                            var u = URLUtil.url(formatUrl);
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
+                    }
+                    nodeSession.setAssistanceUrl(formatUrl);
                     nodeSession.setUser(assistanceData.getUsername());
                     connectionIdSessionMap.put(connectionId, nodeSession);
                 });
@@ -356,6 +375,25 @@ public class ScenePluginCloudSceneService {
                     String.format(CloudUrlConstant.RECORDING_DOWNLOAD_URL, rawRecording.getRecordingFile())));
             recording.setPlayUrl(StringUtils.join(CloudSingleton.cloudAppConfig.getCpcloudServer(),
                     String.format(CloudUrlConstant.RECORDING_PLAY_URL, rawRecording.getRecordingFile())));
+
+            CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+            if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                    if (StringUtils.isNotEmpty(recording.getFileUrl())) {
+                        String formatUrl = recording.getFileUrl();
+                        var u = URLUtil.url(formatUrl);
+                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        recording.setFileUrl(formatUrl);
+                    }
+                    if (StringUtils.isNotEmpty(recording.getPlayUrl())) {
+                        String formatUrl = recording.getPlayUrl();
+                        var u = URLUtil.url(formatUrl);
+                        formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        recording.setPlayUrl(formatUrl);
+                    }
+                }
+            }
+
             var filesizeStr = rawRecording.getFileSize();
             if (!StringUtils.isEmpty(filesizeStr)) {
                 recording.setFilesize(IntUtils.fromStr(filesizeStr));
@@ -729,9 +767,15 @@ public class ScenePluginCloudSceneService {
             params.setSnapshotUuid(snapshotUuid);
             params.setImageType(node.getImageType());
             params.setDeviceUuid(node.getImageUuid());
-            new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
-            }, true);
-            sceneSnapshotService.deleteElementSnapshot(snapshotId);
+            try {
+                new Remote().cloudDelete(CloudUrlConstant.VIRTUAL_MACHINE_DEL_SNAPSHOT_URL, params, null, new TypeReference<CloudResponse<Object>>() {
+                }, true);
+                sceneSnapshotService.deleteElementSnapshot(snapshotId);
+            } catch (Exception e) {
+                if (!"snapshot not exists".equals(e.getMessage())) {
+                    throw e;
+                }
+            }
         }
         return new ServiceResult<>(true);
     }

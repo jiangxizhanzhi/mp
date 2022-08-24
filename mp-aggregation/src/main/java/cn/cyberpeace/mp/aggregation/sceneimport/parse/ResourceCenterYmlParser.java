@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.parse;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -24,7 +25,14 @@ public final class ResourceCenterYmlParser {
     private static Logger log = LoggerFactory.getLogger(ResourceCenterYmlParser.class);
 
     public static YmlParseResult parseTopoYml(String filePath) {
-        YmlParseResult result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+        YmlParseResult result = null;
+        try {
+            result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+        } catch (Exception e) {
+            YmlParseResultV2 resultV2 = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResultV2.class).parse();
+            result = resultV2.convert();
+        }
+
         if (CollectionUtils.isNotEmpty(result.getNodes())) {
             result.getNodes().forEach(node -> {
                 if (StringUtils.isNotEmpty(node.getFile())) {

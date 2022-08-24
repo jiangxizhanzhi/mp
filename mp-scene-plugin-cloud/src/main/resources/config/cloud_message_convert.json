@@ -358,5 +358,95 @@
         "relation": "contains"
       }
     ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Duplicate name"
+      },
+      {
+        "locale": "zh",
+        "message": "名称重复"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "name duplicated",
+        "relation": "contains"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "System info not assigned"
+      },
+      {
+        "locale": "zh",
+        "message": "未分配系统信息"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "System info not assigned",
+        "relation": "contains"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Instance type does not exist"
+      },
+      {
+        "locale": "zh",
+        "message": "实例类型不存在"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^409 conflict flavor with name (.*) already exists$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "The virtual machine state is wrong, the instance generation is terminated, the fixed IP is not a valid IP address for the network"
+      },
+      {
+        "locale": "zh",
+        "message": "虚拟机状态错误，实例生成被终止，固定IP不是网络的有效IP地址"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^Object vm (.*) status error. Reason: Build of instance (.*) aborted: Invalid input received: Fixed IP (.*) is not a valid ip address for network (.*)$",
+        "relation": "regx"
+      }
+    ]
+  },
+  {
+    "messages": [
+      {
+        "locale": "en",
+        "message": "Container `{0}` stopped"
+      },
+      {
+        "locale": "zh",
+        "message": "容器`{0}`已停止"
+      }
+    ],
+    "rules": [
+      {
+        "keyword": "^container (.*) has stopped$",
+        "relation": "regx"
+      }
+    ]
   }
 ]

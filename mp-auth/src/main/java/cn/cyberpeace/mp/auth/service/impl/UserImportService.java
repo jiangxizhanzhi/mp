@@ -50,7 +50,7 @@ public class UserImportService {
     @Transactional(rollbackFor = Exception.class)
     public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<OrgUserModel> orgUserModels) {
         if (CollectionUtil.isNotEmpty(userModels)) {
-            ServiceResult<Integer> re = userService.bulkCreateWithPasswordPreSet(userModels);
+            ServiceResult<Integer> re = userService.bulkCreate(userModels);
             if (!Objects.equals(userModels.size(), re.getSource())) {
                 log.error("userModels.size:{} and re.getSource:{} not same!", userModels.size(), re.getSource());
                 throw new MpRuntimeException(AuthErrorCode.USER_ADD_ERROR);

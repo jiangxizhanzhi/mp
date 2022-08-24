@@ -26,4 +26,6 @@ public interface ProbeScriptMapper extends BaseModelMapper<ProbeScriptModel> {
     int deleteByProbeId(String probeId);
 
     String getChecksumByProbeId(String probeId);
+
+    ProbeScriptModel getScriptModelByProbeId(String probeId);
 }

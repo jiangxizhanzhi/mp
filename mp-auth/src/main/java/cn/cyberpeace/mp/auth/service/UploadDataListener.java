@@ -258,13 +258,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
 
     private void preProcessImportUsers(List<ImportUser> users) {
-        preProcessPwd(users);
         preProcessOrgs(users);
         preProcessRoles(users);
     }
 
 
     /**
+     * 导入excel暂时不用对密码进行预处理
      * 预处理密码
      */
     private void preProcessPwd(List<ImportUser> users) {
@@ -297,7 +297,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
                 // 组织路径不存在，默认都存一级组织
                 // 组织为空则默认一级组织
                 user.setOrgIdList(CollectionUtil.toList(defaultTopOrg.getId()));
-                return;
+                continue;
             }
 
             user.setOrgIdList(new ArrayList<>());

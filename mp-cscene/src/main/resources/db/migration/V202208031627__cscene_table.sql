@@ -9,6 +9,7 @@ create table mp_cscene_snapshot
     node_id              varchar(64)  not null comment '描述',
     snapshot_id          varchar(64)  not null comment '场景数据库快照id',
     snapshot_resource_id varchar(64)  not null comment '快照资源id',
+    deleted              tinyint(1) NOT NULL COMMENT '是否删除',
     create_time          datetime(6) not null comment '创建时间',
     update_time          datetime(6) not null comment '更新时间',
     PRIMARY KEY (`pk`)

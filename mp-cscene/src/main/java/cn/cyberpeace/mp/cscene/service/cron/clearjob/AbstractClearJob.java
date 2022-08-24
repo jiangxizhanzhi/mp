@@ -5,7 +5,9 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
+import cn.cyberpeace.mp.scene.repository.SceneMapper;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +90,11 @@ public abstract class AbstractClearJob<Q> {
         if (element.getEventStatus() == EventStatus.OVER && element.getEvent() == SceneElementModel.Event.DELETE) {
             return true;
         } else {
+            SceneMapper sceneMapper = BeanCommon.getBean(SceneMapper.class);
+            var scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
+            if (scene != null && scene.getEventStatus() == EventStatus.OVER && scene.getEvent() == SceneElementModel.Event.DELETE) {
+                return true;
+            }
             return false;
         }
     }

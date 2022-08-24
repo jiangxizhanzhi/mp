@@ -80,12 +80,10 @@ public class UserPermissionServiceImpl
     }
 
     @Override
-    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_20S, value = CACHE_VAL_USER_TARGETS)
+    @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_NORMAL, value = CACHE_VAL_USER_TARGETS)
     public List<TargetModel> listTargetsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-
         Set<TargetModel> authorizedTargetsSet = new HashSet<>();
-
 
         // 用户绑定的所有角色绑定的target
         List<RoleModel> roles = userRoleService.listByUserId(userId);
@@ -100,7 +98,10 @@ public class UserPermissionServiceImpl
 
         // 角色绑定的target
         List<String> roleIds = roles.stream().map(RoleModel::getId).collect(Collectors.toList());
-        List<TargetModel> roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
+        List<TargetModel> roleTargets = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(roleIds)) {
+            roleTargets = rolePermissionService.listTargetsByRoleIds(roleIds);
+        }
         authorizedTargetsSet.addAll(roleTargets);
 
         // 用户直接绑定的target
@@ -115,7 +116,6 @@ public class UserPermissionServiceImpl
         //    allTargetsByOrgSet.addAll(tset);
         //});
         //authorizedTargetsSet.addAll(allTargetsByOrgSet);
-
 
         List<TargetModel> targetModelList = authorizedTargetsSet.stream().collect(Collectors.toList());
         return targetModelList;

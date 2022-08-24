@@ -1,11 +1,11 @@
 package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
-import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
-import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;

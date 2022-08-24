@@ -1,0 +1,77 @@
+package cn.cyberpeace.mp.devopslog.service;
+
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.devopslog.bo.LogFileDownloadBO;
+import cn.cyberpeace.mp.devopslog.dto.LogDownloadDTO;
+import cn.cyberpeace.mp.devopslog.dto.LogReportDTO;
+import cn.cyberpeace.mp.devopslog.enums.LogReportTypeEnum;
+import cn.cyberpeace.mp.devopslog.request.BasePageRequest;
+import com.google.common.collect.Lists;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+/**
+ * @description:
+ * @author：Geek Wang
+ * @date: 2022/6/15
+ */
+@Component
+@RequiredArgsConstructor
+public class LogFileServiceFactory {
+
+    private final List<LogFileService> fileServiceList;
+
+    private Map<String,LogFileService> logFileServiceMap = new ConcurrentHashMap();
+
+    @PostConstruct
+    public void init(){
+        logFileServiceMap = fileServiceList.stream().collect(Collectors.toMap(LogFileService::logReportType, Function.identity()));
+    }
+
+    /**
+     * 查询全部日志上报数据
+     * @return
+     */
+    public List<LogReportDTO> listAll(BasePageRequest basePageRequest) {
+        List<LogReportDTO> result = Lists.newArrayList();
+        if (Objects.nonNull(basePageRequest.getType())) {
+            LogFileService logFileService = logFileServiceMap.get(basePageRequest.getType().name());
+            if (Objects.isNull(logFileService)) {
+                result.addAll(logFileServiceMap.get(LogReportTypeEnum.REPORT.name()).list(basePageRequest.getType().name()));
+            } else {
+                result.addAll(logFileService.list(basePageRequest.getType().name()));
+            }
+        } else {
+            for (LogFileService logFileService : fileServiceList) {
+                var list = logFileService.list(null);
+                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 下载日志
+     * @param downloadDTO
+     */
+    public LogFileDownloadBO downLoad(LogDownloadDTO downloadDTO) throws IOException {
+        String logReportType = downloadDTO.getType();
+        LogFileService logFileService = logFileServiceMap.get(logReportType);
+        if (Objects.isNull(logFileService)){
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        return logFileService.download(downloadDTO);
+    }
+}

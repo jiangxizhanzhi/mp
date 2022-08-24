@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.aggregation.service;
 
-import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.cluster.ClusterData;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemData;

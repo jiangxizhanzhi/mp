@@ -8,6 +8,7 @@ CREATE TABLE mp_common_option (
     `en_name` varchar(255) NOT NULL COMMENT '选项英文名称',
     `sort` int(10) NOT NULL COMMENT '排序字段',
     `type` varchar(255) NOT NULL COMMENT '选项类型',
+    `meta` varchar(2000) NOT NULL COMMENT '元数据',
     `create_time`  datetime NOT NULL COMMENT '创建时间',
     `update_time`  datetime NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),

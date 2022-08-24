@@ -82,6 +82,8 @@ public class CloudUrlConstant {
     public static final String FORCE_DELETE_NETWORK = "/cpcloud/host/v1/network";
     public static final String FORCE_DELETE_ROUTER = "/cpcloud/host/v1/router";
 
+    public static final String SNAPSHOT_LIST = "/cpcloud/device/v1/snapshot";
+
     private CloudUrlConstant() {
     }
 }

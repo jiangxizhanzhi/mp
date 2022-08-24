@@ -2,14 +2,15 @@ package cn.cyberpeace.mp.sceneplugincloud.service;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.hutool.core.io.FileUtil;
+import com.google.common.io.CharStreams;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ResourceUtils;
 
-import java.io.File;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,11 +55,11 @@ public class CloudCommonConfigService {
         } else {
             for (String config : CONFIGS) {
                 try {
-                    File file = ResourceUtils.getFile("classpath:config/" + config + CONFIG_PATH_SUFFIX);
-                    String content = FileUtil.readString(file, "utf8");
+                    Resource resource = new ClassPathResource("config/" + config + CONFIG_PATH_SUFFIX);
+                    String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
                     CONFIG_MAP.put(config, content);
                 } catch (Exception e) {
-                    log.error("faild to read config : {}", config);
+                    log.error("failed to read config : {}", config, e);
                 }
             }
             LOADED = true;

@@ -21,7 +21,7 @@ public class SceneNodeNumInitJob extends AbstractInitJob {
     @Override
     protected boolean doExecute() {
         int count = csceneService.getActiveVirtualDeviceCount();
-        NodeLimitUtils.addLimitedNodeCount(count);
+        NodeLimitUtils.refreshCount(count);
         return true;
     }
 

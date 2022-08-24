@@ -1,9 +1,10 @@
 package cn.cyberpeace.mp.aggregation.service;
 
-import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
-import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
-import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
+import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
+import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
+import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -17,11 +18,12 @@ import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
-import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
+import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +58,8 @@ public class DashboardService {
 
     private CsceneInstanceMapper csceneInstanceMapper;
 
+    private CloudPluginSceneElementMapper cloudPluginSceneElementMapper;
+
     @Autowired
     private UserOnlineRecordService userOnlineRecordService;
 
@@ -64,12 +68,14 @@ public class DashboardService {
                             CsceneInstanceService csceneInstanceService,
                             CsceneSpecialService csceneSpecialService,
                             CsceneInstanceMapper csceneInstanceMapper,
+                            CloudPluginSceneElementMapper cloudPluginSceneElementMapper,
                             ScenePluginCloudSceneService scenePluginCloudSceneService,
                             DevopsTargetService devopsTargetService) {
         this.deviceService = deviceService;
         this.csceneInstanceService = csceneInstanceService;
         this.csceneSpecialService = csceneSpecialService;
         this.csceneInstanceMapper = csceneInstanceMapper;
+        this.cloudPluginSceneElementMapper = cloudPluginSceneElementMapper;
         this.scenePluginCloudSceneService = scenePluginCloudSceneService;
         this.devopsTargetService = devopsTargetService;
     }
@@ -174,6 +180,54 @@ public class DashboardService {
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
         return new ServiceResult<>(userResource);
+    }
+
+    public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {
+        var condition = new HumanCondition()
+                .filterEqual(CsceneInstanceModel::getDeleted, false);
+        List<CsceneInstanceModel> csceneInstances = csceneInstanceMapper.list(condition);
+        if (csceneInstances.isEmpty()) {
+            return new ServiceResult<>(new SceneBusinessSummary());
+        }
+        List<String> sceneIds = csceneInstances.stream()
+                .filter(csceneInstance -> !StringUtils.isEmpty(csceneInstance.getScene()))
+                .map(csceneInstance -> csceneInstance.getScene())
+                .collect(Collectors.toList());
+        var fieldName = BeanUtils.getBeanGetterFieldName(CloudPluginSceneElementModel::getRole);
+        var result = scenePluginCloudSceneService
+                .groupCountElement(sceneIds, null, List.of(fieldName)).getSource().get(fieldName);
+        SceneBusinessSummary sceneBusinessSummary = new SceneBusinessSummary();
+        sceneBusinessSummary.setFirewallCount(this.groupSummary(SceneBusinessSummary.firewallType(), result));
+        sceneBusinessSummary.setNpcCount(this.groupSummary(SceneBusinessSummary.npcType(), result));
+        sceneBusinessSummary.setSwitchCount(this.groupSummary(SceneBusinessSummary.switchType(), result));
+        sceneBusinessSummary.setRouterCount(this.groupSummary(SceneBusinessSummary.routerType(), result));
+        // todo 快速统计出各类虚拟资源的数量
+        sceneBusinessSummary.setVmCount(this.countByVirtualTypeAndRole(sceneIds,
+                List.of(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE),
+                List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
+        sceneBusinessSummary.setContainerCount(this.countByVirtualTypeAndRole(sceneIds,
+                List.of(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
+                List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
+        return new ServiceResult<>(sceneBusinessSummary);
+    }
+
+    private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
+        var condition = new HumanCondition()
+                .filterIn(CloudPluginSceneElementModel::getScene, sceneIds.toArray())
+                .filterIn(CloudPluginSceneElementModel::getVirtualType, virtualTypes.toArray())
+                .filterIn(CloudPluginSceneElementModel::getRole, roles.toArray());
+        List<CloudPluginSceneElementModel> cloudElements = cloudPluginSceneElementMapper.list(condition);
+        return cloudElements.size();
+    }
+
+    private int groupSummary(List<Integer> roleType, Map<Object, Long> result) {
+        int sum = 0;
+        for (var role : roleType) {
+            if (result.containsKey(role)) {
+                sum += result.get(role);
+            }
+        }
+        return sum;
     }
 
 }

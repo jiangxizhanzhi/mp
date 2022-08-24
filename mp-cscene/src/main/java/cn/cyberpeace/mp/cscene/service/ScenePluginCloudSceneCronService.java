@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * @Description:
@@ -25,13 +27,20 @@ public class ScenePluginCloudSceneCronService {
     @Resource
     private ClearService clearService;
 
+    @Resource
+    private CsceneSnapshotService csceneSnapshotService;
+
     public void action() {
         log.info("start cloud plugin scene correct job");
 
-        // 内存和数据库中节点数量保持同步
+        // 内存和数据库中节点数量保持同步 凌晨同步即可,
         try {
-            int count = csceneService.getActiveVirtualDeviceCount();
-            NodeLimitUtils.refreshCount(count);
+            GregorianCalendar calendar = new GregorianCalendar();
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
+            if (hour < 2) {
+                int count = csceneService.getActiveVirtualDeviceCount();
+                NodeLimitUtils.refreshCount(count);
+            }
         } catch (Exception e) {
             log.error("failed to refresh node limit count", e);
         }
@@ -41,6 +50,13 @@ public class ScenePluginCloudSceneCronService {
             sceneCorrectService.correctErrorStatusScene();
         } catch (Exception e) {
             log.error("failed to correct error status scene", e);
+        }
+
+        // 纠正cscene和scene快照表的数据
+        try {
+            csceneSnapshotService.correctSnapshotRelativeInfo();
+        } catch (Exception e) {
+            log.error("failed to corrcet snapshot relative info", e);
         }
 
         // 清理未正常释放的资源

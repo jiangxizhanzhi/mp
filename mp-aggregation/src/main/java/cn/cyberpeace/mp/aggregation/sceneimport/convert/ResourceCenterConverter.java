@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.devops.cluster.converter.TargetConverter;
+import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
