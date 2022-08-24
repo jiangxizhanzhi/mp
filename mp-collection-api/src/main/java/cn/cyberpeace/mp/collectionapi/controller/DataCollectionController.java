@@ -1,28 +1,28 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
-import cn.cyberpeace.mp.collectionapi.vo.HostVO;
-import cn.cyberpeace.mp.collectionapi.vo.ProcessVO;
-import cn.cyberpeace.mp.collectionapi.vo.SystemUserVO;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
 import cn.cyberpeace.mp.collection.model.FileEventModel;
 import cn.cyberpeace.mp.collection.model.wazuh.common.request.CollectorBaseRequest;
 import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.collection.request.HostMonitorPageRequest;
 import cn.cyberpeace.mp.collection.request.SyscheckEventRequest;
-import cn.cyberpeace.mp.collection.service.impl.DataCollectServiceImpl;
-import cn.cyberpeace.mp.collection.service.impl.HostMonitorServiceImpl;
+import cn.cyberpeace.mp.collection.service.DataCollectService;
+import cn.cyberpeace.mp.collection.service.HostMonitorService;
+import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
+import cn.cyberpeace.mp.collectionapi.request.PageQueryRequest;
+import cn.cyberpeace.mp.collectionapi.vo.HostVO;
+import cn.cyberpeace.mp.collectionapi.vo.ProcessVO;
+import cn.cyberpeace.mp.collectionapi.vo.SystemUserVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import cn.cyberpeace.mp.collectionapi.request.PageQueryRequest;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 public class DataCollectionController {
     private static GroupConfig groupConfig;
 
-    @Resource
-    private DataCollectServiceImpl dataCollectService;
+    @Resource(name = "dataCollectServiceImpl")
+    private DataCollectService dataCollectService;
 
-    @Resource
-    private HostMonitorServiceImpl hostMonitorService;
+    @Resource(name = "hostMonitorServiceImpl")
+    private HostMonitorService hostMonitorService;
 
     @GetMapping("/file_events")
     @ApiOperation(value = "查询文件变更事件", notes = "")
