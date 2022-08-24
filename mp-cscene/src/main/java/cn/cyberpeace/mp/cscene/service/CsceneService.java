@@ -30,6 +30,7 @@ import cn.cyberpeace.mp.cscene.service.taskpool.CsceneSnapshotDeleteTaskPool;
 import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneConfigService;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
@@ -148,14 +149,27 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     private void checkSceneUsingNodeLimit(String csceneId, CsceneBO cscene) {
-        var elementCount = 0;
+        int elementCount = 0;
         if (cscene == null) {
             var sceneConfigId = getSceneConfigId(csceneId);
             elementCount = getSceneConfigVirtualDeviceCount(sceneConfigId);
         } else {
             // TODO 获取需要虚拟化的节点数量
             try {
-                elementCount = cscene.getSceneConfig().getTopology().getElements().size();
+                var plugin = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+                if (plugin != null) {
+                    for (var e : plugin.values()) {
+                        var virtualType = e.get("virtual_type");
+                        if (virtualType != null) {
+                            if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                                    Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE
+                            ) {
+                                elementCount++;
+                            }
+                        }
+                    }
+                }
             } catch (NullPointerException e) {
                 // do nothing
             } catch (Exception e) {
@@ -201,11 +215,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         ListObjServiceResult<CsceneModel> listResult = null;
         //未指定排序方式时默认按创建时间倒序排列
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
-            queryParams.setOrders(new String[]{"-createTime"});
+            queryParams.setOrders(new String[]{ "-createTime" });
         }
         //指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
         if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
-            queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
+            queryParams.setSearchFields(new String[]{ "name", "referenceMetaData" });
         }
         listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
@@ -217,11 +231,11 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
         List<CsceneBO> csceneBOs = new ArrayList<>();
-        Map<String,CsceneBO> csceneBOMap = new HashMap<>();
+        Map<String, CsceneBO> csceneBOMap = new HashMap<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
-            csceneBOMap.put(csceneId,csceneHandler.toData(withInstance));
+            csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
         });
         //转为Map后顺序被打乱，此时再次排序
         listResult.getSource().getObjs().stream().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
