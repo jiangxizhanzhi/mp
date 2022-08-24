@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@Component
 public class FlowInfoServiceImpl implements FlowInfoService {
 
     @Resource(name = "restHighLevelClientImpl")

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.service.impl.FlowInfoServiceImpl;
 import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
@@ -27,7 +28,7 @@ import java.util.Objects;
 public class FlowController {
 
     @Resource
-    private FlowInfoServiceImpl flowInfoService;
+    private FlowInfoService flowInfoService;
 
     @GetMapping("/detail")
     @ApiOperation(value = "查询一条流量的详细信息", notes = "")
