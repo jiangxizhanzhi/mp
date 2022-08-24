@@ -1,16 +1,17 @@
-package cn.cyberpeace.mp.collection.service;
+package cn.cyberpeace.mp.collection.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
+import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
+import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
+import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -38,14 +39,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
-/**
- *
- */
 @Service
 @Slf4j
-@Component
-public class FlowService {
+public class FlowInfoServiceImpl implements FlowInfoService {
+
     @Resource(name = "restHighLevelClientImpl")
     private IRestHighLevelClient restHighLevelClient;
     private static final String ARKIME_SESSIONS3_ = "arkime_sessions3-";
@@ -56,6 +53,7 @@ public class FlowService {
      * @param pageFlowRequest
      * @return ListObjServiceResult<TeamFlowInfo>
      */
+    @Override
     public ListObjServiceResult<TeamFlowInfo> queryFlowPage(PageFlowRequest pageFlowRequest) {
         log.info("{}", pageFlowRequest);
 
@@ -89,6 +87,7 @@ public class FlowService {
         return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos, (int) total)).asResult();
     }
 
+    @Override
     public ServiceResult<FlowDetailInfo> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
         log.info("{}", flowQueryRequest);
         String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
@@ -335,5 +334,4 @@ public class FlowService {
         log.info("dayList:{}", dayList);
         return dayList;
     }
-
 }
