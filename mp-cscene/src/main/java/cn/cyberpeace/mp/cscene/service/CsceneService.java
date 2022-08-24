@@ -159,9 +159,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         } else {
             // TODO 获取需要虚拟化的节点数量
             try {
-                var plugin = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
-                if (plugin != null) {
-                    for (var e : plugin.values()) {
+                var pluginElements = cscene.getSceneConfig().getPlugins().get(PluginConstant.PLUGIN_KEY).getElements();
+                if (pluginElements != null) {
+                    for (var e : pluginElements.values()) {
                         var virtualType = e.get("virtual_type");
                         if (virtualType != null) {
                             if (Integer.parseInt(virtualType.toString()) == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
