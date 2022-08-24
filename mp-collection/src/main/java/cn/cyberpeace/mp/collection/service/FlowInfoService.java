@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
-import cn.cyberpeace.mp.collection.vo.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.vo.TeamFlowInfo;
+import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
+import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 
 /**
  * 查询流量列表和一条流量的详细信息
