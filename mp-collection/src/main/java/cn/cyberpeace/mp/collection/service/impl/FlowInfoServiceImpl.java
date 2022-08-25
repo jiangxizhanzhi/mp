@@ -79,7 +79,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
         }
 
-        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(this::getTeamFlowModel).collect(Collectors.toList());
+        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(flowFileRoot -> {
+            return this.getTeamFlowModel(flowFileRoot, pageFlowRequest);
+        }).collect(Collectors.toList());
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
@@ -217,6 +219,35 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
     }
 
+    /**
+     * 转换为TeamFlowInfo类
+     * @param flowFileRoot
+     * @return TeamFlowInfo
+     */
+    private TeamFlowInfo getTeamFlowModel(FlowFileRoot flowFileRoot, PageFlowRequest pageFlowRequest) {
+        TeamFlowInfo.TeamFlowInfoBuilder builder = TeamFlowInfo.builder();
+        if (Objects.nonNull(flowFileRoot.getSource())) {
+            builder.sourceIp(flowFileRoot.getSource().getIp());
+            builder.sourcePort(flowFileRoot.getSource().getPort().toString());
+            builder.size(flowFileRoot.getSource().getBytes());
+        }
+
+        if (Objects.nonNull(flowFileRoot.getDestination())) {
+            builder.targetIp(flowFileRoot.getDestination().getIp());
+        }
+
+        if (!StringUtils.isEmpty(pageFlowRequest.getProtocol())) {
+            builder.protocol(pageFlowRequest.getProtocol());
+        } else {
+            builder.protocol(flowFileRoot.getProtocol().get(0));
+        }
+
+        if (!StringUtils.isEmpty(flowFileRoot.getId())) {
+            builder.dataId(flowFileRoot.getId());
+        }
+
+        return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
+    }
     /**
      * 转换为FlowDetailInfo类
      * @param flowFileRoot
