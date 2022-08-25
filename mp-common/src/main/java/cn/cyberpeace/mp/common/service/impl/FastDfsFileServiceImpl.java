@@ -1,20 +1,24 @@
 package cn.cyberpeace.mp.common.service.impl;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @Description: FastDFS文件操作实现类
@@ -25,12 +29,6 @@ import java.io.File;
 @Slf4j
 @Service
 public class FastDfsFileServiceImpl implements FileService {
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     /**
      * 文件上传
@@ -56,11 +54,28 @@ public class FastDfsFileServiceImpl implements FileService {
      */
     @Override
     public void downloadFile(String filePath, HttpServletResponse response) throws MpRuntimeException {
+        InputStream is = null;
+        OutputStream os = null;
         try {
-            fastDFSClient.downloadFile(filePath, response, FdfsGroupEnum.DEFAULT.toString());
-        } catch (MpRuntimeException e) {
+            byte[] fileByte = FdfsCommon.downloadRawContent(filePath);
+            if (ArrayUtils.isEmpty(fileByte)) {
+                log.error("downloadFile not exist");
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+            }
+            is = new ByteArrayInputStream(fileByte);
+            os = response.getOutputStream();
+            byte[] buffer = new byte[1024 * 5];
+            int len = 0;
+            while ((len = is.read(buffer)) > 0) {
+                os.write(buffer, 0, len);
+            }
+            os.flush();
+        } catch (Exception e) {
             log.error("downloadFile error", e);
-            throw e;
+            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+        } finally {
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(os);
         }
     }
 
@@ -70,9 +85,9 @@ public class FastDfsFileServiceImpl implements FileService {
      * @return
      */
     @Override
-    public ServiceResult deleteFile(String filePath) {
+    public ServiceResult<Void> deleteFile(String filePath) {
         try {
-            fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
+            FdfsCommon.delete(filePath);
         } catch (MpRuntimeException e) {
             log.error("deleteFile error", e);
             return ServiceResult.fail(e.getMessage());
@@ -90,20 +105,16 @@ public class FastDfsFileServiceImpl implements FileService {
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
-            String filepath = fastDFSClient.uploadFileWithMultipart(file, FdfsGroupEnum.DEFAULT.toString());
-
-            // 获取当前集群配置
-            FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-
+            String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+            String filepath = FdfsCommon.upload(file.getInputStream(), suffix);
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
-            responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
-            responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
-            responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
+            responseData.setFileType(suffix);
+            responseData.setHttpUrl(FdfsCommon.genHttpUrl(filepath));
+            responseData.setInnerHttpUrl(FdfsCommon.genInnerHttpUrl(filepath));
             responseData.setFileSize(file.getSize());
-        } catch (MpRuntimeException e) {
+        } catch (MpRuntimeException | IOException e) {
             responseData.setSuccess(false);
-//            responseData.setCode(e.getErrorCode());
             responseData.setMessage(MessageCommon.get(e.getMessage()));
         }
 

@@ -1,16 +1,14 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
+import java.io.IOException;
 
 /**
  * @Description: 头像管理service
@@ -21,32 +19,20 @@ import java.io.File;
 @Slf4j
 public class AvatarService {
 
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
-
     public FileResponseData upload(MultipartFile file) {
-        // todo 判断是否是图片
-
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
-            String filepath = fastDFSClient.uploadFileWithMultipart(file, FdfsGroupEnum.DEFAULT.toString());
-
-            // 获取当前集群配置
-            FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
+            String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+            String filepath = FdfsCommon.upload(file.getInputStream(), suffix);
 
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
-            responseData.setFileType(FastDFSClient.getFilenameSuffix(file.getOriginalFilename()));
-            responseData.setHttpUrl(group.getFileServerAddr() + File.separator + filepath);
-            responseData.setInnerHttpUrl(group.getInnerFileServerAddr() + File.separator + filepath);
-        } catch (MpRuntimeException e) {
+            responseData.setFileType(suffix);
+            responseData.setHttpUrl(FdfsCommon.genHttpUrl(filepath));
+            responseData.setInnerHttpUrl(FdfsCommon.genInnerHttpUrl(filepath));
+        } catch (MpRuntimeException | IOException e) {
             responseData.setSuccess(false);
-//            responseData.setCode(e.getErrorCode());
             responseData.setMessage(e.getMessage());
         }
 
