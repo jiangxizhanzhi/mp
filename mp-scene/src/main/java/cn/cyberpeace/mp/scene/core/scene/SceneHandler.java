@@ -523,6 +523,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return true;
     }
 
@@ -538,6 +541,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.UNPAUSE, SceneElementModel.Event.UNPAUSE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return true;
     }
 
@@ -553,6 +559,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.SUSPEND, SceneElementModel.Event.SUSPEND);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return true;
     }
 
@@ -568,6 +577,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.RESUME, SceneElementModel.Event.RESUME);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return true;
     }
 
@@ -587,7 +599,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
-
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return super.delete();
     }
 
@@ -604,7 +618,9 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.DELETE, SceneElementModel.Event.DELETE);
-
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            save();
+        }
         return super.logicDelete();
     }
 
@@ -633,6 +649,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.RESTART);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void pauseElement(String nodeId) {
@@ -648,6 +667,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.PAUSE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void unpauseElement(String nodeId) {
@@ -663,6 +685,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.UNPAUSE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void snapshotElement(String nodeId) {
@@ -687,6 +712,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.RECREATE);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void suspendElement(String nodeId) {
@@ -702,6 +730,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.SUSPEND);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void resumeElement(String nodeId) {
@@ -717,6 +748,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.RESUME);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     public void snapshotElement(String nodeId, String snapshotId, String snapshotName, String description) {
@@ -732,6 +766,9 @@ public class SceneHandler extends BaseSceneHandler<
             return;
         }
         overElementEvent(nodeId, SceneElementModel.Event.SNAPSHOT);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            updateSceneElementWithPlugins(nodeId);
+        }
     }
 
     @Override
