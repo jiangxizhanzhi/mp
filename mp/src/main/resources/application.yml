@@ -86,14 +86,17 @@ mp:
           nodes:
             - node-ip: 192.168.2.56
               node-names: aitest003
+              target-ips: 192.168.2.56
             - node-ip: 192.168.2.55
               node-names: aitest001,aitest002
+              target-ips: 192.168.2.55,172.20.0.2
         - group-id: "002"
           es-node: 10.100.0.251:9205
           wazuh-url: http://10.100.0.251:15500
           nodes:
             - node-ip: 10.100.0.251
               node-names: test251
+              target-ips: 10.100.0.251
 
   log:
     es-nodes: ${ip.es}:9205

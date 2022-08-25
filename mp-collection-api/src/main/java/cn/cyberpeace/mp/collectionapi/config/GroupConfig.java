@@ -23,6 +23,7 @@ public class GroupConfig {
         public static class Node {
             private String nodeIp;
             private List<String> nodeNames;
+            private List<String> targetIps;
         }
     }
 }
