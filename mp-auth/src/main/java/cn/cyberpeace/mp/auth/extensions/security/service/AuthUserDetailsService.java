@@ -99,8 +99,11 @@ public class AuthUserDetailsService implements UserDetailsService {
      */
     @Cacheable(value = CACHE_USER_AUTHORITIES)
     public Set<GrantedAuthority> loadAuthorities(String userId) {
-        List<RoleModel> roles = userRoleService.listByUserId(userId);
         Set<GrantedAuthority> authoritySet = new HashSet<>();
+        if (StringUtils.isBlank(userId)) {
+            return authoritySet;
+        }
+        List<RoleModel> roles = userRoleService.listByUserId(userId);
         roles.forEach(r -> {
             authoritySet.add(new SimpleGrantedAuthority("ROLE_" + r.getIdentifier()));
         });

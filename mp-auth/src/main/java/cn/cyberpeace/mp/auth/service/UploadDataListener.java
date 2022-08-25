@@ -258,13 +258,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
 
     private void preProcessImportUsers(List<ImportUser> users) {
-        preProcessPwd(users);
         preProcessOrgs(users);
         preProcessRoles(users);
     }
 
 
     /**
+     * 导入excel暂时不用对密码进行预处理
      * 预处理密码
      */
     private void preProcessPwd(List<ImportUser> users) {
