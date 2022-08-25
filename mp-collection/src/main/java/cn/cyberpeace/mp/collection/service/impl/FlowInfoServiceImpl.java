@@ -128,6 +128,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         }
 
         if (!CollectionUtils.isEmpty(pageFlowRequest.getAgentIps())) {
+            //todo:获取全部ip
             buildRuleAgentIpQuery(pageFlowRequest.getAgentIps(), boolQueryBuilder);
         }
 
@@ -185,10 +186,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     private void buildRuleAgentIpQuery(List<String> agentIp, BoolQueryBuilder boolQueryBuilder) {
-        BoolQueryBuilder boolQueryBuilder1 = new BoolQueryBuilder();
-        boolQueryBuilder1.should(QueryBuilders.termsQuery("source.ip", agentIp));
-        boolQueryBuilder1.should(QueryBuilders.termsQuery("destination.ip", agentIp));
-        boolQueryBuilder.must(boolQueryBuilder1);
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("destination.ip", agentIp));
     }
 
     /**
