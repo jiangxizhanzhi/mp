@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collection.service.impl;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -78,7 +79,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
         }
 
-        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(this::getTeamFlowModel).collect(Collectors.toList());
+        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(flowFileRoot -> {
+            return this.getTeamFlowModel(flowFileRoot, pageFlowRequest);
+        }).collect(Collectors.toList());
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
@@ -94,8 +97,11 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
-
-        buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
+        if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
+            buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
+        } else {
+            return new ServiceResult<>(new FlowDetailInfo()).asResult();
+        }
         sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -150,12 +156,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     private void buildFlowQueryBuilder(FlowQueryRequest flowQueryRequest, BoolQueryBuilder boolQueryBuilder) {
-        if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", flowQueryRequest.getDataId()));
-        } else {
-            //TODO:待优化
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", ARKIME_SESSIONS3_));
-        }
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", flowQueryRequest.getDataId()));
     }
 
     private void buildRuleSourceIpQuery(List<String> sourceIps, BoolQueryBuilder boolQueryBuilder) {
@@ -218,6 +219,35 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
     }
 
+    /**
+     * 转换为TeamFlowInfo类
+     * @param flowFileRoot
+     * @return TeamFlowInfo
+     */
+    private TeamFlowInfo getTeamFlowModel(FlowFileRoot flowFileRoot, PageFlowRequest pageFlowRequest) {
+        TeamFlowInfo.TeamFlowInfoBuilder builder = TeamFlowInfo.builder();
+        if (Objects.nonNull(flowFileRoot.getSource())) {
+            builder.sourceIp(flowFileRoot.getSource().getIp());
+            builder.sourcePort(flowFileRoot.getSource().getPort().toString());
+            builder.size(flowFileRoot.getSource().getBytes());
+        }
+
+        if (Objects.nonNull(flowFileRoot.getDestination())) {
+            builder.targetIp(flowFileRoot.getDestination().getIp());
+        }
+
+        if (!StringUtils.isEmpty(pageFlowRequest.getProtocol())) {
+            builder.protocol(pageFlowRequest.getProtocol());
+        } else {
+            builder.protocol(flowFileRoot.getProtocol().get(0));
+        }
+
+        if (!StringUtils.isEmpty(flowFileRoot.getId())) {
+            builder.dataId(flowFileRoot.getId());
+        }
+
+        return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
+    }
     /**
      * 转换为FlowDetailInfo类
      * @param flowFileRoot
