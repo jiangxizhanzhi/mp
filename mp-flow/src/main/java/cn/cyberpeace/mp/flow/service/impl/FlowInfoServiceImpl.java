@@ -1,16 +1,15 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.*;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowCategory;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -33,6 +32,7 @@ import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
@@ -64,9 +64,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
 
     @Autowired
     private FlowCollectionRelMapper flowCollectionRelMapper;
@@ -875,9 +872,11 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     if (flowFile.getName().endsWith(".pcap") || flowFile.getName().endsWith(".sh") || flowFile.getName().endsWith(".py")) {
                         String fileName = flowFile.getName().split(BaseConstants.SPOT)[0];
                         FlowInfoModel flowInfoModel = new FlowInfoModel();
+                        String flowId = DigestUtil.md5Hex(fileName);
+                        flowInfoModel.setId(flowId);
                         flowInfoModel.setTitle(fileName);
                         flowInfoModel.setFileName(flowFile.getName());
-                        String fdfsPath = fastDFSClient.uploadFileWithFilepath(flowFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
+                        String fdfsPath = FdfsCommon.upload(flowFile.getAbsolutePath());
                         if (flowFile.getName().endsWith(".pcap")) {
                             // 背景流量
                             flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
@@ -1007,7 +1006,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
 
             flowInfoModel.setFileName(pcapFile.getName());
-            String fdfsPath = fastDFSClient.uploadFileWithFilepath(pcapFile.getAbsolutePath(), FdfsGroupEnum.DEFAULT.toString());
+            String fdfsPath = FdfsCommon.upload(pcapFile.getAbsolutePath());
             flowInfoModel.setFlowDesc(readmeList.get(3));
             boolean isContainType = readmeList.get(10).contains("类型");
             int diffCount = 0;

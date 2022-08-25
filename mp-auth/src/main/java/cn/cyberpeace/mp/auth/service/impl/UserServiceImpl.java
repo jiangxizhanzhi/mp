@@ -10,32 +10,18 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.DefaultImgService;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -46,9 +32,10 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,21 +47,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -95,13 +70,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public static final String CACHE_VAL_USERDTO = "USERDTO_CACHE";
 
     public static final String CACHE_VAL_ORGDTOS_TO_USERDTOS = "ORGDTOS_TO_USERDTOS_CACHE";
-
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private RoleService roleService;
@@ -752,18 +720,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 上传服务器
             String filepath = null;
             try {
-                filepath = fastDFSClient.uploadFileWithMultipart(multipartFile, FdfsGroupEnum.DEFAULT.toString());
+                String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
+                filepath = FdfsCommon.upload(multipartFile.getInputStream(), suffix);
                 log.info("uploaded avatar success! filepath:{}", filepath);
-            } catch (MpRuntimeException e) {
+            } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw e;
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
             }
 
             if (StringUtils.isNotBlank(filepath)) {
-                // 获取当前集群配置
-                FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-                String httpUrl = group.getFileServerAddr() + File.separator + filepath;
-
+                String httpUrl = FdfsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 var ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();

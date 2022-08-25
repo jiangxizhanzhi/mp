@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
-import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ public class AgentServiceTest {
 
     @Test
     public void testListAgents() {
-        agentService.listAgents(new AgentRequest("windows_agent1"));
+//        agentService.listAgents(new AgentRequest("windows_agent1"));
     }
 
 }

@@ -1,24 +1,15 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateModel;
 import cn.cyberpeace.mp.situationaware.model.CollectionTemplateProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeModel;
 import cn.cyberpeace.mp.situationaware.model.ProbeParamModel;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCommonProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCommonProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.ColTempCustomProbeRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateSearchCondition;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.*;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
@@ -73,9 +64,6 @@ public class CollectionTemplateService {
 
     @Autowired
     private ProbeService probeService;
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
 
     /**
      * 分页查询探针列表
@@ -196,7 +184,7 @@ public class CollectionTemplateService {
             if (StringUtils.isNotBlank(colTempProbeDto.getScriptUrl())) {
                 log.info("Render Script Content...");
                 // 加载脚本内容
-                byte[] scriptByte = fastDFSClient.download(colTempProbeDto.getScriptUrl(), FdfsGroupEnum.DEFAULT.toString());
+                byte[] scriptByte = FdfsCommon.downloadRawContent(colTempProbeDto.getScriptUrl());
                 String scriptContent = new String(scriptByte, StandardCharsets.UTF_8);
                 colTempProbeDto.setScriptContent(scriptContent);
             }

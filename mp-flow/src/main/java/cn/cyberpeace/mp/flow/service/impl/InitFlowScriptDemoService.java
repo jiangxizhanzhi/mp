@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
@@ -27,11 +27,7 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
     @Autowired
     private FlowScriptDemoServiceImpl flowScriptDemoService;
 
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
     private static final String PY_DEMO_NAME = "demo_py.py";
-
     private static final String SH_DEMO_NAME = "demo_sh.sh";
 
     private static final String PROBE_SH_DEMO_NAME = "get_host_name.sh";
@@ -57,12 +53,17 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
                 probePyDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/probe/get_host_name.py"));
                 probeBatDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/probe/get_host_name.bat"));
 
-                String pyPath = fastDFSClient.upload(pyDemo, PY_DEMO_NAME, null, FdfsGroupEnum.DEFAULT.toString());
-                String shPath = fastDFSClient.upload(shDemo, SH_DEMO_NAME, null, FdfsGroupEnum.DEFAULT.toString());
+                String pySuffix = FileUtil.getSuffix(PY_DEMO_NAME);
+                String shSuffix = FileUtil.getSuffix(SH_DEMO_NAME);
+                String pyPath = FdfsCommon.upload(pyDemo, pySuffix);
+                String shPath = FdfsCommon.upload(shDemo, shSuffix);
 
-                String probeShPath = fastDFSClient.upload(probeShDemo, PROBE_SH_DEMO_NAME, null, FdfsGroupEnum.DEFAULT.toString());
-                String probePyPath = fastDFSClient.upload(probePyDemo, PROBE_PY_DEMO_NAME, null, FdfsGroupEnum.DEFAULT.toString());
-                String probeBatPath = fastDFSClient.upload(probeBatDemo, PROBE_BAT_DEMO_NAME, null, FdfsGroupEnum.DEFAULT.toString());
+                String probeShSuffix = FileUtil.getSuffix(PROBE_SH_DEMO_NAME);
+                String probePySuffix = FileUtil.getSuffix(PROBE_PY_DEMO_NAME);
+                String probeBatSuffix = FileUtil.getSuffix(PROBE_BAT_DEMO_NAME);
+                String probeShPath = FdfsCommon.upload(probeShDemo, probeShSuffix);
+                String probePyPath = FdfsCommon.upload(probePyDemo, probePySuffix);
+                String probeBatPath = FdfsCommon.upload(probeBatDemo, probeBatSuffix);
 
                 FlowScriptDemoModel pyDemoModel = new FlowScriptDemoModel(PY_DEMO_NAME, pyPath, FlowScriptDemoModel.TYPE_FLOW);
                 FlowScriptDemoModel shDemoModel = new FlowScriptDemoModel(SH_DEMO_NAME, shPath, FlowScriptDemoModel.TYPE_FLOW);

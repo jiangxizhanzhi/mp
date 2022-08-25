@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.field;
 
+import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
@@ -14,7 +15,7 @@ public class FlowInfoFields extends BaseModelFields {
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 
-    public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
+    public static final DynamicFields readonlyFields = new DynamicFields().merge(new DynamicFields(BaseModel::getCreateTime, BaseModel::getUpdateTime));
 
     public static final DynamicFields searchFields = new DynamicFields(FlowInfoModel::getTitle, FlowInfoModel::getFlowDesc,
             FlowInfoModel::getInteractiveType, FlowInfoModel::getResourceType, FlowInfoModel::getPcapFile,
