@@ -12,7 +12,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
+import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
@@ -28,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @Description: 注册接口
@@ -61,6 +65,10 @@ public class RegisterController {
         if (result.getSource() != null) {
             UserModel userModel = result.getSource().getObj();
             JwtUtils.addResponseHeaderWithJWT(userModel);
+            HttpServletRequest request = ServletUtils.getRequest();
+            request.setAttribute(LogConstant.USER_ID_KEY, userModel.getId());
+            request.setAttribute(LogConstant.USER_NAME_KEY, userModel.getUsername());
+            request.setAttribute(LogConstant.USER_TYPE_KEY,  LogConstant.USER_TYPE_USER);
             return ServiceResult.success(userModel);
         }
 
