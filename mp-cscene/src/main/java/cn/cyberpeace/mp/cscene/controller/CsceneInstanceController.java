@@ -384,6 +384,19 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
                 request.getContext()).asResult();
     }
 
+    @ApiOperation("获取容器console连接,仅支持非neutron网络的容器")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "nodeId", value = "节点id", dataTypeClass = String.class),
+    })
+    @PostMapping(value = "/get_tty_connection")
+    public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(@RequestParam(required = false) String id,
+                                                                  @RequestParam(required = false) String nodeId,
+                                                                  @RequestBody(required = false) CsceneInstanceNodeActionRequest request) {
+        request = formatNodeActionRequest(request, id, nodeId);
+        return modelService.getRemoteTtyConnection(request.getId(), request.getNodeId()).asResult();
+    }
+
     @ApiOperation("场景实例连接开启录屏")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),

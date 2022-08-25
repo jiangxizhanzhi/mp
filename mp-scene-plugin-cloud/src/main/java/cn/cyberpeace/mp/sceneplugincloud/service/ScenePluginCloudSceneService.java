@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -439,6 +441,23 @@ public class ScenePluginCloudSceneService {
 //        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
         CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
+    }
+
+    public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String sceneId, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (cloudPlugin != null) {
+            var cloudElement = cloudPlugin.getElement(nodeId);
+            if (cloudElement != null) {
+                String resourceId = cloudElement.getResourceId();
+                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(resourceId);
+                NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                nodeConnectionBO.setNodeId(nodeId);
+                nodeConnectionBO.setConnectionUrl(url);
+                return new ServiceResult<>(nodeConnectionBO);
+            }
+        }
+        throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
     }
 
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
