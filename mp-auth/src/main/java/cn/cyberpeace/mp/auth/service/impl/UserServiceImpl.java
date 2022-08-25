@@ -74,13 +74,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private AuthBizConfig authBizConfig;
 
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
-
     @Autowired
     private RoleService roleService;
 
