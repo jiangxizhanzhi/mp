@@ -60,6 +60,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                     accessMode.setAvailable(true);
                     return;
                 }
+                if (!Boolean.TRUE.equals(accessMode.getProxy())) {
+                    accessMode.setAvailable(true);
+                    return;
+                }
 
                 var ip = accessMode.getAccessIp();
                 if (StringUtils.isEmpty(ip)) {

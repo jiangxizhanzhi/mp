@@ -953,6 +953,16 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 context.getAccessUserId(), cloudScenePluginContext);
     }
 
+    public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String id, String nodeId) {
+        var sceneId = getSceneId(id);
+        if (StringUtils.isEmpty(sceneId)) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        var result = scenePluginCloudSceneService.getRemoteTtyConnection(sceneId, nodeId).getSource();
+        result.setSceneId(id);
+        return new ServiceResult<>(result);
+    }
+
     public ServiceResult<NodeConnectionBO> enableRecording(String id, String nodeId, String connectionId, CsceneContextBO context) {
         CsceneContextHolder.setCsceneInstanceId(id);
         if (context == null || StringUtils.isEmpty(context.getAccessUserId())) {

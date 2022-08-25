@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConnectionModel;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.CloudApiProxyBuilder;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualSwitchDele
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneConnectionMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.util.ElementTypeUtils;
 import cn.cyberpeace.mp.sceneplugincloud.util.SceneInstanceLinkCacheUtil;
 import lombok.AllArgsConstructor;
@@ -229,6 +231,19 @@ public class DeleteHandler extends HandlerCommon {
 
     protected boolean deleteContainer(CloudPluginSceneElementBO cloudElement) {
         var resourceId = cloudElement.getResourceId();
+        if (StringUtils.isEmpty(resourceId)) {
+            var elementMapper = BeanCommon.getBean(CloudPluginSceneElementMapper.class);
+            var sceneId = getPluginHandler().getSourceSceneId();
+            var sceneElementId = cloudElement.getSrcElement().getId();
+            var element = elementMapper.first(new HumanCondition()
+                    .filterEqual(CloudPluginSceneElementModel::getScene, sceneId)
+                    .filterEqual(CloudPluginSceneElementModel::getSceneElement, sceneElementId)
+            );
+            if (element != null && StringUtils.isNotEmpty(element.getResourceId())) {
+                resourceId = element.getResourceId();
+                cloudElement.setResourceId(resourceId);
+            }
+        }
         if (StringUtils.isEmpty(resourceId)) {
             containerClient.deleteByName(HandlerUtils.genResourceName(cloudElement.getSrcElement().getEid()));
             return true;

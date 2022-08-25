@@ -20,9 +20,8 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
@@ -33,9 +32,10 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -742,18 +742,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 上传服务器
             String filepath = null;
             try {
-                filepath = fastDFSClient.uploadFileWithMultipart(multipartFile, FdfsGroupEnum.DEFAULT.toString());
+                String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
+                filepath = FdfsCommon.upload(multipartFile.getInputStream(), suffix);
                 log.info("uploaded avatar success! filepath:{}", filepath);
-            } catch (MpRuntimeException e) {
+            } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw e;
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
             }
 
             if (StringUtils.isNotBlank(filepath)) {
-                // 获取当前集群配置
-                FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-                String httpUrl = group.getFileServerAddr() + File.separator + filepath;
-
+                String httpUrl = FdfsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 var ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();
@@ -907,7 +905,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserDto> listByUserIds(String[] userIds) {
         List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
         List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
-        userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userDtos;
     }
 

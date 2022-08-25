@@ -7,7 +7,6 @@ import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
-import cn.hutool.crypto.digest.MD5;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.Cache;
@@ -37,8 +36,6 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    private static final MD5 MD5_ = MD5.create();
 
     @Resource(name = "authCacheManager_6H")
     private CacheManager cacheManager;
@@ -70,30 +67,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     private void refreshToken(HttpServletResponse response, String token, UserModel userModel) {
-        String md5 = MD5_.digestHex(token);
         Cache tokenCache = cacheManager.getCache("_token");
-        String jwt = tokenCache.get(md5, String.class);
-        if (StringUtils.isBlank(jwt)) {
-            log.debug("hit cache... md5:{}, jwt:{}", md5, jwt);
+        String newJwt = tokenCache.get(token, String.class);
+        if (StringUtils.isBlank(newJwt)) {
             Date date = JwtUtils.getTokenExpiredTime(token);
             if (Objects.isNull(date)) {
                 return;
             }
-            log.debug("refreshToken, username:{}", userModel.getUsername());
             LocalDateTime expiredTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
             LocalDateTime now = LocalDateTime.now();
             if (now.isAfter(expiredTime.minusHours(6)) && now.isBefore(expiredTime)) {
                 log.warn("token is expired in less than 6 hours, auto refresh token...");
-                jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
+                newJwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
+                tokenCache.put(token, newJwt);
             }
         }
 
-        if (StringUtils.isNotBlank(jwt)) {
-            tokenCache.put(md5, jwt);
+        if (StringUtils.isNotBlank(newJwt)) {
             // 后端回塞一个新的token
-            setCookie(response, "cr_jwttoken", jwt, "/", null, Integer.MAX_VALUE);
+            setCookie(response, "cr_jwttoken", newJwt, "/", null, Integer.MAX_VALUE);
 
-            response.setHeader(AuthConstant.JWT_HEADER_KEY, jwt);
+            response.setHeader(AuthConstant.JWT_HEADER_KEY, newJwt);
             response.setHeader(AuthConstant.CP_TOKEN_REFRESHED_HEADER_KEY, "true");
         }
     }
