@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthBizConfig;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
@@ -70,6 +71,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     public static final String CACHE_VAL_ORGDTOS_TO_USERDTOS = "ORGDTOS_TO_USERDTOS_CACHE";
 
+    @Autowired
+    private AuthBizConfig authBizConfig;
+
 
     @Autowired
     private FastDFSClient fastDFSClient;
@@ -128,18 +132,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserDto getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
-
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
     }
 
     @Override
     public UserDto getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
+    }
+
+    /**
+     * 判断是否有头像，没有则设置为默认头像
+     * @param userModel
+     */
+    private void setDefaultIfNoAvatar(UserModel userModel) {
+        if (StringUtils.isEmpty(userModel.getAvatar())) {
+            userModel.setAvatar(getDefaultUserAvatar());
+        }
     }
 
 
@@ -149,8 +162,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(userModel)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
     }
 
@@ -270,9 +283,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         createCheckService.check(userModel);
 
-        if (StringUtils.isEmpty(userModel.getAvatar())) {
-            userModel.setAvatar(getDefaultUserAvatar());
-        }
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
@@ -395,6 +405,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
@@ -402,18 +413,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listByUserName(List<String> userNames) {
         List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
+        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         return userModels;
     }
 
     @Override
     public UserModel getByIdent(String ident) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
     @Override
     public UserModel getByMobile(String mobile) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
@@ -665,7 +679,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<OrgUserModel> orgUserModels = new ArrayList<>();
-        String defaultavatar = getDefaultUserAvatar();
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
             log.info("importUser:{}", importUser);
@@ -673,10 +686,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             UserModel userModel = importUser2UserModel(importUser);
             if (Objects.isNull(userModel)) {
                 continue;
-            }
-
-            if (StringUtils.isEmpty(userModel.getAvatar())) {
-                userModel.setAvatar(defaultavatar);
             }
 
             String userId = TextUtils.uuid();
@@ -898,6 +907,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserDto> listByUserIds(String[] userIds) {
         List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
         List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
+        userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userDtos;
     }
 
@@ -915,7 +925,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public String getDefaultUserAvatar() {
-        return "/api/mp/avatar/1.png";
+        return authBizConfig.getDefaultUserAvatar();
     }
 
 
