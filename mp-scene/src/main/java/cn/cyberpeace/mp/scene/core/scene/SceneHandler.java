@@ -354,6 +354,12 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void ackSceneChanged(boolean forceSave, boolean withPlugins) {
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneProcessSaveRealtime())) {
+            forceSave = false;
+        }
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            realTimeUpdate = false;
+        }
         if (forceSave || realTimeUpdate) {
             if (withPlugins) {
                 updateSceneWithPlugins();
@@ -365,6 +371,12 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     public void ackElementChanged(String nodeId, boolean forceSave, boolean withPlugins) {
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getElementProcessSaveRealtime())) {
+            forceSave = false;
+        }
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            realTimeUpdate = false;
+        }
         if (forceSave || realTimeUpdate) {
             if (withPlugins) {
                 updateSceneElementWithPlugins(nodeId);
