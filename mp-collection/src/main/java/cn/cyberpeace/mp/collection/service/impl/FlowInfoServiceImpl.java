@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collection.service.impl;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -94,8 +95,11 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
-
-        buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
+        if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
+            buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
+        } else {
+            return new ServiceResult<>(new FlowDetailInfo()).asResult();
+        }
         sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -150,12 +154,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     private void buildFlowQueryBuilder(FlowQueryRequest flowQueryRequest, BoolQueryBuilder boolQueryBuilder) {
-        if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", flowQueryRequest.getDataId()));
-        } else {
-            //TODO:待优化
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", ARKIME_SESSIONS3_));
-        }
+        boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", flowQueryRequest.getDataId()));
     }
 
     private void buildRuleSourceIpQuery(List<String> sourceIps, BoolQueryBuilder boolQueryBuilder) {

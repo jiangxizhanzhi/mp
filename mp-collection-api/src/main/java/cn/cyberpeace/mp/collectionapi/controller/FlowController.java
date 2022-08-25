@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -38,7 +39,7 @@ public class FlowController {
         var flowDetailInfo = flowInfoService.queryFlowDetail(flowQueryRequest).getSource();
 
         if (Objects.isNull(flowDetailInfo) || StringUtils.isEmpty(flowDetailInfo.getSourceIp()) || StringUtils.isEmpty(flowDetailInfo.getTargetIp())) {
-            return new ServiceResult<>(new FlowDetailVO()).asResult();
+            return new ServiceResult<>(new FlowDetailVO(), BaseErrorCode.PARAMS_INVALID).asResult();
         }
 
         FlowDetailVO flowDetailVO = new FlowDetailVO();
