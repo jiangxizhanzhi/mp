@@ -108,7 +108,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         SearchResponse response = restHighLevelClient.search(searchRequest);
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
 
-        if (Objects.isNull(flowFileRoots)) {
+        if (flowFileRoots.isEmpty()) {
             return new ServiceResult<>(new FlowDetailInfo()).asResult();
         }
         FlowDetailInfo flowDetailInfo = this.getFlowDetailModel(flowFileRoots.get(0), flowQueryRequest);
@@ -152,6 +152,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     private void buildFlowQueryBuilder(FlowQueryRequest flowQueryRequest, BoolQueryBuilder boolQueryBuilder) {
         if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
             boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", flowQueryRequest.getDataId()));
+        } else {
+            //TODO:待优化
+            boolQueryBuilder.filter(QueryBuilders.termsQuery("_id", ARKIME_SESSIONS3_));
         }
     }
 

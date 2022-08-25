@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.collectionapi.vo.TeamFlowVO;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +37,8 @@ public class FlowController {
 
         var flowDetailInfo = flowInfoService.queryFlowDetail(flowQueryRequest).getSource();
 
-        if (Objects.isNull(flowDetailInfo)) {
-            return new ServiceResult<>(new FlowDetailVO());
+        if (Objects.isNull(flowDetailInfo) || StringUtils.isEmpty(flowDetailInfo.getSourceIp()) || StringUtils.isEmpty(flowDetailInfo.getTargetIp())) {
+            return new ServiceResult<>(new FlowDetailVO()).asResult();
         }
 
         FlowDetailVO flowDetailVO = new FlowDetailVO();
@@ -62,7 +63,7 @@ public class FlowController {
         var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
 
         if (CollectionUtil.isEmpty(teamFlowInfoListObjResult.getObjs())) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<>(), 0));
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0)).asResult();
         }
 
         List<TeamFlowVO> teamFlowVOList = new ArrayList<>();
