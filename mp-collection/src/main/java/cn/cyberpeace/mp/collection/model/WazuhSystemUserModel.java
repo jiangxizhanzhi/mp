@@ -42,4 +42,6 @@ public class WazuhSystemUserModel {
     private String action;
 
     private String agentIp;
+
+    private String agentName;
 }

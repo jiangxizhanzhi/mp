@@ -2,11 +2,10 @@ package cn.cyberpeace.mp.collection.config;
 
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ClusterConfig {
-    public static List<Node> nodes = new ArrayList<>();
+    public static List<Node> nodes;
 
     private ClusterConfig() {
     }

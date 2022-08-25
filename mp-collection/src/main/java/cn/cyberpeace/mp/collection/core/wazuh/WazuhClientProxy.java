@@ -22,6 +22,11 @@ public class WazuhClientProxy implements MethodInterceptor {
 
     }
 
+    public static void updateClientMap(String wazuhUsername, String wazuhPassword) {
+        init = false;
+        init(wazuhUsername, wazuhPassword);
+    }
+
     public static void init(String wazuhUsername, String wazuhPassword) {
         if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
             wazuhClientMap = new ConcurrentHashMap<>();

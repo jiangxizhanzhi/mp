@@ -308,26 +308,27 @@ public class CollectionClient {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
-        wazuhMonitorEventsRequest.setPageSize(1);
+        // 每个agent取1条数据，做假分页处理
+        wazuhMonitorEventsRequest.setPageNum(1);
+        wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_NET_CONNS);
-        JSONObject jsonObject = processBaseChangeOutput(response);
-        if (jsonObject.isEmpty()) {
-            return Collections.emptyList();
-        }
-        JSONArray arr = jsonObject.getJSONArray("values");
-        if (Objects.isNull(arr)) {
+        List<JSONObject> jsonObjects = processBaseChangeOutput(response);
+        if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
         }
         List<WazuhNetworkConnectionModel> list = new ArrayList<>();
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject data = arr.getJSONObject(i);
-            WazuhNetworkConnectionModel netConnModel = JSON.toJavaObject(data, WazuhNetworkConnectionModel.class);
-            if (Objects.nonNull(jsonObject.get("time"))) {
-                netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
+        for (JSONObject jsonObject : jsonObjects) {
+            JSONArray arr = jsonObject.getJSONArray("values");
+            if (Objects.isNull(arr)) {
+                continue;
             }
-            netConnModel.setDescription("CMD LAUNCH LOG");
-            list.add(netConnModel);
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject data = arr.getJSONObject(i);
+                WazuhNetworkConnectionModel netConnModel = JSON.toJavaObject(data, WazuhNetworkConnectionModel.class);
+                netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
+                netConnModel.setDescription("CMD LAUNCH LOG");
+                list.add(netConnModel);
+            }
         }
         return list;
     }
@@ -342,31 +343,30 @@ public class CollectionClient {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
-        wazuhMonitorEventsRequest.setPageSize(1);
+        // 每个agent取1条数据，做假分页处理
+        wazuhMonitorEventsRequest.setPageNum(1);
+        wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_PROCESSES);
-        JSONObject jsonObject = processBaseChangeOutput(response);
-        if (jsonObject.isEmpty()) {
-            return Collections.emptyList();
-        }
-        JSONArray arr = jsonObject.getJSONArray("values");
-        if (Objects.isNull(arr)) {
+        List<JSONObject> jsonObjects = processBaseChangeOutput(response);
+        if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
         }
         List<WazuhProcessModel> list = new ArrayList<>();
-        for (int i = 0; i < arr.size(); i++) {
-            JSONObject data = arr.getJSONObject(i);
-            WazuhProcessModel processModel = JSON.toJavaObject(data, WazuhProcessModel.class);
-            if (Objects.nonNull(jsonObject.get("time"))) {
+        for (JSONObject jsonObject : jsonObjects) {
+            JSONArray arr = jsonObject.getJSONArray("values");
+            if (Objects.isNull(arr)) {
+                continue;
+            }
+            for (int i = 0; i < arr.size(); i++) {
+                JSONObject data = arr.getJSONObject(i);
+                WazuhProcessModel processModel = JSON.toJavaObject(data, WazuhProcessModel.class);
                 processModel.setTime((LocalDateTime) jsonObject.get("time"));
-            }
-            if (Objects.nonNull(jsonObject.get("agent_ip"))) {
                 processModel.setAgentIp((String) jsonObject.get("agent_ip"));
+                processModel.setAgentName((String) jsonObject.get("agent_name"));
+                processModel.setDescription("PROCESS");
+                list.add(processModel);
             }
-            processModel.setDescription("PROCESS");
-            list.add(processModel);
         }
-
         return list;
     }
 
@@ -380,22 +380,25 @@ public class CollectionClient {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
         }
-        // 只取一条数据，做假分页处理
-        wazuhMonitorEventsRequest.setPageSize(1);
+        // 取agent个数条数据，做假分页处理
+        wazuhMonitorEventsRequest.setPageNum(1);
+        wazuhMonitorEventsRequest.setPageSize(wazuhMonitorEventsRequest.getAgentNames().size());
         SearchResponse response = querySICLaunchEventsWithTimeRange(wazuhMonitorEventsRequest, SicLaunchConfig.LAUNCH_ID_SYSTEM_USERS);
-        JSONObject jsonObject = processBaseChangeOutput(response);
-        if (jsonObject.isEmpty()) {
+        List<JSONObject> jsonObjects = processBaseChangeOutput(response);
+        if (CollectionUtils.isEmpty(jsonObjects)) {
             return Collections.emptyList();
         }
-        JSONArray values = jsonObject.getJSONArray("values");
-        JSONArray modified = jsonObject.getJSONArray("modified");
-        JSONArray deleted = jsonObject.getJSONArray("deleted_prev");
-        JSONArray added = jsonObject.getJSONArray("added");
-        List<WazuhSystemUserModel> list = new ArrayList<>(processJSONArray(values, jsonObject, StringUtils.EMPTY));
-        list.addAll(processJSONArray(modified, jsonObject, "modify"));
-        list.addAll(processJSONArray(deleted, jsonObject, "delete"));
-        list.addAll(processJSONArray(added, jsonObject, "add"));
-
+        List<WazuhSystemUserModel> list = new ArrayList<>();
+        for (JSONObject jsonObject : jsonObjects) {
+            JSONArray values = jsonObject.getJSONArray("values");
+            JSONArray modified = jsonObject.getJSONArray("modified");
+            JSONArray deleted = jsonObject.getJSONArray("deleted_prev");
+            JSONArray added = jsonObject.getJSONArray("added");
+            list.addAll(processJSONArray(values, jsonObject, StringUtils.EMPTY));
+            list.addAll(processJSONArray(modified, jsonObject, "modify"));
+            list.addAll(processJSONArray(deleted, jsonObject, "delete"));
+            list.addAll(processJSONArray(added, jsonObject, "add"));
+        }
         return list;
     }
 
@@ -582,34 +585,36 @@ public class CollectionClient {
      * @param response
      * @return
      */
-    private JSONObject processBaseChangeOutput(SearchResponse response) {
+    private List<JSONObject> processBaseChangeOutput(SearchResponse response) {
         List<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>> wazuhFileRootList = Arrays.stream(response.getHits()
                 .getHits()).map(hit ->
                 JSON.parseObject(hit.getSourceAsString(), new TypeReference<WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>>>() {
                 })).collect(Collectors.toList());
 
+        List<JSONObject> jsonObjects = new ArrayList<>();
         if (CollectionUtils.isEmpty(wazuhFileRootList)) {
-            return new JSONObject();
+            return jsonObjects;
         }
 
-        // 只取最近一条
-        WazuhMonitorRoot<Launch<BaseChangeCountOutput, BaseInput>> launchModel = wazuhFileRootList.get(0);
-        if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
-            BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
-            if (StringUtils.isNotBlank(changedCntOutput.getData())) {
-                byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
-                String output = TextUtils.decompress(raw);
-                JSONObject jsonObject = JSON.parseObject(output);
+        wazuhFileRootList.forEach(launchModel -> {
+            if (Objects.nonNull(launchModel.getData()) && Objects.nonNull(launchModel.getData().getOutput())) {
+                BaseChangeCountOutput changedCntOutput = launchModel.getData().getOutput();
+                if (StringUtils.isNotBlank(changedCntOutput.getData())) {
+                    byte[] raw = TextUtils.rawDecodeBase64(StringUtils.strip(changedCntOutput.getData().trim(), "\""));
+                    String output = TextUtils.decompress(raw);
+                    JSONObject jsonObject = JSON.parseObject(output);
 
-                Date date = launchModel.getTimestamp();
-                if (Objects.nonNull(date)) {
-                    jsonObject.put("time", date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    Date date = launchModel.getTimestamp();
+                    if (Objects.nonNull(date)) {
+                        jsonObject.put("time", date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+                    }
+                    jsonObject.put("agent_ip", launchModel.getAgent().getIp());
+                    jsonObject.put("agent_name", launchModel.getAgent().getName());
+                    jsonObjects.add(jsonObject);
                 }
-                jsonObject.put("agent_ip", launchModel.getAgent().getIp());
-                return jsonObject;
             }
-        }
-        return new JSONObject();
+        });
+        return jsonObjects;
     }
 
     /**
@@ -641,6 +646,7 @@ public class CollectionClient {
             }
             if (Objects.nonNull(jsonObject.get("agent_ip"))) {
                 userModel.setAgentIp((String) jsonObject.get("agent_ip"));
+                userModel.setAgentName((String) jsonObject.get("agent_name"));
             }
             userModel.setDescription("USER MODIFIED");
             userModel.setAction(acton);

@@ -8,6 +8,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 @Component
 public class CollectionApiInit implements ApplicationRunner {
@@ -17,8 +18,13 @@ public class CollectionApiInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        init(groupConfig);
+    }
+
+    public static void init(GroupConfig groupConfig) {
         // 初始化es及wazuh节点
         if (CollectionUtils.isNotEmpty(groupConfig.getGroups())) {
+            ClusterConfig.nodes = new ArrayList<>();
             groupConfig.getGroups().forEach(group -> {
                 ClusterConfig.Node node = new ClusterConfig.Node();
                 node.setEsAddress(group.getEsNode());

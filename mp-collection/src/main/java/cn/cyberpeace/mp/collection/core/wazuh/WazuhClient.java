@@ -54,8 +54,8 @@ public class WazuhClient extends RequestProcessor{
 
     public static final String CACHE_KEY_AGENTS = "agents";
 
-    // expires in 14 minutes
-    private static TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(14 * 60 * 1000);
+    // expires in 10 minutes
+    private static final TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
 
     /**
      * 查询wazuhToken防止token失效
@@ -104,7 +104,6 @@ public class WazuhClient extends RequestProcessor{
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
         BaseResponse<Port> result = JSON.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
         List<Port> ports = result.getData().getAffectedItems();
 
         return new ListObjResult<>(ports, result.getData().getTotalAffectedItems());
@@ -157,7 +156,6 @@ public class WazuhClient extends RequestProcessor{
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<OS> result = JSON.parseObject(res, new TypeReference<>() {
         });
-        log.info("{}", result);
         return result.getData().getAffectedItems();
     }
 

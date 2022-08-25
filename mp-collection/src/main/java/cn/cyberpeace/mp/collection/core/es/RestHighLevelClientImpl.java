@@ -35,6 +35,11 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
 
     private static Map<String, RestHighLevelClient> restHighLevelClientMap;
 
+    public static void updateClientMap() {
+        init = false;
+        initClientMap();
+    }
+
     public static void initClientMap() {
         if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
             restHighLevelClientMap = new ConcurrentHashMap<>();

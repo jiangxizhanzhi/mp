@@ -22,7 +22,7 @@ public class GroupConfig {
         @Data
         public static class Node {
             private String nodeIp;
-            private String nodeName;
+            private List<String> nodeNames;
         }
     }
 }
