@@ -82,15 +82,22 @@ public class SceneExporter {
                 params.setDestPath(currentImageDir);
                 var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
                 }, true);
+                var image = result.getData();
+
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = FdfsCommon.downloadRawContent(logoUrl);
-                    this.createFile(content, currentImageDir + "/logo.png");
+                    // 判断图片文件类型
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
                 }
                 // 生成service.yml
-                var image = result.getData();
-
                 if (CollectionUtils.isNotEmpty(device.getAccessModes())) {
                     List<AccessModeParseResult> normal = new ArrayList<>();
                     List<AccessModeParseResult> manage = new ArrayList<>();
@@ -137,6 +144,19 @@ public class SceneExporter {
                 }
             }
         }
+    }
+
+    private boolean isPng(byte[] content) {
+        if (content == null || content.length < 8) {
+            return false;
+        }
+        int[] pngHeaders = new int[]{ 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+        for (int i = 0; i < pngHeaders.length; i++) {
+            if (Byte.toUnsignedInt(content[i]) != pngHeaders[i]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void createFile(byte[] content, String filePath) {
