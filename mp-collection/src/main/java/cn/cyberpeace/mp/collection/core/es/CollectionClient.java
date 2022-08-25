@@ -394,7 +394,7 @@ public class CollectionClient {
             JSONArray modified = jsonObject.getJSONArray("modified");
             JSONArray deleted = jsonObject.getJSONArray("deleted_prev");
             JSONArray added = jsonObject.getJSONArray("added");
-            list.addAll(processJSONArray(values, jsonObject, StringUtils.EMPTY));
+            list.addAll(processJSONArray(values, jsonObject, "initial"));
             list.addAll(processJSONArray(modified, jsonObject, "modify"));
             list.addAll(processJSONArray(deleted, jsonObject, "delete"));
             list.addAll(processJSONArray(added, jsonObject, "add"));

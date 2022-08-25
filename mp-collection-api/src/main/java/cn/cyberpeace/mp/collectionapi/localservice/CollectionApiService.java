@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.collection.core.wazuh.WazuhClientProxy;
 import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
 import cn.cyberpeace.mp.collectionapi.controller.DataCollectionController;
 import cn.cyberpeace.mp.collectionapi.init.CollectionApiInit;
+import cn.cyberpeace.mp.collectionapi.util.GroupUtil;
 import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,7 @@ public class CollectionApiService {
             String content = FileUtil.readString(file, "utf8");
             GroupConfig groupConfig = JSON.parseObject(content, GroupConfig.class);
             // 更新groupConfig
-            DataCollectionController.updateGroupConfig(groupConfig);
+            GroupUtil.updateGroupConfig(groupConfig);
             CollectionApiInit.init(groupConfig);
             // 更新esClient
             RestHighLevelClientImpl.updateClientMap();

@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.collection.service.DataCollectService;
 import cn.cyberpeace.mp.collection.service.HostMonitorService;
 import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
 import cn.cyberpeace.mp.collectionapi.request.PageQueryRequest;
+import cn.cyberpeace.mp.collectionapi.util.GroupUtil;
 import cn.cyberpeace.mp.collectionapi.vo.HostVO;
 import cn.cyberpeace.mp.collectionapi.vo.ProcessVO;
 import cn.cyberpeace.mp.collectionapi.vo.SystemUserVO;
@@ -36,22 +37,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/wazuh")
 @Api(value = "态势感知-事件查询接口", tags = "态势感知-事件查询接口")
 public class DataCollectionController {
-    private static GroupConfig groupConfig;
-
     @Resource(name = "dataCollectServiceImpl")
     private DataCollectService dataCollectService;
 
     @Resource(name = "hostMonitorServiceImpl")
     private HostMonitorService hostMonitorService;
 
-    public static void updateGroupConfig(GroupConfig groupConfig) {
-        DataCollectionController.groupConfig = groupConfig;
-    }
-
     @GetMapping("/file_events")
     @ApiOperation(value = "查询文件变更事件", notes = "")
     public ListObjServiceResult<FileEventModel> queryFileEvents(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<FileEventModel>(), 0)).asResult();
         }
@@ -80,7 +75,7 @@ public class DataCollectionController {
     @GetMapping("/process_info")
     @ApiOperation(value = "查询进程信息", notes = "")
     public ListObjServiceResult<ProcessVO> queryProcessInfo(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<ProcessVO>(), 0)).asResult();
         }
@@ -115,7 +110,7 @@ public class DataCollectionController {
     @GetMapping("/host_info")
     @ApiOperation(value = "查询主机信息", notes = "")
     public ListObjServiceResult<HostVO> queryHostInfo(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<HostVO>(), 0)).asResult();
         }
@@ -153,7 +148,7 @@ public class DataCollectionController {
     @GetMapping("/port_info")
     @ApiOperation(value = "查询端口信息", notes = "")
     public ListObjServiceResult<Port> queryPortInfo(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<Port>(), 0)).asResult();
         }
@@ -181,7 +176,7 @@ public class DataCollectionController {
     @GetMapping("/system_user")
     @ApiOperation(value = "查询用户信息", notes = "")
     public ListObjServiceResult<SystemUserVO> querySystemUser(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<SystemUserVO>(), 0)).asResult();
         }
@@ -215,7 +210,7 @@ public class DataCollectionController {
     @DeleteMapping("/delete")
     @ApiOperation(value = "删除es数据", notes = "")
     public ServiceResult<Long> deleteEsData(PageQueryRequest request) {
-        var group = getGroup(request.getTeamId());
+        var group = GroupUtil.getGroup(request.getTeamId());
         if (Objects.isNull(group)) {
             return new ServiceResult<>(0L);
         }
@@ -231,19 +226,6 @@ public class DataCollectionController {
             }
         }
         return dataCollectService.deleteDocByAgentNames(baseEventRequest);
-    }
-
-    private GroupConfig.Group getGroup(String groupId) {
-        if (groupConfig == null) {
-            groupConfig = BeanCommon.getBean(GroupConfig.class);
-        }
-        var groups = groupConfig.getGroups().stream()
-                .filter(g -> g.getGroupId().equals(groupId))
-                .collect(Collectors.toList());
-        if (CollectionUtils.isNotEmpty(groups)) {
-            return groups.get(0);
-        }
-        return null;
     }
 
     private Map<String, String> processQueryRequest(PageQueryRequest request, GroupConfig.Group group) {
