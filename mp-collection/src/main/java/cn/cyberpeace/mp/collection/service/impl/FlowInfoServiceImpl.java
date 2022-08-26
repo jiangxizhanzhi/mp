@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
 import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +79,12 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
 
+
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
+
+        if (CollectionUtil.isEmpty(flowFileRoots)) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowInfo>(), 0)).asResult();
+        }
 
         for (int i = 0; i < flowFileRoots.size(); i++) {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
