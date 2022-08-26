@@ -128,7 +128,6 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         }
 
         if (!CollectionUtils.isEmpty(pageFlowRequest.getAgentIps())) {
-            //todo:获取全部ip
             buildRuleAgentIpQuery(pageFlowRequest.getAgentIps(), boolQueryBuilder);
         }
 
@@ -246,6 +245,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
         return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
     }
+
     /**
      * 转换为FlowDetailInfo类
      * @param flowFileRoot

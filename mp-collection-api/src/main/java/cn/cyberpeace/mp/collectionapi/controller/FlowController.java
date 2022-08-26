@@ -42,6 +42,7 @@ public class FlowController {
     private FlowInfoService flowInfoService;
 
     private static GroupConfig groupConfig;
+
     @GetMapping("/detail")
     @ApiOperation(value = "查询一条流量的详细信息", notes = "")
     public ServiceResult<FlowDetailVO> queryFlowDetailInfo(FlowQueryRequest flowQueryRequest) {
