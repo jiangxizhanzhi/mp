@@ -3,14 +3,10 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordStatusCheckTask;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.cglib.core.Local;
-import org.apache.lucene.analysis.bn.BengaliAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -49,9 +45,6 @@ public class UserOnlineRecordScheduleService {
     @Autowired
     private UserHeartbeatService heartbeatService;
 
-    @Autowired
-    private ApplicationContext applicationContext;
-
     /**
      * 创建或者更新用户在线记录
      */
@@ -84,7 +77,7 @@ public class UserOnlineRecordScheduleService {
 
         if (CollectionUtil.isNotEmpty(userModel2LastTsMapList)) {
             for (Map<UserModel, LocalDateTime> userModel2LastTsMap : userModel2LastTsMapList) {
-                UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userModel2LastTsMap, applicationContext);
+                UserOnlineRecordTask recordTask = new UserOnlineRecordTask(userModel2LastTsMap);
                 threadPool.submit(recordTask);
             }
         }
@@ -112,7 +105,7 @@ public class UserOnlineRecordScheduleService {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-        UserOnlineRecordStatusCheckTask recordStatusCheckTask = new UserOnlineRecordStatusCheckTask(applicationContext);
+        UserOnlineRecordStatusCheckTask recordStatusCheckTask = new UserOnlineRecordStatusCheckTask();
         threadPool.submit(recordStatusCheckTask);
     }
 
