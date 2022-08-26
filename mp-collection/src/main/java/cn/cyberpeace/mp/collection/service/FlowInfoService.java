@@ -7,6 +7,8 @@ import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
 
+import java.util.Map;
+
 /**
  * 查询流量列表和一条流量的详细信息
  */
@@ -23,5 +25,5 @@ public interface FlowInfoService {
      * @param request
      * @return
      */
-    ServiceResult<FlowDetailInfo> queryFlowDetail(FlowQueryRequest request);
+    ServiceResult<Map<String, Object>> queryFlowDetail(FlowQueryRequest request);
 }
