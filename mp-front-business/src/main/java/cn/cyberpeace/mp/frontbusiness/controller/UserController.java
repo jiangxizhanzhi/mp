@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.request.user.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.ResetSelfPwdRequest;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.request.validate.AddGroup;
 import cn.cyberpeace.mp.auth.request.validate.UpdateGroup;
@@ -113,17 +113,6 @@ public class UserController {
         return ServiceResult.success(errMsg);
     }
 
-   /* @ApiOperation(value = "更改用户头像", notes = "")
-    @PostMapping("/update_avatar")
-    @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更改头像", target = OpTargetEnums.USER)
-    public ServiceResult updateAvatar(@RequestParam String userId, MultipartFile file) throws MpRuntimeException {
-        if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.UPLOAD_HEAD_IMAGE_LIST)) {
-            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
-        }
-
-        boolean success = userService.updateAvatar(userId, file);
-        return ServiceResult.successful();
-    }*/
 
     @ApiOperation(value = "用户心跳-统计在线用户信息", notes = "")
     @PostMapping("/heartbeat")

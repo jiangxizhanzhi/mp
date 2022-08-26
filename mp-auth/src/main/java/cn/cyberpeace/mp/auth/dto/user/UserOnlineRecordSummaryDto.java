@@ -29,4 +29,7 @@ public class UserOnlineRecordSummaryDto {
     @ApiModelProperty(value = "累计在线时长（分钟）")
     private Long totalOnlineMinutes;
 
+    @ApiModelProperty(value = "未完成状态数量")
+    private Integer unCompleteCnt;
+
 }

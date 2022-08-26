@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper">
 
     <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto">
-        select user, username, name, sum(duration_minutes) total_online_minutes
+        select pk, user, username, name, sum(duration_minutes) total_online_minutes, sum(status = 0) unCompleteCnt
         from mp_auth_user_online_record
         <where>
             <if test="userIds != null and userIds.size() > 0">
@@ -14,6 +14,7 @@
             </if>
         </where>
         group by user
+        order by unCompleteCnt desc, total_online_minutes desc
     </select>
 
     <select id="listCurrentOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
