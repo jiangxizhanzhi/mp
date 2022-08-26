@@ -134,9 +134,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             buildRuleAgentIpQuery(pageFlowRequest.getAgentIps(), boolQueryBuilder);
         }
 
-        if (!CollectionUtils.isEmpty(pageFlowRequest.getTargetIps())) {
-            buildRuleTargetIpQuery(pageFlowRequest.getTargetIps(), boolQueryBuilder);
-        }
+//        if (!CollectionUtils.isEmpty(pageFlowRequest.getTargetIps())) {
+//            buildRuleTargetIpQuery(pageFlowRequest.getTargetIps(), boolQueryBuilder);
+//        }
 
         if (!StringUtils.isEmpty(pageFlowRequest.getPort())) {
             buildRulePortQuery(pageFlowRequest.getPort(), boolQueryBuilder);

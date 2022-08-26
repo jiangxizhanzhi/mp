@@ -9,4 +9,5 @@ import java.util.Map;
 public class FlowTarget {
     private List<String> targetIps;
     private Map<String, String> target2Node;
+    private List<String> destinationIp;
 }

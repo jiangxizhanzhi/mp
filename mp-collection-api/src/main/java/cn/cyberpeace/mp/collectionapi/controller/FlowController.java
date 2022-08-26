@@ -50,9 +50,11 @@ public class FlowController {
         if (CollectionUtil.isEmpty(request.getAgentIps()) || StringUtils.isEmpty(request.getTeamId())) {
             return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0), BaseErrorCode.PARAMS_INVALID).asResult();
         }
-        var flowTarget = this.getTargetIps(request.getAgentIps(), request.getTeamId());
-        if (!CollectionUtil.isEmpty(request.getAgentIps())) {
-            request.setAgentIps(flowTarget.getTargetIps());
+        var flowTarget = this.getTargetIps(request.getAgentIps(), request.getTeamId(), request.getTargetIps());
+        request.setAgentIps(flowTarget.getTargetIps());
+        if (!CollectionUtil.isEmpty(request.getTargetIps())) {
+            //targetIp不为空，改变agentIp即可，只搜targetIp和它的子ip
+            request.setAgentIps(flowTarget.getDestinationIp());
         }
         var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
 
@@ -76,11 +78,12 @@ public class FlowController {
         return new ListObjServiceResult<>(new ListObjResult<>(teamFlowVOList, teamFlowInfoListObjResult.getTotal())).asResult();
     }
 
-    private FlowTarget getTargetIps(List<String> agentIps, String teamId) {
+    private FlowTarget getTargetIps(List<String> agentIps, String teamId, List<String> targetIp) {
         var group = GroupUtil.getGroup(teamId);
         FlowTarget flowTarget = new FlowTarget();
         List<String> targetIps = new ArrayList<>();
         Map<String, String> target2Node = new HashMap<>();
+        List<String> destinationIp = new ArrayList<>();
         if (Objects.isNull(group)) {
             return flowTarget;
         }
@@ -92,10 +95,15 @@ public class FlowController {
                     target2Node.put(t, node.getNodeIp());
                 });
             }
+            if (!CollectionUtil.isEmpty(targetIp)) {
+                if (node.getNodeIp().equals(targetIp.get(0))) {
+                    destinationIp.addAll(node.getTargetIps());
+                }
+            }
         });
         flowTarget.setTargetIps(targetIps);
         flowTarget.setTarget2Node(target2Node);
-
+        flowTarget.setDestinationIp(destinationIp);
         return flowTarget;
     }
 
