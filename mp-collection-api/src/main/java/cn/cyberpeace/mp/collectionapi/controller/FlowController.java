@@ -70,6 +70,9 @@ public class FlowController {
     @ApiOperation(value = "筛选战队流量信息", notes = "")
     public ListObjServiceResult<TeamFlowVO> queryFlowPageEvents(PageFlowRequest request) {
         request.ensure();
+        if (CollectionUtil.isEmpty(request.getAgentIps()) || StringUtils.isEmpty(request.getTeamId())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0), BaseErrorCode.PARAMS_INVALID).asResult();
+        }
         var flowTarget = this.getTargetIps(request.getAgentIps(), request.getTeamId());
         if (!CollectionUtil.isEmpty(request.getAgentIps())) {
             request.setAgentIps(flowTarget.getTargetIps());
