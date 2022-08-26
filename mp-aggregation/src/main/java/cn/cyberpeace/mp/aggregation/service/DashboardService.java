@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
@@ -260,6 +261,15 @@ public class DashboardService {
         BeanUtils.copyProperties(pageInfo, newPageInfo);
         newPageInfo.setList(monitorDtoList);
         return newPageInfo;
+    }
+
+    /**
+     * 查询用户会话
+     * @param userId
+     * @return
+     */
+    public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String userId) {
+        return csceneSpecialService.getUserNodeSessions(userId, true, false);
     }
 
     private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
