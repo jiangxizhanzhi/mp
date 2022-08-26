@@ -1,13 +1,14 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
-import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
+import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
 import cn.cyberpeace.mp.auth.service.UserLogService;
@@ -31,8 +32,13 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -72,12 +78,17 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
-        req.ensure();
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
 
-        List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlined(null);
+        ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
+        Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
+        for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
+            if (Objects.nonNull(entry.getKey().getId()) && Objects.nonNull(entry.getValue())) {
+                heatbeatCntMap.put(entry.getKey().getId(), entry.getValue().size());
+            }
+        }
 
         List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
         List<UserOnlineReportDto> reportDtos = new ArrayList<>();
@@ -92,11 +103,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
             }
 
-            // orgpaths
-            List<OrgModel> orgs = orgUserService.listOrgsByUserId(r.getUser());
-            String orgpaths = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
-            reportDto.setOrg(orgpaths);
-
             // 只获取最新的一条日志
             OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
             logPageRequest.setUserName(r.getUsername());
@@ -110,7 +116,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 reportDto.setSubject(logs.get(0).getOpTarget());
             }
 
-            boolean isOnline = onlineRecordModels.stream().filter(model -> model.getUser().equals(r.getUser())).findAny().isPresent();
+            boolean isOnline = false;
+            if (Objects.nonNull(heatbeatCntMap.get(r.getUser())) && heatbeatCntMap.get(r.getUser()) > 0) {
+                isOnline = true;
+            } else if (Objects.nonNull(r.getUnCompleteCnt()) && r.getUnCompleteCnt() > 0) {
+                isOnline = true;
+            }
+
             if (isOnline) {
                 reportDto.setIsOnline(1);
             } else {
@@ -118,6 +130,17 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
 
             reportDtos.add(reportDto);
+        });
+
+
+        // orgpaths
+        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
+        List<UserOrgMapDto> userOrgMapDtos = orgUserService.listUserOrgMapDtosByUserIds(userIds);
+        reportDtos.forEach(r -> {
+            Optional<UserOrgMapDto> userOrgMapDtoOptional = userOrgMapDtos.stream().filter(mapDto -> Objects.equals(mapDto.getUserId(), r.getUser())).findFirst();
+            if (userOrgMapDtoOptional.isPresent()) {
+                r.setOrg(userOrgMapDtoOptional.get().getOrgPaths());
+            }
         });
 
         // 替换为reportDto

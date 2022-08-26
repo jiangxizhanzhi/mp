@@ -35,6 +35,24 @@
             order by mp_auth_org.pk
     </select>
 
+
+    <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto">
+        select ou.user as userId, group_concat(distinct o.id separator ',') as orgIds,
+               group_concat(distinct o.name separator ',') as orgNames,
+               group_concat(distinct o.path separator ',') as orgPaths
+        from mp_auth_org o
+        left join mp_auth_org_user ou
+        on ou.org = o.id
+        where ou.user != ''
+        <if test="userIds != null and userIds.size() > 0">
+            AND ou.user in
+            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                #{userId}
+            </foreach>
+        </if>
+        group by ou.user
+    </select>
+
     <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select
             distinct u.*,

@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import com.github.pagehelper.PageInfo;
@@ -41,6 +42,13 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
      * @return
      */
     List<OrgModel> listOrgsByUserId(String userId);
+
+    /**
+     * 批量查询用户所在组织信息，返回一个map
+     * @param userIds
+     * @return
+     */
+    List<UserOrgMapDto> listUserOrgMapDtosByUserIds(List<String> userIds);
 
     /**
      * 列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织

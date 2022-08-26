@@ -624,10 +624,12 @@ public class CreateHandler extends HandlerCommon {
         } catch (Exception e) {
             log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
         }
-        try {
-            ContainerFileUtils.prepareApkUnzip(containerClient, containerId);
-        } catch (Exception e) {
-            log.warn("Scene({}) cloud container({}) element prepare unzip.apk failed: ", sceneId, containerId, e);
+        if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getSceneCreateInstallUnzipApk())) {
+            try {
+                ContainerFileUtils.prepareApkUnzip(containerClient, containerId);
+            } catch (Exception e) {
+                log.warn("Scene({}) cloud container({}) element prepare unzip.apk failed: ", sceneId, containerId, e);
+            }
         }
 
         var sceneFileUrl = srcScene.getFile();

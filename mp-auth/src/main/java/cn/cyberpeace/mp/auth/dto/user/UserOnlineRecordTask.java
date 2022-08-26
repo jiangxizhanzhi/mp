@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.auth.dto.user;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -25,18 +25,15 @@ public class UserOnlineRecordTask implements Runnable {
 
     private Map<UserModel, LocalDateTime> userModel2LastTsMap;
 
-    private ApplicationContext applicationContext;
-
-    public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap, ApplicationContext applicationContext) {
+    public UserOnlineRecordTask(Map<UserModel, LocalDateTime> userModel2LastTsMap) {
         this.userModel2LastTsMap = userModel2LastTsMap;
-        this.applicationContext = applicationContext;
     }
 
     @Override
     public void run() {
         // 更新用户在线记录信息
         // 1. 查询状态为未完成的记录，然后更新duration_minutes, end_time
-        UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
+        UserOnlineRecordService userOnlineRecordService = BeanCommon.getBean(UserOnlineRecordService.class);
 
         List<UserModel> userModels = userModel2LastTsMap.keySet().stream().collect(Collectors.toList());
         List<String> userIds = userModels.stream().map(UserModel::getId).collect(Collectors.toList());
