@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collection.service.impl;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -36,7 +37,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -74,7 +77,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
+
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
+
         for (int i = 0; i < flowFileRoots.size(); i++) {
             flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
         }
@@ -91,7 +96,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     @Override
-    public ServiceResult<FlowDetailInfo> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
+    public ServiceResult<Map<String, Object>> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
         log.info("{}", flowQueryRequest);
         String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -100,7 +105,8 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
             buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
         } else {
-            return new ServiceResult<>(new FlowDetailInfo()).asResult();
+            Map<String, Object> flowMap = new HashMap<>();
+            return new ServiceResult<>(flowMap).asResult();
         }
         sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
@@ -110,16 +116,13 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
         log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
-
         SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
-
-        if (flowFileRoots.isEmpty()) {
-            return new ServiceResult<>(new FlowDetailInfo()).asResult();
+        if (response.getHits().getTotalHits().value < 1L) {
+            Map<String, Object> flowMap = new HashMap<>();
+            return new ServiceResult<>(flowMap).asResult();
         }
-        FlowDetailInfo flowDetailInfo = this.getFlowDetailModel(flowFileRoots.get(0), flowQueryRequest);
-        return new ServiceResult<>(flowDetailInfo).asResult();
-
+        var flowDetail = JsonCommon.parseMap(response.getHits().getAt(0).getSourceAsString());
+        return new ServiceResult<>(flowDetail).asResult();
     }
 
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
