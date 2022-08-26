@@ -31,7 +31,7 @@ public class CollectionApiService {
 
     /**
      * 手动触发更新GroupConfig
-     * @param filePath
+     * @param filePath 包含Group配置的json文件路径
      */
     @LocalCallFunc
     public void updateGroupConfig(String filePath) {
