@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincloud.service;
 import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.base.common.StatCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -828,22 +827,53 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<List<UserConnectionNumBO>> countUserConnections(List<String> users) {
+        List<UserConnectionNumBO> connectionNumBOS = new ArrayList<>();
+        for (String user : users) {
+            UserConnectionNumBO connectionNumBO = new UserConnectionNumBO();
+            connectionNumBO.setUser(user);
+            connectionNumBO.setConnectionNum(0);
+            connectionNumBOS.add(connectionNumBO);
+        }
         HumanCondition condition = new HumanCondition()
                 .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
                 .filterIn(CloudPluginSceneConnectionModel::getAccessUser, users.toArray());
-        var countResult = StatCommon.groupCount(cloudPluginSceneConnectionMapper, condition, "access_user", List.of("access_user"), false);
-        Map<Object, Long> accessUserGroup = countResult.get("access_user");
-        if (accessUserGroup != null && accessUserGroup.size() != 0) {
-            List<UserConnectionNumBO> connectionNumBOS = new ArrayList<>();
-            accessUserGroup.forEach((user, num) -> {
-                UserConnectionNumBO connectionNumBO = new UserConnectionNumBO();
-                connectionNumBO.setUser(user.toString());
-                connectionNumBO.setConnectionNum(num.intValue());
-                connectionNumBOS.add(connectionNumBO);
-            });
+        var list = cloudPluginSceneConnectionMapper.list(condition);
+        if (CollectionUtils.isEmpty(list)) {
             return new ServiceResult<>(connectionNumBOS);
         }
-        return new ServiceResult<>(new ArrayList<>());
+        Set<String> connectionIds = new HashSet<>();
+        list.forEach(c -> {
+            if (StringUtils.isNotEmpty(c.getConnectionId())) {
+                connectionIds.add(c.getConnectionId());
+            }
+        });
+        if (CollectionUtils.isEmpty(connectionIds)) {
+            return new ServiceResult<>(connectionNumBOS);
+        }
+        var monitors = new Remote().getMonitors(connectionIds.toArray(new String[]{}));
+        if (monitors == null || monitors.isEmpty()) {
+            return new ServiceResult<>(connectionNumBOS);
+        }
+        Map<String, Set<String>> user2ConnectionIds = new HashMap<>();
+        for (var model : list) {
+            if (!user2ConnectionIds.containsKey(model.getAccessUser())) {
+                user2ConnectionIds.put(model.getAccessUser(), new HashSet<>());
+            }
+            if (StringUtils.isNotEmpty(model.getConnectionId())) {
+                user2ConnectionIds.get(model.getAccessUser()).add(model.getConnectionId());
+            }
+        }
+        for (var node : connectionNumBOS) {
+            var userConnectIds = user2ConnectionIds.get(node.getUser());
+            if (userConnectIds != null) {
+                for (String cId : userConnectIds) {
+                    if (monitors.keySet().contains(cId)) {
+                        node.setConnectionNum(node.getConnectionNum() + 1);
+                    }
+                }
+            }
+        }
+        return new ServiceResult<>(connectionNumBOS);
     }
 
     public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String user, boolean monitor, boolean assistance) {
