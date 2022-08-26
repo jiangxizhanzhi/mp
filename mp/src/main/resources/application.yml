@@ -81,8 +81,8 @@ mp:
     team:
       groups:
         - group-id: "f2121f517fb980e438b02336c2aca85a"
-          es-node: 10.100.0.101:9205
-          wazuh-url: http://10.100.7.1:15500
+          es-node: 192.168.2.71:9205
+          wazuh-url: http://192.168.2.71:15500
           nodes:
             - node-ip: 192.168.2.56
               node-names: aitest003
