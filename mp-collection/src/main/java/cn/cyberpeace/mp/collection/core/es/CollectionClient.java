@@ -30,6 +30,7 @@ import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
+import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -667,7 +668,9 @@ public class CollectionClient {
      */
     private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
         if (Objects.isNull(start) || Objects.isNull(end)) {
-            return new String[0];
+            GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
+            var result = restHighLevelClient.getIndices(getIndexRequest);
+            return result.getIndices();
         }
         List<String> indexList = indexListBuilder(getUtcTime(start), getUtcTime(end));
         var indexArray = new String[indexList.size()];
@@ -793,12 +796,8 @@ public class CollectionClient {
 
     private SearchRequest buildSearchRequest(WazuhEventRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
-        SearchRequest searchRequest;
-        if (indexArray.length == 0) {
-            searchRequest = new SearchRequest();
-        } else {
-            searchRequest = new SearchRequest(indexArray);
-        }
+        var searchRequest = new SearchRequest(indexArray);
+
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         if (request.isScroll()) {
@@ -812,12 +811,8 @@ public class CollectionClient {
 
     private SearchRequest buildSearchRequest(WazuhHostMonitorPageRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
-        SearchRequest searchRequest;
-        if (indexArray.length == 0) {
-            searchRequest = new SearchRequest();
-        } else {
-            searchRequest = new SearchRequest(indexArray);
-        }
+        var searchRequest = new SearchRequest(indexArray);
+
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 
         //配置索引为空
@@ -870,12 +865,8 @@ public class CollectionClient {
 
     private CountRequest buildCountRequest(WazuhEventRequest request) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
-        CountRequest countRequest;
-        if (indexArray.length == 0) {
-            countRequest = new CountRequest();
-        } else {
-            countRequest = new CountRequest(indexArray);
-        }
+        var countRequest = new CountRequest(indexArray);
+
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
 
@@ -890,12 +881,8 @@ public class CollectionClient {
 
     private DeleteByQueryRequest buildDeleteRequest(WazuhEventRequest request) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
-        DeleteByQueryRequest deleteRequest;
-        if (indexArray.length == 0) {
-            deleteRequest = new DeleteByQueryRequest();
-        } else {
-            deleteRequest = new DeleteByQueryRequest(indexArray);
-        }
+        var deleteRequest = new DeleteByQueryRequest(indexArray);
+
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
         //构造查询条件

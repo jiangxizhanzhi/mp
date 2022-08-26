@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.collectionapi.vo.SystemUserVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,9 +55,9 @@ public class DataCollectionController {
         eventRequest.setPageNum(request.getPage());
         eventRequest.setPageSize(request.getPageSize());
         eventRequest.setAgentNames(request.getAgentNames());
-        if (Objects.nonNull(request.getStartTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             eventRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
-            if (Objects.nonNull(request.getEndTime())) {
+            if (StringUtils.isNotEmpty(request.getEndTime())) {
                 eventRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
             } else {
                 eventRequest.setEndTime(LocalDateTime.now());
@@ -83,9 +84,9 @@ public class DataCollectionController {
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
-        if (Objects.nonNull(request.getStartTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
-            if (Objects.nonNull(request.getEndTime())) {
+            if (StringUtils.isNotEmpty(request.getEndTime())) {
                 pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
             } else {
                 pageRequest.setEndTime(LocalDateTime.now());
@@ -118,9 +119,9 @@ public class DataCollectionController {
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
-        if (Objects.nonNull(request.getStartTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
-            if (Objects.nonNull(request.getEndTime())) {
+            if (StringUtils.isNotEmpty(request.getEndTime())) {
                 pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
             } else {
                 pageRequest.setEndTime(LocalDateTime.now());
@@ -184,9 +185,9 @@ public class DataCollectionController {
         pageRequest.setPageNum(request.getPage());
         pageRequest.setPageSize(request.getPageSize());
         pageRequest.setAgentNames(request.getAgentNames());
-        if (Objects.nonNull(request.getStartTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             pageRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
-            if (Objects.nonNull(request.getEndTime())) {
+            if (StringUtils.isNotEmpty(request.getEndTime())) {
                 pageRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
             } else {
                 pageRequest.setEndTime(LocalDateTime.now());
@@ -216,9 +217,9 @@ public class DataCollectionController {
         processQueryRequest(request, group);
         BaseEventRequest baseEventRequest = new BaseEventRequest();
         baseEventRequest.setAgentNames(request.getAgentNames());
-        if (Objects.nonNull(request.getStartTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             baseEventRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
-            if (Objects.nonNull(request.getEndTime())) {
+            if (StringUtils.isNotEmpty(request.getEndTime())) {
                 baseEventRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
             } else {
                 baseEventRequest.setEndTime(LocalDateTime.now());
