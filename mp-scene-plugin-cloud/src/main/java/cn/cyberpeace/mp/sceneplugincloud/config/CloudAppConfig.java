@@ -165,6 +165,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.gateway_types:2,3}")
     private String gatewayTypes;
 
+    @Value("${mp.sceneplugincloud.scene_create_install_unzip_apk:true}")
+    private Boolean sceneCreateInstallUnzipApk;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
