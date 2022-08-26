@@ -207,7 +207,7 @@ mp:
     biz:
       max-import-size: 100
       logout-reset-secret: true
-      defaultUserAvatar: /api/mp/avatar/1.png
+      default-user-avatar: /api/mp/avatar/1.png
     authenticate:
       cache-time: 30
       use-individual-token-secret: true
