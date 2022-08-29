@@ -14,7 +14,15 @@
             </if>
         </where>
         group by user
-        order by unCompleteCnt desc, total_online_minutes desc
+        order by unCompleteCnt desc,
+        <if test="priorityUserIds != null and priorityUserIds.size() > 0">
+            (case when user IN
+                <foreach item="priorityUserId" index="index" collection="priorityUserIds" open="(" separator="," close=")">
+                    #{priorityUserId}
+                </foreach>
+            then 1 ELSE 2 END),
+        </if>
+        total_online_minutes desc
     </select>
 
     <select id="listCurrentOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">

@@ -78,11 +78,18 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
-        PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), req.getStartTime(), req.getEndTime());
-        PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
 
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
+        List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
+                .filter(entry -> CollectionUtil.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
+                .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
+
+        PageHelper.startPage(req.getPage(), req.getPageSize());
+        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
+
+
+
         Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
             if (Objects.nonNull(entry.getKey().getId()) && Objects.nonNull(entry.getValue())) {

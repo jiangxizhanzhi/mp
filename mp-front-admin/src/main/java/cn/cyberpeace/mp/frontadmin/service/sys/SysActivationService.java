@@ -10,11 +10,11 @@ import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationModuleItem;
-import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationResourceItem;
-import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationVerifyInfo;
 import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
+import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
+import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.activmenu.ActivMenuService;
 import cn.cyberpeace.mp.frontadmin.util.EncryptUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -342,9 +342,6 @@ public class SysActivationService {
             return null;
         }
 
-        //// todo
-        //return mockActivationContent();
-
         List<String> lines = FileUtil.readUtf8Lines(activationFile);
         if (CollectionUtil.isEmpty(lines)) {
             return null;
@@ -388,7 +385,7 @@ public class SysActivationService {
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
 
-        // todo 考虑用时间戳替代
+        // 考虑用时间戳替代
         LocalDateTime expiredTime = LocalDateTime.now().plusMonths(activationRequest.getDeadline()).plusDays(1);
         Duration duration = Duration.between(LocalDateTime.now(), expiredTime);
         Long lifeTimeSeconds = duration.toSeconds();
@@ -398,12 +395,10 @@ public class SysActivationService {
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
         String encryptedLicenseCode = EncryptUtils.desEncrypt(activationRequest.getVerifyCode());
 
-        // todo 这条分支不会再进入
         if (StringUtils.isNotBlank(oldSysActivCtlModel.getLicenseCode())) {
             // 不是首次激活
             String oldLicenseCode = oldSysActivCtlModel.getLicenseCode();
 
-            // todo 考虑相同激活码，如果原来已经过期了怎么处理？
             // 1. 相同激活码 last_active_date，active_count变动
             if (Objects.equals(oldLicenseCode, encryptedLicenseCode)) {
                 updateSysActivCtlModel.setActiveCount(oldSysActivCtlModel.getActiveCount() + 1);
@@ -440,7 +435,6 @@ public class SysActivationService {
      * @param activeDateStr
      * @param expiredDateStr
      */
-    // todo 考虑用事务
     private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
         log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
