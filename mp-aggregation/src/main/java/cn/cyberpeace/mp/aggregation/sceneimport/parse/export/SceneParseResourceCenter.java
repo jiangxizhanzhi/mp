@@ -5,10 +5,13 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseRes
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.SceneElementShape;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.StaticRoutesResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.NetworkElementParseResultV2;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
@@ -34,6 +37,8 @@ import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +62,7 @@ public class SceneParseResourceCenter {
         ymlParseResult.setScene(this.getSceneElementParseResult(sceneConfigHandler));
         ymlParseResult.setNodes(new ArrayList<>());
         ymlParseResult.setNetworks(new ArrayList<>());
+        ymlParseResult.setShape(new ArrayList<>());
 
         // 解析节点
         Map<String, NetworkElementParseResultV2> id2Network = new HashMap<>();
@@ -74,6 +80,9 @@ public class SceneParseResourceCenter {
         // 处理连线
         this.addConnect(sceneHandler, id2Network, id2Node);
 
+        // 处理区域信息
+        this.handlerShapes(sceneHandler, ymlParseResult.getShape(), idConvert);
+
         // 处理节点附件
         Map<String, String> file2Download = new HashMap<>();
         this.handleNodeFile(ymlParseResult.getNodes(), file2Download);
@@ -88,6 +97,37 @@ public class SceneParseResourceCenter {
         result.setFile2Download(file2Download);
         result.setIdConvert(idConvert);
         return result;
+    }
+
+    private void handlerShapes(SceneHandler sceneHandler, List<SceneElementShape> shapes, Map<String, String> idConvert) {
+        if (sceneHandler.getAreaMap() == null || sceneHandler.getAreaMap().isEmpty()) {
+            return;
+        }
+        Map<String, SceneElementShape> id2Shape = new HashMap<>();
+        for (SceneAreaBO areaBO : sceneHandler.getAreaMap().values()) {
+            SceneElementShape shape = new SceneElementShape();
+            shape.setId(areaBO.getId());
+            shape.setName(areaBO.getName());
+            shape.setNodeIds(new ArrayList<>());
+            Position position = JsonCommon.parse(areaBO.getPosition2(), Position.class);
+            shape.setLength(this.formatDouble(position.getHeight()));
+            shape.setWidth(this.formatDouble(position.getWidth()));
+            double x = this.formatDouble(position.getOrigin().getX());
+            double y = this.formatDouble(position.getOrigin().getY());
+            shape.setPosition(x + "," + y);
+            id2Shape.put(shape.getId(), shape);
+        }
+        for (SceneElementBO e : sceneHandler.getElementMap().values()) {
+            if (StringUtils.isNotEmpty(e.getArea()) && id2Shape.containsKey(e.getArea())) {
+                String nodeId = idConvert.getOrDefault(e.getId(), e.getId());
+                id2Shape.get(e.getArea()).getNodeIds().add(nodeId);
+            }
+        }
+        shapes.addAll(id2Shape.values());
+    }
+
+    private double formatDouble(double number) {
+        return BigDecimal.valueOf(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
     }
 
     private SceneElementParseResult getSceneElementParseResult(SceneConfigHandler sceneHandler) {
@@ -385,5 +425,20 @@ public class SceneParseResourceCenter {
         public void asyncAckSceneChanged(boolean forceSave, boolean withPlugins) {
             // do nothing
         }
+    }
+
+    @Getter
+    @Setter
+    private static class Position {
+        private Origin origin;
+        private double height;
+        private double width;
+    }
+
+    @Getter
+    @Setter
+    private static class Origin {
+        private double x;
+        private double y;
     }
 }

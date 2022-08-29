@@ -225,6 +225,7 @@ public class SceneExporter {
             FIELD_ORDER.put("scene", 1);
             FIELD_ORDER.put("networks", 2);
             FIELD_ORDER.put("nodes", 3);
+            FIELD_ORDER.put("shape", 4);
         }
 
         @Override
