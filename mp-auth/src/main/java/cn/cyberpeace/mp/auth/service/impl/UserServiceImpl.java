@@ -148,7 +148,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * @param userModel
      */
     public void setDefaultIfNoAvatar(UserModel userModel) {
-        if (StringUtils.isEmpty(userModel.getAvatar())) {
+        if (Objects.nonNull(userModel) && StringUtils.isEmpty(userModel.getAvatar())) {
             userModel.setAvatar(getDefaultUserAvatar());
         }
     }

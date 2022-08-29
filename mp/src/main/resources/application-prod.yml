@@ -214,6 +214,7 @@ mp:
     biz:
       max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
       logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
+      default-user-avatar: /api/mp/avatar/1.png
     authenticate:
       cache-time: ${MP_AUTH_CACHE_TIME:30}
       use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
