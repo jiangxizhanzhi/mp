@@ -42,6 +42,11 @@ public class SceneImportController {
         return ServiceResult.success(serviceResult.getSource().getId());
     }
 
+    @PostMapping("/export_scene")
+    public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
+        return ServiceResult.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
+    }
+
     @PostMapping("/mount")
     public ServiceResult<Boolean> mount(@RequestBody MoundRequest request) {
         log.info("mount nfs , input params is {}", JsonCommon.stringify(request));

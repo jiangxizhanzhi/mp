@@ -2,12 +2,16 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.convert.ResourceCenterConverter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.ResourceCenterYmlParser;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneExporter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.hutool.core.io.FileUtil;
@@ -73,6 +77,15 @@ public class ResourceCenterService {
         }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
+    }
+
+    public ServiceResult<ExportResult> exportScene(String csceneId, String envPath, String imagePath, String singleImagePath) {
+        var cscene = csceneService.get(csceneId);
+        if (cscene == null || cscene.getSource() == null || cscene.getSource().getObj() == null) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_NOT_EXIST);
+        }
+        var result = new SceneExporter().export(cscene.getSource().getObj().getSceneConfig(), envPath, imagePath, singleImagePath);
+        return new ServiceResult<>(result);
     }
 
     public ServiceResult<Boolean> mount(String host, String path) {
