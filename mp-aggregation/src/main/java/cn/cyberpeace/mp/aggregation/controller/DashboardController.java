@@ -89,7 +89,7 @@ public class DashboardController {
 
     @ApiOperation(value = "用户监控会话", notes = "")
     @GetMapping("/user_node_session")
-    public ServiceResult<List<NodeSessionBO>>  userNodeSession(@RequestParam String userId) {
+    public ServiceResult<List<NodeSessionBO>> userNodeSession(@RequestParam String userId) {
         return dashboardService.getUserNodeSessions(userId);
     }
 

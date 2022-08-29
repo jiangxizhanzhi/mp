@@ -6,5 +6,6 @@ dependencies {
     implementation project(':mp-scene-plugin-cloud')
     implementation project(':mp-devops-cluster')
     implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
+    implementation 'commons-io:commons-io:2.6'
     task wrapper() {}
 }
