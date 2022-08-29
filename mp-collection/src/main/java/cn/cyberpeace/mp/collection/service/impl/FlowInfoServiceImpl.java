@@ -80,10 +80,10 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
 
-
+        List<TeamFlowInfo> teamFlowInfos = new ArrayList<>();
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
         if (CollectionUtil.isEmpty(flowFileRoots)) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowInfo>(), 0));
+            return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos, 0));
         }
 
         long total = 0L;
@@ -91,12 +91,11 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             total = response.getHits().getTotalHits().value;
         }
 
-        int i = 0;
-        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(flowFileRoot -> {
-            flowFileRoot.setId(response.getHits().getAt(i).getId());
-            return this.getTeamFlowModel(flowFileRoot, pageFlowRequest);
-        }).collect(Collectors.toList());
 
+        for (int i = 0; i < flowFileRoots.size(); i++) {
+            flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
+            teamFlowInfos.add(this.getTeamFlowModel(flowFileRoots.get(i), pageFlowRequest));
+        }
 
         return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos, (int) total)).asResult();
     }
