@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -36,10 +35,7 @@ public class FlowController {
     public ServiceResult<Map<String, Object>> queryFlowDetailInfo(FlowQueryRequest flowQueryRequest) {
 
         var flowDetailInfo = flowInfoService.queryFlowDetail(flowQueryRequest).getSource();
-        if (CollectionUtil.isEmpty(flowDetailInfo)) {
-            Map<String, Object> flowMap = new HashMap<>();
-            return new ServiceResult<>(flowMap).asResult();
-        }
+
         return new ServiceResult<>(flowDetailInfo).asResult();
     }
 
@@ -47,26 +43,22 @@ public class FlowController {
     @ApiOperation(value = "筛选战队流量信息", notes = "")
     public ListObjServiceResult<TeamFlowVO> queryFlowPageEvents(PageFlowRequest request) {
         request.ensure();
-        if (CollectionUtil.isEmpty(request.getAgentIps()) || StringUtils.isEmpty(request.getTeamId())) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0), BaseErrorCode.PARAMS_INVALID).asResult();
-        }
-        var flowTarget = this.getTargetIps(request.getAgentIps(), request.getTeamId(), request.getTargetIps());
-        request.setAgentIps(flowTarget.getTargetIps());
-        if (!CollectionUtil.isEmpty(request.getTargetIps())) {
-            //targetIp不为空，改变agentIp即可，只搜targetIp和它的子ip
-            if (CollectionUtil.isEmpty(flowTarget.getDestinationIp())) {
-                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0)).asResult();
-            } else {
-                request.setAgentIps(flowTarget.getDestinationIp());
-            }
-        }
-        var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
-
-        if (CollectionUtil.isEmpty(teamFlowInfoListObjResult.getObjs())) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0)).asResult();
-        }
-
         List<TeamFlowVO> teamFlowVOList = new ArrayList<>();
+
+        if (CollectionUtil.isEmpty(request.getAgentIps()) || StringUtils.isEmpty(request.getTeamId())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(teamFlowVOList, 0)).asResult();
+        }
+
+        var flowTarget = this.getTargetIps(request.getAgentIps(), request.getTeamId(), request.getTargetIps());
+
+        request.setTargetIps(flowTarget.getTargetIps());
+
+        var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
+        if (CollectionUtil.isEmpty(teamFlowInfoListObjResult.getObjs())) {
+            return new ListObjServiceResult<>(new ListObjResult<>(teamFlowVOList, 0)).asResult();
+        }
+
+
         teamFlowInfoListObjResult.getObjs().forEach(teamFlowInfo -> {
             var teamFlow = new TeamFlowVO();
             teamFlow.setTeamId(request.getTeamId());
@@ -105,9 +97,13 @@ public class FlowController {
                 }
             }
         });
-        flowTarget.setTargetIps(targetIps);
         flowTarget.setTarget2Node(target2Node);
-        flowTarget.setDestinationIp(destinationIp);
+        if (!CollectionUtil.isEmpty(destinationIp)) {
+            flowTarget.setTargetIps(destinationIp);
+        } else {
+            flowTarget.setTargetIps(targetIps);
+        }
+
         return flowTarget;
     }
 
