@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.collection.service.impl;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -81,39 +82,38 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
 
         List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
-
         if (CollectionUtil.isEmpty(flowFileRoots)) {
-            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowInfo>(), 0)).asResult();
+            return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowInfo>(), 0));
         }
 
-        for (int i = 0; i < flowFileRoots.size(); i++) {
-            flowFileRoots.get(i).setId(response.getHits().getAt(i).getId());
-        }
-
-        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(flowFileRoot -> {
-            return this.getTeamFlowModel(flowFileRoot, pageFlowRequest);
-        }).collect(Collectors.toList());
         long total = 0L;
         if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
             total = response.getHits().getTotalHits().value;
         }
+
+        int i = 0;
+        List<TeamFlowInfo> teamFlowInfos = flowFileRoots.stream().map(flowFileRoot -> {
+            flowFileRoot.setId(response.getHits().getAt(i).getId());
+            return this.getTeamFlowModel(flowFileRoot, pageFlowRequest);
+        }).collect(Collectors.toList());
+
 
         return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos, (int) total)).asResult();
     }
 
     @Override
     public ServiceResult<Map<String, Object>> queryFlowDetail(FlowQueryRequest flowQueryRequest) {
+        if (StringUtils.isEmpty(flowQueryRequest.getDataId())) {
+            return new ServiceResult<>(new HashMap<>());
+        }
         log.info("{}", flowQueryRequest);
         String[] indexArray = buildEsIndex(flowQueryRequest.getStartTime(), flowQueryRequest.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
         var boolQueryBuilder = QueryBuilders.boolQuery();
         var sourceBuilder = new SearchSourceBuilder();
-        if (!StringUtils.isEmpty(flowQueryRequest.getDataId())) {
-            buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
-        } else {
-            Map<String, Object> flowMap = new HashMap<>();
-            return new ServiceResult<>(flowMap).asResult();
-        }
+
+        buildFlowQueryBuilder(flowQueryRequest, boolQueryBuilder);
+
         sourceBuilder.sort("@timestamp", SortOrder.DESC);
         sourceBuilder.trackTotalHits(true);
         searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -124,11 +124,10 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
         SearchResponse response = restHighLevelClient.search(searchRequest);
         if (response.getHits().getTotalHits().value < 1L) {
-            Map<String, Object> flowMap = new HashMap<>();
-            return new ServiceResult<>(flowMap).asResult();
+            return new ServiceResult<>(new HashMap<>());
         }
         var flowDetail = JsonCommon.parseMap(response.getHits().getAt(0).getSourceAsString());
-        return new ServiceResult<>(flowDetail).asResult();
+        return new ServiceResult<>(flowDetail);
     }
 
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
@@ -136,13 +135,9 @@ public class FlowInfoServiceImpl implements FlowInfoService {
             buildRuleSourceIpQuery(pageFlowRequest.getSourceIps(), boolQueryBuilder);
         }
 
-        if (!CollectionUtils.isEmpty(pageFlowRequest.getAgentIps())) {
-            buildRuleAgentIpQuery(pageFlowRequest.getAgentIps(), boolQueryBuilder);
+        if (!CollectionUtils.isEmpty(pageFlowRequest.getTargetIps())) {
+            buildRuleTargetIpQuery(pageFlowRequest.getTargetIps(), boolQueryBuilder);
         }
-
-//        if (!CollectionUtils.isEmpty(pageFlowRequest.getTargetIps())) {
-//            buildRuleTargetIpQuery(pageFlowRequest.getTargetIps(), boolQueryBuilder);
-//        }
 
         if (!StringUtils.isEmpty(pageFlowRequest.getPort())) {
             buildRulePortQuery(pageFlowRequest.getPort(), boolQueryBuilder);
@@ -184,45 +179,12 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("protocol", protocol));
     }
 
-
     private void buildRuleStarTimeQuery(Long startTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").gte(startTime));
     }
 
     private void buildRuleEndTimeQuery(Long endTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
-    }
-
-    private void buildRuleAgentIpQuery(List<String> agentIp, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("destination.ip", agentIp));
-    }
-
-    /**
-     * 转换为TeamFlowInfo类
-     * @param flowFileRoot
-     * @return TeamFlowInfo
-     */
-    private TeamFlowInfo getTeamFlowModel(FlowFileRoot flowFileRoot) {
-        TeamFlowInfo.TeamFlowInfoBuilder builder = TeamFlowInfo.builder();
-        if (Objects.nonNull(flowFileRoot.getSource())) {
-            builder.sourceIp(flowFileRoot.getSource().getIp());
-            builder.sourcePort(flowFileRoot.getSource().getPort().toString());
-            builder.size(flowFileRoot.getSource().getBytes());
-        }
-
-        if (Objects.nonNull(flowFileRoot.getDestination())) {
-            builder.targetIp(flowFileRoot.getDestination().getIp());
-        }
-
-        if (Objects.nonNull(flowFileRoot.getProtocol())) {
-            builder.protocol(flowFileRoot.getProtocol().get(0));
-        }
-
-        if (!StringUtils.isEmpty(flowFileRoot.getId())) {
-            builder.dataId(flowFileRoot.getId());
-        }
-
-        return builder.time(TimeUtils.timestampToLocalDateTime(flowFileRoot.getTimestamp())).build();
     }
 
     /**
@@ -331,15 +293,13 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     public String[] buildEsIndex(LocalDateTime start, LocalDateTime end) {
         if (Objects.nonNull(start) && Objects.nonNull(end)) {
             return buildRequestIndex(start, end);
-        }
-        if (Objects.isNull(start) || Objects.isNull(end)) {
+        } else {
             IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
             indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
             GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
             GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
             return indices.getIndices();
         }
-        return new String[]{};
     }
 
     /**
