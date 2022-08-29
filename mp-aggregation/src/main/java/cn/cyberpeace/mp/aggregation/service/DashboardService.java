@@ -230,8 +230,8 @@ public class DashboardService {
         PageInfo<UserOnlineReportDto> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
         List<UserOnlineReportDto> userOnlineReportDtoList = pageInfo.getList();
 
-        List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
-        //List<String> onlinedUserIds = userOnlineReportDtoList.stream().map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        List<String> onlinedUserIds = userOnlineReportDtoList.stream().map(UserOnlineReportDto::getUser).collect(Collectors.toList());
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
             ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);

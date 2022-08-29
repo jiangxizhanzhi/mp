@@ -87,7 +87,6 @@ public class DashboardController {
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
-
     @ApiOperation(value = "用户监控会话", notes = "")
     @GetMapping("/user_node_session")
     public ServiceResult<List<NodeSessionBO>>  userNodeSession(@RequestParam String userId) {

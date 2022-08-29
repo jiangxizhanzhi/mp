@@ -21,7 +21,10 @@ import java.util.List;
 @ModelClass(UserOnlineRecordModel.class)
 public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecordModel> {
 
-    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userIds") List<String> userIds, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
+    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userIds") List<String> userIds,
+                                                       @Param("priorityUserIds") List<String> priorityUserIds,
+                                                       @Param("startTime") LocalDateTime startTime,
+                                                       @Param("endTime") LocalDateTime endTime);
 
     /**
      * 判断在线的依据：
