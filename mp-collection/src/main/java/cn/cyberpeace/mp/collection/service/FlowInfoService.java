@@ -5,8 +5,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
-import cn.cyberpeace.mp.collection.request.DeleteDocRequest;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -28,9 +28,9 @@ public interface FlowInfoService {
     ServiceResult<Map<String, Object>> queryFlowDetail(FlowQueryRequest request);
 
     /**
-     * 根据条件删除一个或多个文档
-     * @param request
+     * 删除从开始时间到结束时间内的文档
+     * @param
      * @return
      */
-    Long deleteDoc(DeleteDocRequest request);
+    Long deleteDoc(LocalDateTime startTime, LocalDateTime endTime);
 }

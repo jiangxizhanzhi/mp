@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.collection.service.impl;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -9,7 +11,6 @@ import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
-import cn.cyberpeace.mp.collection.request.DeleteDocRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
 import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
@@ -130,15 +131,14 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     }
 
     /**
-     * 按照条件删除一个或多个文档
-     * @param request
+     * 删除从开始时间到结束时间内的文档
+     * @param
      * @return
      */
     @Override
-    public Long deleteDoc(DeleteDocRequest request) {
-        log.info("{}", request);
+    public Long deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
 
-        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(request);
+        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
         BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest);
 
         return response.getUpdated();
@@ -201,28 +201,27 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
     }
 
-    private DeleteByQueryRequest buildDeleteRequest(DeleteDocRequest request) {
-        String[] indexArray = buildEsIndex(request.getStartTime(), request.getEndTime());
+    private DeleteByQueryRequest buildDeleteRequest(LocalDateTime startTime, LocalDateTime endTime) {
+        String[] indexArray = buildEsIndex(startTime, endTime);
         var deleteRequest = new DeleteByQueryRequest(indexArray);
 
         var boolQueryBuilder = QueryBuilders.boolQuery();
 
         //构造查询条件
-        buildDeleteDocQuery(request, boolQueryBuilder);
+        buildDeleteDocQuery(startTime, endTime, boolQueryBuilder);
         deleteRequest.setQuery(boolQueryBuilder);
 
         deleteRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
         return deleteRequest;
     }
 
-    private void buildDeleteDocQuery(DeleteDocRequest request, BoolQueryBuilder boolQueryBuilder) {
-        if (Objects.nonNull(request.getStartTime()) && Objects.nonNull(request.getEndTime())) {
+    private void buildDeleteDocQuery(LocalDateTime startTime, LocalDateTime endTime, BoolQueryBuilder boolQueryBuilder) {
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(request.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
-                    .to(request.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+                    .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
         } else {
-            //todo：暂时用不可能的条件，以免数据全没了
-            boolQueryBuilder.filter(QueryBuilders.matchQuery("_id","28902-fiuhfuiahfigsdyfu"));
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
     }
