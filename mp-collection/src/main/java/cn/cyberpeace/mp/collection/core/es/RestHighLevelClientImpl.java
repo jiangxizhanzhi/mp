@@ -94,6 +94,17 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     }
 
     @Override
+    public void allDeleteByQuery(DeleteByQueryRequest deleteRequest) {
+        restHighLevelClientMap.values().forEach(restHighLevelClient -> {
+            try {
+                restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+            } catch (Exception e) {
+                log.error("es delete by query error: {}", ExceptionUtils.getStackTrace(e));
+            }
+        });
+    }
+
+    @Override
     public GetIndexResponse getIndices(GetIndexRequest getIndexRequest) {
         try {
             return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);

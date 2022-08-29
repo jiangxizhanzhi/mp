@@ -9,8 +9,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-
 /**
  * 启动完后生命周期进行
  */

@@ -19,5 +19,7 @@ public interface IRestHighLevelClient {
 
     BulkByScrollResponse deleteByQuery(DeleteByQueryRequest deleteRequest);
 
+    void allDeleteByQuery(DeleteByQueryRequest deleteRequest);
+
     GetIndexResponse getIndices(GetIndexRequest getIndexRequest);
 }

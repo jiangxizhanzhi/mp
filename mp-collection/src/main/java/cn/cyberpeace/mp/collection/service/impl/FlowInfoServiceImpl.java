@@ -138,7 +138,7 @@ public class FlowInfoServiceImpl implements FlowInfoService {
     @Override
     public void deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
         DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
-        restHighLevelClient.deleteByQuery(deleteByQueryRequest);
+        restHighLevelClient.allDeleteByQuery(deleteByQueryRequest);
     }
 
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {

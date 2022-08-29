@@ -542,6 +542,15 @@ public class CollectionClient {
     }
 
     /**
+     * 删除对应时间段内的全部es文档数据
+     * @param request
+     */
+    public void deleteDocByTime(WazuhEventRequest request) {
+        DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
+        restHighLevelClient.allDeleteByQuery(deleteRequest);
+    }
+
+    /**
      * 查询数据变动数通用方法
      * @param request
      * @param launchId
@@ -645,10 +654,8 @@ public class CollectionClient {
             if (Objects.nonNull(jsonObject.get("time"))) {
                 userModel.setTime((LocalDateTime) jsonObject.get("time"));
             }
-            if (Objects.nonNull(jsonObject.get("agent_ip"))) {
-                userModel.setAgentIp((String) jsonObject.get("agent_ip"));
-                userModel.setAgentName((String) jsonObject.get("agent_name"));
-            }
+            userModel.setAgentIp((String) jsonObject.get("agent_ip"));
+            userModel.setAgentName((String) jsonObject.get("agent_name"));
             userModel.setDescription("USER MODIFIED");
             userModel.setAction(acton);
             list.add(userModel);
@@ -667,6 +674,7 @@ public class CollectionClient {
      * @return
      */
     private String[] buildRequestIndex(LocalDateTime start, LocalDateTime end) {
+        // 时间为空时返回所有相关索引
         if (Objects.isNull(start) || Objects.isNull(end)) {
             GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
             var result = restHighLevelClient.getIndices(getIndexRequest);
