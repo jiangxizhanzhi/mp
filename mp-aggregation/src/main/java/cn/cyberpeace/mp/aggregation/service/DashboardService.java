@@ -269,7 +269,8 @@ public class DashboardService {
      * @return
      */
     public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String userId) {
-        return csceneSpecialService.getUserNodeSessions(userId, true, false);
+        ServiceResult<List<NodeSessionBO>> serviceResult = csceneSpecialService.getUserNodeSessions(userId, true, false);
+        return serviceResult.asResult();
     }
 
     private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
