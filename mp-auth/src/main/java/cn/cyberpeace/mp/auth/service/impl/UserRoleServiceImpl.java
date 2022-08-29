@@ -100,6 +100,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             userOrgRoleDtos.stream().map(uor -> {
                 UserModel userModel = new UserModel();
                 BeanUtils.copyProperties(uor, userModel);
+                userService.setDefaultIfNoAvatar(userModel);
                 return userModel;
             }).collect(Collectors.toList());
 

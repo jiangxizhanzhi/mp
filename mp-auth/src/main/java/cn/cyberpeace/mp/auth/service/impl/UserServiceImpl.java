@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
@@ -117,7 +118,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_ID)
     public ObjServiceResult<UserModel> get(String id) {
-        return super.get(id);
+        ObjServiceResult<UserModel> userModelObjServiceResult = super.get(id);
+        ObjResult<UserModel> source = userModelObjServiceResult.getSource();
+        UserModel userModel = source.getObj();
+        setDefaultIfNoAvatar(userModel);
+        return userModelObjServiceResult;
     }
 
     @Override
@@ -142,7 +147,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * 判断是否有头像，没有则设置为默认头像
      * @param userModel
      */
-    private void setDefaultIfNoAvatar(UserModel userModel) {
+    public void setDefaultIfNoAvatar(UserModel userModel) {
         if (StringUtils.isEmpty(userModel.getAvatar())) {
             userModel.setAvatar(getDefaultUserAvatar());
         }
@@ -170,6 +175,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
+        users.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         if (CollectionUtil.isNotEmpty(users)) {
             // 转换
             ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
@@ -841,7 +847,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userDto.setIsSuperUser(0);
                 userDto.setIsAdmin(0);
             }
-
+            setDefaultIfNoAvatar(userDto);
             userDtos.add(userDto);
         }
 
@@ -891,6 +897,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
+        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         return userModels;
     }
 
@@ -898,6 +905,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserDto> listByUserIds(String[] userIds) {
         List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
         List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
+        userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userDtos;
     }
 

@@ -101,7 +101,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -110,7 +110,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -142,6 +142,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
             BeanUtils.copyProperties(u, userModel);
+            userService.setDefaultIfNoAvatar(userModel);
             return userModel;
         }).collect(Collectors.toList());
 
