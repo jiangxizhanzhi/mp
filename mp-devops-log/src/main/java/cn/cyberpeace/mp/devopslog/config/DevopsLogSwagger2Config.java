@@ -33,7 +33,7 @@ public class DevopsLogSwagger2Config {
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.log"))
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devopslog"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(authParameter))

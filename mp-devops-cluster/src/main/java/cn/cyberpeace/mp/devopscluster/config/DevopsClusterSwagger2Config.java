@@ -23,7 +23,7 @@ public class DevopsClusterSwagger2Config {
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devops.cluster"))
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.devopscluster"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(AuthSwagger2Config.authParameter))

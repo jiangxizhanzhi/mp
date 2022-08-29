@@ -23,7 +23,7 @@ public class FrontBusinessSwagger2Config {
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.business"))
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.frontbusiness"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(AuthSwagger2Config.authParameter))
