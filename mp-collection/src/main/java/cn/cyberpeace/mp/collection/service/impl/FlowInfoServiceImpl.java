@@ -27,9 +27,10 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -129,6 +130,17 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         return new ServiceResult<>(flowDetail);
     }
 
+    /**
+     * 删除从开始时间到结束时间内的文档
+     * @param
+     * @return
+     */
+    @Override
+    public void deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
+        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
+        restHighLevelClient.deleteByQuery(deleteByQueryRequest);
+    }
+
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(pageFlowRequest.getSourceIps())) {
             buildRuleSourceIpQuery(pageFlowRequest.getSourceIps(), boolQueryBuilder);
@@ -184,6 +196,31 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
     private void buildRuleEndTimeQuery(Long endTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
+    }
+
+    private DeleteByQueryRequest buildDeleteRequest(LocalDateTime startTime, LocalDateTime endTime) {
+        String[] indexArray = buildEsIndex(startTime, endTime);
+        var deleteRequest = new DeleteByQueryRequest(indexArray);
+
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+
+        //构造查询条件
+        buildDeleteDocQuery(startTime, endTime, boolQueryBuilder);
+        deleteRequest.setQuery(boolQueryBuilder);
+
+        deleteRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        return deleteRequest;
+    }
+
+    private void buildDeleteDocQuery(LocalDateTime startTime, LocalDateTime endTime, BoolQueryBuilder boolQueryBuilder) {
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime)) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+                    .from(startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    .to(endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+        } else {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
     }
 
     /**
