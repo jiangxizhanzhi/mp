@@ -54,7 +54,11 @@ public class FlowController {
         request.setAgentIps(flowTarget.getTargetIps());
         if (!CollectionUtil.isEmpty(request.getTargetIps())) {
             //targetIp不为空，改变agentIp即可，只搜targetIp和它的子ip
-            request.setAgentIps(flowTarget.getDestinationIp());
+            if (CollectionUtil.isEmpty(flowTarget.getDestinationIp())) {
+                return new ListObjServiceResult<>(new ListObjResult<>(new ArrayList<TeamFlowVO>(), 0)).asResult();
+            } else {
+                request.setAgentIps(flowTarget.getDestinationIp());
+            }
         }
         var teamFlowInfoListObjResult = flowInfoService.queryFlowPage(request).getSource();
 
