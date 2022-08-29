@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collection.request.DeleteDocRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
@@ -72,6 +73,13 @@ public class FlowController {
             teamFlowVOList.add(teamFlow);
         });
         return new ListObjServiceResult<>(new ListObjResult<>(teamFlowVOList, teamFlowInfoListObjResult.getTotal())).asResult();
+    }
+
+    @GetMapping("/delete")
+    @ApiOperation(value = "删除文档", notes = "")
+    public ServiceResult<Long> deleteDoc(DeleteDocRequest request) {
+        var docCount = flowInfoService.deleteDoc(request);
+        return new ServiceResult<>(docCount).asResult();
     }
 
     private FlowTarget getTargetIps(List<String> agentIps, String teamId, List<String> targetIp) {

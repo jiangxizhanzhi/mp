@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.collection.service.impl;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -11,6 +9,7 @@ import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
+import cn.cyberpeace.mp.collection.request.DeleteDocRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
 import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
@@ -27,9 +26,10 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -129,6 +129,21 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         return new ServiceResult<>(flowDetail);
     }
 
+    /**
+     * 按照条件删除一个或多个文档
+     * @param request
+     * @return
+     */
+    @Override
+    public Long deleteDoc(DeleteDocRequest request) {
+        log.info("{}", request);
+
+        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(request);
+        BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest);
+
+        return response.getUpdated();
+    }
+
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(pageFlowRequest.getSourceIps())) {
             buildRuleSourceIpQuery(pageFlowRequest.getSourceIps(), boolQueryBuilder);
@@ -184,6 +199,32 @@ public class FlowInfoServiceImpl implements FlowInfoService {
 
     private void buildRuleEndTimeQuery(Long endTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
+    }
+
+    private DeleteByQueryRequest buildDeleteRequest(DeleteDocRequest request) {
+        String[] indexArray = buildEsIndex(request.getStartTime(), request.getEndTime());
+        var deleteRequest = new DeleteByQueryRequest(indexArray);
+
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+
+        //构造查询条件
+        buildDeleteDocQuery(request, boolQueryBuilder);
+        deleteRequest.setQuery(boolQueryBuilder);
+
+        deleteRequest.setIndicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+        return deleteRequest;
+    }
+
+    private void buildDeleteDocQuery(DeleteDocRequest request, BoolQueryBuilder boolQueryBuilder) {
+        if (Objects.nonNull(request.getStartTime()) && Objects.nonNull(request.getEndTime())) {
+            boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
+                    .from(request.getStartTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    .to(request.getEndTime().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
+        } else {
+            //todo：暂时用不可能的条件，以免数据全没了
+            boolQueryBuilder.filter(QueryBuilders.matchQuery("_id","28902-fiuhfuiahfigsdyfu"));
+        }
+
     }
 
     /**
