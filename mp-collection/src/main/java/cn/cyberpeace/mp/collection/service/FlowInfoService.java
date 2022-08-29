@@ -32,5 +32,5 @@ public interface FlowInfoService {
      * @param
      * @return
      */
-    Long deleteDoc(LocalDateTime startTime, LocalDateTime endTime);
+    void deleteDoc(LocalDateTime startTime, LocalDateTime endTime);
 }
