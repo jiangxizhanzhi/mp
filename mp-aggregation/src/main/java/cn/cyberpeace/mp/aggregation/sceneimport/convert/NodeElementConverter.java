@@ -62,10 +62,8 @@ class NodeElementConverter implements IConverter {
         container.addNodeElement(sceneConfigElementBO);
 
         if (StringUtils.isNotEmpty(node.getPosition())) {
-            Position position = new Position();
             String[] xy = node.getPosition().split(",");
-            position.setOrigin(new Origin(formatDouble(xy[0]), formatDouble(xy[1])));
-            sceneConfigElementBO.setPosition2(JsonCommon.stringify(position));
+            sceneConfigElementBO.setPosition2(JsonCommon.stringify(new Origin(formatDouble(xy[0]), formatDouble(xy[1]))));
         }
 
         sceneConfigElementBO.setId(node.getId());

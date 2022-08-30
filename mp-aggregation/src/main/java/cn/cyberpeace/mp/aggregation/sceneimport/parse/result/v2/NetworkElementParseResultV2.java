@@ -32,6 +32,7 @@ public class NetworkElementParseResultV2 {
         result.setGateway(gateway);
         result.setDhcp(dhcp);
         result.setDhcpPool(dhcpPool);
+        result.setPosition(position);
         result.setDns(StringUtils.join(dns, ","));
         return result;
     }

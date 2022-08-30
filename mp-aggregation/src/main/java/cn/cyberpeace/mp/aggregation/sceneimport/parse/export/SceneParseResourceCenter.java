@@ -142,9 +142,9 @@ public class SceneParseResourceCenter {
 
                 try {
                     if (StringUtils.isNotEmpty(e.getPosition2())) {
-                        Position position = JsonCommon.parse(e.getPosition2(), Position.class);
-                        if (position.getOrigin() != null) {
-                            networkElementParseResult.setPosition(position.getOrigin().getX() + "," + position.getOrigin().getY());
+                        Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                        if (position != null) {
+                            networkElementParseResult.setPosition(position.getX() + "," + position.getY());
                         }
                     }
                 } catch (Exception exception) {
@@ -163,9 +163,9 @@ public class SceneParseResourceCenter {
 
                 try {
                     if (StringUtils.isNotEmpty(e.getPosition2())) {
-                        Position position = JsonCommon.parse(e.getPosition2(), Position.class);
-                        if (position.getOrigin() != null) {
-                            nodeElementParseResult.setPosition(position.getOrigin().getX() + "," + position.getOrigin().getY());
+                        Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                        if (position != null) {
+                            nodeElementParseResult.setPosition(position.getX() + "," + position.getY());
                         }
                     }
                 } catch (Exception exception) {

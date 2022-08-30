@@ -214,6 +214,7 @@ public class SceneExporter {
         result.put("sourcePort", "source-port");
         result.put("targetIP", "target-iP");
         result.put("targetPort", "target-port");
+        result.put("virtualPlatform", "virtual-platform");
         return result;
     }
 
