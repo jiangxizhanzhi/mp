@@ -50,12 +50,21 @@ class ConvertDataContainer {
     // 未连接任何网络的节点
     private List<SceneConfigElementBO> noNetworkNodeElements = new ArrayList<>();
 
+    // 存区域信息
+    private List<SceneConfigAreaBO> areaBOS = new ArrayList<>();
+
     private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
+
+    private Map<String, SceneConfigElementPortBO> node2NodePort = new HashMap<>();
 
     private String sceneFilePath;
 
     public void putImageInfo(String image, ImageInfoParseResult result) {
         this.imageInfos.put(image, result);
+    }
+
+    public void addAreaElement(SceneConfigAreaBO area) {
+        this.areaBOS.add(area);
     }
 
     public void addNetworkElement(SceneConfigElementBO element) {
@@ -97,6 +106,7 @@ class ConvertDataContainer {
         SceneConfigDataBO configDataBO = new SceneConfigDataBO();
         configDataBO.setTopology(this.getSceneConfigTopologyBO());
         configDataBO.setPlugins(this.getPlugins());
+        configDataBO.getTopology().setAreas(this.areaBOS);
 
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(configDataBO);
@@ -160,5 +170,9 @@ class ConvertDataContainer {
 
     public void setSceneFilePath(String sceneFilePath) {
         this.sceneFilePath = sceneFilePath;
+    }
+
+    public void addNode2NodePort(String fromNode, String toNode, SceneConfigElementPortBO fromPort) {
+        this.node2NodePort.put(fromNode + "_" + toNode, fromPort);
     }
 }
