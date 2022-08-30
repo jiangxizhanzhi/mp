@@ -55,6 +55,8 @@ class ConvertDataContainer {
 
     private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
 
+    private Map<String, SceneConfigElementPortBO> node2NodePort = new HashMap<>();
+
     private String sceneFilePath;
 
     public void putImageInfo(String image, ImageInfoParseResult result) {
@@ -168,5 +170,9 @@ class ConvertDataContainer {
 
     public void setSceneFilePath(String sceneFilePath) {
         this.sceneFilePath = sceneFilePath;
+    }
+
+    public void addNode2NodePort(String fromNode, String toNode, SceneConfigElementPortBO fromPort) {
+        this.node2NodePort.put(fromNode + "_" + toNode, fromPort);
     }
 }

@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.AclsInfo;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetElementParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.base.common.FsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -18,10 +19,14 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.IpVersion;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.hutool.core.io.FileUtil;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,6 +60,13 @@ class NodeElementConverter implements IConverter {
         sceneConfigElementBO.setSystemArchitecture(BaseSceneElementModel.SystemArchitecture.BIT_64);
         sceneConfigElementBO.setSystemLanguage(BaseSceneElementModel.SystemLanguage.EN);
         container.addNodeElement(sceneConfigElementBO);
+
+        if (StringUtils.isNotEmpty(node.getPosition())) {
+            Position position = new Position();
+            String[] xy = node.getPosition().split(",");
+            position.setOrigin(new Origin(formatDouble(xy[0]), formatDouble(xy[1])));
+            sceneConfigElementBO.setPosition2(JsonCommon.stringify(position));
+        }
 
         sceneConfigElementBO.setId(node.getId());
         sceneConfigElementBO.setName(node.getName());
@@ -142,6 +154,11 @@ class NodeElementConverter implements IConverter {
                     pluginPort.setFirewallRules(this.buildFirewallRules(ymlNetParseResult.getAcls()));
                 }
                 container.putPluginElementPort(portBO.getId(), pluginPort);
+                if (StringUtils.startsWith(ymlNetParseResult.getId(), "network") || StringUtils.startsWith(ymlNetParseResult.getId(), "internet")) {
+                    continue;
+                } else {
+                    container.addNode2NodePort(node.getId(), ymlNetParseResult.getId(), portBO);
+                }
             }
         }
     }
@@ -180,5 +197,29 @@ class NodeElementConverter implements IConverter {
             }
             return firewallRule;
         }).collect(Collectors.toList());
+    }
+
+    private double formatDouble(String number) {
+        return new BigDecimal(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
+    }
+
+    @Getter
+    @Setter
+    private static class Position {
+        private Origin origin;
+        private double height;
+        private double width;
+    }
+
+    @Getter
+    @Setter
+    private static class Origin {
+        private double x;
+        private double y;
+
+        public Origin(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 }

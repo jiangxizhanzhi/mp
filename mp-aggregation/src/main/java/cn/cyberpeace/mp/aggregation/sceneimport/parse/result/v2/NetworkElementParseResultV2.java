@@ -17,6 +17,7 @@ import java.util.List;
 public class NetworkElementParseResultV2 {
     private String id;
     private String name;
+    private String position;
     private String cidr;
     private String gateway;
     private String dhcp;
