@@ -20,6 +20,7 @@ public class Netiface {
     @ApiModelProperty(value = "发送包")
     private X tx;
 
+    @ApiModelProperty(value = "扫描信息")
     private Scan scan;
 
     @ApiModelProperty(value = "类型")

@@ -32,7 +32,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/9/13 10:32
  */
-@Api(value = "Dashboard统计接口", tags = "Dashboard统计接口")
+@Api(value = "仪表盘统计接口", tags = "仪表盘统计接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dashboard")
@@ -52,6 +52,7 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
+    @ApiOperation("用户日活跃情况")
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
         DailyUserActivityResponse response = dashboardService.dailyUserActivity();
@@ -66,6 +67,7 @@ public class DashboardController {
     }
 
 
+    @ApiOperation("资源使用情况")
     @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
         SystemClusterUsed response = mockService.mockSystemClusterUsed();

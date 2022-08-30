@@ -27,25 +27,25 @@ public class SceneSummary {
     @ApiModelProperty("靶场测试")
     private Integer cyberTestScene;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("竞技演练")
     private Integer competitiveDrillScene;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("课程训练")
     private Integer courseTraining;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("技能评估")
     private Integer skillsAssessment;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("战术评估")
     private Integer tacticalAssessment;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("综合评估")
     private Integer comprehensiveAssessment;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("战术训练")
     private Integer tacticalTraining;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("综合训练")
     private Integer comprehensiveTraining;
 
 }
