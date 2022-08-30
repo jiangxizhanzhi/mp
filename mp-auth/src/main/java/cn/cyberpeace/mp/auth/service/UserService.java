@@ -98,6 +98,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     List<UserDto> listByUserIds(String[] userIds);
 
+    List<UserModel> listByIds(String[] userIds);
+
     int totalUserCnt();
 
     String getDefaultUserAvatar();

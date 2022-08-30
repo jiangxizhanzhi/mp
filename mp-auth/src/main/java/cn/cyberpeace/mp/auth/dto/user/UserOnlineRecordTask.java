@@ -89,8 +89,6 @@ public class UserOnlineRecordTask implements Runnable {
 
                 UserOnlineRecordModel onlineRecordModel = UserOnlineRecordModel.builder()
                         .user(userModel.getId())
-                        .username(userModel.getUsername())
-                        .name(userModel.getName())
                         .durationMinutes(durationMin)
                         .startTime(startTime).build();
 
