@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.vo;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class ImportDiskSpaceVO extends BaseVO {
     /**
      * 虚拟机空间
      */
+    @ApiModelProperty(value = "虚拟机空间")
     private Long vmSpace;
 
 }
