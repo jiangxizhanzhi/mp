@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Data
-@ConfigurationProperties(prefix = "mp.auth.activation")
+@ConfigurationProperties(prefix = "mp.front.admin.activation")
 public class ActivationConfig {
 
     public static String DEFAULT_LICENSE_DIR = "/home/mp/config/license";

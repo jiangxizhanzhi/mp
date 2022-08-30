@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "mp.auth.url-ac-filter")
+@ConfigurationProperties(prefix = "mp.front.biz.url-ac-filter")
 public class UrlACFilterConfig {
 
     /**

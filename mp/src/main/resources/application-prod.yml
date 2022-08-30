@@ -203,14 +203,6 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
-    activation:
-      enable: true
-      licenseDir: /home/mp/config/license
-    url-ac-filter:
-      enabled: true
-      method-match: true
-      authority-match: true
-      ignore-if-not-defined: false
     biz:
       max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
       logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
@@ -223,6 +215,14 @@ mp:
       encoder:
         iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
         hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
+  front.admin.activation:
+    enable: true
+    licenseDir: /home/mp/config/license
+  front.biz.url-ac-filter:
+    enabled: true
+    method-match: true
+    authority-match: true
+    ignore-if-not-defined: false
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
   sceneplugincloud:
