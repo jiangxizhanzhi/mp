@@ -12,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-@ApiModel("每日用户活动")
+@ApiModel("每日用户活动响应")
 public class DailyUserActivityResponse {
 
     @ApiModelProperty(value = "x轴", notes = "x轴")

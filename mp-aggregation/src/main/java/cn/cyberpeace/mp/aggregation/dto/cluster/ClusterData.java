@@ -10,13 +10,12 @@ import lombok.Data;
  * @Author zhouxinghuai
  * @Date：2021/9/13 13:58
  */
-
 @Data
 @Builder
-@ApiModel("集群数据")
+@ApiModel("集群数据类型")
 public class ClusterData {
 
-    @ApiModelProperty("cpu数据")
+    @ApiModelProperty(value = "cpu数据")
     private Integer[] CPUData;
 
     @ApiModelProperty("磁盘数据")
