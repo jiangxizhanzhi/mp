@@ -25,7 +25,7 @@ public class SnmpConfig implements Serializable {
     /**
      *
      */
-    @ApiModelProperty(value = "")
+    @ApiModelProperty(value = "团体名")
     private String communityName;
 
     /**

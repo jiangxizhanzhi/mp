@@ -33,5 +33,6 @@ public class TypeItemModel {
     /**
      *
      */
+    @ApiModelProperty(value = "子节点属性")
     private List<TypeItemModel> child;
 }

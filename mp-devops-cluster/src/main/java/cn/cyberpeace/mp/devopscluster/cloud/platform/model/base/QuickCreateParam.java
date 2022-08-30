@@ -11,7 +11,7 @@ import java.util.List;
 public class QuickCreateParam {
     @ApiModelProperty(value = "用户uid")
     private String installerUuid;
-
+    @ApiModelProperty(value = "快速构建启动参数")
     private List<StartUpParameter> settings;
     @ApiModelProperty(value = "用户名")
     private String name;
