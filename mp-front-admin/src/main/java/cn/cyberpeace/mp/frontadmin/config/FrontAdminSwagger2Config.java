@@ -23,7 +23,7 @@ public class FrontAdminSwagger2Config {
                 .apiInfo(swagger2Config.apiInfo())
                 .enableUrlTemplating(true)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.front.admin"))
+                .apis(RequestHandlerSelectors.basePackage("cn.cyberpeace.mp.frontadmin"))
                 .paths(PathSelectors.any())
                 .build()
                 .globalRequestParameters(CollectionUtil.toList(AuthSwagger2Config.authParameter))

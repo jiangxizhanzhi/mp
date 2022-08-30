@@ -93,6 +93,7 @@ public class DashboardController {
         return dashboardService.getUserNodeSessions(userId);
     }
 
+    @ApiOperation(value = "用户资源")
     @GetMapping("/user_resource")
     public ServiceResult<UserResourceResponse> userResource() {
         return dashboardService.countUserResourceResponse().asResult();
