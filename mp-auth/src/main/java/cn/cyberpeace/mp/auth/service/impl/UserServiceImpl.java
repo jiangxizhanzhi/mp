@@ -910,6 +910,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
+    public List<UserModel> listByIds(String[] userIds) {
+        return getModelMapper().list(new HumanCondition().filterIn(UserModel::getId, userIds));
+    }
+
+    @Override
     public int totalUserCnt() {
         return getModelMapper().getUserCnt();
     }

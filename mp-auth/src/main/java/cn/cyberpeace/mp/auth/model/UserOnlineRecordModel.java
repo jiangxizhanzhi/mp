@@ -37,12 +37,6 @@ public class UserOnlineRecordModel extends BaseModel {
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;
 
-    @ApiModelProperty(value = "用户名")
-    private String username;
-
-    @ApiModelProperty(value = "用户姓名")
-    private String name;
-
     @ApiModelProperty(value = "开始时间")
     @DefaultGen(DateTimeGenerator.class)
     private LocalDateTime startTime;
@@ -60,12 +54,10 @@ public class UserOnlineRecordModel extends BaseModel {
     private Integer status;
 
     @Builder
-    public UserOnlineRecordModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String user, String tenant, String username, String name, LocalDateTime startTime, LocalDateTime endTime, Integer durationMinutes, Integer status) {
+    public UserOnlineRecordModel(String id, LocalDateTime createTime, LocalDateTime updateTime, String user, String tenant, LocalDateTime startTime, LocalDateTime endTime, Integer durationMinutes, Integer status) {
         super(id, createTime, updateTime);
         this.user = user;
         this.tenant = tenant;
-        this.username = username;
-        this.name = name;
         this.startTime = startTime;
         this.endTime = endTime;
         this.durationMinutes = durationMinutes;
