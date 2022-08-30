@@ -89,6 +89,7 @@ public class Device extends BaseCloudPlatformResult {
     /**
      *
      */
+    @ApiModelProperty(value = "靶标分类(TRM:1,TGM:2,CGM:3,其他:0)")
     private Integer maintype;
 
     /**
