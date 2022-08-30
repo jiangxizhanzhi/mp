@@ -9,4 +9,8 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class CommonAppConfig {
 
+    /**
+     * 云平台地址
+     */
+    private String cpUrl;
 }

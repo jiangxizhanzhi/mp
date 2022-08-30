@@ -86,6 +86,9 @@ mp:
         - ${ip.fdfs}:22122
     fdfs-inner-http-server: http://${ip.fdfs}:8888
     fdfs-outer-http-server: /fdfs
+  # mp-common 模块配置
+  common:
+    cp-url: http://${ip.cp}:11111 #云平台地址 m:元mp.devops.cp-url
   devops:
 #    cp-url: http://10.100.7.1:111 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.model.FlowActuatorModel;
@@ -16,7 +17,7 @@ import cn.cyberpeace.mp.flow.util.CommonUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +38,10 @@ import java.util.stream.Collectors;
 public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, FlowPortMapper, FlowPortFields, QueryParams> implements FlowPortService {
 
     /**
-     * 云平台地址
+     * 通过 commonAppConfig 获取云平台地址
      */
-    @Value("${mp.devops.cp-url}")
-    private String cpUrl;
+    @Autowired
+    private CommonAppConfig commonAppConfig;
 
 
     public FlowPortServiceImpl(FlowPortMapper stuMapper, FlowPortFields stuFields) {
@@ -85,7 +86,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
                     String clientPortId = "";
 
                     // pcap需要给trex虚拟机添加client网口
-                    String addTrexClientPortRsp = HttpUtils.sendPost(cpUrl + "/v1/instances/" +
+                    String addTrexClientPortRsp = HttpUtils.sendPost(commonAppConfig.getCpUrl() + "/v1/instances/" +
                             flowActuatorModel.getInstanceId() + "/interfaces", addPortReq.toJSONString());
                     JSONObject addTrexClientObj = JSONObject.parseObject(addTrexClientPortRsp);
                     log.info("add client port response:{}", addTrexClientObj.toJSONString());
