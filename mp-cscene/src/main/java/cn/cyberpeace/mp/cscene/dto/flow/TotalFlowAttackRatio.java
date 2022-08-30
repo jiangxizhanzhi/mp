@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.dto.flow;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,15 +22,18 @@ public class TotalFlowAttackRatio {
     /**
      * 攻击次数
      */
+    @ApiModelProperty(value = "攻击次数")
     private Long totalAttackNumber;
 
     /**
      * 流量大小，单位B
      */
+    @ApiModelProperty(value = "流量大小，单位B")
     private Double totalTrafficSize;
 
     /**
      * 攻击手法列表
      */
+    @ApiModelProperty(value = "攻击手法列表")
     private List<FlowAttackRatio> attackWayList;
 }
