@@ -13,7 +13,7 @@ import lombok.Data;
 
 @Data
 @Builder
-@ApiModel
+@ApiModel("系统数据")
 public class SystemData {
 
     @ApiModelProperty("cpu数据")
