@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.model.common;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,16 +15,19 @@ public class TypeItemModel {
     /**
      * ID
      */
+    @ApiModelProperty(value = "ID")
     private Integer id;
 
     /**
      * 名称
      */
+    @ApiModelProperty(value = "名称")
     private String name;
 
     /**
      * 父ID
      */
+    @ApiModelProperty(value = "父ID")
     private Integer parentId;
 
     /**

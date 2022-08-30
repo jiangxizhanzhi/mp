@@ -26,6 +26,7 @@ public class FlowSceneSimulationRequest {
     @NotBlank
     private String sceneId;
 
+    @ApiModelProperty("节点id")
     private List<String> nodeIds;
 
     @ApiModelProperty("源IP")
