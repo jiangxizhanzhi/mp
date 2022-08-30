@@ -10,17 +10,23 @@ import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.io.IOException;
-import java.util.List;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/sessions")
@@ -57,6 +63,7 @@ public class NetWorkTrafficController {
      * @return ServiceResult<List < SessionResult>>
      */
     @PostMapping
+    @ApiOperation("按照组ID查询流量信息")
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.<List<SessionResult>>builder().data(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build();
@@ -69,12 +76,14 @@ public class NetWorkTrafficController {
      * @return ServiceResult<ListObjResult < SessionResult>>
      */
     @PostMapping("pageable")
+    @ApiOperation("分局分组id查询流量分页信息接口")
     public ListObjServiceResult<SessionResult> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest) {
         return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest));
     }
 
     @PostMapping("spiview")
+    @ApiOperation("SPI视图")
     public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
         var spiView = netWorkTrafficService.querySPIView(spiViewRequest);
         return ServiceResult.<JSONObject>builder().data(JSONObject.parseObject(spiView)).build();

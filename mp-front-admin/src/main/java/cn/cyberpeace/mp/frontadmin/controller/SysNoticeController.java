@@ -12,11 +12,11 @@ import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
 import cn.cyberpeace.mp.frontadmin.request.validate.UpdateGroup;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -154,8 +154,8 @@ public class SysNoticeController {
         return ServiceResult.success(result.getSource());
     }
 
-    @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
+    @GetMapping("/types")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
     }
