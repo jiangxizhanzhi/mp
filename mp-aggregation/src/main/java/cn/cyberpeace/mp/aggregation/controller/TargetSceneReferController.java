@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,6 +38,11 @@ public class TargetSceneReferController {
     }
 
     @ApiOperation("分页查询")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "name", value = "名称", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "per_page", value = "每页大小", dataTypeClass = Integer.class),
+        @ApiImplicitParam(name = "page", value = "页码", dataTypeClass = Integer.class),
+    })
     @GetMapping("/page")
     public ServiceResult<DeviceReferCsceneInstanceStat> page(@RequestParam("name") String name, @RequestParam(value = "per_page", defaultValue = "10") Integer perPage,
                                                              @RequestParam(value = "page", defaultValue = "1") Integer page) {

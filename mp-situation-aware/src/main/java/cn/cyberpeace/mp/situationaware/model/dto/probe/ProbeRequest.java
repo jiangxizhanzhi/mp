@@ -52,7 +52,7 @@ public class ProbeRequest {
     /**
      * 0:shell 1:python 2:bat
      */
-    @ApiModelProperty(value = "0:shell 1:python 2:bat")
+    @ApiModelProperty(value = "脚本类型0:shell 1:python 2:bat")
     @NotNull(groups = {AddGroup.class})
     private Integer scriptType;
 
@@ -63,7 +63,7 @@ public class ProbeRequest {
     @ApiModelProperty(value = "探针脚本Url")
     private String scriptUrl;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(value = "脚本内容校验码", hidden = true)
     private String scriptChecksum;
 
 //    @ApiModelProperty(value = "脚本参数列表")

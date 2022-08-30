@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.request.user;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -9,6 +10,7 @@ import lombok.Data;
  * @Date：2021/8/31 11:13
  */
 @Data
+@ApiModel("导出用户请求")
 public class UserExportRequest {
 
     @ApiModelProperty(value = "后台会匹配 username 或者 name")

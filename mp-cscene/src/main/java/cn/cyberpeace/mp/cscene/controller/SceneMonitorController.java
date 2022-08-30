@@ -3,12 +3,14 @@ package cn.cyberpeace.mp.cscene.controller;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneMonitorInfo;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.SceneMonitorService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,9 @@ public class SceneMonitorController {
     private SceneMonitorService sceneMonitorService;
 
     @ApiOperation(value = "查询场景监控信息")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+    })
     @GetMapping("/info/{sceneId}")
     public ServiceResult<SceneMonitorInfo> getSceneMonitorInfo(@PathVariable String sceneId) {
         SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
@@ -47,6 +52,10 @@ public class SceneMonitorController {
 
 
     @ApiOperation(value = "查询场景所有节点列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "realTimeHostState", value = "是否获取实时节点主机信息", dataTypeClass = Boolean.class)
+    })
     @GetMapping("/all_elements/{sceneId}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId, @RequestParam(required = false) Boolean realTimeHostState) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
@@ -69,6 +78,10 @@ public class SceneMonitorController {
     }
 
     @ApiOperation(value = "查询场景top5节点状态")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sceneId", value = "场景ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "topCount", value = "数量", dataTypeClass = Integer.class)
+    })
     @GetMapping("/elements/top_by_states/{sceneId}")
     public ServiceResult<Map<String, List<ElementMonitorBasicInfo>>> topByHoststates(@PathVariable String sceneId, @RequestParam(required = false) Integer topCount) {
         Map<String, List<ElementMonitorBasicInfo>> result = sceneMonitorService.topAggrByHoststates(sceneId, 5);

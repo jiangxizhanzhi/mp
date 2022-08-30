@@ -10,7 +10,7 @@ import lombok.Data;
  * @Date 2022/6/21
  */
 @Data
-@ApiModel
+@ApiModel("挂载请求")
 public class MoundRequest {
     @ApiModelProperty(value = "主机")
     private String host;

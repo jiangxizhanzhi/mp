@@ -2,13 +2,14 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.request.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.dto.target.TargetDto;
 import cn.cyberpeace.mp.auth.model.TargetModel;
+import cn.cyberpeace.mp.auth.request.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class UserPermissionController {
 
 
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/byuser")
     public ServiceResult getTargetsByUser(String userId) {
         List<TargetModel> targets = userPermissionService.listTargetsByUserId(userId);
@@ -46,6 +48,7 @@ public class UserPermissionController {
 
 
     @ApiOperation(value = "根据userId查询所有权限", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/tree/byuser")
     public ServiceResult getTargetsTreeByUser(@RequestParam String userId) {
         List<TargetDto> tree = userPermissionService.getTreeByUserId(userId);
@@ -55,6 +58,7 @@ public class UserPermissionController {
 
 
     @ApiOperation(value = "根据userId查询所有菜单权限（对象集合）", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/menus/byuser")
     public ServiceResult getMenuTargetsByUser(@RequestParam String userId) {
         List<TargetModel> targets = userPermissionService.listMenusByUserId(userId);

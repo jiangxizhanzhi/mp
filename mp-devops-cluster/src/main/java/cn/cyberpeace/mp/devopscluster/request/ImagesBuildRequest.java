@@ -34,6 +34,7 @@ public class ImagesBuildRequest extends BaseRequest {
     /**
      * 服务集合
      */
+    @ApiModelProperty(value = "服务集合")
     private List<InstallerDTO> installerDTOList;
 
 

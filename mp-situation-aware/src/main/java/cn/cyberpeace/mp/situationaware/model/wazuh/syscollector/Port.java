@@ -14,13 +14,16 @@ import lombok.Data;
 @ApiModel("端口信息")
 public class Port {
 
+    @ApiModelProperty(value = "本地端口")
     private Local local;
 
+    @ApiModelProperty(value = "远程端口")
     private Remote remote;
 
+    @ApiModelProperty(value = "扫描信息")
     private Scan scan;
 
-     @ApiModelProperty(value = "inode")
+     @ApiModelProperty(value = "索引节点")
     private Integer inode;
 
      @ApiModelProperty(value = "父进程ID")

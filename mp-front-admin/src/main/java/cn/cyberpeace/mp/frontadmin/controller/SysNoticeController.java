@@ -60,6 +60,7 @@ public class SysNoticeController {
     private OptionService optionService;
 
     @ApiOperation("查询单个公告")
+    @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
         ObjServiceResult<SysNoticeModel> result = noticeService.get(id);
@@ -74,6 +75,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告接口")
+    @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
         noticeService.read(id);
@@ -82,6 +84,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("不再推送公告消息")
+    @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
         noticeService.unpush(CollectionUtil.toList(ids));
@@ -97,6 +100,7 @@ public class SysNoticeController {
     }
 
     @ApiOperation("分页查询所有公告")
+    @ApiImplicitParam(name = "pageRequest", value = "分页查询请求体", dataTypeClass = SysNoticePageRequest.class)
     @GetMapping("/page")
     public ServiceResult<SysNoticeDto> page(SysNoticePageRequest pageRequest) {
         pageRequest.ensure();

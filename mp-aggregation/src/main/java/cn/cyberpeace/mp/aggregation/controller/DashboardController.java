@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,7 @@ public class DashboardController {
     }
 
     @ApiOperation(value = "用户监控会话", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/user_node_session")
     public ServiceResult<List<NodeSessionBO>> userNodeSession(@RequestParam String userId) {
         return dashboardService.getUserNodeSessions(userId);

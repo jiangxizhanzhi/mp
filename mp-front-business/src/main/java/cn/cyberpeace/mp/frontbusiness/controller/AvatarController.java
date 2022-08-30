@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ public class AvatarController {
     private AvatarService avatarService;
 
     @ApiOperation(value = "上传头像，返回url", notes = "")
+    @ApiImplicitParam(name = "file", value = "图片文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/upload")
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {
