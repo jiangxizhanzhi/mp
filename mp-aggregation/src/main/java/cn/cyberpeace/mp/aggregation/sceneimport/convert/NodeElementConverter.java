@@ -105,7 +105,11 @@ class NodeElementConverter implements IConverter {
             }
         } else if (node.getId().toLowerCase().startsWith("server")) {
             sceneConfigElementBO.setIcon2(CommonConstant.DefaultImageUrl.SERVER);
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+            if ("npc".equals(node.getVirtualPlatform())) {
+                pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.NPC);
+            } else {
+                pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL);
+            }
         }
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 

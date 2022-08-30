@@ -21,6 +21,7 @@ public class NodeElementParseResult {
     private String image;
     private String images;
     private String file;
+    private String virtualPlatform;
     private List<NetElementParseResult> net;
     private List<StaticRoutesResult> staticRoutes;
     private List<StaticRoutesResult> staticRouters;

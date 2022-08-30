@@ -177,6 +177,9 @@ public class SceneParseResourceCenter {
                 nodeElementParseResult.setId("firewall-" + firewallIndex++);
             } else {
                 nodeElementParseResult.setId("server-" + serverIndex++);
+                if (pluginElement.getRole() == BaseCloudPluginSceneElementModel.Role.NPC) {
+                    nodeElementParseResult.setVirtualPlatform("npc");
+                }
             }
             id2Node.put(element.getId(), nodeElementParseResult);
             nodes.add(nodeElementParseResult);
