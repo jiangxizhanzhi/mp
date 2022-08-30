@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@ConfigurationProperties(prefix = "mp.devops.monitor",ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "mp.situationaware.monitor",ignoreInvalidFields = true)
 @Data
 public class MonitorConfig {
 
