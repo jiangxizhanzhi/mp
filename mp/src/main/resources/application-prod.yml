@@ -248,6 +248,7 @@ mp:
     cloud_heavy_concurrent_delay_enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
     cloud_heavy_concurrent_delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
     scene_create_install_unzip_apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
+    dhcp_ip_allocate: ${MP_DHCP_IP_ALLOCATE:true}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
     wazuh-api-server: http://${ip.wazuh}:15500
