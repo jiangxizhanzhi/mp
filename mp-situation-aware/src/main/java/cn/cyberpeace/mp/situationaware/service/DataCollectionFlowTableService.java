@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ import java.util.List;
 public class DataCollectionFlowTableService{
 
     @Autowired
-    private WazuhConfig wazuhConfig;
+    private SituationAwareConfig situationAwareConfig;
 
 
     /**
@@ -31,7 +31,7 @@ public class DataCollectionFlowTableService{
      * @param agentInstanceIds agentInstanceIds
      */
     public void createDataCollectionFlow(List<String> agentInstanceIds) {
-        String createUrl = wazuhConfig.getFlowTableUrl() + "/probe/flows";
+        String createUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
         try {
@@ -50,7 +50,7 @@ public class DataCollectionFlowTableService{
      * @param agentInstanceIds agentInstanceIds
      */
     public void deleteDataCollectionFlow(List<String> agentInstanceIds) {
-        String deleteUrl = wazuhConfig.getFlowTableUrl() + "/probe/flows";
+        String deleteUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
 

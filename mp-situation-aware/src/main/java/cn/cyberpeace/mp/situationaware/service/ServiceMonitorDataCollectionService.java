@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.alibaba.fastjson.JSONObject;
@@ -11,11 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -31,7 +27,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     private DataCollectionService dataCollectionService;
 
     @Autowired
-    private MonitorConfig monitorConfig;
+    private SituationAwareConfig situationAwareConfig;
 
 
     /**
@@ -40,7 +36,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = monitorConfig.getCpSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = situationAwareConfig.getCpSrvMonitors().stream().map(SituationAwareConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
@@ -55,7 +51,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = monitorConfig.getBizSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = situationAwareConfig.getBizSrvMonitors().stream().map(SituationAwareConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));

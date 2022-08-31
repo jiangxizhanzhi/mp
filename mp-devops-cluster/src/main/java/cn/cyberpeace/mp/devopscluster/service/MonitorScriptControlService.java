@@ -16,7 +16,7 @@ import cn.cyberpeace.mp.devopscluster.repository.CpNodeMonitorScriptConfigMapper
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControl;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
-import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
@@ -32,13 +32,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +51,7 @@ public class MonitorScriptControlService {
     private HypervisorConverter hypervisorConverter;
 
     @Autowired
-    private MonitorConfig monitorConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     @Autowired
     private AgentService agentService;
@@ -102,8 +96,8 @@ public class MonitorScriptControlService {
             return;
         }
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> cpSrvs = situationAwareConfig.getCpSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> bizSrvs = situationAwareConfig.getBizSrvMonitors();
 
         if (CollectionUtil.isEmpty(cpSrvs)) {
             return;
@@ -136,9 +130,9 @@ public class MonitorScriptControlService {
 
 
     public void statusManually(String hostname) {
-        List<MonitorConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
+        List<SituationAwareConfig.MonitorProbe> cpSrvs = situationAwareConfig.getCpSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> bizSrvs = situationAwareConfig.getBizSrvMonitors();
 
         if (CollectionUtil.isNotEmpty(cpSrvs)) {
             allSrvMonitors.addAll(cpSrvs);
@@ -152,7 +146,7 @@ public class MonitorScriptControlService {
             return;
         }
 
-        for (MonitorConfig.MonitorProbe monitor : allSrvMonitors) {
+        for (SituationAwareConfig.MonitorProbe monitor : allSrvMonitors) {
             String srvs = monitor.getServiceList();
             String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
@@ -233,15 +227,15 @@ public class MonitorScriptControlService {
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> cpSrvs = situationAwareConfig.getCpSrvMonitors();
+        List<SituationAwareConfig.MonitorProbe> bizSrvs = situationAwareConfig.getBizSrvMonitors();
 
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
-        for (MonitorConfig.MonitorProbe cpSrvProbe : cpSrvs) {
+        for (SituationAwareConfig.MonitorProbe cpSrvProbe : cpSrvs) {
             controlProbeParams.add(generateControlProbeParam(cpSrvProbe, nameFileMap));
         }
 
-        for (MonitorConfig.MonitorProbe bizSrvProbe : bizSrvs) {
+        for (SituationAwareConfig.MonitorProbe bizSrvProbe : bizSrvs) {
             controlProbeParams.add(generateControlProbeParam(bizSrvProbe, nameFileMap));
         }
 
@@ -251,7 +245,7 @@ public class MonitorScriptControlService {
     }
 
 
-    private WazuhControl.ControlProbeParam generateControlProbeParam(MonitorConfig.MonitorProbe monitorProbe, Map<String, String> nameFileMap) {
+    private WazuhControl.ControlProbeParam generateControlProbeParam(SituationAwareConfig.MonitorProbe monitorProbe, Map<String, String> nameFileMap) {
 
         WazuhControl.ControlProbeParam probeParam = new WazuhControl.ControlProbeParam();
 
@@ -325,21 +319,21 @@ public class MonitorScriptControlService {
     }
 
     private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
-        List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
-        allSrvs.addAll(monitorConfig.getCpSrvMonitors());
-        allSrvs.addAll(monitorConfig.getBizSrvMonitors());
+        List<SituationAwareConfig.MonitorProbe> allSrvs = new ArrayList<>();
+        allSrvs.addAll(situationAwareConfig.getCpSrvMonitors());
+        allSrvs.addAll(situationAwareConfig.getBizSrvMonitors());
 
         if (CollectionUtil.isNotEmpty(allSrvs)) {
-            allSrvs.sort(new Comparator<MonitorConfig.MonitorProbe>() {
+            allSrvs.sort(new Comparator<SituationAwareConfig.MonitorProbe>() {
                 @Override
-                public int compare(MonitorConfig.MonitorProbe o1, MonitorConfig.MonitorProbe o2) {
+                public int compare(SituationAwareConfig.MonitorProbe o1, SituationAwareConfig.MonitorProbe o2) {
                     return o1.getProbeName().compareTo(o2.getProbeName());
                 }
             });
         }
 
         List<CpNodeMonitorScriptConfigModel.ParamConfig> configs = new ArrayList<>();
-        for (MonitorConfig.MonitorProbe monitorProbe : allSrvs) {
+        for (SituationAwareConfig.MonitorProbe monitorProbe : allSrvs) {
             String url = FsCommon.genInnerHttpUrl(nameFileMap.get(monitorProbe.getProbeName()));
 
             CpNodeMonitorScriptConfigModel.ParamConfig config = new CpNodeMonitorScriptConfigModel.ParamConfig();

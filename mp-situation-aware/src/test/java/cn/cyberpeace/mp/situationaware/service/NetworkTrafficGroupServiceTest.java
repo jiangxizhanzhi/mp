@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
-import cn.cyberpeace.mp.situationaware.config.ArkimeConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
@@ -62,12 +62,12 @@ public class NetworkTrafficGroupServiceTest {
     }
 
     @Autowired
-    private ArkimeConfig arkimeConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     @Test
     public void testInit() {
         try {
-            String result = HttpUtils.sendGet(arkimeConfig.getCpcloudContainerCreateUrl() + "/networks");
+            String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks");
             JSONArray networkList = (JSONArray)JSONPath.eval(JSON.parse(result), "$.data.list");
             networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network ->{
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");

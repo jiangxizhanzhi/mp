@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.situationaware.config.ArkimeConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.BaseCloudPlatformResult;
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NetworkTrafficGroupService {
 
     @Autowired
-    private ArkimeConfig arkimeConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     /**
      * 索引前缀
@@ -47,7 +47,7 @@ public class NetworkTrafficGroupService {
     public void initArkimeNetwork() {
         log.info("init arkime network");
         try {
-            String result = HttpUtils.sendGet(arkimeConfig.getCpcloudContainerCreateUrl() + "/networks?fetch_all=true");
+            String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks?fetch_all=true");
             log.info("init arkime network result {}", result);
             JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
             networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> ARKIMENETWORKNAME.equals(json.get("name"))).findFirst().ifPresent(network -> {
@@ -68,7 +68,7 @@ public class NetworkTrafficGroupService {
         //查询groupId对应的实例镜像
         String result = null;
         try {
-            result = HttpUtils.sendGet(arkimeConfig.getCpcloudContainerCreateUrl() + "/containers");
+            result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/containers");
         } catch (IOException e) {
             log.error("query cloud containers error");
         }
@@ -80,7 +80,7 @@ public class NetworkTrafficGroupService {
 
         //删除实例镜像
         var deleteParam = new JSONObject();
-        var deleteUrl = arkimeConfig.getCpcloudContainerCreateUrl() + "/scenarios/container";
+        var deleteUrl = situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/scenarios/container";
         var containerArray = new JSONArray();
         containerArray.add(0, containerId.get());
         deleteParam.put("containers", containerArray);
@@ -115,12 +115,12 @@ public class NetworkTrafficGroupService {
         if (Objects.isNull(SituationalAwareConstant.ArkimeNetworkId)) {
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_ADD_ERROR, "networkId 为空");
         }
-        String url = arkimeConfig.getCpcloudContainerCreateUrl() + "/scenarios/container";
+        String url = situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/scenarios/container";
         var paramObject = new JSONObject();
         //实例名称
         paramObject.put("name", instanceId);
         //docker镜像名称
-        paramObject.put("image", arkimeConfig.getImageName());
+        paramObject.put("image", situationAwareConfig.getArkimeImageName());
         paramObject.put("cpu", 4);
         paramObject.put("ram", 4096);
 
@@ -133,8 +133,8 @@ public class NetworkTrafficGroupService {
         paramObject.put("networks", networks);
         //设置环境变量
         JSONObject environment = new JSONObject();
-        environment.put("ES_HOST", arkimeConfig.getEsHost());
-        environment.put("ES_PORT", arkimeConfig.getEsPort());
+        environment.put("ES_HOST", situationAwareConfig.getArkimeEsHost());
+        environment.put("ES_PORT", situationAwareConfig.getArkimeEsPort());
         environment.put("ES_PREFIX", instanceId);
         paramObject.put("environment", environment);
 
@@ -161,7 +161,7 @@ public class NetworkTrafficGroupService {
      * @param networkTrafficMirrorRequest
      */
     public void doBindingNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
-        String url = arkimeConfig.getCpcloudNetworkMirrorUrl() + "/openflow/mirror";
+        String url = situationAwareConfig.getArkimeCpcloudNetworkMirrorUrl() + "/openflow/mirror";
         var paramObject = new JSONObject();
 
         paramObject.put("scene_id", networkTrafficMirrorRequest.getSceneId());
@@ -183,7 +183,7 @@ public class NetworkTrafficGroupService {
      * @param networkTrafficMirrorRequest
      */
     public void deleteNetworkTrafficMirror(NetworkTrafficMirrorRequest networkTrafficMirrorRequest) {
-        String url = arkimeConfig.getCpcloudNetworkMirrorUrl() + "/openflow/mirror";
+        String url = situationAwareConfig.getArkimeCpcloudNetworkMirrorUrl() + "/openflow/mirror";
         var paramObject = new JSONObject();
 
         paramObject.put("src_vm", networkTrafficMirrorRequest.getVmInstanceIds());

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
-import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
@@ -35,7 +35,7 @@ public class AgentService extends RequestProcessor {
     public static final String CACHE_KEY_AGENTS = "agents";
 
     @Autowired
-    private WazuhConfig wazuhConfig;
+    private SituationAwareConfig situationAwareConfig;
 
 
     /**
@@ -48,7 +48,7 @@ public class AgentService extends RequestProcessor {
         agentRequest.ensure();
         log.info("agentRequest:{}", agentRequest);
         var requestUri = "/agents";
-        var requestUrl = wazuhConfig.getBaseUrl() + requestUri;
+        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);

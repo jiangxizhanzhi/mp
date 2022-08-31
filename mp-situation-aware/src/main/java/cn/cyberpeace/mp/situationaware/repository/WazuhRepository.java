@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.repository;
 
-import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
 import cn.cyberpeace.mp.situationaware.model.WazuhNetifaceRoot;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
@@ -20,7 +20,7 @@ import java.io.IOException;
 public class WazuhRepository {
 
     @Autowired
-    private WazuhConfig wazuhConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     /**
      * 查询wazuhToken防止token失效
@@ -28,8 +28,8 @@ public class WazuhRepository {
      * @throws IOException
      */
     public String queryWazuhToken() throws IOException {
-        var requestUrl = wazuhConfig.getBaseUrl() + "/security/user/authenticate?raw=true";
-        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, wazuhConfig.getUsername(), wazuhConfig.getPassword());
+        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + "/security/user/authenticate?raw=true";
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, situationAwareConfig.getWazuhUsername(), situationAwareConfig.getWazuhPassword());
     }
 
 
@@ -39,7 +39,7 @@ public class WazuhRepository {
      * @return WazuhFileRoot
      */
     public WazuhFileRoot queryFileEvents(String requestUri){
-        var requestUrl = wazuhConfig.getBaseUrl() + requestUri;
+        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhFileRoot.class);
     }
@@ -50,7 +50,7 @@ public class WazuhRepository {
      */
     public WazuhNetifaceRoot queryAllAgentMac() {
         var requestUri = "/experimental/syscollector/ports";
-        var requestUrl = wazuhConfig.getBaseUrl() + requestUri;
+        var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhNetifaceRoot.class);
     }

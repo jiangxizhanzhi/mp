@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.situationaware.config.ArkimeConfig;
 import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
@@ -52,7 +52,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
 
     @Autowired
-    private ArkimeConfig arkimeConfig;
+    private SituationAwareConfig situationAwareConfig;
 
     private static final String SESSION3 = "_sessions3";
 
@@ -204,7 +204,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
-                arkimeConfig.getUsername(), arkimeConfig.getPassword());
+                situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
@@ -236,7 +236,7 @@ public class NetworkTrafficService extends AbstractBaseService{
             .append("&interval").append("auto")
         ;
         try {
-           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), arkimeConfig.getUsername(), arkimeConfig.getPassword());
+           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (Exception e) {
             log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
             throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());
