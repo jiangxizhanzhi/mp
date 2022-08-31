@@ -338,7 +338,7 @@ public class DevopsTargetController {
 
     @ApiOperation("上传靶标图标")
     @PostMapping("/upload/icon")
-    @ApiImplicitParam(name = "file", value = "文件内容")
+    @ApiImplicitParam(name = "file", value = "文件")
     @ResponseBody
     public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
         return targetIconUploadService.build(file).upload();

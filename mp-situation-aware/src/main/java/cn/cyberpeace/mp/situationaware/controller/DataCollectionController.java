@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -33,6 +34,7 @@ public class DataCollectionController {
 
     @PostMapping("/file_events")
     @ApiOperation(value = "查询文件注册表变更信息", notes = "")
+    @ApiImplicitParam(name = "wazuhEventRequest", value = "查询请求体")
     public ListObjServiceResult<FileEventModel> queryFileEvents(@RequestBody @Valid WazuhEventRequest wazuhEventRequest) {
         if (Objects.isNull(wazuhEventRequest.getStartTime()) || Objects.isNull(wazuhEventRequest.getEndTime())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -46,6 +48,7 @@ public class DataCollectionController {
 
     @PostMapping("/monitor_events")
     @ApiOperation(value = "查询场景系统指标信息", notes = "")
+    @ApiImplicitParam(name = "wazuhMonitorEventsRequest", value = "查询请求体")
     public ListObjServiceResult<WazuhHostStateModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getMacIds()) && CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

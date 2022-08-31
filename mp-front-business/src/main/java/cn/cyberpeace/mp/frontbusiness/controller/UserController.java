@@ -58,6 +58,7 @@ public class UserController {
     private UserHeartbeatService heartbeatService;
 
     @ApiOperation(value = "修改密码", notes = "")
+    @ApiImplicitParam(name="resetPwdRequest", value="修改请求")
     @PostMapping("/resetpwd")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
@@ -68,6 +69,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
+    @ApiImplicitParam(name="req", value="修改请求")
     @PostMapping("/resetpwd/self")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置本人密码", target = OpTargetEnums.USER)
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {
@@ -93,7 +95,7 @@ public class UserController {
 
 
     @ApiOperation(value = "启用用户", notes = "")
-    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
+    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class, paramType = "body", required = true)
     @PostMapping("/enable")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = OpTargetEnums.USER)
@@ -106,7 +108,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "审核用户", notes = "")
-    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
+    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class, paramType = "query")
     @PostMapping("/approve")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = OpTargetEnums.USER)

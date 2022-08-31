@@ -110,6 +110,7 @@ public class UserController {
 
 
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiImplicitParam(name = "createRequest", value = "请求")
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = OpTargetEnums.USER)
@@ -119,6 +120,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiImplicitParam(name = "modifyRequest", value = "修改请求")
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
