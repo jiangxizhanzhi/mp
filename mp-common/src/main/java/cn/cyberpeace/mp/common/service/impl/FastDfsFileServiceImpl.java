@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;

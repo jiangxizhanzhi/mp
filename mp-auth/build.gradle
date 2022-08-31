@@ -10,6 +10,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
 
     implementation project(':mp-base')
+    implementation project(':mp-common')
     implementation project(':mp-auth-base')
     implementation project(':mp-devops-log')
 }

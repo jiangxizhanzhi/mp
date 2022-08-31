@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
 import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
