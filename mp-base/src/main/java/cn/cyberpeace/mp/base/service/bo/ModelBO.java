@@ -4,7 +4,9 @@ import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.Arrays;
 
@@ -14,8 +16,9 @@ import java.util.Arrays;
  */
 @SuppressWarnings("java:S1610")
 @Data
-public class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
+public abstract class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
 
+    @ApiModelProperty(value = "id")
     private String id;
 
     /**
@@ -33,7 +36,7 @@ public class ModelBO<M extends BaseModel, T extends ModelBO<M, T>> {
      * @return 初始表模型对象
      */
     public M createModel() {
-        return null;
+        throw new NotImplementedException();
     }
 
     /**
