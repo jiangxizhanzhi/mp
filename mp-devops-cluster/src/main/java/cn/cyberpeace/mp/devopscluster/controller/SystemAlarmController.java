@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -53,6 +54,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      * @return
      */
     @ApiOperation("分页查询告警信息")
+    @ApiImplicitParam(name = "queryParams", value = "查询参数")
     @GetMapping("/page")
     public ListObjServiceResult<SystemAlarmModel> page(QueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {

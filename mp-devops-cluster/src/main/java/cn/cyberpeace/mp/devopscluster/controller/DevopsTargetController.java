@@ -32,6 +32,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.devopscluster.vo.convert.DeviceVoConverter;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -266,6 +267,7 @@ public class DevopsTargetController {
     }
 
     @ApiOperation("根据UUID查询靶标信息")
+    @ApiImplicitParam(name = "request", value = "靶标id")
     @GetMapping("/get-by-uuid")
     public Result<DeviceVO> findByUuid(@RequestParam String uuid){
         Device device = targetConverter.findByUuid(uuid);
@@ -327,6 +329,7 @@ public class DevopsTargetController {
     }
 
     @ApiOperation("注册MP地址")
+    @ApiImplicitParam(name = "url", value = "地址")
     @GetMapping("/register")
     public ServiceResult register(@RequestParam(required = false) String url){
         initRegisterService.register(url);
@@ -335,6 +338,7 @@ public class DevopsTargetController {
 
     @ApiOperation("上传靶标图标")
     @PostMapping("/upload/icon")
+    @ApiImplicitParam(name = "file", value = "文件内容")
     @ResponseBody
     public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
         return targetIconUploadService.build(file).upload();
@@ -343,6 +347,7 @@ public class DevopsTargetController {
 
     @ApiOperation("校验靶标是否存在")
     @PostMapping("/check")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @ResponseBody
     public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request){
         request.setPage(null);
