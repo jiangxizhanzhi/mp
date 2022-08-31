@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.config.AuthBizConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -14,12 +14,7 @@ import com.alibaba.excel.event.AnalysisEventListener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Description: 模板的读取类
@@ -47,7 +42,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
     private OperateUserPermissionService opUserPermCheckService;
 
-    private AuthBizConfig authBizConfig;
+    private AuthConfig authConfig;
 
     /**
      * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
@@ -55,12 +50,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * @param userService
      */
     public UploadDataListener(UserService userService, RoleService roleService, OrgService orgService,
-                              OperateUserPermissionService opUserPermCheckService, AuthBizConfig authBizConfig) {
+                              OperateUserPermissionService opUserPermCheckService, AuthConfig authConfig) {
         this.userService = userService;
         this.roleService = roleService;
         this.orgService = orgService;
         this.opUserPermCheckService = opUserPermCheckService;
-        this.authBizConfig = authBizConfig;
+        this.authConfig = authConfig;
     }
 
     /**
@@ -97,9 +92,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        if (list.size() > authBizConfig.getMaxImportUserSize()) {
+        if (list.size() > authConfig.getMaxImportUserSize()) {
             log.error("size exceed the limit:{}！", list.size());
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authBizConfig.getMaxImportUserSize().toString()));
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format(authConfig.getMaxImportUserSize().toString()));
         }
 
         // 校验字段是否合法
