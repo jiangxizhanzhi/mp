@@ -1,0 +1,28 @@
+package cn.cyberpeace.mp.devopslog.config;
+
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+
+/**
+ * @Description
+ * @Author shgang
+ * @Date 2022/8/31
+ */
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "mp.devops.log")
+public class DevopsLogConfig {
+
+    /**
+     * 不希望记录日志的URL Pattern
+     */
+    private List<String> excludeUri;
+
+    /**
+     * 不需要记录日志的请求method。譬如通常可以忽略的method: OPTIONS
+     */
+    private List<String> excludeMethod;
+}

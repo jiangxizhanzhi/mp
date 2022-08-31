@@ -195,11 +195,12 @@ mp:
           os-type: linux
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
-
-  log:
-
-    exclude-uri: /login
-    exclude-method: OPTIONS
+  # mp-devops-log 模块配置
+  devops.log:
+    exclude-uri:
+      - /login
+    exclude-method:
+      - OPTIONS
   # mp-auth 模块配置
   auth.biz:
     max-import-user-size: 100

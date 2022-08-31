@@ -203,10 +203,12 @@ mp:
           log-format: syslog
           location: /var/log/clamav.log,/var/log/secure
           os-type: linux
-  log:
-
-    exclude-uri: /login
-    exclude-method: OPTIONS
+  # mp-devops-log 模块配置
+  devops.log:
+    exclude-uri:
+      - /login
+    exclude-method:
+      - OPTIONS
   # auth 模块配置
   auth.biz:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
