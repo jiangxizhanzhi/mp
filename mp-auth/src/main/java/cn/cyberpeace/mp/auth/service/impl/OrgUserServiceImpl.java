@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
@@ -164,6 +165,12 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         return userOrgMapDtos;
     }
 
+    @Override
+    public List<UserOrgDto> listUserOrgByUserIds(List<String> userIds) {
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
+        List<UserOrgDto> userOrgDtos = getModelMapper().listUserOrgByUserIds(userIds);
+        return userOrgDtos;
+    }
 
     @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {

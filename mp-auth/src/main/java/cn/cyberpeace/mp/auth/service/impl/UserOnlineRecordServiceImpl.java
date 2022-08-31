@@ -1,19 +1,16 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -24,6 +21,7 @@ import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -31,12 +29,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -59,6 +52,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OrgService orgService;
 
     @Autowired
     private UserHeartbeatService heartbeatService;
@@ -142,12 +138,17 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
         // orgpaths
         List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
-        List<UserOrgMapDto> userOrgMapDtos = orgUserService.listUserOrgMapDtosByUserIds(userIds);
+        List<UserOrgDto> userOrgDtos = orgUserService.listUserOrgByUserIds(userIds);
         List<UserModel> userModelList = userService.listByIds(userIds.toArray(String[]::new));
         reportDtos.forEach(r -> {
-            Optional<UserOrgMapDto> userOrgMapDtoOptional = userOrgMapDtos.stream().filter(mapDto -> Objects.equals(mapDto.getUserId(), r.getUser())).findFirst();
-            if (userOrgMapDtoOptional.isPresent()) {
-                r.setOrg(userOrgMapDtoOptional.get().getOrgPaths());
+            List<OrgModel> orgModelList =
+                    userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {
+                        OrgModel orgModel = new OrgModel();
+                        BeanUtils.copyProperties(dto, orgModel);
+                        return orgModel;
+                    }).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(orgModelList)) {
+                r.setOrg(orgService.getBatchPath(orgModelList));
             }
 
             if (CollectionUtil.isNotEmpty(userModelList)) {
