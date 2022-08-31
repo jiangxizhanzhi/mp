@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.common.config.CommonAppConfig;
+import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.enums.*;
@@ -32,7 +33,6 @@ import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -61,11 +61,8 @@ public class AsyncPlatFlowTaskService {
     @Autowired
     private CommonAppConfig commonAppConfig;
 
-    /**
-     * trex镜像名称
-     */
-    @Value("${mp.flow.trex-image}")
-    private String trexImage;
+    @Autowired
+    private FlowConfig flowConfig;
 
     @Autowired
     private FlowTaskMapper flowTaskMapper;
@@ -458,7 +455,7 @@ public class AsyncPlatFlowTaskService {
         FlowActuatorModel flowActuatorModel = new FlowActuatorModel();
         AddVmRequest addVmRequest = new AddVmRequest();
         addVmRequest.setName(trexName);
-        addVmRequest.setImage(trexImage);
+        addVmRequest.setImage(flowConfig.getTrexImage());
         AddVmRequest.Networks networks = new AddVmRequest.Networks();
         networks.setNetworkId(externalNetId);
         AddVmRequest.AccessModes accessModes = new AddVmRequest.AccessModes();
