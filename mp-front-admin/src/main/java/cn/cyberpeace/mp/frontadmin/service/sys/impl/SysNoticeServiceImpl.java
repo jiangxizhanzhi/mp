@@ -413,7 +413,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<OrgModel> orgModels = noticeOrgMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
         if (CollectionUtil.isNotEmpty(orgModels)) {
             noticeDto.setOrgIds(orgModels.stream().map(OrgModel::getId).collect(Collectors.toList()));
-            noticeDto.setOrgPaths(orgModels.stream().map(OrgModel::getPath).collect(Collectors.joining(",")));
+            noticeDto.setOrgPaths(orgService.getBatchPath(orgModels));
         }
 
 

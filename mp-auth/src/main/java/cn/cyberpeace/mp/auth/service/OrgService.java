@@ -54,4 +54,26 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
         // todo 如果是更新组织名称，那要更新关联的组织orgpath
         return BaseModelService.super.update(obj, fields);
     }
+
+    /**
+     * 获取组织完整path
+     * @param orgModel
+     * @return
+     */
+    String getPath(OrgModel orgModel);
+
+    /**
+     * 批量获取组织完整path
+     * @param orgModelList
+     * @return
+     */
+    String getBatchPath(List<OrgModel> orgModelList);
+
+    /**
+     * 批量获取组织路径list
+     * @param orgModelList
+     * @return
+     */
+    List<List<String>> getBathPathToList(List<OrgModel> orgModelList);
+
 }

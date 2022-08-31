@@ -25,7 +25,10 @@ public interface OrgMapper extends BaseModelMapper<OrgModel> {
 
     List<OrgModel> listAll(@Param("tenantId") String tenantId);
 
-    OrgModel getByPath(@Param("path") String path);
+//    OrgModel getByPath(@Param("path") String path);
 
-    int updatePath(@Param("id") String id, @Param("path") String path);
+//    int updatePath(@Param("id") String id, @Param("path") String path);
+
+    List<OrgModel> listByParentIdAndName(@Param("parentId") String parentId, @Param("name") String name);
+
 }
