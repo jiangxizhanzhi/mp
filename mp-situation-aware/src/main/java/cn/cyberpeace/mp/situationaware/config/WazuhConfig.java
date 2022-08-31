@@ -32,7 +32,7 @@ public class WazuhConfig {
     @Data
     public static class ProbeManager {
         private String url;
-        private String agentScriptLinuxPat;
+        private String agentScriptLinuxPath;
         private String agentScriptWindowsPath;
         private String taskEnable;
     }
