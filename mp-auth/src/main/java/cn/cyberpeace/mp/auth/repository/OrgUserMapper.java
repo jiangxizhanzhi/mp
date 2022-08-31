@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
@@ -32,6 +33,8 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
     List<UserOrgMapDto> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
+
+    List<UserOrgDto> listUserOrgByUserIds(@Param("userIds") List<String> userIds);
 
     /**
      * @param orgIds
