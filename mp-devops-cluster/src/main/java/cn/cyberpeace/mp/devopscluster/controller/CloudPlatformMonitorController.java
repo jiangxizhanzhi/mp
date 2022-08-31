@@ -53,6 +53,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -311,6 +312,7 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("服务重启")
+    @ApiImplicitParam(name = "serverRestartRequest", value = "服务重启请求体")
     @PostMapping("/restart")
     public ServiceResult<Boolean> restartServer(@RequestBody @Validated ServerRestartRequest serverRestartRequest) {
         monitorScriptControlService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());

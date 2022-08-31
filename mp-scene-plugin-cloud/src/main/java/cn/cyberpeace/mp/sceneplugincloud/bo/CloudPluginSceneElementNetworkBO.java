@@ -42,6 +42,8 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private List<String> dnsNameservers;
     @ApiModelProperty(value = "虚拟交换机是否开启dhcp")
     private Boolean dhcp;
+    @ApiModelProperty(value = "指定dhcp的ip")
+    private String dhcpIp;
     @ApiModelProperty(value = "虚拟交换机地址池")
     private List<AllocationPool> allocationPools;
     @ApiModelProperty(value = "虚拟交换机静态路由")
