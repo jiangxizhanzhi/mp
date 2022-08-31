@@ -4,7 +4,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.util.ObjectUtils;
@@ -12,8 +12,8 @@ import org.springframework.util.ObjectUtils;
 @Configuration
 public class ArkimeElasticsearchConfig {
 
-    @Value("${mp.situationaware.es-nodes}")
-    private String elasticsearchNodes;
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     @Bean(name="datasandtableRestHighLevelClient")
     public RestHighLevelClient restHighLevelClient() {
@@ -26,6 +26,7 @@ public class ArkimeElasticsearchConfig {
      * @return 返回 HttpHost 对象数组
      */
     private HttpHost[] createHttpHost() {
+        String elasticsearchNodes = situationAwareConfig.getEsNodes();
         Asserts.check(!ObjectUtils.isEmpty(elasticsearchNodes), "ElasticSearch cluster ip address cannot empty");
         String[] ipArray = elasticsearchNodes.split(",");
         var httpHosts = new HttpHost[ipArray.length];

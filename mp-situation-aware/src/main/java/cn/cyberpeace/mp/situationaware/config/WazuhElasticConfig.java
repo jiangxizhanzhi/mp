@@ -15,20 +15,6 @@ import org.springframework.util.ObjectUtils;
 @Slf4j
 public class WazuhElasticConfig {
 
-//    @Value("${mp.situationaware.wazuh.es-url}")
-//    private String esUrl;
-//
-//
-//    @Value("${mp.situationaware.wazuh.es-port}")
-//    private Integer port;
-//
-//
-//    @Value("${mp.situationaware.wazuh.es-username}")
-//    private String userName;
-//
-//    @Value("${mp.situationaware.wazuh.es-password}")
-//    private String passWord;
-
     @Autowired
     private CommonAppConfig commonAppConfig;
 
