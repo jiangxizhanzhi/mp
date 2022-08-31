@@ -33,7 +33,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -746,7 +745,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 log.info("uploaded avatar success! filepath:{}", filepath);
             } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
+                throw new MpRuntimeException(AuthErrorCode.FILE_ISNULL);
             }
 
             if (StringUtils.isNotBlank(filepath)) {
@@ -823,7 +822,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             if (StringUtils.isNotBlank(userOrgRoleDto.getOrgs())) {
                 List<String> userOrgIds = Arrays.asList(userOrgRoleDto.getOrgs().split(","));
                 List<OrgModel> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
-                List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+                List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
                 userDto.setOrgs(userOrgModels);
                 userDto.setOrgIds(userOrgIds);
                 userDto.setOrgpaths(allorgpath);
@@ -867,7 +866,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
             List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-            List<List<String>> allorgpath = orgs.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
             userDto.setOrgs(orgs);
             userDto.setOrgIds(orgIds);
             userDto.setOrgpaths(allorgpath);
@@ -970,7 +969,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
         Optional<OrgModel> optional = orgList.stream().max(Comparator.comparing(OrgModel::getPk));
-        optional.ifPresent(o -> exportUser.setOrg(o.getPath()));
+        optional.ifPresent(o -> exportUser.setOrg(orgService.getPath(o)));
 
         String statusNormal = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NORMAL);
         String statusForbidden = MessageCommon.get(AuthBasei18nCode.USER_STATUS_FORBIDDEN);
