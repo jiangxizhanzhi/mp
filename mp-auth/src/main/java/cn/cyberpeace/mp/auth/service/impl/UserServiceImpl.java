@@ -32,7 +32,6 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -725,7 +724,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 log.info("uploaded avatar success! filepath:{}", filepath);
             } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
+                throw new MpRuntimeException(AuthErrorCode.FILE_ISNULL);
             }
 
             if (StringUtils.isNotBlank(filepath)) {

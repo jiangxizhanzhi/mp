@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,7 @@ public class FastDfsFileServiceImpl implements FileService {
             byte[] fileByte = FdfsCommon.downloadRawContent(filePath);
             if (ArrayUtils.isEmpty(fileByte)) {
                 log.error("downloadFile not exist");
-                throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+                throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
             }
             is = new ByteArrayInputStream(fileByte);
             os = response.getOutputStream();
@@ -72,7 +72,7 @@ public class FastDfsFileServiceImpl implements FileService {
             os.flush();
         } catch (Exception e) {
             log.error("downloadFile error", e);
-            throw new MpRuntimeException(FastDfsErrorCode.FILE_DOWNLOAD_FAILED);
+            throw new MpRuntimeException(CommonErrorCode.FILE_DOWNLOAD_FAILED);
         } finally {
             IOUtils.closeQuietly(is);
             IOUtils.closeQuietly(os);

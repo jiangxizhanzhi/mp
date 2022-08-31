@@ -37,6 +37,8 @@ public enum AuthErrorCode implements ErrorCode {
     USER_CANNOT_DELETE_SELF("MP-110025", "user_cannot_delete_self"),
     USER_CANNOT_DISABLE_SELF("MP-110026", "user_cannot_disable_self"),
     USER_CANNOT_OPERATE_SELF("MP-110027", "user_cannot_operate_self"),
+    FILE_ISNULL("MP-110028", "file_path_isnull"),
+
 
 
 
