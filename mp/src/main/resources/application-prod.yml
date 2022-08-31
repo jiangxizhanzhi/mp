@@ -129,15 +129,15 @@ mp:
         interval: ${MP_MONITOR_BIZ_SRV_INTERVAL:180s}
         service-list: mp,mp_es,wazuh-manager,ad,bc,drm,PY-HOST
         restart-restrict-list: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:mp,mp_es,wazuh-manager}
+  situationaware.arkime:
+    cpcloud-container-create-url: http://${ip.cp}:11111/v1
+    cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
+    es-host: ${ip.moloch}
+    es-port: ${ARKIME_PORT:9205}
+    image-name: centos-arkime_arkime:v2
+    username: api
+    password: api
   situationaware:
-    arkime:
-      cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
-      es-host: ${ip.moloch}
-      es-port: ${ARKIME_PORT:9205}
-      image-name: centos-arkime_arkime:v2
-      username: api
-      password: api
     #moloch es节点地址
     es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
     wazuh:
