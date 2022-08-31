@@ -13,4 +13,9 @@ public class CommonAppConfig {
      * 云平台地址
      */
     private String cpUrl;
+
+    /**
+     *
+     */
+    private String esNodes;
 }

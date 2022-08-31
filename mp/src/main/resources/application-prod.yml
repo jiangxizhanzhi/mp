@@ -99,6 +99,7 @@ mp:
   # mp-common 模块配置
   common:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
+    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
   devops:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
@@ -203,7 +204,7 @@ mp:
           location: /var/log/clamav.log,/var/log/secure
           os-type: linux
   log:
-    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
+
     exclude-uri: /login
     exclude-method: OPTIONS
   # auth 模块配置

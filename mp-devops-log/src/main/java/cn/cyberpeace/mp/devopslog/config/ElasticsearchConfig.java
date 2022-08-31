@@ -1,18 +1,14 @@
 package cn.cyberpeace.mp.devopslog.config;
 
+import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.util.ObjectUtils;
-
-import javax.annotation.PostConstruct;
 
 /**
  * ES配置类
@@ -21,8 +17,8 @@ import javax.annotation.PostConstruct;
 @Configuration(value = "LogElasticsearchConfig")
 public class ElasticsearchConfig {
 
-    @Value("${mp.log.es-nodes}")
-    private String elasticsearchNodes;
+    @Autowired
+    private CommonAppConfig commonAppConfig;
 
     @Bean(name="logRestHighLevelClient")
     public RestHighLevelClient restHighLevelClient() {
@@ -35,8 +31,8 @@ public class ElasticsearchConfig {
      * @return 返回 HttpHost 对象数组
      */
     private HttpHost[] createHttpHost() {
-        Asserts.check(!ObjectUtils.isEmpty(elasticsearchNodes), "ElasticSearch cluster ip address cannot empty");
-        String[] ipArray = elasticsearchNodes.split(",");
+        Asserts.check(!ObjectUtils.isEmpty(commonAppConfig.getEsNodes()), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = commonAppConfig.getEsNodes().split(",");
         var httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
             var ipAddress = ipArray[i];

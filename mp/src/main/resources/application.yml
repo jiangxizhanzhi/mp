@@ -88,7 +88,8 @@ mp:
     fdfs-outer-http-server: /fdfs
   # mp-common 模块配置
   common:
-    cp-url: http://${ip.cp}:11111 #云平台地址 m:元mp.devops.cp-url
+    cp-url: http://${ip.cp}:11111 #云平台地址
+    es-nodes: ${ip.es}:9205
   devops:
     #    cp-url: http://10.100.7.1:111 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址
@@ -196,7 +197,7 @@ mp:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
 
   log:
-    es-nodes: ${ip.es}:9205
+
     exclude-uri: /login
     exclude-method: OPTIONS
   # mp-auth 模块配置
