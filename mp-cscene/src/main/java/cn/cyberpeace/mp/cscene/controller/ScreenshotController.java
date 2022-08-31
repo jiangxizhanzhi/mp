@@ -42,7 +42,6 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     }
 
     @ApiOperation("截屏文件上传")
-    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/upload")
     public ServiceResult<ScreenshotModel> screenshotUpload(@Validated ScreenshotUploadRequest request) {
         return getModelService().screenshotUpload(request);
@@ -57,7 +56,6 @@ public class ScreenshotController extends BaseModelController<ScreenshotModel, S
     @ApiOperation("截屏文件下载")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "filePath", value = "请求参数"),
-            @ApiImplicitParam(name = "response", value = "请求体"),
     })
     @GetMapping(value = "/download")
     public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {

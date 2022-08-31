@@ -371,7 +371,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")
-    @ApiImplicitParam(name = "request", value = "设备id")
+    @ApiImplicitParam(name = "uuid", value = "设备id")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(uuid);

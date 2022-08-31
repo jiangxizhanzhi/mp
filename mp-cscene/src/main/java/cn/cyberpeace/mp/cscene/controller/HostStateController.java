@@ -45,7 +45,6 @@ public class HostStateController {
      * @return
      */
     @ApiOperation(value = "场景主机状态趋势图")
-    @ApiImplicitParam(name = "hostStateTrendRequest", value = "查询数据请求体")
     @GetMapping("/scene_trend")
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
@@ -60,7 +59,6 @@ public class HostStateController {
      * @return
      */
     @ApiOperation(value = "集群状态趋势图")
-    @ApiImplicitParam(name = "hostStateTrendRequest", value = "查询数据请求体")
     @GetMapping("/cluster_trend")
     public ServiceResult<List<HostState>> getClusterHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         hostStateTrendRequest.setSceneId(null);
@@ -78,7 +76,6 @@ public class HostStateController {
      * @return
      */
     @ApiOperation(value = "节点主机状态趋势图")
-    @ApiImplicitParam(name = "hostStateTrendRequest", value = "查询数据请求体")
     @GetMapping("/element_trend")
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
@@ -93,7 +90,6 @@ public class HostStateController {
      * @return
      */
     @ApiOperation(value = "节点主机状态")
-    @ApiImplicitParam(name = "pageRequest", value = "查询数据请求体")
     @GetMapping()
     public ServiceResult<List<HostState>> getElementHostState(BaseSceneElementPageRequest pageRequest) {
         pageRequest.setPage(1);
@@ -108,7 +104,6 @@ public class HostStateController {
      * @return
      */
     @ApiOperation(value = "节点主机状态")
-    @ApiImplicitParam(name = "request", value = "查询数据请求体")
     @GetMapping("/by_agent_name")
     public ServiceResult<List<HostState>> getHostStateByAgentName(AgentNameBasedRequest request) {
         request.setPage(1);
@@ -118,21 +113,18 @@ public class HostStateController {
     }
 
     @ApiOperation(value = "节点端口信息")
-    @ApiImplicitParam(name = "listPageInfoQueryParams", value = "查询数据请求体")
     @GetMapping("/element_port")
     public ListObjServiceResult<Port> pagePorts(ListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pagePorts(listPageInfoQueryParams).asResult();
     }
 
     @ApiOperation(value = "节点进程信息")
-    @ApiImplicitParam(name = "listPageInfoQueryParams", value = "查询数据请求体")
     @GetMapping("/element_process")
     public ListObjServiceResult<Process> pageProcesses(ListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageProcesses(listPageInfoQueryParams).asResult();
     }
 
     @ApiOperation(value = "节点网卡信息")
-    @ApiImplicitParam(name = "listPageInfoQueryParams", value = "查询数据请求体")
     @GetMapping("/element_netifaces")
     public ListObjServiceResult<Netiface> pageNetifaces(ListPageInfoQueryParams listPageInfoQueryParams) {
         return hostStateService.pageNetifaces(listPageInfoQueryParams).asResult();

@@ -32,7 +32,6 @@ public class CollectionTypeController {
     private CollectionTypeService collectionTypeService;
 
     @GetMapping("/list")
-    @ApiImplicitParam(name = "baseRequest", value = "查询信息请求体")
     @ApiOperation(value = "查询采集类型")
     public ServiceResult<List<CollectionType>> typesTree(BaseSceneElementRequest baseRequest) {
 
@@ -43,7 +42,6 @@ public class CollectionTypeController {
 
 
     @GetMapping("/apps")
-    @ApiImplicitParam(name = "appRequest", value = "查询信息请求体")
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);

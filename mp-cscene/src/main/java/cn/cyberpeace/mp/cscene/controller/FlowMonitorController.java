@@ -63,7 +63,6 @@ public class FlowMonitorController {
     private CsceneCommonService csceneCommonService;
 
     @ApiOperation(value = "模拟流量")
-    @ApiImplicitParam(name = "request", value = "请求体")
     @GetMapping("/simulation")
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
         flowMonitorService.simulation(request);
@@ -80,7 +79,6 @@ public class FlowMonitorController {
      * @return
      */
     @ApiOperation(value = "场景流量趋势图")
-    @ApiImplicitParam(name = "flowTrendRequest", value = "查询数据请求体")
     @GetMapping("/scene_trend")
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
@@ -94,7 +92,6 @@ public class FlowMonitorController {
      * @return
      */
     @ApiOperation(value = "场景受攻击端口")
-    @ApiImplicitParam(name = "request", value = "查询数据请求体")
     @GetMapping("/scene_attacked_port")
     public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
         List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
@@ -108,7 +105,6 @@ public class FlowMonitorController {
      * @return
      */
     @ApiOperation(value = "场景主机状态")
-    @ApiImplicitParam(name = "request", value = "查询数据请求体")
     @GetMapping("/scene_target_status")
     public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
         List<FlowGroupByDestinationIpAndSeverityVO> list = flowMonitorService.groupByDestinationIpAndSeverity(request);
@@ -122,7 +118,6 @@ public class FlowMonitorController {
      * @return
      */
     @ApiOperation(value = "节点流量趋势图")
-    @ApiImplicitParam(name = "flowTrendRequest", value = "查询数据请求体")
     @GetMapping("/element_trend")
     public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendRequest flowTrendRequest) {
         List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
@@ -132,7 +127,6 @@ public class FlowMonitorController {
 
 
     @ApiOperation(value = "流量风险各级别统计")
-    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/risk_count")
     public ServiceResult<FlowRiskCount> getFlowRiskCount(BaseSceneElementRequest baseRequest) {
         log.info("{}", baseRequest);
@@ -142,7 +136,6 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "攻击流量各类别统计")
-    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/attack_type_count")
     public ServiceResult<List<FlowAttackTypeCount>> getAttackTypeCount(BaseSceneElementRequest baseRequest) {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
@@ -152,7 +145,6 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
-    @ApiImplicitParam(name = "request", value = "查询数据请求体")
     @GetMapping("/attack_ip_count")
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
         log.info("attack_times params: {}", JsonCommon.stringify(request));
@@ -161,7 +153,6 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "攻击占比统计")
-    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/attack_ratio_count")
     public ServiceResult<TotalFlowAttackRatio> getAttackRatioCount(AttackCountRequest baseRequest) {
         log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
@@ -170,7 +161,6 @@ public class FlowMonitorController {
     }
 
     @ApiOperation(value = "场景监控-流量分析: 统计场景流量，攻击流量，网络连接，带宽占用，攻击事件")
-    @ApiImplicitParam(name = "timeRangeRequest", value = "查询数据请求体")
     @GetMapping("/summary")
     public ServiceResult<FlowAnalysisSummary> getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         log.info("{}", timeRangeRequest);
@@ -182,7 +172,6 @@ public class FlowMonitorController {
     @ApiOperation(value = "流量分页接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "查询数据请求体")
     })
     @GetMapping("/page")
     public ListObjServiceResult<FlowAttackDto> pageFlow(@RequestParam String id, FlowQueryParams queryParams) {
@@ -194,7 +183,6 @@ public class FlowMonitorController {
 
 
     @ApiOperation(value = "资产统计", notes = "资产统计")
-    @ApiImplicitParam(name = "request", value = "查询数据请求体")
     @GetMapping("/assets_statistics")
     public ServiceResult<List<AssetsStatisticsResponse>> getAssetsStatistics(AssetsStatisticsRequest request) {
         log.info("assets_statistics params: {}", JsonCommon.stringify(request));

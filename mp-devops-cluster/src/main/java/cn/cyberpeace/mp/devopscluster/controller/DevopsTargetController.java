@@ -267,7 +267,7 @@ public class DevopsTargetController {
     }
 
     @ApiOperation("根据UUID查询靶标信息")
-    @ApiImplicitParam(name = "request", value = "靶标id")
+    @ApiImplicitParam(name = "uuid", value = "靶标id")
     @GetMapping("/get-by-uuid")
     public Result<DeviceVO> findByUuid(@RequestParam String uuid){
         Device device = targetConverter.findByUuid(uuid);
