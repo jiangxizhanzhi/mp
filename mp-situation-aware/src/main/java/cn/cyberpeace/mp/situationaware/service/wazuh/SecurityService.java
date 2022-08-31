@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
+import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,14 +17,8 @@ import java.io.IOException;
 @Slf4j
 public class SecurityService {
 
-    @Value("${mp.situationaware.wazuh.base-url}")
-    private String wazuhUrl;
-
-    @Value("${mp.situationaware.wazuh.username}")
-    private String wazuhUsername;
-
-    @Value("${mp.situationaware.wazuh.password}")
-    private String wazuhPassword;
+    @Autowired
+    private WazuhConfig wazuhConfig;
 
     /**
      * 查询wazuhToken防止token失效
@@ -33,8 +28,8 @@ public class SecurityService {
      */
     public String authenticate() {
         log.info("retrieve wazuh token...");
-        var requestUrl = wazuhUrl + "/security/user/authenticate?raw=true";
-        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, wazuhUsername, wazuhPassword);
+        var requestUrl = wazuhConfig.getBaseUrl() + "/security/user/authenticate?raw=true";
+        return WazuhHttpsUtils.sendGetWithAuth(requestUrl, wazuhConfig.getUsername(), wazuhConfig.getPassword());
     }
 
 

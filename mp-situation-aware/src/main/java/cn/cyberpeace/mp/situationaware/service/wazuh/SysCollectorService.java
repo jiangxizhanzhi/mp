@@ -1,25 +1,18 @@
 package cn.cyberpeace.mp.situationaware.service.wazuh;
 
+import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentPortsModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhAgentProcessModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhRamRoot;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseRequest;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.CollectorBaseRequest;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Hardware;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.NetAddr;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Netiface;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.OS;
-import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.Process;
+import cn.cyberpeace.mp.situationaware.model.wazuh.syscollector.*;
 import cn.cyberpeace.mp.situationaware.utils.WazuhHttpsUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.URLUtil;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONPath;
-import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.*;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -46,9 +38,8 @@ import java.util.Objects;
 @Slf4j
 public class SysCollectorService extends RequestProcessor {
 
-
-    @Value("${mp.situationaware.wazuh.base-url}")
-    private String wazuhUrl;
+    @Autowired
+    private WazuhConfig wazuhConfig;
 
     @Autowired
     private AgentService agentService;
@@ -65,7 +56,7 @@ public class SysCollectorService extends RequestProcessor {
             return new PageInfo<>(new ArrayList<>());
         }
         var uri = "/syscollector/" + agentId + "/ports";
-        var requestUrl = wazuhUrl + uri;
+        var requestUrl = wazuhConfig.getBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -95,7 +86,7 @@ public class SysCollectorService extends RequestProcessor {
             return new PageInfo<>(new ArrayList<>());
         }
         var uri = "/syscollector/" + agentId + "/processes";
-        var requestUrl = wazuhUrl + uri;
+        var requestUrl = wazuhConfig.getBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -124,7 +115,7 @@ public class SysCollectorService extends RequestProcessor {
             return new PageInfo<>(new ArrayList<>());
         }
         var uri = "/syscollector/" + agentId + "/netiface";
-        var requestUrl = wazuhUrl + uri;
+        var requestUrl = wazuhConfig.getBaseUrl() + uri;
 
         List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
@@ -159,7 +150,7 @@ public class SysCollectorService extends RequestProcessor {
             return Collections.emptyList();
         }
         var uri = "/syscollector/" + agentId + "/netaddr";
-        var requestUrl = wazuhUrl + uri;
+        var requestUrl = wazuhConfig.getBaseUrl() + uri;
 
 
         List<NameValuePair> params = processRequestParams(new BaseRequest());
@@ -198,7 +189,7 @@ public class SysCollectorService extends RequestProcessor {
             return null;
         }
 
-        var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
+        var requestUrl = wazuhConfig.getBaseUrl() + "/syscollector/" + agentId + "/hardware";
 
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<Hardware> result = JSONObject.parseObject(res, new TypeReference<>() {
@@ -222,7 +213,7 @@ public class SysCollectorService extends RequestProcessor {
             return null;
         }
 
-        var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/os";
+        var requestUrl = wazuhConfig.getBaseUrl() + "/syscollector/" + agentId + "/os";
 
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         BaseResponse<OS> result = JSONObject.parseObject(res, new TypeReference<>() {
@@ -246,7 +237,7 @@ public class SysCollectorService extends RequestProcessor {
         }
         List<String> agentIds = agentService.listAgentIds(agents);
         var uri = "/experimental/syscollector/ports";
-        var requestUrl = wazuhUrl + uri + "?agents_list=" + String.join(",", agentIds);
+        var requestUrl = wazuhConfig.getBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
 
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
@@ -262,7 +253,7 @@ public class SysCollectorService extends RequestProcessor {
         }
         List<String> agentIds = agentService.listAgentIds(agents);
         var uri = "/experimental/syscollector/processes";
-        var requestUrl = wazuhUrl + uri + "?agents_list=" + String.join(",", agentIds);
+        var requestUrl = wazuhConfig.getBaseUrl() + uri + "?agents_list=" + String.join(",", agentIds);
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         JSONArray agentArray = (JSONArray) JSONPath.eval(JSON.parse(res), "$.data.affected_items");
         wazuhAgentProcessModels = agentArray.toJavaList(WazuhAgentProcessModel.class);
@@ -280,7 +271,7 @@ public class SysCollectorService extends RequestProcessor {
      */
     @Deprecated
     public WazuhRamRoot queryRamByAgentId(String agentId) {
-        var requestUrl = wazuhUrl + "/syscollector/" + agentId + "/hardware";
+        var requestUrl = wazuhConfig.getBaseUrl() + "/syscollector/" + agentId + "/hardware";
         String res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl);
         return JSONObject.toJavaObject(JSON.parseObject(res), WazuhRamRoot.class);
     }

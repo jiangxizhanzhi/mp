@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.service.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
+import cn.cyberpeace.mp.situationaware.config.WazuhConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.BaseResponse;
@@ -15,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +34,8 @@ public class AgentService extends RequestProcessor {
 
     public static final String CACHE_KEY_AGENTS = "agents";
 
-    @Value("${mp.situationaware.wazuh.base-url}")
-    private String wazuhUrl;
+    @Autowired
+    private WazuhConfig wazuhConfig;
 
 
     /**
@@ -47,7 +48,7 @@ public class AgentService extends RequestProcessor {
         agentRequest.ensure();
         log.info("agentRequest:{}", agentRequest);
         var requestUri = "/agents";
-        var requestUrl = wazuhUrl + requestUri;
+        var requestUrl = wazuhConfig.getBaseUrl() + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
         log.info("requestUrl:{}", requestUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params);
