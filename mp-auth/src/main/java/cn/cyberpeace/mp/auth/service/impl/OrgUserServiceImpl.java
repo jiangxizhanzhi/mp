@@ -218,8 +218,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
         List<OrgModel> orgs = listOrgsByUserId(userId);
-//        String allorgpath = orgs.stream().map(o -> orgService.calculatePathByOrgId(o.getId())).collect(Collectors.joining(","));
-        String allorgpath = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
+        String allorgpath = orgService.getBatchPath(orgs);
         return allorgpath;
     }
 

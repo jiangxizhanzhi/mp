@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.model.BaseObjMappingModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devopscluster.constant.MonitorConstant;
@@ -56,9 +55,6 @@ public class MonitorScriptControlService {
 
     @Autowired
     private HypervisorConverter hypervisorConverter;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private MonitorConfig monitorConfig;
@@ -262,8 +258,7 @@ public class MonitorScriptControlService {
         probeParam.setId(monitorProbe.getLaunchId());
         probeParam.setAction(WazuhControl.CONTROL_ACTION_ADD);
         probeParam.setGroup("server");
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-        String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
+        String url = FsCommon.genInnerHttpUrl(nameFileMap.get(monitorProbe.getProbeName()));
         probeParam.setScriptUrl(url);
         probeParam.setScriptSuffix(WazuhControl.SCRIPT_SUFFIX_PY);
         probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_NONE);
@@ -343,11 +338,9 @@ public class MonitorScriptControlService {
             });
         }
 
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT); 
-
         List<CpNodeMonitorScriptConfigModel.ParamConfig> configs = new ArrayList<>();
         for (MonitorConfig.MonitorProbe monitorProbe : allSrvs) {
-            String url = group.getInnerFileServerAddr() + File.separator + nameFileMap.get(monitorProbe.getProbeName());
+            String url = FsCommon.genInnerHttpUrl(nameFileMap.get(monitorProbe.getProbeName()));
 
             CpNodeMonitorScriptConfigModel.ParamConfig config = new CpNodeMonitorScriptConfigModel.ParamConfig();
             config.setId(monitorProbe.getLaunchId());

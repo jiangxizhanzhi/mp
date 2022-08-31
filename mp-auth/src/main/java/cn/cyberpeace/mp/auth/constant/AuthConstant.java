@@ -38,6 +38,11 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
+    /**
+     * 逗号
+     */
+    public static final String COMMA = ",";
+
     private AuthConstant() {
     }
 }

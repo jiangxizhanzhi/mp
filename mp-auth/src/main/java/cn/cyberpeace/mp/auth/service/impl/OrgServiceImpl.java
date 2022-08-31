@@ -20,17 +20,14 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Description:
@@ -47,9 +44,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Autowired
     private QueryChildOrgDtoOperation queryChildOrgDtoOperation;
-
-    @Autowired
-    private UpdateChildOrgDtoPathDtoOperation updateChildOrgPathOperation;
 
     @Autowired
     private OrgPermissionService orgPermissionService;
@@ -74,15 +68,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 log.error("org {} not existed!", obj.getParent());
                 throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
             }
-            String path = calculatePathByOrgId(parentOrg.getId());
-            path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
 
-            if (Objects.nonNull(getByPath(path))) {
-                log.info("org child already exited! {}", path);
+            // 校验组织是否重复
+            if (this.checkExist(obj)) {
+                log.info("org child already exited! {}", obj.getName());
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
-
-            obj.setPath(path);
         }
         return super.create(obj, fields);
     }
@@ -96,61 +87,121 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             log.error("org {} not existed!", obj.getId());
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getId()));
         }
-        // 不允许直接更新path
-        obj.setPath(null);
 
         if (StringUtils.isBlank(obj.getIdentifier())) {
             obj.setIdentifier(null);
         }
 
-        // 如果更新parent，则重新计算path
-        if (StringUtils.isNotBlank(obj.getParent())) {
-            OrgModel parentOrg = getModelMapper().get(obj.getParent());
-            if (Objects.isNull(parentOrg)) {
-                log.error("parent org {} not existed!", obj.getParent());
-                throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
-            }
-            String path = calculatePathByOrgId(parentOrg.getId());
-            path = path + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
-            obj.setPath(path);
-        }
-
         // 是否需要更新组织名称
         boolean needUpdateName = StringUtils.isNotBlank(obj.getName()) && !Objects.equals(obj.getName(), oldOrg.getName());
 
-        if (needUpdateName) {
-            // 更新自身的path
-            String newPath = "";
-            if (StringUtils.isNotBlank(oldOrg.getParent())) {
-                newPath = calculatePathByOrgId(oldOrg.getParent()) + AuthConstant.ORG_PATH_SEPARATOR + obj.getName();
-            } else {
-                newPath = obj.getName();
-            }
-            obj.setPath(newPath);
-        }
-
         // 查看组织path是否重复
-        if (StringUtils.isNotBlank(obj.getPath())) {
-            String path = obj.getPath();
-            if (Objects.nonNull(getByPath(path))) {
+        if (needUpdateName) {
+            if (this.checkExist(obj)) {
+                log.info("org child already exited! {}", obj.getName());
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
         }
 
         // 1.先更新OrgModel信息
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
-        OrgModel orgUpdated = result.getSource().getObj();
-
-        // 2.再更新orgpath信息，这样可以查询到前面未提交sql更新的内容
-        if (needUpdateName) {
-            // 如果更新组织名称，则递归更新所有下级组织的path
-            OrgDto orgDto = new OrgDto();
-            BeanUtils.copyProperties(orgUpdated, orgDto);
-            updateChildOrgPathOperation.doExecute(orgDto);
-        }
 
         userCacheService.evictAllUserCache();
         return result;
+    }
+
+    /**
+     * 校验组织是否重复
+     * @param obj
+     * @return
+     */
+    private boolean checkExist(OrgModel obj) {
+        String parentId = obj.getParent();
+        String name = obj.getName();
+        if (Objects.isNull(parentId) || Objects.isNull(name)) {
+            log.error("parentId and name can not be empty");
+            return true;
+        }
+
+        List<OrgModel> orgModelList = this.getModelMapper().listByParentIdAndName(parentId, name);
+        if (CollectionUtil.isNotEmpty(orgModelList)) {
+            if (StringUtils.isNotBlank(obj.getId())) {
+                // 判断是否当前组织
+                for (OrgModel orgModel : orgModelList) {
+                    if (orgModel.getId().equals(obj.getId())) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public String getPath(OrgModel orgModel) {
+        String path = orgModel.getName();
+        if (StringUtils.isNotBlank(orgModel.getParent())) {
+            List<OrgModel> orgModelList = this.getModelMapper().listAll(orgModel.getTenant());
+
+            while (StringUtils.isNotBlank(orgModel.getParent())) {
+                String parentId = orgModel.getParent();
+                Optional<OrgModel> orgModelOptional =
+                        orgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                if (orgModelOptional.isPresent()) {
+                    orgModel = orgModelOptional.get();
+                    path = orgModel.getName().concat(AuthConstant.ORG_PATH_SEPARATOR).concat(path);
+                } else {
+                    orgModel = new OrgModel();
+                }
+            }
+        }
+
+        return path;
+    }
+
+    @Override
+    public String getBatchPath(List<OrgModel> orgModelList) {
+        String allOrgPath = StringUtils.EMPTY;
+        if (CollectionUtil.isNotEmpty(orgModelList)) {
+            for (OrgModel orgModel : orgModelList) {
+                allOrgPath = allOrgPath.concat(AuthConstant.COMMA).concat(this.getPath(orgModel));
+            }
+            allOrgPath = allOrgPath.substring(1);
+        }
+
+        return allOrgPath;
+    }
+
+    @Override
+    public List<List<String>> getBathPathToList(List<OrgModel> orgModelList) {
+        List<List<String>> resultList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(orgModelList)) {
+            for (OrgModel orgModel : orgModelList) {
+                List<String> pathList = new ArrayList<>();
+                pathList.add(orgModel.getName());
+                if (StringUtils.isNotBlank(orgModel.getParent())) {
+                    List<OrgModel> allOrgModelList = this.getModelMapper().listAll(orgModel.getTenant());
+
+                    while (StringUtils.isNotBlank(orgModel.getParent())) {
+                        String parentId = orgModel.getParent();
+                        Optional<OrgModel> orgModelOptional =
+                                allOrgModelList.stream().filter(org -> org.getId().equals(parentId)).findFirst();
+                        if (orgModelOptional.isPresent()) {
+                            orgModel = orgModelOptional.get();
+                            pathList.add(0, orgModel.getName());
+                        } else {
+                            orgModel = new OrgModel();
+                        }
+                    }
+                }
+                resultList.add(pathList);
+            }
+        }
+
+        return resultList;
     }
 
     @Override
@@ -284,8 +335,25 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public OrgModel getByPath(String path) {
         ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
+        OrgModel orgModel = null;
+        if (StringUtils.isNotBlank(path)) {
+            String[] pathArray = path.split(AuthConstant.ORG_PATH_SEPARATOR);
+            String parentId = StringUtils.EMPTY;
+            for (int i = 0; i < pathArray.length; i++) {
+                String p = pathArray[i].trim();
+                OrgModel tmpModel;
+                List<OrgModel> orgModelList = this.getModelMapper().listByParentIdAndName(parentId, p);
+                if (CollectionUtils.isNotEmpty(orgModelList)) {
+                    tmpModel = orgModelList.get(0);
+                    parentId = tmpModel.getId();
 
-        OrgModel orgModel = getModelMapper().getByPath(path);
+                    // 最后一个，获取组织
+                    if (i == (pathArray.length - 1)) {
+                        orgModel = tmpModel;
+                    }
+                }
+            }
+        }
         return orgModel;
     }
 
