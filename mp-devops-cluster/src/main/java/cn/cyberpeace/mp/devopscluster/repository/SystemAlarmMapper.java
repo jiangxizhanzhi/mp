@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmCountVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,6 +25,6 @@ public interface SystemAlarmMapper extends BaseModelMapper<SystemAlarmModel> {
      * 当天告警数量统计
      * @return
      */
-    List<AlarmCountVO> todayAlarmCount();
+    List<AlarmCountVO> todayAlarmCount(@Param("currentTime")LocalDateTime currentTime);
 
 }

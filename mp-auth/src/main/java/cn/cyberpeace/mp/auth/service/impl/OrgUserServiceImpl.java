@@ -5,13 +5,14 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
+import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -37,6 +38,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,7 +101,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -108,7 +110,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -134,12 +136,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-
-        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
             BeanUtils.copyProperties(u, userModel);
+            userService.setDefaultIfNoAvatar(userModel);
             return userModel;
         }).collect(Collectors.toList());
 
@@ -151,8 +154,16 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public List<OrgModel> listOrgsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
-
         return orgs;
+    }
+
+
+    @Override
+    @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
+    public List<UserOrgMapDto> listUserOrgMapDtosByUserIds(List<String> userIds) {
+        ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
+        List<UserOrgMapDto> userOrgMapDtos = getModelMapper().listUserOrgMapDtosByUserIds(userIds);
+        return userOrgMapDtos;
     }
 
 
@@ -260,7 +271,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
         PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
         List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
 

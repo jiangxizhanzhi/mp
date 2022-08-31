@@ -46,6 +46,9 @@ public class SceneAppConfig {
     @Value("${mp.scene.windows_help_installer_dir:}")
     private String windowsHelpInstallerDir;
 
+    @Value("${mp.scene.scene_handler_realtime_update:true}")
+    private Boolean sceneHandlerRealtimeUpdate;
+
     @Value("${mp.scene.scene_process_save_realtime:true}")
     private Boolean sceneProcessSaveRealtime;
 

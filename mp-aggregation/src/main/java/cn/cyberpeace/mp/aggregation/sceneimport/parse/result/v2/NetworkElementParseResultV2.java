@@ -17,6 +17,7 @@ import java.util.List;
 public class NetworkElementParseResultV2 {
     private String id;
     private String name;
+    private String position;
     private String cidr;
     private String gateway;
     private String dhcp;
@@ -31,6 +32,7 @@ public class NetworkElementParseResultV2 {
         result.setGateway(gateway);
         result.setDhcp(dhcp);
         result.setDhcpPool(dhcpPool);
+        result.setPosition(position);
         result.setDns(StringUtils.join(dns, ","));
         return result;
     }

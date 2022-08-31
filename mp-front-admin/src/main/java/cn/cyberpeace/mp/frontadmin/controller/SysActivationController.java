@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class SysActivationController {
 
 
     @ApiOperation("激活")
+    @ApiImplicitParam(name = "activationRequest", value = "激活请求体", dataTypeClass = ActivationRequest.class)
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
         activationService.activate(activationRequest);
@@ -58,6 +60,7 @@ public class SysActivationController {
 
 
     @ApiOperation("查询激活配置项")
+    @ApiImplicitParam(name = "key", value = "配置名称", dataTypeClass = String.class)
     @GetMapping("/config_value")
     public ServiceResult<String> getConfigValue(@RequestParam String key) {
         String value = activationService.getValueByKey(key);

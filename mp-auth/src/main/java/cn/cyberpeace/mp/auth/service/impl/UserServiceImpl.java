@@ -1,54 +1,42 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.config.AuthBizConfig;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.DefaultImgService;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
+import cn.cyberpeace.mp.base.util.fdfsclient.FastDfsErrorCode;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
+import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,21 +48,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -96,12 +72,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     public static final String CACHE_VAL_ORGDTOS_TO_USERDTOS = "ORGDTOS_TO_USERDTOS_CACHE";
 
-
     @Autowired
-    private FastDFSClient fastDFSClient;
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
+    private AuthBizConfig authBizConfig;
 
     @Autowired
     private RoleService roleService;
@@ -127,10 +99,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserUpdateCheckService updateCheckService;
 
-
-    @Autowired
-    private DefaultImgService defaultImgService;
-
     @Autowired
     private OperateUserPermissionService opUserPermCheckService;
 
@@ -150,7 +118,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_ID)
     public ObjServiceResult<UserModel> get(String id) {
-        return super.get(id);
+        ObjServiceResult<UserModel> userModelObjServiceResult = super.get(id);
+        ObjResult<UserModel> source = userModelObjServiceResult.getSource();
+        UserModel userModel = source.getObj();
+        setDefaultIfNoAvatar(userModel);
+        return userModelObjServiceResult;
     }
 
     @Override
@@ -158,18 +130,27 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserDto getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
-
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
     }
 
     @Override
     public UserDto getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
+    }
+
+    /**
+     * 判断是否有头像，没有则设置为默认头像
+     * @param userModel
+     */
+    public void setDefaultIfNoAvatar(UserModel userModel) {
+        if (Objects.nonNull(userModel) && StringUtils.isEmpty(userModel.getAvatar())) {
+            userModel.setAvatar(getDefaultUserAvatar());
+        }
     }
 
 
@@ -179,8 +160,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (Objects.isNull(userModel)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
+        setDefaultIfNoAvatar(userModel);
         UserDto userDto = userModel2UserDto(userModel);
-
         return userDto;
     }
 
@@ -194,6 +175,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         List<UserModel> users = listObjSrvResult.getSource().getObjs();
+        users.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         if (CollectionUtil.isNotEmpty(users)) {
             // 转换
             ListObjServiceResult<UserModel> result = new ListObjServiceResult<>();
@@ -215,6 +197,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public ObjServiceResult<UserModel> update(UserModel obj, String[] fields) {
         obj.encodePassword();
+        if (StringUtils.isBlank(obj.getIdentifier())) {
+            obj.setIdentifier(null);
+        }
         obj.setUpdateTime(LocalDateTime.now());
         var ret = super.update(obj, fields);
         userCacheService.evictAllUserCache();
@@ -290,12 +275,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setPassword(decryptedPwd);
         userModel.setTokenSecret(null);
         userModel.setId(null);
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 如果ident为空，设置为null
+            userModel.setIdentifier(null);
+        }
 
         createCheckService.check(userModel);
 
-        if (StringUtils.isEmpty(userModel.getAvatar())) {
-            userModel.setAvatar(getDefaultUserAvatar());
-        }
         // create中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = create(userModel);
         ResultUtils.throwExceptionIfError(result, AuthErrorCode.USER_ADD_ERROR);
@@ -369,6 +355,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
         log.info("user has been modified id:{}", userId);
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
+            getModelMapper().updateIdentToNull(userId);
+        }
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
@@ -414,6 +404,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public UserModel getByUserName(String userName) {
         log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
@@ -421,18 +412,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listByUserName(List<String> userNames) {
         List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
+        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         return userModels;
     }
 
     @Override
     public UserModel getByIdent(String ident) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("identifier", ident));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
     @Override
     public UserModel getByMobile(String mobile) {
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("mobile", mobile));
+        setDefaultIfNoAvatar(userModel);
         return userModel;
     }
 
@@ -684,7 +678,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<OrgUserModel> orgUserModels = new ArrayList<>();
-        String defaultavatar = getDefaultUserAvatar();
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
             log.info("importUser:{}", importUser);
@@ -692,10 +685,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             UserModel userModel = importUser2UserModel(importUser);
             if (Objects.isNull(userModel)) {
                 continue;
-            }
-
-            if (StringUtils.isEmpty(userModel.getAvatar())) {
-                userModel.setAvatar(defaultavatar);
             }
 
             String userId = TextUtils.uuid();
@@ -752,18 +741,16 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 上传服务器
             String filepath = null;
             try {
-                filepath = fastDFSClient.uploadFileWithMultipart(multipartFile, FdfsGroupEnum.DEFAULT.toString());
+                String suffix = FileUtil.getSuffix(multipartFile.getOriginalFilename());
+                filepath = FdfsCommon.upload(multipartFile.getInputStream(), suffix);
                 log.info("uploaded avatar success! filepath:{}", filepath);
-            } catch (MpRuntimeException e) {
+            } catch (MpRuntimeException | IOException e) {
                 log.error("uploaded error! {}", ExceptionUtil.stacktraceToString(e));
-                throw e;
+                throw new MpRuntimeException(FastDfsErrorCode.FILE_ISNULL);
             }
 
             if (StringUtils.isNotBlank(filepath)) {
-                // 获取当前集群配置
-                FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
-                String httpUrl = group.getFileServerAddr() + File.separator + filepath;
-
+                String httpUrl = FdfsCommon.genHttpUrl(filepath);
                 UserModel updateUser = UserModel.builder().id(userId).avatar(httpUrl).build();
                 var ret = getModelMapper().update(updateUser);
                 userCacheService.evictAllUserCache();
@@ -860,7 +847,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userDto.setIsSuperUser(0);
                 userDto.setIsAdmin(0);
             }
-
+            setDefaultIfNoAvatar(userDto);
             userDtos.add(userDto);
         }
 
@@ -910,6 +897,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     public List<UserModel> listNotAudited() {
         List<UserModel> userModels = getModelMapper().list(new HumanCondition().filterEqual("is_audited", "0"));
+        userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         return userModels;
     }
 
@@ -917,7 +905,13 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public List<UserDto> listByUserIds(String[] userIds) {
         List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
         List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
+        userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userDtos;
+    }
+
+    @Override
+    public List<UserModel> listByIds(String[] userIds) {
+        return getModelMapper().list(new HumanCondition().filterIn(UserModel::getId, userIds));
     }
 
     @Override
@@ -934,9 +928,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public String getDefaultUserAvatar() {
-        List<String> avatarList = defaultImgService.getFileByDefaultImgDirEnum(DefaultImgDirEnum.AVATAR);
-        String avatar = "/api/mp" + avatarList.get(0);
-        return avatar;
+        return authBizConfig.getDefaultUserAvatar();
     }
 
 

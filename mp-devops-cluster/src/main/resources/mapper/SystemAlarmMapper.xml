@@ -9,7 +9,7 @@
         FROM
             mp_devops_system_alarm
         WHERE
-            TO_DAYS( create_time ) = TO_DAYS(NOW())
+            TO_DAYS( create_time ) = TO_DAYS(#{currentTime})
         GROUP BY
             alarm_type
     </select>

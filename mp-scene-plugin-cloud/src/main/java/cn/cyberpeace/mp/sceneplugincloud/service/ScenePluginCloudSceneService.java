@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.BaseCommon;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -26,6 +28,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeLinkStatusBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.config.CloudAppConfig;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
@@ -282,7 +285,7 @@ public class ScenePluginCloudSceneService {
                 monitors.forEach((connectionId, monitorData) -> {
                     var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
                             new NodeSessionBO());
-                    String formatUrl = monitorData.getMonitorUrl() ;
+                    String formatUrl = monitorData.getMonitorUrl();
                     CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
                     if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
                         if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
@@ -439,6 +442,25 @@ public class ScenePluginCloudSceneService {
 //        CloudSceneConnectionCommon.disableRecording(connectionLinkInfo.getSceneConnection());
         CloudSceneConnectionCommon.convertRecording(connectionLinkInfo.getSceneConnection());
         return new ServiceResult<>(connectionLinkInfo.toNewNodeConnection());
+    }
+
+    public ServiceResult<NodeConnectionBO> getRemoteTtyConnection(String sceneId, String nodeId) {
+        SceneHandler sceneHandler = new SceneHandler(sceneId, null, null);
+        CloudScenePluginHandler cloudPlugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        if (cloudPlugin != null) {
+            var cloudElement = cloudPlugin.getElement(nodeId);
+            if (cloudElement != null) {
+                String resourceId = cloudElement.getResourceId();
+                String url = CloudSceneConnectionCommon.getContainerConsoleUrl(resourceId);
+                NodeConnectionBO nodeConnectionBO = new NodeConnectionBO();
+                nodeConnectionBO.setNodeId(nodeId);
+                nodeConnectionBO.setConnectionUrl(url);
+                nodeConnectionBO.setSceneName(sceneHandler.getScene().getName());
+                nodeConnectionBO.setNodeName(sceneHandler.getElement(nodeId).getName());
+                return new ServiceResult<>(nodeConnectionBO);
+            }
+        }
+        throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
     }
 
     public ServiceResult<NodeConnectionBO> getSceneRemoteConnection(String sceneId, String nodeId,
@@ -802,5 +824,132 @@ public class ScenePluginCloudSceneService {
             }
         }
         return null;
+    }
+
+    public ServiceResult<List<UserConnectionNumBO>> countUserConnections(List<String> users) {
+        List<UserConnectionNumBO> connectionNumBOS = new ArrayList<>();
+        for (String user : users) {
+            UserConnectionNumBO connectionNumBO = new UserConnectionNumBO();
+            connectionNumBO.setUser(user);
+            connectionNumBO.setConnectionNum(0);
+            connectionNumBOS.add(connectionNumBO);
+        }
+        HumanCondition condition = new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                .filterIn(CloudPluginSceneConnectionModel::getAccessUser, users.toArray());
+        var list = cloudPluginSceneConnectionMapper.list(condition);
+        if (CollectionUtils.isEmpty(list)) {
+            return new ServiceResult<>(connectionNumBOS);
+        }
+        Set<String> connectionIds = new HashSet<>();
+        list.forEach(c -> {
+            if (StringUtils.isNotEmpty(c.getConnectionId())) {
+                connectionIds.add(c.getConnectionId());
+            }
+        });
+        if (CollectionUtils.isEmpty(connectionIds)) {
+            return new ServiceResult<>(connectionNumBOS);
+        }
+        var monitors = new Remote().getMonitors(connectionIds.toArray(new String[]{}));
+        if (monitors == null || monitors.isEmpty()) {
+            return new ServiceResult<>(connectionNumBOS);
+        }
+        Map<String, Set<String>> user2ConnectionIds = new HashMap<>();
+        for (var model : list) {
+            if (!user2ConnectionIds.containsKey(model.getAccessUser())) {
+                user2ConnectionIds.put(model.getAccessUser(), new HashSet<>());
+            }
+            if (StringUtils.isNotEmpty(model.getConnectionId())) {
+                user2ConnectionIds.get(model.getAccessUser()).add(model.getConnectionId());
+            }
+        }
+        for (var node : connectionNumBOS) {
+            var userConnectIds = user2ConnectionIds.get(node.getUser());
+            if (userConnectIds != null) {
+                for (String cId : userConnectIds) {
+                    if (monitors.keySet().contains(cId)) {
+                        node.setConnectionNum(node.getConnectionNum() + 1);
+                    }
+                }
+            }
+        }
+        return new ServiceResult<>(connectionNumBOS);
+    }
+
+    public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String user, boolean monitor, boolean assistance) {
+        HumanCondition condition = new HumanCondition()
+                .filterEqual(CloudPluginSceneConnectionModel::getDisable, false)
+                .filterEqual(CloudPluginSceneConnectionModel::getAccessUser, user);
+        var connectionModels = cloudPluginSceneConnectionMapper.list(condition);
+        if (CollectionUtils.isEmpty(connectionModels)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        Map<String, CloudPluginSceneConnectionModel> connectionId2Model = new HashMap<>();
+        connectionModels.forEach(m -> {
+            if (StringUtils.isNotEmpty(m.getConnectionId())) {
+                connectionId2Model.put(m.getConnectionId(), m);
+            }
+        });
+        if (connectionId2Model.isEmpty()) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        Map<String, NodeSessionBO> connectionIdSessionMap = this.getNodeSessions(connectionId2Model.keySet().toArray(new String[]{}), monitor, assistance);
+        if (connectionIdSessionMap.isEmpty()) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        connectionIdSessionMap.forEach((connectionId, session) -> {
+            var model = connectionId2Model.get(connectionId);
+            if (model != null) {
+                session.setSceneId(model.getScene());
+                session.setNodeId(model.getSceneElement());
+            }
+        });
+        return new ServiceResult<>(new ArrayList<>(connectionIdSessionMap.values()));
+    }
+
+    private Map<String, NodeSessionBO> getNodeSessions(String[] connectionIds, boolean monitor, boolean assistance) {
+        var remoteClient = new Remote();
+        Map<String, NodeSessionBO> connectionIdSessionMap = new HashMap<>();
+        if (monitor) {
+            var monitors = remoteClient.getMonitors(connectionIds);
+            if (monitors != null) {
+                monitors.forEach((connectionId, monitorData) -> {
+                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                            new NodeSessionBO());
+                    String formatUrl = monitorData.getMonitorUrl();
+                    CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+                    if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                        if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                            var u = URLUtil.url(formatUrl);
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
+                    }
+                    nodeSession.setMonitorUrl(formatUrl);
+                    nodeSession.setUser(monitorData.getUsername());
+                    connectionIdSessionMap.put(connectionId, nodeSession);
+                });
+            }
+        }
+        if (assistance) {
+            var assistances = remoteClient.getAssistances(connectionIds);
+            if (assistances != null) {
+                assistances.forEach((connectionId, assistanceData) -> {
+                    var nodeSession = connectionIdSessionMap.getOrDefault(connectionId,
+                            new NodeSessionBO());
+                    String formatUrl = assistanceData.getAssistanceUrl();
+                    CloudAppConfig config = BeanCommon.getBean(CloudAppConfig.class);
+                    if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
+                        if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
+                            var u = URLUtil.url(formatUrl);
+                            formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), config.getPublicNetProxyIp());
+                        }
+                    }
+                    nodeSession.setAssistanceUrl(formatUrl);
+                    nodeSession.setUser(assistanceData.getUsername());
+                    connectionIdSessionMap.put(connectionId, nodeSession);
+                });
+            }
+        }
+        return connectionIdSessionMap;
     }
 }

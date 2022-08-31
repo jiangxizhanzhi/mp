@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
+import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -11,6 +12,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,9 +31,10 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
+    List<UserOrgMapDto> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
+
     /**
      * @param orgIds
-     * @param userDto.username 会同时模糊查询username和name
      * @param userIds
      * @return
      */
@@ -41,8 +44,9 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
                                    @Param("userCondition") UserDto userDto,
                                    @Param("selfUserId") String selfUserId,
                                    @Param("excludeRoleIds") List<String> excludeRoleIds,
-                                   @Param("excludeUserIds") List<String> excludeUserIds
-    );
+                                   @Param("excludeUserIds") List<String> excludeUserIds,
+                                   @Param("currentDateTime") LocalDateTime currentDateTime
+                                   );
 
     Integer selectUserCnt(@Param("orgId") String orgId);
 

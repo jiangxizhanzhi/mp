@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,6 +18,7 @@ public class RealEquipmentDeleteRequest extends BaseRequest{
     /**
      * ID
      */
+    @ApiModelProperty(value = "UUIDS")
     private List<String> uuids;
 
 

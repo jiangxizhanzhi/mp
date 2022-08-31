@@ -5,12 +5,11 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.cscene.model.ScreenshotModel;
 import cn.cyberpeace.mp.cscene.repository.ScreenshotMapper;
 import cn.cyberpeace.mp.cscene.request.ScreenshotBatchDeleteRequest;
@@ -22,6 +21,7 @@ import cn.cyberpeace.mp.cscene.service.AsyncScreenshotModelService;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.cscene.service.filed.ScreenshotFields;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
 import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -44,9 +44,6 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         setModelFields(stuFields);
         setModelMapper(stuMapper);
     }
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
 
     @Autowired
     private UserService userService;
@@ -75,7 +72,14 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
      */
     public ServiceResult<ScreenshotModel> screenshotUpload(ScreenshotUploadRequest request) {
         // 上传截屏文件
-        String filePath = fastDFSClient.upload(request.getFile(), null, FdfsGroupEnum.DEFAULT.toString());
+        String suffix = FileUtil.getSuffix(request.getFile().getOriginalFilename());
+        String filePath = null;
+        try {
+            filePath = FdfsCommon.upload(request.getFile().getInputStream(), suffix);
+        } catch (IOException e) {
+            return ServiceResult.fail("Upload screenshot error");
+        }
+
         ScreenshotModel model = new ScreenshotModel();
         model.setFile(filePath);
         model.setSceneName(request.getSceneName());
@@ -110,7 +114,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 新增截屏文件
         this.create(model);
         // 返回前端地址加上 /fdfs 前缀
-        model.setFile(baseAppConfig.getFdfsOuterHttpServer() + File.separator + filePath);
+        model.setFile(FdfsCommon.genHttpUrl(filePath));
 
         return ServiceResult.success(model);
     }

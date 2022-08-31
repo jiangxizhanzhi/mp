@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,5 +35,5 @@ public interface FlowClassificationsMapper extends BaseModelMapper<FlowClassific
      * @param list
      * @return
      */
-    Integer batchInsert(@Param("list") List<FlowClassificationModel> list);
+    Integer batchInsert(@Param("list") List<FlowClassificationModel> list, @Param("currentTime")LocalDateTime currentTime);
 }

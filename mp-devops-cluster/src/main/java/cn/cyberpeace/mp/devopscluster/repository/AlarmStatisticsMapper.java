@@ -5,8 +5,10 @@ import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -23,18 +25,18 @@ public interface AlarmStatisticsMapper extends BaseModelMapper<AlarmStatisticsMo
      * 查询今天告警统计信息
      * @return
      */
-    List<AlarmStatisticsModel> todayAlarmStatistics();
+    List<AlarmStatisticsModel> todayAlarmStatistics(@Param("currentTime")LocalDateTime currentTime);
 
     /**
      * 服务告警趋势
      * @return
      */
-    List<AlarmStatisticsVO> serviceAlarmStatistics();
+    List<AlarmStatisticsVO> serviceAlarmStatistics(@Param("currentTime")LocalDateTime currentTime);
 
     /**
      * 设备告警趋势
      * @return
      */
-    List<AlarmStatisticsVO> serverAlarmStatistics();
+    List<AlarmStatisticsVO> serverAlarmStatistics(@Param("currentTime")LocalDateTime currentTime);
 
 }

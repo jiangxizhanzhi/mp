@@ -22,16 +22,19 @@ public class ImageRequest extends BaseRequest {
     /**
      * UUID
      */
+    @ApiModelProperty(value = "UUID")
     private String uuid;
 
     /**
      * logo文件流
      */
+    @ApiModelProperty(value = "logo文件流")
     private MultipartFile logoFile;
 
     /**
      * 镜像文件流
      */
+    @ApiModelProperty(value = "镜像文件流")
     private MultipartFile imageFile;
 
     /**

@@ -32,7 +32,7 @@ public class CollectionTypeController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查询采集类型")
-    public ServiceResult<CollectionType> typesTree(BaseSceneElementRequest baseRequest) {
+    public ServiceResult<List<CollectionType>> typesTree(BaseSceneElementRequest baseRequest) {
 
         List<CollectionType> list = collectionTypeService.typeTrees(baseRequest);
         return ServiceResult.success(list);
@@ -42,7 +42,7 @@ public class CollectionTypeController {
 
     @GetMapping("/apps")
     @ApiOperation(value = "查询节点应用列表")
-    public ServiceResult<CollectionApp> getApps(CollectionAppRequest appRequest) {
+    public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
         return ServiceResult.success(appNames);
     }

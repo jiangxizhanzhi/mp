@@ -1,13 +1,12 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.util.CheckUtils;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
-import cn.cyberpeace.mp.base.util.fdfsclient.FastDFSClient;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -78,9 +77,6 @@ public class AsyncPlatFlowTaskService {
 
     @Autowired
     private FlowPortMapper flowPortMapper;
-
-    @Autowired
-    private FastDFSClient fastDFSClient;
 
     @Autowired
     private FlowPortService flowPortService;
@@ -606,7 +602,7 @@ public class AsyncPlatFlowTaskService {
             if (CollectionUtils.isNotEmpty(infoModelList)) {
                 infoModelList.forEach(infoModel -> {
                     String filePath = ResourceTypeEnum.SCRIPT.toValue() == infoModel.getResourceType() ? infoModel.getScriptFile() : infoModel.getPcapFile();
-                    fastDFSClient.deleteFile(filePath, FdfsGroupEnum.DEFAULT.toString());
+                    FdfsCommon.delete(filePath);
                 });
             }
         } catch (Exception e) {
@@ -915,7 +911,7 @@ public class AsyncPlatFlowTaskService {
             // 判断是pcap包还是脚本
             if (ResourceTypeEnum.PACP.toValue() == flowInfoModel.getResourceType()) {
                 // 获取pcap流量包
-                byte[] fileByte = fastDFSClient.download(flowInfoModel.getPcapFile(), FdfsGroupEnum.DEFAULT.name());
+                byte[] fileByte = FdfsCommon.downloadRawContent(flowInfoModel.getPcapFile());
                 // 先向流量发生平台导入pcap包
                 JSONObject object = new JSONObject();
                 object.put("fileName",
@@ -951,7 +947,7 @@ public class AsyncPlatFlowTaskService {
                 }
             } else {
                 // 获取script流量脚本
-                byte[] fileByte = fastDFSClient.download(flowInfoModel.getScriptFile(), FdfsGroupEnum.DEFAULT.name());
+                byte[] fileByte = FdfsCommon.downloadRawContent(flowInfoModel.getScriptFile());
                 // 获取替换脚本参数后的脚本内容
                 String code = replaceCode(fileByte, flowInfoModel.getId(), addFlowTaskRequest);
 

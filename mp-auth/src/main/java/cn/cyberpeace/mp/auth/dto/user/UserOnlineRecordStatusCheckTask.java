@@ -2,9 +2,9 @@ package cn.cyberpeace.mp.auth.dto.user;
 
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,17 +17,11 @@ import java.util.List;
 @Slf4j
 public class UserOnlineRecordStatusCheckTask implements Runnable {
 
-    private ApplicationContext applicationContext;
-
-    public UserOnlineRecordStatusCheckTask(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
     @Override
     public void run() {
         // 更新用户在线记录信息
         // 1. 查找end_time超过5分钟，且status还是0的记录
-        UserOnlineRecordService userOnlineRecordService = applicationContext.getBean(UserOnlineRecordService.class);
+        UserOnlineRecordService userOnlineRecordService = BeanCommon.getBean(UserOnlineRecordService.class);
         List<UserOnlineRecordModel> offlineList = userOnlineRecordService.listCurrentOfflined(null);
 
         if (CollectionUtil.isNotEmpty(offlineList)) {

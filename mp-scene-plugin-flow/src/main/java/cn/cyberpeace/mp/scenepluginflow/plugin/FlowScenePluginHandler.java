@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scenepluginflow.plugin;
 
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
 import cn.cyberpeace.mp.scenepluginflow.bo.FlowPluginSceneBO;
@@ -142,10 +143,19 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
         String finalSourceIp = sourceIp == null ? flow.getSourceIp() : sourceIp;
         var flag = handlerUtils.startFlow(flowElement, flow, finalSourceIp, () -> {
             asyncAckElementChanged(nodeId, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                getSceneHandler().updateSceneElementWithPlugins(nodeId);
+            }
         }, async, () -> {
             asyncAckElementChanged(nodeId, true);
+            if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                getSceneHandler().updateSceneElementWithPlugins(nodeId);
+            }
         });
         asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
         return flag;
     }
 
@@ -169,6 +179,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
         var flag = handlerUtils.stopFlow(flow);
         asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
         return flag;
     }
 
@@ -209,11 +222,20 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
         var flag = handlerUtils.startFlows(flowElement, flowWithSourceIps, () -> {
                     asyncAckElementChanged(nodeId, true);
+                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                        getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                    }
                 }, async, () -> {
                     asyncAckElementChanged(nodeId, true);
+                    if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                        getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                    }
                 },
                 runType);
         asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
         return flag;
     }
 
@@ -245,6 +267,9 @@ public class FlowScenePluginHandler extends ScenePluginHandler<FlowPluginSceneBO
 
         var flag = handlerUtils.stopFlows(newFlows);
         asyncAckElementChanged(nodeId, true);
+        if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+            getSceneHandler().updateSceneElementWithPlugins(nodeId);
+        }
         return flag;
     }
 

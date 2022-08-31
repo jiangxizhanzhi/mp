@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.request.org;
 
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -16,8 +17,10 @@ import java.util.List;
 public class BindOrgUsersRequest {
 
     @NotBlank
+    @ApiModelProperty("组织ID")
     String orgId;
 
+    @ApiModelProperty("用户ID列表")
     List<String> userIds;
 
 }

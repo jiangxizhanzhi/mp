@@ -23,6 +23,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,7 @@ public class ProbeManagerController {
 
     @GetMapping
     @ApiOperation(value = "根据id查询单个探针详情，包含探针脚本内容")
+    @ApiImplicitParam(name = "id", value = "探针ID", dataTypeClass = String.class)
     public ServiceResult<ProbeDto> getById(@RequestParam String id) {
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(id));
         if (CollectionUtil.isNotEmpty(probeDtos)) {
@@ -100,6 +102,7 @@ public class ProbeManagerController {
 
     @GetMapping("/batch")
     @ApiOperation(value = "根据id数组批量查询探针详情，包含探针脚本内容")
+    @ApiImplicitParam(name = "ids", value = "探针ID集合", dataTypeClass = String[].class)
     public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(ids));
@@ -163,6 +166,7 @@ public class ProbeManagerController {
 
     @DeleteMapping()
     @ApiOperation(value = "删除探针")
+    @ApiImplicitParam(name = "ids", value = "探针ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.DELETE, title = "删除探针", target = OpTargetEnums.PROBE)
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
 
@@ -171,6 +175,7 @@ public class ProbeManagerController {
     }
 
     @ApiOperation(value = "导入脚本文件，返回脚本内容", notes = "")
+    @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/script/import")
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {

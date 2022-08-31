@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,11 +20,13 @@ public class BizServicePageRequest extends BasePageRequest implements Serializab
     /**
      * 节点名称
      */
+    @ApiModelProperty(value = "节点名称")
     private String hostName;
 
     /**
      * 如 +runtime or -runtime
      */
+    @ApiModelProperty(value = "排序方式")
     private String sort;
 
 }

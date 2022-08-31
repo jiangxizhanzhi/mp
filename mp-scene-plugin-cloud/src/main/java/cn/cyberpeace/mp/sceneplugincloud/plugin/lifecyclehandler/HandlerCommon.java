@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.thread.taskpool.TaskPool;
+import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.plugin.bo.BasePluginSceneElementBO;
 import cn.cyberpeace.mp.scene.core.plugin.common.PluginSceneEventHandlerCommon;
@@ -60,6 +61,10 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
                     accessMode.setAvailable(true);
                     return;
                 }
+                if (!Boolean.TRUE.equals(accessMode.getProxy())) {
+                    accessMode.setAvailable(true);
+                    return;
+                }
 
                 var ip = accessMode.getAccessIp();
                 if (StringUtils.isEmpty(ip)) {
@@ -87,6 +92,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             Runnable checkSuccessCallback = () -> {
                 accessModes.forEach(accessMode -> accessMode.setAvailable(true));
                 getPluginHandler().asyncAckElementChanged(nodeId, true);
+                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                }
             };
 
             if (port == null || port.compareTo(0) <= 0) {
@@ -119,6 +127,9 @@ public class HandlerCommon extends PluginSceneEventHandlerCommon<CloudScenePlugi
             var nodeId = cloudElement.getSrcElement().getId();
             try {
                 getPluginHandler().asyncAckElementChanged(nodeId, true);
+                if (!Boolean.TRUE.equals(SceneSingleton.sceneAppConfig.getSceneHandlerRealtimeUpdate())) {
+                    getPluginHandler().getSceneHandler().updateSceneElementWithPlugins(nodeId);
+                }
             } catch (Exception e) {
                 log.error("Close access mode ack element changed error: ", e);
             }
