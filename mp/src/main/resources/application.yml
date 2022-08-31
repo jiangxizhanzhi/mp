@@ -223,6 +223,7 @@ mp:
     method-match: true
     authority-match: true
     ignore-if-not-defined: false
+  # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
   sceneplugincloud:
