@@ -203,7 +203,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取分页的聚合数据")
-    @ApiImplicitParam(name = "queryParams", value = "请求参数")
     @GetMapping("/list_stat")
     public ListObjServiceResult<CsceneInstanceStat> listStat(CsceneInstanceStatQueryParams queryParams) {
         handleQueryParams("listStat", queryParams);
@@ -467,7 +466,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "ids", value = "场景实例id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "nodeIds", value = "场景节点id", allowMultiple = true, dataTypeClass = String.class),
             @ApiImplicitParam(name = "userIds", value = "用户id", allowMultiple = true, dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/list_recordings", params = "ids")
     public ListObjServiceResult<NodeRecordingBO> listRecordings(@RequestParam List<String> ids,
@@ -481,7 +479,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("场景实例获取分页流量列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/list_flows", params = "id")
     public ListObjServiceResult<CsceneCollectionFlowBO> listFlows(@RequestParam String id, FlowQueryParams queryParams) {
@@ -492,7 +489,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("场景实例获取分页主机采集数据列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/list_host_states", params = "id")
     public ListObjServiceResult<CollectionHostStateBO> listHostStates(@RequestParam String id,
@@ -504,7 +500,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("查询场景实例事件列表（分页列表）")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/list_host_events", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> listHostEvents(@RequestParam String id,
@@ -518,7 +513,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "scrollId", value = "scrollId", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/scroll_host_events")
     public ListObjServiceResult<CollectionHostEventBO> scrollHostEvents(@RequestParam String id,
@@ -533,7 +527,6 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
             @ApiImplicitParam(name = "id", value = "场景实例id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "probeId", value = "探针id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "requestId", value = "请求参数"),
-            @ApiImplicitParam(name = "queryParams", value = "请求参数"),
     })
     @GetMapping(value = "/get_probe_collection_data", params = "id")
     public ListObjServiceResult<CollectionHostEventBO> getProbeCollectionData(@RequestParam String id,
@@ -742,11 +735,11 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @ApiOperation("节点文件上传")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景实例id"),
-            @ApiImplicitParam(name = "nodeId", value = "节点id"),
+            @ApiImplicitParam(name = "node_id", value = "节点id"),
             @ApiImplicitParam(name = "file", value = "文件"),
-            @ApiImplicitParam(name = "filePath", value = "文件路径"),
+            @ApiImplicitParam(name = "file_path", value = "文件路径"),
             @ApiImplicitParam(name = "filename", value = "文件名"),
-            @ApiImplicitParam(name = "destPath", value = "目标路径"),
+            @ApiImplicitParam(name = "dest_path", value = "目标路径"),
     })
     @PostMapping("/upload_element_file")
     public ServiceResult<Boolean> uploadElementFile(

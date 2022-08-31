@@ -61,7 +61,6 @@ public class ElementMonitorController {
      * @return
      */
     @ApiOperation(value = "查询节点基本信息")
-    @ApiImplicitParam(name = "baseRequest", value = "查询信息请求体")
     @GetMapping("/info")
     public ServiceResult<ElementMonitorBasicInfo> getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
         ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest, true);
@@ -77,7 +76,6 @@ public class ElementMonitorController {
      * @return
      */
     @ApiOperation(value = "查询节点实时状态")
-    @ApiImplicitParam(name = "baseRequest", value = "查询信息请求体")
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
         ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
@@ -86,7 +84,6 @@ public class ElementMonitorController {
 
 
     @ApiOperation(value = "节点操作系统信息")
-    @ApiImplicitParam(name = "baseRequest", value = "查询信息请求体")
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
         OS os = sceneElementMonitorService.getOSInfo(baseRequest);
@@ -95,7 +92,6 @@ public class ElementMonitorController {
 
 
     @ApiOperation(value = "查询节点网络连接状态")
-    @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
     @GetMapping("/connection_state")
     public ListObjServiceResult<ConnectionState> pageConnectionStates(BaseSceneElementPageRequest pageRequest) {
         pageRequest.ensure();
@@ -105,8 +101,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点文件变更事件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
+            @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class)
     })
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
@@ -117,8 +112,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点文件变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/file_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
@@ -129,8 +123,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点注册表变更事件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
+            @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class)
     })
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
@@ -141,8 +134,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
-            @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/registry_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,
@@ -152,7 +144,6 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "查询节点服务漏洞Top10")
-    @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
     @GetMapping("/get_service_vulnerability")
     public ListObjServiceResult<ElementVulnerabilityCountInfo> getServiceVulnerability(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();
@@ -162,7 +153,6 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "查询节点服务漏洞饼状图")
-    @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
     @GetMapping("/get_vulnerability_pie_chart")
     public ListObjServiceResult<ElementVulnerabilityPieChartInfo> getVulnerabilityPieChart(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();
@@ -172,7 +162,6 @@ public class ElementMonitorController {
     }
 
     @ApiOperation(value = "查询节点服务漏洞列表")
-    @ApiImplicitParam(name = "pageRequest", value = "查询信息请求体")
     @GetMapping("/get_vulnerability_list")
     public ListObjServiceResult<ElementVulnerabilityInfo> getVulnerabilityList(ElementMonitorRequest pageRequest) {
         pageRequest.ensure();

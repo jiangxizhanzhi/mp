@@ -54,7 +54,6 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      * @return
      */
     @ApiOperation("分页查询告警信息")
-    @ApiImplicitParam(name = "queryParams", value = "查询参数")
     @GetMapping("/page")
     public ListObjServiceResult<SystemAlarmModel> page(QueryParams queryParams) {
         if (Objects.isNull(queryParams.getOrders()) && Objects.isNull(queryParams.getSort())) {

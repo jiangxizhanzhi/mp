@@ -64,7 +64,6 @@ public class SceneMonitorController {
 
 
     @ApiOperation(value = "查询场景所有IP列表")
-    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/ips")
     public ServiceResult<List<String>> listIps(BaseSceneElementRequest baseRequest) {
         List<String> ips = sceneMonitorService.listIps(baseRequest);
@@ -72,7 +71,6 @@ public class SceneMonitorController {
     }
 
     @ApiOperation(value = "查询场景所有录屏用户列表")
-    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/recording/users")
     public ServiceResult<List<UserModel>> listRecordingUsers(BaseSceneElementRequest baseRequest) {
         List<UserModel> users = sceneMonitorService.listSceneRecordingUsers(baseRequest);

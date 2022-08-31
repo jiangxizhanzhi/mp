@@ -41,7 +41,6 @@ public class LogFileController {
      * @return
      */
     @ApiOperation(value = "分页查询日志文件")
-    @ApiImplicitParam(name = "pageRequest", value = "查询数据请求体")
     @GetMapping("/page")
     public ListObjServiceResult<LogFileVO> pageLogFiles(BaseSceneElementPageRequest pageRequest) {
         log.info("{}", pageRequest);
@@ -56,7 +55,6 @@ public class LogFileController {
      * @return
      */
     @ApiOperation(value = "查询日志原始文件下载地址")
-    @ApiImplicitParam(name = "request", value = "请求体")
     @GetMapping("/download_urls")
     public ListObjServiceResult<LogFileDownloadUrlDto> getDownloadUrl(LogFileDownloadUrlRequest request) {
         List<LogFileDownloadUrlDto> downloadUrlDtos = logFileService.getDownloadUrls(request);

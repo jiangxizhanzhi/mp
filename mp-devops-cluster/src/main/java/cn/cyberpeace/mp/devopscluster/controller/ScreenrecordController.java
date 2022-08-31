@@ -35,7 +35,6 @@ public class ScreenrecordController {
     private final ScreenrecordService screenrecordService;
 
     @ApiOperation("分页查询录屏文件")
-    @ApiImplicitParam(name = "queryParams", value = "删除请求体")
     @GetMapping("/page")
     public ListObjServiceResult<ScreenrecordVO> pageScreenrecord(ScreenrecordQueryParams queryParams) {
         return screenrecordService.pageScreenrecord(queryParams);
