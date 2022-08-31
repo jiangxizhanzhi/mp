@@ -100,6 +100,7 @@ mp:
   common:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
   devops:
+    cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:} #公网端口
