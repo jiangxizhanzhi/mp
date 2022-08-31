@@ -38,8 +38,8 @@ public class RolePermissionController {
     private RolePermissionModelService rolePermissionModelService;
 
     @ApiOperation(value = "查询角色权限", notes = "")
+    @ApiImplicitParam(name="roleId", value="角色ID", dataTypeClass = String.class)
     @GetMapping("/byrole")
-    @ApiImplicitParam(name="roleId", value="角色ID",dataTypeClass = String.class)
     public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = rolePermissionModelService.listTargetsByRoleIds(Arrays.asList(roleId));
 

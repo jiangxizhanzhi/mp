@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,7 @@ public class TypeController {
      * @return
      */
     @ApiOperation("查询所有镜像管理分类")
+    @ApiImplicitParam(name = "isAll", value = "是否全部")
     @GetMapping("/image-mg-categories")
     public Result<TypeAllVO> imageCategories(Boolean isAll){
         if (Objects.isNull(isAll)){
@@ -131,6 +133,7 @@ public class TypeController {
      * @return
      */
     @ApiOperation("查询所有二级分类")
+    @ApiImplicitParam(name = "firstTypeId", value = "一级分类id")
     @GetMapping("/l2-categories")
     public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId){
         ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();

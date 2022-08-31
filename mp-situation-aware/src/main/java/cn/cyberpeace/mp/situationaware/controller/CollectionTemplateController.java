@@ -105,6 +105,7 @@ public class CollectionTemplateController {
      */
     @PostMapping
     @ApiOperation(value = "新增采集模板")
+    @ApiImplicitParam(name = "addRequest", value = "新增请求体")
     public ServiceResult addTemplate(@RequestBody @Validated(AddGroup.class) CollectionTemplateRequest addRequest) {
         String id = templateService.addTemplate(addRequest);
         return ServiceResult.success(id);
@@ -117,6 +118,7 @@ public class CollectionTemplateController {
      */
     @PatchMapping
     @ApiOperation(value = "修改采集模板")
+    @ApiImplicitParam(name = "updateRequest", value = "修改请求体")
     public ServiceResult<Void> modifyTemplate(@RequestBody @Validated(UpdateGroup.class) CollectionTemplateRequest updateRequest) {
         templateService.modifyTemplate(updateRequest);
         return ServiceResult.successful();

@@ -40,9 +40,9 @@ public class OrgModel extends BaseModel {
     @DefaultStr
     private String name;
 
-    @ApiModelProperty(value = "路径")
-    @DefaultStr
-    private String path;
+//    @ApiModelProperty(value = "路径")
+//    @DefaultStr
+//    private String path;
 
     @ApiModelProperty(value = "描述")
     @DefaultStr
@@ -55,11 +55,11 @@ public class OrgModel extends BaseModel {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         OrgModel orgModel = (OrgModel) o;
-        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name) && Objects.equals(path, orgModel.path);
+        return Objects.equals(tenant, orgModel.tenant) && Objects.equals(parent, orgModel.parent) && Objects.equals(identifier, orgModel.identifier) && Objects.equals(name, orgModel.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), tenant, parent, identifier, name, path);
+        return Objects.hash(super.hashCode(), tenant, parent, identifier, name);
     }
 }

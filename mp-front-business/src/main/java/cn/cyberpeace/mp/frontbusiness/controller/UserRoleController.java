@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class UserRoleController {
 
 
     @ApiOperation(value = "绑定用户-角色关系(单个用户 -> 多个角色)，注意，该操作会删除原有用户的所有角色。 如果roleIds为空，表示删除用户所有角色！", notes = "")
+    @ApiImplicitParam(name="userRolesReq", value="绑定请求")
     @PostMapping("/bind/userRoles")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult bindUserRoles(@RequestBody @Validated UserRolesRequest userRolesReq) {
@@ -80,6 +82,7 @@ public class UserRoleController {
 
 
     @ApiOperation(value = "绑定用户-角色关系(单个角色 -> 多个用户)", notes = "")
+    @ApiImplicitParam(name="roleUsersReq", value="绑定请求")
     @PostMapping("/bind/roleUsers")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult bindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
@@ -94,6 +97,7 @@ public class UserRoleController {
 
 
     @ApiOperation(value = "删除用户-角色关系(通过 role_id 和 user_ids组合)", notes = "")
+    @ApiImplicitParam(name="roleUsersReq", value="删除请求")
     @PostMapping("/delete/byRoleUsers")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult deleteByRoleIdAnUserIds(@RequestBody @Validated RoleUsersRequest roleUsersReq) {

@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.situationaware.model.SessionResult;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficService;
 import com.alibaba.fastjson.JSONObject;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -37,6 +38,7 @@ public class NetWorkTrafficController {
     private NetworkTrafficService netWorkTrafficService;
 
     @GetMapping("/pcap/{groupId}/{sessionId}")
+    @ApiImplicitParam(name = "groupId", value = "分组ID", dataType = "path")
     @ApiOperation(value = "流量下载", notes = "")
     public ResponseEntity<Resource> downloadPcapFile(HttpServletResponse httpServletResponse,
         @PathVariable("sessionId") String sessionId, @PathVariable("groupId") String groupId) {
@@ -64,6 +66,7 @@ public class NetWorkTrafficController {
      */
     @PostMapping
     @ApiOperation("按照组ID查询流量信息")
+    @ApiImplicitParam(name = "sessionRequest", value = "查询请求", dataType = "body")
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest) {
         return ServiceResult.<List<SessionResult>>builder().source(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build().asResult();
@@ -77,6 +80,7 @@ public class NetWorkTrafficController {
      */
     @PostMapping("pageable")
     @ApiOperation("分局分组id查询流量分页信息接口")
+    @ApiImplicitParam(name = "sessionRequest", value = "查询请求", dataType = "body")
     public ListObjServiceResult<SessionResult> querySessionListWithGroupWithPage(
         @RequestBody @Valid SessionRequest sessionRequest) {
         return new ListObjServiceResult<>(netWorkTrafficService.querySessionWithPage(sessionRequest));
@@ -84,6 +88,7 @@ public class NetWorkTrafficController {
 
     @PostMapping("spiview")
     @ApiOperation("SPI视图")
+    @ApiImplicitParam(name = "spiViewRequest", value = "查询请求", dataType = "body")
     public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
         var spiView = netWorkTrafficService.querySPIView(spiViewRequest);
         return ServiceResult.<JSONObject>builder().source(JSONObject.parseObject(spiView)).build().asResult();

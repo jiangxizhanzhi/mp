@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devopscluster.vo.ScreenRecordUsedSpaceVO;
 import cn.cyberpeace.mp.devopscluster.vo.ScreenrecordVO;
 import cn.cyberpeace.mp.devopscluster.vo.SpaceStaticsVO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +41,14 @@ public class ScreenrecordController {
     }
 
     @ApiOperation("按时间删除录屏文件")
+    @ApiImplicitParam(name = "request", value = "删除请求体")
     @DeleteMapping("/time_delete")
     public ServiceResult<Boolean> timeDelete(@RequestBody @Validated ScreenrecordDeleteRequest request) {
         return screenrecordService.removeRecordfile(request);
     }
 
     @ApiOperation("批量删除录屏文件")
+    @ApiImplicitParam(name = "request", value = "删除请求体")
     @DeleteMapping("/batch_delete")
     public ServiceResult<Boolean> batchDelete(@RequestBody @Validated ScreenrecordBatchDeleteRequest request) {
         return screenrecordService.batchDeleteScreenRecord(request);
@@ -64,6 +67,7 @@ public class ScreenrecordController {
     }
 
     @ApiOperation("下载录屏文件")
+    @ApiImplicitParam(name = "fileName", value = "文件名")
     @GetMapping("/download")
     public void download(@RequestParam String fileName, HttpServletResponse response) {
         screenrecordService.download(fileName, response);

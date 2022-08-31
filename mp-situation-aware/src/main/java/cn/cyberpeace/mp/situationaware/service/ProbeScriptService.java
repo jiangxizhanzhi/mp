@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.common.FsCommon;
-import cn.cyberpeace.mp.base.config.FastDfsConfig;
-import cn.cyberpeace.mp.base.enums.FdfsGroupEnum;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.situationaware.model.ProbeScriptModel;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
@@ -29,10 +27,6 @@ import java.util.Objects;
 @Slf4j
 @Service
 public class ProbeScriptService {
-
-
-    @Autowired
-    private FastDfsConfig fastDfsConfig;
 
     @Autowired
     private ProbeScriptMapper probeScriptMapper;
@@ -71,9 +65,8 @@ public class ProbeScriptService {
         }
 
         InputStream is = new ByteArrayInputStream(scriptContent.getBytes(StandardCharsets.UTF_8));
-        FastDfsConfig.Group group = fastDfsConfig.getGroupByName(FdfsGroupEnum.DEFAULT);
         String filePath = FsCommon.upload(is, suffix);
-        String httpUrl = group.getFileServerAddr() + File.separator + filePath;
+        String httpUrl = FsCommon.genHttpUrl(filePath);
         return httpUrl;
     }
 

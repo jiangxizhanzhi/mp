@@ -16,7 +16,6 @@ import cn.cyberpeace.mp.devopslog.request.RunTimeLogDownloadRequest;
 import cn.cyberpeace.mp.devopslog.service.LogFileServiceFactory;
 import cn.cyberpeace.mp.devopslog.service.RuntimeLogService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +56,6 @@ public class RunTimeLogController {
 
     @GetMapping("/download")
     @ApiOperation(value = "日志下载", notes = "")
-    @ApiImplicitParam(name = "request", value = "日志下载请求", dataTypeClass = RunTimeLogDownloadRequest.class)
     public ResponseEntity<Resource> downloadLogFiles(HttpServletResponse response,
                                                      RunTimeLogDownloadRequest request) {
         InputStreamResource resource = null;
