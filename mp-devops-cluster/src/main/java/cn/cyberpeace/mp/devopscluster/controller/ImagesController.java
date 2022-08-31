@@ -249,8 +249,8 @@ public class ImagesController {
      */
     @ApiOperation("导出")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "uuid", value = "请求参数"),
-            @ApiImplicitParam(name = "imageName", value = "镜像名称")
+            @ApiImplicitParam(name = "id", value = "请求参数"),
+            @ApiImplicitParam(name = "image_name", value = "镜像名称")
     })
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)

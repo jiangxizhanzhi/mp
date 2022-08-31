@@ -211,6 +211,7 @@ public class RealEquipmentController {
      * 更新
      */
     @ApiOperation("更新")
+    @ApiImplicitParam(name = "request", value = "更新数据请求体")
     @PutMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult update(@RequestBody RealEquipmentRequest request){
@@ -225,6 +226,7 @@ public class RealEquipmentController {
      * 删除
      */
     @ApiOperation("删除")
+    @ApiImplicitParam(name = "request", value = "删除数据请求体")
     @DeleteMapping("/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.REALEQUIPMENT)
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
@@ -233,6 +235,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("查询详情")
+    @ApiImplicitParam(name = "uuid", value = "请求参数")
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailVO> findDevopsDetails(@RequestParam("uuid") String id){
         RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
