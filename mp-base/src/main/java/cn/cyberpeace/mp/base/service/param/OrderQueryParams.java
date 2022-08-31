@@ -7,4 +7,6 @@ public interface OrderQueryParams {
 
     String[] getOrders();
 
+    void setOrders(String[] fields);
+
 }

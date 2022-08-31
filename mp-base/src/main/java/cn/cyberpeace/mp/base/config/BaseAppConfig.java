@@ -3,7 +3,9 @@ package cn.cyberpeace.mp.base.config;
 import cn.hutool.core.io.FileUtil;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,8 +21,14 @@ import java.util.List;
 @Data
 public class BaseAppConfig {
 
+    @Autowired
+    private ServerProperties serverProperties;
+
     @Value("${mp.base.project-name:mp}")
     private String projectName;
+
+    @Value("${mp.base.snake-api-mode:true}")
+    private Boolean snakeApiMode;
 
     @Value("${mp.base.default-page-size:10}")
     private Integer defaultPageSize;
@@ -49,6 +57,12 @@ public class BaseAppConfig {
     @Value("${mp.base.task-hold-size:200000}")
     private Integer taskHoldSize;
 
+    @Value("${mp.base.hang-task-pool-size:1000}")
+    private Integer hangTaskPoolSize;
+
+    @Value("${mp.base.enable-local-call:true}")
+    private Boolean enableLocalCall;
+
     @Value("${mp.base.fdfs-tracker-servers:127.0.0.1:11211}")
     private List<String> fdfsTrackerServers;
 
@@ -61,10 +75,10 @@ public class BaseAppConfig {
     @Value("${mp.base.lfs-url-pattern:/file/**}")
     private String lfsUrlPattern;
 
-    @Value("${mp.base.lfs-inner-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    @Value("${mp.base.lfs-inner-http-url-template:http://127.0.0.1:8080/mp/file/%s}")
     private String lfsInnerHttpUrlTemplate;
 
-    @Value("${mp.base.lfs-outer-http-url-template:http://127.0.0.1:8080/api/mp/file/%s}")
+    @Value("${mp.base.lfs-outer-http-url-template:http://127.0.0.1:8080/mp/file/%s}")
     private String lfsOuterHttpUrlTemplate;
 
     @Value("${mp.base.home-dir:}")

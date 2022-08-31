@@ -66,7 +66,7 @@ public class NetWorkTrafficController {
     @ApiOperation("按照组ID查询流量信息")
     public ServiceResult<List<SessionResult>> querySessionListWithGroup(
         @RequestBody @Valid SessionRequest sessionRequest) {
-        return ServiceResult.<List<SessionResult>>builder().data(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build();
+        return ServiceResult.<List<SessionResult>>builder().source(netWorkTrafficService.querySessionListWithGroup(sessionRequest)).build().asResult();
     }
 
     /**
@@ -86,6 +86,6 @@ public class NetWorkTrafficController {
     @ApiOperation("SPI视图")
     public ServiceResult<JSONObject> querySessionSpiView(@RequestBody @Valid SPIViewRequest spiViewRequest) {
         var spiView = netWorkTrafficService.querySPIView(spiViewRequest);
-        return ServiceResult.<JSONObject>builder().data(JSONObject.parseObject(spiView)).build();
+        return ServiceResult.<JSONObject>builder().source(JSONObject.parseObject(spiView)).build().asResult();
     }
 }

@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.websocket;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.config.websocket.WebSocketConfig;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.message.MessageConverter;
 import lombok.Getter;
@@ -17,6 +18,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public abstract class BaseServer {
+
+    public static final String CLOSE_TYPE = "close";
 
     @Getter
     private Session session;
@@ -48,6 +51,14 @@ public abstract class BaseServer {
         sessionMap.forEach((sessionKey, server) -> server.send(data, type, context));
     }
 
+    public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {
+        sendToSession(serverClass, sessionKey, null, CLOSE_TYPE, null);
+    }
+
+    public static void sendCloseToAllSessions(Class<?> serverClass) {
+        sendToAllSessions(serverClass, null, CLOSE_TYPE, null);
+    }
+
     public static Map<String, Object> getHeaders(Session session) {
         var headers = session.getUserProperties().getOrDefault(WebSocketConfig.Configurator.USER_HEADERS_KEY, null);
         if (headers == null) {
@@ -56,7 +67,7 @@ public abstract class BaseServer {
         return (Map<String, Object>) headers;
     }
 
-    private ConcurrentHashMap<String, BaseServer> getSessionMap() {
+    protected ConcurrentHashMap<String, BaseServer> getSessionMap() {
         return serverSessionMap.get(this.getClass());
     }
 
@@ -75,6 +86,8 @@ public abstract class BaseServer {
         if (StringUtils.isEmpty(sessionKey)) {
             throw new ValidateException("Session key not found");
         }
+
+        this.sessionKey = sessionKey;
     }
 
     @OnOpen
@@ -92,7 +105,9 @@ public abstract class BaseServer {
         }
 
         this.session = session;
-        this.sessionKey = retrieveSessionKey(session);
+        if (StringUtils.isEmpty(this.sessionKey)) {
+            this.sessionKey = retrieveSessionKey(session);
+        }
         getSessionMap().put(this.sessionKey, this);
     }
 
@@ -119,6 +134,14 @@ public abstract class BaseServer {
 
     public abstract MessageConverter getMessageConverter();
 
+    public <T> void send(T data) {
+        send(data, null, null);
+    }
+
+    public <T> void send(T data, String type) {
+        send(data, type, null);
+    }
+
     public <T> void send(T data, String type, Map<String, Object> context) {
         FormatMessage<T> formatMessage = new FormatMessage<>(data, type, context);
         log.debug("ws content:{}", JsonCommon.stringify(formatMessage));
@@ -128,6 +151,20 @@ public abstract class BaseServer {
             session.getBasicRemote().sendText(messageStr);
         } catch (IOException e) {
             log.error("Websocket send message({}) error: {}", messageStr, e);
+        }
+    }
+
+    public void sendClose() {
+        send(null, CLOSE_TYPE);
+    }
+
+    public void close() {
+        if (this.session != null) {
+            try {
+                this.session.close();
+            } catch (IOException e) {
+                throw new MpRuntimeException("Close websocket session error: " + e.getMessage());
+            }
         }
     }
 

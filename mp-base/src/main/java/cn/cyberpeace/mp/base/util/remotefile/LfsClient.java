@@ -31,6 +31,9 @@ public class LfsClient implements FileClient {
     @Getter
     private final String groupDir;
 
+    @Getter
+    private final Boolean unique;
+
     private static String genFilenameGroup(String filename) {
         var fileGroupLengthPattern = new int[]{3, 3};
         var filenameLength = filename.length();
@@ -74,9 +77,14 @@ public class LfsClient implements FileClient {
     }
 
     public LfsClient(String storeDir, String group) {
+        this(storeDir, group, true);
+    }
+
+    public LfsClient(String storeDir, String group, boolean unique) {
         this.storeDir = FileUtil.getAbsolutePath(storeDir);
         this.group = group;
         this.groupDir = genGroupDir(this.storeDir, this.group);
+        this.unique = unique;
     }
 
     private void validateFileKey(String fileKey) {
@@ -85,10 +93,11 @@ public class LfsClient implements FileClient {
         }
     }
 
-    private String getTargetFilePath(String fileKey) {
+    public String getTargetFilePath(String fileKey) {
         return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, groupDir, fileKey);
     }
 
+    @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
         var tmpFileKey = genFileKey(null, fileSuffix, false);
         var tmpFilePath = getTargetFilePath(tmpFileKey);
@@ -103,16 +112,18 @@ public class LfsClient implements FileClient {
             throw new MpRuntimeException(msg);
         }
 
-        String fileMd5;
-        try (var tis = FileUtil.getInputStream(tmpFilePath)) {
-            fileMd5 = DigestUtils.md5Hex(tis);
-        } catch (IOException e) {
-            var msg = String.format("Local upload with input stream error(get file md5): %s", e.getMessage());
-            log.error(msg);
-            if (FileUtil.exist(tmpFilePath)) {
-                FileUtil.del(tmpFilePath);
+        String fileMd5 = null;
+        if (Boolean.TRUE.equals(unique)) {
+            try (var tis = FileUtil.getInputStream(tmpFilePath)) {
+                fileMd5 = DigestUtils.md5Hex(tis);
+            } catch (IOException e) {
+                var msg = String.format("Local upload with input stream error(get file md5): %s", e.getMessage());
+                log.error(msg);
+                if (FileUtil.exist(tmpFilePath)) {
+                    FileUtil.del(tmpFilePath);
+                }
+                throw new MpRuntimeException(msg);
             }
-            throw new MpRuntimeException(msg);
         }
 
         var fileKey = genFileKey(fileMd5, fileSuffix, true);
@@ -126,6 +137,7 @@ public class LfsClient implements FileClient {
         return fileKey;
     }
 
+    @Override
     public void download(String fileKey, OutputStream os) {
         validateFileKey(fileKey);
 
@@ -144,6 +156,7 @@ public class LfsClient implements FileClient {
         }
     }
 
+    @Override
     public boolean delete(String fileKey) {
         validateFileKey(fileKey);
 

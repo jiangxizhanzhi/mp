@@ -27,6 +27,10 @@ public class LfsCommon {
         return String.format(baseAppConfig.getLfsInnerHttpUrlTemplate(), fileKey);
     }
 
+    public static String getLocalPath(String fileKey) {
+        return lfsClient.getTargetFilePath(fileKey);
+    }
+
     public static String uploadContent(String content) {
         return lfsClient.uploadContent(content);
     }
