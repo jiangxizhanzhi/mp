@@ -143,10 +143,19 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         // orgpaths
         List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
         List<UserOrgMapDto> userOrgMapDtos = orgUserService.listUserOrgMapDtosByUserIds(userIds);
+        List<UserModel> userModelList = userService.listByIds(userIds.toArray(String[]::new));
         reportDtos.forEach(r -> {
             Optional<UserOrgMapDto> userOrgMapDtoOptional = userOrgMapDtos.stream().filter(mapDto -> Objects.equals(mapDto.getUserId(), r.getUser())).findFirst();
             if (userOrgMapDtoOptional.isPresent()) {
                 r.setOrg(userOrgMapDtoOptional.get().getOrgPaths());
+            }
+
+            if (CollectionUtil.isNotEmpty(userModelList)) {
+                Optional<UserModel> userModelOptional = userModelList.stream().filter(userModel -> Objects.equals(userModel.getId(), r.getUser())).findFirst();
+                if (userModelOptional.isPresent()) {
+                    r.setUsername(userModelOptional.get().getUsername());
+                    r.setName(userModelOptional.get().getName());
+                }
             }
         });
 
@@ -157,14 +166,16 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, DEFAULT_MINUTES);
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, fromTime);
         return onlineList;
     }
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
         // 默认超过5分钟没有更新end_time既判定为离线
-        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds, DEFAULT_MINUTES);
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds,fromTime);
         return list;
     }
 

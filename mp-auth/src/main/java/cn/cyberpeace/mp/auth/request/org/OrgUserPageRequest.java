@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.request.org;
 
-import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.common.PageRequest;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -15,7 +14,8 @@ import lombok.Data;
 @Data
 public class OrgUserPageRequest extends PageRequest {
 
-    @ApiModelProperty(value = "username 注意 后台会匹配 username 或者 name")
+    // 注意 后台会匹配 username 或者 name
+    @ApiModelProperty(value = "用户名")
     private String username;
 
     @ApiModelProperty(value = "组织id")

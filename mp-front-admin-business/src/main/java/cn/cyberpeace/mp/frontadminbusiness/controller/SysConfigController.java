@@ -12,12 +12,13 @@ import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +87,7 @@ public class SysConfigController {
     }
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
+    @ApiImplicitParam(name = "configs", value = "配置列表", dataTypeClass = List.class)
     @PostMapping("/updateall")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {

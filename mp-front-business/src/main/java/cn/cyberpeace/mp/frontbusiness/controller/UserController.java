@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -78,6 +79,7 @@ public class UserController {
 
 
     @ApiOperation(value = "禁用用户", notes = "")
+    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
     @PostMapping("/disable")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "禁用用户", target = OpTargetEnums.USER)
@@ -91,6 +93,7 @@ public class UserController {
 
 
     @ApiOperation(value = "启用用户", notes = "")
+    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
     @PostMapping("/enable")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "启用用户", target = OpTargetEnums.USER)
@@ -103,6 +106,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "审核用户", notes = "")
+    @ApiImplicitParam(name = "userIds", value = "id列表", dataTypeClass = List.class)
     @PostMapping("/approve")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "审核用户", target = OpTargetEnums.USER)

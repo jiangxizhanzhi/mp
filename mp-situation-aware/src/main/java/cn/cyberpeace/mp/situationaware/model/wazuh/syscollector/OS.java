@@ -11,11 +11,13 @@ import lombok.Data;
  * @Date：2022/2/25 09:32
  */
 @Data
-@ApiModel("操作系统")
+@ApiModel("操作系统信息")
 public class OS {
 
+    @ApiModelProperty(value = "操作系统详细信息")
     private OSDetail os;
 
+    @ApiModelProperty(value = "扫描信息")
     private Scan scan;
 
     @ApiModelProperty(value = "版本")
@@ -40,7 +42,7 @@ public class OS {
     private String agentId;
 
     @Data
-    @ApiModel("OSDetail")
+    @ApiModel("操作系统详细信息")
     public static class OSDetail {
 
         @ApiModelProperty(value = "大版本号")

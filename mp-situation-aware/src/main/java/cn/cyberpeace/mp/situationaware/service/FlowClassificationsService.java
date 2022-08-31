@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,6 +98,6 @@ public class FlowClassificationsService {
             categoryDic.setSeverity(classification.getSeverity());
             return categoryDic;
         }).collect(Collectors.toList());
-        return flowClassificationsMapper.batchInsert(categoryDicList);
+        return flowClassificationsMapper.batchInsert(categoryDicList, LocalDateTime.now());
     }
 }

@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -28,7 +29,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsModel> todayAlarmStatistics() {
-        return this.getModelMapper().todayAlarmStatistics();
+        return this.getModelMapper().todayAlarmStatistics(LocalDateTime.now());
     }
 
     /**
@@ -37,7 +38,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serviceAlarmStatistics() {
-        return this.getModelMapper().serviceAlarmStatistics();
+        return this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now());
     }
 
     /**
@@ -46,6 +47,6 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsVO> serverAlarmStatistics() {
-        return this.getModelMapper().serverAlarmStatistics();
+        return this.getModelMapper().serverAlarmStatistics(LocalDateTime.now());
     }
 }

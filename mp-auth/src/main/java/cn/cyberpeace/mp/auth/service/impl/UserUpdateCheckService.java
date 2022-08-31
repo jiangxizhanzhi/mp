@@ -51,6 +51,14 @@ public class UserUpdateCheckService implements UserCheckService {
         }
 
         // 手机号是否合法
+        if (StringUtils.isNotBlank(user.getMobile())) {
+            // 如果手机号已存在，查看手机号是否是oldUser
+            UserModel userByMobile = userService.getByMobile(user.getMobile());
+
+            if (userByMobile != null && !Objects.equals(userByMobile.getId(), oldUser.getId())) {
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_MOBILE_EXISTED);
+            }
+        }
 
         if (StringUtils.isNotBlank(user.getUsername())) {
             // 如果username已存在，查看username是否是oldUser的
@@ -61,6 +69,14 @@ public class UserUpdateCheckService implements UserCheckService {
             }
         }
 
+        if (StringUtils.isNotBlank(user.getIdentifier())) {
+            // 如果identifier已存在，查看identifier是否是oldUser的
+            UserModel userByIdent = userService.getByIdent(user.getIdentifier());
+
+            if (userByIdent != null && !Objects.equals(userByIdent.getId(), oldUser.getId())) {
+                throw new MpRuntimeException(AuthErrorCode.ACCOUNT_IDENTIFIER_EXISTED);
+            }
+        }
 
     }
 

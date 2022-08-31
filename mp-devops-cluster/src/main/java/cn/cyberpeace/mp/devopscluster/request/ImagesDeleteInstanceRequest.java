@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -20,11 +21,13 @@ public class ImagesDeleteInstanceRequest extends BaseRequest {
     /**
      * 名称
      */
+    @ApiModelProperty(value = "UUID")
     private String uuid;
 
     /**
      * 镜像名称
      */
+    @ApiModelProperty(value = "镜像名称")
     private String imageType;
 
 }

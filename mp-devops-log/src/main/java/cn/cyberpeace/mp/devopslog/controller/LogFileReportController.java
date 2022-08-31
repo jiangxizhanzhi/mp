@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.devopslog.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopslog.request.LogReportRequest;
 import cn.cyberpeace.mp.devopslog.service.LogReportService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ public class LogFileReportController {
 
     @PostMapping
     @ApiOperation(value = "上报日志", notes = "")
+    @ApiImplicitParam(name = "request", value = "日志上报请求", dataTypeClass = LogReportRequest.class)
     public ServiceResult<Integer> report(@RequestBody LogReportRequest request) {
         return new ServiceResult(logReportService.report(request.getLogReportTypeEnum(),request.getList())).asResult();
     }

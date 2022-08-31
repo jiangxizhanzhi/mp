@@ -32,7 +32,7 @@
         VALUES
         <foreach collection="list" item="item" index="index"  separator=",">
         (
-            #{item.id},#{item.name},#{item.categoryEn},#{item.categoryZh},#{item.severity},now()
+            #{item.id},#{item.name},#{item.categoryEn},#{item.categoryZh},#{item.severity},#{currentTime}
         )
         </foreach>
     </insert>

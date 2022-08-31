@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class OrgController {
     private OrgService orgService;
 
     @ApiOperation(value = "根据parent组织获取下级组织", notes = "")
+    @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
     @GetMapping("/byparent")
     public ServiceResult getByParent(@RequestParam String parentId) {
         List<OrgModel> orgs = orgService.listByParent(parentId);
@@ -38,6 +40,7 @@ public class OrgController {
     }
 
     @ApiOperation(value = "根据组织路径查询", notes = "")
+    @ApiImplicitParam(name = "path", value = "组织路径", dataTypeClass = String.class)
     @GetMapping("/bypath")
     public ServiceResult<OrgModel> getByPath(@RequestParam String path) {
         OrgModel org = orgService.getByPath(path.trim());
@@ -45,6 +48,7 @@ public class OrgController {
     }
 
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")
+    @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/tree")
     public ServiceResult getOrgTree(@RequestParam(required = false) String orgId) {
         List<OrgDto> tree = orgService.getTree(orgId);

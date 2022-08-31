@@ -18,9 +18,11 @@ import java.util.List;
 public class NodeElementParseResult {
     private String id;
     private String name;
+    private String position;
     private String image;
     private String images;
     private String file;
+    private String virtualPlatform;
     private List<NetElementParseResult> net;
     private List<StaticRoutesResult> staticRoutes;
     private List<StaticRoutesResult> staticRouters;
