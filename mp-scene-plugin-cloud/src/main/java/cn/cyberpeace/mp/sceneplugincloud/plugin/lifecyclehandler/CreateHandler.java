@@ -210,6 +210,7 @@ public class CreateHandler extends HandlerCommon {
             var subnet = new VirtualSwitchCreateData.Subnet();
             subnet.setCidr(connectedNetwork.network.getCidr());
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
+            subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             // 默认开启dhcp
             var dhcp = connectedNetwork.network.getDhcp();
             subnet.setEnableDhcp(dhcp == null || dhcp);

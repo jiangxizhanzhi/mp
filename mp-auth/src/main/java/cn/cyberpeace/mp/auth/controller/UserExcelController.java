@@ -81,6 +81,7 @@ public class UserExcelController {
 
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
+    @ApiImplicitParam(name = "exportRequest", value = "导出请求")
     @PostMapping("/excel/export")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {

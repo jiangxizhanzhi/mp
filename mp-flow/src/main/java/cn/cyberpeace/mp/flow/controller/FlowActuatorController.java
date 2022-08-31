@@ -10,11 +10,17 @@ import cn.cyberpeace.mp.flow.request.AddVmInstanceRequest;
 import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.impl.AsyncPlatFlowTaskService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @Description: 流量执行控制器
@@ -40,6 +46,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      * @return
      */
     @ApiOperation("创建trex虚拟机")
+    @ApiImplicitParam(name = "addVmInstanceRequest", value = "创建请求")
     @PostMapping("/vm/add")
     public ServiceResult<String> addExecutor(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
         String uuid = TextUtils.uuid();
@@ -54,6 +61,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      * @return
      */
     @ApiOperation("删除虚拟机实例")
+    @ApiImplicitParam(name = "actuatorId", paramType = "path", value = "实例ID")
     @DeleteMapping("/vm/{actuatorId}")
     public ServiceResult<String> delExecutor(@PathVariable String actuatorId) {
         getModelService().delExecutor(actuatorId);

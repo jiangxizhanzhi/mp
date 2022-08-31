@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.frontbusiness.controller.register;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
@@ -19,6 +19,7 @@ import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,12 +50,14 @@ public class RegisterController {
 
     @ApiIgnore
     @ApiOperation(value = "获取注册短信", notes = "")
+    @ApiImplicitParam(name = "mobile", value = "手机号", dataTypeClass = String.class, required = true, dataType = "query")
     @GetMapping("/sms")
     public ServiceResult sms(@RequestParam String mobile) {
         return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
     }
 
     @ApiOperation(value = "注册接口", notes = "")
+    @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")
     @PostMapping
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "注册新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> register(@RequestBody @Validated RegisterRequest req) {

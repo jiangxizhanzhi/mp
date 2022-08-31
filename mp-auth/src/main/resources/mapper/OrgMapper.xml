@@ -14,12 +14,16 @@
         SELECT * FROM mp_auth_org where tenant = #{tenantId}
     </select>
 
-    <select id="getByPath" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
-        SELECT * FROM mp_auth_org where path = #{path}
-    </select>
+<!--    <select id="getByPath" resultType="cn.cyberpeace.mp.auth.model.OrgModel">-->
+<!--        SELECT * FROM mp_auth_org where path = #{path}-->
+<!--    </select>-->
 
-    <update id="updatePath">
-        update mp_auth_org set path = #{path} where id = #{id}
-    </update>
+<!--    <update id="updatePath">-->
+<!--        update mp_auth_org set path = #{path} where id = #{id}-->
+<!--    </update>-->
+
+    <select id="listByParentIdAndName" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
+        SELECT * FROM mp_auth_org where name = #{name} and parent = #{parentId}
+    </select>
 
 </mapper>

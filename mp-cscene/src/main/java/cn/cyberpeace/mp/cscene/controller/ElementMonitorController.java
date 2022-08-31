@@ -101,7 +101,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点文件变更事件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "path", value = "文件路径 模糊查询", dataTypeClass = String.class)
     })
     @GetMapping("/file_modify")
     public ListObjServiceResult<CollectionHostEventBO> fileModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
@@ -112,7 +112,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点文件变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/file_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> fileModifyHistogram(@RequestParam(required = false) Integer segmentCount,
@@ -123,7 +123,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "查询节点注册表变更事件")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "path", value = "注册表路径 模糊查询", dataTypeClass = String.class)
     })
     @GetMapping("/registry_modify")
     public ListObjServiceResult<CollectionHostEventBO> registryModify(ElementMonitorRequest pageRequest, @RequestParam(required = false) String path) {
@@ -134,7 +134,7 @@ public class ElementMonitorController {
 
     @ApiOperation(value = "节点注册表变更事件柱状图")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class),
+            @ApiImplicitParam(name = "segmentCount", value = "分段数，默认15", dataTypeClass = Integer.class)
     })
     @GetMapping("/registry_modify_histogram")
     public ServiceResult<List<ElementHistogramInfo>> registryModifyHistogram(@RequestParam(required = false) Integer segmentCount,

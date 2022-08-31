@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
 import cn.cyberpeace.mp.devopscluster.ws.ImagesByUuidSocketServer;
 import cn.cyberpeace.mp.devopscluster.ws.ImagesConnectSocketServer;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,7 @@ public class WebSocketNoticeController {
     private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
     @ApiOperation("根据镜像UUID获取登录链接信息")
+    @ApiImplicitParam(name = "uuid", value = "靶标id")
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
@@ -56,6 +58,7 @@ public class WebSocketNoticeController {
     }
 
     @ApiOperation("根据镜像UUID获取靶标信息")
+    @ApiImplicitParam(name = "uuid", value = "靶标id")
     @GetMapping("/device/get-by-uuid")
     public ServiceResult getByUuid(@RequestParam String uuid){
         ImageConvertModel convertModel = imagesConverter.findByUuid(uuid);

@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

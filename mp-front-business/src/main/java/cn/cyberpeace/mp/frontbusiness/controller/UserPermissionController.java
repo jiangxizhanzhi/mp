@@ -83,6 +83,7 @@ public class UserPermissionController {
 
 
     @ApiOperation(value = "绑定用户-资源关系，注意，该操作会清除用户原来绑定的权限。如果targetIds为空，表示删除用户所有角色！", notes = "")
+    @ApiImplicitParam(name="userTargetsReq", value="绑定请求")
     @PostMapping("/bind")
     public ServiceResult bindUserPermissions(@RequestBody @Validated BindUserTargetsRequest userTargetsReq) {
         boolean success = userPermissionService.bindUserTargets(userTargetsReq.getUserId(), userTargetsReq.getTargetIds(), true);

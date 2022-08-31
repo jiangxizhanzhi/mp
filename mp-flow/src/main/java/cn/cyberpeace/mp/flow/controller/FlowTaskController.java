@@ -15,11 +15,21 @@ import cn.cyberpeace.mp.flow.response.FlowRecordsResponse;
 import cn.cyberpeace.mp.flow.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.service.impl.FlowTaskServiceImpl;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +60,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("查询任务详情")
+    @ApiImplicitParam(name = "id", value = "任务ID")
     @GetMapping("/detail/{id}")
     public ServiceResult<FlowTaskModel> getDetail(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         return flowTaskService.getDetail(id, fields);
@@ -80,6 +91,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("新增流量任务")
+    @ApiImplicitParam(name = "request", value = "新增请求")
     @PostMapping("/add")
     public ServiceResult<FlowTaskModel> addFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
         return flowTaskService.addFlowTask(request);
@@ -92,6 +104,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("更新流量任务")
+    @ApiImplicitParam(name = "request", value = "更新请求")
     @PatchMapping("/update")
     public ServiceResult<FlowTaskModel> updateFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
         return flowTaskService.updateFlowTask(request);
@@ -104,6 +117,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("删除流量任务")
+    @ApiImplicitParam(name = "id", value = "任务ID")
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowTask(@PathVariable String id) {
         return flowTaskService.deleteFlowTask(id);
@@ -129,6 +143,10 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("执行流量任务")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "id", value = "任务ID", paramType = "path"),
+        @ApiImplicitParam(name = "taskAction", value = "任务类型 1:start 2:stop", paramType = "path")
+    })
     @PostMapping("/actuator/{id}/{taskAction}")
     public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
         return flowTaskService.actuator(id, taskAction, null, null);
@@ -140,6 +158,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("查询任务流量记录信息")
+    @ApiImplicitParam(name = "taskId", value = "任务ID", paramType = "query")
     @GetMapping("/flow/records")
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(@RequestParam String taskId) {
         return flowTaskService.queryFlowRecords(taskId);
@@ -151,6 +170,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("批量新增流量任务")
+    @ApiImplicitParam(name = "request", value = "批量新增请求", paramType = "body")
     @PostMapping("/batch/add")
     public ServiceResult<List<FlowTaskModel>> batchAddFlowTask(@RequestBody @Validated BatchAddFlowTaskRequest request) {
         return ServiceResult.success(flowTaskService.batchSavePlatFlowTask(request.getAddTaskRequestList()));
@@ -162,6 +182,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("批量执行流量任务")
+    @ApiImplicitParam(name = "request", value = "批量执行请求", paramType = "body")
     @PostMapping("/batch/actuator")
     public ServiceResult<Boolean> batchActuator(@RequestBody @Validated BatchActuatorTaskRequest request) {
         return flowTaskService.batchActuator(request);

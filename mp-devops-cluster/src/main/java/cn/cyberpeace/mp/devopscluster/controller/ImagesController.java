@@ -9,7 +9,11 @@ import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
@@ -21,13 +25,32 @@ import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devopscluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
-import cn.cyberpeace.mp.devopscluster.converter.model.*;
+import cn.cyberpeace.mp.devopscluster.converter.model.DeviceAndSnapshotConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.ImageTargetConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.InjectFileConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
 import cn.cyberpeace.mp.devopscluster.dto.ImageInjectFileDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.request.*;
+import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageInjectFilePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesAuthRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
+import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
@@ -44,6 +67,8 @@ import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -52,13 +77,26 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -117,6 +155,7 @@ public class ImagesController {
      * 新增
      */
     @ApiOperation("新增")
+    @ApiImplicitParam(name = "request", value = "查询信息请求体")
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult add(@RequestBody ImageRequest request){
@@ -129,6 +168,7 @@ public class ImagesController {
      * 更新
      */
     @ApiOperation("更新")
+    @ApiImplicitParam(name = "request", value = "更新信息请求体")
     @PostMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult update(@RequestBody ImageRequest request){
@@ -144,6 +184,7 @@ public class ImagesController {
      * 根据UUID查询
      */
     @ApiOperation("根据UUID查询")
+    @ApiImplicitParam(name = "uuid", value = "镜像ID")
     @GetMapping("/search/{uuid}")
     public Result<ImagesByIdVO> findByUuid(@PathVariable("uuid") String uuid) {
         ImageConvertModel model = imagesConverter.findByUuid(uuid);
@@ -179,6 +220,7 @@ public class ImagesController {
      * 根据UUID集合查询
      */
     @ApiOperation("根据UUID集合查询")
+    @ApiImplicitParam(name = "request", value = "查询信息请求体")
     @PostMapping("/search/uuids")
     public Result<List<ImagesByUuidsVO>> findByIds(@RequestBody ImageByUuidsRequest request){
         List<ImageTargetConvertModel> models = imagesConverter.findByUuids(request.getUuids());
@@ -195,6 +237,7 @@ public class ImagesController {
      * 构建
      */
     @ApiOperation("快速构建")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/build")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
@@ -207,6 +250,7 @@ public class ImagesController {
      * 删除镜像
      */
     @ApiOperation("删除")
+    @ApiImplicitParam(name = "request", value = "删除信息请求体")
     @DeleteMapping("/page")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
@@ -218,6 +262,7 @@ public class ImagesController {
      * 授权
      */
     @ApiOperation("授权/批量授权")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/auth")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "授权镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult auth(@RequestBody ImagesAuthRequest request){
@@ -229,6 +274,7 @@ public class ImagesController {
      * 授权
      */
     @ApiOperation("根据uuid查询授权用户信息")
+    @ApiImplicitParam(name = "uuid", value = "请求参数")
     @GetMapping("/auth-users")
     public Result<List<UserDto>> authUsers(@RequestParam("uuid") String uuid ){
         List<UserDto> userDtos = imagesConverter.findUsersByUuid(uuid);
@@ -239,6 +285,10 @@ public class ImagesController {
      * 导出
      */
     @ApiOperation("导出")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "请求参数"),
+            @ApiImplicitParam(name = "image_name", value = "镜像名称")
+    })
     @GetMapping("/export")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
@@ -268,6 +318,7 @@ public class ImagesController {
      * 删除虚拟机/容器
      */
     @ApiOperation("释放镜像机器")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/delete-instance")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
@@ -279,6 +330,7 @@ public class ImagesController {
      * 重启镜像机器
      */
     @ApiOperation("重启镜像机器")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/reboot")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
@@ -332,6 +384,7 @@ public class ImagesController {
      * 查询快照历史
      */
     @ApiOperation("根据镜像名称或快照名称查询镜像名称和快照历史信息")
+    @ApiImplicitParam(name = "name", value = "镜像名称")
     @GetMapping("/snapshot/by-name")
     public Result<DeviceAndSnapshotConvertModel> deviceAndSnapshotByName(@RequestParam String name){
         DeviceAndSnapshotConvertModel convertModel = snapshotConverter.deviceAndSnapshotByName(name);
@@ -342,6 +395,7 @@ public class ImagesController {
      * 合并快照历史
      */
     @ApiOperation("合并快照历史")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/snapshot/merge")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
@@ -353,6 +407,7 @@ public class ImagesController {
      * 删除快照
      */
     @ApiOperation("删除快照")
+    @ApiImplicitParam(name = "request", value = "删除数据请求体")
     @PostMapping("/snapshot/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
@@ -364,6 +419,7 @@ public class ImagesController {
      * 创建快照
      */
     @ApiOperation("创建快照")
+    @ApiImplicitParam(name = "request", value = "创建数据请求体")
     @PostMapping("/snapshot/create")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
@@ -375,6 +431,7 @@ public class ImagesController {
      * 文件注入
      */
     @ApiOperation("文件注入")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/inject-file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "文件注入", target = OpTargetEnums.IMAGE)
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
@@ -397,6 +454,7 @@ public class ImagesController {
      * 删除文件注入
      */
     @ApiOperation("删除文件注入")
+    @ApiImplicitParam(name = "request", value = "删除数据请求体")
     @DeleteMapping("/inject-file")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除文件注入", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
@@ -422,6 +480,7 @@ public class ImagesController {
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")
+    @ApiImplicitParam(name = "uuid", value = "设备ID")
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
@@ -429,6 +488,7 @@ public class ImagesController {
     }
 
     @ApiOperation("同步镜像数据")
+    @ApiImplicitParam(name = "request", value = "请求体")
     @PostMapping("/async")
     public ServiceResult async(@RequestBody ImageAsyncRequest request){
         List<Integer> requestIds = request.getIds();
@@ -476,6 +536,7 @@ public class ImagesController {
      * @param response
      */
     @ApiOperation("SSH文件下载方法")
+    @ApiImplicitParam(name = "filePath", value = "请求参数")
     @GetMapping(value = "/file/download/ssh")
     public void fileDownload(@RequestParam String filePath, HttpServletResponse response) throws MpRuntimeException {
         fileService.downloadFile(filePath, response);

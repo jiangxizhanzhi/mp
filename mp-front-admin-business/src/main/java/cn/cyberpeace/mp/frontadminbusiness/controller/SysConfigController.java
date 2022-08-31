@@ -70,6 +70,7 @@ public class SysConfigController {
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
+    @ApiImplicitParam(name = "updateConfig", value = "更新请求体")
     @PostMapping("/update/bykeyname")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
@@ -111,6 +112,7 @@ public class SysConfigController {
      * @return
      */
     @ApiOperation("系统logo导入")
+    @ApiImplicitParam(name = "file", value = "logo图片")
     @PostMapping(value = "/logo/upload")
     @ResponseBody
     public ServiceResult<FileResponseData> logoUpload(@RequestParam(value = "file") MultipartFile file) {
@@ -128,6 +130,7 @@ public class SysConfigController {
      * @return
      */
     @ApiOperation("VPN软件包导入")
+    @ApiImplicitParam(name = "file", value = "vpn软件包")
     @PostMapping(value = "/vpn/upload")
     @ResponseBody
     public ServiceResult<FileResponseData> importVPN(@RequestParam(value = "file") MultipartFile file) {
