@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.cscene.request.event.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.request.event.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ public class EventMonitorController {
      * @return
      */
     @ApiOperation(value = "查询一定时间范围内的事件总数")
+    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/sum")
     public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
         Long sum = eventMonitorService.sumEvent(baseRequest);
@@ -57,6 +59,7 @@ public class EventMonitorController {
      * @return
      */
     @ApiOperation(value = "根据事件占比多少，统计并排序节点，默认显示前5个节点")
+    @ApiImplicitParam(name = "eventPercentRequest", value = "查询数据请求体")
     @GetMapping("/aggr_top")
     public ServiceResult<List<ElementEventPercent>> getTopElementsByEventCount(EventPercentRequest eventPercentRequest) {
         List<ElementEventPercent> eventPercents = eventMonitorService.topElementByEventPercent(eventPercentRequest);
@@ -77,6 +80,7 @@ public class EventMonitorController {
      * @return
      */
     @ApiOperation(value = "根据事件类型，统计饼图")
+    @ApiImplicitParam(name = "baseRequest", value = "查询数据请求体")
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
@@ -92,6 +96,7 @@ public class EventMonitorController {
      * @return
      */
     @ApiOperation(value = "采集事件趋势图")
+    @ApiImplicitParam(name = "eventTrendRequest", value = "查询数据请求体")
     @GetMapping("/event_trend")
     public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
         List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);

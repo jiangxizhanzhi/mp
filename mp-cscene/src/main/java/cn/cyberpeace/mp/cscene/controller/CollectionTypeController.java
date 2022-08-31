@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,7 @@ public class CollectionTypeController {
     private CollectionTypeService collectionTypeService;
 
     @GetMapping("/list")
+    @ApiImplicitParam(name = "baseRequest", value = "查询信息请求体")
     @ApiOperation(value = "查询采集类型")
     public ServiceResult<List<CollectionType>> typesTree(BaseSceneElementRequest baseRequest) {
 
@@ -41,6 +43,7 @@ public class CollectionTypeController {
 
 
     @GetMapping("/apps")
+    @ApiImplicitParam(name = "appRequest", value = "查询信息请求体")
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
