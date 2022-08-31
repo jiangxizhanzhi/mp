@@ -515,19 +515,10 @@ public class ScenePluginCloudSceneService {
             if (accessMode.getPublicNetProxy() != null) {
                 if (Boolean.TRUE.equals(accessMode.getPublicNetProxy())) {
                     String ip = StringUtils.isNotEmpty(accessMode.getPublicNetProxyIp()) ? accessMode.getPublicNetProxyIp() : CloudSingleton.cloudAppConfig.getPublicNetProxyIp();
-                    Integer port = accessMode.getPublicNetProxyPort() != null ? accessMode.getPublicNetProxyPort() : accessMode.getAccessPort();
                     formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), ip);
-                    if (port != null) {
-                        formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
-                    }
                 }
             } else if (CloudSingleton.cloudAppConfig.getPublicNetProxy()) {
                 formatUrl = StringUtils.replaceOnce(formatUrl, u.getHost(), CloudSingleton.cloudAppConfig.getPublicNetProxyIp());
-                Integer port = CloudSingleton.cloudAppConfig.getPublicNetProxyPort() != null ? CloudSingleton.cloudAppConfig.getPublicNetProxyPort()
-                        : accessMode.getAccessPort();
-                if (port != null) {
-                    formatUrl = StringUtils.replaceOnce(formatUrl, String.valueOf(u.getPort()), String.valueOf(port));
-                }
             }
         }
         return formatUrl;
