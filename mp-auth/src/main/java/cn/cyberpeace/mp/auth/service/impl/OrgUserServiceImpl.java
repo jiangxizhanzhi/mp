@@ -59,6 +59,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     public static final String CACHE_VAL_ORGS_BY_USERID = "ORGS_BY_USERID";
 
+    public static final String CACHE_VAL_ORGS_LIST_ALL = "ORGS_LIST_ALL";
+
     @Autowired
     private OrgService orgService;
 
