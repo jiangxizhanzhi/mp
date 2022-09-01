@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -24,13 +23,10 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -47,14 +43,6 @@ public class RegisterController {
 
     @Autowired
     private RegisterService registerService;
-
-    @ApiIgnore
-    @ApiOperation(value = "获取注册短信", notes = "")
-    @ApiImplicitParam(name = "mobile", value = "手机号", dataTypeClass = String.class, required = true, dataType = "query")
-    @GetMapping("/sms")
-    public ServiceResult sms(@RequestParam String mobile) {
-        return ServiceResult.builder().message("OK").data("no sms support!").serviceCode(BaseErrorCode.SUCCESS).build();
-    }
 
     @ApiOperation(value = "注册接口", notes = "")
     @ApiImplicitParam(name = "req", value = "注册请求体", dataTypeClass = RegisterRequest.class, required = true, dataType = "body")

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
@@ -49,6 +50,13 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
      * @return
      */
     List<UserOrgMapDto> listUserOrgMapDtosByUserIds(List<String> userIds);
+
+    /**
+     * 批量查询用户组织对应关系
+     * @param userIds
+     * @return
+     */
+    List<UserOrgDto> listUserOrgByUserIds(List<String> userIds);
 
     /**
      * 列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织
