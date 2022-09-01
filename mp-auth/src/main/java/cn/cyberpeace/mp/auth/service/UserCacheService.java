@@ -30,6 +30,7 @@ public class UserCacheService {
             UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
             AuthUserDetailsService.CACHE_USER_AUTHORITIES,
             OrgUserServiceImpl.CACHE_VAL_ORGS_BY_USERID,
+            OrgUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL,
             UserRoleServiceImpl.CACHE_VAL_ROLES,
             UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS};
 
