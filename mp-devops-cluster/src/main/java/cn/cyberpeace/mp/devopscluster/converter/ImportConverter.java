@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImportService;
+import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devopscluster.model.ImportDiskSpaceCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.vo.ImportDiskSpaceVO;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -10,7 +11,7 @@ import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,11 +29,8 @@ public class ImportConverter implements BaseConverter{
 
     private final SysActivationService sysActivationService;
 
-    /**
-     * 承诺最大支持靶标的磁盘大小(G)
-     */
-    @Value("${mp.devops.max-target-size:100}")
-    private String maxTargetSize;
+    @Autowired
+    private DevopsConfig devopsConfig;
 
     /**
      * 获取磁盘剩余空间
@@ -47,7 +45,7 @@ public class ImportConverter implements BaseConverter{
             ActivationItem activationItem = activationResponse.getItems().stream().filter(item ->
                     ("LCS-RES-CR-ACTIVENODES").equals(item.getKey())).findFirst().get();
             BigDecimal maxCount = new BigDecimal(activationItem.getValue());
-            BigDecimal maxSize = new BigDecimal(maxTargetSize);
+            BigDecimal maxSize = new BigDecimal(devopsConfig.getMaxTargetSize());
             // 单位换算倍数
             BigDecimal multi = new BigDecimal(1024);
             // 预留容量
