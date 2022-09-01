@@ -50,4 +50,14 @@ public class DevopsConfig {
      * 承诺最大支持靶标的磁盘大小(G)
      */
     private String maxTargetSize;
+
+    /**
+     * 云平台接口IP
+     */
+    private String cpIp;
+
+    /**
+     * MP接口IP
+     */
+    private String mpIp;
 }
