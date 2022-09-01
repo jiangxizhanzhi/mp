@@ -18,4 +18,10 @@ public class FlowConfig {
      * trex镜像名称
      */
     private String trexImage;
+
+    /**
+     * 云平台地址
+     */
+    private String cpUrl;
+
 }

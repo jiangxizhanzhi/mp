@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.base.util.NetworkUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.json.JsonUtils;
-import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
@@ -54,12 +53,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AsyncPlatFlowTaskService {
-
-    /**
-     * 通过 commonAppConfig 获取云平台地址
-     */
-    @Autowired
-    private CommonAppConfig commonAppConfig;
 
     @Autowired
     private FlowConfig flowConfig;
@@ -440,7 +433,7 @@ public class AsyncPlatFlowTaskService {
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
         try {
-            String getNetworkRsp = HttpUtils.sendPost(commonAppConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
+            String getNetworkRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/virtual_internet", new JSONObject().toJSONString());
             JSONObject getNetworkObj = JSONObject.parseObject(getNetworkRsp);
             log.info("get network response:{}", getNetworkObj.toJSONString());
             if (BaseConstants.SUCCESS_ZERO.equals(getNetworkObj.getString(BaseConstants.STR_CODE))) {
@@ -466,7 +459,7 @@ public class AsyncPlatFlowTaskService {
 
         try {
             // 创建trex虚拟机
-            String addVmRsp = HttpUtils.sendPost(commonAppConfig.getCpUrl() + "/v1/scenarios/vm",
+            String addVmRsp = HttpUtils.sendPost(flowConfig.getCpUrl() + "/v1/scenarios/vm",
                     JsonUtils.snakeStringify(addVmRequest));
             JSONObject addVmObj = JSONObject.parseObject(addVmRsp);
             log.info("add trex vm response:{}", addVmObj.toJSONString());
@@ -545,7 +538,7 @@ public class AsyncPlatFlowTaskService {
                 // 删除网口信息
                 if (StringUtils.isNotBlank(flowPortModel.getServerPortId())) {
                     String delServerPortRsp =
-                            HttpUtils.sendDelete(commonAppConfig.getCpUrl() + "/v1/instances/" + flowActuatorModel.getInstanceId() +
+                            HttpUtils.sendDelete(flowConfig.getCpUrl() + "/v1/instances/" + flowActuatorModel.getInstanceId() +
                                     "/interfaces/" + flowPortModel.getServerPortId());
                     JSONObject delServerPortObj = JSONObject.parseObject(delServerPortRsp);
                     log.info("del server port response:{}", delServerPortObj.toJSONString());
@@ -556,7 +549,7 @@ public class AsyncPlatFlowTaskService {
 
                 if (StringUtils.isNotBlank(flowPortModel.getClientPortId())) {
                     String delClientPortRsp =
-                            HttpUtils.sendDelete(commonAppConfig.getCpUrl() + "/v1/instances/" + flowActuatorModel.getInstanceId() +
+                            HttpUtils.sendDelete(flowConfig.getCpUrl() + "/v1/instances/" + flowActuatorModel.getInstanceId() +
                                     "/interfaces/" + flowPortModel.getClientPortId());
                     JSONObject delClientPortObj = JSONObject.parseObject(delClientPortRsp);
                     log.info("del client port response:{}", delClientPortObj.toJSONString());

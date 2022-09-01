@@ -225,6 +225,7 @@ mp:
   # mp-flow 模块配置
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
+    cp-url: http://${ip.cp}:11111 #云平台地址
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
     delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}

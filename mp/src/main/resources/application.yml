@@ -218,6 +218,7 @@ mp:
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
+    cp-url: http://${ip.cp}:11111 #云平台地址
   sceneplugincloud:
     cpcloud-server: http://${ip.cp}:11111
   sceneplugincollection:
