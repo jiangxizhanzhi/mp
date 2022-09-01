@@ -1,0 +1,1 @@
+ALTER TABLE `mp_auth_org` DROP COLUMN `path`;
