@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 /**
  * @Description
  * @Author shgang
@@ -26,4 +28,18 @@ public class AuthConfig {
      * 默认头像
      */
     private String defaultUserAvatar;
+
+    private Integer authenticateCacheTime;
+
+    private Boolean authenticateUseIndividualTokenSecret;
+
+    private String authenticateJwtSecret;
+
+    private Long authenticateJwtExpires;
+
+    // 需要认证的url
+    private List<String> authenticateUrls;
+
+    private Integer authenticateEncoderIterations;
+    private Integer authenticateEncoderHashWidth;
 }

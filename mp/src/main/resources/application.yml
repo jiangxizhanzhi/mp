@@ -192,13 +192,13 @@ mp:
     logout-reset-secret: true
     default-User-Avatar: /api/mp/avatar/1.png
     # authenticate
-    authenticate.cache-time: 30
-    authenticate.use-individual-token-secret: true
-    authenticate.jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d
-    authenticate.jwt-expires: 604800
-    authenticate.urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
-    authenticate.encoder.iterations:
-    authenticate.encoder.hash-width:
+    authenticate-cache-time: 30
+    authenticate-use-individual-token-secret: true
+    authenticate-jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d
+    authenticate-jwt-expires: 604800
+    authenticate-urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
+    authenticate-encoder-iterations:
+    authenticate-encoder-hash-width:
   # mp-front-admin 模块配置
   front.admin.activation:
     enable: true

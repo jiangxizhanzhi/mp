@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.config.security;
 
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationFailureHandler;
 import cn.cyberpeace.mp.auth.extensions.security.CustomAuthenticationSuccessHandler;
@@ -47,7 +48,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private LoadAuthoritiesFilter loadAuthoritiesFilter;
 
     @Autowired
-    private AuthenticateConfig authenticateConfig;
+    private AuthConfig authConfig;
 
     @Autowired
     public WebSecurityConfig(AuthUserDetailsService userDetailsService,
@@ -78,8 +79,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // custom authenticate urls
         String[] authenticateUrls = {};
-        if (CollectionUtil.isNotEmpty(authenticateConfig.getUrls())) {
-            authenticateUrls = authenticateConfig.getUrls().toArray(new String[authenticateConfig.getUrls().size()]);
+        if (CollectionUtil.isNotEmpty(authConfig.getAuthenticateUrls())) {
+            authenticateUrls = authConfig.getAuthenticateUrls().toArray(new String[authConfig.getAuthenticateUrls().size()]);
         }
 
         http.authorizeRequests()
