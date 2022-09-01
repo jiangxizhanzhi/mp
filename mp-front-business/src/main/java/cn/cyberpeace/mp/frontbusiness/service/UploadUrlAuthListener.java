@@ -32,24 +32,7 @@ public class UploadUrlAuthListener extends AnalysisEventListener<ImportUrlAuth> 
 
     List<ImportUrlAuth> list = new ArrayList<>();
 
-    //private TargetService targetService;
-
     private UrlACService urlACService;
-
-    //private OperateUserPermissionService opUserPermCheckService;
-
-    /**
-     * 如果使用了spring,请使用这个构造方法。每次创建Listener的时候需要把spring管理的类传进来
-     *
-     * @param userService
-     */
-    //public UploadUrlAuthListener(UserService userService, RoleService roleService, OrgService orgService, OperateUserPermissionService opUserPermCheckService) {
-    //    log.info("New UploadDataListener Instance...");
-    //    this.userService = userService;
-    //    this.roleService = roleService;
-    //    this.orgService = orgService;
-    //    this.opUserPermCheckService = opUserPermCheckService;
-    //}
 
     public UploadUrlAuthListener(UrlACService urlACService) {
         this.urlACService = urlACService;

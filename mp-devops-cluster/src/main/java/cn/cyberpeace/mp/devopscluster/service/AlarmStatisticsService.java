@@ -24,13 +24,13 @@ public interface AlarmStatisticsService extends BaseModelService<AlarmStatistics
      * 服务告警趋势
      * @return
      */
-    List<AlarmStatisticsVO> serviceAlarmStatistics();
+    List<AlarmStatisticsVO> serviceAlarmStatistics(int days);
 
     /**
      * 设备告警趋势
      * @return
      */
-    List<AlarmStatisticsVO> serverAlarmStatistics();
+    List<AlarmStatisticsVO> serverAlarmStatistics(int days);
 
 }
 
