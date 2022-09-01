@@ -87,6 +87,7 @@ mp:
   common:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
+  # mp-devops-cluster 配置
   devops.cluster:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
@@ -136,6 +137,8 @@ mp:
     probe-mgr-task-enable: true
     #moloch es节点地址
     es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
+    # es 日期格式
+    es-date-pattern: ${ES-DATE-PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
   collection:
     #自定义探针配置
     probe:

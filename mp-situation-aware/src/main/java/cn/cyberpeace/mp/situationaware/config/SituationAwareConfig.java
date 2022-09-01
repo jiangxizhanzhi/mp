@@ -17,6 +17,11 @@ public class SituationAwareConfig {
     private String esNodes;
 
     /**
+     *
+     */
+    private String esDatePattern;
+
+    /**
      * monitors 服务监控
      */
     private List<MonitorProbe> cpSrvMonitors;

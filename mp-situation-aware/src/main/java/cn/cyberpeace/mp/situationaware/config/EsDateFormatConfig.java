@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.situationaware.config;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
@@ -17,11 +17,12 @@ public class EsDateFormatConfig {
 
     public static DateTimeFormatter esDateTimeFormatter = null;
 
-    @Value("${mp.situationaware.es.date_pattern:yyyy-MM-dd'T'HH:mm:ss.SSSZ}")
-    private String datePattern;
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     @PostConstruct
     public void init() {
+        String datePattern = situationAwareConfig.getEsDatePattern();
         esDateTimeFormatter = DateTimeFormatter.ofPattern(datePattern);
     }
 
