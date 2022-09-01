@@ -75,6 +75,7 @@ public class FdfsClient implements FileClient {
         connectionPool = new GenericObjectPool<>(new ConnectionFactory(trackerClient), poolConfig);
     }
 
+    @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
         String fdfsFilePath;
         try (is; var connection = getConnection()) {
@@ -88,6 +89,7 @@ public class FdfsClient implements FileClient {
         return fdfsFilePath;
     }
 
+    @Override
     public void download(String fdfsFilepath, OutputStream os) {
         try (var connection = getConnection()) {
             connection.getStorageClient().download_file1(fdfsFilepath, new DownloadStream(os));
@@ -99,6 +101,7 @@ public class FdfsClient implements FileClient {
         }
     }
 
+    @Override
     public boolean delete(String fdfsFilepath) {
         try (var connection = getConnection()) {
             log.info("delete fdfs file, file path: {}", fdfsFilepath);

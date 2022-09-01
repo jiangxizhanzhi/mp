@@ -95,7 +95,7 @@ public class FlowExecutor {
         addFlowTaskRequest.setCount(count == null ? DEFAULT_INSTANCE.getCount() : delay);
         addFlowTaskRequest.setIntervalTime(interval == null ? DEFAULT_INSTANCE.getIntervalTime() : interval);
         var result = flowService3.addFlowTask(addFlowTaskRequest);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
         return result.getData().getId();
@@ -154,14 +154,14 @@ public class FlowExecutor {
 
     public void startFlow(String taskId, Runnable stopCallback, Consumer<String> errorCallback) {
         var result = flowService3.actuator(taskId, TaskActionEnum.START.toValue(), stopCallback, errorCallback);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void stopFlow(String taskId) {
         var result = flowService3.actuator(taskId, TaskActionEnum.STOP.toValue(), null, null);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
@@ -173,7 +173,7 @@ public class FlowExecutor {
         request.setTaskAction(TaskActionEnum.START.toValue());
         request.setCallbackConsumer(callbackConsumer);
         var result = flowService3.batchActuator(request);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
@@ -183,14 +183,14 @@ public class FlowExecutor {
         request.setTaskAction(TaskActionEnum.STOP.toValue());
         request.setTaskIds(taskIds);
         var result = flowService3.batchActuator(request);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }
 
     public void deleteFlow(String taskId) {
         var result = flowService3.deleteFlowTask(taskId);
-        if (!result.isSuccess()) {
+        if (!result.judgeSuccess()) {
             throw new MpRuntimeException(result.getServiceCode());
         }
     }

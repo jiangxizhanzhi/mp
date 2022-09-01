@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

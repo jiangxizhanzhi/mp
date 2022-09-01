@@ -9,4 +9,8 @@ public interface SearchQueryParams {
 
     String[] getSearchFields();
 
+    void setSearch(String search);
+
+    void setSearchFields(String[] searchFields);
+
 }

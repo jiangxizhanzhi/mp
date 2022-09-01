@@ -9,11 +9,6 @@ import org.slf4j.MDC;
 
 import java.lang.reflect.Field;
 
-/**
- * @Description 异步打印日志, 向 eventObject 中加入追踪id
- * @Author maojun
- * @Date 2021/9/26
- */
 public class LogAsyncAppender extends AsyncAppender {
 
     private static final Field mdcPropertyMapField = ClassUtils.getField(LoggingEvent.class, "mdcPropertyMap", false, false);

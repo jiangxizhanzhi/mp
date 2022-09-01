@@ -27,7 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description:
@@ -55,6 +60,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private UserCacheService userCacheService;
 
     @Autowired
+    private OrgPathService orgPathService;
+
+    @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -75,7 +83,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
             }
         }
-        return super.create(obj, fields);
+
+        ObjServiceResult<OrgModel> orgModelObjServiceResult = super.create(obj, fields);
+        OrgModel createModel = orgModelObjServiceResult.getData();
+        createModel.setPath(this.getPath(createModel));
+        userCacheService.evictAllUserCache();
+        return orgModelObjServiceResult;
     }
 
     @Override
@@ -105,6 +118,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         // 1.先更新OrgModel信息
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
+        OrgModel resultModel = result.getData();
+        resultModel.setPath(this.getPath(resultModel));
 
         userCacheService.evictAllUserCache();
         return result;
@@ -144,7 +159,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public String getPath(OrgModel orgModel) {
         String path = orgModel.getName();
         if (StringUtils.isNotBlank(orgModel.getParent())) {
-            List<OrgModel> orgModelList = this.getModelMapper().listAll(orgModel.getTenant());
+
+            List<OrgModel> orgModelList = orgPathService.listByTenant(orgModel.getTenant());
 
             while (StringUtils.isNotBlank(orgModel.getParent())) {
                 String parentId = orgModel.getParent();
@@ -245,6 +261,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgModel> listParents() {
         List<OrgModel> orgs = getModelMapper().listParents();
+        orgs.forEach(org -> org.setPath(this.getPath(org)));
         return orgs;
     }
 
@@ -252,12 +269,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public List<OrgModel> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
         List<OrgModel> orgs = getModelMapper().listByParentId(parentId);
+        orgs.forEach(org -> org.setPath(this.getPath(org)));
         return orgs;
     }
 
     @Override
     public List<OrgModel> listAll(String tenantId) {
         List<OrgModel> orgs = getModelMapper().listAll(tenantId);
+        orgs.forEach(org -> org.setPath(this.getPath(org)));
         return orgs;
     }
 
@@ -350,6 +369,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                     // 最后一个，获取组织
                     if (i == (pathArray.length - 1)) {
                         orgModel = tmpModel;
+                        orgModel.setPath(path);
                     }
                 }
             }

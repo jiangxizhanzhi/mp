@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
-import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 
@@ -31,17 +31,7 @@ public interface BaseModelListControllerBase {
      * @param queryParams 查询参数
      */
     default void handleQueryParams(String listFuncName, QueryParams queryParams) {
-        queryParams.ensure();
-
-        int page = queryParams.getPage() == null ? 1 : queryParams.getPage();
-        int pageSize = queryParams.getPageSize() == null ? 0 : queryParams.getPageSize();
-        if (pageSize <= 0) {
-            pageSize = BaseSingleton.baseAppConfig.getDefaultPageSize();
-        } else if (pageSize > BaseSingleton.baseAppConfig.getMaxPageSize() && !isUnlimitPagination(listFuncName)) {
-            pageSize = BaseSingleton.baseAppConfig.getMaxPageSize();
-        }
-        queryParams.setPage(page);
-        queryParams.setPageSize(pageSize);
+        ControllerCommon.convertValidQueryParams(queryParams, isUnlimitPagination(listFuncName));
     }
 
 }

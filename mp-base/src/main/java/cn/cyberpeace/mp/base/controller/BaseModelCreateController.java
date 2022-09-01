@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -31,7 +32,7 @@ public interface BaseModelCreateController<M extends BaseModel, S extends BaseMo
     })
     @PostMapping
     default ObjServiceResult<M> create(@RequestBody M obj, @RequestParam(required = false) String[] fields) {
-        return getModelService().create(obj, fields).asResult();
+        return getModelService().create(obj, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
 }

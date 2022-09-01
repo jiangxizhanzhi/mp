@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.base.util.fdfsclient;
+package cn.cyberpeace.mp.common.deprecated;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
+ * @Deprecated
  * @Description: FastDFS返回对象
  * @Author qiaokang
  * @Date：2021/6/21 15:01

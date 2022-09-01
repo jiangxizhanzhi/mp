@@ -8,6 +8,8 @@ import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
+import cn.cyberpeace.mp.base.service.bo.ModelBO;
+import cn.cyberpeace.mp.base.service.common.ModelServiceCommon;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +74,15 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     }
 
 
-    public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String search, String[] searchFields,
+    public HumanCondition getHumanCondition(String[] selectFields, String[] ids, String[] exclude,
+                                            String search, String[] searchFields,
                                             String[] orders, Integer page, Integer pageSize) {
         var humanCondition = getHumanCondition(selectFields);
         if (ids != null && ids.length > 0) {
             humanCondition.filterIn(BaseModel::getId, ids);
+        }
+        if (exclude != null && exclude.length > 0) {
+            humanCondition.filterNotIn(BaseModel::getId, exclude);
         }
         humanCondition.pagination(page, pageSize);
         handleSearchCondition(humanCondition, search, searchFields);
@@ -113,12 +121,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     }
 
     @Override
-    public ListObjServiceResult<M> list(Q queryParams) {
+    public ListObjServiceResult<M> list(Q queryParams, boolean withTotal) {
         F actualModelFields = getModelFields();
         DynamicFields validModelFields = actualModelFields != null ?
                 actualModelFields.getValidFields(queryParams.getFields()) : null;
         String[] selectFields = validModelFields != null ? validModelFields.getFields() : null;
-        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(),
+        var humanCondition = getHumanCondition(selectFields, queryParams.getIds(), queryParams.getExclude(),
                 queryParams.getSearch(), queryParams.getSearchFields(), queryParams.getOrders(), queryParams.getPage(),
                 queryParams.getPageSize());
         loadListFilterCondition(humanCondition, queryParams);
@@ -126,10 +134,12 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
                 CustomConditionClass.class));
 
         List<M> data;
-        int total;
+        var total = 0;
         try {
             data = getModelMapper().list(humanCondition);
-            total = getModelMapper().total(humanCondition);
+            if (withTotal) {
+                total = getModelMapper().total(humanCondition);
+            }
         } catch (Exception e) {
             log.error("Service list error: {}", e.getMessage());
             return new ListObjServiceResult<>(null, BaseErrorCode.ERROR, e.getMessage());
@@ -308,4 +318,16 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
+    @Override
+    public <T extends ModelBO<M, T>> ServiceResult<Boolean> exportExcel(Q queryParams, OutputStream os, Class<T> tClass) {
+        var modelResult = list(queryParams);
+        ModelServiceCommon.exportListExcel(modelResult, os, tClass);
+        return new ServiceResult<>(true);
+    }
+
+    @Override
+    public <T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(InputStream is, Class<T> tClass) {
+        var objs = ModelServiceCommon.importListExcel(is, tClass);
+        return bulkCreate(objs);
+    }
 }
