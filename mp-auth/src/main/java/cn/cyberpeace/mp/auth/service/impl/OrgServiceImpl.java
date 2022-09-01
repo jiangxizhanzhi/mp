@@ -104,12 +104,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         if (StringUtils.isBlank(obj.getIdentifier())) {
             obj.setIdentifier(null);
         }
-
         // 是否需要更新组织名称
         boolean needUpdateName = StringUtils.isNotBlank(obj.getName()) && !Objects.equals(obj.getName(), oldOrg.getName());
 
         // 查看组织path是否重复
         if (needUpdateName) {
+            obj.setParent(oldOrg.getParent());
             if (this.checkExist(obj)) {
                 log.info("org child already exited! {}", obj.getName());
                 throw new MpRuntimeException(AuthErrorCode.ORG_CHILD_ALREADY_EXISTED);
@@ -130,10 +130,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private boolean checkExist(OrgModel obj) {
         String parentId = obj.getParent();
         String name = obj.getName();
-        if (Objects.isNull(parentId) || Objects.isNull(name)) {
-            log.error("parentId and name can not be empty");
-            return true;
-        }
 
         List<OrgModel> orgModelList = this.getModelMapper().listByParentIdAndName(parentId, name);
         if (CollectionUtil.isNotEmpty(orgModelList)) {
