@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
@@ -48,11 +47,8 @@ public class ScreenrecordService extends BaseCpService {
         super(devopsConfig);
     }
 
-    /**
-     * 通过 commonAppConfig 获取云平台地址
-     */
     @Autowired
-    private CommonAppConfig commonAppConfig;
+    private DevopsConfig devopsConfig;
 
     @Autowired
     private ScreenshotService screenshotService;
@@ -264,7 +260,7 @@ public class ScreenrecordService extends BaseCpService {
         BufferedInputStream bin = null;
         OutputStream os = null;
         try {
-            URL url = new URL(commonAppConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
+            URL url = new URL(devopsConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
             // 建立连接
             URLConnection urlConnection = url.openConnection();
             // http的连接类
