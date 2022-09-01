@@ -14,13 +14,13 @@ import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -85,17 +85,21 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
      */
     @ApiOperation("系统告警统计信息")
     @GetMapping("/statistics")
-    public ServiceResult<SystemAlarmVO> getSystemAlarm() {
+    public ServiceResult<SystemAlarmVO> getSystemAlarm(@RequestParam(required = false) Integer days) {
         SystemAlarmVO systemAlarm = serviceMonitorService.getSystemAlarm();
 
+        if (Objects.isNull(days) || days < 1) {
+            days = 30;
+        }
+
         // 服务告警
-        List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics();
+        List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
         if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
             systemAlarm.setServiceAlarmList(serviceAlarmList);
         }
 
         // 设备告警
-        List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics();
+        List<AlarmStatisticsVO> serverAlarmList = alarmStatisticsService.serverAlarmStatistics(days);
         if (CollectionUtils.isNotEmpty(serverAlarmList)) {
             systemAlarm.setServerAlarmList(serverAlarmList);
         }

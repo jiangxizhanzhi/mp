@@ -10,8 +10,11 @@ import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -37,8 +40,10 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      * @return
      */
     @Override
-    public List<AlarmStatisticsVO> serviceAlarmStatistics() {
-        return this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now());
+    public List<AlarmStatisticsVO> serviceAlarmStatistics(int days) {
+        var list = this.getModelMapper().serviceAlarmStatistics(LocalDateTime.now(), days);
+
+        return processTrend(list, days);
     }
 
     /**
@@ -46,7 +51,30 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      * @return
      */
     @Override
-    public List<AlarmStatisticsVO> serverAlarmStatistics() {
-        return this.getModelMapper().serverAlarmStatistics(LocalDateTime.now());
+    public List<AlarmStatisticsVO> serverAlarmStatistics(int days) {
+        var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
+        return processTrend(list, days);
+    }
+
+    private List<AlarmStatisticsVO> processTrend(List<AlarmStatisticsVO> voList, int days) {
+        LocalDate nowDate = LocalDate.now();
+        LocalDate startDate = nowDate.minusDays(days);
+        List<AlarmStatisticsVO> finalList = new ArrayList<>();
+        LocalDate date = startDate.plusDays(1);
+        while (!date.isAfter(nowDate)) {
+            LocalDate finalDate = date;
+            Optional<AlarmStatisticsVO> optional = voList.stream().filter(vo -> vo.getAlarmDate().isEqual(finalDate)).findFirst();
+            if (optional.isPresent()) {
+                finalList.add(optional.get());
+            } else {
+                AlarmStatisticsVO vo = new AlarmStatisticsVO();
+                vo.setAlarmDate(date);
+                vo.setAlarmCount(0);
+                finalList.add(vo);
+            }
+            date = date.plusDays(1);
+        }
+
+        return finalList;
     }
 }
