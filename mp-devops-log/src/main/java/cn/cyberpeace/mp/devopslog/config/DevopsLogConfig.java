@@ -30,4 +30,9 @@ public class DevopsLogConfig {
      * MP新中台ES地址
      */
     private String esNodes;
+
+    /**
+     * 云平台地址
+     */
+    private String cpUrl;
 }
