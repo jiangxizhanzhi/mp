@@ -25,6 +25,9 @@ public class AgentNameUtils {
     }
 
     public static boolean isAgentNamesEmpty(List<String> agentNames) {
+        if (CollectionUtils.isEmpty(agentNames)) {
+            return true;
+        }
         List<String> processedAgentNames = agentNamesExcludeNullValue(agentNames);
         boolean isEmpty = CollectionUtils.isEmpty(processedAgentNames);
         if (isEmpty) {

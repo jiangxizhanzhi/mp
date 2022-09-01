@@ -1,15 +1,11 @@
 package cn.cyberpeace.mp.collection.constant;
 
-import com.google.common.cache.LoadingCache;
-
 import java.util.List;
 
 /**
- * 态势感知全局缓存
+ * 数据采集静态变量
  */
 public class CollectionConstant {
-    public static LoadingCache<String, String> wazuhToken;
-
     public static String ERROR_CODE_PREFIX = "collection.error_code.";
 
     public static List<String> VULNERABILITY_GROUP = List.of("vulnerability-detector");

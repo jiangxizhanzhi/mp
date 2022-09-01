@@ -5,92 +5,92 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.collection.constant.CollectionConstant;
-import cn.cyberpeace.mp.collection.model.*;
+import cn.cyberpeace.mp.collection.core.model.FileEvent;
+import cn.cyberpeace.mp.collection.core.model.WazuhProbeCommon;
+import cn.cyberpeace.mp.collection.core.model.WazuhVulnerabilityInfo;
+import cn.cyberpeace.mp.collection.core.model.WazuhVulnerabilityInfoCount;
+import cn.cyberpeace.mp.collection.core.request.WazuhEventRequest;
+import cn.cyberpeace.mp.collection.core.clientmanager.ClientManagerCommon;
 import cn.cyberpeace.mp.collection.request.*;
 import cn.cyberpeace.mp.collection.service.DataCollectService;
-import cn.cyberpeace.mp.collection.core.es.CollectionClient;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 @Service
 public class DataCollectServiceImpl implements DataCollectService {
-    @Resource
-    private CollectionClient collectionClient;
-
     // expires in 10 minutes
-    private TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000);
+    private final TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
 
     @Override
-    public ListObjServiceResult<FileEventModel> queryFileModifyEvents(SyscheckEventRequest request) {
-        WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
-        BeanUtils.copyProperties(request, wazuhEventRequest);
-        wazuhEventRequest.setRuleGroups(CollectionConstant.FILE_MODIFY_GROUP);
-        var result = collectionClient.queryFileEvents(wazuhEventRequest);
+    public ListObjServiceResult<FileEvent> queryFileModifyEvents(SyscheckEventRequest request) {
+        WazuhEventRequest eventRequest = new WazuhEventRequest();
+        BeanUtils.copyProperties(request, eventRequest);
+        eventRequest.setRuleGroups(CollectionConstant.FILE_MODIFY_GROUP);
+        var result = ClientManagerCommon.clientManager.queryFileEvents(eventRequest);
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> queryRegistryModifyEvents(SyscheckEventRequest request) {
+    public ListObjServiceResult<FileEvent> queryRegistryModifyEvents(SyscheckEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
         wazuhEventRequest.setRuleGroups(CollectionConstant.REGISTRY_MODIFY_GROUP);
-        var result = collectionClient.queryFileEvents(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.queryFileEvents(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> queryFileEvents(DataCollectEventRequest request) {
+    public ListObjServiceResult<FileEvent> queryFileEvents(DataCollectEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.queryFileEvents(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.queryFileEvents(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<FileEventModel> scrollFileEvents(DataCollectEventRequest request) {
+    public ListObjServiceResult<FileEvent> scrollFileEvents(DataCollectEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        ListObjResult<FileEventModel> result;
+        ListObjResult<FileEvent> result;
         String requestId = request.getRequestId();
         if (Objects.isNull(TIMED_CACHE.get(requestId))) {
-            result = collectionClient.queryFileEvents(wazuhEventRequest);
+            result = ClientManagerCommon.clientManager.queryFileEvents(wazuhEventRequest);
             TIMED_CACHE.put(requestId, result.getObjs().get(0).getScrollId());
         } else {
-            result = collectionClient.scrollFileEvents(TIMED_CACHE.get(requestId));
+            result = ClientManagerCommon.clientManager.scrollFileEvents(TIMED_CACHE.get(requestId));
         }
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<WazuhProbeCommonModel> queryCustomProbeData(CustomDataQueryRequest request) {
+    public ListObjServiceResult<WazuhProbeCommon> queryCustomProbeData(CustomDataQueryRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.queryCustomProbeData(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.queryCustomProbeData(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(VulnerabilityEventRequest request) {
+    public ListObjServiceResult<WazuhVulnerabilityInfo> queryVulnerabilityInfo(VulnerabilityEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
         wazuhEventRequest.setRuleGroups(CollectionConstant.VULNERABILITY_GROUP);
-        var result = collectionClient.queryVulnerabilityInfo(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.queryVulnerabilityInfo(wazuhEventRequest);
         return new ListObjServiceResult<>(result);
     }
 
     @Override
-    public ServiceResult<List<WazuhVulnerabilityInfoCountModel>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request) {
+    public ServiceResult<List<WazuhVulnerabilityInfoCount>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
         wazuhEventRequest.setRuleGroups(CollectionConstant.VULNERABILITY_GROUP);
-        var result = collectionClient.queryVulnerabilityCountInfo(wazuhEventRequest,
-                request.getFiledPath(), request.getFiledName());
+        var result = ClientManagerCommon.clientManager
+                .queryVulnerabilityCountInfo(wazuhEventRequest, request.getFiledPath(), request.getFiledName());
         return new ServiceResult<>(result);
     }
 
@@ -98,7 +98,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ServiceResult<Map<String, Long>> countByAgentNamesBucket(BaseEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.countByAgentNamesBucket(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.countByAgentNamesBucket(wazuhEventRequest);
         return new ServiceResult<>(result);
     }
 
@@ -106,7 +106,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ServiceResult<Long> countByAgentNames(BaseEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.countByAgentNames(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.countByAgentNames(wazuhEventRequest);
         return new ServiceResult<>(result);
     }
 
@@ -114,7 +114,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ServiceResult<Map<String, Long>> aggsRuleIdsByAgentName(BaseEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.aggsRuleIdsByAgentName(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.aggsRuleIdsByAgentName(wazuhEventRequest);
         return new ServiceResult<>(result);
     }
 
@@ -122,7 +122,7 @@ public class DataCollectServiceImpl implements DataCollectService {
     public ServiceResult<Long> deleteDocByAgentNames(BaseEventRequest request) {
         WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
         BeanUtils.copyProperties(request, wazuhEventRequest);
-        var result = collectionClient.deleteDocByAgentNames(wazuhEventRequest);
+        var result = ClientManagerCommon.clientManager.deleteDocByAgentNames(wazuhEventRequest);
         return new ServiceResult<>(result);
     }
 }

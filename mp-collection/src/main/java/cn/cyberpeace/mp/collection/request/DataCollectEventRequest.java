@@ -17,7 +17,7 @@ public class DataCollectEventRequest extends BaseEventRequest{
     private boolean trackTotalHits = false;
 
     @ApiModelProperty(value = "关键字集合")
-    private List<String> keyword;
+    private List<String> keywords;
 
     @ApiModelProperty(value = "请求id,滚动分页请求时需要")
     private String requestId;

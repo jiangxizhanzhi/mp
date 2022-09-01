@@ -2,11 +2,14 @@ package cn.cyberpeace.mp.collection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.collection.model.*;
-import cn.cyberpeace.mp.collection.model.wazuh.common.request.CollectorBaseRequest;
-import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Netiface;
-import cn.cyberpeace.mp.collection.model.wazuh.syscollector.OS;
-import cn.cyberpeace.mp.collection.model.wazuh.syscollector.Port;
+import cn.cyberpeace.mp.collection.core.model.WazuhHostState;
+import cn.cyberpeace.mp.collection.core.model.WazuhNetworkConnection;
+import cn.cyberpeace.mp.collection.core.model.WazuhProcess;
+import cn.cyberpeace.mp.collection.core.model.WazuhSystemUser;
+import cn.cyberpeace.mp.collection.core.request.wazuh.CollectorBaseRequest;
+import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.Netiface;
+import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.OS;
+import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.Port;
 import cn.cyberpeace.mp.collection.request.HostMonitorBaseRequest;
 import cn.cyberpeace.mp.collection.request.HostMonitorPageRequest;
 
@@ -43,28 +46,28 @@ public interface HostMonitorService {
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhHostStateModel> queryHostStateEventsWithTimeRange(HostMonitorPageRequest request);
+    ListObjServiceResult<WazuhHostState> queryHostStateEventsWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机网络连接信息
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(HostMonitorPageRequest request);
+    ListObjServiceResult<WazuhNetworkConnection> queryNetConnEventsWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机进程信息
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhProcessModel> queryProcessesWithTimeRange(HostMonitorPageRequest request);
+    ListObjServiceResult<WazuhProcess> queryProcessesWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机系统用户信息
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhSystemUserModel> querySystemUserWithTimeRange(HostMonitorPageRequest request);
+    ListObjServiceResult<WazuhSystemUser> querySystemUserWithTimeRange(HostMonitorPageRequest request);
 
     /**
      * 查询主机环境变量变更数量

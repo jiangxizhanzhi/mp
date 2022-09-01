@@ -4,7 +4,7 @@ ip:
   fdfs: 10.100.1.26             # FastDFS地址
   cp: 10.100.7.1                # 云平台适配层接口地址
   moloch: 10.100.0.101          # moloch的IP地址
-  wazuh: 10.100.7.1           # wazuh的IP地址
+  wazuh: 10.100.0.101           # wazuh的IP地址
   es: 10.100.0.101                 # MP新中台ES地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
   mp: 10.100.1.12:8001                       # MP中台地址
@@ -78,25 +78,10 @@ mp:
       username: wazuh
       password: Abcd123#
       flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
-    team:
-      groups:
-        - group-id: "f2121f517fb980e438b02336c2aca85a"
-          es-node: 192.168.2.71:9205
-          wazuh-url: http://192.168.2.71:15500
-          nodes:
-            - node-ip: 192.168.2.56
-              node-names: aitest003
-              target-ips: 192.168.2.56
-            - node-ip: 192.168.2.55
-              node-names: aitest001,aitest002
-              target-ips: 192.168.2.55,172.20.0.2
-        - group-id: "002"
-          es-node: 10.100.0.251:9205
-          wazuh-url: http://10.100.0.251:15500
-          nodes:
-            - node-ip: 10.100.0.251
-              node-names: test251
-              target-ips: 10.100.0.251
+    es:
+      server: 10.100.0.101:9205
+    mgo:
+      server: mongodb://root:Abcd123#@10.100.0.101:27017
 
   log:
     es-nodes: ${ip.es}:9205

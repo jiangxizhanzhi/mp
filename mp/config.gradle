@@ -2,6 +2,5 @@ gradle.ext {
     version = '0.0.1'
     appmodules = [
         'mp-collection',
-        'mp-collection-api'
     ]
 }

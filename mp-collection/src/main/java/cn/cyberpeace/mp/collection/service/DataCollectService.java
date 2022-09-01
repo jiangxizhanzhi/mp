@@ -2,7 +2,10 @@ package cn.cyberpeace.mp.collection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.collection.model.*;
+import cn.cyberpeace.mp.collection.core.model.FileEvent;
+import cn.cyberpeace.mp.collection.core.model.WazuhProbeCommon;
+import cn.cyberpeace.mp.collection.core.model.WazuhVulnerabilityInfo;
+import cn.cyberpeace.mp.collection.core.model.WazuhVulnerabilityInfoCount;
 import cn.cyberpeace.mp.collection.request.*;
 
 import java.util.List;
@@ -18,49 +21,49 @@ public interface DataCollectService {
      * @param request
      * @return
      */
-    ListObjServiceResult<FileEventModel> queryFileModifyEvents(SyscheckEventRequest request);
+    ListObjServiceResult<FileEvent> queryFileModifyEvents(SyscheckEventRequest request);
 
     /**
      * 查询主机注册表变更事件
      * @param request
      * @return
      */
-    ListObjServiceResult<FileEventModel> queryRegistryModifyEvents(SyscheckEventRequest request);
+    ListObjServiceResult<FileEvent> queryRegistryModifyEvents(SyscheckEventRequest request);
 
     /**
      * 查询主机采集事件
      * @param request
      * @return
      */
-    ListObjServiceResult<FileEventModel> queryFileEvents(DataCollectEventRequest request);
+    ListObjServiceResult<FileEvent> queryFileEvents(DataCollectEventRequest request);
 
     /**
      * 滚动查询主机采集事件
      * @param request
      * @return
      */
-    ListObjServiceResult<FileEventModel> scrollFileEvents(DataCollectEventRequest request);
+    ListObjServiceResult<FileEvent> scrollFileEvents(DataCollectEventRequest request);
 
     /**
      * 查询自定义探针采集数据
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhProbeCommonModel> queryCustomProbeData(CustomDataQueryRequest request);
+    ListObjServiceResult<WazuhProbeCommon> queryCustomProbeData(CustomDataQueryRequest request);
 
     /**
      * 分页查询漏洞信息
      * @param request
      * @return
      */
-    ListObjServiceResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(VulnerabilityEventRequest request);
+    ListObjServiceResult<WazuhVulnerabilityInfo> queryVulnerabilityInfo(VulnerabilityEventRequest request);
 
     /**
      * 查询漏洞数量信息
      * @param request
      * @return
      */
-    ServiceResult<List<WazuhVulnerabilityInfoCountModel>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request);
+    ServiceResult<List<WazuhVulnerabilityInfoCount>> queryVulnerabilityCountInfo(VulnerabilityEventRequest request);
 
     /**
      * 查询指定时间段内每个节点事件总数
