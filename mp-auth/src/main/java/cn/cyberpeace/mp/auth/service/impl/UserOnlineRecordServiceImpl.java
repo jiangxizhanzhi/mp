@@ -1,16 +1,21 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
+import cn.cyberpeace.mp.auth.service.UserLogService;
+import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -29,7 +34,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -141,14 +151,14 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         List<UserOrgDto> userOrgDtos = orgUserService.listUserOrgByUserIds(userIds);
         List<UserModel> userModelList = userService.listByIds(userIds.toArray(String[]::new));
         reportDtos.forEach(r -> {
-            List<OrgModel> orgModelList =
+            List<OrgBO> orgBOList =
                     userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {
-                        OrgModel orgModel = new OrgModel();
-                        BeanUtils.copyProperties(dto, orgModel);
-                        return orgModel;
+                        OrgBO orgBO = new OrgBO();
+                        BeanUtils.copyProperties(dto, orgBO);
+                        return orgBO;
                     }).collect(Collectors.toList());
-            if (CollectionUtils.isNotEmpty(orgModelList)) {
-                r.setOrg(orgService.getBatchPath(orgModelList));
+            if (CollectionUtils.isNotEmpty(orgBOList)) {
+                r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
             }
 
             if (CollectionUtil.isNotEmpty(userModelList)) {

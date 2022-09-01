@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -15,11 +16,11 @@ import java.util.List;
  */
 public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
-    List<OrgModel> listParents();
+    List<OrgBO> listParents();
 
-    List<OrgModel> listByParent(String parentId);
+    List<OrgBO> listByParent(String parentId);
 
-    List<OrgModel> listAll(String tenantId);
+    List<OrgBO> listAll(String tenantId);
 
     List<OrgDto> getTree(String orgId);
 
@@ -30,7 +31,7 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
     String calculatePathByOrgId(String orgId);
 
     // 根据路径查出组织
-    OrgModel getByPath(String path);
+    OrgBO getByPath(String path);
 
     boolean exists(String id);
 
@@ -61,6 +62,8 @@ public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
      * @return
      */
     String getPath(OrgModel orgModel);
+
+    OrgBO orgModel2OrgBO(OrgModel orgModel);
 
     /**
      * 批量获取组织完整path

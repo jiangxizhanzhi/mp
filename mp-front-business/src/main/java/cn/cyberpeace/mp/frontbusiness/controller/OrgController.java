@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -35,16 +35,16 @@ public class OrgController {
     @ApiImplicitParam(name = "parentId", value = "上级组织ID", dataTypeClass = String.class)
     @GetMapping("/byparent")
     public ServiceResult getByParent(@RequestParam String parentId) {
-        List<OrgModel> orgs = orgService.listByParent(parentId);
+        List<OrgBO> orgs = orgService.listByParent(parentId);
         return ServiceResult.builder().source(orgs).build().asResult();
     }
 
     @ApiOperation(value = "根据组织路径查询", notes = "")
     @ApiImplicitParam(name = "path", value = "组织路径", dataTypeClass = String.class)
     @GetMapping("/bypath")
-    public ServiceResult<OrgModel> getByPath(@RequestParam String path) {
-        OrgModel org = orgService.getByPath(path.trim());
-        return ServiceResult.success(org);
+    public ServiceResult<OrgBO> getByPath(@RequestParam String path) {
+        OrgBO orgBO = orgService.getByPath(path.trim());
+        return ServiceResult.success(orgBO);
     }
 
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")

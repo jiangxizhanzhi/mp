@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import org.springframework.beans.BeanUtils;
@@ -43,9 +43,9 @@ public class QueryChildOrgDtoOperation implements OrgDtoOperation<OrgDto> {
 
         var list = orgService.listByParent(orgDto.getId());
         var childList = new ArrayList();
-        for (OrgModel org : list) {
+        for (OrgBO orgBO : list) {
             OrgDto childDto = new OrgDto();
-            BeanUtils.copyProperties(org, childDto);
+            BeanUtils.copyProperties(orgBO, childDto);
             childDto.execute(this);
             childList.add(childDto);
         }

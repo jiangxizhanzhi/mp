@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -84,11 +86,9 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             }
         }
 
-        ObjServiceResult<OrgModel> orgModelObjServiceResult = super.create(obj, fields);
-        OrgModel createModel = orgModelObjServiceResult.getData();
-        createModel.setPath(this.getPath(createModel));
+        ObjServiceResult<OrgModel> result = super.create(obj, fields);
         userCacheService.evictAllUserCache();
-        return orgModelObjServiceResult;
+        return result;
     }
 
     @Override
@@ -118,9 +118,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
         // 1.先更新OrgModel信息
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
-        OrgModel resultModel = result.getData();
-        resultModel.setPath(this.getPath(resultModel));
-
         userCacheService.evictAllUserCache();
         return result;
     }
@@ -179,6 +176,17 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
+    public OrgBO orgModel2OrgBO(OrgModel orgModel) {
+        if (Objects.isNull(orgModel)) {
+            return null;
+        }
+        OrgBO orgBO = new OrgBO();
+        BeanUtils.copyProperties(orgModel, orgBO);
+        orgBO.setPath(this.getPath(orgModel));
+        return orgBO;
+    }
+
+    @Override
     public String getBatchPath(List<OrgModel> orgModelList) {
         String allOrgPath = StringUtils.EMPTY;
         if (CollectionUtil.isNotEmpty(orgModelList)) {
@@ -230,7 +238,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<OrgModel> children = listByParent(orgId);
+        List<OrgModel> children = getModelMapper().listByParentId(orgId);
         if (CollectionUtil.isNotEmpty(children)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
         }
@@ -246,7 +254,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         for (String id : ids) {
-            List<OrgModel> children = listByParent(id);
+            List<OrgModel> children = getModelMapper().listByParentId(id);
             if (CollectionUtil.isNotEmpty(children)) {
                 throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
             }
@@ -259,36 +267,54 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     }
 
     @Override
-    public List<OrgModel> listParents() {
+    public List<OrgBO> listParents() {
         List<OrgModel> orgs = getModelMapper().listParents();
-        orgs.forEach(org -> org.setPath(this.getPath(org)));
-        return orgs;
+        List<OrgBO> orgBOS =
+                orgs.stream().map(orgModel -> {
+                    OrgBO orgBO = new OrgBO();
+                    BeanUtils.copyProperties(orgModel, orgBO);
+                    orgBO.setPath(this.getPath(orgModel));
+                    return orgBO;
+                }).collect(Collectors.toList());
+        return orgBOS;
     }
 
     @Override
-    public List<OrgModel> listByParent(String parentId) {
+    public List<OrgBO> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
         List<OrgModel> orgs = getModelMapper().listByParentId(parentId);
-        orgs.forEach(org -> org.setPath(this.getPath(org)));
-        return orgs;
+        List<OrgBO> orgBOS =
+                orgs.stream().map(orgModel -> {
+                    OrgBO orgBO = new OrgBO();
+                    BeanUtils.copyProperties(orgModel, orgBO);
+                    orgBO.setPath(this.getPath(orgModel));
+                    return orgBO;
+                }).collect(Collectors.toList());
+        return orgBOS;
     }
 
     @Override
-    public List<OrgModel> listAll(String tenantId) {
+    public List<OrgBO> listAll(String tenantId) {
         List<OrgModel> orgs = getModelMapper().listAll(tenantId);
-        orgs.forEach(org -> org.setPath(this.getPath(org)));
-        return orgs;
+        List<OrgBO> orgBOS =
+            orgs.stream().map(orgModel -> {
+                OrgBO orgBO = new OrgBO();
+                BeanUtils.copyProperties(orgModel, orgBO);
+                orgBO.setPath(this.getPath(orgModel));
+                return orgBO;
+            }).collect(Collectors.toList());
+        return orgBOS;
     }
 
     @Override
     public List<OrgDto> getTree(String parentOrgId) {
         if (StringUtils.isBlank(parentOrgId)) {
             // 查询所有组织树
-            List<OrgModel> orgs = listAll(AuthConstant.DEFAULT_TENANT);
-            if (CollectionUtil.isEmpty(orgs)) {
+            List<OrgBO> orgBOS = listAll(AuthConstant.DEFAULT_TENANT);
+            if (CollectionUtil.isEmpty(orgBOS)) {
                 return new ArrayList<>();
             }
-            List<OrgDto> tree = toTree(orgs);
+            List<OrgDto> tree = toTree(orgBOS);
 
             sortTree(tree);
 
@@ -352,7 +378,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
 
     @Override
-    public OrgModel getByPath(String path) {
+    public OrgBO getByPath(String path) {
         ParamCheck.notBlank(path, AuthBasei18nCode.ORG_PATH);
         OrgModel orgModel = null;
         if (StringUtils.isNotBlank(path)) {
@@ -369,12 +395,15 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                     // 最后一个，获取组织
                     if (i == (pathArray.length - 1)) {
                         orgModel = tmpModel;
-                        orgModel.setPath(path);
+                        OrgBO orgBO = new OrgBO();
+                        BeanUtils.copyProperties(orgModel, orgBO);
+                        orgBO.setPath(path);
+                        return orgBO;
                     }
                 }
             }
         }
-        return orgModel;
+        return null;
     }
 
     @Override
@@ -433,7 +462,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return new ArrayList<>();
     }
 
-    private List<OrgDto> toTree(List<OrgModel> orgs) {
+    private List<OrgDto> toTree(List<OrgBO> orgs) {
         ParamCheck.notEmpty(orgs, AuthBasei18nCode.ORG_LIST);
         Map<String, OrgDto> mapTmp = new HashMap<>();
 
@@ -441,6 +470,8 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         for (OrgModel orgModel : orgs) {
             OrgDto targetDto = new OrgDto();
             BeanUtils.copyProperties(orgModel, targetDto);
+            String path = getPath(orgModel);
+            targetDto.setPath(path);
             mapTmp.put(targetDto.getId(), targetDto);
         }
 

@@ -22,6 +22,7 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table("mp_auth_org")
+@Deprecated
 public class OrgModel extends BaseModel {
 
     @ApiModelProperty(value = "租户")
@@ -39,9 +40,6 @@ public class OrgModel extends BaseModel {
     @ApiModelProperty(value = "名称")
     @DefaultStr
     private String name;
-
-    @ApiModelProperty(value = "路径")
-    private String path;
 
     @ApiModelProperty(value = "描述")
     @DefaultStr

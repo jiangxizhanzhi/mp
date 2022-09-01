@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
@@ -34,9 +35,10 @@ public class QueryParentOrgDtoOperation implements OrgDtoOperation<OrgDto> {
         ObjResult<OrgModel> result = objSrvResult.getSource();
         if (result != null) {
             OrgModel parentOrgModel = result.getObj();
-            if (parentOrgModel != null) {
+            OrgBO parentOrgBO = orgService.orgModel2OrgBO(parentOrgModel);
+            if (parentOrgBO != null) {
                 OrgDto parentOrgDto = new OrgDto();
-                BeanUtils.copyProperties(parentOrgModel, parentOrgDto);
+                BeanUtils.copyProperties(parentOrgBO, parentOrgDto);
                 orgDto.setParentOrg(parentOrgDto);
                 parentOrgDto.execute(this);
             }

@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -49,8 +50,7 @@ public class OrgController {
     public ObjServiceResult get(@PathVariable String id) {
         ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
         OrgModel orgModel = orgModelObjServiceResult.getData();
-        orgModel.setPath(orgService.getPath(orgModel));
-        return orgModelObjServiceResult;
+        return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null));
     }
 
     @ApiOperation(value = "查询指定id数据", notes = "")
@@ -61,8 +61,7 @@ public class OrgController {
     public ObjServiceResult getByParam(@RequestParam String id) {
         ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
         OrgModel orgModel = orgModelObjServiceResult.getData();
-        orgModel.setPath(orgService.getPath(orgModel));
-        return orgModelObjServiceResult;
+        return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgBO(orgModel), null));
     }
 
     @ApiOperation("创建组织")
@@ -73,7 +72,10 @@ public class OrgController {
     @PostMapping
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ObjServiceResult create(@RequestBody OrgModel obj, @RequestParam(required = false) String[] fields) {
-        return orgService.create(obj, fields);
+        ObjServiceResult<OrgModel> result = orgService.create(obj, fields);
+        //OrgModel createModel = result.getData();
+        //return new ObjServiceResult<>(new ObjResult<>(orgService.orgModel2OrgB(createModel), null));
+        return result;
     }
 
     @ApiOperation("更新指定id组织")

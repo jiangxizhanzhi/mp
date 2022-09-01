@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
@@ -154,10 +155,18 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
-    public List<OrgModel> listOrgsByUserId(String userId) {
+    public List<OrgBO> listOrgsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
         List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
-        return orgs;
+
+        List<OrgBO> orgBOS =
+                orgs.stream().map(orgModel -> {
+                    OrgBO orgBO = new OrgBO();
+                    BeanUtils.copyProperties(orgModel, orgBO);
+                    orgBO.setPath(orgService.getPath(orgModel));
+                    return orgBO;
+                }).collect(Collectors.toList());
+        return orgBOS;
     }
 
 
@@ -173,14 +182,23 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public List<UserOrgDto> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
         List<UserOrgDto> userOrgDtos = getModelMapper().listUserOrgByUserIds(userIds);
+        for (UserOrgDto userOrgDto : userOrgDtos) {
+            String path = orgService.getPath(userOrgDto);
+            userOrgDto.setPath(path);
+        }
         return userOrgDtos;
     }
 
     @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
-        List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
+        List<OrgModel> orgModels = getModelMapper().listOrgsByUserId(userId);
+        List<OrgBO> orgBOS =
+                orgModels.stream().map(orgModel ->
+                    orgService.orgModel2OrgBO(orgModel)
+                ).collect(Collectors.toList());
+
         List<OrgDto> orgDtos = new ArrayList<>();
-        orgs.forEach(o -> {
+        orgBOS.forEach(o -> {
             OrgDto orgDto = new OrgDto();
             BeanUtils.copyProperties(o, orgDto);
             orgDto.execute(queryParentOrgOperation);
@@ -226,8 +244,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     public String getAllOrgPathByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
 
-        List<OrgModel> orgs = listOrgsByUserId(userId);
-        String allorgpath = orgService.getBatchPath(orgs);
+        List<OrgBO> orgBOS = listOrgsByUserId(userId);
+        //String allorgpath = orgService.getBatchPath(orgs);
+        String allorgpath = orgBOS.stream().map(OrgBO::getPath).collect(Collectors.joining(","));
         return allorgpath;
     }
 
