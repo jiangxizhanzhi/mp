@@ -88,7 +88,7 @@ mp:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
   # mp-devops-cluster 配置
-  devops.cluster:
+  devopscluster:
     cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
@@ -192,7 +192,7 @@ mp:
           location: /var/log/clamav.log,/var/log/secure
           os-type: linux
   # mp-devops-log 模块配置
-  devops.log:
+  devopslog:
     exclude-uri:
       - /login
     exclude-method:
@@ -211,11 +211,11 @@ mp:
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
   # mp-front-admin 模块配置
-  front.admin.activation:
-    enable: true
+  frontadmin:
+    activ-enable: true
     licenseDir: /home/mp/config/license
   # mp-front-business 模块配置
-  front.biz:
+  frontbiz:
     url-ac-filter-enabled: true
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true

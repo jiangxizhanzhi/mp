@@ -1,24 +1,22 @@
 package cn.cyberpeace.mp.frontadmin.config;
 
-
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 /**
- * @Description:
- * @Author zhouxinghuai
- * @Date：2021/8/31 11:13
+ * @Description
+ * @Author shgang
+ * @Date 2022/9/1
  */
-@Component
 @Data
-@ConfigurationProperties(prefix = "mp.front.admin.activation")
-public class ActivationConfig {
+@Configuration
+@ConfigurationProperties(prefix = "mp.frontadmin")
+public class FrontAdminConfig {
 
     public static String DEFAULT_LICENSE_DIR = "/home/mp/config/license";
 
-    private boolean enable = false;
+    private boolean activEnable = false;
 
     private String licenseDir = DEFAULT_LICENSE_DIR;
-
 }

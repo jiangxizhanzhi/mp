@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "mp.front.biz")
+@ConfigurationProperties(prefix = "mp.frontbiz")
 public class FrontBizConfig {
 
     /**

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
  * @author wanggang
  */
 @Configuration
-@ConfigurationProperties(prefix = "mp.devops.cluster",ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "mp.devopscluster",ignoreInvalidFields = true)
 @Data
 public class DevopsConfig {
 

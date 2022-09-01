@@ -78,7 +78,7 @@ mp:
     cp-url: http://${ip.cp}:11111 #云平台地址
     es-nodes: ${ip.es}:9205
   # mp-devops-cluster 配置
-  devops.cluster:
+  devopscluster:
     # cp-url: http://10.100.7.1:111 #云平台地址
     cp-url: http://${ip.cp}:11111 #云平台地址
     public-net-proxy: false #公网开关
@@ -185,7 +185,7 @@ mp:
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
   # mp-devops-log 模块配置
-  devops.log:
+  devopslog:
     exclude-uri:
       - /login
     exclude-method:
@@ -204,11 +204,11 @@ mp:
     authenticate-encoder-iterations:
     authenticate-encoder-hash-width:
   # mp-front-admin 模块配置
-  front.admin.activation:
-    enable: true
+  frontadmin:
+    activ-enable: true
     licenseDir: /home/mp/config/license
   # mp-front-business 模块配置
-  front.biz:
+  frontbiz:
     url-ac-filter-enabled: true
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true

@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "mp.devops.log")
+@ConfigurationProperties(prefix = "mp.devopslog")
 public class DevopsLogConfig {
 
     /**
