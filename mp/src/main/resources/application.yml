@@ -130,6 +130,8 @@ mp:
     probe-mgr-task-enable: false
     #moloch es节点地址
     es-nodes: ${ip.moloch}:9205
+    # MP新中台ES地址
+    mp-es-nodes: ${ip.es}:9205
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   collection:

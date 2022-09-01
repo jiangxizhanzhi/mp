@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.situationaware.config;
 
-import cn.cyberpeace.mp.common.config.CommonAppConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.apache.http.util.Asserts;
@@ -16,7 +15,7 @@ import org.springframework.util.ObjectUtils;
 public class WazuhElasticConfig {
 
     @Autowired
-    private CommonAppConfig commonAppConfig;
+    private SituationAwareConfig situationAwareConfig;
 
 
 
@@ -57,8 +56,8 @@ public class WazuhElasticConfig {
      * @return 返回 HttpHost 对象数组
      */
     private HttpHost[] createHttpHost() {
-        Asserts.check(!ObjectUtils.isEmpty(commonAppConfig.getEsNodes()), "ElasticSearch cluster ip address cannot empty");
-        String[] ipArray = commonAppConfig.getEsNodes().split(",");
+        Asserts.check(!ObjectUtils.isEmpty(situationAwareConfig.getMpEsNodes()), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = situationAwareConfig.getMpEsNodes().split(",");
         var httpHosts = new HttpHost[ipArray.length];
         for (int i = 0, len = ipArray.length; i < len; i++) {
             var ipAddress = ipArray[i];

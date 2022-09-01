@@ -17,6 +17,11 @@ public class SituationAwareConfig {
     private String esNodes;
 
     /**
+     * MP新中台ES地址
+     */
+    private String mpEsNodes;
+
+    /**
      *
      */
     private String esDatePattern;
