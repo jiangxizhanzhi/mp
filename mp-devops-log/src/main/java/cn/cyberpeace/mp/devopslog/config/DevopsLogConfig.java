@@ -25,4 +25,9 @@ public class DevopsLogConfig {
      * 不需要记录日志的请求method。譬如通常可以忽略的method: OPTIONS
      */
     private List<String> excludeMethod;
+
+    /**
+     * MP新中台ES地址
+     */
+    private String esNodes;
 }

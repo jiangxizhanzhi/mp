@@ -199,6 +199,7 @@ mp:
       - /login
     exclude-method:
       - OPTIONS
+    es-nodes: ${ip.es}:9205
   # auth 模块配置
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
