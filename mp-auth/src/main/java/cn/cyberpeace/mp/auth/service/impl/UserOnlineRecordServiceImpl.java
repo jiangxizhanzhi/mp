@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -149,7 +148,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         // orgpaths
         List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
         List<UserOrgDto> userOrgDtos = orgUserService.listUserOrgByUserIds(userIds);
-        List<UserModel> userModelList = userService.listByIds(userIds.toArray(String[]::new));
         reportDtos.forEach(r -> {
             List<OrgBO> orgBOList =
                     userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {
@@ -159,14 +157,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                     }).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(orgBOList)) {
                 r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
-            }
-
-            if (CollectionUtil.isNotEmpty(userModelList)) {
-                Optional<UserModel> userModelOptional = userModelList.stream().filter(userModel -> Objects.equals(userModel.getId(), r.getUser())).findFirst();
-                if (userModelOptional.isPresent()) {
-                    r.setUsername(userModelOptional.get().getUsername());
-                    r.setName(userModelOptional.get().getName());
-                }
             }
         });
 
