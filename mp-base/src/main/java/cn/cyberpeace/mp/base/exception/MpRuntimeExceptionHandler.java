@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.base.exception;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
@@ -17,7 +18,7 @@ import org.springframework.web.client.HttpServerErrorException;
  */
 @ControllerAdvice
 @Slf4j
-public class CpRuntimeExceptionHandler {
+public class MpRuntimeExceptionHandler {
 
     private static final String LOGGER_FORMAT = "System error: {}, detail: {}";
 
@@ -30,7 +31,8 @@ public class CpRuntimeExceptionHandler {
         if (serviceCode == null) {
             serviceCode = BaseErrorCode.ERROR;
         }
-        return new ServiceResult<>(null, serviceCode, ex.getDetail()).asResult();
+        var detail = StringUtils.isEmpty(ex.getDetail()) ? ex.getMessage() : ex.getDetail();
+        return new ServiceResult<>(null, serviceCode, detail).asResult();
     }
 
     @ExceptionHandler({BindException.class})

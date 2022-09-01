@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -32,7 +33,7 @@ public interface BaseModelGetController<M extends BaseModel, S extends BaseModel
     })
     @GetMapping("/{id}")
     default ObjServiceResult<M> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        return getModelService().get(id, fields).asResult();
+        return getModelService().get(id, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
     /**
@@ -48,6 +49,6 @@ public interface BaseModelGetController<M extends BaseModel, S extends BaseModel
     })
     @GetMapping(params = "id")
     default ObjServiceResult<M> getByParam(@RequestParam String id, @RequestParam(required = false) String[] fields) {
-        return getModelService().get(id, fields).asResult();
+        return getModelService().get(id, ControllerCommon.convertValidFields(fields)).asResult();
     }
 }

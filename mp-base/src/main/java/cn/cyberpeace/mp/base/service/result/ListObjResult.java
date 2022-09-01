@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,18 +14,15 @@ import java.util.Objects;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class ListObjResult<T> extends BaseObjResult<T, ListObjResult<T>> {
 
-    @Builder.Default
+    @ApiModelProperty(value = "数据列表")
     private List<T> list = new ArrayList<>();
 
-    @Builder.Default
     @ApiModelProperty(value = "总数")
     private Integer total = 0;
 
     @JsonIgnore
-    @Builder.Default
     private List<T> objs = new ArrayList<>();
 
     public ListObjResult(List<T> objs, int total) {

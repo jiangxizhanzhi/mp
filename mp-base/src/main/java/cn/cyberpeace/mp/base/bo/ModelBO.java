@@ -9,6 +9,7 @@ import lombok.Data;
 import java.util.Arrays;
 
 /**
+ * @Deprecated
  * 对应表模型主体的业务模型
  * @param <M> 表模型类型
  */

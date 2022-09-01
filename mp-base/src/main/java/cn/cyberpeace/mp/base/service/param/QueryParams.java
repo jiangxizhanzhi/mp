@@ -13,11 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @ApiModel
-public class QueryParams implements IdsQueryParams, SearchQueryParams, OrderQueryParams, PageQueryParams,
-        FieldsQueryParams, CompatiblePageQueryParams, CompatibleOrderQueryParams {
+public class QueryParams implements IdsQueryParams, ExcludeQueryParams, SearchQueryParams, OrderQueryParams,
+        PageQueryParams, FieldsQueryParams, CompatiblePageQueryParams, CompatibleOrderQueryParams {
     /** id列表 */
     @ApiModelProperty(value = "id列表")
     private String[] ids;
+    /** id排除列表 */
+    @ApiModelProperty(value = "id排除列表")
+    private String[] exclude;
     /** 搜索关键词 */
     @ApiModelProperty(value = "搜索关键词")
     private String search;
@@ -44,6 +47,7 @@ public class QueryParams implements IdsQueryParams, SearchQueryParams, OrderQuer
     @ApiModelProperty(value = "排序字段(兼容)")
     private String[] sort;
 
+    @Override
     public void ensure() {
         CompatiblePageQueryParams.ensureCompatible(this);
         CompatibleOrderQueryParams.ensureCompatible(this);
