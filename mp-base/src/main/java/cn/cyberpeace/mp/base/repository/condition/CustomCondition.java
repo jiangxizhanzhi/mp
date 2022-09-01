@@ -38,7 +38,7 @@ public class CustomCondition implements BaseCondition {
 
             Class<?> fieldType = field.getType();
             Class<?> fieldValueType = fieldValue.getClass();
-            if (fieldType == fieldValueType) {
+            if (fieldType.equals(fieldValueType)) {
                 objWrapper.setPropertyValue(fieldName, fieldValue);
             }
         }

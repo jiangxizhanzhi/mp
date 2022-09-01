@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.base.repository;
 
 import cn.cyberpeace.mp.base.annotation.Recommendation;
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.common.ModelUtils;
 import cn.cyberpeace.mp.base.repository.condition.Condition;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
+import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,6 +28,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public interface BaseModelMapper<M extends BaseModel> {
 
@@ -45,11 +48,11 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     private static Object handleRawFieldValue(Class<?> fieldType, Object fieldValue) {
-        if (fieldType == LocalDateTime.class && fieldValue instanceof java.sql.Timestamp) {
+        if (LocalDateTime.class.equals(fieldType) && fieldValue instanceof java.sql.Timestamp) {
             return ((java.sql.Timestamp) fieldValue).toLocalDateTime();
-        } else if (fieldType == LocalDate.class && fieldValue instanceof java.sql.Date) {
+        } else if (LocalDate.class.equals(fieldType) && fieldValue instanceof java.sql.Date) {
             return ((java.sql.Date) fieldValue).toLocalDate();
-        } else if (fieldType == LocalTime.class && fieldValue instanceof java.sql.Time) {
+        } else if (LocalTime.class.equals(fieldType) && fieldValue instanceof java.sql.Time) {
             return ((java.sql.Time) fieldValue).toLocalTime();
         } else {
             return fieldValue;
@@ -395,8 +398,23 @@ public interface BaseModelMapper<M extends BaseModel> {
         return bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
     }
 
+    @Recommendation
+    default int bulkCreate(List<M> objs, int batchSize, boolean concurrent) {
+        var successCount = new AtomicInteger();
+        if (concurrent) {
+            List<Runnable> tasks = new ArrayList<>();
+            CollectionUtils.batchHandle(objs, batchSize, batchList -> {
+                tasks.add(() -> successCount.addAndGet(bulkCreate(batchList)));
+            });
+            TaskCommon.runTasks(tasks);
+        } else {
+            CollectionUtils.batchHandle(objs, batchSize, batchList -> successCount.addAndGet(bulkCreate(batchList)));
+        }
+        return successCount.get();
+    }
+
     /**
-     * 批量更新，所有objs必须要有id, 更新数据字段必须一致
+     * 批量更新，所有objs必须要有id, 更新数据字段最好一致
      */
     @Recommendation
     default int bulkUpdate(List<M> objs) {
@@ -415,6 +433,24 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         return successCount;
+    }
+
+    /**
+     * 批量更新，所有objs必须要有id, 更新数据字段最好一致
+     */
+    @Recommendation
+    default int bulkUpdate(List<M> objs, int batchSize, boolean concurrent) {
+        var successCount = new AtomicInteger();
+        if (concurrent) {
+            List<Runnable> tasks = new ArrayList<>();
+            CollectionUtils.batchHandle(objs, batchSize, batchList -> {
+                tasks.add(() -> successCount.addAndGet(bulkUpdate(batchList)));
+            });
+            TaskCommon.runTasks(tasks);
+        } else {
+            CollectionUtils.batchHandle(objs, batchSize, batchList -> successCount.addAndGet(bulkUpdate(batchList)));
+        }
+        return successCount.get();
     }
 
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {
@@ -505,6 +541,22 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
+    default int bulkDelete(String[] ids, int batchSize, boolean concurrent) {
+        var successCount = new AtomicInteger();
+        if (concurrent) {
+            List<Runnable> tasks = new ArrayList<>();
+            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
+                tasks.add(() -> successCount.addAndGet(bulkDelete(batchList.toArray(new String[0]))));
+            });
+            TaskCommon.runTasks(tasks);
+        } else {
+            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize,
+                    batchList -> successCount.addAndGet(bulkDelete(batchList.toArray(new String[0]))));
+        }
+        return successCount.get();
+    }
+
+    @Recommendation
     default int bulkLogicDelete(String[] ids) {
         Class<M> actualModelClass = getModelClass();
         if (actualModelClass == null) {
@@ -537,6 +589,22 @@ public interface BaseModelMapper<M extends BaseModel> {
         }
 
         return successCount;
+    }
+
+    @Recommendation
+    default int bulkLogicDelete(String[] ids, int batchSize, boolean concurrent) {
+        var successCount = new AtomicInteger();
+        if (concurrent) {
+            List<Runnable> tasks = new ArrayList<>();
+            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
+                tasks.add(() -> successCount.addAndGet(bulkLogicDelete(batchList.toArray(new String[0]))));
+            });
+            TaskCommon.runTasks(tasks);
+        } else {
+            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize,
+                    batchList -> successCount.addAndGet(bulkLogicDelete(batchList.toArray(new String[0]))));
+        }
+        return successCount.get();
     }
 
     /**
