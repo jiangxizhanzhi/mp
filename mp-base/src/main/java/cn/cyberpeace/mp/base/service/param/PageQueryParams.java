@@ -9,4 +9,8 @@ public interface PageQueryParams {
 
     Integer getPageSize();
 
+    void setPage(Integer page);
+
+    void setPageSize(Integer pageSize);
+
 }

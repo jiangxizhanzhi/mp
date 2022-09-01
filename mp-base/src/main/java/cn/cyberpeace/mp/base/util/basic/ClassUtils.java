@@ -14,10 +14,7 @@ import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -181,6 +178,22 @@ public class ClassUtils {
     }
 
     public static String[] getBeanClassFields(Class<?> clazz) {
+        return getBeanClassFields(clazz, true);
+    }
+
+    private static List<Field> getClassDeclaredFields(Class<?> clazz, boolean findSuper) {
+        List<Field> fields = new ArrayList<>();
+        if (findSuper) {
+            var superClass = clazz.getSuperclass();
+            if (superClass != null) {
+                fields.addAll(getClassDeclaredFields(superClass, true));
+            }
+        }
+        fields.addAll(Arrays.asList(clazz.getDeclaredFields()));
+        return fields;
+    }
+
+    public static String[] getBeanClassFields(Class<?> clazz, boolean tryOrder) {
         String[] fields = beanClassFieldsCache.getOrDefault(clazz, null);
         if (fields != null) {
             return fields;
@@ -188,14 +201,29 @@ public class ClassUtils {
 
         final BeanWrapper clazzWrapper = new BeanWrapperImpl(clazz);
         var propertyDescriptors = clazzWrapper.getPropertyDescriptors();
-        List<String> fieldList = new ArrayList<>();
+        Map<String, String> fieldPool = new HashMap<>();
         for (java.beans.PropertyDescriptor propertyDescriptor : propertyDescriptors) {
             String fieldName = propertyDescriptor.getName();
             if (!StringUtils.equals("class", fieldName)) {
-                fieldList.add(fieldName);
+                fieldPool.put(fieldName, null);
             }
         }
-        fields = fieldList.toArray(new String[0]);
+
+        if (tryOrder) {
+            var allFields = getClassDeclaredFields(clazz, true);
+            List<String> orderedFields = new ArrayList<>();
+            allFields.forEach(field -> {
+                var fieldName = field.getName();
+                if (fieldPool.containsKey(fieldName)) {
+                    fieldPool.remove(fieldName);
+                    orderedFields.add(fieldName);
+                }
+            });
+            orderedFields.addAll(fieldPool.keySet());
+            fields = orderedFields.toArray(new String[0]);
+        } else {
+            fields = fieldPool.keySet().toArray(new String[0]);
+        }
 
         beanClassFieldsCache.put(clazz, fields);
 

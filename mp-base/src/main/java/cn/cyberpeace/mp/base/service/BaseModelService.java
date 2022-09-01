@@ -1,14 +1,22 @@
 package cn.cyberpeace.mp.base.service;
 
+import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.service.bo.ModelBO;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
-public interface BaseModelService<M, Q> {
+public interface BaseModelService<M extends BaseModel, Q> {
 
     default ListObjServiceResult<M> list(Q queryParams) {
+        return list(queryParams, true);
+    }
+
+    default ListObjServiceResult<M> list(Q queryParams, boolean withTotal) {
         return new ListObjServiceResult<>();
     }
 
@@ -51,4 +59,10 @@ public interface BaseModelService<M, Q> {
     default ObjServiceResult<M> update(M obj) {
         return update(obj, null);
     }
+
+    default <T extends ModelBO<M, T>> ServiceResult<Boolean> exportExcel(
+            Q queryParams, OutputStream os, Class<T> tClass) { return new ServiceResult<>(); }
+
+    default <T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(
+            InputStream is, Class<T> tClass) { return new ServiceResult<>(); }
 }

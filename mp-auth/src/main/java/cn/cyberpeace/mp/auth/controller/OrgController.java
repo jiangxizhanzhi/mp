@@ -47,7 +47,10 @@ public class OrgController {
     })
     @GetMapping("/{id}")
     public ObjServiceResult get(@PathVariable String id) {
-        return orgService.get(id).asResult();
+        ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
+        OrgModel orgModel = orgModelObjServiceResult.getData();
+        orgModel.setPath(orgService.getPath(orgModel));
+        return orgModelObjServiceResult;
     }
 
     @ApiOperation(value = "查询指定id数据", notes = "")
@@ -56,7 +59,10 @@ public class OrgController {
     })
     @GetMapping
     public ObjServiceResult getByParam(@RequestParam String id) {
-        return orgService.get(id).asResult();
+        ObjServiceResult<OrgModel> orgModelObjServiceResult = orgService.get(id).asResult();
+        OrgModel orgModel = orgModelObjServiceResult.getData();
+        orgModel.setPath(orgService.getPath(orgModel));
+        return orgModelObjServiceResult;
     }
 
     @ApiOperation("创建组织")

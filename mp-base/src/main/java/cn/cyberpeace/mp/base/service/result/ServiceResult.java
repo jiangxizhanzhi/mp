@@ -1,14 +1,9 @@
 package cn.cyberpeace.mp.base.service.result;
 
-import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * 统一服务返回结果
@@ -16,27 +11,11 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
-@Builder
 public class ServiceResult<T> extends BaseServiceResult<T, T> {
 
-    // 重复定义for Builder
-    @ApiModelProperty(value = "响应数据")
-    private T data;
-    @ApiModelProperty(value = "错误码")
-    private String code;
-    @ApiModelProperty(value = "错误说明")
-    private String message;
-    @ApiModelProperty(value = "错误详细说明")
-    private String detail;
-    @ApiModelProperty(value = "服务器时间UTC毫秒")
-    @Builder.Default
-    private Long timestamp = System.currentTimeMillis();
-    @JsonIgnore
-    @Builder.Default
-    private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
-    @JsonIgnore
-    private T source;
+    public static <T1> ServiceResultBuilder<T1> builder() {
+        return new ServiceResultBuilder<>();
+    }
 
     public ServiceResult(T source) {
         this();
@@ -59,68 +38,71 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
         return this;
     }
 
-    /**
-     * @Deprecated 不允许返回没有类型的ServiceResult
-     * 返回成功
-     * @return
-     */
-    public static ServiceResult successful() {
-        return ServiceResult.builder()
-                .code(BaseErrorCode.SUCCESS.getCode())
-                .message(BaseErrorCode.SUCCESS.toString())
-                .build();
+    public static class ServiceResultBuilder<T> {
+        private T source;
+        private ServiceCode serviceCode = BaseErrorCode.SUCCESS;
+        private String detail;
+
+        public ServiceResultBuilder<T> source(T source) {
+            this.source = source;
+            return this;
+        }
+
+        public ServiceResultBuilder<T> serviceCode(ServiceCode serviceCode) {
+            this.serviceCode = serviceCode;
+            return this;
+        }
+
+        public ServiceResultBuilder<T> detail(String detail) {
+            this.detail = detail;
+            return this;
+        }
+
+        public ServiceResult<T> build() {
+            return new ServiceResult<>(source, serviceCode, detail);
+        }
     }
 
     /**
-     * @Deprecated 不允许返回没有类型的ServiceResult
+     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.success
+     * 返回成功
+     * @return
+     */
+    public static <T1> ServiceResult<T1> successful() {
+        return ServiceResult.<T1>builder().build().asResult();
+    }
+
+    /**
+     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.success
      * 返回成功，带数据
      * @param source
      * @return
      */
-    public static ServiceResult success(Object source) {
-        return ServiceResult.builder()
-                .code(BaseErrorCode.SUCCESS.getCode())
-                .message(BaseErrorCode.SUCCESS.toString())
-                .data(source)
-                .timestamp(System.currentTimeMillis())
-                .build();
+    public static <T1> ServiceResult<T1> success(T1 source) {
+        return ServiceResult.<T1>builder().source(source).build().asResult();
     }
 
     /**
-     * @Deprecated 不允许返回没有类型的ServiceResult
+     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.fail
      * 返回失败
      * @param errorCode
      * @return
      */
-    public static ServiceResult fail(ServiceCode errorCode) {
-        return new ServiceResult<>("", errorCode, MessageCommon.get(errorCode.getMessage())).asResult();
+    public static <T1> ServiceResult<T1> fail(ServiceCode errorCode) {
+        return ServiceResult.<T1>builder().serviceCode(errorCode).build().asResult();
     }
 
     /**
-     * @Deprecated 不允许返回没有类型的ServiceResult
+     * @Deprecated 不允许直接执行返回asResult, 不允许复用错误码, 请消除此类代码
      * 返回通用失败信息
      * @param msg
      * @return
      */
-    public static ServiceResult fail(String msg) {
-        return ServiceResult.builder()
-                .code(BaseErrorCode.ERROR.getCode())
-                .message(msg)
-                .build();
-    }
-
-    /**
-     * @Deprecated 不允许返回没有类型的ServiceResult
-     * 返回自定义失败信息
-     * @param errorCode
-     * @param msg
-     * @return
-     */
-    public static ServiceResult fail(ServiceCode errorCode, String msg) {
-        return ServiceResult.builder()
-                .code(errorCode.getCode())
-                .message(msg)
-                .build();
+    public static <T1> ServiceResult<T1> fail(String msg) {
+        var serviceResult = new ServiceResult<T1>();
+        serviceResult.setCode(BaseErrorCode.ERROR.getCode());
+        serviceResult.setMessage(msg);
+        return serviceResult.asResult();
     }
 
 }

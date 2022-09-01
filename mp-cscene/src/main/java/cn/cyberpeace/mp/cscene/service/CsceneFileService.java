@@ -30,7 +30,7 @@ public class CsceneFileService extends BaseRemoteFileServiceImpl {
             return new ServiceResult<>(null, CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
         var uploadResult = super.upload(is);
-        if (!uploadResult.isSuccess()) {
+        if (!uploadResult.judgeSuccess()) {
             return new ServiceResult<>(null, uploadResult.getServiceCode(), uploadResult.getDetail());
         } else {
             SceneFileUploadResponse response = new SceneFileUploadResponse(uploadResult.getSource(), fileName);

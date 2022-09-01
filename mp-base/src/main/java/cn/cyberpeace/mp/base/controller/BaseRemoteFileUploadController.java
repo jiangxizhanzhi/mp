@@ -28,7 +28,7 @@ public interface BaseRemoteFileUploadController<S extends BaseRemoteFileService>
 
     static <T extends FileUploadResponse> ServiceResult<T> toFileUploadResponseResult(
             ServiceResult<String> uploadResult, Class<T> responseClazz) {
-        if (!uploadResult.isSuccess()) {
+        if (!uploadResult.judgeSuccess()) {
             return new ServiceResult<>(null, uploadResult.getServiceCode(), uploadResult.getDetail());
         }
 

@@ -40,9 +40,8 @@ public class OrgModel extends BaseModel {
     @DefaultStr
     private String name;
 
-//    @ApiModelProperty(value = "路径")
-//    @DefaultStr
-//    private String path;
+    @ApiModelProperty(value = "路径")
+    private String path;
 
     @ApiModelProperty(value = "描述")
     @DefaultStr

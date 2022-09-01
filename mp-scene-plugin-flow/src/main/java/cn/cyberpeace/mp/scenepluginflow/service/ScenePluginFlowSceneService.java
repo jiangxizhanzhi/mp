@@ -95,7 +95,7 @@ public class ScenePluginFlowSceneService {
             result = flowExecutor.queryFlowRecords(flow.getTaskId());
         }
         SceneFlowRecordsResponse response = new SceneFlowRecordsResponse();
-        if (result.isSuccess()) {
+        if (result.judgeSuccess()) {
             response.setResult(result.getData().getResult());
             response.setStatus(result.getData().getStatus());
             response.setFlowRecordsList(result.getData().getFlowRecordsList());

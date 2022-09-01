@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.service.AvatarService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
+import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

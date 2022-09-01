@@ -178,6 +178,11 @@ public class WazuhControl {
             return this;
         }
 
+        public WazuhControlBuilder configMongo(String mongoServer) {
+            wazuhLauncherBuilder.configMongo(mongoServer);
+            return this;
+        }
+
         public WazuhControlBuilder configCallbackSelf(boolean callbackSelf) {
             wazuhLauncherBuilder.configCallbackSelf(callbackSelf);
             return this;

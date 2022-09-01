@@ -5,11 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
-/**
- * @Description 用于保存业务线程的上下文信息
- * @Author maojun
- * @Date 2021/8/31
- */
 @Slf4j
 public class SysContextHolder {
 

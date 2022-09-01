@@ -10,11 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/27
- */
 public class HttpContextFilter extends OncePerRequestFilter {
 
     private final static String X_REQUEST_ID = "X-Request-Id";
@@ -27,7 +22,7 @@ public class HttpContextFilter extends OncePerRequestFilter {
                 SysContextHolder.setCallChainId(requestId);
             }
             filterChain.doFilter(request, response);
-        }finally {
+        } finally {
             SysContextHolder.resetSysContext();
         }
     }

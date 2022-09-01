@@ -55,6 +55,13 @@ public class BaseServiceResult<T, R> {
         setDetail(detail);
     }
 
+    public boolean judgeSuccess() {
+        return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
+    }
+
+    /**
+     * @Deprecated use judgeSuccess
+     */
     public boolean isSuccess() {
         return BaseErrorCode.SUCCESS.getCode().equals(getServiceCode().getCode());
     }

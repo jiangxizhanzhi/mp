@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -36,7 +37,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     default ObjServiceResult<M> update(@PathVariable String id, @RequestBody M obj,
                                        @RequestParam(required = false) String[] fields) {
         obj.setId(id);
-        return getModelService().update(obj, fields).asResult();
+        return getModelService().update(obj, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
     /**
@@ -52,7 +53,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     @PatchMapping
     default ObjServiceResult<M> update(@RequestBody M obj,
                                        @RequestParam(required = false) String[] fields) {
-        return getModelService().update(obj, fields).asResult();
+        return getModelService().update(obj, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
     /**
@@ -71,7 +72,7 @@ public interface BaseModelUpdateController<M extends BaseModel, S extends BaseMo
     default ObjServiceResult<M> updateByParam(@RequestParam String id, @RequestBody M obj,
                                               @RequestParam(required = false) String[] fields) {
         obj.setId(id);
-        return getModelService().update(obj, fields).asResult();
+        return getModelService().update(obj, ControllerCommon.convertValidFields(fields)).asResult();
     }
 
 }
