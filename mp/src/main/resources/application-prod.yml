@@ -1,13 +1,13 @@
 ip:
   self: ${MP_SELF_IP:mp}                    # mp自身地址
   mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
-  fdfs: ${FDFS_IP:10.100.1.26}           # FastDFS地址
-  cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
-  moloch: ${MOLOCH_IP:10.100.0.101}        # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
-  rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
-  log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
-  mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
+  fdfs: ${FDFS_IP:10.100.1.26}              # FastDFS地址
+  cp: ${CP_IP:10.100.7.1}                   # 云平台适配层接口地址
+  moloch: ${MOLOCH_IP:10.100.0.101}         # moloch的IP地址
+  wazuh: ${WAZUH_IP:10.100.7.1}             # wazuh的IP地址
+  rabbitmq: ${RABBITMQ_IP:10.100.0.101}     # rabbitmq地址
+  log-es: ${LOG_ES_IP:10.100.0.101}         # 日志es
+  mp: ${MP_API_IP_PORT:10.100.1.12:8001}    # MP中台API地址
 port:
   self-callback: ${MP_SELF_PORT:8080}
 server:
@@ -201,7 +201,7 @@ mp:
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
     logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
-    default-User-Avatar: ${MP_AUTH_default_User_Avatar:/api/mp/avatar/1.png}
+    default-user-avatar: ${MP_AUTH_default_User_Avatar:/api/mp/avatar/1.png}
     # authenticate
     authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
     authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
