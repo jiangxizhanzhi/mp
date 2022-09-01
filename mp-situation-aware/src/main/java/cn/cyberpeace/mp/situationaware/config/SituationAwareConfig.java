@@ -40,15 +40,13 @@ public class SituationAwareConfig {
     private String wazuhUsername;
     private String wazuhPassword;
     private String wazuhFlowTableUrl;
-    private WazuhProbeManager wazuhProbeManager;
-
-    @Data
-    public static class WazuhProbeManager {
-        private String url;
-        private String agentScriptLinuxPath;
-        private String agentScriptWindowsPath;
-        private String taskEnable;
-    }
+    /**
+     * wazuh-probe-manager
+     */
+    private String probeMgrUrl;
+    private String probeMgrAgentScriptLinuxPath;
+    private String probeMgrAgentScriptWindowsPath;
+    private String probeMgrTaskEnable;
 
     @Data
     public static class MonitorProbe {

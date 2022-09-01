@@ -120,10 +120,11 @@ mp:
     wazuh-username: wazuh
     wazuh-password: Abcd123#
     wazuh-flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
-    wazuh-probe-manager.url: http://10.100.0.111:8002
-    wazuh-probe-manager.agent-script-linux-path: /var/ossec/etc/shared/scripts/
-    wazuh-probe-manager.agent-script-windows-path: C:\ossec-agent\shared\scripts\
-    wazuh-probe-manager.task-enable: false
+    # wazuh-probe-manager
+    probe-mgr-url: http://10.100.0.111:8002
+    probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
+    probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
+    probe-mgr-task-enable: false
     #moloch es节点地址
     es-nodes: ${ip.moloch}:9205
   collection:
