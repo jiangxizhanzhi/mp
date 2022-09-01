@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -70,6 +70,7 @@ public class RoleController {
      * @return 成功数量
      */
     @ApiOperation("批量删除角色")
+    @ApiImplicitParam(name="ids", value="角色ID列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
@@ -78,6 +79,7 @@ public class RoleController {
 
     @GetMapping("/{id}")
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
+    @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
     public ObjServiceResult get(@PathVariable String id) {
         RoleDto roleDto = roleService.getRoleDto(id);
         return ResultUtils.obj2ObjServiceResult(roleDto);
@@ -93,6 +95,7 @@ public class RoleController {
     }
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
+    @ApiImplicitParam(name = "createRequest", value = "请求")
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
@@ -103,6 +106,7 @@ public class RoleController {
 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
+    @ApiImplicitParam(name = "modifyRequest", value = "修改请求")
     @PostMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)

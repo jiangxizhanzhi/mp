@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.base.service.result;
 
+import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.code.ServiceCode;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +19,14 @@ public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
         super(source, code, detail);
     }
 
+    public ObjServiceResult(T obj) {
+        this(new ObjResult<>(obj));
+    }
+
+    public ObjServiceResult(T obj, DynamicFields fields) {
+        this(new ObjResult<>(obj, fields));
+    }
+
     @Override
     public T sourceToData(ObjResult<T> source) {
         if (source == null) {
@@ -31,6 +40,14 @@ public class ObjServiceResult<T> extends BaseServiceResult<ObjResult<T>, T> {
     public ObjServiceResult<T> asResult() {
         super.asResult();
         return this;
+    }
+
+    public T sourceObj() {
+        var source = getSource();
+        if (source == null) {
+            return null;
+        }
+        return source.getObj();
     }
 
 }

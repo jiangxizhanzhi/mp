@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.flow.response.QueryFlowScriptDemoResponse;
 import cn.cyberpeace.mp.flow.service.FlowScriptDemoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowScriptDemoServiceImpl;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class FlowScriptDemoController extends BaseModelController<FlowScriptDemo
     private FlowScriptDemoServiceImpl flowScriptDemoService;
 
     @ApiOperation("查询脚本模板信息")
+    @ApiImplicitParam(name = "type", value = "类型")
     @GetMapping("/list")
     public ServiceResult<QueryFlowScriptDemoResponse> listFlowScriptDemos(@RequestParam(required = false) Integer type) {
         return flowScriptDemoService.listScriptDemos(type);

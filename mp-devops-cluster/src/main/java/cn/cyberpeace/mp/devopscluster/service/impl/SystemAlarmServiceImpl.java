@@ -111,6 +111,6 @@ public class SystemAlarmServiceImpl extends BaseModelServiceImpl<SystemAlarmMode
      */
     @Override
     public List<AlarmCountVO> todayAlarmCount() {
-        return this.getModelMapper().todayAlarmCount();
+        return this.getModelMapper().todayAlarmCount(LocalDateTime.now());
     }
 }

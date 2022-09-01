@@ -27,12 +27,16 @@ import java.util.Map;
 @ApiModel("资源统计")
 public class ResourceStatisticsResponse {
 
+    @ApiModelProperty(value = "实体靶标")
     private PhysicalTarget physicalTarget;
 
+    @ApiModelProperty(value = "场景统计")
     private SceneSummary sceneSummary;
 
+    @ApiModelProperty(value = "靶标类型统计")
     private TargetSummary targetSummary;
 
+    @ApiModelProperty(value = "虚拟靶标")
     private VirtualTargetSummary virtualTargetSummary;
 
     /**

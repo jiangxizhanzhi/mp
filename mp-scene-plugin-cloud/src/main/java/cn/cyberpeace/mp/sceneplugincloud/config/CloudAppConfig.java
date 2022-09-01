@@ -168,6 +168,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.scene_create_install_unzip_apk:true}")
     private Boolean sceneCreateInstallUnzipApk;
 
+    @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
+    private Boolean dhcpIpAllocate;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 

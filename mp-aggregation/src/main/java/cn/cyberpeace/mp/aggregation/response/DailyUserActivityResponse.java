@@ -12,16 +12,16 @@ import lombok.Data;
  */
 @Data
 @Builder
-@ApiModel("每日用户活动")
+@ApiModel("每日用户活动响应")
 public class DailyUserActivityResponse {
 
-    @ApiModelProperty(notes = "x轴")
+    @ApiModelProperty(value = "x轴", notes = "x轴")
     private String[] xAxis;
 
-    @ApiModelProperty(notes = "用户数量")
+    @ApiModelProperty(value = "用户数量", notes = "用户数量")
     private Integer[] userCount;
 
-    @ApiModelProperty(notes = "场景数量")
+    @ApiModelProperty(value = "场景数量", notes = "场景数量")
     private Integer[] sceneCount;
 
 }

@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.frontbusiness.dto.UrlAccessCtlDto;
 import cn.cyberpeace.mp.frontbusiness.request.urlac.UrlAccessCtlRequest;
 import cn.cyberpeace.mp.frontbusiness.service.UrlACService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +38,7 @@ public class UrlACController {
 
 
     @ApiOperation(value = "根据url模糊查询", notes = "")
+    @ApiImplicitParam(name = "urls", value = "url列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @GetMapping("/by_urls")
     public ServiceResult<List<UrlAccessCtlDto>> listByFuzzyUrls(@RequestParam String[] urls) {
         List<UrlAccessCtlDto> urlAccessCtlDtoList = urlACService.listByUrlFuzzyQuery(Arrays.asList(urls));
@@ -44,6 +46,7 @@ public class UrlACController {
     }
 
     @ApiOperation(value = "根据权限绑定的url", notes = "")
+    @ApiImplicitParam(name = "ids", value = "id列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @GetMapping("/by_targets")
     public ServiceResult<List<UrlAccessCtlDto>> listByTargetIds(@RequestParam String[] ids) {
         List<UrlAccessCtlDto> urlAccessCtlDtoList = urlACService.listByTargetIds(Arrays.asList(ids));
@@ -52,6 +55,7 @@ public class UrlACController {
 
 
     @ApiOperation(value = "新增URL访问控制", notes = "")
+    @ApiImplicitParam(name = "addRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PostMapping("/add")
     public ServiceResult add(@RequestBody @Validated(AddGroup.class) UrlAccessCtlRequest addRequest) {
         String urlACId = urlACService.add(addRequest);
@@ -61,6 +65,7 @@ public class UrlACController {
 
 
     @ApiOperation(value = "更新URL访问控制", notes = "")
+    @ApiImplicitParam(name = "updateRequest", value = "请求体", dataTypeClass = UrlAccessCtlRequest.class, required = true, dataType = "body")
     @PatchMapping("/modify")
     public ServiceResult modify(@RequestBody @Validated(UpdateGroup.class) UrlAccessCtlRequest updateRequest) {
         String urlACId = urlACService.modify(updateRequest);
@@ -70,6 +75,7 @@ public class UrlACController {
 
 
     @ApiOperation(value = "删除URL访问控制", notes = "")
+    @ApiImplicitParam(name = "ids", value = "id列表", dataTypeClass = String[].class, required = true, dataType = "query")
     @DeleteMapping
     public ServiceResult delete(@RequestParam String[] ids) {
         int cnt = urlACService.delete(ids);

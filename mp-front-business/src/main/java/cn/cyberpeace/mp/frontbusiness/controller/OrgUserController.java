@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class OrgUserController {
 
 
     @ApiOperation(value = "查询组织下所有用户信息", notes = "")
+    @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/list/byorg")
     public ServiceResult<List<UserModel>> getByOrg(@RequestParam String orgId) {
         List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
@@ -60,6 +62,7 @@ public class OrgUserController {
 
 
     @ApiOperation(value = "根据userId查询所在组织信息（按照层级排列）", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/hierarchical/byuser")
     public ServiceResult listHierarchicalOrgs(@RequestParam String userId) {
         List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(userId);
@@ -69,6 +72,7 @@ public class OrgUserController {
 
 
     @ApiOperation(value = "增量绑定组织-用户关系！", notes = "")
+    @ApiImplicitParam(name = "bindOrgUsersReq", value = "绑定请求体")
     @PostMapping("/bind")
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = orgUserService.additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
@@ -81,7 +85,8 @@ public class OrgUserController {
     }
 
 
-    @ApiOperation(value = "根据userId查询所有所在组织的路径 如： 赛宁信息/产品研发中心/产品部,赛宁信息/产品研发中心/研发部", notes = "")
+    @ApiOperation(value = "根据userId查询所有所在组织的路径 如： 一级组织/二级组织/三级组织", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/allorgpath/byuser")
     public ServiceResult getAllOrgPath(@RequestParam String userId) {
         String allOrgPath = orgUserService.getAllOrgPathByUserId(userId);
@@ -89,6 +94,7 @@ public class OrgUserController {
     }
 
     @ApiOperation(value = "查询组织下的用户数量", notes = "")
+    @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/usercnt")
     public ServiceResult<Integer> getUserCnt(@RequestParam String orgId) {
         Integer userCnt = orgUserService.getUserCnt(orgId);

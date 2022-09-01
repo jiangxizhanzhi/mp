@@ -5,11 +5,6 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @Description
- * @Author maojun
- * @Date 2021/10/27
- */
 @Configuration
 public class ContextRegistry {
 

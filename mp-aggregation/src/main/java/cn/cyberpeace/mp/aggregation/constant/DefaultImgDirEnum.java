@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.constant;
+package cn.cyberpeace.mp.aggregation.constant;
 
 /**
  * 默认图片文件夹

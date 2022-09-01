@@ -39,6 +39,7 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -103,7 +104,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -112,7 +113,7 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
         List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 
@@ -138,12 +139,13 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-
-        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
             BeanUtils.copyProperties(u, userModel);
+            userService.setDefaultIfNoAvatar(userModel);
             return userModel;
         }).collect(Collectors.toList());
 
@@ -277,7 +279,8 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds);
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
         PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
         List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
 

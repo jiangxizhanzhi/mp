@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel
+@ApiModel("操作日志请求体")
 public class OperationLogRequest {
 
     /**

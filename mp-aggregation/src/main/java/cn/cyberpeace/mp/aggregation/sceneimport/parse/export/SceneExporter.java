@@ -214,6 +214,7 @@ public class SceneExporter {
         result.put("sourcePort", "source-port");
         result.put("targetIP", "target-iP");
         result.put("targetPort", "target-port");
+        result.put("virtualPlatform", "virtual-platform");
         return result;
     }
 
@@ -225,6 +226,7 @@ public class SceneExporter {
             FIELD_ORDER.put("scene", 1);
             FIELD_ORDER.put("networks", 2);
             FIELD_ORDER.put("nodes", 3);
+            FIELD_ORDER.put("shape", 4);
         }
 
         @Override

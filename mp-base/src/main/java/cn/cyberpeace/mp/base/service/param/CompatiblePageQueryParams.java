@@ -12,10 +12,11 @@ public interface CompatiblePageQueryParams extends PageQueryParams, CompatibleQu
         }
     }
 
-    void setPageSize(Integer pageSize);
-
     Integer getPerPage();
 
+    void setPerPage(Integer perPage);
+
+    @Override
     default void ensure() {
         ensureCompatible(this);
     }

@@ -26,11 +26,19 @@ import cn.cyberpeace.mp.flow.service.FlowCollectionService;
 import cn.cyberpeace.mp.flow.service.impl.FlowCollectionServiceImpl;
 import io.micrometer.core.instrument.util.StringUtils;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,6 +91,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("查询指定id数据")
+    @ApiImplicitParam(name = "id", value = "集合ID")
     @GetMapping("/bulk")
     public ServiceResult<FlowCollectionModel> get(@RequestParam String id) {
         FlowCollectionModel model = new FlowCollectionModel();
@@ -94,6 +103,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("新增流量集合信息")
+    @ApiImplicitParam(name = "model", value = "新增集合请求")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/bulk")
     public ServiceResult<FlowCollectionModel> add(@RequestBody @Validated FlowCollectionModel model) {
@@ -101,6 +111,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("更新流量集合信息")
+    @ApiImplicitParam(name = "request", value = "更新集合请求")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "更新流量集合", target = OpTargetEnums.FLOW_COLLECTION)
     @PatchMapping("/bulk")
     public ServiceResult<FlowCollectionModel> update(@RequestBody @Validated ModifyCollectionRequest request) {
@@ -123,6 +134,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("新增集合关联信息")
+    @ApiImplicitParam(name = "request", value = "新增关联信息请求")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.CREATE, title = "新增流量管理", target = OpTargetEnums.FLOW_COLLECTION)
     @PostMapping("/collection_rel")
     public ServiceResult<Integer> addCollectionRel(@RequestBody @Validated AddFlowCollectionRelRequest request) {
@@ -130,6 +142,7 @@ public class FlowCollectionController extends BaseModelController<FlowCollection
     }
 
     @ApiOperation("删除集合关联信息")
+    @ApiImplicitParam(name = "request", value = "删除请求体")
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.UPDATE, title = "更新流量管理", target = OpTargetEnums.FLOW_COLLECTION)
     @DeleteMapping("/collection_rel")
     public ServiceResult<Integer> delCollectionRel(@RequestBody @Validated DelFlowCollectionRelRequest request) {

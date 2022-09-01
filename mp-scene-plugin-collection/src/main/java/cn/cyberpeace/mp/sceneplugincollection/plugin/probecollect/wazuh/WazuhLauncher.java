@@ -11,12 +11,14 @@ import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.mongodb.client.model.Filters;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -44,8 +46,11 @@ public class WazuhLauncher {
     public static final String CMD_OUTPUT_FORMAT_PLAIN = "plain";
     public static final String CMD_OUTPUT_FORMAT_NONE = "none";
 
-    public static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
-    public static final DateTimeFormatter WAZUH_ALERT_INDEX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+    public static final String WAZUH_ALERT_ES_INDEX_PREFIX = "wazuh-alerts-4.x-";
+    public static final DateTimeFormatter WAZUH_ALERT_ES_INDEX_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+    public static final String WAZUH_ALERT_MONGO_DB = "wazuh";
+    public static final String WAZUH_ALERT_MONGO_COLLECTION = "wazuh-alerts-4.x";
 
     private static Cache<String, LaunchAlert> runCommandResultPool = CacheBuilder.newBuilder()
             .maximumSize(120000)
@@ -63,17 +68,6 @@ public class WazuhLauncher {
     public static void runCommandResultCall(LaunchAlert alertData) {
         log.info("Wazuh run command({}) result call", alertData.getData().getSicLaunchId());
         runCommandResultPool.put(alertData.getData().getSicLaunchId(), alertData);
-    }
-
-    private String getAlertIndex(LocalDateTime time) {
-        return String.format("%s%s", WAZUH_ALERT_INDEX_PREFIX,
-                TimeUtils.localDateTimeToString(time, WAZUH_ALERT_INDEX_DATE_FORMAT));
-    }
-
-    private List<String> getRecentAlertIndices() {
-        var currentDayTime = LocalDateTime.now();
-//        var prevDayTime = currentDayTime.minusDays(1);
-        return List.of(getAlertIndex(currentDayTime));
     }
 
     private void runCommand(RunCommandItem runCommandItem) {
@@ -150,12 +144,12 @@ public class WazuhLauncher {
                 }
             }
 
-            // 本地查不到，最后查一遍es
+            // 本地查不到，最后查一遍db
             if (launchAlert == null) {
                 launchAlert = queryCommandLaunchAlert(runCommandItem.getAgentId(), runCommandItem.getRunId());
             }
         } else {
-            // 轮询es
+            // 轮询db
             for (var i = 0; i < runCommandItem.getCheckOutputTime(); i++) {
                 try {
                     Thread.sleep(runCommandItem.getCheckOutputInterval());
@@ -178,7 +172,22 @@ public class WazuhLauncher {
     }
 
     private LaunchAlert queryCommandLaunchAlert(String agentId, String runId) {
-        var esSearchRequest = new SearchRequest(getRecentAlertIndices().toArray(new String[0]));
+        if (wazuhClient.getMongoClient() != null) {
+            return queryCommandLaunchAlertOnMongo(agentId, runId);
+        }
+
+        if (wazuhClient.getEsClient() != null) {
+            return queryCommandLaunchAlertOnEs(agentId, runId);
+        }
+
+        return null;
+    }
+
+    private LaunchAlert queryCommandLaunchAlertOnEs(String agentId, String runId) {
+        var currentDayTime = LocalDateTime.now();
+        var currentDayAlertIndex = String.format("%s%s", WAZUH_ALERT_ES_INDEX_PREFIX,
+                TimeUtils.localDateTimeToString(currentDayTime, WAZUH_ALERT_ES_INDEX_DATE_FORMAT));
+        var esSearchRequest = new SearchRequest(currentDayAlertIndex);
         var esBoolQueryBuilder = QueryBuilders.boolQuery();
         esBoolQueryBuilder.filter(QueryBuilders.matchQuery("agent.id", agentId));
         esBoolQueryBuilder.filter(QueryBuilders.matchQuery("data.sic_launch_id", runId));
@@ -193,6 +202,18 @@ public class WazuhLauncher {
         }
         if (esHits != null && esHits.length > 0) {
             return JsonCommon.snakeParse(esHits[0].getSourceAsString(), new TypeReference<LaunchAlert>() {});
+        } else {
+            return null;
+        }
+    }
+
+    private LaunchAlert queryCommandLaunchAlertOnMongo(String agentId, String runId) {
+        var db = wazuhClient.getMongoClient().getDatabase(WAZUH_ALERT_MONGO_DB);
+        var collection = db.getCollection(WAZUH_ALERT_MONGO_COLLECTION);
+        var document = collection.find(Filters.eq("_source.agent.id", agentId))
+                .filter(Filters.eq("_source.data.sic_launch_id", runId)).first();
+        if (document != null && document.containsKey("_source")) {
+            return JsonCommon.snakeParse(JsonCommon.stringify(document.get("_source")), new TypeReference<LaunchAlert>() {});
         } else {
             return null;
         }
@@ -225,6 +246,11 @@ public class WazuhLauncher {
 
         public WazuhLauncherBuilder configEs(String esServer) {
             wazuhClientBuilder.configEs(esServer);
+            return this;
+        }
+
+        public WazuhLauncherBuilder configMongo(String mongoServer) {
+            wazuhClientBuilder.configMongo(mongoServer);
             return this;
         }
 

@@ -3,21 +3,22 @@ package cn.cyberpeace.mp.frontadminbusiness.controller;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.fdfsclient.FileResponseData;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
 import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
+import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +70,7 @@ public class SysConfigController {
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
+    @ApiImplicitParam(name = "updateConfig", value = "更新请求体")
     @PostMapping("/update/bykeyname")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateByKeyName(@RequestBody SysConfigModel updateConfig) {
@@ -86,6 +88,7 @@ public class SysConfigController {
     }
 
     @ApiOperation(value = "根据keyname批量更新sysconfig", notes = "")
+    @ApiImplicitParam(name = "configs", value = "配置列表", dataTypeClass = List.class)
     @PostMapping("/updateall")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新系统配置", target = OpTargetEnums.SYS_CONFIG)
     public ServiceResult updateAll(@RequestBody @NotEmpty List<SysConfigModel> configs) {
@@ -109,6 +112,7 @@ public class SysConfigController {
      * @return
      */
     @ApiOperation("系统logo导入")
+    @ApiImplicitParam(name = "file", value = "logo图片")
     @PostMapping(value = "/logo/upload")
     @ResponseBody
     public ServiceResult<FileResponseData> logoUpload(@RequestParam(value = "file") MultipartFile file) {
@@ -126,6 +130,7 @@ public class SysConfigController {
      * @return
      */
     @ApiOperation("VPN软件包导入")
+    @ApiImplicitParam(name = "file", value = "vpn软件包")
     @PostMapping(value = "/vpn/upload")
     @ResponseBody
     public ServiceResult<FileResponseData> importVPN(@RequestParam(value = "file") MultipartFile file) {

@@ -9,8 +9,8 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -29,6 +29,7 @@ import com.alibaba.excel.exception.ExcelCommonException;
 import com.alibaba.excel.exception.ExcelDataConvertException;
 import com.alibaba.excel.exception.ExcelGenerateException;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,7 @@ public class UserExcelController {
 
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
+    @ApiImplicitParam(name = "exportRequest", value = "导出请求")
     @PostMapping("/excel/export")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void exportExcel(HttpServletResponse response, @RequestBody UserExportRequest exportRequest) throws IOException {
@@ -114,6 +116,7 @@ public class UserExcelController {
 
 
     @ApiOperation(value = "通过excel导入用户数据", notes = "")
+    @ApiImplicitParam(name="file", value="文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/excel/import")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @ResponseBody

@@ -75,6 +75,7 @@ public class GodfsClient implements FileClient {
         this.godfsHttpClient.setLogRequest(true);
     }
 
+    @Override
     public String upload(InputStream is, long filesize, String fileSuffix) {
         var filename = TextUtils.uuid();
         if (!StringUtils.isEmpty(fileSuffix)) {
@@ -108,6 +109,7 @@ public class GodfsClient implements FileClient {
         return response.getData().getPath();
     }
 
+    @Override
     public void download(String godfsFilepath, OutputStream os) {
         var downloadUrl = StringUtils.join(DOWNLOAD_URL_PREFIX, godfsFilepath);
         var httpResult = godfsHttpClient.download(os, downloadUrl, null, null, null);
@@ -119,6 +121,7 @@ public class GodfsClient implements FileClient {
         }
     }
 
+    @Override
     public boolean delete(String godfsFilepath) {
         var deleteParam = new GodfsDeleteParam();
         deleteParam.setPath(godfsFilepath);

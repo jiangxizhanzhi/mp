@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.dto.cluster;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -9,12 +10,12 @@ import lombok.Data;
  * @Author zhouxinghuai
  * @Date：2021/9/13 13:58
  */
-
 @Data
 @Builder
+@ApiModel("集群数据类型")
 public class ClusterData {
 
-    @ApiModelProperty("cpu数据")
+    @ApiModelProperty(value = "cpu数据")
     private Integer[] CPUData;
 
     @ApiModelProperty("磁盘数据")

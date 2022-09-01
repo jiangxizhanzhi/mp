@@ -2,16 +2,15 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,10 +52,6 @@ public class RegisterService {
                 .name(req.getName())
                 .avatar(req.getAvatar()).build();
 
-        // 给注册用户分配默认头像
-        if (StringUtils.isEmpty(user.getAvatar())) {
-            user.setAvatar(userService.getDefaultUserAvatar());
-        }
 
         // 查看系统设置，注册用户是否需要审核
         if (adminConfigService.isNewUserNeedAudit()) {

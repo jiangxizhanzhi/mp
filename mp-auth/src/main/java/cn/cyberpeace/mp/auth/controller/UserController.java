@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.auth.controller;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -64,6 +64,7 @@ public class UserController {
      * @return 成功数量
      */
     @ApiOperation("批量删除用户")
+    @ApiImplicitParam(name="ids", value="用户id列表",dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
@@ -109,6 +110,7 @@ public class UserController {
 
 
     @ApiOperation(value = "创建用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiImplicitParam(name = "createRequest", value = "请求")
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = OpTargetEnums.USER)
@@ -118,11 +120,11 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
+    @ApiImplicitParam(name = "modifyRequest", value = "修改请求")
     @PostMapping("/modify")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = userService.modify(modifyRequest);
         return ServiceResult.success(userModel);
     }
-
 }

@@ -126,7 +126,7 @@ public class UserPermissionServiceImpl
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
 
         List<UserModel> users = getModelMapper().listUsersByTargetId(targetId);
-
+        users.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
 

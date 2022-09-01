@@ -46,7 +46,9 @@ public class JacksonConfig {
         if (Boolean.FALSE.equals(baseAppConfig.getJsonStringifyIncludeNull())) {
             objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
-        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        if (Boolean.TRUE.equals(baseAppConfig.getSnakeApiMode())) {
+            objectMapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
+        }
         return objectMapper;
     }
 

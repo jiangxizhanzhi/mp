@@ -15,7 +15,7 @@ import java.util.List;
 @Data
 public class UserOnlineRecordSummaryPageRequest extends PageRequest {
 
-    @ApiModelProperty(value = "userIds")
+    @ApiModelProperty(value = "用户ID列表")
     private List<String> userIds;
 
     @ApiModelProperty(value = "开始时间")

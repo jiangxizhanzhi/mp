@@ -41,11 +41,13 @@ public class ResourceCenterConverter {
         converters.add(new SceneElementConverter(parseResult.getScene()));
         converters.add(new NodeElementConverter(parseResult.getNodes()));
         converters.add(new NetworkElementConverter(parseResult.getNetworks()));
+        converters.add(new Node2NodeConnectConverter(parseResult.getNodes()));
         converters.add(new DeviceInfoConverter(this.targetConverter));
         converters.add(new ImageInfoConverter());
         converters.add(new SceneFilePathConverter());
         converters.add(new PortIdAndNameConvert());
         converters.add(new DefaultValueConverter());
+        converters.add(new SceneElementShapeConverter(parseResult.getShape()));
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 

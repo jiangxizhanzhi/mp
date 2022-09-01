@@ -7,4 +7,6 @@ public interface IdsQueryParams {
 
     String[] getIds();
 
+    void setIds(String[] ids);
+
 }

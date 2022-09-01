@@ -27,7 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description:
@@ -82,6 +87,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         ObjServiceResult<OrgModel> orgModelObjServiceResult = super.create(obj, fields);
         OrgModel createModel = orgModelObjServiceResult.getData();
         createModel.setPath(this.getPath(createModel));
+        userCacheService.evictAllUserCache();
         return orgModelObjServiceResult;
     }
 

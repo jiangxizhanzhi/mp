@@ -7,9 +7,12 @@ import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.base.util.http.HttpResult;
 import cn.cyberpeace.mp.base.util.http.SnakeHttpParam;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
@@ -27,6 +30,8 @@ public class WazuhClient {
     private HttpClient wazuhHttpClient;
     @Getter
     private RestHighLevelClient esClient;
+    @Getter
+    private MongoClient mongoClient;
 
     private int wazuhTokenExpiredSeconds = 900;
 
@@ -112,6 +117,7 @@ public class WazuhClient {
         private String wazuhUser;
         private String wazuhPass;
         private String esServer;
+        private String mongoServer;
 
         public WazuhClientBuilder configWazuh(String wazuhServer, String wazuhUser, String wazuhPass) {
             this.wazuhServer = wazuhServer;
@@ -125,12 +131,17 @@ public class WazuhClient {
             return this;
         }
 
+        public WazuhClientBuilder configMongo(String mongoServer) {
+            this.mongoServer = mongoServer;
+            return this;
+        }
+
         public WazuhClient build() {
-            return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer);
+            return new WazuhClient(wazuhServer, wazuhUser, wazuhPass, esServer, mongoServer);
         }
     }
 
-    private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer) {
+    private WazuhClient(String wazuhServer, String wazuhUser, String wazuhPass, String esServer, String mongoServer) {
         this.wazuhHttpClient = HttpClient.builder()
                 .configServer(wazuhServer)
                 .configTimeout(60000)
@@ -141,9 +152,15 @@ public class WazuhClient {
         this.wazuhUser = wazuhUser;
         this.wazuhPass = wazuhPass;
 
-        var esHostParts = esServer.split("://")[1].split(":");
-        var restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
-        this.esClient = new RestHighLevelClient(restClientBuilder);
+        if (!StringUtils.isEmpty(esServer)) {
+            var esHostParts = esServer.split("://")[1].split(":");
+            var restClientBuilder = RestClient.builder(new HttpHost(esHostParts[0], IntUtils.fromStr(esHostParts[1])));
+            this.esClient = new RestHighLevelClient(restClientBuilder);
+        }
+
+        if (!StringUtils.isEmpty(mongoServer)) {
+            this.mongoClient = MongoClients.create(mongoServer);
+        }
     }
 
     public static WazuhClientBuilder builder() {

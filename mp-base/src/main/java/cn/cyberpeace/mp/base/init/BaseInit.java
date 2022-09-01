@@ -32,9 +32,12 @@ public class BaseInit implements ApplicationRunner {
         log.info("Resource dir: {}", resourcesDir);
         log.info("Local file server dir: {}", fileServerDir);
 
+        if (Boolean.TRUE.equals(baseAppConfig.getEnableLocalCall())) {
+            TaskCommon.executeTask(() -> LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext()));
+        }
+
         BaseServer.initServerSessionMap();
         BaseGroupServer.initServerGroupSessionsListMap();
-        TaskCommon.executeTask(() -> LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext()));
     }
 
 }

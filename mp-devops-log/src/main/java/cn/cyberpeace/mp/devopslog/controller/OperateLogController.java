@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.SearchResponse;
@@ -57,6 +58,7 @@ public class OperateLogController {
     }
 
     @ApiOperation(value = "新增操作日志")
+    @ApiImplicitParam(name = "request", value = "操作日志请求", dataTypeClass = OperationLogRequest.class)
     @PostMapping("/add")
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));

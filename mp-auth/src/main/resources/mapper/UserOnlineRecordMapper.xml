@@ -34,8 +34,8 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="minutes != null">
-                AND end_time &gt; NOW() - INTERVAL #{minutes} MINUTE
+            <if test="fromTime != null">
+                AND end_time &gt; #{fromTime}
             </if>
             AND status = 0
         </where>
@@ -50,8 +50,8 @@
                     #{userId}
                 </foreach>
             </if>
-            <if test="minutes != null">
-                AND end_time &lt; NOW() - INTERVAL #{minutes} MINUTE
+            <if test="fromTime != null">
+                AND end_time &lt; #{fromTime}
             </if>
             AND status = 0
         </where>

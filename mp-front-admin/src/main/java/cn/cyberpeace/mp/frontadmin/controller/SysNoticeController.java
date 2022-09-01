@@ -12,11 +12,11 @@ import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.constant.FrontAdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.request.validate.AddGroup;
 import cn.cyberpeace.mp.frontadmin.request.validate.UpdateGroup;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.util.ResultUtils;
 import cn.hutool.core.collection.CollectionUtil;
@@ -60,6 +60,7 @@ public class SysNoticeController {
     private OptionService optionService;
 
     @ApiOperation("查询单个公告")
+    @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @GetMapping("/{id}")
     public ServiceResult<SysNoticeDto> get(@PathVariable String id) {
         ObjServiceResult<SysNoticeModel> result = noticeService.get(id);
@@ -74,6 +75,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("阅读公告接口")
+    @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
         noticeService.read(id);
@@ -82,6 +84,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("不再推送公告消息")
+    @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String.class)
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
         noticeService.unpush(CollectionUtil.toList(ids));
@@ -117,6 +120,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("新增公告")
+    @ApiImplicitParam(name = "noticeReq", value = "新增公告请求")
     @PostMapping
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
@@ -125,6 +129,7 @@ public class SysNoticeController {
     }
 
     @ApiOperation("更新公告")
+    @ApiImplicitParam(name = "noticeReq", value = "更新公告请求")
     @PatchMapping("/{id}")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "修改公告", target = OpTargetEnums.NOTICE)
     public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
@@ -135,6 +140,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("批量删除公告")
+    @ApiImplicitParam(name = "ids", value = "公告ID列表")
     @DeleteMapping
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
@@ -154,8 +160,8 @@ public class SysNoticeController {
         return ServiceResult.success(result.getSource());
     }
 
-    @GetMapping("/types")
     @ApiOperation(value = "查询系统公告类型")
+    @GetMapping("/types")
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(FrontAdminConstant.MP_COMMON_OPTION_TYPE_FRONT_ADMIN_NOTICE_TYPE);
     }

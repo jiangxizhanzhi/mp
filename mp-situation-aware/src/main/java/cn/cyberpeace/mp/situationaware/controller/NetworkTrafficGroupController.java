@@ -7,9 +7,16 @@ import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.GroupRequest;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -30,6 +37,7 @@ public class NetworkTrafficGroupController {
 
     @DeleteMapping("/{groupId}")
     @ApiOperation(value = "根据groupId删除分组信息", notes = "")
+    @ApiImplicitParam(name = "groupId", value = "场景分组id", dataTypeClass = String.class)
     public ServiceResult deleteModelById(@PathVariable("groupId") String groupId) {
         networkTrafficGroupService.deleteArkimeInstance(groupId);
         return ServiceResult.successful();
@@ -38,6 +46,7 @@ public class NetworkTrafficGroupController {
 
     @PostMapping
     @ApiOperation(value = "新增分组信息", notes = "")
+    @ApiImplicitParam(name = "groupRequest", value = "新增请求体", dataType = "body")
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);

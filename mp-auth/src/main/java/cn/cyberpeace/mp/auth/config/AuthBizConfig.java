@@ -21,4 +21,7 @@ public class AuthBizConfig {
     // 最大可通过excel导入的用户数量
     private Integer maxImportUserSize;
 
+    // 默认头像
+    private String defaultUserAvatar;
+
 }

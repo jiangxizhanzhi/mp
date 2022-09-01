@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.auth.service;
+package cn.cyberpeace.mp.aggregation.service;
 
-import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.aggregation.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;

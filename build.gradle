@@ -1,9 +1,6 @@
-
-
 plugins {
     id 'org.springframework.boot' version '2.5.12'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
-    id 'org.asciidoctor.convert' version '1.5.8'
     id 'java'
     id 'application'
     id 'org.flywaydb.flyway' version '8.0.5'
@@ -28,11 +25,9 @@ allprojects {
     }
 }
 
-//引入 mybatis-generator 插件
 subprojects {
     apply plugin: 'org.springframework.boot'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'org.asciidoctor.convert'
     apply plugin: 'java'
     apply plugin: 'application'
     apply plugin: 'org.flywaydb.flyway'
@@ -80,28 +75,26 @@ subprojects {
         implementation 'com.github.xiaoymin:knife4j-spring-boot-starter:3.0.2'
         implementation 'cn.hutool:hutool-all:5.6.6'
         implementation 'commons-net:commons-net:3.6'
+        implementation 'commons-io:commons-io:2.11.0'
+        implementation 'commons-codec:commons-codec:1.15'
+        implementation 'org.mongodb:bson:4.7.0'
+        implementation 'org.mongodb:mongodb-driver-core:4.7.0'
+        implementation 'org.mongodb:mongodb-driver-sync:4.7.0'
+        implementation 'org.slf4j:slf4j-api:1.7.30'
         compileOnly 'org.projectlombok:lombok'
         runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.projectlombok:lombok'
-        asciidoctor 'org.springframework.restdocs:spring-restdocs-asciidoctor'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
         testImplementation 'junit:junit:4.13.2'
-        implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
-        testImplementation'org.mybatis.generator:mybatis-generator-core:1.3.7'
+        testImplementation 'org.mybatis.generator:mybatis-generator-core:1.3.7'
     }
-
 
 
     test {
         outputs.dir snippetsDir
         useJUnitPlatform()
-    }
-
-    asciidoctor {
-        inputs.dir snippetsDir
-        dependsOn test
     }
 
     bootJar {

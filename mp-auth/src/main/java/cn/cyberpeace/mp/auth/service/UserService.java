@@ -104,6 +104,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     String getDefaultUserAvatar();
 
+    void setDefaultIfNoAvatar(UserModel userModel);
+
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 
 }

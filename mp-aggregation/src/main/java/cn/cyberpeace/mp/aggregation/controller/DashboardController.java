@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import java.util.List;
  * @Author zhouxinghuai
  * @Date：2021/9/13 10:32
  */
-@Api(value = "Dashboard统计接口", tags = "Dashboard统计接口")
+@Api(value = "仪表盘统计接口", tags = "仪表盘统计接口")
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dashboard")
@@ -52,6 +53,7 @@ public class DashboardController {
         this.dashboardService = dashboardService;
     }
 
+    @ApiOperation("用户日活跃情况")
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
         DailyUserActivityResponse response = dashboardService.dailyUserActivity();
@@ -66,6 +68,7 @@ public class DashboardController {
     }
 
 
+    @ApiOperation("资源使用情况")
     @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
         SystemClusterUsed response = mockService.mockSystemClusterUsed();
@@ -88,6 +91,7 @@ public class DashboardController {
     }
 
     @ApiOperation(value = "用户监控会话", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/user_node_session")
     public ServiceResult<List<NodeSessionBO>> userNodeSession(@RequestParam String userId) {
         return dashboardService.getUserNodeSessions(userId);

@@ -10,7 +10,6 @@ import lombok.Data;
  * @Date：2022/4/25 09:41
  */
 @Data
-@Deprecated
 public class CollectionTemplateProbeDto {
 
     /**

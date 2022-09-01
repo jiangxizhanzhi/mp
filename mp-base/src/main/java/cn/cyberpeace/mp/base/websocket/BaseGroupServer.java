@@ -35,11 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
  *     }
  *
- *     @Autowired
- *     public TestGroupServer(SnakeJsonMessageConverter messageConverter) {
- *         setMessageConverter(messageConverter);
- *     }
- *
  *     @Override
  *     protected List<String> retrieveGroupKeys(Session session) {
  *         return List.of("test1");
@@ -90,11 +85,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  *     public static <T> void sendToAllSessions(T data) {
  *         BaseGroupServer.sendToAllSessions(TestGroupServer.class, data, null, null);
- *     }
- *
- *     @Autowired
- *     public TestGroupServer(SnakeJsonMessageConverter messageConverter) {
- *         setMessageConverter(messageConverter);
  *     }
  *
  *     @Override
@@ -186,11 +176,31 @@ public abstract class BaseGroupServer extends BaseServer {
         BaseServer.sendToAllSessions(serverClass, data, type, context);
     }
 
-    private List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> getGroupSessionsList() {
+    public static void sendCloseToGroup(Class<?> serverClass, String groupKey) {
+        sendToGroup(serverClass, groupKey, null, BaseServer.CLOSE_TYPE, null);
+    }
+
+    public static void sendCloseToGroup(Class<?> serverClass, int groupIndex, String groupKey) {
+        sendToGroup(serverClass, groupIndex, groupKey, null, BaseServer.CLOSE_TYPE, null);
+    }
+
+    public static void sendCloseToGroupIndex(Class<?> serverClass, int groupIndex) {
+        sendToGroupIndex(serverClass, groupIndex, null, BaseServer.CLOSE_TYPE, null);
+    }
+
+    public static void sendCloseToSession(Class<?> serverClass, String sessionKey) {
+        sendToSession(serverClass, sessionKey, null, CLOSE_TYPE, null);
+    }
+
+    public static void sendCloseToAllSessions(Class<?> serverClass) {
+        sendToAllSessions(serverClass, null, CLOSE_TYPE, null);
+    }
+
+    protected List<ConcurrentHashMap<String, ConcurrentHashMap<String, Session>>> getGroupSessionsList() {
         return serverGroupSessionsListMap.get(this.getClass());
     }
 
-    private ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> getGroupSessionsMap(int groupIndex) {
+    protected ConcurrentHashMap<String, ConcurrentHashMap<String, Session>> getGroupSessionsMap(int groupIndex) {
         var groupSessionsList = getGroupSessionsList();
         if (groupSessionsList.size() < groupIndex + 1) {
             return null;
@@ -213,6 +223,8 @@ public abstract class BaseGroupServer extends BaseServer {
         if (groupKeys == null || groupKeys.isEmpty()) {
             throw new ValidateException("Group key not found");
         }
+
+        this.groupKeys = groupKeys;
     }
 
     @Override
@@ -220,7 +232,9 @@ public abstract class BaseGroupServer extends BaseServer {
     public void onOpen(Session session) throws ValidateException {
         super.onOpen(session);
 
-        groupKeys = retrieveGroupKeys(session);
+        if (groupKeys == null || groupKeys.isEmpty()) {
+            groupKeys = retrieveGroupKeys(session);
+        }
         for (var i = 0; i < groupKeys.size(); i++) {
             var groupKey = groupKeys.get(i);
             var groupSessionsMap = getGroupSessionsMap(i);

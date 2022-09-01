@@ -167,14 +167,16 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, DEFAULT_MINUTES);
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, fromTime);
         return onlineList;
     }
 
     @Override
     public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
         // 默认超过5分钟没有更新end_time既判定为离线
-        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds, DEFAULT_MINUTES);
+        LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
+        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds,fromTime);
         return list;
     }
 

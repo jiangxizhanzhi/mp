@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +96,7 @@ public class InstallerController {
      * 新增
      */
     @ApiOperation("新增")
+    @ApiImplicitParam(name = "request", value = "新增数据请求体")
     @PostMapping
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增服务", target = OpTargetEnums.SERVICE)
     public ServiceResult add(@RequestBody InstallerRequest request){
@@ -106,6 +108,7 @@ public class InstallerController {
      * 更新
      */
     @ApiOperation("更新")
+    @ApiImplicitParam(name = "request", value = "更新数据请求体")
     @PatchMapping("/{uuid}")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改服务", target = OpTargetEnums.SERVICE)
     public ServiceResult update(@RequestBody InstallerRequest request,@PathVariable("uuid") String uuid){
@@ -121,6 +124,7 @@ public class InstallerController {
      * 删除
      */
     @ApiOperation("删除")
+    @ApiImplicitParam(name = "request", value = "删除数据请求体")
     @DeleteMapping
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除服务", target = OpTargetEnums.SERVICE)
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){

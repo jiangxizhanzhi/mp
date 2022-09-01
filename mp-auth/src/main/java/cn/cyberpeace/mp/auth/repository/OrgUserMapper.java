@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -37,7 +38,6 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
 
     /**
      * @param orgIds
-     * @param userDto.username 会同时模糊查询username和name
      * @param userIds
      * @return
      */
@@ -47,8 +47,9 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
                                    @Param("userCondition") UserDto userDto,
                                    @Param("selfUserId") String selfUserId,
                                    @Param("excludeRoleIds") List<String> excludeRoleIds,
-                                   @Param("excludeUserIds") List<String> excludeUserIds
-    );
+                                   @Param("excludeUserIds") List<String> excludeUserIds,
+                                   @Param("currentDateTime") LocalDateTime currentDateTime
+                                   );
 
     Integer selectUserCnt(@Param("orgId") String orgId);
 
