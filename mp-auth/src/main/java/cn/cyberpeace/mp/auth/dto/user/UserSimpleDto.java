@@ -1,10 +1,7 @@
 package cn.cyberpeace.mp.auth.dto.user;
 
-import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.base.model.generator.UuidGenerator;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultGen;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -47,7 +44,7 @@ public class UserSimpleDto {
     List<String> orgIds;
 
     @ApiModelProperty(value = "组织集合")
-    List<OrgModel> orgs;
+    List<OrgBO> orgs;
 
     @ApiModelProperty(value = "角色集合")
     List<RoleModel> roles;

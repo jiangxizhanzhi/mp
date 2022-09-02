@@ -8,9 +8,9 @@ import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -831,7 +831,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
             return Collections.emptyList();
         }
-        List<OrgModel> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
+        List<OrgBO> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
         List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
         List<UserDto> userDtos = new ArrayList<>();
         for (UserOrgRoleDto userOrgRoleDto : userOrgRoleDtos) {
@@ -842,8 +842,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             if (StringUtils.isNotBlank(userOrgRoleDto.getOrgs())) {
                 List<String> userOrgIds = Arrays.asList(userOrgRoleDto.getOrgs().split(","));
-                List<OrgModel> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
-                List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
+                List<OrgBO> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
+                //List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
+                List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
                 userDto.setOrgs(userOrgModels);
                 userDto.setOrgIds(userOrgIds);
                 userDto.setOrgpaths(allorgpath);
@@ -884,11 +885,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         processExpiredStatus(userDto);
 
         if (needOrg) {
-            List<OrgModel> orgs = orgUserService.listOrgsByUserId(userModel.getId());
-            List<String> orgIds = orgs.stream().map(BaseModel::getId).collect(Collectors.toList());
+            List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+            List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
 
-            List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
-            userDto.setOrgs(orgs);
+            //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
+            List<List<String>> allorgpath = orgBOS.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
+            userDto.setOrgs(orgBOS);
             userDto.setOrgIds(orgIds);
             userDto.setOrgpaths(allorgpath);
         }
@@ -987,9 +989,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ExportUser exportUser = ExportUser.builder().username(user.getUsername()).name(user.getName()).build();
 
         // org path
-        List<OrgModel> orgList = orgUserService.listOrgsByUserId(user.getId());
+        List<OrgBO> orgList = orgUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
-        Optional<OrgModel> optional = orgList.stream().max(Comparator.comparing(OrgModel::getPk));
+        Optional<OrgBO> optional = orgList.stream().max(Comparator.comparing(OrgBO::getPk));
         optional.ifPresent(o -> exportUser.setOrg(orgService.getPath(o)));
 
         String statusNormal = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NORMAL);

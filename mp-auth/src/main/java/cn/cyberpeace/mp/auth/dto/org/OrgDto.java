@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.dto.org;
 
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -13,7 +12,7 @@ import java.util.List;
  * @Date：2021/8/31 11:13
  */
 @Data
-public class OrgDto extends OrgModel {
+public class OrgDto extends OrgBO {
 
     @ApiModelProperty(value = "上级组织")
     OrgDto parentOrg;

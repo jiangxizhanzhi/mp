@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.dto.org;
 
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("用户组织对象")
-public class UserOrgDto extends OrgModel {
+public class UserOrgDto extends OrgBO {
 
     /**
      * 用户id

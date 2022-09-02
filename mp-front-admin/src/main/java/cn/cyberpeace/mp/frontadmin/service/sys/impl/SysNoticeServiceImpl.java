@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -21,8 +22,6 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
-import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
-import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
@@ -31,6 +30,8 @@ import cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
+import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
+import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
@@ -294,8 +295,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
-        orgModels.forEach(o -> {
+        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+        orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());
             // 查找所有上级组织id
@@ -349,8 +350,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgModel> orgModels = orgUserService.listOrgsByUserId(userModel.getId());
-        orgModels.forEach(o -> {
+        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+        orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());
             // 查找所有上级组织id
@@ -413,9 +414,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         List<OrgModel> orgModels = noticeOrgMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
         if (CollectionUtil.isNotEmpty(orgModels)) {
             noticeDto.setOrgIds(orgModels.stream().map(OrgModel::getId).collect(Collectors.toList()));
-            noticeDto.setOrgPaths(orgService.getBatchPath(orgModels));
+            List<OrgBO> orgBOS = orgModels.stream().map(orgModel -> orgService.orgModel2OrgBO(orgModel)).collect(Collectors.toList());
+            noticeDto.setOrgPaths(orgBOS.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
         }
-
 
         // role
         List<RoleModel> roleModels = noticeRoleMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));

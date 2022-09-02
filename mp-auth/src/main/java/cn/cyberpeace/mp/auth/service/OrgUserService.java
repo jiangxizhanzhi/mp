@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
@@ -42,7 +42,7 @@ public interface OrgUserService extends BaseModelService<OrgUserModel, QueryPara
      * @param userId
      * @return
      */
-    List<OrgModel> listOrgsByUserId(String userId);
+    List<OrgBO> listOrgsByUserId(String userId);
 
     /**
      * 批量查询用户所在组织信息，返回一个map

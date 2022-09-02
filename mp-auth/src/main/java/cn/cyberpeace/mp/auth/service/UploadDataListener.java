@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -228,8 +228,8 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         if (StringUtils.isBlank(orgPaths)) {
             // 组织路径不存在，默认都存一级组织
             // 组织为空则默认一级组织
-            List<OrgModel> orgs = orgService.listParents();
-            OrgModel defaultTopOrg = orgs.get(0);
+            List<OrgBO> orgBOS = orgService.listParents();
+            OrgBO defaultTopOrg = orgBOS.get(0);
             if (Objects.isNull(defaultTopOrg)) {
                 log.error("默认一级组织不存在！");
                 throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
@@ -241,12 +241,12 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
         user.setOrgIdList(new ArrayList<>());
         Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
-            OrgModel orgModel = orgService.getByPath(path.trim());
-            if (Objects.isNull(orgModel)) {
+            OrgBO orgBO = orgService.getByPath(path.trim());
+            if (Objects.isNull(orgBO)) {
                 log.error("No {} row error! org {} not existed!", index, path.trim());
                 throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ORG_NOT_EXISTED.format(String.valueOf(index), path.trim()));
             } else {
-                user.getOrgIdList().add(orgModel.getId());
+                user.getOrgIdList().add(orgBO.getId());
             }
         });
     }
@@ -277,9 +277,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 预处理组织
      */
     private void preProcessOrgs(List<ImportUser> users) {
-        Map<String, OrgModel> orgPath2ModelMap = new HashMap<>();
-        List<OrgModel> orgs = orgService.listParents();
-        OrgModel defaultTopOrg = orgs.get(0);
+        Map<String, OrgBO> orgPath2ModelMap = new HashMap<>();
+        List<OrgBO> orgBOS = orgService.listParents();
+        OrgBO defaultTopOrg = orgBOS.get(0);
         if (Objects.isNull(defaultTopOrg)) {
             throw new MpRuntimeException(BaseErrorCode.ERROR, "default org not existed!");
         }
@@ -297,16 +297,16 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
             user.setOrgIdList(new ArrayList<>());
             Arrays.stream(StringUtils.split(orgPaths, ",")).forEach(path -> {
-                OrgModel orgModel = orgPath2ModelMap.get(path.trim());
-                if (Objects.isNull(orgModel)) {
-                    orgModel = orgService.getByPath(path.trim());
-                    orgPath2ModelMap.put(path.trim(), orgModel);
+                OrgBO orgBO = orgPath2ModelMap.get(path.trim());
+                if (Objects.isNull(orgBO)) {
+                    orgBO = orgService.getByPath(path.trim());
+                    orgPath2ModelMap.put(path.trim(), orgBO);
                 }
-                if (Objects.isNull(orgModel)) {
+                if (Objects.isNull(orgBO)) {
                     log.error("No {} row error! org {} not existed!", index, path.trim());
                     throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_ORG_NOT_EXISTED.format(String.valueOf(index), path.trim()));
                 } else {
-                    user.getOrgIdList().add(orgModel.getId());
+                    user.getOrgIdList().add(orgBO.getId());
                 }
             });
         }
