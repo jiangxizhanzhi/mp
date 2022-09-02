@@ -240,17 +240,17 @@ public abstract class BaseCsceneHandler<
         });
         String[] removingTargetIds = existRoleObjMap.keySet().toArray(new String[0]);
 
-        var deleteResult = csceneRoleMapper.bulkLogicDelete(removingTargetIds);
+        var deleteResult = csceneRoleMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();
         if (deleteResult < removingTargetIds.length) {
             throw new SceneUpdateException("Cscene role diff delete failed");
         }
 
-        var createResult = csceneRoleMapper.bulkCreate(addingTargets);
+        var createResult = csceneRoleMapper.bulkCreate(addingTargets).getSuccessCount();
         if (createResult < addingTargets.size()) {
             throw new SceneUpdateException("Cscene role diff create failed");
         }
 
-        var updateResult = csceneRoleMapper.bulkUpdate(updatingTargets);
+        var updateResult = csceneRoleMapper.bulkUpdate(updatingTargets).getSuccessCount();
         if (updateResult < updatingTargets.size()) {
             throw new SceneUpdateException("Cscene role diff update failed");
         }

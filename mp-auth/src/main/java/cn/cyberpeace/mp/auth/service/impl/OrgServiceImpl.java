@@ -73,7 +73,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public ObjServiceResult<OrgModel> create(OrgModel obj, String[] fields) {
         if (StringUtils.isNotBlank(obj.getParent())) {
-            OrgModel parentOrg = getModelMapper().get(obj.getParent());
+            OrgModel parentOrg = getOrgModel(obj.getParent());
             if (Objects.isNull(parentOrg)) {
                 log.error("org {} not existed!", obj.getParent());
                 throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getParent()));
@@ -95,7 +95,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<OrgModel> update(OrgModel obj, String[] fields) {
 
-        OrgModel oldOrg = getModelMapper().get(obj.getId());
+        OrgModel oldOrg = getOrgModel(obj.getId());
         if (Objects.isNull(oldOrg)) {
             log.error("org {} not existed!", obj.getId());
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(obj.getId()));
@@ -120,6 +120,20 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         ObjServiceResult<OrgModel> result = super.update(obj, fields);
         userCacheService.evictAllUserCache();
         return result;
+    }
+
+    @Override
+    public OrgBO getOrgBO(String id) {
+        OrgModel orgModel = getModelMapper().get(id);
+        if (Objects.isNull(orgModel)) {
+            return null;
+        }
+        return orgModel2OrgBO(orgModel);
+    }
+
+    @Override
+    public OrgModel getOrgModel(String id) {
+        return getModelMapper().get(id);
     }
 
     /**
@@ -318,14 +332,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         // 根据parentId查询单个组织树
-        OrgModel parentOrg = getModelMapper().get(parentOrgId);
-        if (parentOrg == null) {
+        OrgBO pOrgBO = getOrgBO(parentOrgId);
+        if (pOrgBO == null) {
             log.info("org:{} not existed!", parentOrgId);
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
-
         OrgDto orgDto = new OrgDto();
-        BeanUtils.copyProperties(parentOrg, orgDto);
+        BeanUtils.copyProperties(pOrgBO, orgDto);
         orgDto.execute(queryChildOrgDtoOperation);
 
         return CollectionUtil.toList(orgDto);
@@ -336,14 +349,14 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public OrgDto getHierarchicalOrgsByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
 
-        OrgModel orgModel = getModelMapper().get(orgId);
-        if (orgModel == null) {
+        OrgBO orgBO = getOrgBO(orgId);
+        if (orgBO == null) {
             log.info("org:{} not existed!", orgId);
             throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED);
         }
 
         OrgDto orgDto = new OrgDto();
-        BeanUtils.copyProperties(orgModel, orgDto);
+        BeanUtils.copyProperties(orgBO, orgDto);
         log.warn("queryParentOrgDtoOperation:{}", queryParentOrgDtoOperation);
         orgDto.execute(queryParentOrgDtoOperation);
 
@@ -406,7 +419,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     public boolean exists(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ORG_ID);
 
-        OrgModel orgModel = getModelMapper().get(id);
+        OrgModel orgModel = getOrgModel(id);
         return Objects.nonNull(orgModel);
     }
 

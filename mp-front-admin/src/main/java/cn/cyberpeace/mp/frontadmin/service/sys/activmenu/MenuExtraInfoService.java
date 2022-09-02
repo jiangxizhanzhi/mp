@@ -26,7 +26,7 @@ public class MenuExtraInfoService {
     }
 
     public boolean bulkCreate(List<MenuExtraInfoModel> menuExtraInfoModels) {
-        int result = menuExtraInfoMapper.bulkCreate(menuExtraInfoModels);
+        int result = menuExtraInfoMapper.bulkCreate(menuExtraInfoModels).getSuccessCount();
         log.info("added {} menu extra info rows", result);
         return true;
     }

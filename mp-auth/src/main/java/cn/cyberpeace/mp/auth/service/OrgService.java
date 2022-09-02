@@ -16,6 +16,10 @@ import java.util.List;
  */
 public interface OrgService extends BaseModelService<OrgModel, QueryParams> {
 
+    OrgBO getOrgBO(String id);
+
+    OrgModel getOrgModel(String id);
+
     List<OrgBO> listParents();
 
     List<OrgBO> listByParent(String parentId);

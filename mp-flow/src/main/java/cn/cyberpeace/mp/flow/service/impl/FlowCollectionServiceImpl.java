@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
@@ -97,7 +98,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         ObjResult<FlowCollectionModel> modelResult = get(addRequest.getCollectionId()).getSource();
         if (Objects.isNull(modelResult)) {
             log.error("collection is empty for:{}", addRequest.getCollectionId());
-            return ServiceResult.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
         }
 
         // 查询已有关联信息
@@ -124,7 +125,7 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
             return flowCollectionRelService.bulkCreate(addRelModels);
         }
 
-        return ServiceResult.success(0);
+        return ResultCommon.success(0);
     }
 
     /**
@@ -137,11 +138,11 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
         ObjResult<FlowCollectionModel> modelResult = get(delRequest.getCollectionId()).getSource();
         if (Objects.isNull(modelResult)) {
             log.error("collection is empty for:{}", delRequest.getCollectionId());
-            return ServiceResult.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.COLLECTION_NOT_EXIST);
         }
 
         if (CollectionUtils.isEmpty(delRequest.getFlowIds())) {
-            return ServiceResult.success(0);
+            return ResultCommon.success(0);
         }
 
         // 更新关联流量数量
@@ -186,10 +187,10 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      */
     public ServiceResult<FlowCollectionModel> addCollection(FlowCollectionModel flowCollectionModel) {
         if (!checkNameUnique(flowCollectionModel.getTitle(), StringUtils.EMPTY)) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
         this.getModelMapper().create(flowCollectionModel);
-        return ServiceResult.success(flowCollectionModel);
+        return ResultCommon.success(flowCollectionModel);
     }
 
     /**
@@ -199,13 +200,13 @@ public class FlowCollectionServiceImpl extends BaseModelServiceImpl<FlowCollecti
      */
     public ServiceResult<FlowCollectionModel> updateCollection(ModifyCollectionRequest request) {
         if (StringUtils.isNotBlank(request.getTitle()) && !checkNameUnique(request.getTitle(), request.getId())) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         FlowCollectionModel flowCollectionModel = new FlowCollectionModel();
         BeanUtils.copyProperties(request, flowCollectionModel);
         this.getModelMapper().update(flowCollectionModel);
-        return ServiceResult.success(flowCollectionModel);
+        return ResultCommon.success(flowCollectionModel);
     }
 
     /**

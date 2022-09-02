@@ -26,7 +26,7 @@ public class ActivEditionMenuService {
     }
 
     public boolean bulkCreate(List<ActivEditionMenuModel> editionMenuModels) {
-        int result = editionMenuMapper.bulkCreate(editionMenuModels);
+        int result = editionMenuMapper.bulkCreate(editionMenuModels).getSuccessCount();
         return true;
     }
 
