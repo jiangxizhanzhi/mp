@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -15,12 +16,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Description: 流量执行控制器
@@ -51,7 +47,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     public ServiceResult<String> addExecutor(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
         String uuid = TextUtils.uuid();
         asyncPlatFlowTaskService.addExecutor(uuid, addVmInstanceRequest.getNetworkInfos());
-        return ServiceResult.success(uuid);
+        return ResultCommon.success(uuid);
     }
 
 
@@ -65,7 +61,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
     @DeleteMapping("/vm/{actuatorId}")
     public ServiceResult<String> delExecutor(@PathVariable String actuatorId) {
         getModelService().delExecutor(actuatorId);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 }

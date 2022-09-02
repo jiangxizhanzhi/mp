@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -118,7 +119,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (checkTask) {
             List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Collections.singletonList(id));
             if (CollectionUtils.isNotEmpty(flowTaskList)) {
-                return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
+                return ResultCommon.fail(FlowErrorCode.TASK_DELETE_FAILED);
             }
         }
 
@@ -153,7 +154,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             log.error("flow file to delete not exist");
         }
 
-        return ServiceResult.success(false);
+        return ResultCommon.success(false);
     }
 
     /**
@@ -169,7 +170,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowTaskModel> flowTaskList = flowTaskMapper.listByFlowIds(Arrays.asList(ids));
         if (CollectionUtils.isNotEmpty(flowTaskList)) {
             log.info("flow info related flow task can not delete: {}", flowTaskList);
-            return ServiceResult.fail(FlowErrorCode.TASK_DELETE_FAILED);
+            return ResultCommon.fail(FlowErrorCode.TASK_DELETE_FAILED);
         }
 
         // 判断流量是否关联流量集合信息
@@ -209,7 +210,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             log.error("flow files to delete not exist");
         }
 
-        return ServiceResult.success(0);
+        return ResultCommon.success(0);
     }
 
     /**
@@ -262,7 +263,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         List<FlowCollectionRelModel> flowCollectionRelModels =
                 flowCollectionRelService.selectByCollectionIds(request.getCollectionIds());
         if (CollectionUtils.isEmpty(flowCollectionRelModels)) {
-            return ServiceResult.success(new ArrayList<>());
+            return ResultCommon.success(new ArrayList<>());
         }
 
         List<String> flowIds =
@@ -271,7 +272,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         queryParams.setIds(flowIds.toArray(new String[0]));
         ListObjServiceResult<FlowInfoResponse> listObjServiceResult = pageFlowInfo(queryParams);
 
-        return ServiceResult.success(listObjServiceResult.getSource().getList());
+        return ResultCommon.success(listObjServiceResult.getSource().getList());
     }
 
     /**
@@ -287,14 +288,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
             if (InteractiveTypeEnum.BACKGROUND.toValue() != flowInfoModel.getInteractiveType()) {
-                return ServiceResult.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
+                return ResultCommon.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
             response = new BackgroundFlowResponse(flowInfoModel, prefixUrl);
         } else {
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -310,7 +311,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
             if (InteractiveTypeEnum.ATTACK.toValue() != flowInfoModel.getInteractiveType()) {
-                return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
+                return ResultCommon.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
 
             // 根据流量id查询脚本参数
@@ -332,10 +333,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             String code = FsCommon.downloadContent(flowInfoModel.getScriptFile());
             response.setCode(code);
         } else {
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         }
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -345,12 +346,12 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> addBackgroundFlow(AddBackgroundFlowRequest addRequest) {
         if (!checkNameUnique(addRequest.getTitle(), org.apache.commons.lang3.StringUtils.EMPTY)) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
         if (!BaseConstants.STR_PCAP.equals(suffix)) {
-            return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+            return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
         // 上传文件获取路径
@@ -359,7 +360,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
         } catch (IOException e) {
             log.error("upload pcap file error", e);
-            return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+            return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
         }
         addRequest.setPcapFilePath(filePath);
 
@@ -371,7 +372,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -382,16 +383,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Transactional
     public ServiceResult<AttackFlowResponse> addAttackFlow(AddAttackFlowRequest addRequest) {
         if (!checkNameUnique(addRequest.getTitle(), org.apache.commons.lang3.StringUtils.EMPTY)) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         AttackFlowResponse response = new AttackFlowResponse();
         if (ResourceTypeEnum.SCRIPT.toValue() == addRequest.getResourceType()) {
             if (StringUtils.isBlank(addRequest.getCode())) {
-                return ServiceResult.fail("code can not be empty");
+                return ResultCommon.fail("code can not be empty");
             }
             if (Objects.isNull(addRequest.getSuffix())) {
-                return ServiceResult.fail("suffix can not be empty");
+                return ResultCommon.fail("suffix can not be empty");
             }
 
             // 解析攻击流量脚本参数
@@ -449,7 +450,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 addRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
                 log.error("add attack flow error", e);
-                return ServiceResult.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
+                return ResultCommon.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
             } finally {
                 IOUtils.closeQuietly(is);
             }
@@ -473,15 +474,15 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response.setCode(addRequest.getCode());
         } else {
             if (StringUtils.isEmpty(addRequest.getFileName())) {
-                return ServiceResult.fail("fileName can not be empty");
+                return ResultCommon.fail("fileName can not be empty");
             }
             if (Objects.isNull(addRequest.getPcapFile())) {
-                return ServiceResult.fail("pcapFile can not be empty");
+                return ResultCommon.fail("pcapFile can not be empty");
             }
 
             String suffix = FileUtil.getSuffix(addRequest.getPcapFile().getOriginalFilename());
             if (!BaseConstants.STR_PCAP.equals(suffix)) {
-                return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+                return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
             }
 
             // 上传文件获取路径
@@ -490,7 +491,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
                 log.error("attack upload pcap file error", e);
-                return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             addRequest.setPcapFilePath(filePath);
 
@@ -505,7 +506,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(resultModel, prefixUrl, null);
         }
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -515,21 +516,21 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<BackgroundFlowResponse> modifyBackgroundFlow(ModifyBackgroundFlowRequest modifyRequest) {
         if (!checkNameUnique(modifyRequest.getTitle(), modifyRequest.getId())) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         if (StringUtils.isNotBlank(modifyRequest.getFileName()) && !modifyRequest.getFileName().endsWith(".pcap")) {
-            return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+            return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
         }
 
         ObjServiceResult<FlowInfoModel> oldServiceResult = get(modifyRequest.getId());
         if (Objects.isNull(oldServiceResult.getSource())) {
             // 判断流量是否存在
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         } else {
             // 判断是否背景流量
             if (InteractiveTypeEnum.BACKGROUND.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
-                return ServiceResult.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
+                return ResultCommon.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
         }
 
@@ -537,7 +538,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             // 文件后缀校验
             String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
             if (!BaseConstants.STR_PCAP.equals(suffix)) {
-                return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+                return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
             }
             // 上传文件获取路径
             String filePath = null;
@@ -545,7 +546,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
                 log.error("upload pcap file for update error", e);
-                return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             modifyRequest.setPcapFilePath(filePath);
         }
@@ -558,7 +559,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         String prefixUrl = baseAppConfig.getFdfsOuterHttpServer();
         // 转换返回对象
         BackgroundFlowResponse response = new BackgroundFlowResponse(serviceResult.getSource().getObj(), prefixUrl);
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -569,17 +570,17 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
     @Transactional
     public ServiceResult<AttackFlowResponse> modifyAttackFlow(ModifyAttackFlowRequest modifyRequest) {
         if (!checkNameUnique(modifyRequest.getTitle(), modifyRequest.getId())) {
-            return ServiceResult.fail(FlowErrorCode.TITLE_UNIQUE);
+            return ResultCommon.fail(FlowErrorCode.TITLE_UNIQUE);
         }
 
         ObjServiceResult<FlowInfoModel> oldServiceResult = get(modifyRequest.getId());
         if (Objects.isNull(oldServiceResult.getSource())) {
             // 判断流量是否存在
-            return ServiceResult.fail(FlowErrorCode.FLOW_NOT_EXIST);
+            return ResultCommon.fail(FlowErrorCode.FLOW_NOT_EXIST);
         } else {
             // 判断是否攻击流量
             if (InteractiveTypeEnum.ATTACK.toValue() != oldServiceResult.getSource().getObj().getInteractiveType()) {
-                return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
+                return ResultCommon.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
         }
 
@@ -630,7 +631,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         modifyRequest.setFilePath(filePath);
                     } catch (MpRuntimeException e) {
                         log.error("modify attack flow error", e);
-                        return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
+                        return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                     } finally {
                         IOUtils.closeQuietly(is);
                     }
@@ -657,7 +658,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     modifyRequest.setFilePath(filePath);
                 } catch (MpRuntimeException e) {
                     log.error("modify attack flow error", e);
-                    return ServiceResult.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
+                    return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                 } finally {
                     IOUtils.closeQuietly(is);
                 }
@@ -684,14 +685,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             if (ResourceTypeEnum.PACP.toValue() != oldServiceResult.getSource().getObj().getResourceType()) {
                 // 脚本文件更新为pcap文件，判断pcap是否上传了
                 if (Objects.isNull(modifyRequest.getPcapFile())) {
-                    return ServiceResult.fail("pcapFile can not be empty");
+                    return ResultCommon.fail("pcapFile can not be empty");
                 }
             }
             if (Objects.nonNull(modifyRequest.getPcapFile())) {
                 // 文件后缀校验
                 String suffix = FileUtil.getSuffix(modifyRequest.getPcapFile().getOriginalFilename());
                 if (!BaseConstants.STR_PCAP.equals(suffix)) {
-                    return ServiceResult.fail(FlowErrorCode.NOT_PCAP_FILE);
+                    return ResultCommon.fail(FlowErrorCode.NOT_PCAP_FILE);
                 }
                 // 上传文件获取路径
                 String filePath = null;
@@ -699,7 +700,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
                 } catch (IOException e) {
                     log.error("attack upload pcap file for update error", e);
-                    return ServiceResult.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+                    return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
                 }
                 modifyRequest.setPcapFilePath(filePath);
             }
@@ -713,7 +714,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             response = new AttackFlowResponse(serviceResult.getSource().getObj(), prefixUrl, null);
         }
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -945,7 +946,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             File[] flowFiles = fileFolder.listFiles();
             if (ArrayUtil.isEmpty(flowFiles)) {
                 log.error("file folder is empty");
-                return ServiceResult.fail("file folder is empty");
+                return ResultCommon.fail("file folder is empty");
             }
 
             // readme文本集合
@@ -957,7 +958,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     File[] pcapFiles = flowFile.listFiles();
                     if (ArrayUtil.isEmpty(pcapFiles)) {
                         log.error("flow info folder is empty");
-                        return ServiceResult.fail("flow info folder is empty");
+                        return ResultCommon.fail("flow info folder is empty");
                     }
                     pcapFile = pcapFiles[0];
                 } else {
@@ -977,10 +978,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             readmeList = readmeList.stream().filter(text -> StringUtils.isNotBlank(text)).collect(Collectors.toList());
                         } catch (FileNotFoundException e) {
                             log.error("flow info import error for FileNotFoundException", e);
-                            return ServiceResult.fail("flow file import error");
+                            return ResultCommon.fail("flow file import error");
                         } catch (IOException e) {
                             log.error("flow info import error for IOException", e);
-                            return ServiceResult.fail("flow file import error");
+                            return ResultCommon.fail("flow file import error");
                         } finally {
                             IOUtils.closeQuietly(fileReader);
                             IOUtils.closeQuietly(bufferedReader);
@@ -991,7 +992,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             if (Objects.isNull(pcapFile)) {
                 log.error("flow info file is empty");
-                return ServiceResult.fail("flow info file is empty");
+                return ResultCommon.fail("flow info file is empty");
             }
 
             FlowInfoModel flowInfoModel = new FlowInfoModel();
@@ -1050,7 +1051,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         String[] parmaArray = strParam.split("\\s\\|\\s");
                         if (parmaArray.length != 4) {
                             log.error("script param parse error");
-                            return ServiceResult.fail("script param parse error");
+                            return ResultCommon.fail("script param parse error");
                         }
                         scriptParam.setFlowId(flowInfoModel.getId());
                         scriptParam.setParamKey(parmaArray[0].trim());
@@ -1069,10 +1070,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             }
         } else {
             log.error("file floder is not exist");
-            return ServiceResult.fail("file folder is not exist");
+            return ResultCommon.fail("file folder is not exist");
         }
 
-        return ServiceResult.success(true);
+        return ResultCommon.success(true);
     }
 
 
@@ -1088,7 +1089,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             existNameList = flowInfoModels.stream().map(FlowInfoModel::getTitle).collect(Collectors.toList());
         }
 
-        return ServiceResult.success(existNameList);
+        return ResultCommon.success(existNameList);
     }
 
 }
