@@ -16,7 +16,12 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,14 +46,14 @@ public class ScreenrecordController {
     }
 
     @ApiOperation("按时间删除录屏文件")
-    @ApiImplicitParam(name = "request", value = "删除请求体")
+    @ApiImplicitParam(name = "request", value = "删除请求体", dataTypeClass = ScreenrecordDeleteRequest.class)
     @DeleteMapping("/time_delete")
     public ServiceResult<Boolean> timeDelete(@RequestBody @Validated ScreenrecordDeleteRequest request) {
         return screenrecordService.removeRecordfile(request);
     }
 
     @ApiOperation("批量删除录屏文件")
-    @ApiImplicitParam(name = "request", value = "删除请求体")
+    @ApiImplicitParam(name = "request", value = "删除请求体", dataTypeClass = ScreenrecordBatchDeleteRequest.class)
     @DeleteMapping("/batch_delete")
     public ServiceResult<Boolean> batchDelete(@RequestBody @Validated ScreenrecordBatchDeleteRequest request) {
         return screenrecordService.batchDeleteScreenRecord(request);
@@ -67,7 +72,7 @@ public class ScreenrecordController {
     }
 
     @ApiOperation("下载录屏文件")
-    @ApiImplicitParam(name = "fileName", value = "文件名")
+    @ApiImplicitParam(name = "fileName", value = "文件名", dataTypeClass = String.class)
     @GetMapping("/download")
     public void download(@RequestParam String fileName, HttpServletResponse response) {
         screenrecordService.download(fileName, response);

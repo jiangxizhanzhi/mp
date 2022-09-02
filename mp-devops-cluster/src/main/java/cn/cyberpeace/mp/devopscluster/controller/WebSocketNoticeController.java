@@ -49,7 +49,7 @@ public class WebSocketNoticeController {
     private final ImagesByUuidSocketServer imagesByUuidSocketServer;
 
     @ApiOperation("根据镜像UUID获取登录链接信息")
-    @ApiImplicitParam(name = "uuid", value = "靶标id")
+    @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/images/connection")
     public ServiceResult connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
@@ -58,7 +58,7 @@ public class WebSocketNoticeController {
     }
 
     @ApiOperation("根据镜像UUID获取靶标信息")
-    @ApiImplicitParam(name = "uuid", value = "靶标id")
+    @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/device/get-by-uuid")
     public ServiceResult getByUuid(@RequestParam String uuid){
         ImageConvertModel convertModel = imagesConverter.findByUuid(uuid);

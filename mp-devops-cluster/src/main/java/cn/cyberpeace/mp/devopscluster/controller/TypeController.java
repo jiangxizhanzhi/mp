@@ -89,7 +89,7 @@ public class TypeController {
      * @return
      */
     @ApiOperation("查询所有镜像管理分类")
-    @ApiImplicitParam(name = "isAll", value = "是否全部")
+    @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
     public Result<TypeAllVO> imageCategories(Boolean isAll){
         if (Objects.isNull(isAll)){
@@ -133,7 +133,7 @@ public class TypeController {
      * @return
      */
     @ApiOperation("查询所有二级分类")
-    @ApiImplicitParam(name = "firstTypeId", value = "一级分类id")
+    @ApiImplicitParam(name = "firstTypeId", value = "一级分类id", dataTypeClass = Integer.class)
     @GetMapping("/l2-categories")
     public Result<TypeL2AllVO> l2List(@RequestParam(value = "firstTypeId", required = false) Integer firstTypeId){
         ListResult<TargetType> l1AndL2AndL3Type = typeConverter.findL1AndL2Type();

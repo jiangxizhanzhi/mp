@@ -267,7 +267,7 @@ public class DevopsTargetController {
     }
 
     @ApiOperation("根据UUID查询靶标信息")
-    @ApiImplicitParam(name = "uuid", value = "靶标id")
+    @ApiImplicitParam(name = "uuid", value = "靶标id", dataTypeClass = String.class)
     @GetMapping("/get-by-uuid")
     public Result<DeviceVO> findByUuid(@RequestParam String uuid){
         Device device = targetConverter.findByUuid(uuid);
@@ -329,7 +329,7 @@ public class DevopsTargetController {
     }
 
     @ApiOperation("注册MP地址")
-    @ApiImplicitParam(name = "url", value = "地址")
+    @ApiImplicitParam(name = "url", value = "地址", dataTypeClass = String.class)
     @GetMapping("/register")
     public ServiceResult register(@RequestParam(required = false) String url){
         initRegisterService.register(url);
@@ -338,7 +338,7 @@ public class DevopsTargetController {
 
     @ApiOperation("上传靶标图标")
     @PostMapping("/upload/icon")
-    @ApiImplicitParam(name = "file", value = "文件")
+    @ApiImplicitParam(name = "file", value = "文件", dataTypeClass = MultipartFile.class)
     @ResponseBody
     public ServiceResult<FileResponseData> uploadIcon(MultipartFile file){
         return targetIconUploadService.build(file).upload();
@@ -347,7 +347,7 @@ public class DevopsTargetController {
 
     @ApiOperation("校验靶标是否存在")
     @PostMapping("/check")
-    @ApiImplicitParam(name = "request", value = "请求体")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = TargetSceneRequest.class)
     @ResponseBody
     public ServiceResult<List<String>> check(@RequestBody TargetSceneRequest request){
         request.setPage(null);

@@ -41,7 +41,7 @@ public class CsceneFileController {
      * @throws IOException
      */
     @ApiOperation("上传场景中的附件")
-    @ApiImplicitParam(name = "file", value = "附件")
+    @ApiImplicitParam(name = "file", value = "附件", dataTypeClass = MultipartFile.class)
     @PostMapping("/attachment_upload")
     public ServiceResult<SceneFileUploadResponse> attachmentUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalType = new String[]{ "zip" };
@@ -57,7 +57,7 @@ public class CsceneFileController {
      * @throws IOException
      */
     @ApiOperation("上传场景中的执行脚本")
-    @ApiImplicitParam(name = "file", value = "脚本文件")
+    @ApiImplicitParam(name = "file", value = "脚本文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/script_upload")
     public ServiceResult<SceneFileUploadResponse> scriptUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalType = new String[]{ "sh" };
@@ -73,7 +73,7 @@ public class CsceneFileController {
      * @throws IOException
      */
     @ApiOperation("上传场景中的图标")
-    @ApiImplicitParam(name = "file", value = "图标文件")
+    @ApiImplicitParam(name = "file", value = "图标文件", dataTypeClass = MultipartFile.class)
     @PostMapping("/icon_upload")
     public ServiceResult<SceneFileUploadResponse> iconUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "png" };
@@ -89,7 +89,7 @@ public class CsceneFileController {
      * @throws IOException
      */
     @ApiOperation("上传节点秘钥")
-    @ApiImplicitParam(name = "file", value = "节点秘钥")
+    @ApiImplicitParam(name = "file", value = "节点秘钥", dataTypeClass = MultipartFile.class)
     @PostMapping("/private_key_upload")
     public ServiceResult<SceneFileUploadResponse> privateKeyUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "pub", "txt" };
@@ -105,7 +105,7 @@ public class CsceneFileController {
      * @throws IOException
      */
     @ApiOperation("上传场景模板截图")
-    @ApiImplicitParam(name = "file", value = "场景模板截图")
+    @ApiImplicitParam(name = "file", value = "场景模板截图", dataTypeClass = MultipartFile.class)
     @PostMapping("/scene_template_screenshot_upload")
     public ServiceResult<SceneFileUploadResponse> sceneTemplateScreenshotUpload(@RequestParam(value = "file") MultipartFile file) throws IOException {
         String[] legalSuffix = new String[]{ "png" };

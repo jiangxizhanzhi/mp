@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
 import cn.cyberpeace.mp.cscene.dto.event.EventAggr;
 import cn.cyberpeace.mp.cscene.dto.event.EventTimeCount;
+import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
 import cn.cyberpeace.mp.cscene.request.event.EventPercentRequest;
 import cn.cyberpeace.mp.cscene.request.event.EventTrendRequest;
 import cn.cyberpeace.mp.cscene.service.EventMonitorService;
@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,7 +63,6 @@ public class EventMonitorController {
             eventPercentRequest.setTopCount(5);
         }
         List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
-//        List<ElementEventPercent> eventPercents = mockElementPercents();
         return ServiceResult.success(limitList);
     }
 
@@ -80,8 +77,6 @@ public class EventMonitorController {
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
-//        EventAggr eventAggr = mockEventAggr();
-
         return ServiceResult.success(eventAggr);
     }
 
@@ -95,53 +90,7 @@ public class EventMonitorController {
     @GetMapping("/event_trend")
     public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
         List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);
-
         return ServiceResult.success(eventTimeCounts);
     }
-
-
-    private EventAggr mockEventAggr() {
-        EventAggr eventAggr = new EventAggr();
-        eventAggr.setProcess(23.81);
-        eventAggr.setFile(22.62);
-        eventAggr.setPort(19.05);
-        eventAggr.setNetwork(17.86);
-        eventAggr.setUser(16.67);
-        return eventAggr;
-    }
-
-
-    private List<ElementEventPercent> mockElementPercents() {
-        List<ElementEventPercent> list = new ArrayList();
-
-        ElementEventPercent e1 = new ElementEventPercent();
-        e1.setElementId("1");
-        e1.setElementName("node1");
-        e1.setPercent(88.0);
-
-
-        ElementEventPercent e2 = new ElementEventPercent();
-        e2.setElementId("2");
-        e2.setElementName("node2");
-        e2.setPercent(80.0);
-
-        ElementEventPercent e3 = new ElementEventPercent();
-        e3.setElementId("3");
-        e3.setElementName("node3");
-        e3.setPercent(48.0);
-
-        ElementEventPercent e4 = new ElementEventPercent();
-        e4.setElementId("4");
-        e4.setElementName("node4");
-        e4.setPercent(37.0);
-
-        ElementEventPercent e5 = new ElementEventPercent();
-        e5.setElementId("5");
-        e5.setElementName("node5");
-        e5.setPercent(25.0);
-        Collections.addAll(list, e1, e2, e3, e4, e5);
-        return list;
-    }
-
 
 }
