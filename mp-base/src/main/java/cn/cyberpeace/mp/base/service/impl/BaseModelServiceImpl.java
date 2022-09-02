@@ -257,7 +257,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
         int result;
         try {
-            result = getModelMapper().bulkCreate(objs);
+            result = getModelMapper().bulkCreate(objs).getSuccessCount();
         } catch (DuplicateKeyException e) {
             log.error("Service bulk create {} failed: {}", objs, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
@@ -283,7 +283,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
 
         int result;
         try {
-            result = getModelMapper().bulkUpdate(objs);
+            result = getModelMapper().bulkUpdate(objs).getSuccessCount();
         } catch (DuplicateKeyException e) {
             log.error("Service bulk update {} failed: {}", objs, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.DATA_EXISTS);
@@ -304,7 +304,7 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         int result;
         try {
-            result = getModelMapper().bulkLogicDelete(ids);
+            result = getModelMapper().bulkLogicDelete(ids).getSuccessCount();
         } catch (Exception e) {
             log.error("Service bulk delete {} error: {}", ids, e.getMessage());
             return new ServiceResult<>(0, BaseErrorCode.ERROR, e.getMessage());

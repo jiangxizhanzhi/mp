@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Param;
@@ -28,7 +29,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public interface BaseModelMapper<M extends BaseModel> {
 
@@ -384,73 +385,103 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
-    default int bulkCreate(List<M> objs) {
+    default BulkResult<M> bulkCreate(List<M> objs) {
+        BulkResult<M> result = new BulkResult<>(0);
         if (objs.isEmpty()) {
-            return 0;
+            return result;
         }
 
         Object[] createParams = convertCreateParams(objs);
         if (createParams.length == 0) {
             log.error("Bulk create {} has empty field", objs);
-            return 0;
+            return result.addFail(objs);
         }
 
-        return bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+        var successCount = bulkCreate((String[]) createParams[0], (Object[][]) createParams[1]);
+        if (successCount == 0) {
+            return result.addFail(objs);
+        } else {
+            return result.addSuccessCount(successCount);
+        }
     }
 
     @Recommendation
-    default int bulkCreate(List<M> objs, int batchSize, boolean concurrent) {
-        var successCount = new AtomicInteger();
-        if (concurrent) {
-            List<Runnable> tasks = new ArrayList<>();
-            CollectionUtils.batchHandle(objs, batchSize, batchList -> {
-                tasks.add(() -> successCount.addAndGet(bulkCreate(batchList)));
+    default BulkResult<M> bulkCreate(List<M> objs, int batchSize, boolean concurrent) {
+        BulkResult<M> result = new BulkResult<>(0);
+        if (objs.isEmpty()) {
+            return result;
+        }
+
+        List<Runnable> tasks = new ArrayList<>();
+        CollectionUtils.batchHandle(objs, batchSize, batchList -> {
+            tasks.add(() -> {
+                var batchResult = bulkCreate(batchList);
+                synchronized (result) {
+                    result.add(batchResult);
+                }
             });
+        });
+        if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            CollectionUtils.batchHandle(objs, batchSize, batchList -> successCount.addAndGet(bulkCreate(batchList)));
+            tasks.forEach(Runnable::run);
         }
-        return successCount.get();
+        return result;
     }
 
     /**
      * 批量更新，所有objs必须要有id, 更新数据字段最好一致
      */
     @Recommendation
-    default int bulkUpdate(List<M> objs) {
+    default BulkResult<M> bulkUpdate(List<M> objs) {
+        BulkResult<M> result = new BulkResult<>(0);
         if (objs.isEmpty()) {
-            return 0;
+            return result;
         }
 
-        var successCount = 0;
         for (var validFieldsObjs: groupValidFieldsObjs(objs).values()) {
             Object[] updateParams = convertUpdateParams(validFieldsObjs);
             if (updateParams.length == 0) {
+                result.addFail(objs);
                 log.error("Service bulk update {} has empty field", objs);
                 continue;
             }
-            successCount += bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+            var successCount = bulkUpdate((String[]) updateParams[0], (Object[][]) updateParams[1]);
+            if (successCount == 0) {
+                result.addFail(objs);
+            } else {
+                result.addSuccessCount(successCount);
+            }
         }
 
-        return successCount;
+        return result;
     }
 
     /**
      * 批量更新，所有objs必须要有id, 更新数据字段最好一致
      */
     @Recommendation
-    default int bulkUpdate(List<M> objs, int batchSize, boolean concurrent) {
-        var successCount = new AtomicInteger();
-        if (concurrent) {
-            List<Runnable> tasks = new ArrayList<>();
-            CollectionUtils.batchHandle(objs, batchSize, batchList -> {
-                tasks.add(() -> successCount.addAndGet(bulkUpdate(batchList)));
+    default BulkResult<M> bulkUpdate(List<M> objs, int batchSize, boolean concurrent) {
+        BulkResult<M> result = new BulkResult<>(0);
+        if (objs.isEmpty()) {
+            return result;
+        }
+
+        List<Runnable> tasks = new ArrayList<>();
+        CollectionUtils.batchHandle(objs, batchSize, batchList -> {
+            tasks.add(() -> {
+                var batchResult = bulkUpdate(batchList);
+                synchronized (result) {
+                    result.add(batchResult);
+                }
             });
+        });
+        if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            CollectionUtils.batchHandle(objs, batchSize, batchList -> successCount.addAndGet(bulkUpdate(batchList)));
+            tasks.forEach(Runnable::run);
         }
-        return successCount.get();
+        return result;
     }
 
     default List<M> commonList(String tableName, @Param("condition") Condition condition, String[] selectFields) {
@@ -532,35 +563,54 @@ public interface BaseModelMapper<M extends BaseModel> {
     }
 
     @Recommendation
-    default int bulkDelete(String[] ids) {
+    default BulkResult<String> bulkDelete(String[] ids) {
+        BulkResult<String> result = new BulkResult<>(0);
         if (ids.length == 0) {
-            return 0;
+            return result;
         }
 
-        return getCommonMapper().bulkDelete(getTableName(), ids);
+        var successCount = getCommonMapper().bulkDelete(getTableName(), ids);
+        if (successCount == 0) {
+            return result.addFail(Arrays.asList(ids));
+        } else {
+            return result.addSuccessCount(successCount);
+        }
     }
 
     @Recommendation
-    default int bulkDelete(String[] ids, int batchSize, boolean concurrent) {
-        var successCount = new AtomicInteger();
-        if (concurrent) {
-            List<Runnable> tasks = new ArrayList<>();
-            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
-                tasks.add(() -> successCount.addAndGet(bulkDelete(batchList.toArray(new String[0]))));
+    default BulkResult<String> bulkDelete(String[] ids, int batchSize, boolean concurrent) {
+        BulkResult<String> result = new BulkResult<>(0);
+        if (ids.length == 0) {
+            return result;
+        }
+
+        List<Runnable> tasks = new ArrayList<>();
+        CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
+            tasks.add(() -> {
+                var batchResult = bulkDelete(batchList.toArray(new String[0]));
+                synchronized (result) {
+                    result.add(batchResult);
+                }
             });
+        });
+        if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize,
-                    batchList -> successCount.addAndGet(bulkDelete(batchList.toArray(new String[0]))));
+            tasks.forEach(Runnable::run);
         }
-        return successCount.get();
+        return result;
     }
 
     @Recommendation
-    default int bulkLogicDelete(String[] ids) {
+    default BulkResult<String> bulkLogicDelete(String[] ids) {
+        BulkResult<String> result = new BulkResult<>(0);
+        if (ids.length == 0) {
+            return result;
+        }
+
         Class<M> actualModelClass = getModelClass();
         if (actualModelClass == null) {
-            return 0;
+            return result.addFail(Arrays.asList(ids));
         }
 
         List<M> logicObjs = new ArrayList<>();
@@ -577,34 +627,45 @@ public interface BaseModelMapper<M extends BaseModel> {
             }
         } catch (Exception e) {
             log.error("Bulk logic delete {} on model {} failed: {}", ids, actualModelClass, e);
-            return 0;
+            return result.addFail(Arrays.asList(ids));
         }
 
-        var successCount = 0;
         if (!logicObjs.isEmpty()) {
-            successCount += bulkUpdate(logicObjs);
+            var updateResult = bulkUpdate(logicObjs);
+            result.addSuccessCount(updateResult.getSuccessCount());
+            if (updateResult.getFail() != null) {
+                result.addFail(updateResult.getFail().stream().map(BaseModel::getId).collect(Collectors.toList()));
+            }
         }
         if (!rawIds.isEmpty()) {
-            successCount += bulkDelete(rawIds.toArray(new String[0]));
+            result.add(bulkDelete(rawIds.toArray(new String[0])));
         }
 
-        return successCount;
+        return result;
     }
 
     @Recommendation
-    default int bulkLogicDelete(String[] ids, int batchSize, boolean concurrent) {
-        var successCount = new AtomicInteger();
-        if (concurrent) {
-            List<Runnable> tasks = new ArrayList<>();
-            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
-                tasks.add(() -> successCount.addAndGet(bulkLogicDelete(batchList.toArray(new String[0]))));
+    default BulkResult<String> bulkLogicDelete(String[] ids, int batchSize, boolean concurrent) {
+        BulkResult<String> result = new BulkResult<>(0);
+        if (ids.length == 0) {
+            return result;
+        }
+
+        List<Runnable> tasks = new ArrayList<>();
+        CollectionUtils.batchHandle(Arrays.asList(ids), batchSize, batchList -> {
+            tasks.add(() -> {
+                var batchResult = bulkLogicDelete(batchList.toArray(new String[0]));
+                synchronized (result) {
+                    result.add(batchResult);
+                }
             });
+        });
+        if (concurrent) {
             TaskCommon.runTasks(tasks);
         } else {
-            CollectionUtils.batchHandle(Arrays.asList(ids), batchSize,
-                    batchList -> successCount.addAndGet(bulkLogicDelete(batchList.toArray(new String[0]))));
+            tasks.forEach(Runnable::run);
         }
-        return successCount.get();
+        return result;
     }
 
     /**
@@ -643,4 +704,42 @@ public interface BaseModelMapper<M extends BaseModel> {
     int filterUpdate(String table, String[] updateFields, Object[] updateFieldValues,
                      @Param("condition") Condition condition);
     int filterDelete(String table, @Param("condition") Condition condition);
+
+    @Data
+    class BulkResult<T> {
+        private int successCount;
+        private List<T> fail;
+
+        public BulkResult() {}
+
+        public BulkResult(int successCount) {
+            this.successCount = successCount;
+        }
+
+        public BulkResult(int successCount, List<T> fail) {
+            this.successCount = successCount;
+            this.fail = fail;
+        }
+
+        public BulkResult<T> add(BulkResult<T> result) {
+            this.addSuccessCount(result.getSuccessCount());
+            if (result.getFail() != null) {
+                addFail(result.getFail());
+            }
+            return this;
+        }
+
+        public BulkResult<T> addSuccessCount(int successCount) {
+            this.successCount += successCount;
+            return this;
+        }
+
+        public BulkResult<T> addFail(List<T> fail) {
+            if (this.fail == null) {
+                this.fail = new ArrayList<>();
+            }
+            this.fail.addAll(fail);
+            return this;
+        }
+    }
 }

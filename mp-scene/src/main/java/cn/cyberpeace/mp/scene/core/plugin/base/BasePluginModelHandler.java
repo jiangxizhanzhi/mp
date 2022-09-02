@@ -227,7 +227,7 @@ public class BasePluginModelHandler<
             element.setSceneElement(elementId);
             elements.add(element);
         }
-        return pluginSceneElementMapper.bulkCreate(elements);
+        return pluginSceneElementMapper.bulkCreate(elements).getSuccessCount();
     }
 
     /**
@@ -251,7 +251,7 @@ public class BasePluginModelHandler<
             element.setId(existElement.getId());
             updatingElements.add(element);
         });
-        var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements);
+        var updateCount = pluginSceneElementMapper.bulkUpdate(updatingElements).getSuccessCount();
 
         // 创建不存在的
         var createCount = createElements(creatingElementIds.toArray(new String[0]));
@@ -297,7 +297,7 @@ public class BasePluginModelHandler<
             elementPort.setSceneElementPort(elementPortId);
             elementPorts.add(elementPort);
         }
-        return pluginSceneElementPortMapper.bulkCreate(elementPorts);
+        return pluginSceneElementPortMapper.bulkCreate(elementPorts).getSuccessCount();
     }
 
     /**
@@ -321,7 +321,7 @@ public class BasePluginModelHandler<
             elementPort.setId(existElementPort.getId());
             updatingElementPorts.add(elementPort);
         });
-        var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts);
+        var updateCount = pluginSceneElementPortMapper.bulkUpdate(updatingElementPorts).getSuccessCount();
 
         // 创建不存在的
         var createCount = createElementPorts(creatingElementPortIds.toArray(new String[0]));

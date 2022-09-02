@@ -26,7 +26,7 @@ public class ActivKeyMenuService {
     }
 
     public boolean bulkCreate(List<ActivKeyMenuModel> keyMenuModels) {
-        int result = keyMenuMapper.bulkCreate(keyMenuModels);
+        int result = keyMenuMapper.bulkCreate(keyMenuModels).getSuccessCount();
         return true;
     }
 

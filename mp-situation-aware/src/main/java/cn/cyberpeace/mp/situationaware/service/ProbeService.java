@@ -124,7 +124,7 @@ public class ProbeService {
                         return paramModel;
                     }).collect(Collectors.toList());
 
-            int createCnt = probeParamMapper.bulkCreate(paramList);
+            int createCnt = probeParamMapper.bulkCreate(paramList).getSuccessCount();
             if (createCnt <= 0) {
                 log.error("create probeparam cnt less than 1:{}", createCnt);
                 rollback = true;
@@ -206,7 +206,7 @@ public class ProbeService {
                     }).collect(Collectors.toList());
 
             probeParamMapper.deleteByProbeIdAndTemplateId(probeId, null);
-            int createCnt = probeParamMapper.bulkCreate(paramList);
+            int createCnt = probeParamMapper.bulkCreate(paramList).getSuccessCount();
             if (createCnt <= 0) {
                 log.error("create probeparam cnt less than 1:{}", createCnt);
                 rollback = true;
@@ -301,7 +301,7 @@ public class ProbeService {
                 return probeModel;
             }).collect(Collectors.toList());
 
-        int cnt = probeMapper.bulkUpdate(probesToUpdate);
+        int cnt = probeMapper.bulkUpdate(probesToUpdate).getSuccessCount();
         return cnt;
     }
 

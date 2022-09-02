@@ -93,7 +93,7 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
                 .toArray(new String[]{})
         );
         // 新建
-        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList()));
+        return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList())).getSuccessCount();
     }
 
     public int updateElementNetworks(String sceneElement) {
@@ -106,11 +106,11 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         DiffTargets<CloudPluginSceneElementNetworkModel> diffTargets = this.diffTargets(toUpdateMap, existMap);
         int result = 0;
         if (CollectionUtils.isNotEmpty(diffTargets.getAddingTargets())) {
-            int r = this.cloudPluginSceneElementNetworkMapper.bulkCreate(diffTargets.getAddingTargets());
+            int r = this.cloudPluginSceneElementNetworkMapper.bulkCreate(diffTargets.getAddingTargets()).getSuccessCount();
             result += r;
         }
         if (CollectionUtils.isNotEmpty(diffTargets.getUpdatingTargets())) {
-            int r = this.cloudPluginSceneElementNetworkMapper.bulkUpdate(diffTargets.getUpdatingTargets());
+            int r = this.cloudPluginSceneElementNetworkMapper.bulkUpdate(diffTargets.getUpdatingTargets()).getSuccessCount();
             result += r;
         }
         if (CollectionUtils.isNotEmpty(diffTargets.getRemovingTargets())) {
@@ -118,7 +118,7 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
                     .map(e -> e.getId())
                     .collect(Collectors.toList())
                     .toArray(new String[]{})
-            );
+            ).getSuccessCount();
             result += r;
         }
         return result;
