@@ -54,6 +54,6 @@ public class DevopsTargetAuthService {
      */
     @Transactional
     public int bulkCreate(List<DeviceTargetAuthPO> authModelList){
-        return deviceTargetAuthMapper.bulkCreate(authModelList);
+        return deviceTargetAuthMapper.bulkCreate(authModelList).getSuccessCount();
     }
 }

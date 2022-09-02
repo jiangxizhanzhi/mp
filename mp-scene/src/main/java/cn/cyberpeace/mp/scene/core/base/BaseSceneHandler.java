@@ -860,17 +860,17 @@ public abstract class BaseSceneHandler<
         String[] removingTargetIds = diff.getRemovingTargets().stream()
                 .map(BaseModel::getId)
                 .toArray(String[]::new);
-        var deleteResult = modelMapper.bulkLogicDelete(removingTargetIds);
+        var deleteResult = modelMapper.bulkLogicDelete(removingTargetIds).getSuccessCount();
         if (deleteResult < removingTargetIds.length) {
             throw new SceneUpdateException("Scene diff delete failed");
         }
 
-        var createResult = modelMapper.bulkCreate(diff.getAddingTargets());
+        var createResult = modelMapper.bulkCreate(diff.getAddingTargets()).getSuccessCount();
         if (createResult < diff.getAddingTargets().size()) {
             throw new SceneUpdateException("Scene diff create failed");
         }
 
-        var updateResult = modelMapper.bulkUpdate(diff.getUpdatingTargets());
+        var updateResult = modelMapper.bulkUpdate(diff.getUpdatingTargets()).getSuccessCount();
         if (updateResult < diff.getUpdatingTargets().size()) {
             throw new SceneUpdateException("Scene diff update failed");
         }

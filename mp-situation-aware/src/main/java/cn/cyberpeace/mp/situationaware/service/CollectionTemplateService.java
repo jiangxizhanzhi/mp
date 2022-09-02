@@ -257,7 +257,7 @@ public class CollectionTemplateService {
         }
 
         if (CollectionUtil.isNotEmpty(allColTempProbeList)) {
-            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList);
+            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create template-probe count less than 1:{}", cnt);
                 rollback = true;
@@ -265,7 +265,7 @@ public class CollectionTemplateService {
         }
 
         if (CollectionUtil.isNotEmpty(probeParamList)) {
-            int cnt = probeParamMapper.bulkCreate(probeParamList);
+            int cnt = probeParamMapper.bulkCreate(probeParamList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create probe-param count less than 1:{}", cnt);
                 rollback = true;
@@ -316,7 +316,7 @@ public class CollectionTemplateService {
             // templateId相关关联实体全部删除
             // todo 保留 通用探针>基础信息 类探针关联数据
             templateProbeMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
-            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList);
+            int cnt = templateProbeMapper.bulkCreate(allColTempProbeList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create template-probe count less than 1:{}", cnt);
                 rollback = true;
@@ -326,7 +326,7 @@ public class CollectionTemplateService {
         if (CollectionUtil.isNotEmpty(probeParamList)) {
             // templateId相关参数全部删除
             probeParamMapper.deleteByTemplateIds(ArrayUtils.toArray(templateId));
-            int cnt = probeParamMapper.bulkCreate(probeParamList);
+            int cnt = probeParamMapper.bulkCreate(probeParamList).getSuccessCount();
             if (cnt <= 0) {
                 log.error("create probe-param count less than 1:{}", cnt);
                 rollback = true;
@@ -345,7 +345,7 @@ public class CollectionTemplateService {
     @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(String[] ids) {
         log.info("ids:{}", ids);
-        int cnt = templateMapper.bulkDelete(ids);
+        int cnt = templateMapper.bulkDelete(ids).getSuccessCount();
 
         templateProbeMapper.deleteByTemplateIds(ids);
         probeParamMapper.deleteByTemplateIds(ids);
