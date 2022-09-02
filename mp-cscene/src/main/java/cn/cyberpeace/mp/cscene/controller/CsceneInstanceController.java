@@ -199,7 +199,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneInstanceBO> list(CsceneInstanceQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
+        return getModelService().listCsceneInstanceBO(queryParams, new CsceneContextBO(queryParams.getAccessUserId(), null)).asResult();
     }
 
     @ApiOperation("获取分页的聚合数据")

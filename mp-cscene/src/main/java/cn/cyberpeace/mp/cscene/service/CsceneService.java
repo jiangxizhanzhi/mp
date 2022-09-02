@@ -213,8 +213,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    public ListObjServiceResult<CsceneBO> listBO(CsceneQueryParams queryParams, boolean withInstance,
-                                                 CsceneContextBO context) {
+    public ListObjServiceResult<CsceneBO> listCsceneBO(CsceneQueryParams queryParams, boolean withInstance,
+                                                       CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
         //未指定排序方式时默认按创建时间倒序排列
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
