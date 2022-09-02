@@ -58,7 +58,7 @@ public class UserController {
     private UserHeartbeatService heartbeatService;
 
     @ApiOperation(value = "修改密码", notes = "")
-    @ApiImplicitParam(name="resetPwdRequest", value="修改请求")
+    @ApiImplicitParam(name="resetPwdRequest", value="修改请求", dataTypeClass = ResetPwdRequest.class)
     @PostMapping("/resetpwd")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置密码", target = OpTargetEnums.USER)
@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
-    @ApiImplicitParam(name="req", value="修改请求")
+    @ApiImplicitParam(name="req", value="修改请求", dataTypeClass = ResetSelfPwdRequest.class)
     @PostMapping("/resetpwd/self")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "重置本人密码", target = OpTargetEnums.USER)
     public ServiceResult resetSelfPwd(@Validated(UpdateGroup.class) @RequestBody ResetSelfPwdRequest req) {

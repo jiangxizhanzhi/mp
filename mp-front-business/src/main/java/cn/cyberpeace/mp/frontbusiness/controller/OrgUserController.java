@@ -72,7 +72,7 @@ public class OrgUserController {
 
 
     @ApiOperation(value = "增量绑定组织-用户关系！", notes = "")
-    @ApiImplicitParam(name = "bindOrgUsersReq", value = "绑定请求体")
+    @ApiImplicitParam(name = "bindOrgUsersReq", value = "绑定请求体", dataTypeClass = BindOrgUsersRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = orgUserService.additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());

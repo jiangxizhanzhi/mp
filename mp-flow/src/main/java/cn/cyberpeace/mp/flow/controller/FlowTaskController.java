@@ -53,7 +53,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("查询任务详情")
-    @ApiImplicitParam(name = "id", value = "任务ID")
+    @ApiImplicitParam(name = "id", value = "任务ID", dataTypeClass = String[].class)
     @GetMapping("/detail/{id}")
     public ServiceResult<FlowTaskModel> getDetail(@PathVariable String id, @RequestParam(required = false) String[] fields) {
         return flowTaskService.getDetail(id, fields);
@@ -84,7 +84,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("新增流量任务")
-    @ApiImplicitParam(name = "request", value = "新增请求")
+    @ApiImplicitParam(name = "request", value = "新增请求", dataTypeClass = AddFlowTaskRequest.class)
     @PostMapping("/add")
     public ServiceResult<FlowTaskModel> addFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
         return flowTaskService.addFlowTask(request);
@@ -97,7 +97,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("更新流量任务")
-    @ApiImplicitParam(name = "request", value = "更新请求")
+    @ApiImplicitParam(name = "request", value = "更新请求", dataTypeClass = AddFlowTaskRequest.class)
     @PatchMapping("/update")
     public ServiceResult<FlowTaskModel> updateFlowTask(@RequestBody @Validated AddFlowTaskRequest request) {
         return flowTaskService.updateFlowTask(request);
@@ -110,7 +110,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("删除流量任务")
-    @ApiImplicitParam(name = "id", value = "任务ID")
+    @ApiImplicitParam(name = "id", value = "任务ID", dataTypeClass = String.class)
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowTask(@PathVariable String id) {
         return flowTaskService.deleteFlowTask(id);
@@ -137,8 +137,8 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      */
     @ApiOperation("执行流量任务")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "id", value = "任务ID", paramType = "path"),
-        @ApiImplicitParam(name = "taskAction", value = "任务类型 1:start 2:stop", paramType = "path")
+        @ApiImplicitParam(name = "id", value = "任务ID", paramType = "path", dataTypeClass = String.class),
+        @ApiImplicitParam(name = "taskAction", value = "任务类型 1:start 2:stop", paramType = "path", dataTypeClass = Integer.class)
     })
     @PostMapping("/actuator/{id}/{taskAction}")
     public ServiceResult<Boolean> actuator(@PathVariable String id, @PathVariable int taskAction) {
@@ -151,7 +151,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("查询任务流量记录信息")
-    @ApiImplicitParam(name = "taskId", value = "任务ID", paramType = "query")
+    @ApiImplicitParam(name = "taskId", value = "任务ID", paramType = "query", dataTypeClass = String.class)
     @GetMapping("/flow/records")
     public ServiceResult<FlowRecordsResponse> queryFlowRecords(@RequestParam String taskId) {
         return flowTaskService.queryFlowRecords(taskId);
@@ -163,7 +163,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("批量新增流量任务")
-    @ApiImplicitParam(name = "request", value = "批量新增请求", paramType = "body")
+    @ApiImplicitParam(name = "request", value = "批量新增请求", paramType = "body", dataTypeClass = BatchAddFlowTaskRequest.class)
     @PostMapping("/batch/add")
     public ServiceResult<List<FlowTaskModel>> batchAddFlowTask(@RequestBody @Validated BatchAddFlowTaskRequest request) {
         return ResultCommon.success(flowTaskService.batchSavePlatFlowTask(request.getAddTaskRequestList()));
@@ -175,7 +175,7 @@ public class FlowTaskController extends BaseModelController<FlowTaskModel, Query
      * @return
      */
     @ApiOperation("批量执行流量任务")
-    @ApiImplicitParam(name = "request", value = "批量执行请求", paramType = "body")
+    @ApiImplicitParam(name = "request", value = "批量执行请求", paramType = "body", dataTypeClass = BatchActuatorTaskRequest.class)
     @PostMapping("/batch/actuator")
     public ServiceResult<Boolean> batchActuator(@RequestBody @Validated BatchActuatorTaskRequest request) {
         return flowTaskService.batchActuator(request);
