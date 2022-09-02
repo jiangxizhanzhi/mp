@@ -8,12 +8,7 @@ import cn.cyberpeace.mp.base.service.code.ErrorCode;
   *@Date 9/3/21 10:22 上午
 **/
 public enum SituationalAwareErrorCode implements ErrorCode {
-    CONNECTION_FAIL("MP-110400", "connection_fail"),
-    PROBE_DELETE_FAIL("MP-110401", "probe_delete_fail"),
-    PROBE_MODIFY_FAIL("MP-110402", "probe_update_fail"),
-    PROBE_MODIFY_PARAM_ERROR("MP-110403", "probe_update_param_error"),
     PROBE_MANAGER_ADD_ERROR("MP-110404", "probe_manager_add_script_error"),
-    PROBE_MANAGER_BIND_ERROR("MP-110417", "probe_bind_agents_error"),
     PROBE_NAME_EXIST("MP-110405", "probe_name_already_exit"),
     PROBE_MANAGER_ES_QUERY_ERROR("MP-110406", "probe_es_query_error"),
     PROBE_MANAGER_DELETE_PARAM_ERROR("MP-110407", "probe_delete_param_is_empty"),
@@ -26,9 +21,14 @@ public enum SituationalAwareErrorCode implements ErrorCode {
     WAZUH_AGENTS_QUERY_PORT_ERROR("MP-110414", "wazuh_ports_query_error"),
     WAZUH_AGENTS_QUERY_PROCESS_ERROR("MP-110415", "wazuh_agent_process_query_error"),
     WAZUH_AGENTS_QUERY_EVENT_ERROR("MP-110416", "wazuh_agent_query_event_error"),
-    WAZUH_AGENTS_QUERY_HARDWARE_ERROR("MP-110417", "wazuh_agent_hardware_query_error"),
+    PROBE_MANAGER_BIND_ERROR("MP-110417", "probe_bind_agents_error"),
+    WAZUH_AGENTS_QUERY_HARDWARE_ERROR("MP-110418", "wazuh_agent_hardware_query_error"),
 
     WAZUH_AUTHENTICATION_FAIL("MP-110420","wazuh_authentication_fail"),
+    CONNECTION_FAIL("MP-110421", "connection_fail"),
+    PROBE_DELETE_FAIL("MP-110422", "probe_delete_fail"),
+    PROBE_MODIFY_FAIL("MP-110423", "probe_update_fail"),
+    PROBE_MODIFY_PARAM_ERROR("MP-110424", "probe_update_param_error"),
 
 
     COLLECTION_TEMPLATE_NOT_EXISTED("MP-110430", "collection_template_not_existed"),
