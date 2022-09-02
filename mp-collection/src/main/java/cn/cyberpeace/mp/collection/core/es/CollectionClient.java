@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
-import cn.cyberpeace.mp.collection.config.CollectionCacheConfig;
 import cn.cyberpeace.mp.collection.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.collection.model.*;
 import cn.cyberpeace.mp.collection.model.enums.FileEventType;
@@ -48,8 +47,6 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -62,7 +59,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-@CacheConfig(cacheManager = CollectionCacheConfig.CACHE_MANAGER)
 public class CollectionClient {
     @Resource(name = "restHighLevelClientImpl")
     private IRestHighLevelClient restHighLevelClient;
@@ -106,7 +102,6 @@ public class CollectionClient {
      * @param request
      * @return ListObjResult<FileEventModel>
      */
-    @Cacheable(value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -153,7 +148,6 @@ public class CollectionClient {
      * @param request
      * @return ListObjResult<WazuhProbeCommonModel>
      */
-    @Cacheable(value = CACHE_KEY_CUSTOM_PROBES)
     public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -195,7 +189,6 @@ public class CollectionClient {
      * @param request
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
-    @Cacheable(value = CACHE_KEY_VUL_INFOS)
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
@@ -236,7 +229,6 @@ public class CollectionClient {
      * @param fieldName 字段名称
      * @return List<WazuhVulnerabilityInfoCountModel>
      */
-    @Cacheable(value = CACHE_KEY_VUL_COUNTS)
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest request,
                                                                               String fieldPath, String fieldName) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
@@ -269,7 +261,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_HOST_STATE)
     public ListObjResult<WazuhHostStateModel> queryHostStateEventsWithTimeRange(WazuhHostMonitorPageRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(new ArrayList<>(), 0);
@@ -304,7 +295,6 @@ public class CollectionClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnectionModel> queryNetConnEventsWithTimeRange(WazuhHostMonitorPageRequest wazuhMonitorEventsRequest) {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -339,7 +329,6 @@ public class CollectionClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_PROCESS)
     public List<WazuhProcessModel> queryProcessesWithTimeRange(WazuhHostMonitorPageRequest wazuhMonitorEventsRequest) {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -376,7 +365,6 @@ public class CollectionClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_USERS)
     public List<WazuhSystemUserModel> querySystemUserWithTimeRange(WazuhHostMonitorPageRequest wazuhMonitorEventsRequest) {
         if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return Collections.emptyList();
@@ -408,7 +396,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
@@ -421,7 +408,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
     public int sumSysUsersChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
@@ -434,7 +420,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_PROCESS_CHANGED_COUNT)
     public int sumProcessesChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
@@ -447,7 +432,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
     public int sumNetConnsChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
@@ -461,7 +445,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> countByAgentNamesBucket(WazuhEventRequest request) {
         Map<String, Long> map = new LinkedHashMap<>();
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
@@ -490,7 +473,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
     public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest request) {
         Map<String, Long> map = new LinkedHashMap<>();
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
@@ -518,7 +500,6 @@ public class CollectionClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public Long countByAgentNames(WazuhEventRequest request) {
         if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
             return 0L;

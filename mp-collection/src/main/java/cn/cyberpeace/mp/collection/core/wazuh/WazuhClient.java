@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.collection.core.wazuh;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.collection.config.CollectionCacheConfig;
 import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
 import cn.cyberpeace.mp.collection.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.collection.model.wazuh.common.BaseRequest;
@@ -25,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -71,7 +69,6 @@ public class WazuhClient extends RequestProcessor{
      * @param agentRequest
      * @return
      */
-    @Cacheable(cacheManager = CollectionCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public ListObjResult<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
         var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
