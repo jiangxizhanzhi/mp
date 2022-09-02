@@ -23,7 +23,6 @@ public enum AuthErrorCode implements ErrorCode {
     ACCOUNT_EXPIRED("MP-110012", "account_expired"),
     ACCOUNT_TYPE_ERROR("MP-110013", "account_type_error"),
     ACCOUNT_NOT_EXISTED("MP-110014", "account_not_existed"),
-    ACCOUNT_LOCKED("MP-110014", "account_locked"),
     USER_TARGET_DELETE_ERROR("MP-110015", "user_target_delete_error"),
     USER_TARGET_ADD_ERROR("MP-110016", "user_target_add_error"),
     USER_ROLE_DELETE_ERROR("MP-110017", "user_role_delete_error"),
@@ -38,6 +37,7 @@ public enum AuthErrorCode implements ErrorCode {
     USER_CANNOT_DISABLE_SELF("MP-110026", "user_cannot_disable_self"),
     USER_CANNOT_OPERATE_SELF("MP-110027", "user_cannot_operate_self"),
     FILE_ISNULL("MP-110028", "file_path_isnull"),
+    ACCOUNT_LOCKED("MP-110029", "account_locked"),
 
 
 
