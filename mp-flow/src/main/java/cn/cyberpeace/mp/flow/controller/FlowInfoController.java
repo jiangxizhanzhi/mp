@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -95,7 +96,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @DeleteMapping("/batch_delete")
     public ServiceResult<Integer> batchDeleteFlowInfo(@RequestBody String[] ids) {
         if (Objects.isNull(ids)) {
-            return ServiceResult.fail(FlowErrorCode.IDS_CAN_NOT_EMPTY);
+            return ResultCommon.fail(FlowErrorCode.IDS_CAN_NOT_EMPTY);
         }
         return flowServiceImpl.batchDeleteFlowInfo(ids);
     }
