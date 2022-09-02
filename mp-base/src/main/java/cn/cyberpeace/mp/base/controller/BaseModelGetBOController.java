@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.service.BaseModelBOService;
+import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import io.swagger.annotations.ApiImplicitParam;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelBOService<T, ?>> {
+public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelService<M, ?>> {
 
-    S getModelBOService();
+    S getModelService();
 
     @ApiOperation("获取指定id数据")
     @ApiImplicitParams({
@@ -23,7 +23,7 @@ public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends Bas
     })
     @GetMapping("/{id}")
     default ObjServiceResult<T> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        return getModelBOService().getBO(id, ControllerCommon.convertValidFields(fields)).asResult();
+        return getModelService().<T>getBO(id, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
     @ApiOperation("获取指定id数据")
@@ -33,6 +33,6 @@ public interface BaseModelGetBOController<T extends ModelBO<M, T>, M extends Bas
     })
 //    @GetMapping(params = "id")
     default ObjServiceResult<T> getByParam(@RequestParam String id, @RequestParam(required = false) String[] fields) {
-        return getModelBOService().getBO(id, ControllerCommon.convertValidFields(fields)).asResult();
+        return getModelService().<T>getBO(id, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 }

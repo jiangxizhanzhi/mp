@@ -8,8 +8,6 @@ import cn.cyberpeace.mp.base.repository.condition.CustomCondition;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.repository.fields.DynamicFields;
 import cn.cyberpeace.mp.base.service.BaseModelService;
-import cn.cyberpeace.mp.base.service.bo.ModelBO;
-import cn.cyberpeace.mp.base.service.common.ModelServiceCommon;
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.*;
@@ -19,8 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -318,16 +314,4 @@ public abstract class BaseModelServiceImpl<M extends BaseModel, P extends BaseMo
         }
     }
 
-    @Override
-    public <T extends ModelBO<M, T>> ServiceResult<Boolean> exportExcel(Q queryParams, OutputStream os, Class<T> tClass) {
-        var modelResult = list(queryParams);
-        ModelServiceCommon.exportListExcel(modelResult, os, tClass);
-        return new ServiceResult<>(true);
-    }
-
-    @Override
-    public <T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(InputStream is, Class<T> tClass) {
-        var objs = ModelServiceCommon.importListExcel(is, tClass);
-        return bulkCreate(objs);
-    }
 }

@@ -44,7 +44,7 @@ public class ModelServiceCommon {
     }
 
     public static <M extends BaseModel, T extends ModelBO<M, T>> void exportListExcel(
-            ListObjServiceResult<M> modelResult, OutputStream os, Class<T> tClass) {
+            ListObjServiceResult<M> modelResult, OutputStream os, Class<T> textResourceClass) {
         var modelData = modelResult.asResult().getData();
         List<M> objs;
         if (modelData == null || modelData.getList() == null) {
@@ -53,21 +53,18 @@ public class ModelServiceCommon {
             objs = modelData.getList();
         }
         var exportData = objs.stream()
-                .map(obj -> ClassUtils.createInstance(tClass).fromModel(obj))
+                .map(obj -> ClassUtils.createInstance(textResourceClass).fromModel(obj))
                 .collect(Collectors.toList());
         if (exportData.isEmpty()) {
-            ExcelCommon.writeHeaderOnly(tClass, os);
+            ExcelCommon.writeHeaderOnly(textResourceClass, os);
         } else {
             ExcelCommon.write(exportData, os);
         }
     }
 
-    public static <T> List<T> importListBOExcel(InputStream is, Class<T> tClass) {
-        return ExcelCommon.read(is, tClass);
-    }
-
-    public static <M extends BaseModel, T extends ModelBO<M, T>> List<M> importListExcel(InputStream is, Class<T> tClass) {
-        var bos = importListBOExcel(is, tClass);
+    public static <M extends BaseModel, T extends ModelBO<M, T>> List<M> importListExcel(InputStream is,
+                                                                                         Class<T> textResourceClass) {
+        var bos = ExcelCommon.read(is, textResourceClass);
         return bos.stream().map(bo -> bo.toModel()).collect(Collectors.toList());
     }
 

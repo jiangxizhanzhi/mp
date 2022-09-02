@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.base.controller.common;
 
 import cn.cyberpeace.mp.base.constant.BaseSingleton;
+import cn.cyberpeace.mp.base.controller.stereotype.ModelBOClass;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
@@ -60,7 +61,7 @@ public class ControllerCommon {
     }
 
     public static <S extends BaseModelService<M, Q>, M extends BaseModel, Q, T extends ModelBO<M, T>> void exportExcel(
-            S service, Q queryParams,  Class<T> tClass,
+            S service, Q queryParams,  Class<T> textResourceClass,
             String filename, HttpServletResponse response) throws IOException {
         if (StringUtils.isEmpty(filename)) {
             filename = "export.xlsx";
@@ -72,14 +73,20 @@ public class ControllerCommon {
         response.setHeader("Content-Disposition", String.format("attachment;filename=\"%s\"", encodedFilename));
         response.setContentType("application/octet-stream;charset=utf-8");
         var os = response.getOutputStream();
-        service.exportExcel(queryParams, os, tClass);
+        service.exportExcel(queryParams, os, textResourceClass);
     }
 
     public static <S extends BaseModelService<M, ?>, M extends BaseModel, T extends ModelBO<M, T>> ServiceResult<Integer> importExcel(
             MultipartFile file,
-            S service, Class<T> tClass) throws IOException {
+            S service, Class<T> textResourceClass) throws IOException {
         var is = file.getInputStream();
-        return service.importExcel(is, tClass);
+        return service.importExcel(is, textResourceClass);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> getModelBOClass(Class<?> controllerClass) {
+        var modelBOClassAnnotation = controllerClass.getAnnotation(ModelBOClass.class);
+        return (Class<T>) modelBOClassAnnotation.value();
     }
 
 }

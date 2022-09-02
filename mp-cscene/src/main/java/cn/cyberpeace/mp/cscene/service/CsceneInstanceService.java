@@ -497,7 +497,8 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         setCsceneInstanceRoleMapper(csceneInstanceRoleMapper);
     }
 
-    public ListObjServiceResult<CsceneInstanceBO> listBO(QueryParams queryParams, CsceneContextBO context) {
+    public ListObjServiceResult<CsceneInstanceBO> listCsceneInstanceBO(QueryParams queryParams,
+                                                                       CsceneContextBO context) {
         var listResult = super.list(queryParams);
         if (listResult.getSource() == null) {
             new ListObjServiceResult<>(null, listResult.getServiceCode(), listResult.getDetail());
