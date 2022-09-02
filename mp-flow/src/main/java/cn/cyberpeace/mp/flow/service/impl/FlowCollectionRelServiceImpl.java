@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -60,7 +61,7 @@ public class FlowCollectionRelServiceImpl extends BaseModelServiceImpl<FlowColle
         condition.filterEqual("collectionId", delRequest.getCollectionId());
         condition.filterIn("flowId", delRequest.getFlowIds().toArray(new String[0]));
         int count = getModelMapper().filterDelete(condition);
-        return ServiceResult.success(count);
+        return ResultCommon.success(count);
     }
 
 

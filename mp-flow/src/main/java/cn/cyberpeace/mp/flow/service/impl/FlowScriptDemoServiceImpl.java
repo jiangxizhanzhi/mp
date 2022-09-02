@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -61,7 +62,7 @@ public class FlowScriptDemoServiceImpl extends BaseModelServiceImpl<FlowScriptDe
         }
         response.setDemoList(scriptDemoList);
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
 }
