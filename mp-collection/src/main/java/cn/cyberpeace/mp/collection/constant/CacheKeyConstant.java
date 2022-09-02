@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.core.constant;
+package cn.cyberpeace.mp.collection.constant;
 
 /**
  * 缓存key

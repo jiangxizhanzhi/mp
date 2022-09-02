@@ -8,8 +8,8 @@ import javax.annotation.PostConstruct;
 import java.time.format.DateTimeFormatter;
 
 /**
- * 对接云平台配置类
- * @author wanggang
+ * es时间戳配置类
+ * @author hewei
  */
 @Configuration
 @Data

@@ -145,14 +145,4 @@ public class WazuhHttpsUtils {
             throw new MpRuntimeException("wazuh api query error!");
         }
     }
-
-    private static String doGetRequest(String url, HttpClient client) throws IOException {
-        HttpGet httpget = new HttpGet(url);
-        HttpResponse resp = client.execute(httpget);
-        // 设置请求和传输超时时间
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();
-        httpget.setConfig(requestConfig);
-        // 获得返回值
-        return EntityUtils.toString(resp.getEntity(), "UTF-8");
-    }
 }

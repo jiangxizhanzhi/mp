@@ -5,7 +5,7 @@ package cn.cyberpeace.mp.collection.constant;
  * @Author zhouxinghuai
  * @Date：2022/5/26 11:53
  */
-public class SicLaunchConfig {
+public class SicLaunchConstant {
 
     // 主机状态
     public static final String LAUNCH_ID_HOST_STATE = "eda72998ba654c8d8625f61eaa918eb3";

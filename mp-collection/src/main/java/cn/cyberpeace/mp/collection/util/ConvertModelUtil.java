@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.core.common;
+package cn.cyberpeace.mp.collection.util;
 
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.core.model.FileEvent;
@@ -21,13 +21,16 @@ import java.util.List;
 import java.util.Objects;
 
 public class ConvertModelUtil {
+    private ConvertModelUtil() {
+
+    }
+
     /**
      * 采集事件转换
      * @param wazuhFileRoot
      * @return
      */
     public static FileEvent getFileEvent(WazuhFileRoot wazuhFileRoot) {
-
         FileEvent.FileEventBuilder builder = FileEvent.builder();
         if (Objects.nonNull(wazuhFileRoot.getSyscheck())) {
             builder.filePath(wazuhFileRoot.getSyscheck().getPath())

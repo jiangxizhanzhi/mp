@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.utils;
+package cn.cyberpeace.mp.collection.util;
 
 import com.alibaba.fastjson.JSON;
 import org.elasticsearch.action.search.SearchResponse;

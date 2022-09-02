@@ -78,10 +78,6 @@ mp:
       username: wazuh
       password: Abcd123#
       flow-table-url: http://${ip.cp}:9999/knapsack/probe/v1
-    es:
-      server: 10.100.0.101:9205
-    mgo:
-      server: mongodb://root:Abcd123#@10.100.0.101:27017
 
   log:
     es-nodes: ${ip.es}:9205

@@ -64,7 +64,7 @@ public class WazuhClient extends RequestProcessor{
         return new WazuhClientBuilder();
     }
 
-    public static final String CACHE_KEY_AGENTS = "agents";
+    private static final String CACHE_KEY_AGENTS = "agents";
 
     // expires in 10 minutes
     private static final TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
