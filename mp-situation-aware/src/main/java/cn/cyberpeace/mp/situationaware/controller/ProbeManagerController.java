@@ -118,7 +118,7 @@ public class ProbeManagerController {
     @PostMapping
     @ApiOperation(value = "新增自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.CREATE, title = "创建探针", target = OpTargetEnums.PROBE)
-    @ApiImplicitParam(name = "probeRequest", value = "新增请求")
+    @ApiImplicitParam(name = "probeRequest", value = "新增请求", dataTypeClass = ProbeRequest.class)
     public ServiceResult addProbe(@RequestBody @Validated(AddGroup.class) ProbeRequest probeRequest) {
         if (StringUtils.isBlank(probeRequest.getScriptUrl()) && StringUtils.isNotBlank(probeRequest.getScriptContent())) {
             String httpUrl = probeScriptService.uploadScriptContentToFDFS(probeRequest.getScriptContent(), probeRequest.getScriptType());
@@ -134,7 +134,7 @@ public class ProbeManagerController {
     @PatchMapping
     @ApiOperation(value = "修改自定义探针")
     @OperateLog(module = OpModuleEnums.PROBE, type = OpTypeEnums.UPDATE, title = "修改探针", target = OpTargetEnums.PROBE)
-    @ApiImplicitParam(name = "probeRequest", value = "修改请求")
+    @ApiImplicitParam(name = "probeRequest", value = "修改请求", dataTypeClass = ProbeRequest.class)
     public ServiceResult modifyProbe(@RequestBody @Validated(UpdateGroup.class) ProbeRequest probeRequest) {
         var oldScript = probeScriptService.getScriptModelByProbeId(probeRequest.getId());
         String oldMd5 = oldScript.getChecksum();

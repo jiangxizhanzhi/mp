@@ -38,7 +38,7 @@ public class FlowScriptDemoController extends BaseModelController<FlowScriptDemo
     private FlowScriptDemoServiceImpl flowScriptDemoService;
 
     @ApiOperation("查询脚本模板信息")
-    @ApiImplicitParam(name = "type", value = "类型")
+    @ApiImplicitParam(name = "type", value = "类型", dataTypeClass = Integer.class)
     @GetMapping("/list")
     public ServiceResult<QueryFlowScriptDemoResponse> listFlowScriptDemos(@RequestParam(required = false) Integer type) {
         return flowScriptDemoService.listScriptDemos(type);

@@ -78,7 +78,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("删除流量信息")
-    @ApiImplicitParam(name = "id", value = "流量ID")
+    @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/delete/{id}")
     public ServiceResult<Boolean> deleteFlowInfo(@PathVariable String id) {
@@ -91,7 +91,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("批量删除流量信息")
-    @ApiImplicitParam(name = "ids", value = "流量ID集合")
+    @ApiImplicitParam(name = "ids", value = "流量ID集合", dataTypeClass = String[].class)
     @OperateLog(module = OpModuleEnums.FLOW, type = OpTypeEnums.DELETE, title = "删除流量", target = OpTargetEnums.FLOW_INFO)
     @DeleteMapping("/batch_delete")
     public ServiceResult<Integer> batchDeleteFlowInfo(@RequestBody String[] ids) {
@@ -130,7 +130,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("背景流量详情")
-    @ApiImplicitParam(name = "id", value = "流量ID")
+    @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/background")
     public ServiceResult<BackgroundFlowResponse> queryBackgroundDetail(@RequestParam String id) {
         return flowServiceImpl.queryBackgroundDetail(id);
@@ -166,7 +166,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("攻击流量详情")
-    @ApiImplicitParam(name = "id", value = "流量ID")
+    @ApiImplicitParam(name = "id", value = "流量ID", dataTypeClass = String.class)
     @GetMapping("/attack")
     public ServiceResult<AttackFlowResponse> queryAttackDetail(@RequestParam String id) {
         return flowServiceImpl.queryAttackDetail(id);
@@ -213,7 +213,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("流量信息导入")
-    @ApiImplicitParam(name = "request", value = "导入请求")
+    @ApiImplicitParam(name = "request", value = "导入请求", dataTypeClass = ImportFlowInfoRequest.class)
     @PostMapping("/flow_import")
     public ServiceResult<Boolean> flowImport(@RequestBody @Validated ImportFlowInfoRequest request) {
         return flowServiceImpl.flowImport(request);
@@ -226,7 +226,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
      * @return
      */
     @ApiOperation("名称存在校验")
-    @ApiImplicitParam(name = "request", value = "校验请求")
+    @ApiImplicitParam(name = "request", value = "校验请求", dataTypeClass = CheckNamesRequest.class)
     @PostMapping("/check_names")
     public ServiceResult<List<String>> checkNames(@RequestBody @Validated CheckNamesRequest request) {
         return flowServiceImpl.checkNamesExist(request);

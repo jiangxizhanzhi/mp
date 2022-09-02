@@ -34,7 +34,7 @@ public class DataCollectionController {
 
     @PostMapping("/file_events")
     @ApiOperation(value = "查询文件注册表变更信息", notes = "")
-    @ApiImplicitParam(name = "wazuhEventRequest", value = "查询请求体")
+    @ApiImplicitParam(name = "wazuhEventRequest", value = "查询请求体", dataTypeClass = WazuhEventRequest.class)
     public ListObjServiceResult<FileEventModel> queryFileEvents(@RequestBody @Valid WazuhEventRequest wazuhEventRequest) {
         if (Objects.isNull(wazuhEventRequest.getStartTime()) || Objects.isNull(wazuhEventRequest.getEndTime())){
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
@@ -48,7 +48,7 @@ public class DataCollectionController {
 
     @PostMapping("/monitor_events")
     @ApiOperation(value = "查询场景系统指标信息", notes = "")
-    @ApiImplicitParam(name = "wazuhMonitorEventsRequest", value = "查询请求体")
+    @ApiImplicitParam(name = "wazuhMonitorEventsRequest", value = "查询请求体", dataTypeClass = WazuhMonitorEventsRequest.class)
     public ListObjServiceResult<WazuhHostStateModel> queryMonitorEvents(@RequestBody @Valid WazuhMonitorEventsRequest wazuhMonitorEventsRequest) {
         if (CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getMacIds()) && CollectionUtils.isEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
