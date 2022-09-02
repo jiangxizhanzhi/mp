@@ -42,7 +42,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      * @return
      */
     @ApiOperation("创建trex虚拟机")
-    @ApiImplicitParam(name = "addVmInstanceRequest", value = "创建请求")
+    @ApiImplicitParam(name = "addVmInstanceRequest", value = "创建请求", dataTypeClass = AddVmInstanceRequest.class)
     @PostMapping("/vm/add")
     public ServiceResult<String> addExecutor(@RequestBody @Validated AddVmInstanceRequest addVmInstanceRequest) {
         String uuid = TextUtils.uuid();
@@ -57,7 +57,7 @@ public class FlowActuatorController extends BaseModelController<FlowActuatorMode
      * @return
      */
     @ApiOperation("删除虚拟机实例")
-    @ApiImplicitParam(name = "actuatorId", paramType = "path", value = "实例ID")
+    @ApiImplicitParam(name = "actuatorId", paramType = "path", value = "实例ID", dataTypeClass = String.class)
     @DeleteMapping("/vm/{actuatorId}")
     public ServiceResult<String> delExecutor(@PathVariable String actuatorId) {
         getModelService().delExecutor(actuatorId);

@@ -46,7 +46,7 @@ public class NetworkTrafficGroupController {
 
     @PostMapping
     @ApiOperation(value = "新增分组信息", notes = "")
-    @ApiImplicitParam(name = "groupRequest", value = "新增请求体", dataType = "body")
+    @ApiImplicitParam(name = "groupRequest", value = "新增请求体", dataType = "body", dataTypeClass = GroupRequest.class)
     public ServiceResult addGroup(@RequestBody @Valid GroupRequest groupRequest) {
         var groupModel = new GroupModel();
         BeanUtils.copyProperties(groupRequest, groupModel);
