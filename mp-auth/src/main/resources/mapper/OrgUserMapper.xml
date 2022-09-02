@@ -53,7 +53,7 @@
     </select>
 
     <select id="listUserOrgByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgDto">
-        select ou.user as userId, o.*
+        select distinct o.*, ou.user as userId
             from mp_auth_org o
         left join mp_auth_org_user ou
             on ou.org = o.id
