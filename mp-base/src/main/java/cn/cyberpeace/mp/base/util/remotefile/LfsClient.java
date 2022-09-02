@@ -50,7 +50,7 @@ public class LfsClient implements FileClient {
             }
             fileGroups[i] = StringUtils.join(fileGroupParts);
         }
-        return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, fileGroups);
+        return StringUtils.joinWith(FileUtil.FILE_SEPARATOR, (Object[]) fileGroups);
     }
 
     private static String genFileKey(String filename, String fileSuffix, boolean groupByFilename) {
