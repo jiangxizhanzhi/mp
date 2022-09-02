@@ -25,7 +25,7 @@ public interface BaseModelBulkCreateController<M extends BaseModel, S extends Ba
      * @return 成功数量
      */
     @ApiOperation("批量创建数据")
-    @ApiImplicitParam(name = "objs", value = "创建数据请求体")
+    @ApiImplicitParam(name = "objs", value = "创建数据请求体", dataTypeClass = List.class)
     @PostMapping("/bulk_create")
     default ServiceResult<Integer> bulkCreate(@RequestBody List<M> objs) {
         return getModelService().bulkCreate(objs).asResult();

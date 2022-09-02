@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.base.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.controller.request.BaseDeleteData;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.service.BaseModelBOService;
+import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.ApiImplicitParam;
@@ -13,9 +14,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelBOService<T, ?>> {
+public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelService<M, ?>> {
 
-    S getModelBOService();
+    S getModelService();
 
     @ApiOperation("删除指定id数据")
     @ApiImplicitParams({
@@ -23,7 +24,7 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
     })
     @DeleteMapping("/{id}")
     default ServiceResult<Boolean> delete(@PathVariable String id) {
-        return getModelBOService().deleteBO(id).asResult();
+        return getModelService().<T>deleteBO(id, ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
     @ApiOperation("删除指定id数据")
@@ -32,12 +33,12 @@ public interface BaseModelDeleteBOController<T extends ModelBO<M, T>, M extends 
     })
 //    @DeleteMapping(params = "id")
     default ServiceResult<Boolean> deleteByParam(@RequestParam String id) {
-        return getModelBOService().deleteBO(id).asResult();
+        return getModelService().<T>deleteBO(id, ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
 //    @DeleteMapping
     default ServiceResult<Boolean> deleteByData(@RequestBody BaseDeleteData deleteData) {
-        return getModelBOService().deleteBO(deleteData.getId()).asResult();
+        return getModelService().<T>deleteBO(deleteData.getId(), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
 }

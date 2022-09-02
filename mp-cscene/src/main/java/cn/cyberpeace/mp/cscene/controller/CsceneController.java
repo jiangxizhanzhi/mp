@@ -104,7 +104,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listBO(queryParams, false, null).asResult();
+        return getModelService().listCsceneBO(queryParams, false, null).asResult();
     }
 
     @ApiOperation("获取指定id场景模板")

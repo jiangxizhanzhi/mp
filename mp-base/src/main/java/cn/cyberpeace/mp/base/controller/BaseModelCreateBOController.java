@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.base.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ControllerCommon;
 import cn.cyberpeace.mp.base.model.BaseModel;
-import cn.cyberpeace.mp.base.service.BaseModelBOService;
+import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import io.swagger.annotations.ApiImplicitParam;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-public interface BaseModelCreateBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelBOService<T, ?>> {
+public interface BaseModelCreateBOController<T extends ModelBO<M, T>, M extends BaseModel, S extends BaseModelService<M, ?>> {
 
-    S getModelBOService();
+    S getModelService();
 
     @ApiOperation("创建数据")
     @ApiImplicitParams({
@@ -22,7 +22,7 @@ public interface BaseModelCreateBOController<T extends ModelBO<M, T>, M extends 
     })
     @PostMapping
     default ObjServiceResult<T> create(@RequestBody T bo, @RequestParam(required = false) String[] fields) {
-        return getModelBOService().createBO(bo, ControllerCommon.convertValidFields(fields)).asResult();
+        return getModelService().<T>createBO(bo, ControllerCommon.convertValidFields(fields), ControllerCommon.getModelBOClass(getClass())).asResult();
     }
 
 }

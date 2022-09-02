@@ -25,7 +25,7 @@ public interface BaseModelBulkUpdateController<M extends BaseModel, S extends Ba
      * @return 成功数量
      */
     @ApiOperation("批量更新数据")
-    @ApiImplicitParam(name = "objs", value = "更新数据请求体")
+    @ApiImplicitParam(name = "objs", value = "更新数据请求体", dataTypeClass = List.class)
     @PatchMapping("/bulk_update")
     default ServiceResult<Integer> bulkUpdate(@RequestBody List<M> objs) {
         return getModelService().bulkUpdate(objs).asResult();
