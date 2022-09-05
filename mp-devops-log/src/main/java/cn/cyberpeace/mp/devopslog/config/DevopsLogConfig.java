@@ -35,4 +35,9 @@ public class DevopsLogConfig {
      * 云平台地址
      */
     private String cpUrl;
+
+    /**
+     * MP中台地址
+     */
+    private String mpIp;
 }
