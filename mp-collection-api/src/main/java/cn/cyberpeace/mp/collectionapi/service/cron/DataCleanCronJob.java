@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collectionapi.service.cron;
 import cn.cyberpeace.mp.collection.core.es.CollectionClient;
 import cn.cyberpeace.mp.collection.model.WazuhEventRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 
 @Configuration
 @EnableScheduling
+@Slf4j
 public class DataCleanCronJob implements SchedulingConfigurer {
 
     private static String cron = "0 0 0 * * ?";
@@ -29,6 +31,7 @@ public class DataCleanCronJob implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
+        log.info("delete es doc start");
         taskRegistrar.addTriggerTask(new TriggerTask(() -> {
             try {
                 // 停一秒 避免定时任务太快不停的跑
