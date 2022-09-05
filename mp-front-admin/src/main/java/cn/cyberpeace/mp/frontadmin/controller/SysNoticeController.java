@@ -120,7 +120,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("新增公告")
-    @ApiImplicitParam(name = "noticeReq", value = "新增公告请求")
+    @ApiImplicitParam(name = "noticeReq", value = "新增公告请求", dataTypeClass = SysNoticeRequest.class)
     @PostMapping
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
@@ -129,7 +129,7 @@ public class SysNoticeController {
     }
 
     @ApiOperation("更新公告")
-    @ApiImplicitParam(name = "noticeReq", value = "更新公告请求")
+    @ApiImplicitParam(name = "noticeReq", value = "更新公告请求", dataTypeClass = SysNoticeRequest.class)
     @PatchMapping("/{id}")
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "修改公告", target = OpTargetEnums.NOTICE)
     public ServiceResult modify(@PathVariable String id, @RequestBody @Validated(UpdateGroup.class) SysNoticeRequest noticeReq) {
@@ -140,7 +140,7 @@ public class SysNoticeController {
 
 
     @ApiOperation("批量删除公告")
-    @ApiImplicitParam(name = "ids", value = "公告ID列表")
+    @ApiImplicitParam(name = "ids", value = "公告ID列表", dataTypeClass = String[].class)
     @DeleteMapping
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {

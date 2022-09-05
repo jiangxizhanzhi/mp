@@ -225,7 +225,7 @@ public interface BaseModelMapper<M extends BaseModel> {
     private Map<String, List<M>> groupValidFieldsObjs(List<M> objs) {
         Map<String, List<M>> validFieldsObjs = new HashMap<>();
         objs.forEach(obj -> {
-            String key = DigestUtils.md5Hex(StringUtils.joinWith(":", BeanUtils.getNotNullPropertyNames(obj)));
+            String key = DigestUtils.md5Hex(StringUtils.joinWith(":", (Object[]) BeanUtils.getNotNullPropertyNames(obj)));
             var keyObjs = validFieldsObjs.getOrDefault(key, new ArrayList<>());
             keyObjs.add(obj);
             validFieldsObjs.put(key, keyObjs);

@@ -199,7 +199,7 @@ public class RealEquipmentController {
      * 新增
      */
     @ApiOperation("新增")
-    @ApiImplicitParam(name = "request", value = "新增实装设备请求体")
+    @ApiImplicitParam(name = "request", value = "新增实装设备请求体", dataTypeClass = RealEquipmentRequest.class)
     @PostMapping("/add")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult add(@RequestBody RealEquipmentRequest request){
@@ -211,7 +211,7 @@ public class RealEquipmentController {
      * 更新
      */
     @ApiOperation("更新")
-    @ApiImplicitParam(name = "request", value = "更新数据请求体")
+    @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = RealEquipmentRequest.class)
     @PutMapping("/update")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "修改实装", target = OpTargetEnums.REALEQUIPMENT)
     public ServiceResult update(@RequestBody RealEquipmentRequest request){
@@ -226,7 +226,7 @@ public class RealEquipmentController {
      * 删除
      */
     @ApiOperation("删除")
-    @ApiImplicitParam(name = "request", value = "删除数据请求体")
+    @ApiImplicitParam(name = "request", value = "删除数据请求体", dataTypeClass = RealEquipmentDeleteRequest.class)
     @DeleteMapping("/delete")
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除实装", target = OpTargetEnums.REALEQUIPMENT)
     public Result<Boolean> delete(@RequestBody RealEquipmentDeleteRequest request){
@@ -235,7 +235,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("查询详情")
-    @ApiImplicitParam(name = "uuid", value = "请求参数")
+    @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
     @GetMapping("/get-devops-details")
     public Result<RealEquipmentDevopsDetailVO> findDevopsDetails(@RequestParam("uuid") String id){
         RealEquipmentBO realEquipmentBO = realEquipmentConverter.findByUuid(id);
@@ -374,7 +374,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("根据设备ID获取登录链接信息")
-    @ApiImplicitParam(name = "uuid", value = "设备id")
+    @ApiImplicitParam(name = "uuid", value = "设备id", dataTypeClass = String.class)
     @GetMapping("/connection")
     public Result<List<TargetConnection>> connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = realEquipmentService.connection(uuid);
@@ -385,7 +385,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("根据交换机名称查询实体装备")
-    @ApiImplicitParam(name = "switchName", value = "交换机名称")
+    @ApiImplicitParam(name = "switchName", value = "交换机名称", dataTypeClass = String.class)
     @GetMapping("/by-switch-name")
     public Result<List<RealEquipmentByParams>> findBySwitchName(@RequestParam("switchName") String switchName){
         CloudPlatformPageResult<RealEquipmentByParams> bySwitchName = realEquipmentService.findBySwitchName(switchName);
@@ -396,7 +396,7 @@ public class RealEquipmentController {
     }
 
     @ApiOperation("根据串口名称查询实体装备")
-    @ApiImplicitParam(name = "serialPort", value = "端口名称")
+    @ApiImplicitParam(name = "serialPort", value = "端口名称", dataTypeClass = String.class)
     @GetMapping("/by-serial-port")
     public Result<List<RealEquipmentByParams>> findBySerialPort(@RequestParam("serialPort") String serialPort){
         CloudPlatformPageResult<RealEquipmentByParams> bySerialPort = realEquipmentService.findBySerialPort(serialPort);

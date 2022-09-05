@@ -95,7 +95,7 @@ public class RoleController {
     }
 
     @ApiOperation(value = "创建角色，同时完成角色-权限绑定关系", notes = "")
-    @ApiImplicitParam(name = "createRequest", value = "请求")
+    @ApiImplicitParam(name = "createRequest", value = "请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/add")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
@@ -106,7 +106,7 @@ public class RoleController {
 
 
     @ApiOperation(value = "更新角色，同时完成角色-权限绑定关系", notes = "")
-    @ApiImplicitParam(name = "modifyRequest", value = "修改请求")
+    @ApiImplicitParam(name = "modifyRequest", value = "修改请求", dataTypeClass = RoleRequest.class)
     @PostMapping("/modify")
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)

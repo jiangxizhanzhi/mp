@@ -312,7 +312,7 @@ public class CloudPlatformMonitorController {
      * @return
      */
     @ApiOperation("服务重启")
-    @ApiImplicitParam(name = "serverRestartRequest", value = "服务重启请求体")
+    @ApiImplicitParam(name = "serverRestartRequest", value = "服务重启请求体", dataTypeClass = ServerRestartRequest.class)
     @PostMapping("/restart")
     public ServiceResult<Boolean> restartServer(@RequestBody @Validated ServerRestartRequest serverRestartRequest) {
         monitorScriptControlService.restart(serverRestartRequest.getHostname(), serverRestartRequest.getServiceList());

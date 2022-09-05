@@ -126,7 +126,7 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation(value = "保存（创建/更新）场景模板", notes = "请忽略test_scenes和app_scenes字段")
-    @ApiImplicitParam(name = "csceneBO", value = "请求体")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
     @PostMapping("/sync")
     public ServiceResult<CsceneBO> sync(@RequestBody CsceneBO csceneBO) {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
@@ -144,7 +144,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("克隆指定id场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "请求体")
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)
     })
     @PostMapping(value = "/clone")
     public ServiceResult<CsceneBO> clone(@RequestParam(required = false) String id,
@@ -158,7 +158,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("删除场景模板")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "请求体")
+            @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneActionRequest.class)
     })
     @DeleteMapping
     public ServiceResult<Boolean> delete(@RequestParam(required = false) String id,
@@ -171,7 +171,7 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("批量删除场景模板")
-    @ApiImplicitParam(name = "ids", value = "删除数据请求体")
+    @ApiImplicitParam(name = "ids", value = "删除数据请求体", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         log.info("delete cscene configs , cscene ids is {}", JsonCommon.stringify(ids));
@@ -183,7 +183,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("创建场景模板测试实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体")
+            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
     })
     @PostMapping(value = "/test_instance")
     public ServiceResult<CsceneInstanceBO> createTestInstance(
@@ -199,7 +199,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiOperation("创建场景模板应用实例")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体")
+            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
     })
     @PostMapping(value = "/app_instance")
     public ServiceResult<CsceneInstanceBO> createAppInstance(
@@ -213,7 +213,7 @@ public class CsceneController implements BaseModelListControllerBase {
     }
 
     @ApiOperation("获取场景模板统计数据")
-    @ApiImplicitParam(name = "ids", value = "请求参数")
+    @ApiImplicitParam(name = "ids", value = "请求参数", dataTypeClass = String[].class)
     @GetMapping("/stat")
     public ServiceResult<List<CsceneStat>> statCscenes(@RequestParam String[] ids) {
         return csceneSpecialService.statCscenes(ids).asResult();
@@ -221,7 +221,7 @@ public class CsceneController implements BaseModelListControllerBase {
 
     @ApiOperation("统计靶标对应引用该靶标的场景模板")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String.class, allowMultiple = true),
+            @ApiImplicitParam(name = "images", value = "靶标名称", dataTypeClass = String[].class, allowMultiple = true),
     })
     @GetMapping("/stat_device_refer_cscenes")
     public ServiceResult<Map<String, List<DeviceReferCsceneStat>>> statDeviceReferCscenes(

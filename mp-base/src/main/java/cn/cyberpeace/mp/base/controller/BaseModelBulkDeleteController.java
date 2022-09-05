@@ -24,7 +24,7 @@ public interface BaseModelBulkDeleteController<M extends BaseModel, S extends Ba
      * @return 成功数量
      */
     @ApiOperation("批量删除数据")
-    @ApiImplicitParam(name = "ids", value = "删除数据id列表")
+    @ApiImplicitParam(name = "ids", value = "删除数据id列表", dataTypeClass = String[].class)
     @DeleteMapping("/bulk_delete")
     default ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         return getModelService().bulkDelete(ids).asResult();
