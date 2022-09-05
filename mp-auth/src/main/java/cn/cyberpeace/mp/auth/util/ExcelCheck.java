@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @Description:
@@ -61,12 +62,18 @@ public class ExcelCheck {
     public static File multipartFileToFile(MultipartFile multipartFile) {
         ParamCheck.notNull(multipartFile, AuthBasei18nCode.REQUEST_PARAMS);
         String filename = multipartFile.getOriginalFilename();
+        // multipartFile.getOriginalFilename() is nullable
+        // pathname of new File() is notnull
+        if (Objects.isNull(filename)) {
+            log.error("fileName is null");
+            throw new MpRuntimeException(AuthErrorCode.FILE_NAME_ISNULL_ERROR);
+        }
         File file = new File(filename);
         try {
             FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), file);
         } catch (IOException e) {
             log.error("copy file failed:{}", e.getMessage());
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_COPY_FILE_ERROR);
+            throw new MpRuntimeException(AuthErrorCode.COPY_FILE_ERROR);
         }
         return file;
     }
