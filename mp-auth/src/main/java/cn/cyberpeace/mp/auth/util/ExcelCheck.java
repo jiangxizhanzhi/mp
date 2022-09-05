@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,16 +28,6 @@ public class ExcelCheck {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
         String fileName = file.getName();
         String type = fileName.substring(fileName.lastIndexOf(".") + 1);
-//        String type = "";
-//        try {
-//            int begin = file.getOriginalFilename().indexOf(".");
-//            int last = file.getOriginalFilename().length();
-//            type = file.getOriginalFilename().substring(begin + 1, last);
-////            type = FileTypeUtil.getType(file.getInputStream());
-//        } catch (Exception e) {
-//            log.error("not an excel file, ex:{}", ExceptionUtil.stacktraceToString(e));
-//            throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);
-//        }
 
         boolean typeMatch = false;
         if (StringUtils.isNotBlank(type)) {
@@ -52,7 +43,6 @@ public class ExcelCheck {
             log.error("not an excel file, type:{}", type);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_NOT_EXCEL);
         }
-
 
         long size = file.length();
         if (size > MAX_SIZE) {
@@ -73,7 +63,7 @@ public class ExcelCheck {
         String filename = multipartFile.getOriginalFilename();
         File file = new File(filename);
         try {
-            multipartFile.transferTo(file);
+            FileUtils.copyInputStreamToFile(multipartFile.getInputStream(), file);
         } catch (IOException e) {
             log.error("copy file failed:{}", e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.EXCEL_COPY_FILE_ERROR);
