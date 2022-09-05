@@ -30,6 +30,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -59,7 +60,10 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         setModelService(modelService);
     }
 
-    private static final String sysIdstr = "F7EB8C529C1A503B79E729581EDBC95E";
+    @Value("${mp.auth.sysidstr:F7EB8C529C1A503B79E729581EDBC95E}")
+    private String sysIdstr;
+
+//    private static final String sysIdstr = "F7EB8C529C1A503B79E729581EDBC95E";
 
     public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
 

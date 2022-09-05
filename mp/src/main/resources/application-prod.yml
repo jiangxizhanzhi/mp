@@ -124,6 +124,7 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
+    sysidstr: F7EB8C529C1A503B79E729581EDBC95E
     activation:
       enable: true
       licenseDir: /home/mp/config/license
