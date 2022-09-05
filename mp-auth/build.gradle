@@ -5,6 +5,10 @@ dependencies {
     implementation 'com.github.jsqlparser:jsqlparser:0.9.5'
     implementation 'com.alibaba:easyexcel:2.2.6'
     implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
+    implementation 'javax.xml.bind:jaxb-api:2.3.0'
+    implementation 'javax.xml:jaxb-impl:2.1'
+//    implementation 'org.glassfish.jaxb:jaxb-core:2.3.0'
+    implementation 'javax.xml.bind:activation:1.0.2'
 
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation 'junit:junit:4.13.2'

@@ -1,5 +1,5 @@
 ip:
-  mariadb: 10.100.0.101        # MP新中台mariadb数据库地址
+  mariadb: 10.100.1.12        # MP新中台mariadb数据库地址
   fdfs: 10.100.1.26             # FastDFS地址
   cp: 10.100.7.1                # 云平台适配层接口地址
   moloch: 10.100.0.101          # moloch的IP地址
@@ -15,9 +15,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${ip.mariadb}:3306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: root
-    password: root
+    url: jdbc:mysql://${ip.mariadb}:9306/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: mp
+    password: bymsoSAGToyAcs9H
     driver-class-name: org.mariadb.jdbc.Driver
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
