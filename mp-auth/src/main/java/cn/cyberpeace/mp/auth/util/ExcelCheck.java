@@ -3,10 +3,12 @@ package cn.cyberpeace.mp.auth.util;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @Description:
@@ -21,19 +23,20 @@ public class ExcelCheck {
 
     public static final String[] EXCEL_TYPES = {"xls", "xlsx"};
 
-    public static void check(MultipartFile file) {
+    public static void check(File file) {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
-
-        String type = "";
-        try {
-            int begin = file.getOriginalFilename().indexOf(".");
-            int last = file.getOriginalFilename().length();
-            type = file.getOriginalFilename().substring(begin + 1, last);
-//            type = FileTypeUtil.getType(file.getInputStream());
-        } catch (Exception e) {
-            log.error("not an excel file, ex:{}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);
-        }
+        String fileName = file.getName();
+        String type = fileName.substring(fileName.lastIndexOf(".") + 1);
+//        String type = "";
+//        try {
+//            int begin = file.getOriginalFilename().indexOf(".");
+//            int last = file.getOriginalFilename().length();
+//            type = file.getOriginalFilename().substring(begin + 1, last);
+////            type = FileTypeUtil.getType(file.getInputStream());
+//        } catch (Exception e) {
+//            log.error("not an excel file, ex:{}", ExceptionUtil.stacktraceToString(e));
+//            throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);
+//        }
 
         boolean typeMatch = false;
         if (StringUtils.isNotBlank(type)) {
@@ -51,12 +54,33 @@ public class ExcelCheck {
         }
 
 
-        long size = file.getSize();
+        long size = file.length();
         if (size > MAX_SIZE) {
             log.error("over size, size:{}", size);
             throw new MpRuntimeException(AuthErrorCode.EXCEL_EXCEED_SIZE);
         }
 
     }
+
+    /**
+     * 将 MultipartFile 类型转成 File
+     *
+     * @param multipartFile
+     * @return
+     */
+    public static File multipartFileToFile(MultipartFile multipartFile) {
+        ParamCheck.notNull(multipartFile, AuthBasei18nCode.REQUEST_PARAMS);
+        String filename = multipartFile.getOriginalFilename();
+        File file = new File(filename);
+        try {
+            multipartFile.transferTo(file);
+        } catch (IOException e) {
+            log.error("copy file failed:{}", e.getMessage());
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_COPY_FILE_ERROR);
+        }
+        return file;
+    }
+
+
 
 }
