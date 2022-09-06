@@ -30,17 +30,13 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     @Autowired
     private DataCollectionService dataCollectionService;
 
-    @Autowired
-    private MonitorConfig monitorConfig;
-
-
     /**
      * 查询平台服务状态列表
      * @param hostnames
      * @return
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = monitorConfig.getCpSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = MonitorConfig.cpSrvMonitors.stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
@@ -55,7 +51,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = monitorConfig.getBizSrvMonitors().stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = MonitorConfig.bizSrvMonitors.stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));

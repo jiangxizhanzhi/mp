@@ -60,8 +60,6 @@ public class ServiceMonitorService {
 
     private final MonitorScriptControlService monitorScriptControlService;
 
-    private final MonitorConfig monitorConfig;
-
     private final ImagesConverter imagesConverter;
 
 
@@ -80,7 +78,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
+        processRestartRestrict(serviceMonitorDtos, MonitorConfig.bizSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());
@@ -109,7 +107,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
+        processRestartRestrict(serviceMonitorDtos, MonitorConfig.cpSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());

@@ -57,9 +57,6 @@ public class MonitorScriptControlService {
     private HypervisorConverter hypervisorConverter;
 
     @Autowired
-    private MonitorConfig monitorConfig;
-
-    @Autowired
     private AgentService agentService;
 
     // expires in 20 minutes
@@ -102,8 +99,8 @@ public class MonitorScriptControlService {
             return;
         }
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
 
         if (CollectionUtil.isEmpty(cpSrvs)) {
             return;
@@ -137,8 +134,8 @@ public class MonitorScriptControlService {
 
     public void statusManually(String hostname) {
         List<MonitorConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
 
         if (CollectionUtil.isNotEmpty(cpSrvs)) {
             allSrvMonitors.addAll(cpSrvs);
@@ -233,8 +230,8 @@ public class MonitorScriptControlService {
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = monitorConfig.getCpSrvMonitors();
-        List<MonitorConfig.MonitorProbe> bizSrvs = monitorConfig.getBizSrvMonitors();
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
 
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
         for (MonitorConfig.MonitorProbe cpSrvProbe : cpSrvs) {
@@ -326,8 +323,8 @@ public class MonitorScriptControlService {
 
     private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
         List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
-        allSrvs.addAll(monitorConfig.getCpSrvMonitors());
-        allSrvs.addAll(monitorConfig.getBizSrvMonitors());
+        allSrvs.addAll(MonitorConfig.cpSrvMonitors);
+        allSrvs.addAll(MonitorConfig.bizSrvMonitors);
 
         if (CollectionUtil.isNotEmpty(allSrvs)) {
             allSrvs.sort(new Comparator<MonitorConfig.MonitorProbe>() {
