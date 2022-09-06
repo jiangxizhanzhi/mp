@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
@@ -59,7 +59,7 @@ public class DevopsTargetController {
 
     private final TypeConverter typeConverter;
 
-    private final DevopsConfig devopsConfig;
+    private final DevopsClusterConfig devopsClusterConfig;
 
     private final DeviceVoConverter deviceVoConverter;
 
@@ -78,8 +78,8 @@ public class DevopsTargetController {
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
     public Result<String> getFtpAddress(){
-        String formatUrl = devopsConfig.getCpIp();
-        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        String formatUrl = devopsClusterConfig.getCpIp();
+        DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                 formatUrl = config.getPublicNetProxyIp();

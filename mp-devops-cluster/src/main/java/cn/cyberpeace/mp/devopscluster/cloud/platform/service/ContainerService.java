@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.ContainerActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.ContainerModel;
@@ -23,8 +23,8 @@ public class ContainerService extends BaseCpService {
      */
     private static final String CONTAINERS = "/containers";
 
-    public ContainerService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public ContainerService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

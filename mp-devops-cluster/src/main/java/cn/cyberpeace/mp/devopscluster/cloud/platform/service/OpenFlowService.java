@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.OpenFlow;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.OpenFlowPageParams;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
 import com.alibaba.fastjson.JSONObject;
@@ -26,8 +26,8 @@ import static cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudP
 @Slf4j
 public class OpenFlowService extends BaseCpService {
 
-    public OpenFlowService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public OpenFlowService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

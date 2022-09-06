@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Configuration
@@ -14,12 +16,12 @@ public class SituationAwareConfig {
     /**
      * moloch es节点地址
      */
-    private String esNodes;
+    private String wazuhEsNodes;
 
     /**
      * MP新中台ES地址
      */
-    private String mpEsNodes;
+    private String arkimeEsNodes;
 
     /**
      *
@@ -57,6 +59,12 @@ public class SituationAwareConfig {
     private String probeMgrAgentScriptLinuxPath;
     private String probeMgrAgentScriptWindowsPath;
     private String probeMgrTaskEnable;
+
+    public static DateTimeFormatter esDateTimeFormatter = null;
+    @PostConstruct
+    public void init() {
+        esDateTimeFormatter = DateTimeFormatter.ofPattern(esDatePattern);
+    }
 
     @Data
     public static class MonitorProbe {

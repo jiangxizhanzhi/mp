@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.task;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
@@ -46,7 +46,7 @@ public class SystemAlarmTask {
 
     private final ServiceMonitorService serviceMonitorService;
 
-    private final DevopsConfig devopsConfig;
+    private final DevopsClusterConfig devopsClusterConfig;
 
     private final AlarmStatisticsService alarmStatisticsService;
 
@@ -71,10 +71,10 @@ public class SystemAlarmTask {
 
         if (CollectionUtils.isNotEmpty(allcpNodesHostStates)) {
             allcpNodesHostStates.forEach(hostState -> {
-                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsConfig.getDiskAlarmPercent()) {
+                    if (Objects.nonNull(hostState.getDiskPercent()) && hostState.getDiskPercent() >= devopsClusterConfig.getDiskAlarmPercent()) {
                         // 磁盘使用率大于阈值，添加告警
                         SystemAlarmModel serverAlarmModel = SystemAlarmModel.builder()
-                                .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsConfig.getDiskAlarmPercent()))
+                                .alarmMsg(String.format("%s disk usage is over %s%%", hostState.getAgentName(), devopsClusterConfig.getDiskAlarmPercent()))
                                 .alarmStatus(AlarmStatusEnum.ENABLED.toValue())
                                 .alarmType(AlarmTypeEnum.SERVER.toValue())
                                 .hostname(hostState.getAgentName())

@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatform
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.DeviceSnapshotMergeCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.params.ScenariosSnapshot;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.*;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
@@ -21,8 +21,8 @@ public class ScenariosService extends BaseCpService {
 
     private static final String SCENARIOS = "/scenarios";
 
-    public ScenariosService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public ScenariosService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

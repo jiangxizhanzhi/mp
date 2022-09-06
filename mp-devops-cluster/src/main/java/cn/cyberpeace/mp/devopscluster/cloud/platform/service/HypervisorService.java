@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.HypervisorStatisticsCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.model.HypervisorWeightAndMaxInstanceCloudPlatformResult;
@@ -22,8 +22,8 @@ public class HypervisorService extends BaseCpService {
 
     public static final String HYPERVISORS = "/hypervisors";
 
-    public HypervisorService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public HypervisorService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

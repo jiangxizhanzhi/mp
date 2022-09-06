@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Snapshot;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.SnapshotCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.InjectFile;
@@ -25,8 +25,8 @@ public class InjectFileService extends BaseCpService {
 
     private static final String INJECT_FILE = "/inject_file";
 
-    public InjectFileService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public InjectFileService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**
