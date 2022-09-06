@@ -1,0 +1,58 @@
+[
+  {
+    "probe_id": "008",
+    "log_format": "eventchannel",
+    "location": [
+      "Microsoft-Windows-PrintService/Operational",
+      "System",
+      "Microsoft-Windows-Sysmon/Operational"
+    ],
+    "os_type": "windows"
+  },
+  {
+    "probe_id": "008",
+    "log_format": "syslog",
+    "location": [
+      "/var/log/syslog"
+    ],
+    "os_type": "linux"
+  },
+  {
+    "probe_id": "009",
+    "log_format": "eventchannel",
+    "location": [
+      "Application",
+      "File Replication Service",
+      "Service Microsoft-Windows-TerminalServices-RemoteConnectionManager"
+    ],
+    "os_type": "windows"
+  },
+  {
+    "probe_id": "009",
+    "log_format": "syslog",
+    "location": [
+      "/var/log/maillog",
+      "/var/log/httpd"
+    ],
+    "os_type": "linux"
+  },
+  {
+    "probe_id": "010",
+    "log_format": "eventchannel",
+    "location": [
+      "Security",
+      "Microsoft-Windows-Windows Defender/Operational",
+      "Microsoft-Windows-Windows Firewall With Advanced Security/Firewall"
+    ],
+    "os_type": "windows"
+  },
+  {
+    "probe_id": "010",
+    "log_format": "syslog",
+    "location": [
+      "/var/log/clamav.log",
+      "/var/log/secure"
+    ],
+    "os_type": "linux"
+  }
+]

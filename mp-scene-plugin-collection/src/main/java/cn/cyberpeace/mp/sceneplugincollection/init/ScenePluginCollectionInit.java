@@ -4,6 +4,8 @@ import cn.cyberpeace.mp.base.common.LocalFileMappingCommon;
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.sceneplugincollection.config.CollectionAppConfig;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhLogProbeLocationConfig;
+import cn.cyberpeace.mp.sceneplugincollection.config.WazuhProbeConfig;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncEventPublisher;
 import cn.cyberpeace.mp.sceneplugincollection.event.LocalFileSyncSuccessEvent;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.WazuhCommon;
@@ -28,6 +30,9 @@ public class ScenePluginCollectionInit implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        // 初始化探针配置
+        WazuhProbeConfig.init();
+        WazuhLogProbeLocationConfig.init();
         // 本地开发环境不运行资源的更新和删除
         if (!collectionAppConfig.getBaseAppConfig().isRunInit()) {
             return;
