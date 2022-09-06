@@ -1,23 +1,18 @@
-package cn.cyberpeace.mp.sceneplugincollection.service;
+package cn.cyberpeace.mp.sceneplugincollection.util;
 
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.google.common.io.CharStreams;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Service;
 
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Service
-@Data
-public class CollectionCommonConfigService {
-    private CollectionCommonConfigService(){
+public class CollectionCommonConfigUtil {
+    private CollectionCommonConfigUtil() {
 
     }
 
@@ -33,12 +28,12 @@ public class CollectionCommonConfigService {
 
     private static final Map<String, String> CONFIG_MAP = new HashMap<>();
 
-    public static ServiceResult<String> getConfigString(String config) {
+    public static String getConfigString(String config) {
         init();
         if (CONFIG_MAP.containsKey(config)) {
-            return new ServiceResult<>(CONFIG_MAP.get(config));
+            return CONFIG_MAP.get(config);
         }
-        return new ServiceResult<>(StringUtils.EMPTY);
+        return StringUtils.EMPTY;
     }
 
     private static synchronized void init() {
