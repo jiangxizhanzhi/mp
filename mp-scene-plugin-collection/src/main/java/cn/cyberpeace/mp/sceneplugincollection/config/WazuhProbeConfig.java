@@ -14,7 +14,6 @@ import java.util.List;
  * @Date： 2022.3.23 15:49
  */
 @Component
-@Getter
 public class WazuhProbeConfig {
     private static DefaultProbe defaultProbe;
 
@@ -26,6 +25,10 @@ public class WazuhProbeConfig {
         }
         defaultProbe = JSON.parseObject(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_CUSTOM_PROBES), DefaultProbe.class);
         isInit = true;
+    }
+
+    public DefaultProbe getDefaultProbe() {
+        return defaultProbe;
     }
 
     @Data
