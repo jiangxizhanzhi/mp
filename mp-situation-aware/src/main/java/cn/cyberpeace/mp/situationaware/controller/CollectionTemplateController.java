@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePa
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.validate.AddGroup;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
 import cn.cyberpeace.mp.situationaware.utils.ResultUtils;
@@ -105,8 +104,8 @@ public class CollectionTemplateController {
      */
     @PostMapping
     @ApiOperation(value = "新增采集模板")
-    @ApiImplicitParam(name = "addRequest", value = "新增请求体", dataTypeClass = CollectionTemplateRequest.class)
-    public ServiceResult addTemplate(@RequestBody @Validated(AddGroup.class) CollectionTemplateRequest addRequest) {
+    @ApiImplicitParam(name = "addRequest", value = "采集模板新增请求体")
+    public ServiceResult addTemplate(@RequestBody CollectionTemplateRequest addRequest) {
         String id = templateService.addTemplate(addRequest);
         return ServiceResult.success(id);
     }
@@ -118,7 +117,7 @@ public class CollectionTemplateController {
      */
     @PatchMapping
     @ApiOperation(value = "修改采集模板")
-    @ApiImplicitParam(name = "updateRequest", value = "修改请求体", dataTypeClass = CollectionTemplateRequest.class)
+    @ApiImplicitParam(name = "updateRequest", value = "采集模板修改请求体")
     public ServiceResult<Void> modifyTemplate(@RequestBody @Validated(UpdateGroup.class) CollectionTemplateRequest updateRequest) {
         templateService.modifyTemplate(updateRequest);
         return ServiceResult.successful();
