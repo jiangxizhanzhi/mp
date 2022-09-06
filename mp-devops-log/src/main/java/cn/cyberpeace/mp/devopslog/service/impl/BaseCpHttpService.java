@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.devopslog.service.impl;
 
+import cn.cyberpeace.mp.devopslog.config.DevopsLogConfig;
 import cn.cyberpeace.mp.devopslog.model.BaseModel;
 import cn.hutool.http.HttpResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -17,8 +18,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BaseCpHttpService extends BaseHttpService {
 
-    @Value("${mp.devops.cp-url}")
-    private String cpUrl;
+    @Autowired
+    private DevopsLogConfig devopsLogConfig;
 
     /**
      * 通过Post方式查询信息
@@ -31,7 +32,7 @@ public class BaseCpHttpService extends BaseHttpService {
      */
     @Override
     protected <T extends BaseModel> T sendPost(String api, String body, Class<T> valueType) {
-        return super.sendPost(cpUrl.concat(api), body, valueType);
+        return super.sendPost(devopsLogConfig.getCpUrl().concat(api), body, valueType);
     }
 
     /**
@@ -42,6 +43,6 @@ public class BaseCpHttpService extends BaseHttpService {
      */
     @Override
     protected HttpResponse downLoad(String api, String body) {
-        return super.downLoad(cpUrl.concat(api),body);
+        return super.downLoad(devopsLogConfig.getCpUrl().concat(api),body);
     }
 }

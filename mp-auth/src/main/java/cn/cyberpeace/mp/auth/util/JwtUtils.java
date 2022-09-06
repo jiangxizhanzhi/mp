@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.util;
 
-import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import com.auth0.jwt.JWT;
@@ -44,7 +44,7 @@ public class JwtUtils {
     public static JwtUtils jwtUtils;
 
     @Autowired
-    private AuthenticateConfig authenticateConfig;
+    private AuthConfig authConfig;
 
     //private static final long JWT_EXPIRATION = 24 * 3600 * 1000L * 7;
 
@@ -53,17 +53,17 @@ public class JwtUtils {
     @PostConstruct
     public void init() {
         jwtUtils = this;
-        jwtUtils.authenticateConfig = authenticateConfig;
+        jwtUtils.authConfig = authConfig;
     }
 
     private static String getSecret(UserInfo user) {
         String secret = "";
-        if (jwtUtils.authenticateConfig.getUseIndividualTokenSecret()) {
+        if (jwtUtils.authConfig.getAuthenticateUseIndividualTokenSecret()) {
             secret = user.getLatestTokenSecret();
         }
         if (StringUtils.isBlank(secret)) {
             //secret = AuthConstant.JWT_SECRET;
-            secret = jwtUtils.authenticateConfig.getJwtSecret();
+            secret = jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
         return secret;
     }
@@ -75,10 +75,10 @@ public class JwtUtils {
         try {
             mac = Mac.getInstance(algorithm);
             //mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
-            mac.init(new SecretKeySpec(jwtUtils.authenticateConfig.getJwtSecret().getBytes(StandardCharsets.UTF_8), algorithm));
+            mac.init(new SecretKeySpec(jwtUtils.authConfig.getAuthenticateJwtSecret().getBytes(StandardCharsets.UTF_8), algorithm));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("Generate Jwt Secret error: {}", e.getMessage());
-            return jwtUtils.authenticateConfig.getJwtSecret();
+            return jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
 
         mac.update(secret.getBytes(StandardCharsets.UTF_8));
@@ -110,7 +110,7 @@ public class JwtUtils {
 
     public static String generateToken(UserInfo user) {
         String jwtSecret = generateJwtSecret(user);
-        Long expireSeconds = jwtUtils.authenticateConfig.getJwtExpires();
+        Long expireSeconds = jwtUtils.authConfig.getAuthenticateJwtExpires();
         if (Objects.isNull(expireSeconds)) {
             expireSeconds = 604800L;
         }

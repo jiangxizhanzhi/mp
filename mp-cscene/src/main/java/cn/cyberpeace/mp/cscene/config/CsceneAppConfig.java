@@ -11,9 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
-import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,6 +21,11 @@ import java.util.Set;
 @ConfigurationProperties(prefix = "mp.cscene")
 @Data
 public class CsceneAppConfig {
+
+    /**
+     * 云平台适配层接口地址
+     */
+    private String cpIP;
 
     @Autowired
     private SysActivationService sysActivationService;

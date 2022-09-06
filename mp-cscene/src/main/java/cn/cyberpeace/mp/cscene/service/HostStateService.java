@@ -7,12 +7,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.config.CPCloudConfig;
+import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneBasei18nCode;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.request.hoststate.HostStateTrendRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
@@ -40,13 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -81,7 +75,7 @@ public class HostStateService {
     private AgentService agentService;
 
     @Autowired
-    private CPCloudConfig cpCloudConfig;
+    private CsceneAppConfig csceneAppConfig;
 
 
 
@@ -194,12 +188,12 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
-        if (StringUtils.isBlank(cpCloudConfig.getCpIP())) {
+        if (StringUtils.isBlank(csceneAppConfig.getCpIP())) {
             log.error("cp cloud ip is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         AgentRequest agentRequest = new AgentRequest();
-        agentRequest.setIp(cpCloudConfig.getCpIP());
+        agentRequest.setIp(csceneAppConfig.getCpIP());
         List<Agent> agents = agentService.listAgents(agentRequest);
         List<String> agentNames = agents.stream().map(Agent::getName).collect(Collectors.toList());
 

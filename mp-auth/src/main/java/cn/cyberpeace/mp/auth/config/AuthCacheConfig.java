@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.config;
 
-import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
@@ -32,13 +31,13 @@ public class AuthCacheConfig {
     public static final String CACHE_MANAGER_6H = "authCacheManager_6H";
 
     @Autowired
-    private AuthenticateConfig authenticateConfig;
+    private AuthConfig authConfig;
 
 
     @Bean(name = CACHE_MANAGER_NORMAL)
     public CacheManager authCacheManagerNormal() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-        Integer seconds = authenticateConfig.getCacheTime();
+        Integer seconds = authConfig.getAuthenticateCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
             seconds = 30;
         }
@@ -50,7 +49,7 @@ public class AuthCacheConfig {
     @Bean(name = CACHE_MANAGER_MEDIUM)
     public CacheManager authCacheManagerMedium() {
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
-        Integer seconds = authenticateConfig.getCacheTime();
+        Integer seconds = authConfig.getAuthenticateCacheTime();
         if (Objects.isNull(seconds) || seconds < 1) {
             seconds = 30;
         }
