@@ -112,7 +112,7 @@ public class UserExcelController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     @ResponseBody
     public ServiceResult importUsers(MultipartFile file) throws IOException {
-        ExcelCheck.check(file);
+        ExcelCheck.check(ExcelCheck.multipartFileToFile(file));
         try {
             EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
                     .headRowNumber(2).sheet().doRead();

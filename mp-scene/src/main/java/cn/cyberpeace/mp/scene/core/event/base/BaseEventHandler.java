@@ -169,7 +169,7 @@ public abstract class BaseEventHandler<M extends BaseEventModel, E extends Event
      */
     public int startEvent() {
         var processMessage = MessageCommon.get("scene.event.start_message", MessageCommon.get(eventName));
-        return triggerEvent(event, EventStatus.START, target.getProcess(), target.getProcessStatus(),
+        return triggerEvent(event, EventStatus.START, target.getProcess(), ProcessStatus.START,
                 formatProcessMessage(processMessage));
     }
 
