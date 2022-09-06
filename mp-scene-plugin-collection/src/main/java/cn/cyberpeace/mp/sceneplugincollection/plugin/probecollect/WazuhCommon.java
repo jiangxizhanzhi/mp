@@ -180,11 +180,11 @@ public class WazuhCommon {
     private static List<WazuhControl.ControlProbeParam> getDefaultProbeParams(Map<String, String> nameFileMap,
                                                                               String metadataFileServer, String agentName,
                                                                               WazuhProbeConfig wazuhProbeConfig) {
-        if (wazuhProbeConfig == null || CollectionUtils.isEmpty(wazuhProbeConfig.getProbes())) {
+        if (wazuhProbeConfig == null || wazuhProbeConfig.getDefaultProbe() == null || CollectionUtils.isEmpty(wazuhProbeConfig.getDefaultProbe().getProbes())) {
             return new ArrayList<>();
         }
         List<WazuhControl.ControlProbeParam> defaultProbeParams = new ArrayList<>();
-        wazuhProbeConfig.getProbes().forEach(probe -> {
+        wazuhProbeConfig.getDefaultProbe().getProbes().forEach(probe -> {
             String url = StringUtils.joinWith(InstallerUtils.FILE_URL_SEPARATOR, metadataFileServer,
                     nameFileMap.getOrDefault(probe.getProbeName(), StringUtils.EMPTY));
             WazuhControl.ControlProbeParam defaultProbeParam = new WazuhControl.ControlProbeParam();
@@ -203,7 +203,7 @@ public class WazuhCommon {
             if (probe.getInterval() != null) {
                 defaultProbeParam.setInterval(probe.getInterval());
             } else {
-                defaultProbeParam.setInterval(wazuhProbeConfig.getDefaultInterval());
+                defaultProbeParam.setInterval(wazuhProbeConfig.getDefaultProbe().getDefaultInterval());
             }
             defaultProbeParams.add(defaultProbeParam);
         });
