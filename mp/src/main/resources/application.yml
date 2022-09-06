@@ -81,7 +81,7 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     # monitor
-    cp_srv_monitors:
+    cp-srv-monitors:
       - probe-name: monitor_cp_service.py
         launch-id: 093f61683e1a4e3fbe80664e791ea001
         interval: 180s
@@ -92,7 +92,7 @@ mp:
         interval: 180s
         service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql
         restart-restrict-list: docker,containerd,adaptation,fastdfs,mariadb-docker,rabbitmq,redis
-    biz_srv_monitors:
+    biz-srv-monitors:
       - probe-name: monitor_biz_service.py
         launch-id: 093fc7abba264d38a022a4c143d6a003
         interval: 180s
@@ -102,7 +102,7 @@ mp:
     arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
     arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1
     arkime-es-host: 10.100.0.101
-    arkime-es-port: ${ARKIME_PORT:9205}
+    arkime-es-port: 9205
     arkime-image-name: centos-arkime_arkime:v2
     arkime-username: api
     arkime-password: api
@@ -116,10 +116,10 @@ mp:
     probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
     probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
     probe-mgr-task-enable: false
-    #moloch es节点地址
-    es-nodes: 10.100.0.101:9205
-    # MP新中台ES地址
-    mp-es-nodes: 10.100.0.101:9205
+    # wazuh es节点地址
+    wazuh-es-nodes: 10.100.0.101:9205
+    # arkime es 地址
+    arkime-es-nodes: 10.100.0.101:9205
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   collection:
@@ -201,7 +201,7 @@ mp:
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true
-    licenseDir: /home/mp/config/license
+    license-dir: /home/mp/config/license
   # mp-front-business 模块配置
   frontbiz:
     url-ac-filter-enabled: true

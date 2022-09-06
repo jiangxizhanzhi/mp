@@ -7,7 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.response.ScreenshotUsedSpaceResponse;
 import cn.cyberpeace.mp.cscene.service.ScreenshotService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordBatchDeleteRequest;
 import cn.cyberpeace.mp.devopscluster.request.ScreenrecordDeleteRequest;
@@ -43,12 +43,12 @@ import java.util.Objects;
 @Slf4j
 public class ScreenrecordService extends BaseCpService {
 
-    public ScreenrecordService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public ScreenrecordService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     @Autowired
-    private DevopsConfig devopsConfig;
+    private DevopsClusterConfig devopsClusterConfig;
 
     @Autowired
     private ScreenshotService screenshotService;
@@ -260,7 +260,7 @@ public class ScreenrecordService extends BaseCpService {
         BufferedInputStream bin = null;
         OutputStream os = null;
         try {
-            URL url = new URL(devopsConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
+            URL url = new URL(devopsClusterConfig.getCpUrl() + BaseCloudPlatformConstant.SCREENRECORD_METHOD + "/downloadfile?recordfilename=" + fileName);
             // 建立连接
             URLConnection urlConnection = url.openConnection();
             // http的连接类

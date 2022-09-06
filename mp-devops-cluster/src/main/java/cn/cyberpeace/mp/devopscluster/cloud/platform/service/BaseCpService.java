@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.model.BaseModel;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
@@ -47,7 +47,7 @@ public class BaseCpService {
 
     private static final String DELETE_LOG_INFO = "=====DELETE url：{},params：{},>>>>>>>result：{}";
 
-    private final DevopsConfig devopsConfig;
+    private final DevopsClusterConfig devopsClusterConfig;
 
     /**
      * 通过Get方式查询信息
@@ -296,7 +296,7 @@ public class BaseCpService {
      * @return
      */
     private String buildUrl(String api){
-        return devopsConfig.getCpUrl().concat(api);
+        return devopsClusterConfig.getCpUrl().concat(api);
     }
 
     /**

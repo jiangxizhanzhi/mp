@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.ElasticIpModel;
 import cn.cyberpeace.mp.devopscluster.model.common.NetworkAgentModel;
@@ -19,8 +19,8 @@ public class NetworkService extends BaseCpService {
 
     private static final String NETWORKS = "/networks";
 
-    public NetworkService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public NetworkService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.FileEventModel;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
@@ -109,7 +109,7 @@ public class BaseDataCollectionServiceTest {
 
     @Test
     public void testDateFormate() {
-        String date = TimeUtils.localDateTimeToString(LocalDateTime.now(), EsDateFormatConfig.esDateTimeFormatter);
+        String date = TimeUtils.localDateTimeToString(LocalDateTime.now(), SituationAwareConfig.esDateTimeFormatter);
         System.out.println(date);
     }
 

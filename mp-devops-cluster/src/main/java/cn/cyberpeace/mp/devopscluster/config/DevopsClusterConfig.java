@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "mp.devopscluster",ignoreInvalidFields = true)
 @Data
-public class DevopsConfig {
+public class DevopsClusterConfig {
 
     /**
      * 云平台接口地址

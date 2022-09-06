@@ -90,7 +90,7 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     # monitor
-    cp_srv_monitors:
+    cp-srv-monitors:
       - probe-name: monitor_cp_service.py
         launch-id: 093f61683e1a4e3fbe80664e791ea001
         interval: ${MP_MONITOR_CP_SRV_INTERVAL:180s}
@@ -101,7 +101,7 @@ mp:
         interval: ${MP_MONITOR_CP_SRV_INTERVAL:180s}
         service-list: docker,containerd,zun-api,zun-cni-daemon,zun-compute,zun-wsproxy,openstack-cinder-scheduler,cpcloud:celery,cpcloud:info,cpcloud:instance_control,cpcloud:logger_app,cpcloud:npc_node,cpcloud:probe,cpcloud:scheduler,cpcloud:sdn_app,cpcloud:sdn_base_vr,cpcloud:vpn,cpcloud:web,adaptation,cpcloud_guacamole,cpcloud_guacd,cpcloud_web-tty-client,fastdfs,mariadb,rabbitmq,redis,zabbix-server-mysql,zabbix-web-nginx-mysql
         restart-restrict-list: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST_2:docker,containerd,adaptation,fastdfs,mariadb-docker,rabbitmq,redis}
-    biz_srv_monitors:
+    biz-srv-monitors:
       - probe-name: monitor_biz_service.py
         launch-id: 093fc7abba264d38a022a4c143d6a003
         interval: ${MP_MONITOR_BIZ_SRV_INTERVAL:180s}
@@ -110,7 +110,7 @@ mp:
     # arkime
     arkime-cpcloud-container-create-url: http://${CP_IP:10.100.7.1}:11111/v1
     arkime-cpcloud-network-mirror-url: http://${CP_IP:10.100.7.1}:11111/cpcloud/sdn_app/v1
-    arkime-es-host: ${MOLOCH_IP:10.100.0.101}
+    arkime-es-host: ${ARKIME_IP:10.100.0.101}
     arkime-es-port: ${ARKIME_PORT:9205}
     arkime-image-name: centos-arkime_arkime:v2
     arkime-username: api
@@ -125,10 +125,10 @@ mp:
     probe-mgr-agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
     probe-mgr-agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
     probe-mgr-task-enable: true
-    #moloch es节点地址
-    es-nodes: ${MOLOCH_IP:10.100.0.101}:${MOLOCH_PORT:9205}
-    # MP新中台ES地址
-    mp-es-nodes: ${LOG_ES_IP:10.100.0.101}:9205
+    # wazuh es节点地址
+    wazuh-es-nodes: ${WAZUH_ES_IP:10.100.0.101}:${WAZUH_ES_PORT:9205}
+    # arkime es 地址
+    arkime-es-nodes: ${ARKIME_ES_IP:10.100.0.101}:${ARKIME_ES_PORT:9205}
     # es 日期格式
     es-date-pattern: ${ES-DATE-PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
   collection:
@@ -189,7 +189,7 @@ mp:
       - /login
     exclude-method:
       - OPTIONS
-    es-nodes: ${LOG_ES_IP:10.100.0.101}:9205
+    es-nodes: ${ES_IP:10.100.0.101}:${ES_PORT:9205}
     cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
     mp-ip: ${MP_API_IP_PORT:10.100.1.12:8001}    # MP中台API地址
   # auth 模块配置
@@ -208,7 +208,7 @@ mp:
   # mp-front-admin 模块配置
   frontadmin:
     activ-enable: true
-    licenseDir: /home/mp/config/license
+    license-dir: /home/mp/config/license
   # mp-front-business 模块配置
   frontbiz:
     url-ac-filter-enabled: true

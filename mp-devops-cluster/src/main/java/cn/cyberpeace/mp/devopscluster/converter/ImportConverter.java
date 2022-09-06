@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.devopscluster.converter;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImportService;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.ImportDiskSpaceCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.vo.ImportDiskSpaceVO;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -30,7 +30,7 @@ public class ImportConverter implements BaseConverter{
     private final SysActivationService sysActivationService;
 
     @Autowired
-    private DevopsConfig devopsConfig;
+    private DevopsClusterConfig devopsClusterConfig;
 
     /**
      * 获取磁盘剩余空间
@@ -45,7 +45,7 @@ public class ImportConverter implements BaseConverter{
             ActivationItem activationItem = activationResponse.getItems().stream().filter(item ->
                     ("LCS-RES-CR-ACTIVENODES").equals(item.getKey())).findFirst().get();
             BigDecimal maxCount = new BigDecimal(activationItem.getValue());
-            BigDecimal maxSize = new BigDecimal(devopsConfig.getMaxTargetSize());
+            BigDecimal maxSize = new BigDecimal(devopsClusterConfig.getMaxTargetSize());
             // 单位换算倍数
             BigDecimal multi = new BigDecimal(1024);
             // 预留容量

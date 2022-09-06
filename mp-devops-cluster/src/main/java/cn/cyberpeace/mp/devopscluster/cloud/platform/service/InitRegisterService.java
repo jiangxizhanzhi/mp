@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
@@ -32,8 +32,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class InitRegisterService extends BaseCpService {
 
-    public InitRegisterService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public InitRegisterService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     @Resource
