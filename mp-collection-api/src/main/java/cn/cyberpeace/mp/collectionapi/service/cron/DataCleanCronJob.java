@@ -31,13 +31,13 @@ public class DataCleanCronJob implements SchedulingConfigurer {
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        log.info("delete es doc start");
         taskRegistrar.addTriggerTask(new TriggerTask(() -> {
             try {
                 // 停一秒 避免定时任务太快不停的跑
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
             }
+            log.info("delete es doc start");
             var start = LocalDateTime.now().plusDays(-(day * 2));
             var end = LocalDateTime.now().plusDays(-day);
             WazuhEventRequest wazuhEventRequest = new WazuhEventRequest();
