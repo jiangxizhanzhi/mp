@@ -14,7 +14,6 @@ import java.util.List;
  * @Date： 2022.8.3 18:57
  */
 @Component
-@Getter
 public class WazuhLogProbeLocationConfig {
     private static List<ProbeLocation> locations;
 
@@ -26,6 +25,10 @@ public class WazuhLogProbeLocationConfig {
         }
         locations = JSON.parseArray(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.LOG_PROBE_LOCATIONS), ProbeLocation.class);
         isInit = true;
+    }
+
+    public List<ProbeLocation> getLocations() {
+        return locations;
     }
 
     @Data
