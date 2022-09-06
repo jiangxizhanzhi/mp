@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
-import cn.cyberpeace.mp.sceneplugincollection.service.CollectionCommonConfigService;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * @Date： 2022.3.23 15:49
  */
 @Component
+@Getter
 public class WazuhProbeConfig {
     private static DefaultProbe defaultProbe;
 
@@ -22,15 +24,8 @@ public class WazuhProbeConfig {
         if (isInit) {
             return;
         }
-        defaultProbe = JSON.parseObject(CollectionCommonConfigService.getConfigString(CollectionCommonConfigService.DEFAULT_CUSTOM_PROBES).getSource(), DefaultProbe.class);
+        defaultProbe = JSON.parseObject(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.DEFAULT_CUSTOM_PROBES), DefaultProbe.class);
         isInit = true;
-    }
-
-    public DefaultProbe getDefaultProbe() {
-        if (!isInit) {
-            init();
-        }
-        return defaultProbe;
     }
 
     @Data

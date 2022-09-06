@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.sceneplugincollection.config;
 
-import cn.cyberpeace.mp.sceneplugincollection.service.CollectionCommonConfigService;
+import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
  * @Date： 2022.8.3 18:57
  */
 @Component
+@Getter
 public class WazuhLogProbeLocationConfig {
     private static List<ProbeLocation> locations;
 
@@ -22,15 +24,8 @@ public class WazuhLogProbeLocationConfig {
         if (isInit) {
             return;
         }
-        locations = JSON.parseArray(CollectionCommonConfigService.getConfigString(CollectionCommonConfigService.LOG_PROBE_LOCATIONS).getSource(), ProbeLocation.class);
+        locations = JSON.parseArray(CollectionCommonConfigUtil.getConfigString(CollectionCommonConfigUtil.LOG_PROBE_LOCATIONS), ProbeLocation.class);
         isInit = true;
-    }
-
-    public List<ProbeLocation> getLocations() {
-        if (!isInit) {
-            init();
-        }
-        return locations;
     }
 
     @Data
