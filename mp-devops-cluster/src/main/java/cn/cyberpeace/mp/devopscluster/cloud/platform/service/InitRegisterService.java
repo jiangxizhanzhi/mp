@@ -62,7 +62,8 @@ public class InitRegisterService extends BaseCpService {
     public Integer initTarget() {
         var result = new CloudPlatformItemsPageResult();
         try {
-            result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION + "/init", CloudPlatformItemsPageResult.class);
+            result = super.sendGet(BaseCloudPlatformConstant.CPCLOUD_DEVICE + BaseCloudPlatformConstant.URL_VERSION +
+                    "/device/lists?limit=9999&is_internal=false", CloudPlatformItemsPageResult.class);
         } catch (Exception e) {
             log.error("get init target error: {}", ExceptionUtils.getStackTrace(e));
         }
@@ -87,8 +88,8 @@ public class InitRegisterService extends BaseCpService {
                     .collect(Collectors.toList()));
         }
         if (CollectionUtils.isNotEmpty(notExistedList)) {
-            deviceList.forEach(device -> device.setIsHide(Boolean.FALSE));
-            res += devopsTargetService.insert(deviceList);
+            notExistedList.forEach(device -> device.setIsHide(Boolean.FALSE));
+            res += devopsTargetService.insert(notExistedList);
         }
         if (CollectionUtils.isNotEmpty(existedList)) {
             existedList.forEach(e -> devopsTargetService.updateById(e));
