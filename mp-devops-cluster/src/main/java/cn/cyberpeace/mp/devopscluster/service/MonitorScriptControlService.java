@@ -99,8 +99,8 @@ public class MonitorScriptControlService {
             return;
         }
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
-        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpCloudSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.businessSrvMonitors;
 
         if (CollectionUtil.isEmpty(cpSrvs)) {
             return;
@@ -134,8 +134,8 @@ public class MonitorScriptControlService {
 
     public void statusManually(String hostname) {
         List<MonitorConfig.MonitorProbe> allSrvMonitors = new ArrayList<>();
-        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
-        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpCloudSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.businessSrvMonitors;
 
         if (CollectionUtil.isNotEmpty(cpSrvs)) {
             allSrvMonitors.addAll(cpSrvs);
@@ -150,8 +150,8 @@ public class MonitorScriptControlService {
         }
 
         for (MonitorConfig.MonitorProbe monitor : allSrvMonitors) {
-            String srvs = monitor.getServiceList();
-            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + srvs;
+            List<String> srvs = monitor.getServiceList();
+            String cmd = MonitorConstant.BIN_TOOLS_DIR + "/python27/python " + MonitorConstant.BIN_TOOLS_DIR + File.separator + monitor.getLaunchId() + ".py " + MonitorConstant.OP_STATUS + " " + StringUtils.joinWith(",", srvs);
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
             runCommandItem.setRunId(monitor.getLaunchId());
@@ -230,8 +230,8 @@ public class MonitorScriptControlService {
     private void sendScriptInstallCmd(String hostname, Map<String, String> nameFileMap) {
         WazuhControl.ControlConfigParam configParam = new WazuhControl.ControlConfigParam();
 
-        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpSrvMonitors;
-        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.bizSrvMonitors;
+        List<MonitorConfig.MonitorProbe> cpSrvs = MonitorConfig.cpCloudSrvMonitors;
+        List<MonitorConfig.MonitorProbe> bizSrvs = MonitorConfig.businessSrvMonitors;
 
         List<WazuhControl.ControlProbeParam> controlProbeParams = new ArrayList<>();
         for (MonitorConfig.MonitorProbe cpSrvProbe : cpSrvs) {
@@ -261,7 +261,7 @@ public class MonitorScriptControlService {
         probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_NONE);
         probeParam.setInterval(monitorProbe.getInterval());
 
-        String[] params = {MonitorConstant.OP_STATUS, monitorProbe.getServiceList()};
+        String[] params = {MonitorConstant.OP_STATUS, StringUtils.joinWith(",", monitorProbe.getServiceList())};
         probeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
         return probeParam;
     }
@@ -323,8 +323,8 @@ public class MonitorScriptControlService {
 
     private List<CpNodeMonitorScriptConfigModel.ParamConfig> getConfigFromYaml(Map<String, String> nameFileMap) {
         List<MonitorConfig.MonitorProbe> allSrvs = new ArrayList<>();
-        allSrvs.addAll(MonitorConfig.cpSrvMonitors);
-        allSrvs.addAll(MonitorConfig.bizSrvMonitors);
+        allSrvs.addAll(MonitorConfig.cpCloudSrvMonitors);
+        allSrvs.addAll(MonitorConfig.businessSrvMonitors);
 
         if (CollectionUtil.isNotEmpty(allSrvs)) {
             allSrvs.sort(new Comparator<MonitorConfig.MonitorProbe>() {

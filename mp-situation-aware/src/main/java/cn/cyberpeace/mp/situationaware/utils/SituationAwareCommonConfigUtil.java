@@ -18,9 +18,9 @@ public class SituationAwareCommonConfigUtil {
 
     private static final String CONFIG_PATH_SUFFIX = ".json";
 
-    public static final String BIZ_SRV_MONITORS = "biz_srv_monitors";
+    public static final String BIZ_SRV_MONITORS = "business_server_monitor";
 
-    public static final String CP_SRV_MONITORS = "cp_srv_monitors";
+    public static final String CP_SRV_MONITORS = "cp_cloud_server_monitor";
 
     private static final String[] CONFIGS = new String[]{BIZ_SRV_MONITORS, CP_SRV_MONITORS};
 

@@ -78,7 +78,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, MonitorConfig.bizSrvMonitors);
+        processRestartRestrict(serviceMonitorDtos, MonitorConfig.businessSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());
@@ -107,7 +107,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, MonitorConfig.cpSrvMonitors);
+        processRestartRestrict(serviceMonitorDtos, MonitorConfig.cpCloudSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());
