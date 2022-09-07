@@ -10,9 +10,7 @@ import org.springframework.boot.web.servlet.filter.OrderedFilter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.DispatcherType;
 
 /**
@@ -33,7 +31,7 @@ public class FrontBusinessConfiguration {
     private OperateUserPermissionService opPermService;
 
     @Autowired
-    private UrlACFilterConfig urlACFilterConfig;
+    private FrontBizConfig frontBizConfig;
 
     @Autowired
     private ObjectMapper mapper;
@@ -41,7 +39,7 @@ public class FrontBusinessConfiguration {
     @Bean
     public FilterRegistrationBean urlAuthFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, urlACFilterConfig, mapper));
+        filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, frontBizConfig, mapper));
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 50);
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});

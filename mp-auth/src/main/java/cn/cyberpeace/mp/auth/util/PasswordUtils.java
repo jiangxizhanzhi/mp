@@ -1,8 +1,7 @@
 package cn.cyberpeace.mp.auth.util;
 
-import cn.cyberpeace.mp.auth.config.security.AuthenticateConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.service.UserService;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.symmetric.DES;
@@ -21,22 +20,21 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class PasswordUtils {
-
-    private static AuthenticateConfig authenticateConfig;
+    private static AuthConfig authConfig;
 
     private static Pbkdf2PasswordEncoder passwordEncoder;
 
     private static DES DES = SecureUtil.des(AuthConstant.PASSWORD_DES_KEY.getBytes());
 
     @SuppressWarnings({"java:S3010"})
-    private PasswordUtils(AuthenticateConfig authenticateConfig) {
-        PasswordUtils.authenticateConfig = authenticateConfig;
+    private PasswordUtils(AuthConfig authConfig) {
+        PasswordUtils.authConfig = authConfig;
 
         Integer iterations = null;
         Integer hashWidth = null;
-        if (Objects.nonNull(authenticateConfig.getEncoder())) {
-            iterations = authenticateConfig.getEncoder().getIterations();
-            hashWidth = authenticateConfig.getEncoder().getHashWidth();
+        if (Objects.nonNull(authConfig.getAuthenticateEncoderHashWidth()) && Objects.nonNull(authConfig.getAuthenticateEncoderIterations())) {
+            iterations = authConfig.getAuthenticateEncoderIterations();
+            hashWidth = authConfig.getAuthenticateEncoderHashWidth();
         }
         if (Objects.isNull(iterations) && Objects.isNull(hashWidth)) {
             PasswordUtils.passwordEncoder = new Pbkdf2PasswordEncoder(AuthConstant.PASSWORD_SECRET);

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
-import cn.cyberpeace.mp.auth.config.AuthBizConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -69,7 +69,7 @@ public class UserExcelController {
     private OperateUserPermissionService opUserPermCheckService;
 
     @Autowired
-    private AuthBizConfig authBizConfig;
+    private AuthConfig authConfig;
 
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
@@ -116,7 +116,7 @@ public class UserExcelController {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
         ExcelCheck.check(file.getInputStream(), file.getOriginalFilename());
         try {
-            EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authBizConfig))
+            EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
                     .headRowNumber(2).sheet().doRead();
         } catch (ExcelCommonException | ExcelAnalysisException | ExcelDataConvertException | ExcelGenerateException ex) {
             log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));

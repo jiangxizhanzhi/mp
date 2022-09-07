@@ -2,14 +2,16 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import com.alibaba.fastjson.JSONObject;
-import java.io.IOException;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
   *@Desciption 数据采集流表管理
@@ -20,8 +22,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DataCollectionFlowTableService{
 
-    @Value("${mp.situationaware.wazuh.flow-table-url}")
-    private String flowUrl;
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
 
     /**
@@ -29,7 +31,7 @@ public class DataCollectionFlowTableService{
      * @param agentInstanceIds agentInstanceIds
      */
     public void createDataCollectionFlow(List<String> agentInstanceIds) {
-        String createUrl = flowUrl + "/probe/flows";
+        String createUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
         try {
@@ -48,7 +50,7 @@ public class DataCollectionFlowTableService{
      * @param agentInstanceIds agentInstanceIds
      */
     public void deleteDataCollectionFlow(List<String> agentInstanceIds) {
-        String deleteUrl = flowUrl + "/probe/flows";
+        String deleteUrl = situationAwareConfig.getWazuhFlowTableUrl() + "/probe/flows";
         var param = new JSONObject();
         param.put("instance_ids", agentInstanceIds);
 

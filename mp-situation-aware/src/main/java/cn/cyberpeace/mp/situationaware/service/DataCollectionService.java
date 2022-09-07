@@ -7,31 +7,14 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationCacheConfig;
 import cn.cyberpeace.mp.situationaware.constant.SicLaunchConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
-import cn.cyberpeace.mp.situationaware.model.DataCollectionEventModel;
-import cn.cyberpeace.mp.situationaware.model.FileEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEnvVarEventModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhFileRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhHostStateModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
-import cn.cyberpeace.mp.situationaware.model.WazuhMonitorRoot;
-import cn.cyberpeace.mp.situationaware.model.WazuhNetworkConnectionModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProbeCommonModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhProcessModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhSystemUserModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoCountModel;
-import cn.cyberpeace.mp.situationaware.model.WazuhVulnerabilityInfoModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.DataCollectionType;
 import cn.cyberpeace.mp.situationaware.model.enums.FileEventType;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseInput;
-import cn.cyberpeace.mp.situationaware.model.sic.BaseRawOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.situationaware.model.sic.Launch;
+import cn.cyberpeace.mp.situationaware.model.sic.*;
 import cn.cyberpeace.mp.situationaware.repository.WazuhRepository;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
@@ -89,18 +72,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant.ES_DOC_MAXCOUNT;
@@ -965,8 +937,8 @@ public class DataCollectionService extends CollectionBaseService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //构造事件条件
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
     }
 
@@ -1373,8 +1345,8 @@ public class DataCollectionService extends CollectionBaseService {
         if (Objects.nonNull(wazuhEventRequest.getStartTime()) && Objects.nonNull(wazuhEventRequest.getEndTime())) {
             //时间查询
             boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
-                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
+                    .from(wazuhEventRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                    .to(wazuhEventRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
 
     }

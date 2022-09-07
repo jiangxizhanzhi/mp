@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
-import cn.cyberpeace.mp.auth.config.AuthBizConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.extensions.security.common.JwtCommon;
 import cn.cyberpeace.mp.auth.extensions.security.event.UserEventPublisher;
@@ -49,7 +49,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private OperateLogServiceFactory operateLogServiceFactory;
 
     @Autowired
-    private AuthBizConfig authBizConfig;
+    private AuthConfig authConfig;
 
     @Autowired
     private UserEventPublisher userEventPublisher ;
@@ -66,7 +66,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         UserModel user = JwtCommon.verifyToken(request);
         String userName = null;
         if (Objects.nonNull(user)) {
-            if (Objects.nonNull(authBizConfig.getLogoutResetSecret()) && authBizConfig.getLogoutResetSecret()) {
+            if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {
                 // 退出是否重置秘钥
                 var updateUser = new UserModel();
                 updateUser.setId(user.getId());

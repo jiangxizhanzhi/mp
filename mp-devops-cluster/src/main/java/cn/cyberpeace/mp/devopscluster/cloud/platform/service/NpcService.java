@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.NpcModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
@@ -21,8 +21,8 @@ import java.util.List;
 @Slf4j
 public class NpcService extends BaseCpService {
 
-    public NpcService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public NpcService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

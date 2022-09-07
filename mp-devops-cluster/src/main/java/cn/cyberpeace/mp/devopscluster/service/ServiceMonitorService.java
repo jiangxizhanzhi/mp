@@ -24,6 +24,7 @@ import cn.cyberpeace.mp.devopscluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
@@ -34,11 +35,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -59,6 +56,8 @@ public class ServiceMonitorService {
     private final SystemAlarmMapper systemAlarmMapper;
 
     private final MonitorScriptControlService monitorScriptControlService;
+
+    private final SituationAwareConfig situationAwareConfig;
 
     private final ImagesConverter imagesConverter;
 

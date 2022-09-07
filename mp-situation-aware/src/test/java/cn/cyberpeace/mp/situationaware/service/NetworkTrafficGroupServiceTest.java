@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
+import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
 import cn.cyberpeace.mp.situationaware.model.NetworkTrafficMirrorRequest;
@@ -13,7 +14,6 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -61,13 +61,13 @@ public class NetworkTrafficGroupServiceTest {
         networkTrafficGroupService.addArkimeImageInstance(groupModel1);
     }
 
-    @Value("${mp.situationaware.arkime.cpcloud-container-create-url}")
-    private String cpCloudUrl;
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     @Test
     public void testInit() {
         try {
-            String result = HttpUtils.sendGet(cpCloudUrl + "/networks");
+            String result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/networks");
             JSONArray networkList = (JSONArray)JSONPath.eval(JSON.parse(result), "$.data.list");
             networkList.stream().filter(json -> json instanceof JSONObject).map(JSONObject.class::cast).filter(json -> json.get("name").equals("oj_ext")).findFirst().ifPresent(network ->{
                 SituationalAwareConstant.ArkimeNetworkId = (String) network.get("id");

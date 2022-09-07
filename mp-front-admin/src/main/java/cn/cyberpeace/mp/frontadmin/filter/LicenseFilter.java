@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.filter;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.frontadmin.config.ActivationConfig;
+import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
@@ -32,23 +32,23 @@ public class LicenseFilter extends OncePerRequestFilter {
 //    @Autowired
     // todo 通过构造方法传入
     private SysActivationService sysActivationService;
+    private FrontAdminConfig frontAdminConfig;
 
-    private ActivationConfig activationConfig;
 
 //    @Autowired
     // todo 通过构造方法传入
     private MappingJackson2HttpMessageConverter converter;
 
-    public LicenseFilter(ActivationConfig activationConfig) {
-        this.activationConfig = activationConfig;
+    public LicenseFilter(FrontAdminConfig frontAdminConfig) {
+        this.frontAdminConfig = frontAdminConfig;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        log.info("activation enabled: {}", activationConfig.isEnable());
-        if (activationConfig.isEnable()) {
+        log.info("activation enabled: {}", frontAdminConfig.isActivEnable());
+        if (frontAdminConfig.isActivEnable()) {
             String uri = request.getRequestURI();
 
             if (MATCHER.match("/api/mp/auth/login", uri)) {

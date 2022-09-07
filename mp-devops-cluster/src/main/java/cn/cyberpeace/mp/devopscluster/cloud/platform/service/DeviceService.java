@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Joiner;
@@ -26,8 +26,8 @@ public class DeviceService extends BaseCpService {
 
     private static final String DEVICE = "/device";
 
-    public DeviceService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public DeviceService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**

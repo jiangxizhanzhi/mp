@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.AccessProtocolsPort;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.CloudPlatformItemsPageResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetType;
 import cn.cyberpeace.mp.devopscluster.model.common.TypeItemModel;
@@ -34,8 +34,8 @@ public class TypeService extends BaseCpService {
 
     private static final String cache_prefix_model = "devops:";
 
-    public TypeService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public TypeService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     private Cache<String, Object> lfuCache = null;

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.VmActionCloudPlatformModel;
 import cn.cyberpeace.mp.devopscluster.model.common.InstanceModel;
@@ -21,8 +21,8 @@ public class VmService extends BaseCpService {
 
     private static final String INSTANCES = "/instances";
 
-    public VmService(DevopsConfig devopsConfig) {
-        super(devopsConfig);
+    public VmService(DevopsClusterConfig devopsClusterConfig) {
+        super(devopsClusterConfig);
     }
 
     /**
