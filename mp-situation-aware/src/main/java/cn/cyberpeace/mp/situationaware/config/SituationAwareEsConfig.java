@@ -22,6 +22,11 @@ public class SituationAwareEsConfig {
         return new RestHighLevelClient(RestClient.builder(this.createWazuHttpHost()));
     }
 
+    @Bean(name="datasandtableRestHighLevelClient")
+    public RestHighLevelClient datasandtableRestHighLevelClient() {
+        return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));
+    }
+
     /**cn.cyberpeace.mp.situationaware
      * 创建 HttpHost 对象
      *
@@ -40,11 +45,6 @@ public class SituationAwareEsConfig {
             httpHosts[i] = new HttpHost(ip, port, "http");
         }
         return httpHosts;
-    }
-
-    @Bean(name="datasandtableRestHighLevelClient")
-    public RestHighLevelClient datasandtableRestHighLevelClient() {
-        return new RestHighLevelClient(RestClient.builder(this.createArkimeHttpHost()));
     }
 
     /**cn.cyberpeace.mp.situationaware

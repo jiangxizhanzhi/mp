@@ -19,12 +19,12 @@ public class DevopsLogConfig {
     /**
      * 不希望记录日志的URL Pattern
      */
-    private List<String> excludeUri;
+    private List<String> excludeUrls;
 
     /**
      * 不需要记录日志的请求method。譬如通常可以忽略的method: OPTIONS
      */
-    private List<String> excludeMethod;
+    private List<String> excludeMethods;
 
     /**
      * MP新中台ES地址

@@ -50,7 +50,7 @@ public class SituationAwareConfig {
     private String arkimePassword;
 
     /**
-     * wazuh 开放接口
+     * wazuh
      */
     private String wazuhBaseUrl;
     private String wazuhUsername;

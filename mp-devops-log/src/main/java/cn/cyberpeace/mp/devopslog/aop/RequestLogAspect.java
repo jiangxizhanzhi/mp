@@ -28,7 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -195,7 +199,7 @@ public class RequestLogAspect {
      * @param requestUri 需判定的uri
      */
     private Boolean isExcludePath(String requestUri) {
-        List<String> excludePatterns = devopsLogConfig.getExcludeUri();
+        List<String> excludePatterns = devopsLogConfig.getExcludeUrls();
         if (CollectionUtils.isEmpty(excludePatterns)) {
             return Boolean.FALSE;
         }
@@ -212,7 +216,7 @@ public class RequestLogAspect {
      * @param method request method(GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE)
      */
     private boolean isExcludeMethod(String method) {
-        List<String> excludeMethods = devopsLogConfig.getExcludeMethod();
+        List<String> excludeMethods = devopsLogConfig.getExcludeMethods();
         if (CollectionUtils.isEmpty(excludeMethods)) {
             return Boolean.FALSE;
         }

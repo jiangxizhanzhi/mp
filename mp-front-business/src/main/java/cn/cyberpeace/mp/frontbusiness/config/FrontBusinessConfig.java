@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Data
 @Configuration
-@ConfigurationProperties(prefix = "mp.frontbiz")
-public class FrontBizConfig {
+@ConfigurationProperties(prefix = "mp.frontbusiness")
+public class FrontBusinessConfig {
 
     /**
      * 拦截器是否开启，默认开启

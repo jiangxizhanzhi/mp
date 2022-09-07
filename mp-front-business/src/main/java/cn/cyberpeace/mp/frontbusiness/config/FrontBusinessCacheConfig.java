@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.frontbusiness.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @Date：2022/5/16 11:05
  */
 @Configuration
-public class FrontBizCacheConfig {
+public class FrontBusinessCacheConfig {
 
     public static final String CACHE_MANAGER_1M = "frontBizCacheManager_1M";
     public static final String CACHE_MANAGER_5M = "frontBizCacheManager_5M";

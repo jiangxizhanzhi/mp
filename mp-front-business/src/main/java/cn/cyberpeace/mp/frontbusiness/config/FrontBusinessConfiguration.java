@@ -31,7 +31,7 @@ public class FrontBusinessConfiguration {
     private OperateUserPermissionService opPermService;
 
     @Autowired
-    private FrontBizConfig frontBizConfig;
+    private FrontBusinessConfig frontBusinessConfig;
 
     @Autowired
     private ObjectMapper mapper;
@@ -39,7 +39,7 @@ public class FrontBusinessConfiguration {
     @Bean
     public FilterRegistrationBean urlAuthFilterRegistrationBean() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
-        filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, frontBizConfig, mapper));
+        filterRegistrationBean.setFilter(new UrlACFilter(urlACWrapperService, opPermService, frontBusinessConfig, mapper));
         filterRegistrationBean.addUrlPatterns("/*");
         filterRegistrationBean.setOrder(OrderedFilter.REQUEST_WRAPPER_FILTER_MAX_ORDER - 50);
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST, new DispatcherType[]{DispatcherType.FORWARD, DispatcherType.INCLUDE, DispatcherType.ASYNC});

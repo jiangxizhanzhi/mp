@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.OperatePermissionService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.frontbusiness.config.FrontBizConfig;
+import cn.cyberpeace.mp.frontbusiness.config.FrontBusinessConfig;
 import cn.cyberpeace.mp.frontbusiness.constant.FrontBizErrorCode;
 import cn.cyberpeace.mp.frontbusiness.service.UrlACWrapperService;
 import cn.hutool.core.collection.CollectionUtil;
@@ -41,14 +41,14 @@ public class UrlACFilter extends OncePerRequestFilter {
     private UrlACWrapperService urlACWrapperService;
 
     private OperatePermissionService opPermService;
-    private FrontBizConfig frontBizConfig;
+    private FrontBusinessConfig frontBusinessConfig;
 
     private ObjectMapper mapper;
 
-    public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, FrontBizConfig frontBizConfig, ObjectMapper mapper) {
+    public UrlACFilter(UrlACWrapperService urlACWrapperService, OperatePermissionService opPermService, FrontBusinessConfig frontBusinessConfig, ObjectMapper mapper) {
         this.urlACWrapperService = urlACWrapperService;
         this.opPermService = opPermService;
-        this.frontBizConfig = frontBizConfig;
+        this.frontBusinessConfig = frontBusinessConfig;
         this.mapper = mapper;
     }
 
@@ -58,7 +58,7 @@ public class UrlACFilter extends OncePerRequestFilter {
 
         boolean skip = false;
         // 拦截器总开关是否开启
-        if (Objects.nonNull(frontBizConfig) && !frontBizConfig.getUrlAcFilterEnabled()) {
+        if (Objects.nonNull(frontBusinessConfig) && !frontBusinessConfig.getUrlAcFilterEnabled()) {
             skip = true;
         }
 
@@ -90,7 +90,7 @@ public class UrlACFilter extends OncePerRequestFilter {
             //}
 
             // 权限拦截是否开启
-            if (Objects.nonNull(frontBizConfig.getUrlAcFilterAuthorityMatch()) && frontBizConfig.getUrlAcFilterAuthorityMatch()) {
+            if (Objects.nonNull(frontBusinessConfig.getUrlAcFilterAuthorityMatch()) && frontBusinessConfig.getUrlAcFilterAuthorityMatch()) {
                 boolean isAuthoritiesMatch = isAuthoritiesMatch(requestUrl);
 
                 if (!isAuthoritiesMatch) {
