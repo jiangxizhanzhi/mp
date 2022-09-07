@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -31,7 +30,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -48,7 +46,7 @@ import java.util.Arrays;
  */
 @Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
 @Slf4j
-@Controller
+@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserController extends BaseModelController<UserModel, UserQueryParams, UserService> {
 
@@ -182,10 +180,14 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
                 UserDto userDto = getModelService().getUserDto(userInfo.getUser().getUsrId());
                 if (userDto != null) {
                     String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
-                    LoginResp loginResp = new LoginResp();
-                    loginResp.setUser(userDto);
-                    loginResp.setToken(jwt);
+//                    LoginResp loginResp = new LoginResp();
+//                    loginResp.setUser(userDto);
+//                    loginResp.setToken(jwt);
+                    response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
                     response.setHeader("Authorization", jwt);
+                    response.setHeader("Cache-Control", "no-cache");
+                    response.setHeader("Location", "/");
+                    response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
                     response.sendRedirect("/page/mg/personal");
                 }
             }
@@ -193,10 +195,14 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             UserModel userModel = getModelService().add(userRequest);
             if (userModel != null) {
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
-                LoginResp loginResp = new LoginResp();
-                loginResp.setUser(userModel);
-                loginResp.setToken(jwt);
+//                LoginResp loginResp = new LoginResp();
+//                loginResp.setUser(userModel);
+//                loginResp.setToken(jwt);
+                response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
                 response.setHeader("Authorization", jwt);
+                response.setHeader("Cache-Control", "no-cache");
+                response.setHeader("Location", "/");
+                response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
                 response.sendRedirect("/page/mg/personal");
             }
         }
