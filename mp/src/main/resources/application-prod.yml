@@ -90,13 +90,12 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     # monitor
-    monitor:
-      cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL}
-      business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL}
-      cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST}
-      business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST}
-      cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST}
-      business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST}
+    monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL}
+    monitor-business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL}
+    monitor-cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST}
+    monitor-business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST}
+    monitor-cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST}
+    monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST}
     # arkime
     arkime-cpcloud-container-create-url: http://${CP_IP:10.100.7.1}:11111/v1
     arkime-cpcloud-network-mirror-url: http://${CP_IP:10.100.7.1}:11111/cpcloud/sdn_app/v1
