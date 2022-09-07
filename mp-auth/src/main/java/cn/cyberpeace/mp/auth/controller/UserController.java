@@ -180,30 +180,22 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
                 UserDto userDto = getModelService().getUserDto(userInfo.getUser().getUsrId());
                 if (userDto != null) {
                     String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
-//                    LoginResp loginResp = new LoginResp();
-//                    loginResp.setUser(userDto);
-//                    loginResp.setToken(jwt);
                     response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-                    response.setHeader("Authorization", jwt);
                     response.setHeader("Cache-Control", "no-cache");
                     response.setHeader("Location", "/");
                     response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
-                    response.sendRedirect("/page/mg/personal");
+                    response.sendRedirect(redirectUrl);
                 }
             }
             UserRequest userRequest = this.convert2UserRequest(userInfo);
             UserModel userModel = getModelService().add(userRequest);
             if (userModel != null) {
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userModel.getId(), userModel.getUsername(), userModel.getTokenSecret()));
-//                LoginResp loginResp = new LoginResp();
-//                loginResp.setUser(userModel);
-//                loginResp.setToken(jwt);
                 response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-                response.setHeader("Authorization", jwt);
                 response.setHeader("Cache-Control", "no-cache");
                 response.setHeader("Location", "/");
                 response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
-                response.sendRedirect("/page/mg/personal");
+                response.sendRedirect(redirectUrl);
             }
         }
         log.error("login failed");
