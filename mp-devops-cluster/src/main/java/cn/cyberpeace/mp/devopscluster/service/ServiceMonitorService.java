@@ -23,7 +23,7 @@ import cn.cyberpeace.mp.devopscluster.vo.BizServiceMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
-import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
@@ -60,8 +60,6 @@ public class ServiceMonitorService {
 
     private final MonitorScriptControlService monitorScriptControlService;
 
-    private final MonitorConfig monitorConfig;
-
     private final ImagesConverter imagesConverter;
 
 
@@ -80,7 +78,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, monitorConfig.getBizSrvMonitors());
+        processRestartRestrict(serviceMonitorDtos, ServerMonitorConfig.businessSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());
@@ -109,7 +107,7 @@ public class ServiceMonitorService {
         // 处理重启状态
         processRestartingStatus(serviceMonitorDtos);
         // 处理重启禁用状态
-        processRestartRestrict(serviceMonitorDtos, monitorConfig.getCpSrvMonitors());
+        processRestartRestrict(serviceMonitorDtos, ServerMonitorConfig.cpCloudSrvMonitors);
         this.changeServiceName(serviceMonitorDtos);
 
         sortMonitorDtos(serviceMonitorDtos, request.getSort());
@@ -272,7 +270,7 @@ public class ServiceMonitorService {
      * @param serviceMonitorDtos
      * @param monitorProbes
      */
-    private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<MonitorConfig.MonitorProbe> monitorProbes) {
+    private void processRestartRestrict(List<ServiceMonitorDto> serviceMonitorDtos, List<ServerMonitorConfig.MonitorProbe> monitorProbes) {
         List<String> allRestrictSrvs = new ArrayList<>();
         monitorProbes.forEach(p -> {
             if (CollectionUtil.isNotEmpty(p.getRestartRestrictList())) {

@@ -13,35 +13,19 @@ import java.util.List;
  * @Date：2022/7/14 14:58
  */
 @Slf4j
-@Configuration
-@ConfigurationProperties(prefix = "mp.devops.monitor",ignoreInvalidFields = true)
 @Data
+@Configuration
+@ConfigurationProperties(prefix = "mp.devops.monitor", ignoreInvalidFields = true)
 public class MonitorConfig {
+    private String cpCloudInterval;
 
-    // 云平台服务监控
-    private List<MonitorProbe> cpSrvMonitors;
+    private String businessInterval;
 
-    // 业务服务监控
-    private List<MonitorProbe> bizSrvMonitors;
+    private List<String> cpCloudServerList;
 
-    @Data
-    public static class MonitorProbe {
+    private List<String> businessServerList;
 
-        private String probeName;
+    private List<String> cpCloudRestartRestrict;
 
-        private String launchId;
-
-        private String interval;
-
-        /**
-         * 服务列表
-         */
-        private String serviceList;
-
-        /**
-         * 该列表中的服务：正常状态下不允许重启，异常状态下才允许重启
-         */
-        private List<String> restartRestrictList;
-    }
-
+    private List<String> businessRestartRestrict;
 }
