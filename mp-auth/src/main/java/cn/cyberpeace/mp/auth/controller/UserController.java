@@ -31,6 +31,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -47,7 +48,7 @@ import java.util.Arrays;
  */
 @Api(value = "用户管理接口", tags = "AUTH-用户管理接口")
 @Slf4j
-@RestController
+@Controller
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/users")
 public class UserController extends BaseModelController<UserModel, UserQueryParams, UserService> {
 
@@ -65,7 +66,9 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
     @Value("${mp.auth.sysidstr:F7EB8C529C1A503B79E729581EDBC95E}")
     private String sysIdstr;
 
-//    private static final String sysIdstr = "F7EB8C529C1A503B79E729581EDBC95E";
+    @Value("${mp.auth.redirect-url:}")
+    private String redirectUrl;
+
 
     public static final String defaultOrg = "a13262d600fe40c799d63dce5c1485af";
 

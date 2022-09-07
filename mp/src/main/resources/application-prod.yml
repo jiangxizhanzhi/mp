@@ -7,6 +7,7 @@ ip:
   trex: ${TREX_IP:10.100.7.149}            # trex资源服务器地址
   rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
   log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
+  self: ${IP_SELF:10.100.1.28}
 server:
   servlet:
     context-path: /api/mp
@@ -125,6 +126,7 @@ mp:
     exclude-method: OPTIONS
   auth:
     sysidstr: F7EB8C529C1A503B79E729581EDBC95E
+    redirect-url: http://${ip.self}:80/page/mg/personal
     activation:
       enable: true
       licenseDir: /home/mp/config/license

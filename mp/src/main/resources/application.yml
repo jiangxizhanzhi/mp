@@ -7,7 +7,7 @@ ip:
   es: 10.100.0.101                 # MP新中台ES地址
   trex: 10.100.7.149            # trex资源服务器地址
   rabbitmq: 10.100.0.101        # rabbitmq地址
-
+  self: 10.100.1.28
 server:
   servlet:
     context-path: /api/mp
@@ -126,6 +126,7 @@ mp:
     exclude-method: OPTIONS
   auth:
     sysidstr: F7EB8C529C1A503B79E729581EDBC95E
+    redirect-url: http://${ip.self}:80/page/mg/personal
     activation:
       enable: true
       licenseDir: /home/mp/config/license
