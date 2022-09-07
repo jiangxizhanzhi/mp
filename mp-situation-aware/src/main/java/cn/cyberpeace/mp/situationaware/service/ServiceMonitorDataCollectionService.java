@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
-import cn.cyberpeace.mp.situationaware.config.MonitorConfig;
+import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.alibaba.fastjson.JSONObject;
@@ -36,7 +36,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = MonitorConfig.cpCloudSrvMonitors.stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
@@ -51,7 +51,7 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      * @return
      */
     public List<ServiceMonitorDto> queryBizServiceMonitorData(List<String> hostnames) {
-        List<String> launchIds = MonitorConfig.businessSrvMonitors.stream().map(MonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
+        List<String> launchIds = ServerMonitorConfig.businessSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
