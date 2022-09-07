@@ -81,13 +81,12 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     # monitor
-    monitor:
-      cp-cloud-interval:
-      business-interval:
-      cp-cloud-server-list:
-      business-server-list:
-      cp-cloud-restart-restrict:
-      business-restart-restrict:
+    monitor-cp-cloud-interval:
+    monitor-business-interval:
+    monitor-cp-cloud-server-list:
+    monitor-business-server-list:
+    monitor-cp-cloud-restart-restrict:
+    monitor-business-restart-restrict:
     # arkime
     arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
     arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1

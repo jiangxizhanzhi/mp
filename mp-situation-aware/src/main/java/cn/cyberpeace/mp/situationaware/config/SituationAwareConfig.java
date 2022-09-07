@@ -29,10 +29,14 @@ public class SituationAwareConfig {
     private String esDatePattern;
 
     /**
-     * monitors 服务监控
+     * monitors
      */
-    private List<MonitorProbe> cpSrvMonitors;
-    private List<MonitorProbe> bizSrvMonitors;
+    private String monitorCpCloudInterval;
+    private String monitorBusinessInterval;
+    private List<String> monitorCpCloudServerList;
+    private List<String> monitorBusinessServerList;
+    private List<String> monitorCpCloudRestartRestrict;
+    private List<String> monitorBusinessRestartRestrict;
 
     /**
      * arkime

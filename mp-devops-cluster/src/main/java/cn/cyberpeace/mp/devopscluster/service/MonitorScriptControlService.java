@@ -17,7 +17,6 @@ import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhCon
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhControlCommon;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.probecollect.wazuh.WazuhLauncher;
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
-import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.situationaware.model.wazuh.common.request.AgentRequest;
 import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
@@ -49,9 +48,6 @@ public class MonitorScriptControlService {
 
     @Autowired
     private HypervisorConverter hypervisorConverter;
-
-    @Autowired
-    private SituationAwareConfig situationAwareConfig;
 
     @Autowired
     private AgentService agentService;
@@ -98,8 +94,6 @@ public class MonitorScriptControlService {
 
         List<ServerMonitorConfig.MonitorProbe> cpSrvs = ServerMonitorConfig.cpCloudSrvMonitors;
         List<ServerMonitorConfig.MonitorProbe> bizSrvs = ServerMonitorConfig.businessSrvMonitors;
-        List<SituationAwareConfig.MonitorProbe> cpSrvs = situationAwareConfig.getCpSrvMonitors();
-        List<SituationAwareConfig.MonitorProbe> bizSrvs = situationAwareConfig.getBizSrvMonitors();
 
         if (CollectionUtil.isEmpty(cpSrvs)) {
             return;

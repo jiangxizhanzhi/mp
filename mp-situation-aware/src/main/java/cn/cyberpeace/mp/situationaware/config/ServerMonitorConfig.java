@@ -5,18 +5,18 @@ import com.alibaba.fastjson.JSON;
 import lombok.Data;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class ServerMonitorConfig {
-    @Resource
-    private MonitorConfig monitorConfig;
+    @Autowired
+    private SituationAwareConfig situationAwareConfig;
 
     private static final Integer PART_SIZE = 30;
 
@@ -30,25 +30,25 @@ public class ServerMonitorConfig {
     public void init() {
         var cpCloudMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.CP_SRV_MONITORS), MonitorProbe.class);
         var businessMonitor = JSON.parseObject(SituationAwareCommonConfigUtil.getConfigString(SituationAwareCommonConfigUtil.BIZ_SRV_MONITORS), MonitorProbe.class);
-        if (StringUtils.isNotEmpty(monitorConfig.getCpCloudInterval())) {
-            cpCloudMonitor.setInterval(monitorConfig.getCpCloudInterval());
+        if (StringUtils.isNotEmpty(situationAwareConfig.getMonitorCpCloudInterval())) {
+            cpCloudMonitor.setInterval(situationAwareConfig.getMonitorCpCloudInterval());
         }
-        if (StringUtils.isNotEmpty(monitorConfig.getBusinessInterval())) {
-            businessMonitor.setInterval(monitorConfig.getBusinessInterval());
-        }
-
-        if (CollectionUtils.isNotEmpty(monitorConfig.getCpCloudServerList())) {
-            cpCloudMonitor.setServiceList(monitorConfig.getCpCloudServerList());
-        }
-        if (CollectionUtils.isNotEmpty(monitorConfig.getCpCloudRestartRestrict())) {
-            cpCloudMonitor.setRestartRestrictList(monitorConfig.getCpCloudRestartRestrict());
+        if (StringUtils.isNotEmpty(situationAwareConfig.getMonitorBusinessInterval())) {
+            businessMonitor.setInterval(situationAwareConfig.getMonitorBusinessInterval());
         }
 
-        if (CollectionUtils.isNotEmpty(monitorConfig.getBusinessServerList())) {
-            businessMonitor.setServiceList(monitorConfig.getBusinessServerList());
+        if (CollectionUtils.isNotEmpty(situationAwareConfig.getMonitorCpCloudServerList())) {
+            cpCloudMonitor.setServiceList(situationAwareConfig.getMonitorCpCloudServerList());
         }
-        if (CollectionUtils.isNotEmpty(monitorConfig.getBusinessRestartRestrict())) {
-            businessMonitor.setRestartRestrictList(monitorConfig.getBusinessRestartRestrict());
+        if (CollectionUtils.isNotEmpty(situationAwareConfig.getMonitorCpCloudRestartRestrict())) {
+            cpCloudMonitor.setRestartRestrictList(situationAwareConfig.getMonitorCpCloudRestartRestrict());
+        }
+
+        if (CollectionUtils.isNotEmpty(situationAwareConfig.getMonitorBusinessServerList())) {
+            businessMonitor.setServiceList(situationAwareConfig.getMonitorBusinessServerList());
+        }
+        if (CollectionUtils.isNotEmpty(situationAwareConfig.getMonitorBusinessRestartRestrict())) {
+            businessMonitor.setRestartRestrictList(situationAwareConfig.getMonitorBusinessRestartRestrict());
         }
 
         cpCloudSrvMonitors = new ArrayList<>();

@@ -38,7 +38,6 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
      */
     public List<ServiceMonitorDto> queryCPServiceMonitorData(List<String> hostnames) {
         List<String> launchIds = ServerMonitorConfig.cpCloudSrvMonitors.stream().map(ServerMonitorConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
-        List<String> launchIds = situationAwareConfig.getCpSrvMonitors().stream().map(SituationAwareConfig.MonitorProbe::getLaunchId).collect(Collectors.toList());
         List<ServiceMonitorDto> dtos = new ArrayList<>();
         for (String hostname : hostnames) {
             dtos.addAll(doQueryServiceMonitorDto(hostname, launchIds));
