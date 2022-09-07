@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
-import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.WazuhMonitorEventsRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import com.alibaba.fastjson.JSONObject;
@@ -27,8 +26,6 @@ public class ServiceMonitorDataCollectionService extends CollectionBaseService {
     @Autowired
     private DataCollectionService dataCollectionService;
 
-    @Autowired
-    private SituationAwareConfig situationAwareConfig;
 
 
     /**

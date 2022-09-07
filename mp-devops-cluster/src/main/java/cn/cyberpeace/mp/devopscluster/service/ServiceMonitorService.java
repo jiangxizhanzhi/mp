@@ -24,7 +24,6 @@ import cn.cyberpeace.mp.devopscluster.vo.CloudPlatformMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.ServerMonitorVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import cn.cyberpeace.mp.situationaware.config.ServerMonitorConfig;
-import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
 import cn.cyberpeace.mp.situationaware.service.ServiceMonitorDataCollectionService;
 import cn.hutool.cache.impl.TimedCache;
@@ -56,8 +55,6 @@ public class ServiceMonitorService {
     private final SystemAlarmMapper systemAlarmMapper;
 
     private final MonitorScriptControlService monitorScriptControlService;
-
-    private final SituationAwareConfig situationAwareConfig;
 
     private final ImagesConverter imagesConverter;
 
