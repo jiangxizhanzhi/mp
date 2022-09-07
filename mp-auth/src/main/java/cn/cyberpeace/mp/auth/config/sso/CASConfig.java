@@ -25,7 +25,7 @@ public class CASConfig {
         filterRegistrationBean.setFilter(new CASFilter());
         filterRegistrationBean.setOrder(1);
         filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/backend/user/ssoLogin");
+        filterRegistrationBean.addUrlPatterns("/auth/users/ssoLogin");
         Map<String, String> initParameters = Maps.newHashMap();
         initParameters.put("excludeContext", "web-console,invoker,jbossws,admin-console,jmx-console");
         filterRegistrationBean.setInitParameters(initParameters);

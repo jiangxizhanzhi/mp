@@ -35,7 +35,9 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -151,10 +153,10 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         return ServiceResult.success(userModel);
     }
 
-    @ApiOperation(value = "银联用户定制化登录", notes = "")
-    @GetMapping("/yinlian/login")
+    @ApiOperation(value = "银联用户定制化登录", notes = "银联用户定制化登录")
+    @GetMapping("/ssoLogin")
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.LOGIN, title = "用户登录", target = OpTargetEnums.USER)
-    public ServiceResult<LoginResp> newLogin(HttpServletRequest request) {
+    public void ssoLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session = request.getSession();
         String userId = (String) session.getAttribute(CASFilter.CAS_FILTER_USER);
         String institutedId = (String) session.getAttribute(CASFilter.CAS_FILTER_INSTITUTE);
@@ -169,7 +171,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             log.error("get userInfo failed: ", e);
         }
         if (!canLogin) {
-            return ServiceResult.fail("this user can not login");
+            log.error("this user can not login");
+            return;
         }
         if (userInfo != null) {
             if (userInfo.getUser() != null && userInfo.getUser().getUsrId() != null) {
@@ -179,7 +182,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
                     LoginResp loginResp = new LoginResp();
                     loginResp.setUser(userDto);
                     loginResp.setToken(jwt);
-                    return ServiceResult.success(loginResp);
+                    response.setHeader("Authorization", jwt);
+                    response.sendRedirect("/page/mg/personal");
                 }
             }
             UserRequest userRequest = this.convert2UserRequest(userInfo);
@@ -189,10 +193,11 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
                 LoginResp loginResp = new LoginResp();
                 loginResp.setUser(userModel);
                 loginResp.setToken(jwt);
-                return ServiceResult.success(loginResp);
+                response.setHeader("Authorization", jwt);
+                response.sendRedirect("/page/mg/personal");
             }
         }
-        return ServiceResult.fail("login failed");
+        log.error("login failed");
     }
 
     private UserRequest convert2UserRequest(BaseUserInfo userInfo) {

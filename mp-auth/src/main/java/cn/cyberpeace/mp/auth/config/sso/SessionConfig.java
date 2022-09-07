@@ -22,7 +22,7 @@ public class SessionConfig {
         filterRegistrationBean.setFilter(new SessionFilter());
         filterRegistrationBean.setOrder(2);
         filterRegistrationBean.setEnabled(true);
-        filterRegistrationBean.addUrlPatterns("/backend/user/testsso");
+        filterRegistrationBean.addUrlPatterns("/auth/users/ssoLogin");
         Map<String, String> initParameters = Maps.newHashMap();
         initParameters.put("excludeContext", "web-console,invoker,jbossws,admin-console,jmx-console");
         filterRegistrationBean.setInitParameters(initParameters);
