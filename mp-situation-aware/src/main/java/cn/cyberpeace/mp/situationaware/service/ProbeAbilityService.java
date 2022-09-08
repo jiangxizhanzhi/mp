@@ -45,9 +45,11 @@ public class ProbeAbilityService {
         BeanUtils.copyProperties(pageRequest, condition);
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<ProbeAbilityDto> dtos = probeAbilityMapper.listProbeAbilityDtos(condition);
-        dtos.forEach(dto -> processProbeDtoOsTypes(dto));
-        dtos.forEach(dto -> processAbilityEngine(dto));
-        dtos.forEach(dto -> processInternationalMessage(dto));
+        dtos.forEach(dto -> {
+            processProbeDtoOsTypes(dto);
+            processAbilityEngine(dto);
+            processInternationalMessage(dto);
+        });
         PageInfo<ProbeAbilityDto> pageInfo = new PageInfo(dtos);
         return pageInfo;
     }
