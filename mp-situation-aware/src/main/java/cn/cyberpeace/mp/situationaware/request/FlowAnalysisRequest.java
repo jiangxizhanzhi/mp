@@ -136,6 +136,6 @@ public class FlowAnalysisRequest {
     private List<TeamBO> teamBOS;
 
     public Integer getTopSize() {
-        return Objects.isNull(topSize) ? 10 : topSize;
+        return (Objects.isNull(topSize) || topSize == 0) ? 10 : topSize;
     }
 }
