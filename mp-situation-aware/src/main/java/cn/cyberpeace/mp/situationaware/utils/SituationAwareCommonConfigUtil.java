@@ -22,7 +22,9 @@ public class SituationAwareCommonConfigUtil {
 
     public static final String CP_SRV_MONITORS = "cp_cloud_server_monitor";
 
-    private static final String[] CONFIGS = new String[]{BIZ_SRV_MONITORS, CP_SRV_MONITORS};
+    public static final String INTERNATIONAL_MESSAGE = "international_message";
+
+    private static final String[] CONFIGS = new String[]{BIZ_SRV_MONITORS, CP_SRV_MONITORS, INTERNATIONAL_MESSAGE};
 
     private static volatile boolean LOADED = false;
 

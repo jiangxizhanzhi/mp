@@ -3,7 +3,6 @@ package cn.cyberpeace.mp.sceneplugincollection.config;
 import cn.cyberpeace.mp.sceneplugincollection.util.CollectionCommonConfigUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

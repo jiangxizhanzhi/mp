@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateMapper;
 import cn.cyberpeace.mp.situationaware.repository.CollectionTemplateProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -155,6 +156,11 @@ public class CollectionTemplateService {
                             ).collect(Collectors.toList());
 
 
+                    // 国际化处理
+                    basicProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+                    eventProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+                    logProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+
                     templateDto.setBasicInfoProbes(basicProbeResps);
                     templateDto.setEventProbes(eventProbeResps);
                     templateDto.setLogProbes(logProbeResps);
@@ -165,7 +171,6 @@ public class CollectionTemplateService {
 
         return templateDtoList;
     }
-
 
     /**
      * 查询模板下探针内容（加载脚本内容）
@@ -699,4 +704,15 @@ public class CollectionTemplateService {
         }
     }
 
+
+    /**
+     * 探针模板详细信息国际化处理
+     * @param dto
+     */
+    private void processProbeDtoInternational(ColTempCommonProbeDto dto) {
+        String name = MessageCommonUtil.convertMessage(dto.getName());
+        String description = MessageCommonUtil.convertMessage(dto.getDescription());
+        dto.setName(name);
+        dto.setDescription(description);
+    }
 }
