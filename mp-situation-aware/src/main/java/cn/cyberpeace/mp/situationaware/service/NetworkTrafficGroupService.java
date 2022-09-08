@@ -13,14 +13,17 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,6 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Service
 @Slf4j
+@Configuration
 public class NetworkTrafficGroupService {
 
     @Autowired
@@ -193,6 +197,32 @@ public class NetworkTrafficGroupService {
         }
     }
 
+    /**
+     * 将源机器端口绑定到目标机器端口
+     * @param
+     */
+    public void doBindingTargetPortMirror(String sceneId, String targetResourceId, String targetHost, String targetPortId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
+        String url = mirrorUrl + "/openflow/mirror";
+        var paramObject = new JSONObject();
+        paramObject.put("scene_id", sceneId);
+        paramObject.put("src_vm", vmInstanceIds);
+        paramObject.put("src_container", containerInstanceIds);
+
+        var targetNode = new JSONObject();
+
+        targetNode.put("dst_port_id", targetPortId);
+        targetNode.put("dst_instance_id", targetResourceId);
+        targetNode.put("dst_host", targetHost);
+
+        paramObject.put("dst_node", targetNode);
+        try {
+            String res = HttpUtils.sendPost(url, paramObject.toJSONString());
+            log.info("dobind Network traffic mirror message {}", res);
+        } catch (IOException e) {
+            log.error("binding mirror error param:{}", paramObject);
+            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
 
     /**
      * 接触场景绑定流量镜像
