@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthBizConfig;
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
@@ -94,7 +94,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public static final String CACHE_VAL_ORGDTOS_TO_USERDTOS = "ORGDTOS_TO_USERDTOS_CACHE";
 
     @Autowired
-    private AuthBizConfig authBizConfig;
+    private AuthConfig authConfig;
 
     @Autowired
     private RoleService roleService;
@@ -950,7 +950,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public String getDefaultUserAvatar() {
-        return authBizConfig.getDefaultUserAvatar();
+        return authConfig.getDefaultUserAvatar();
     }
 
 

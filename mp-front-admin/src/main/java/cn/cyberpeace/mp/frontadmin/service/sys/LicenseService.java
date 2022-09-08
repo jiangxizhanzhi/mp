@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.service.sys;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.frontadmin.config.ActivationConfig;
+import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
@@ -27,7 +27,7 @@ public class LicenseService {
     private static Awesome INSTANCE = null;
 
     @Autowired
-    private ActivationConfig activationConfig;
+    private FrontAdminConfig frontAdminConfig;
 
     public interface Awesome extends Library {
 
@@ -69,7 +69,7 @@ public class LicenseService {
         if (Objects.isNull(INSTANCE)) {
             log.info("init INSTANCE...");
             try {
-                INSTANCE = (Awesome) Native.loadLibrary(activationConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
+                INSTANCE = (Awesome) Native.loadLibrary(frontAdminConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
                 log.info("load license.so success!");
             } catch (Exception e) {
                 log.error("load license.so error!");

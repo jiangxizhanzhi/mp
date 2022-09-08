@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.frontadmin.config.ActivationConfig;
+import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
@@ -36,12 +36,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @Description: 系统激活相关service
@@ -62,7 +57,7 @@ public class SysActivationService {
     private LicenseService licenseService;
 
     @Autowired
-    private ActivationConfig activationConfig;
+    private FrontAdminConfig frontAdminConfig;
 
     @Autowired
     private ActivMenuService activMenuService;
@@ -327,7 +322,7 @@ public class SysActivationService {
 
         String encryptedContent = EncryptUtils.desEncrypt(content);
         String finalContent = salt + encryptedContent;
-        String filePath = activationConfig.getLicenseDir() + File.separator + ACTIVATION_FILE;
+        String filePath = frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE;
         log.info("finalContent:{}", finalContent);
 
         FileUtil.writeString(finalContent, new File(filePath), CharsetUtil.CHARSET_UTF_8);
@@ -336,7 +331,7 @@ public class SysActivationService {
 
 
     private ActivationResponse parseContentFromDecrpytedFile() {
-        File activationFile = new File(activationConfig.getLicenseDir() + File.separator + ACTIVATION_FILE);
+        File activationFile = new File(frontAdminConfig.getLicenseDir() + File.separator + ACTIVATION_FILE);
         if (!activationFile.exists()) {
             log.error("activation file not exist!");
             return null;

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopslog.aop;
 
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
+import cn.cyberpeace.mp.devopslog.config.DevopsLogConfig;
 import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +16,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
@@ -50,17 +50,9 @@ public class RequestLogAspect {
 
     private static final String SUB_SUFFIX = "...(source length is %s)";
 
-    /**
-     * 不希望记录日志的URL Pattern, 如果有多个可以采用英文半角逗号(",")分隔; 单个Pattern语法支持AntPathMatcher匹配。
-     */
-    @Value("#{'${mp.log.exclude-uri}'.empty ? null : '${mp.log.exclude-uri}'.split(',')}")
-    private List<String> excludePatterns;
 
-    /**
-     * 不需要记录日志的请求method。譬如通常可以忽略的method: OPTIONS
-     */
-    @Value("#{'${mp.log.exclude-method}'.empty ? null : '${mp.log.exclude-method}'.split(',')}")
-    private List<String> excludeMethods;
+    @Autowired
+    private DevopsLogConfig devopsLogConfig;
 
     private AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -207,10 +199,11 @@ public class RequestLogAspect {
      * @param requestUri 需判定的uri
      */
     private Boolean isExcludePath(String requestUri) {
+        List<String> excludePatterns = devopsLogConfig.getExcludeUrls();
         if (CollectionUtils.isEmpty(excludePatterns)) {
             return Boolean.FALSE;
         }
-        for (String pattern : this.excludePatterns) {
+        for (String pattern : excludePatterns) {
             if (pathMatcher.match(pattern.trim(), requestUri)) {
                 return Boolean.TRUE;
             }
@@ -223,6 +216,7 @@ public class RequestLogAspect {
      * @param method request method(GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE)
      */
     private boolean isExcludeMethod(String method) {
+        List<String> excludeMethods = devopsLogConfig.getExcludeMethods();
         if (CollectionUtils.isEmpty(excludeMethods)) {
             return Boolean.FALSE;
         }

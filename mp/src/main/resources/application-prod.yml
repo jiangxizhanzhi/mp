@@ -1,15 +1,7 @@
 ip:
   self: ${MP_SELF_IP:mp}                    # mp自身地址
-  mariadb: ${MP_DB_IP:10.100.0.101}         # MP新中台mariadb数据库地址
-  fdfs: ${FDFS_IP:10.100.1.26}           # FastDFS地址
-  cp: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
-  moloch: ${MOLOCH_IP:10.100.0.101}        # moloch的IP地址
-  wazuh: ${WAZUH_IP:10.100.7.1}          # wazuh的IP地址
-  rabbitmq: ${RABBITMQ_IP:10.100.0.101}           # rabbitmq地址
-  log-es: ${LOG_ES_IP:10.100.0.101}        # 日志es
-  mp: ${MP_API_IP_PORT:10.100.1.12:8001}                       # MP中台API地址
 port:
-  self-callback: ${MP_SELF_PORT:8080}
+  self-callback: ${MP_SELF_PORT:8001}
 server:
   servlet:
     context-path: /api/mp
@@ -22,7 +14,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${ip.mariadb}:${MP_DB_PORT:3306}/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    url: jdbc:mysql://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${MP_DB_USERNAME:root}
     password: ${MP_DB_PASSWORD:root}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -41,7 +33,7 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: ${ip.rabbitmq}
+    host: ${RABBITMQ_IP:10.100.0.101}
     port: ${RABBITMQ_PORT:5673}
     username: ${RABBITMQ_USERNAME:guest}
     password: ${RABBITMQ_PASSWORD:guest}
@@ -58,7 +50,7 @@ logging:
     path: ${user.home}/logs
     max-file-size: ${MP_LOGFILE_MAX_FILE_SIZE:300MB}
     max-total-size: ${MP_LOGFILE_MAX_TOTAL_SIZE:650MB}
-    max-row-length: ${LOG_FILE_MAX_ROW_LENGTH:2000}
+    max-row-length: ${MP_LOGFILE_MAX_ROW_LENGTH:2000}
   logback:
     rollingpolicy:
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}
@@ -79,79 +71,91 @@ mybatis:
 mp:
   base:
     fdfs-tracker-servers:
-      - ${ip.fdfs}:${FDFS_TRACKER_SERVERS_PORT:22122}
-    fdfs-inner-http-server: http://${ip.fdfs}:${FDFS_INNER_FILE_SERVER_PORT:8888}
-    fdfs-outer-http-server: ${FDFS_FILE-SERVER-ADDR:/fdfs}
+      - ${FDFS_IP:10.100.1.26}:${FDFS_TRACKER_SERVERS_PORT:22122}
+    fdfs-inner-http-server: http://${FDFS_IP:10.100.1.26}:${FDFS_INNER_FILE_SERVER_PORT:8888}
+    fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
     run-init: true
-  devops:
-    cp-url: http://${ip.cp}:${CP_PORT:11111} #云平台地址
+  # mp-devops-cluster 配置
+  devopscluster:
+    cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:} #公网ip
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:} #公网端口
     public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
-    #    cr-url: http://${ip.cr} #
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
     disk-alarm-percent: ${MP_DEVOPS_DISK_ALARM_PERCENT:80} # 磁盘空间告警阈值
-    monitor:
-      cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL}
-      business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL}
-      cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST}
-      business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST}
-      cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST}
-      business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST}
+    cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+    mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
+  # mp-situationaware 模块配置
   situationaware:
-    arkime:
-      cpcloud-container-create-url: http://${ip.cp}:11111/v1
-      cpcloud-network-mirror-url: http://${ip.cp}:11111/cpcloud/sdn_app/v1
-      es-host: ${ip.moloch}
-      es-port: ${ARKIME_PORT:9205}
-      image-name: centos-arkime_arkime:v2
-      username: api
-      password: api
-    #moloch es节点地址
-    es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
-    wazuh:
-      #wazuh 开放接口地址
-      base-url: http://${ip.wazuh}:${WAZUH_PORT:15500}
-      #wazuh 开放接口用户名密码
-      username: ${WAZUH_USERNAME:wazuh}
-      password: ${WAZUH_PASSWORD:Abcd123#}
-    wazuh-probe-manager:
-      url: http://${ip.wazuh}:${WAZUH_PORT:8002}
-      agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
-      agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
-      task-enable: true
-  log:
-    es-nodes: ${ip.log-es}:${LOG_ES_PORT:9205}
-    exclude-uri: /login
-    exclude-method: OPTIONS
+    # monitor
+    monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL}
+    monitor-business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL}
+    monitor-cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST}
+    monitor-business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST}
+    monitor-cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST}
+    monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST}
+    # arkime
+    arkime-cpcloud-container-create-url: http://${CP_IP:10.100.7.1}:11111/v1
+    arkime-cpcloud-network-mirror-url: http://${CP_IP:10.100.7.1}:11111/cpcloud/sdn_app/v1
+    arkime-es-host: ${ARKIME_ES_IP:10.100.0.101}
+    arkime-es-port: ${ARKIME_ES_PORT:9205}
+    arkime-image-name: centos-arkime_arkime:v2
+    arkime-username: api
+    arkime-password: api
+    #wazuh 开放接口地址用户名密码
+    wazuh-base-url: http://${WAZUH_IP:10.100.7.1}:${WAZUH_PORT:15500}
+    wazuh-username: ${WAZUH_USERNAME:wazuh}
+    wazuh-password: ${WAZUH_PASSWORD:Abcd123#}
+    wazuh-flow-table-url: http://${CP_IP:10.100.7.1}:9999/knapsack/probe/v1
+    # wazuh-probe-manager
+    probe-mgr-url: http://${WAZUH_IP:10.100.7.1}:${WAZUH_PORT:15500}
+    probe-mgr-agent-script-linux-path: ${WAZUH_AGENT_SCRIPT_LINUX_PATH:/var/ossec/etc/shared/scripts/}
+    probe-mgr-agent-script-windows-path: ${WAZUH_AGENT_SCRIPT_WINDOWS_PATH:C:\ossec-agent\shared\scripts\}
+    probe-mgr-task-enable: true
+    # wazuh es节点地址
+    wazuh-es-nodes: ${WAZUH_ES_IP:10.100.0.101}:${WAZUH_ES_PORT:9205}
+    # arkime es 地址
+    arkime-es-nodes: ${ARKIME_ES_IP:10.100.0.101}:${ARKIME_ES_PORT:9205}
+    # es 日期格式
+    es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
+  # mp-devops-log 模块配置
+  devopslog:
+    exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
+    exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
+    es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
+    cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
+    mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
+  # auth 模块配置
   auth:
-    activation:
-      enable: true
-      licenseDir: /home/mp/config/license
-    url-ac-filter:
-      enabled: true
-      method-match: true
-      authority-match: true
-      ignore-if-not-defined: false
-    biz:
-      max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
-      logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
-      default-user-avatar: ${MP_AUTH_BIZ_DEFAULT_USER_AVATAR:/api/mp/avatar/1.png}
-    authenticate:
-      cache-time: ${MP_AUTH_CACHE_TIME:30}
-      use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
-      jwt-secret: ${MP_AUTH_JWT_SECRET:}
-      jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-      urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
-      encoder:
-        iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
-        hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
+    max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
+    logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
+    default-user-avatar: ${MP_AUTH_DEFAULT_USER_AVATAR:/api/mp/avatar/1.png}
+    # authenticate
+    authenticate-cache-time: ${MP_AUTH_CACHE_TIME:30}
+    authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
+    authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:}
+    authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
+    authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
+    authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
+    authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
+  # mp-front-admin 模块配置
+  frontadmin:
+    activ-enable: true
+    license-dir: /home/mp/config/license
+  # mp-front-business 模块配置
+  frontbusiness:
+    url-ac-filter-enabled: true
+    url-ac-filter-method-match: true
+    url-ac-filter-authority-match: true
+    url-ac-filter-ignore-if-not-defined: false
+  # mp-flow 模块配置
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
+    cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
   sceneplugincloud:
-    cpcloud-server: http://${ip.cp}:${CP_PORT:11111}
+    cpcloud-server: http://${CP_IP:10.100.7.1}:${CP_PORT:11111}
     delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
     default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
     enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
@@ -175,11 +179,11 @@ mp:
     scene_create_install_unzip_apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
     dhcp_ip_allocate: ${MP_DHCP_IP_ALLOCATE:true}
   sceneplugincollection:
-    wazuh-server-host: ${ip.wazuh}
-    wazuh-api-server: http://${ip.wazuh}:15500
+    wazuh-server-host: ${WAZUH_IP:10.100.7.1}
+    wazuh-api-server: http://${WAZUH_IP:10.100.7.1}:15500
     wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://${ip.es}:9205
-    wazuh-godfs-server: http://${ip.wazuh}:11888
+    wazuh-es-server: http://${WAZUH_ES_IP:10.100.0.101}:9205
+    wazuh-godfs-server: http://${WAZUH_IP:10.100.7.1}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
   cscene:
@@ -191,6 +195,7 @@ mp:
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
     enable_node_limit_db_check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
+    cp-ip: ${CP_IP:10.100.7.1}
   scene:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
     scene_pool_size: ${MP_SCENE_POOL_SIZE:100}

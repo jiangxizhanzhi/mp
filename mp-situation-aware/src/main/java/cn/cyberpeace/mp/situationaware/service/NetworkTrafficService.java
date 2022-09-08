@@ -4,14 +4,9 @@ import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.situationaware.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
-import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
-import cn.cyberpeace.mp.situationaware.model.SessionModel;
-import cn.cyberpeace.mp.situationaware.model.SessionRequest;
-import cn.cyberpeace.mp.situationaware.model.SessionResult;
-import cn.cyberpeace.mp.situationaware.model.SessionSourceModel;
+import cn.cyberpeace.mp.situationaware.model.*;
 import cn.cyberpeace.mp.situationaware.model.enums.SeverityEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -53,6 +48,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
     @Resource(name = "datasandtableRestHighLevelClient")
     private RestHighLevelClient restHighLevelClient;
+
 
     @Autowired
     private SituationAwareConfig situationAwareConfig;
@@ -130,8 +126,8 @@ public class NetworkTrafficService extends AbstractBaseService{
         //时间查询
         if (Objects.nonNull(sessionRequest.getStartTime()) && Objects.nonNull(sessionRequest.getEndTime())) {
             boolQueryBuilder.must(QueryBuilders.rangeQuery("@timestamp")
-                    .from(sessionRequest.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
-                    .to(sessionRequest.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
+                    .from(sessionRequest.getStartTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter))
+                    .to(sessionRequest.getEndTime().atZone(ZoneId.systemDefault()).format(SituationAwareConfig.esDateTimeFormatter)));
         }
 
         //构造动态条件查询
@@ -207,7 +203,7 @@ public class NetworkTrafficService extends AbstractBaseService{
 
         try {
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
-                situationAwareConfig.getUserName(), situationAwareConfig.getPassword());
+                situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (IOException e) {
             log.error("查询缓存异常 groupId {}" + e, groupId);
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
@@ -239,7 +235,7 @@ public class NetworkTrafficService extends AbstractBaseService{
             .append("&interval").append("auto")
         ;
         try {
-           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), situationAwareConfig.getUserName(), situationAwareConfig.getPassword());
+           return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (Exception e) {
             log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
             throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());

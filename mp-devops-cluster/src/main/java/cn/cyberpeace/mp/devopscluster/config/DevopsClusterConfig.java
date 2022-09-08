@@ -10,9 +10,9 @@ import org.springframework.context.annotation.Configuration;
  * @author wanggang
  */
 @Configuration
-@ConfigurationProperties(prefix = "mp.devops",ignoreInvalidFields = true)
+@ConfigurationProperties(prefix = "mp.devopscluster",ignoreInvalidFields = true)
 @Data
-public class DevopsConfig {
+public class DevopsClusterConfig {
 
     /**
      * 云平台接口地址
@@ -40,4 +40,24 @@ public class DevopsConfig {
      * 公网端口
      */
     private Integer publicNetProxyPort;
+
+    /**
+     * 主机名称
+     */
+    private String hostname;
+
+    /**
+     * 承诺最大支持靶标的磁盘大小(G)
+     */
+    private String maxTargetSize;
+
+    /**
+     * 云平台接口IP
+     */
+    private String cpIp;
+
+    /**
+     * MP接口IP
+     */
+    private String mpIp;
 }

@@ -5,8 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.InitRegisterService;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
-import cn.cyberpeace.mp.devopscluster.config.IpAddressConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
 import cn.cyberpeace.mp.devopscluster.converter.TypeConverter;
@@ -40,20 +39,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +59,7 @@ public class DevopsTargetController {
 
     private final TypeConverter typeConverter;
 
-    private final IpAddressConfig ipAddressConfig;
+    private final DevopsClusterConfig devopsClusterConfig;
 
     private final DeviceVoConverter deviceVoConverter;
 
@@ -89,8 +78,8 @@ public class DevopsTargetController {
     @ApiOperation("查询FTP信息")
     @GetMapping("/ftp-info")
     public Result<String> getFtpAddress(){
-        String formatUrl = ipAddressConfig.getCp();
-        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        String formatUrl = devopsClusterConfig.getCpIp();
+        DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                 formatUrl = config.getPublicNetProxyIp();

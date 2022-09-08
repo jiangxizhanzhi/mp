@@ -18,7 +18,7 @@ import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.SnapshotService;
-import cn.cyberpeace.mp.devopscluster.config.DevopsConfig;
+import cn.cyberpeace.mp.devopscluster.config.DevopsClusterConfig;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
@@ -293,7 +293,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.EXPORT, title = "导出镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult<String> export(@RequestParam("id") String uuid,@RequestParam("image_name") String imageName) {
         String downloadUrl = imagesConverter.export(uuid,imageName);
-        DevopsConfig config = BeanCommon.getBean(DevopsConfig.class);
+        DevopsClusterConfig config = BeanCommon.getBean(DevopsClusterConfig.class);
         if (config.getPublicNetProxy() && config.getPublicNetProxyServer()) {
             if (StringUtils.isNotEmpty(config.getPublicNetProxyIp())) {
                 var u = URLUtil.url(downloadUrl);

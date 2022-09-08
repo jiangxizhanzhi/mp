@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopslog.service.impl;
 
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopslog.bo.LogFileDownloadBO;
+import cn.cyberpeace.mp.devopslog.config.DevopsLogConfig;
 import cn.cyberpeace.mp.devopslog.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopslog.constant.LogErrorCode;
 import cn.cyberpeace.mp.devopslog.dto.LogDownloadDTO;
@@ -10,10 +11,16 @@ import cn.cyberpeace.mp.devopslog.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devopslog.service.LogFileService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -37,8 +44,8 @@ public class MpLogFileServiceImpl implements LogFileService {
     @Value("${logging.file.path}")
     private String logPath;
 
-    @Value("${ip.mp}")
-    private String mpUrl;
+    @Autowired
+    private DevopsLogConfig devopsLogConfig;
 
     @Override
     public String logReportType() {
@@ -59,7 +66,7 @@ public class MpLogFileServiceImpl implements LogFileService {
             dto.setFileSize(f.length());
             dto.setLogReportTypeEnum(LogReportTypeEnum.MP);
             dto.setDownloadUrl(ControllerConstant.BASE_API_PATH + "/runtime_log/download?fileName=" + f.getName() + "&type=" + LogReportTypeEnum.MP.toValue());
-            dto.setHostIp(mpUrl.split(":")[0]);
+            dto.setHostIp(devopsLogConfig.getMpIp());
             try {
                 dto.setUpdateTime(Files.getLastModifiedTime(f.toPath()).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
                 if (fileName.endsWith(".zip")) {
