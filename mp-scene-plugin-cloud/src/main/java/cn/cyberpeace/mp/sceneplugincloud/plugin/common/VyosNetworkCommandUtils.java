@@ -78,7 +78,7 @@ public class VyosNetworkCommandUtils {
         @Override
         public List<String> build(ConfigParamsWrapper paramsWrapper) {
             return List.of(
-                    String.format(SET_HOST_NAME, BeanCommon.getBean(CloudAppConfig.class).getDefaultCoreRouteName())
+                    String.format(SET_HOST_NAME, BeanCommon.getBean(CloudAppConfig.class).getDefaultCoreRouterName())
             );
         }
     }

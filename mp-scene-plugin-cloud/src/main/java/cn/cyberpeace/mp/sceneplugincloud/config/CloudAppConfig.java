@@ -36,7 +36,7 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.cpcloud_resource_group:MP_SCENE}")
     private String cpcloudResourceGroup;
 
-    @Value("${mp.sceneplugincloud.cploud_http_pool_size:200}")
+    @Value("${mp.sceneplugincloud.cpcloud_http_pool_size:200}")
     private Integer cpcloudHttpPoolSize;
 
     @Value("${mp.sceneplugincloud.initiate_pool_size:10}")
@@ -133,7 +133,7 @@ public class CloudAppConfig {
     private Integer deleteRetryTimes;
 
     @Value("${mp.sceneplugincloud.default_core_router_name:Router}")
-    private String defaultCoreRouteName;
+    private String defaultCoreRouterName;
 
     @Value("${mp.sceneplugincloud.enable_reallocate_ip_ports:false}")
     private Boolean enableReallocateIpPorts;

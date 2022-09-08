@@ -156,28 +156,28 @@ mp:
     cp-url: http://10.100.7.1:11111 #云平台地址
   sceneplugincloud:
     cpcloud-server: http://10.100.7.1:11111
-    delete_retry_times: 2
-    default_core_router_name: Router
-    enable_reallocate_ip_ports: false
-    link_status_enabled: true
-    link_status_refresh_period: 5
-    link_status_cache_seconds: 600
-    link_status_pool_size: 10
-    link_status_hold_size: 200
+    delete-retry-times: 2
+    default-core-router-name: Router
+    enable-reallocate-ip-ports: false
+    link-status-enabled: true
+    link-status-refresh-period: 5
+    link-status-cache-seconds: 600
+    link-status-pool-size: 10
+    link-status-hold-size: 200
     public-net-proxy-server: false
     public-net-proxy: false
     public-net-proxy-ip:
     public-net-proxy-port:
-    gateway_types: 2,3
-    cploud_http_pool_size: 200
-    initiate_pool_size: 10
-    initiate_hold_size: 20000
-    create_pool_size: 10
-    create_hold_size: 20000
-    cloud_heavy_concurrent_delay_enable: true
-    cloud_heavy_concurrent_delay: 10
-    scene_create_install_unzip_apk: true
-    dhcp_ip_allocate: true
+    gateway-types: 2,3
+    cpcloud-http-pool-size: 200
+    initiate-pool-size: 10
+    initiate-hold-size: 20000
+    create-pool-size: 10
+    create-hold-size: 20000
+    cloud-heavy-concurrent-delay-enable: true
+    cloud-heavy-concurrent-delay: 10
+    scene-create-install-unzip-apk: true
+    dhcp-ip_allocate: true
   sceneplugincollection:
     wazuh-server-host: 10.100.7.1
     wazuh-api-server: http://10.100.7.1:15500
@@ -193,18 +193,16 @@ mp:
     enable-scene-cron-job: true
     enable-command-change: false
     cron-job-expression: 0 0/15 * * * ?
-    access-mode-ip:
-    enable_node_limit_db_check: true
+    enable-node-limit-db-check: true
     cp-ip: 10.100.7.1
   scene:
-    access-mode-ip:
-    scene_pool_size: 100
-    scene_hold_size: 10000
-    element_pool_size: 100
-    element_hold_size: 10000
-    scene_handler_realtime_update: true
-    scene_process_save_realtime: true
-    element_process_save_realtime: true
+    scene-pool-size: 100
+    scene-hold-size: 10000
+    element-pool-size: 100
+    element-hold-size: 10000
+    scene-handler-realtime-update: true
+    scene-process-save-realtime: true
+    element-process-save-realtime: true
 
 management:
   endpoints:

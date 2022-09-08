@@ -90,12 +90,12 @@ mp:
   # mp-situationaware 模块配置
   situationaware:
     # monitor
-    monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL}
-    monitor-business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL}
-    monitor-cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST}
-    monitor-business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST}
-    monitor-cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST}
-    monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST}
+    monitor-cp-cloud-interval: ${MP_MONITOR_CP_SRV_INTERVAL:}
+    monitor-business-interval: ${MP_MONITOR_BIZ_SRV_INTERVAL:}
+    monitor-cp-cloud-server-list: ${MP_MONITOR_CP_SERVER_LIST:}
+    monitor-business-server-list: ${MP_MONITOR_BIZ_SERVER_LIST:}
+    monitor-cp-cloud-restart-restrict: ${MP_MONITOR_CP_SRV_RESTART_RESTRICT_LIST:}
+    monitor-business-restart-restrict: ${MP_MONITOR_BIZ_SRV_RESTART_RESTRICT_LIST:}
     # arkime
     arkime-cpcloud-container-create-url: http://${CP_IP:10.100.7.1}:11111/v1
     arkime-cpcloud-network-mirror-url: http://${CP_IP:10.100.7.1}:11111/cpcloud/sdn_app/v1
@@ -156,28 +156,28 @@ mp:
     cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
   sceneplugincloud:
     cpcloud-server: http://${CP_IP:10.100.7.1}:${CP_PORT:11111}
-    delete_retry_times: ${MP_DELETE_RETRY_TIMES:2}
-    default_core_router_name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
-    enable_reallocate_ip_ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
-    link_status_enabled: ${MP_LINK_STATUS_ENABLED:true}
-    link_status_refresh_period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
-    link_status_cache_seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
-    link_status_pool_size: ${MP_LINK_STATUS_POOL_SIZE:10}
-    link_status_hold_size: ${MP_LINK_STATUS_HOLD_SIZE:200}
+    delete-retry-times: ${MP_DELETE_RETRY_TIMES:2}
+    default-core-router-name: ${MP_DEFAULT_CORE_ROUTER_NAME:Router}
+    enable-reallocate-ip-ports: ${MP_ENABLE_REALLOCATE_IP_PORTS:false}
+    link-status-enabled: ${MP_LINK_STATUS_ENABLED:true}
+    link-status-refresh-period: ${MP_LINK_STATUS_REFRESH_PERIOD:5}
+    link-status-cache-seconds: ${MP_LINK_STATUS_CACHE_SECONDS:600}
+    link-status-pool-size: ${MP_LINK_STATUS_POOL_SIZE:10}
+    link-status-hold-size: ${MP_LINK_STATUS_HOLD_SIZE:200}
     public-net-proxy-server: ${MP_PUBLIC_NET_PROXY_SERVER:false}
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false}
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
-    gateway_types: ${GATEWAY_TYPES:2,3}
-    cploud_http_pool_size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
-    initiate_pool_size: ${MP_INITIATE_POOL_SIZE:10}
-    initiate_hold_size: ${MP_INITIATE_HOLD_SIZE:20000}
-    create_pool_size: ${MP_CREATE_POOL_SIZE:10}
-    create_hold_size: ${MP_CREATE_HOLD_SIZE:20000}
-    cloud_heavy_concurrent_delay_enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
-    cloud_heavy_concurrent_delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
-    scene_create_install_unzip_apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
-    dhcp_ip_allocate: ${MP_DHCP_IP_ALLOCATE:true}
+    gateway-types: ${GATEWAY_TYPES:2,3}
+    cpcloud-http-pool-size: ${MP_CPLOUD_HTTP_POOL_SIZE:200}
+    initiate-pool-size: ${MP_INITIATE_POOL_SIZE:10}
+    initiate-hold-size: ${MP_INITIATE_HOLD_SIZE:20000}
+    create-pool-size: ${MP_CREATE_POOL_SIZE:10}
+    create-hold-size: ${MP_CREATE_HOLD_SIZE:20000}
+    cloud-heavy-concurrent-delay-enable: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY_ENABLE:true}
+    cloud-heavy-concurrent-delay: ${MP_CLOUD_HEAVY_CONCURRENT_DELAY:10}
+    scene-create-install-unzip-apk: ${MP_SCENE_CREATE_INSTALL_UNZIP_APK:true}
+    dhcp-ip-allocate: ${MP_DHCP_IP_ALLOCATE:true}
   sceneplugincollection:
     wazuh-server-host: ${WAZUH_IP:10.100.7.1}
     wazuh-api-server: http://${WAZUH_IP:10.100.7.1}:15500
@@ -193,18 +193,16 @@ mp:
     enable-scene-cron-job: ${MP_ENABLE_SCENE_CRON_JOB:true}
     enable-command-change: ${MP_ENABLE_COMMAND_CHANGE:false}
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
-    access-mode-ip: ${MP_ACCESS_MODE_IP:}
-    enable_node_limit_db_check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
+    enable-node-limit-db-check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
     cp-ip: ${CP_IP:10.100.7.1}
   scene:
-    access-mode-ip: ${MP_ACCESS_MODE_IP:}
-    scene_pool_size: ${MP_SCENE_POOL_SIZE:100}
-    scene_hold_size: ${MP_SCENE_HOLD_SIZE:10000}
-    element_pool_size: ${MP_ELEMENT_POOL_SIZE:100}
-    element_hold_size: ${MP_ELEMENT_HOLD_SIZE:10000}
-    scene_handler_realtime_update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
-    scene_process_save_realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
-    element_process_save_realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
+    scene-pool-size: ${MP_SCENE_POOL_SIZE:100}
+    scene-hold-size: ${MP_SCENE_HOLD_SIZE:10000}
+    element-pool-size: ${MP_ELEMENT_POOL_SIZE:100}
+    element-hold-size: ${MP_ELEMENT_HOLD_SIZE:10000}
+    scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
+    scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
+    element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
 
 management:
   endpoints:
