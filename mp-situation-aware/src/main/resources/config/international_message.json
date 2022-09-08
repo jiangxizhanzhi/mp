@@ -1,0 +1,297 @@
+[
+  {
+    "name": "主板序列号",
+    "zh_name": "主板序列号",
+    "en_name": "motherboard serial number"
+  },
+  {
+    "name": "CPU名称",
+    "zh_name": "CPU名称",
+    "en_name": "CPU name"
+  },
+  {
+    "name": "CPU核数",
+    "zh_name": "CPU核数",
+    "en_name": "number of CPU cores"
+  },
+  {
+    "name": "CPU使用率",
+    "zh_name": "CPU使用率",
+    "en_name": "CPU usage"
+  },
+  {
+    "name": "内存总大小",
+    "zh_name": "内存总大小",
+    "en_name": "total memory size"
+  },
+  {
+    "name": "内存使用率",
+    "zh_name": "内存使用率",
+    "en_name": "memory usage"
+  },
+  {
+    "name": "硬盘总大小",
+    "zh_name": "硬盘总大小",
+    "en_name": "total hard disk size"
+  },
+  {
+    "name": "硬盘使用率",
+    "zh_name": "硬盘使用率",
+    "en_name": "hard disk usage"
+  },
+  {
+    "name": "主机名",
+    "zh_name": "主机名",
+    "en_name": "hostname"
+  },
+  {
+    "name": "OS架构",
+    "zh_name": "OS架构",
+    "en_name": "OS Architecture"
+  },
+  {
+    "name": "系统名称",
+    "zh_name": "系统名称",
+    "en_name": "system name"
+  },
+  {
+    "name": "系统版本",
+    "zh_name": "系统版本",
+    "en_name": "system version"
+  },
+  {
+    "name": "平台",
+    "zh_name": "平台",
+    "en_name": "platform"
+  },
+  {
+    "name": "发布版本",
+    "zh_name": "发布版本",
+    "en_name": "release version"
+  },
+  {
+    "name": "接口名称",
+    "zh_name": "接口名称",
+    "en_name": "interface name"
+  },
+  {
+    "name": "适配器类型",
+    "zh_name": "适配器类型",
+    "en_name": "adapter type"
+  },
+  {
+    "name": "接口状态",
+    "zh_name": "接口状态",
+    "en_name": "interface status"
+  },
+  {
+    "name": "发包数",
+    "zh_name": "发包数",
+    "en_name": "number of packets sent"
+  },
+  {
+    "name": "收包数",
+    "zh_name": "收包数",
+    "en_name": "number of packages received"
+  },
+  {
+    "name": "发送字节数",
+    "zh_name": "发送字节数",
+    "en_name": "number of bytes sent"
+  },
+  {
+    "name": "接收字节数",
+    "zh_name": "接收字节数",
+    "en_name": "received bytes"
+  },
+  {
+    "name": "网络掩码",
+    "zh_name": "网络掩码",
+    "en_name": "netmask"
+  },
+  {
+    "name": "本地IP",
+    "zh_name": "本地IP",
+    "en_name": "local IP"
+  },
+  {
+    "name": "本地端口",
+    "zh_name": "本地端口",
+    "en_name": "local port"
+  },
+  {
+    "name": "协议",
+    "zh_name": "协议",
+    "en_name": "protocol"
+  },
+  {
+    "name": "对端IP",
+    "zh_name": "对端IP",
+    "en_name": "peer IP"
+  },
+  {
+    "name": "对端端口",
+    "zh_name": "对端端口",
+    "en_name": "peer port"
+  },
+  {
+    "name": "端口的状态",
+    "zh_name": "端口的状态",
+    "en_name": "the state of the port"
+  },
+  {
+    "name": "进程名称",
+    "zh_name": "进程名称",
+    "en_name": "process name"
+  },
+  {
+    "name": "进程状态",
+    "zh_name": "进程状态",
+    "en_name": "process status"
+  },
+  {
+    "name": "size变更",
+    "zh_name": "size变更",
+    "en_name": "size change"
+  },
+  {
+    "name": "mtime变更",
+    "zh_name": "mtime变更",
+    "en_name": "mtime change"
+  },
+  {
+    "name": "uid变更",
+    "zh_name": "uid变更",
+    "en_name": "uid change"
+  },
+  {
+    "name": "inode变更",
+    "zh_name": "inode变更",
+    "en_name": "inode change"
+  },
+  {
+    "name": "hash md5变更",
+    "zh_name": "hash md5变更",
+    "en_name": "hash md5 change"
+  },
+  {
+    "name": "hash sha1变更",
+    "zh_name": "hash sha1变更",
+    "en_name": "hash sha1 change"
+  },
+  {
+    "name": "hash sha256变更",
+    "zh_name": "hash sha256变更",
+    "en_name": "hash sha256 change"
+  },
+  {
+    "name": "checksum变更",
+    "zh_name": "checksum变更",
+    "en_name": "checksum change"
+  },
+  {
+    "name": "owner变更",
+    "zh_name": "owner变更",
+    "en_name": "owner change"
+  },
+  {
+    "name": "value变更",
+    "zh_name": "value变更",
+    "en_name": "value change"
+  },
+  {
+    "name": "自定义添加日志路径或日志文件",
+    "zh_name": "自定义添加日志路径或日志文件",
+    "en_name": "add custom log path or log file"
+  },
+  {
+    "name": "硬件信息",
+    "zh_name": "硬件信息",
+    "en_name": "hardware information"
+  },
+  {
+    "name": "板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
+    "zh_name": "板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
+    "en_name": "Board serial number, CPU name, number of CPU cores, CPU frequency, total memory size, remaining memory, memory usage, total hard disk size, hard disk usage"
+  },
+  {
+    "name": "操作系统信息",
+    "zh_name": "操作系统信息",
+    "en_name": "operating system information"
+  },
+  {
+    "name": "主机名、架构、系统名称、系统版本、平台、发布版本",
+    "zh_name": "主机名、架构、系统名称、系统版本、平台、发布版本",
+    "en_name": "Hostname, Architecture, System Name, System Version, Platform, Release Version"
+  },
+  {
+    "name": "网络接口信息",
+    "zh_name": "网络接口信息",
+    "en_name": "network interface information"
+  },
+  {
+    "name": "名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数",
+    "zh_name": "名称、适配器、类型、状态、MTU、MAC地址、IP地址、发包数、收包数、发送字节数、接收字节数",
+    "en_name": "Name, adapter, type, status, MTU, MAC address, IP address, number of packets sent, number of received packets, number of bytes sent, bytes received"
+  },
+  {
+    "name": "端口信息",
+    "zh_name": "端口信息",
+    "en_name": "port information"
+  },
+  {
+    "name": "协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程",
+    "zh_name": "协议类型、本地IP、本地端口、对端ip、对端端口、inode、状态、PID、进程",
+    "en_name": "Protocol type, local IP, local port, peer ip, peer port, inode, status, PID, process"
+  },
+  {
+    "name": "进程信息",
+    "zh_name": "进程信息",
+    "en_name": "process information"
+  },
+  {
+    "name": "PID、进程名、状态、PPID、utime、stime",
+    "zh_name": "PID、进程名、状态、PPID、utime、stime",
+    "en_name": "PID, process name, status, PPID, utime, stime"
+  },
+  {
+    "name": "文件变更事件",
+    "zh_name": "文件变更事件",
+    "en_name": "file change event"
+  },
+  {
+    "name": "包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）",
+    "zh_name": "包含大小、权限、所有者、最后修改日期、校验和目录文件的变更（当监控目录时监控到3级子目录）",
+    "en_name": "Contains changes to size, permissions, owner, last modified date, checksum and directory files (when monitoring directories up to level 3 subdirectories)"
+  },
+  {
+    "name": "注册表变更事件",
+    "zh_name": "注册表变更事件",
+    "en_name": "registry change event"
+  },
+  {
+    "name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持HKEY_CURRENT_USER目录）",
+    "zh_name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持HKEY_CURRENT_USER目录）",
+    "en_name": "Including the changes of size, mtime, inode, md5, sha1, sha256 (when monitoring the directory, the level 5 subdirectory is monitored, and the HKEY_CURRENT_USER directory is not supported)"
+  },
+  {
+    "name": "日志文件",
+    "zh_name": "日志文件",
+    "en_name": "log file"
+  },
+  {
+    "name": "安全软件",
+    "zh_name": "安全软件",
+    "en_name": "security software"
+  },
+  {
+    "name": "操作系统",
+    "zh_name": "操作系统",
+    "en_name": "operating system"
+  },
+  {
+    "name": "应用系统日志",
+    "zh_name": "应用系统日志",
+    "en_name": "application system log"
+  }
+]
