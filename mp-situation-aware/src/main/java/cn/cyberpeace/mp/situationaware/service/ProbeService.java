@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeParamMapper;
 import cn.cyberpeace.mp.situationaware.repository.ProbeScriptMapper;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -250,6 +251,7 @@ public class ProbeService {
         probeDtos.forEach(p -> processProbeDtoOsTypes(p));
         probeDtos.forEach(p -> {
             processProbeDtoParams(p);
+            processInternationalMessage(p);
         });
         // 分页查询不附带参数
         PageInfo pageInfo = new PageInfo(probeDtos);
@@ -351,6 +353,17 @@ public class ProbeService {
     private void processProbeDtoParams(ProbeDto probeDto) {
         String paramStr = probeParamService.getProbeParamAsJsonStr(probeDto.getId(), null);
         probeDto.setParameter(paramStr);
+    }
+
+    /**
+     * 国际化转换
+     * @param dto
+     */
+    private void processInternationalMessage(ProbeDto dto) {
+        String name = MessageCommonUtil.convertMessage(dto.getName());
+        String description = MessageCommonUtil.convertMessage(dto.getDescription());
+        dto.setName(name);
+        dto.setDescription(description);
     }
 
     private void check(ProbeRequest probeRequest) {
