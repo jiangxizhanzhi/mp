@@ -25,7 +25,7 @@ public class CsceneAppConfig {
     /**
      * 云平台适配层接口地址
      */
-    private String cpIP;
+    private String cpIp;
 
     @Autowired
     private SysActivationService sysActivationService;

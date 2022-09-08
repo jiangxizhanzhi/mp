@@ -40,7 +40,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.unit.DataSize;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -188,12 +194,12 @@ public class HostStateService {
      * @return
      */
     public List<HostState> getClusterHostStateTrend(HostStateTrendRequest trendRequest) {
-        if (StringUtils.isBlank(csceneAppConfig.getCpIP())) {
+        if (StringUtils.isBlank(csceneAppConfig.getCpIp())) {
             log.error("cp cloud ip is null...");
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         AgentRequest agentRequest = new AgentRequest();
-        agentRequest.setIp(csceneAppConfig.getCpIP());
+        agentRequest.setIp(csceneAppConfig.getCpIp());
         List<Agent> agents = agentService.listAgents(agentRequest);
         List<String> agentNames = agents.stream().map(Agent::getName).collect(Collectors.toList());
 

@@ -195,6 +195,7 @@ mp:
     cron-job-expression: ${MP_CRON_JOB_EXPRESSION:0 0/15 * * * ?}
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
     enable_node_limit_db_check: ${MP_ENABLE_NODE_LIMIT_DB_CHECK:true}
+    cp-ip: ${CP_IP:10.100.7.1}
   scene:
     access-mode-ip: ${MP_ACCESS_MODE_IP:}
     scene_pool_size: ${MP_SCENE_POOL_SIZE:100}
