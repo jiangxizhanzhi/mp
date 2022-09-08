@@ -125,7 +125,7 @@ mp:
     exclude-uri: /login
     exclude-method: OPTIONS
   auth:
-    sysidstr: F7EB8C529C1A503B79E729581EDBC95E
+    sysidstr: ${SYS_ID_STR:F7EB8C529C1A503B79E729581EDBC95E}
     redirect-url: http://${ip.self}/page/mg/personal
     activation:
       enable: true
