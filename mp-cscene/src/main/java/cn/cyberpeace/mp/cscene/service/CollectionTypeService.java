@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,9 +58,9 @@ public class CollectionTypeService {
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
+        types.forEach(type -> processCollectionType(type));
         return types;
     }
-
 
     public List<CollectionApp> getAppNames(CollectionAppRequest appRequest) {
         log.info("baseRequest:{}", appRequest);
@@ -245,5 +246,23 @@ public class CollectionTypeService {
         secSysType.setChildren(secSubTypes);
 
         return secSysType;
+    }
+
+    private void processCollectionType(CollectionType type) {
+        // 国际化处理
+        String name = MessageCommonUtil.convertMessage(type.getName());
+        type.setName(name);
+        processCollectionTypeChildren(type);
+    }
+
+    private void processCollectionTypeChildren(CollectionType type) {
+        if (CollectionUtils.isEmpty(type.getChildren())) {
+            return;
+        }
+        type.getChildren().forEach(t -> {
+            String childrenName = MessageCommonUtil.convertMessage(t.getName());
+            t.setName(childrenName);
+            processCollectionTypeChildren(t);
+        });
     }
 }

@@ -293,5 +293,125 @@
     "name": "应用系统日志",
     "zh_name": "应用系统日志",
     "en_name": "application system log"
+  },
+  {
+    "name": "变更事件",
+    "zh_name": "变更事件",
+    "en_name": "change event"
+  },
+  {
+    "name": "原始日志",
+    "zh_name": "原始日志",
+    "en_name": "original log"
+  },
+  {
+    "name": "日志事件",
+    "zh_name": "日志事件",
+    "en_name": "log events"
+  },
+  {
+    "name": "操作系统日志",
+    "zh_name": "操作系统日志",
+    "en_name": "OS log"
+  },
+  {
+    "name": "邮件服务器",
+    "zh_name": "邮件服务器",
+    "en_name": "mail server"
+  },
+  {
+    "name": "WEB服务器",
+    "zh_name": "WEB服务器",
+    "en_name": "web server"
+  },
+  {
+    "name": "数据库",
+    "zh_name": "数据库",
+    "en_name": "database"
+  },
+  {
+    "name": "网络服务",
+    "zh_name": "网络服务",
+    "en_name": "internet service"
+  },
+  {
+    "name": "应用软件",
+    "zh_name": "应用软件",
+    "en_name": "application"
+  },
+  {
+    "name": "云",
+    "zh_name": "云",
+    "en_name": "cloud"
+  },
+  {
+    "name": "负载均衡",
+    "zh_name": "负载均衡",
+    "en_name": "load balancing"
+  },
+  {
+    "name": "应用框架",
+    "zh_name": "应用框架",
+    "en_name": "application framework"
+  },
+  {
+    "name": "定时任务",
+    "zh_name": "定时任务",
+    "en_name": "timed task"
+  },
+  {
+    "name": "文件服务器",
+    "zh_name": "文件服务器",
+    "en_name": "file server"
+  },
+  {
+    "name": "虚拟机",
+    "zh_name": "虚拟机",
+    "en_name": "virtual machine"
+  },
+  {
+    "name": "安全系统日志",
+    "zh_name": "安全系统日志",
+    "en_name": "security system Log"
+  },
+  {
+    "name": "其他",
+    "zh_name": "其他",
+    "en_name": "other"
+  },
+  {
+    "name": "接入控制",
+    "zh_name": "接入控制",
+    "en_name": "access control"
+  },
+  {
+    "name": "错误",
+    "zh_name": "错误",
+    "en_name": "error"
+  },
+  {
+    "name": "用户",
+    "zh_name": "用户",
+    "en_name": "user"
+  },
+  {
+    "name": "远程登录",
+    "zh_name": "远程登录",
+    "en_name": "remote login"
+  },
+  {
+    "name": "攻击",
+    "zh_name": "攻击",
+    "en_name": "attack"
+  },
+  {
+    "name": "windows安全事件",
+    "zh_name": "windows安全事件",
+    "en_name": "windows security event"
+  },
+  {
+    "name": "自定义采集",
+    "zh_name": "自定义采集",
+    "en_name": "custom collection"
   }
 ]
