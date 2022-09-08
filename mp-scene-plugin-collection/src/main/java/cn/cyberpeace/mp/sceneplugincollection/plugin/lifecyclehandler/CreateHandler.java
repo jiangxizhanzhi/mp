@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -24,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
@@ -139,36 +139,31 @@ public class CreateHandler extends HandlerCommon {
                         new ArrayList<>(containerInstanceIds));
             });
         }
-
-
         var targetPort = getPluginHandler().getScene().getFlowMirrorTargetPort();
         var targetNode = getPluginHandler().getScene().getFlowMirrorTargetNode();
-        List<String> vmId = new ArrayList<>();
-        List<String> containerId = new ArrayList<>();
-        var test = getPluginHandler().getElementPortMap();
-
-        getPluginHandler().getElementPortMap().values().forEach(p -> {
-            //源机器
-            var nodeId = p.getSrcPort().getElement().getId();
-
-            var resourceId = cloudPluginHandler.getElement(nodeId).getResourceId();
-            var imageType = cloudPluginHandler.getElement(nodeId).getImageType();
-            var sceneId = getPluginHandler().getSrcScene().getEid();
-            if (imageType.equals("container")) {
-                containerId.add(resourceId);
-            } else if (imageType.equals("vm")) {
-                vmId.add(resourceId);
-            }
-
-        });
         if (StringUtils.isNotEmpty(targetPort) && StringUtils.isNotEmpty(targetNode)) {
+
+            List<String> vmId = new ArrayList<>();
+            List<String> containerId = new ArrayList<>();
+
             var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
             var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
             var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
 
+            cloudPluginHandler.getElementMap().values().forEach(e -> {
+                if (targetResourceId.equals(e.getResourceId())) {
+                    return;
+                }
+                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                    containerId.add(e.getResourceId());
+                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                    vmId.add(e.getResourceId());
+                }
+            });
+
             var sceneId = getPluginHandler().getSrcScene().getEid();
 
-            NetworkTrafficGroupService networkTrafficGroupService = new NetworkTrafficGroupService();
+            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
             networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
         }
 

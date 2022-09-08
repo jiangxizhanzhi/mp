@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.service;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import cn.cyberpeace.mp.situationaware.config.SituationAwareConfig;
@@ -239,6 +240,22 @@ public class NetworkTrafficGroupService {
             log.info("delete Network traffic mirror message {}", res);
         } catch (IOException e) {
             log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
+            throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    public void deleteNetworkTrafficMirror(String targetResourceId, List<String> vmInstanceIds, List<String> containerInstanceIds) {
+        String url = mirrorUrl + "/openflow/mirror";
+        var paramObject = new JSONObject();
+
+        paramObject.put("src_vm", vmInstanceIds);
+        paramObject.put("src_container", containerInstanceIds);
+        paramObject.put("dst_node", List.of(targetResourceId));
+        try {
+            String res = HttpUtils.sendDelete(url, paramObject.toJSONString());
+            log.info("delete Network traffic mirror message {}", res);
+        } catch (IOException e) {
+            log.error("binding mirror error param:{},{},{}", targetResourceId, JsonCommon.stringify(vmInstanceIds), JsonCommon.stringify(containerInstanceIds));
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
