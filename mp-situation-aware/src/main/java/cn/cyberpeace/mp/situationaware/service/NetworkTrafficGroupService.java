@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Service
 @Slf4j
-@Configuration
 public class NetworkTrafficGroupService {
 
     @Autowired

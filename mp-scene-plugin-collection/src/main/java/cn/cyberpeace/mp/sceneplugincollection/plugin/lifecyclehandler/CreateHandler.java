@@ -140,45 +140,11 @@ public class CreateHandler extends HandlerCommon {
             });
         }
 
-//        getPluginHandler().getElementPortMap().values().forEach(p -> {
-//            //源机器
-//            var nodeId = p.getSrcPort().getElement().getId();
-//            var resourceId = cloudPluginHandler.getElement(nodeId).getResourceId();
-//            var imageType = cloudPluginHandler.getElement(nodeId).getImageType();
-//            var sceneId = getPluginHandler().getSrcScene().getEid();
-//            List<String> vmId = new ArrayList<>();
-//            List<String> containerId = new ArrayList<>();
-//            if (imageType.equals("container")) {
-//                containerId.add(resourceId);
-//            } else if (imageType.equals("vm")) {
-//                vmId.add(resourceId);
-//            }
-//
-//            //目标机器
-//            if (StringUtils.isNotEmpty(p.getFlowMirrorTargetPort()) && StringUtils.isNotEmpty(p.getFlowMirrorTargetNode())) {
-//                var targetPortId = cloudPluginHandler.getPort(p.getFlowMirrorTargetPort()).getResourceId();
-//                var targetHost = cloudPluginHandler.getElement(p.getFlowMirrorTargetNode()).getHost();
-//                var targetResourceId = cloudPluginHandler.getElement(p.getFlowMirrorTargetNode()).getResourceId();
-//                NetworkTrafficGroupService networkTrafficGroupService = new NetworkTrafficGroupService();
-//                networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
-//            }
-//        });
 
         var targetPort = getPluginHandler().getScene().getFlowMirrorTargetPort();
         var targetNode = getPluginHandler().getScene().getFlowMirrorTargetNode();
         List<String> vmId = new ArrayList<>();
         List<String> containerId = new ArrayList<>();
-//        getPluginHandler().getElementIds().forEach(e -> {
-//            if (!e.equals(targetNode)) {
-//                var resourceId = cloudPluginHandler.getElement(e).getResourceId();
-//                var imageType = cloudPluginHandler.getElement(e).getImageType();
-//                if (imageType.equals("container")) {
-//                    containerId.add(resourceId);
-//                } else if (imageType.equals("vm")) {
-//                    vmId.add(resourceId);
-//                }
-//            }
-//        });
         var test = getPluginHandler().getElementPortMap();
 
         getPluginHandler().getElementPortMap().values().forEach(p -> {
@@ -193,7 +159,6 @@ public class CreateHandler extends HandlerCommon {
             } else if (imageType.equals("vm")) {
                 vmId.add(resourceId);
             }
-
 
         });
         if (StringUtils.isNotEmpty(targetPort) && StringUtils.isNotEmpty(targetNode)) {
