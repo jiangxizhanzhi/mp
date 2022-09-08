@@ -81,6 +81,7 @@ subprojects {
         implementation 'org.mongodb:mongodb-driver-core:4.7.0'
         implementation 'org.mongodb:mongodb-driver-sync:4.7.0'
         implementation 'org.slf4j:slf4j-api:1.7.30'
+        implementation 'com.alibaba:easyexcel:3.1.1'
         compileOnly 'org.projectlombok:lombok'
         runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
