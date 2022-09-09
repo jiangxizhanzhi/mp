@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
@@ -11,6 +12,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.VirtualRouterDele
 import cn.cyberpeace.mp.sceneplugincollection.bo.CollectionPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.DeleteTaskPool;
+import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -106,6 +108,32 @@ public class DeleteHandler extends HandlerCommon {
             runSceneProgress(SceneProcess.DELETE_FLOW_COLLECTOR, () -> {
                 getFlowCollector().deleteCollector(flowCollectorId, new ArrayList<>(vmInstanceIds), new ArrayList<>(containerInstanceIds));
             });
+        }
+
+        var targetPort = getPluginHandler().getScene().getFlowMirrorTargetPort();
+        var targetNode = getPluginHandler().getScene().getFlowMirrorTargetNode();
+        if (StringUtils.isNotEmpty(targetPort) && StringUtils.isNotEmpty(targetNode)) {
+
+            List<String> vmId = new ArrayList<>();
+            List<String> containerId = new ArrayList<>();
+
+            CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
+                    .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
+            var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
+
+            cloudPluginHandler.getElementMap().values().forEach(e -> {
+                if (targetResourceId.equals(e.getResourceId())) {
+                    return;
+                }
+                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                    containerId.add(e.getResourceId());
+                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                    vmId.add(e.getResourceId());
+                }
+            });
+
+            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
+            networkTrafficGroupService.deleteNetworkTrafficMirror(targetResourceId, vmId, containerId);
         }
 
         var probeCollectorId = scene.getProbeCollector();

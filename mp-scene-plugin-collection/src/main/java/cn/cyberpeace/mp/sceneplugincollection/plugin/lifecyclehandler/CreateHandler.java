@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincollection.model.CollectionPluginSceneProbeRo
 import cn.cyberpeace.mp.sceneplugincollection.plugin.CollectionScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.common.HandlerUtils;
 import cn.cyberpeace.mp.sceneplugincollection.plugin.lifecyclehandler.taskpool.CreateTaskPool;
+import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class CreateHandler extends HandlerCommon {
@@ -137,6 +138,33 @@ public class CreateHandler extends HandlerCommon {
                 getFlowCollector().bindNetworkPorts(sceneId, flowCollectorId, new ArrayList<>(vmInstanceIds),
                         new ArrayList<>(containerInstanceIds));
             });
+        }
+        var targetPort = getPluginHandler().getScene().getFlowMirrorTargetPort();
+        var targetNode = getPluginHandler().getScene().getFlowMirrorTargetNode();
+        if (StringUtils.isNotEmpty(targetPort) && StringUtils.isNotEmpty(targetNode)) {
+
+            List<String> vmId = new ArrayList<>();
+            List<String> containerId = new ArrayList<>();
+
+            var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
+            var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
+            var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
+
+            cloudPluginHandler.getElementMap().values().forEach(e -> {
+                if (targetResourceId.equals(e.getResourceId())) {
+                    return;
+                }
+                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                    containerId.add(e.getResourceId());
+                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                    vmId.add(e.getResourceId());
+                }
+            });
+
+            var sceneId = getPluginHandler().getSrcScene().getEid();
+
+            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
+            networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
         }
 
         // 绑定探针agent到探针采集器

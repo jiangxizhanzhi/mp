@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.sceneplugincollection.model.base;
 
 import cn.cyberpeace.mp.base.model.stereotype.DefaultBool;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.scene.core.plugin.model.BasePluginSceneModel;
 import lombok.Data;
 
@@ -10,4 +11,8 @@ public class BaseCollectionPluginSceneModel extends BasePluginSceneModel {
     private Boolean enableFlowCollect;
     @DefaultBool
     private Boolean enableProbeCollect;
+    @DefaultStr
+    private String flowMirrorTargetNode;
+    @DefaultStr
+    private String flowMirrorTargetPort;
 }
