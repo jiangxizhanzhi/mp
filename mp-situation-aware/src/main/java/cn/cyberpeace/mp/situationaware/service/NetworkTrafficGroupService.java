@@ -219,7 +219,7 @@ public class NetworkTrafficGroupService {
             String res = HttpUtils.sendPost(url, paramObject.toJSONString());
             log.info("dobind Network traffic mirror message {}", res);
         } catch (IOException e) {
-            log.error("binding mirror error param:{}", paramObject);
+            log.error("binding mirror error param:{},{},{},{},{},{}", sceneId, targetResourceId, targetHost, targetPortId, JsonCommon.stringify(vmInstanceIds), JsonCommon.stringify(containerInstanceIds));
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
