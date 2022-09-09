@@ -146,9 +146,10 @@ public class CreateHandler extends HandlerCommon {
             List<String> vmId = new ArrayList<>();
             List<String> containerId = new ArrayList<>();
 
-            var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
-            var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
-            if (StringUtils.isNotEmpty(targetHost) && StringUtils.isNotEmpty(targetPortId)) {
+            if (cloudPluginHandler.getElementMap().containsKey(targetNode) && cloudPluginHandler.getElementPortMap().containsKey(targetPort)) {
+                var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
+                var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
+
                 var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
 
                 cloudPluginHandler.getElementMap().values().forEach(e -> {
