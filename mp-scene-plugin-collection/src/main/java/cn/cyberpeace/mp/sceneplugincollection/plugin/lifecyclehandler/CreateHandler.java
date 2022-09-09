@@ -146,25 +146,28 @@ public class CreateHandler extends HandlerCommon {
             List<String> vmId = new ArrayList<>();
             List<String> containerId = new ArrayList<>();
 
-            var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
-            var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
-            var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
+            if (cloudPluginHandler.getElementMap().containsKey(targetNode) && cloudPluginHandler.getElementPortMap().containsKey(targetPort)) {
+                var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
+                var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
 
-            cloudPluginHandler.getElementMap().values().forEach(e -> {
-                if (targetResourceId.equals(e.getResourceId())) {
-                    return;
-                }
-                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
-                    containerId.add(e.getResourceId());
-                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
-                    vmId.add(e.getResourceId());
-                }
-            });
+                var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
 
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+                cloudPluginHandler.getElementMap().values().forEach(e -> {
+                    if (targetResourceId.equals(e.getResourceId())) {
+                        return;
+                    }
+                    if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                        containerId.add(e.getResourceId());
+                    } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                        vmId.add(e.getResourceId());
+                    }
+                });
 
-            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
-            networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
+                var sceneId = getPluginHandler().getSrcScene().getEid();
+
+                NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
+                networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
+            }
         }
 
         // 绑定探针agent到探针采集器
