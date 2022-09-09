@@ -228,6 +228,8 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
             }
             if (user.getPwd() != null) {
                 userRequest.setPassword(PasswordUtils.desEncrypt(user.getPwd()));
+            } else {
+                userRequest.setPassword(PasswordUtils.desEncrypt("Abc123#"));
             }
             if (user.getUsrId() != null) {
                 userRequest.setId(user.getUsrId());
