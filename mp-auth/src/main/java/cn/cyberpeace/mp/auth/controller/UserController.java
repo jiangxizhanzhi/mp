@@ -167,6 +167,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         boolean canLogin = false;
         try {
             userInfo = UserInfoUtil.getLoginUserAndPrivileges(userId, institutedId, sysIdstr);
+            log.info("getLoginUserAndPrivileges userInfo: {}", userInfo);
             canLogin = UserInfoUtil.authenticate(userInfo, userInfo.getPassword());
         } catch (Exception e) {
             log.error("get userInfo failed: ", e);
