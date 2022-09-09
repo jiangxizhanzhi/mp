@@ -148,23 +148,25 @@ public class CreateHandler extends HandlerCommon {
 
             var targetPortId = cloudPluginHandler.getPort(targetPort).getResourceId();
             var targetHost = cloudPluginHandler.getElement(targetNode).getHost();
-            var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
+            if (StringUtils.isNotEmpty(targetHost) && StringUtils.isNotEmpty(targetPortId)) {
+                var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
 
-            cloudPluginHandler.getElementMap().values().forEach(e -> {
-                if (targetResourceId.equals(e.getResourceId())) {
-                    return;
-                }
-                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
-                    containerId.add(e.getResourceId());
-                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
-                    vmId.add(e.getResourceId());
-                }
-            });
+                cloudPluginHandler.getElementMap().values().forEach(e -> {
+                    if (targetResourceId.equals(e.getResourceId())) {
+                        return;
+                    }
+                    if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                        containerId.add(e.getResourceId());
+                    } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                        vmId.add(e.getResourceId());
+                    }
+                });
 
-            var sceneId = getPluginHandler().getSrcScene().getEid();
+                var sceneId = getPluginHandler().getSrcScene().getEid();
 
-            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
-            networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
+                NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
+                networkTrafficGroupService.doBindingTargetPortMirror(sceneId, targetResourceId, targetHost, targetPortId, vmId, containerId);
+            }
         }
 
         // 绑定探针agent到探针采集器

@@ -120,20 +120,21 @@ public class DeleteHandler extends HandlerCommon {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
             var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
+            if (StringUtils.isNotEmpty(targetResourceId)) {
+                cloudPluginHandler.getElementMap().values().forEach(e -> {
+                    if (targetResourceId.equals(e.getResourceId())) {
+                        return;
+                    }
+                    if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
+                        containerId.add(e.getResourceId());
+                    } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
+                        vmId.add(e.getResourceId());
+                    }
+                });
 
-            cloudPluginHandler.getElementMap().values().forEach(e -> {
-                if (targetResourceId.equals(e.getResourceId())) {
-                    return;
-                }
-                if (BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(e.getImageType())) {
-                    containerId.add(e.getResourceId());
-                } else if (BaseCloudPluginSceneElementModel.ImageType.VM.equals(e.getImageType())) {
-                    vmId.add(e.getResourceId());
-                }
-            });
-
-            NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
-            networkTrafficGroupService.deleteNetworkTrafficMirror(targetResourceId, vmId, containerId);
+                NetworkTrafficGroupService networkTrafficGroupService = BeanCommon.getBean(NetworkTrafficGroupService.class);
+                networkTrafficGroupService.deleteNetworkTrafficMirror(targetResourceId, vmId, containerId);
+            }
         }
 
         var probeCollectorId = scene.getProbeCollector();
