@@ -120,7 +120,7 @@ public class DeleteHandler extends HandlerCommon {
             CloudScenePluginHandler cloudPluginHandler = getPluginHandler().getSceneHandler()
                     .getPluginHandler(cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY);
 
-            if (cloudPluginHandler.getElementMap().containsKey(targetNode)) {
+            if (cloudPluginHandler.getElementMap().containsKey(targetNode) && cloudPluginHandler.getElementPortMap().containsKey(targetPort)) {
                 var targetResourceId = cloudPluginHandler.getElement(targetNode).getResourceId();
 
                 cloudPluginHandler.getElementMap().values().forEach(e -> {
