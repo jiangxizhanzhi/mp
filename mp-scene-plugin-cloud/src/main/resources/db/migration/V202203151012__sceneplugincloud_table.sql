@@ -1,2 +1,0 @@
-alter table mp_sceneplugincloud_scene_config_element add column `is_build_in` tinyint(1) NOT NULL COMMENT '是否云平台內置靶标' ;
-alter table mp_sceneplugincloud_scene_element add column `is_build_in` tinyint(1) NOT NULL COMMENT '是否云平台內置靶标' ;

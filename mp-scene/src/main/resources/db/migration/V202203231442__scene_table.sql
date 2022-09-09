@@ -1,2 +1,0 @@
-alter table mp_scene_scene_element_port add column `order` int NOT NULL default 0 COMMENT '端口排序' ;
-alter table mp_scene_scene_config_element_port add column `order` int NOT NULL default 0 COMMENT '端口排序' ;
