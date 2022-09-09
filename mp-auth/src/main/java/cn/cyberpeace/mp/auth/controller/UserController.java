@@ -220,6 +220,7 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         UserRequest userRequest = new UserRequest();
         if (userInfo.getUserName() != null) {
             userRequest.setUsername(userInfo.getUserName());
+            userRequest.setName(userInfo.getUserName());
         }
         if (userInfo.getUser() != null) {
             User user = userInfo.getUser();
