@@ -131,7 +131,7 @@ public class ImagesService extends BaseCpService {
                 }
                 var u = URLUtil.url(l.getUrl());
                 l.setUrl(StringUtils.replaceOnce(l.getUrl(), u.getHost(), config.getPublicNetProxyIp()));
-                if ("console".equals(l.getProtocol())) {
+                if (config.getPublicNetProxyExcludeProtocols().contains(l.getProtocol())) {
                     return;
                 }
                 l.setIpAddress(config.getPublicNetProxyIp());

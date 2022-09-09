@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 
 /**
  * 对接云平台配置类
@@ -40,6 +42,11 @@ public class DevopsClusterConfig {
      * 公网端口
      */
     private Integer publicNetProxyPort;
+
+    /**
+     * 公网部署不需要替换ip的协议
+     */
+    private List<String> publicNetProxyExcludeProtocols;
 
     /**
      * 主机名称
