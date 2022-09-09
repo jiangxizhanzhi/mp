@@ -143,7 +143,7 @@ public class MonitorScriptControlService {
         }
 
         for (ServerMonitorConfig.MonitorProbe monitor : allSrvMonitors) {
-            String servers = StringUtils.joinWith(",", monitor.getServiceList());
+            String servers = StringUtils.join(monitor.getServiceList(), ",");
             String cmd = String.format(MonitorConstant.MONITOR_CMD, monitor.getLaunchId(), MonitorConstant.OP_STATUS, servers);
             log.info("status manually, hostname:{}, cmd:{}", hostname, cmd);
             var runCommandItem = new WazuhLauncher.RunCommandItem();
@@ -254,7 +254,7 @@ public class MonitorScriptControlService {
         probeParam.setOutputFormat(WazuhLauncher.CMD_OUTPUT_FORMAT_NONE);
         probeParam.setInterval(monitorProbe.getInterval());
 
-        String[] params = {MonitorConstant.OP_STATUS, StringUtils.joinWith(",", monitorProbe.getServiceList())};
+        String[] params = {MonitorConstant.OP_STATUS, StringUtils.join(monitorProbe.getServiceList(), ",")};
         probeParam.setScriptParam(StringUtils.joinWith(StringUtils.SPACE, params));
         return probeParam;
     }
