@@ -41,7 +41,7 @@ CREATE TABLE `mp_auth_org`
     `parent`      varchar(64)   NOT NULL DEFAULT '' COMMENT '父组织',
     `identifier`  varchar(64)   NOT NULL COMMENT '编号',
     `name`        varchar(64)   NOT NULL COMMENT '名称',
-    `path`        varchar(180)  NOT NULL COMMENT '组织结构路径',
+    `path`        varchar(180)  NULL COMMENT '组织结构路径',
     `description` varchar(1024) NOT NULL COMMENT '描述',
     `create_time` datetime      NOT NULL COMMENT '创建时间',
     `update_time` datetime      NOT NULL COMMENT '更新时间',
