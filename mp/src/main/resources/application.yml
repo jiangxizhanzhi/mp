@@ -151,6 +151,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
+    url-ac-filter-exclude-urls: /api/mp/actuator/**
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex

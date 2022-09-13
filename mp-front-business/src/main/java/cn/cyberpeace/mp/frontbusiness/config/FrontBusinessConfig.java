@@ -4,6 +4,8 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 /**
  * @Description
  * @Author shgang
@@ -38,4 +40,9 @@ public class FrontBusinessConfig {
      * 如果请求url在规则表中没有定义，是否跳过拦截，默认不跳过
      */
     private Boolean urlAcFilterIgnoreIfNotDefined = false;
+
+    /**
+     * 不需要拦截的url
+     */
+    private List<String> urlAcFilterExcludeUrls;
 }
