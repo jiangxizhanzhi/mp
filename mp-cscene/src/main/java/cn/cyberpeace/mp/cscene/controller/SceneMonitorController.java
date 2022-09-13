@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
@@ -14,11 +15,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +44,7 @@ public class SceneMonitorController {
     @GetMapping("/info/{sceneId}")
     public ServiceResult<SceneMonitorInfo> getSceneMonitorInfo(@PathVariable String sceneId) {
         SceneMonitorInfo sceneMonitorInfo = sceneMonitorService.getSceneMonitorInfo(sceneId);
-        return ServiceResult.success(sceneMonitorInfo);
+        return ResultCommon.success(sceneMonitorInfo);
     }
 
 
@@ -59,7 +56,7 @@ public class SceneMonitorController {
     @GetMapping("/all_elements/{sceneId}")
     public ServiceResult<List<ElementMonitorBasicInfo>> getSceneAllElements(@PathVariable String sceneId, @RequestParam(required = false) Boolean realTimeHostState) {
         List<ElementMonitorBasicInfo> basicInfoList = sceneMonitorService.getAllSceneElements(sceneId, realTimeHostState);
-        return ServiceResult.success(basicInfoList);
+        return ResultCommon.success(basicInfoList);
     }
 
 
@@ -67,14 +64,14 @@ public class SceneMonitorController {
     @GetMapping("/ips")
     public ServiceResult<List<String>> listIps(BaseSceneElementRequest baseRequest) {
         List<String> ips = sceneMonitorService.listIps(baseRequest);
-        return ServiceResult.success(ips);
+        return ResultCommon.success(ips);
     }
 
     @ApiOperation(value = "查询场景所有录屏用户列表")
     @GetMapping("/recording/users")
     public ServiceResult<List<UserModel>> listRecordingUsers(BaseSceneElementRequest baseRequest) {
         List<UserModel> users = sceneMonitorService.listSceneRecordingUsers(baseRequest);
-        return ServiceResult.success(users);
+        return ResultCommon.success(users);
     }
 
     @ApiOperation(value = "查询场景top5节点状态")
@@ -86,7 +83,7 @@ public class SceneMonitorController {
     public ServiceResult<Map<String, List<ElementMonitorBasicInfo>>> topByHoststates(@PathVariable String sceneId, @RequestParam(required = false) Integer topCount) {
         Map<String, List<ElementMonitorBasicInfo>> result = sceneMonitorService.topAggrByHoststates(sceneId, 5);
 
-        return ServiceResult.success(result);
+        return ResultCommon.success(result);
     }
 
 //    @ApiOperation(value = "查询场景所有主机信息，不含实时内存，cpu等数据")

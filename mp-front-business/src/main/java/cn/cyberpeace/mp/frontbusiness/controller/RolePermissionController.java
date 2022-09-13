@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindRoleTargetsRequest;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -13,12 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,7 +39,7 @@ public class RolePermissionController {
     public ServiceResult<List<TargetModel>> getTargetsByRole(@RequestParam String roleId) {
         List<TargetModel> targets = rolePermissionModelService.listTargetsByRoleIds(Arrays.asList(roleId));
 
-        return ServiceResult.success(targets);
+        return ResultCommon.success(targets);
     }
 
     @ApiOperation(value = "绑定角色-权限关系，注意，如果targetIds为空，表示删除角色所有权限！", notes = "")
@@ -52,7 +48,7 @@ public class RolePermissionController {
     public ServiceResult bindRolePermission(@RequestBody @Validated BindRoleTargetsRequest bindRoleTargetsReq) {
         boolean success = rolePermissionModelService.bindRoleTargets(bindRoleTargetsReq.getRoleId(), bindRoleTargetsReq.getTargetIds(), true);
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("bind role permission failed!");
             throw new MpRuntimeException(AuthErrorCode.ROLE_TARGET_ADD_ERROR);

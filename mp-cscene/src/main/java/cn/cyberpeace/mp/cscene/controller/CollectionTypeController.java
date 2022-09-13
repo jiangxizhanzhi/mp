@@ -1,14 +1,14 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionApp;
-import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.dto.common.CollectionType;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.common.CollectionAppRequest;
 import cn.cyberpeace.mp.cscene.service.CollectionTypeService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +36,7 @@ public class CollectionTypeController {
     public ServiceResult<List<CollectionType>> typesTree(BaseSceneElementRequest baseRequest) {
 
         List<CollectionType> list = collectionTypeService.typeTrees(baseRequest);
-        return ServiceResult.success(list);
+        return ResultCommon.success(list);
     }
 
 
@@ -45,7 +45,7 @@ public class CollectionTypeController {
     @ApiOperation(value = "查询节点应用列表")
     public ServiceResult<List<CollectionApp>> getApps(CollectionAppRequest appRequest) {
         List<CollectionApp> appNames = collectionTypeService.getAppNames(appRequest);
-        return ServiceResult.success(appNames);
+        return ResultCommon.success(appNames);
     }
 
 

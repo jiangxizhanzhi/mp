@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
@@ -48,7 +49,7 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getSceneHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getSceneHostStateTrend(hostStateTrendRequest);
 
-        return ServiceResult.success(hostStates);
+        return ResultCommon.success(hostStates);
     }
 
 
@@ -64,7 +65,7 @@ public class HostStateController {
         hostStateTrendRequest.setElementIds(null);
         List<HostState> hostStates = hostStateService.getClusterHostStateTrend(hostStateTrendRequest);
 
-        return ServiceResult.success(hostStates);
+        return ResultCommon.success(hostStates);
     }
 
 
@@ -79,7 +80,7 @@ public class HostStateController {
     public ServiceResult<List<HostState>> getElementHostStateTrend(HostStateTrendRequest hostStateTrendRequest) {
         List<HostState> hostStates = hostStateService.getElementHostStateTrend(hostStateTrendRequest);
 
-        return ServiceResult.success(hostStates);
+        return ResultCommon.success(hostStates);
     }
 
 
@@ -94,7 +95,7 @@ public class HostStateController {
         pageRequest.setPage(1);
         pageRequest.setPageSize(1);
         List<HostState> hostStates = hostStateService.listHostStates(pageRequest);
-        return ServiceResult.success(hostStates);
+        return ResultCommon.success(hostStates);
     }
 
     /**
@@ -108,7 +109,7 @@ public class HostStateController {
         request.setPage(1);
         request.setPageSize(1);
         List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
-        return ServiceResult.success(hostStates);
+        return ResultCommon.success(hostStates);
     }
 
     @ApiOperation(value = "节点端口信息")

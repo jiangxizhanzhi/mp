@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
@@ -32,7 +33,7 @@ public class ActivMenuController {
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.UPDATE, title = "更新菜单列表", target = OpTargetEnums.MENU)
     public ServiceResult activMenu(MultipartFile file) {
         activMenuService.reImportMenus(file);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 }

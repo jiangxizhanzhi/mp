@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -10,37 +11,18 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
-import cn.cyberpeace.mp.devopscluster.converter.FirewallConverter;
-import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
-import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
-import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
-import cn.cyberpeace.mp.devopscluster.converter.NpcConverter;
-import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
-import cn.cyberpeace.mp.devopscluster.converter.RouterConverter;
-import cn.cyberpeace.mp.devopscluster.converter.SwitchConverter;
-import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
+import cn.cyberpeace.mp.devopscluster.converter.*;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
-import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
-import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
-import cn.cyberpeace.mp.devopscluster.dto.HypervisorActionDTO;
-import cn.cyberpeace.mp.devopscluster.dto.HypervisorWeightAndMaxInstanceDTO;
-import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
-import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
-import cn.cyberpeace.mp.devopscluster.dto.RouterPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.*;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.HypervisorRequest;
-import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorPageVO;
@@ -61,11 +43,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -250,7 +228,7 @@ public class CloudPlatformMonitorController {
                 || request.getAction().equals(HypervisorActionEnum.POWEROFF.getAction())) {
             hypervisorConverter.rebootOrPowerOff(new HypervisorActionDTO(request));
         }
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -303,7 +281,7 @@ public class CloudPlatformMonitorController {
     @GetMapping("/cp_page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(CloudPlatformPageRequest request) {
         ListObjResult<ServiceMonitorDto> result = serviceMonitorService.cpPage(request);
-        return ServiceResult.success(result);
+        return ResultCommon.success(result);
     }
 
     /**
@@ -347,7 +325,7 @@ public class CloudPlatformMonitorController {
                     .build();
             hypervisorPageVOList.add(hypervisorPageVO);
         });
-        return ServiceResult.success(hypervisorPageVOList);
+        return ResultCommon.success(hypervisorPageVOList);
     }
 
 

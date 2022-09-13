@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindOrgTargetsRequest;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -13,12 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -43,7 +39,7 @@ public class OrgPermissionController {
     public ServiceResult bindOrgPermissions(@RequestBody @Validated BindOrgTargetsRequest bindOrgTargetsReq) {
         boolean success = orgPermissionService.bindOrgTargets(bindOrgTargetsReq.getUserId(), bindOrgTargetsReq.getTargetIds(), true);
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("bind org permission failed!");
             throw new MpRuntimeException(AuthErrorCode.ORG_TARGET_ADD_ERROR);
@@ -57,7 +53,7 @@ public class OrgPermissionController {
     @GetMapping("/byorg")
     public ServiceResult<Set<TargetModel>> getOrgPermissions(@RequestParam String orgId) {
         Set<TargetModel> targets = orgPermissionService.listTargetsByOrgId(orgId);
-        return ServiceResult.success(targets);
+        return ResultCommon.success(targets);
     }
 
 
@@ -66,7 +62,7 @@ public class OrgPermissionController {
     @GetMapping("/byorg/includeparent")
     public ServiceResult<Set<TargetModel>> getOrgPermission(@RequestParam String orgId) {
         Set<TargetModel> targets = orgPermissionService.listTargetsByOrgIdIncludeAllParentsOrg(orgId);
-        return ServiceResult.success(targets);
+        return ResultCommon.success(targets);
     }
 
 

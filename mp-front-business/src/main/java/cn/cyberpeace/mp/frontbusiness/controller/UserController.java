@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -29,11 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -65,7 +62,7 @@ public class UserController {
     public ServiceResult resetPwd(@Validated(AddGroup.class) @RequestBody ResetPwdRequest resetPwdRequest) {
         String decryptedPwd = PasswordUtils.desDecrypt(resetPwdRequest.getNewPwd());
         boolean success = userService.resetPwd(resetPwdRequest.getUserId(), decryptedPwd);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @ApiOperation(value = "修改自己的密码", notes = "")
@@ -76,7 +73,7 @@ public class UserController {
         String decryptedOldPwd = PasswordUtils.desDecrypt(req.getOldPwd());
         String decryptedNewPwd = PasswordUtils.desDecrypt(req.getNewPwd());
         boolean success = userService.resetSelfPwd(decryptedOldPwd, decryptedNewPwd);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -88,9 +85,9 @@ public class UserController {
     public ServiceResult<String> disable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchDisable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         }
-        return ServiceResult.success(errMsg);
+        return ResultCommon.success(errMsg);
     }
 
 
@@ -102,9 +99,9 @@ public class UserController {
     public ServiceResult<String> enable(@RequestBody List<String> userIds) {
         String errMsg = userService.batchEnable(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         }
-        return ServiceResult.success(errMsg);
+        return ResultCommon.success(errMsg);
     }
 
     @ApiOperation(value = "审核用户", notes = "")
@@ -115,9 +112,9 @@ public class UserController {
     public ServiceResult<String> approve(@RequestBody List<String> userIds) {
         String errMsg = userService.batchApprove(userIds);
         if (StringUtils.isBlank(errMsg)) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         }
-        return ServiceResult.success(errMsg);
+        return ResultCommon.success(errMsg);
     }
 
 
@@ -125,7 +122,7 @@ public class UserController {
     @PostMapping("/heartbeat")
     public ServiceResult heartbeat() throws MpRuntimeException {
         heartbeatService.heartbeat();
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @ApiOperation(value = "用户在线报告", notes = "")
@@ -140,7 +137,7 @@ public class UserController {
     @GetMapping("/olUserCnt")
     public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
         UserOnlineCntDto userOnlineCntDto = userOnlineRecordService.onlineUserCnt();
-        return ServiceResult.success(userOnlineCntDto);
+        return ResultCommon.success(userOnlineCntDto);
     }
 
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.request.activation.ActivationRequest;
@@ -11,12 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
@@ -40,7 +36,7 @@ public class SysActivationController {
     @PostMapping
     public ServiceResult activate(@RequestBody @Validated ActivationRequest activationRequest) {
         activationService.activate(activationRequest);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -55,7 +51,7 @@ public class SysActivationController {
             content.setIsActived(AdminConstant.STATUS_NOT_ACTIVITED);
         }
 
-        return ServiceResult.success(content);
+        return ResultCommon.success(content);
     }
 
 
@@ -65,7 +61,7 @@ public class SysActivationController {
     public ServiceResult<String> getConfigValue(@RequestParam String key) {
         String value = activationService.getValueByKey(key);
 
-        return ServiceResult.success(value);
+        return ResultCommon.success(value);
     }
 
 
@@ -73,7 +69,7 @@ public class SysActivationController {
     @GetMapping("/machinecode")
     public ServiceResult getMachineCode() {
         String code = activationService.querySysUUID();
-        return ServiceResult.success(code);
+        return ResultCommon.success(code);
     }
 
 

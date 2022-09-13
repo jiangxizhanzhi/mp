@@ -1,12 +1,9 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageItemDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplatePageQueryRequest;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateProbeDto;
-import cn.cyberpeace.mp.situationaware.model.dto.collection.CollectionTemplateRequest;
+import cn.cyberpeace.mp.situationaware.model.dto.collection.*;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.validate.UpdateGroup;
 import cn.cyberpeace.mp.situationaware.service.CollectionTemplateService;
@@ -20,14 +17,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -59,9 +49,9 @@ public class CollectionTemplateController {
     public ServiceResult<CollectionTemplateDto> getById(@RequestParam String id) {
         List<CollectionTemplateDto> colTempDtos = templateService.listByIds(ArrayUtils.toArray(id));
         if (CollectionUtil.isNotEmpty(colTempDtos)) {
-            return ServiceResult.success(colTempDtos.get(0));
+            return ResultCommon.success(colTempDtos.get(0));
         }
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -73,7 +63,7 @@ public class CollectionTemplateController {
     })
     public ServiceResult<CollectionTemplateProbeDto> getProbeDetailsById(@RequestParam String templateId, @RequestParam String probeId) {
         CollectionTemplateProbeDto tempProbeDto = templateService.getTemplateProbeDtoWithScriptContent(templateId, probeId);
-        return ServiceResult.success(tempProbeDto);
+        return ResultCommon.success(tempProbeDto);
     }
 
     /**
@@ -93,7 +83,7 @@ public class CollectionTemplateController {
                                                                      @RequestParam(required = false) Integer category,
                                                                      @RequestParam(required = false) String name) {
         List<ProbeDto> probes = templateService.listCustomProbesForTemplate(templateId, category, name);
-        return ServiceResult.success(probes);
+        return ResultCommon.success(probes);
     }
 
     /**
@@ -107,7 +97,7 @@ public class CollectionTemplateController {
     @ApiImplicitParam(name = "addRequest", value = "采集模板新增请求体")
     public ServiceResult addTemplate(@RequestBody CollectionTemplateRequest addRequest) {
         String id = templateService.addTemplate(addRequest);
-        return ServiceResult.success(id);
+        return ResultCommon.success(id);
     }
 
     /**
@@ -120,7 +110,7 @@ public class CollectionTemplateController {
     @ApiImplicitParam(name = "updateRequest", value = "采集模板修改请求体")
     public ServiceResult<Void> modifyTemplate(@RequestBody @Validated(UpdateGroup.class) CollectionTemplateRequest updateRequest) {
         templateService.modifyTemplate(updateRequest);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -129,7 +119,7 @@ public class CollectionTemplateController {
     @ApiImplicitParam(name = "ids", value = "模板ID集合", dataTypeClass = String[].class)
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
         int cnt = templateService.deleteByIds(ids);
-        return ServiceResult.success(cnt);
+        return ResultCommon.success(cnt);
     }
 
 }

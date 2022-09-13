@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.hutool.core.collection.CollectionUtil;
@@ -122,7 +123,7 @@ public class UserExcelController {
             log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));
             throw new MpRuntimeException(AuthErrorCode.EXCEL_FORMAT_ERROR);
         }
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 

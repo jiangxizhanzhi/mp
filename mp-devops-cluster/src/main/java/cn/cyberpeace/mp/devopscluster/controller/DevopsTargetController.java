@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
@@ -322,7 +323,7 @@ public class DevopsTargetController {
     @GetMapping("/register")
     public ServiceResult register(@RequestParam(required = false) String url){
         initRegisterService.register(url);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @ApiOperation("上传靶标图标")

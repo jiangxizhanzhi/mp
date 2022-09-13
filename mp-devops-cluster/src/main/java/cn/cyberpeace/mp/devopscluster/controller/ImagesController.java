@@ -3,17 +3,14 @@ package cn.cyberpeace.mp.devopscluster.controller;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtSystemInfo;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtVm;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Flavor;
+import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.FlavorService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ImagesService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.ScenariosService;
@@ -25,32 +22,13 @@ import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
 import cn.cyberpeace.mp.devopscluster.converter.InjectFileConverter;
 import cn.cyberpeace.mp.devopscluster.converter.SnapshotConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
-import cn.cyberpeace.mp.devopscluster.converter.model.DeviceAndSnapshotConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.ImageConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.ImageTargetConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.InjectFileConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.SnapshotConvertModel;
+import cn.cyberpeace.mp.devopscluster.converter.model.*;
 import cn.cyberpeace.mp.devopscluster.dto.ImageInjectFileDeleteDTO;
 import cn.cyberpeace.mp.devopscluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.DeviceInjectFileCreate;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
-import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageAsyncRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageByUuidsRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFilePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageInjectFileRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagePageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImageRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesAuthRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesBuildRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteInstanceRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.ImagesRebootInstanceRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotDeleteRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotMergeRequest;
-import cn.cyberpeace.mp.devopscluster.request.SnapshotRequest;
+import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.upload.CustomImageUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.InjectFileUploadService;
 import cn.cyberpeace.mp.devopscluster.service.upload.SshPrivateKeyUploadService;
@@ -77,26 +55,13 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -161,7 +126,7 @@ public class ImagesController {
     public ServiceResult add(@RequestBody ImageRequest request){
         validImageRequest(request);
         imagesConverter.add(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -177,7 +142,7 @@ public class ImagesController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         imagesConverter.update(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -242,7 +207,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "快速构建镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult build(@RequestBody ImagesBuildRequest request){
         imagesConverter.build(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -255,7 +220,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult delete(@RequestBody ImagesDeleteRequest request){
         imagesConverter.delete(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -267,7 +232,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "授权镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult auth(@RequestBody ImagesAuthRequest request){
         imagesConverter.auth(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -311,7 +276,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.START, title = "创建虚拟机/容器", target = OpTargetEnums.IMAGE)
     public ServiceResult create(@PathVariable("id") String uuid){
         imagesConverter.create(uuid);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -323,7 +288,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.STOP, title = "释放镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInstance(@RequestBody ImagesDeleteInstanceRequest request){
         imagesConverter.delete(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -335,7 +300,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.RECOVER, title = "重启镜像", target = OpTargetEnums.IMAGE)
     public ServiceResult reboot(@RequestBody ImagesRebootInstanceRequest request){
         imagesConverter.reboot(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -401,7 +366,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.UPDATE, title = "合并快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult mergeSnapshot(@RequestBody SnapshotMergeRequest request){
         snapshotConverter.merge(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -413,7 +378,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult<Boolean> deleteSnapshot(@RequestBody SnapshotDeleteRequest request) {
         snapshotService.deleteSnapshot(request);
-        return ServiceResult.success(true);
+        return ResultCommon.success(true);
     }
 
     /**
@@ -425,7 +390,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "创建快照", target = OpTargetEnums.SNAPSHOT)
     public ServiceResult createSnapshot(@RequestBody SnapshotRequest request){
         snapshotConverter.create(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -438,7 +403,7 @@ public class ImagesController {
     public ServiceResult injectFile(@Valid @RequestBody ImageInjectFileRequest request){
         scenariosService.injectFile(new DeviceInjectFileCreate(request.getDeviceUuid(),
                 request.getFileUrl(),request.getFileName(),request.getFileSize()));
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -460,7 +425,7 @@ public class ImagesController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除文件注入", target = OpTargetEnums.IMAGE)
     public ServiceResult deleteInjectFile(@RequestBody ImageInjectFileDeleteRequest request){
         injectFileConverter.delete(new ImageInjectFileDeleteDTO(request));
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -497,7 +462,7 @@ public class ImagesController {
            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Integer result = imagesConverter.async(request);
-        return result > 0 ? ServiceResult.successful() : ServiceResult.fail("");
+        return result > 0 ? ResultCommon.success() : ResultCommon.fail("");
     }
 
     /**

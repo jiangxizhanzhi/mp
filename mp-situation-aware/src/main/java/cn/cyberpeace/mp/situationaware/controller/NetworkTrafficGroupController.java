@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.situationaware.model.GroupModel;
@@ -10,13 +11,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -32,7 +27,7 @@ public class NetworkTrafficGroupController {
     @ApiOperation(value = "初始化流量网络", notes = "")
     public ServiceResult initArkimeNetwork() {
         networkTrafficGroupService.initArkimeNetwork();
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @DeleteMapping("/{groupId}")
@@ -40,7 +35,7 @@ public class NetworkTrafficGroupController {
     @ApiImplicitParam(name = "groupId", value = "场景分组id", dataTypeClass = String.class)
     public ServiceResult deleteModelById(@PathVariable("groupId") String groupId) {
         networkTrafficGroupService.deleteArkimeInstance(groupId);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 

@@ -11,6 +11,7 @@ import lombok.Data;
  */
 @Data
 @AllArgsConstructor
+@Deprecated
 public class ServiceResult<T> extends BaseServiceResult<T, T> {
 
     public static <T1> ServiceResultBuilder<T1> builder() {
