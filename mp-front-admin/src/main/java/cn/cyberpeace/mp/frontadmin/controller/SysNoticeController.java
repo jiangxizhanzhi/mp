@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -28,14 +29,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Collections;
@@ -67,7 +61,7 @@ public class SysNoticeController {
         if (Objects.nonNull(result.getSource())) {
             SysNoticeModel noticeModel = result.getSource().getObj();
             SysNoticeDto noticeDto = noticeService.noticeModel2NoticeDto(noticeModel, false);
-            return ServiceResult.success(noticeDto);
+            return ResultCommon.success(noticeDto);
         } else {
             throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(id));
         }
@@ -79,7 +73,7 @@ public class SysNoticeController {
     @PostMapping("/read/{id}")
     public ServiceResult read(@PathVariable String id) {
         noticeService.read(id);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -88,7 +82,7 @@ public class SysNoticeController {
     @PostMapping("/unpush")
     public ServiceResult unpush(@RequestBody String[] ids) {
         noticeService.unpush(CollectionUtil.toList(ids));
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -96,7 +90,7 @@ public class SysNoticeController {
     @GetMapping("/unread_count")
     public ServiceResult<Integer> unReadCount() {
         int unreadCnt = noticeService.unReadCount();
-        return ServiceResult.success(unreadCnt);
+        return ResultCommon.success(unreadCnt);
     }
 
     @ApiOperation("分页查询所有公告")
@@ -125,7 +119,7 @@ public class SysNoticeController {
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.CREATE, title = "新增公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<SysNoticeModel> create(@RequestBody @Validated(AddGroup.class) SysNoticeRequest noticeReq) {
         SysNoticeModel noticeModel = noticeService.add(noticeReq);
-        return ServiceResult.success(noticeModel);
+        return ResultCommon.success(noticeModel);
     }
 
     @ApiOperation("更新公告")
@@ -145,7 +139,7 @@ public class SysNoticeController {
     @OperateLog(module = OpModuleEnums.SYSTEM, type = OpTypeEnums.DELETE, title = "删除公告", target = OpTargetEnums.NOTICE)
     public ServiceResult<Integer> bulkDelete(@RequestBody String[] ids) {
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
-        return ServiceResult.success(result.getSource());
+        return ResultCommon.success(result.getSource());
     }
 
     @ApiOperation("删除指定id公告")
@@ -157,7 +151,7 @@ public class SysNoticeController {
     public ServiceResult<Integer> delete(@PathVariable String id) {
         String[] ids = Collections.singletonList(id).toArray(new String[0]);
         ServiceResult<Integer> result = noticeService.bulkDelete(ids);
-        return ServiceResult.success(result.getSource());
+        return ResultCommon.success(result.getSource());
     }
 
     @ApiOperation(value = "查询系统公告类型")

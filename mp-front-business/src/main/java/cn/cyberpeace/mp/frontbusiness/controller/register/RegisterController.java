@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.RegisterService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -60,7 +61,7 @@ public class RegisterController {
             request.setAttribute(LogConstant.USER_ID_KEY, userModel.getId());
             request.setAttribute(LogConstant.USER_NAME_KEY, userModel.getUsername());
             request.setAttribute(LogConstant.USER_TYPE_KEY,  LogConstant.USER_TYPE_USER);
-            return ServiceResult.success(userModel);
+            return ResultCommon.success(userModel);
         }
 
         throw new MpRuntimeException(AuthErrorCode.OP_ERROR);

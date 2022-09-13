@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
@@ -36,7 +37,7 @@ public class BizServiceMonitorController {
     @GetMapping("/page")
     public ServiceResult<ListObjResult<ServiceMonitorDto>> page(BizServicePageRequest request){
         ListObjResult<ServiceMonitorDto> result = serviceMonitorService.bizServicePage(request);
-        return ServiceResult.success(result);
+        return ResultCommon.success(result);
     }
 
 }

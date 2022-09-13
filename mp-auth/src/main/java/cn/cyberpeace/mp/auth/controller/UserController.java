@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -105,7 +106,7 @@ public class UserController {
     @GetMapping("/current")
     public ServiceResult<UserDto> getCurrentUser() {
         UserDto userDto = userService.getCurrentUserDto();
-        return ServiceResult.success(userDto);
+        return ResultCommon.success(userDto);
     }
 
 
@@ -116,7 +117,7 @@ public class UserController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> add(@RequestBody UserRequest createRequest) {
         UserModel userModel = userService.add(createRequest);
-        return ServiceResult.success(userModel);
+        return ResultCommon.success(userModel);
     }
 
     @ApiOperation(value = "修改用户，同时完成组织，角色绑定关系", notes = "")
@@ -125,6 +126,6 @@ public class UserController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "更新用户", target = OpTargetEnums.USER)
     public ServiceResult<UserModel> modify(@RequestBody UserRequest modifyRequest) {
         UserModel userModel = userService.modify(modifyRequest);
-        return ServiceResult.success(userModel);
+        return ResultCommon.success(userModel);
     }
 }

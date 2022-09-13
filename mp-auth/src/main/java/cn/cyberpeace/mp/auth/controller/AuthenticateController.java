@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -45,7 +46,7 @@ public class AuthenticateController {
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
         UserDto userDto = userService.userModel2UserDtoWithoutOrg(userModel);
-        return ServiceResult.success(userDto);
+        return ResultCommon.success(userDto);
     }
 
     private JwtUtils.UserInfo verifyToken(String token) {

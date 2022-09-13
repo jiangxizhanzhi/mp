@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.cloud.platform.service;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -121,12 +122,12 @@ public class ScreenrecordService extends BaseCpService {
 
         log.info("remove record file response: {}", delResponse);
         if (Objects.nonNull(delResponse)) {
-            return ServiceResult.success(delResponse.isSuccess());
+            return ResultCommon.success(delResponse.isSuccess());
         } else {
             log.error("remove record file error");
         }
 
-        return ServiceResult.success(false);
+        return ResultCommon.success(false);
     }
 
     /**
@@ -144,7 +145,7 @@ public class ScreenrecordService extends BaseCpService {
             response.setOtherUseSize(cpResponse.getOtherUseSize());
         }
 
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -219,7 +220,7 @@ public class ScreenrecordService extends BaseCpService {
                 .screenRecordPercent(screenRecordPercent)
                 .build();
 
-        return ServiceResult.success(spaceStaticsVO);
+        return ResultCommon.success(spaceStaticsVO);
     }
 
     /**
@@ -238,12 +239,12 @@ public class ScreenrecordService extends BaseCpService {
 
         log.info("batch delete record file response: {}", delResponse);
         if (Objects.nonNull(delResponse)) {
-            return ServiceResult.success(delResponse.isSuccess());
+            return ResultCommon.success(delResponse.isSuccess());
         } else {
             log.error("batch delete record file error");
         }
 
-        return ServiceResult.success(false);
+        return ResultCommon.success(false);
     }
 
     /**

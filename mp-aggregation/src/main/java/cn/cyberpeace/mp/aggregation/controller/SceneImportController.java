@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ExportResult;
 import cn.cyberpeace.mp.aggregation.service.ResourceCenterService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import io.swagger.annotations.Api;
@@ -42,17 +43,17 @@ public class SceneImportController {
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
         log.info("start import scene topo , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
-            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+            return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
         ServiceResult<CsceneBO> serviceResult = resourceCenterService.importByYmlConfig(request.getPath(), request.getImagePath(), request.getImagePathList(), request.getSceneFilePath());
-        return ServiceResult.success(serviceResult.getSource().getId());
+        return ResultCommon.success(serviceResult.getSource().getId());
     }
 
     @ApiOperation("场景导出")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneExportRequest.class)
     @PostMapping("/export_scene")
     public ServiceResult<ExportResult> exportScene(@RequestBody SceneExportRequest request) {
-        return ServiceResult.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
+        return ResultCommon.success(resourceCenterService.exportScene(request.getId(), request.getEnvPath(), request.getImagePath(), request.getSingleImagePath()).getSource());
     }
 
     @ApiOperation("挂载")
@@ -61,7 +62,7 @@ public class SceneImportController {
     public ServiceResult<Boolean> mount(@RequestBody MoundRequest request) {
         log.info("mount nfs , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getHost()) || StringUtils.isEmpty(request.getPath())) {
-            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+            return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
         return this.resourceCenterService.mount(request.getHost(), request.getPath()).asResult();
     }
@@ -72,7 +73,7 @@ public class SceneImportController {
     public ServiceResult<Boolean> umount(@RequestBody MoundRequest request) {
         log.info("unmount nfs , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
-            return ServiceResult.fail(BaseErrorCode.PARAMS_INVALID);
+            return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
         return this.resourceCenterService.umount(request.getPath()).asResult();
     }

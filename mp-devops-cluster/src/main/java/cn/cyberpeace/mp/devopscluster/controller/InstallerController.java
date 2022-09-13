@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtDocker;
@@ -110,7 +111,7 @@ public class InstallerController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.CREATE, title = "新增服务", target = OpTargetEnums.SERVICE)
     public ServiceResult add(@RequestBody InstallerRequest request){
         installerConverter.add(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -130,7 +131,7 @@ public class InstallerController {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         installerConverter.add(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
@@ -142,7 +143,7 @@ public class InstallerController {
     @OperateLog(module = OpModuleEnums.TARGET, type = OpTypeEnums.DELETE, title = "删除服务", target = OpTargetEnums.SERVICE)
     public ServiceResult delete(@RequestBody InstallerDeleteRequest request){
         installerConverter.delete(request);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**

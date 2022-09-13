@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.common.service.impl;
 
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonErrorCode;
@@ -39,9 +40,9 @@ public class FastDfsFileServiceImpl implements FileService {
     public ServiceResult<FileResponseData> uploadFile(MultipartFile file) {
         FileResponseData responseData = uploadSample(file);
         if (responseData.isSuccess()) {
-            return ServiceResult.success(responseData);
+            return ResultCommon.success(responseData);
         } else {
-            return ServiceResult.fail(responseData.getMessage());
+            return ResultCommon.fail(responseData.getMessage());
         }
 
     }
@@ -90,9 +91,9 @@ public class FastDfsFileServiceImpl implements FileService {
             FdfsCommon.delete(filePath);
         } catch (MpRuntimeException e) {
             log.error("deleteFile error", e);
-            return ServiceResult.fail(e.getMessage());
+            return ResultCommon.fail(e.getMessage());
         }
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**

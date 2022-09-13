@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadminbusiness.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.UnlimitPagination;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -23,13 +24,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
@@ -66,7 +61,7 @@ public class SysConfigController {
     @GetMapping("/all")
     public ServiceResult<List<SysConfigModel>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
-        return ServiceResult.success(configs);
+        return ResultCommon.success(configs);
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
@@ -80,7 +75,7 @@ public class SysConfigController {
         boolean success = sysConfigService.updateByKeyName(updateConfig);
         if (success) {
             sysConfigService.publishConfigUpdateEvent(CollectionUtil.toList(updateConfig));
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("update config failed! {}", updateConfig);
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
@@ -98,7 +93,7 @@ public class SysConfigController {
         boolean success = sysConfigService.batchUpdateByKeyname(configs);
         if (success) {
             sysConfigService.publishConfigUpdateEvent(configs);
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("update config failed!");
             throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_MODIFY_ERROR);
@@ -117,7 +112,7 @@ public class SysConfigController {
     @ResponseBody
     public ServiceResult<FileResponseData> logoUpload(@RequestParam(value = "file") MultipartFile file) {
         if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.IMPORT_SYSTEM_LOGO_LIST)) {
-            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
+            return ResultCommon.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
 
         return fileService.uploadFile(file);
@@ -135,7 +130,7 @@ public class SysConfigController {
     @ResponseBody
     public ServiceResult<FileResponseData> importVPN(@RequestParam(value = "file") MultipartFile file) {
         if (!SuffixCheckUtil.checkByFile(file, FileSuffixConstant.IMPORT_VPN_LIST)) {
-            return ServiceResult.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
+            return ResultCommon.fail(CommonErrorCode.UPLOAD_FILE_TYPE_ERROR);
         }
 
         return fileService.uploadFile(file);

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.dto.event.ElementEventPercent;
@@ -44,7 +45,7 @@ public class EventMonitorController {
     @GetMapping("/sum")
     public ServiceResult<Long> getAllEventSum(BaseTimeRangeRequest baseRequest) {
         Long sum = eventMonitorService.sumEvent(baseRequest);
-        return ServiceResult.success(sum);
+        return ResultCommon.success(sum);
     }
 
 
@@ -63,7 +64,7 @@ public class EventMonitorController {
             eventPercentRequest.setTopCount(5);
         }
         List<ElementEventPercent> limitList = eventPercents.stream().limit(eventPercentRequest.getTopCount()).collect(Collectors.toList());
-        return ServiceResult.success(limitList);
+        return ResultCommon.success(limitList);
     }
 
 
@@ -77,7 +78,7 @@ public class EventMonitorController {
     @GetMapping("/aggr")
     public ServiceResult<EventAggr> getEventAggr(BaseTimeRangeRequest baseRequest) {
         EventAggr eventAggr = eventMonitorService.aggrByEventType(baseRequest);
-        return ServiceResult.success(eventAggr);
+        return ResultCommon.success(eventAggr);
     }
 
     /**
@@ -90,7 +91,7 @@ public class EventMonitorController {
     @GetMapping("/event_trend")
     public ServiceResult<List<EventTimeCount>> getEventTrend(EventTrendRequest eventTrendRequest) {
         List<EventTimeCount> eventTimeCounts = eventMonitorService.getEventTrend(eventTrendRequest);
-        return ServiceResult.success(eventTimeCounts);
+        return ResultCommon.success(eventTimeCounts);
     }
 
 }

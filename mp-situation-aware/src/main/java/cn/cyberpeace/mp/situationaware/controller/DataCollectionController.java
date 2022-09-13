@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -59,6 +60,6 @@ public class DataCollectionController {
     @PostMapping("/monitor_agent_mac")
     @ApiOperation(value = "查询场景agent和mac信息", notes = "")
     public ServiceResult<MultiValueMap<String, String>> queryAllAgentMacAddr() {
-        return ServiceResult.success((dataCollectionService.queryAllAgentMacAddr()));
+        return ResultCommon.success((dataCollectionService.queryAllAgentMacAddr()));
     }
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.BaseModelController;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -103,7 +104,7 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
         if (CollectionUtils.isNotEmpty(serverAlarmList)) {
             systemAlarm.setServerAlarmList(serverAlarmList);
         }
-        return ServiceResult.success(systemAlarm);
+        return ResultCommon.success(systemAlarm);
     }
 
 }
