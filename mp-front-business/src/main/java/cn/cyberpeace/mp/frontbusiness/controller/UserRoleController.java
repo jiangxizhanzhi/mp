@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -22,11 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -73,7 +70,7 @@ public class UserRoleController {
     public ServiceResult bindUserRoles(@RequestBody @Validated UserRolesRequest userRolesReq) {
         boolean success = userRoleService.bindUserRoles(userRolesReq.getUserId(), userRolesReq.getRoleIds(), true);
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("bind user roles failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
@@ -88,7 +85,7 @@ public class UserRoleController {
     public ServiceResult bindRoleUsers(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
         boolean success = userRoleService.bindRoleUsers(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("bind role users failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
@@ -103,7 +100,7 @@ public class UserRoleController {
     public ServiceResult deleteByRoleIdAnUserIds(@RequestBody @Validated RoleUsersRequest roleUsersReq) {
         boolean success = userRoleService.deleteByRoleIdAndUserIds(roleUsersReq.getRoleId(), roleUsersReq.getUserIds());
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("delete user role relation failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ROLE_DELETE_ERROR);

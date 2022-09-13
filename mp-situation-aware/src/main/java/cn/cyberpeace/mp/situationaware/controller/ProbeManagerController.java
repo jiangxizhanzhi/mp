@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.situationaware.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -28,15 +29,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -95,9 +88,9 @@ public class ProbeManagerController {
     public ServiceResult<ProbeDto> getById(@RequestParam String id) {
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(id));
         if (CollectionUtil.isNotEmpty(probeDtos)) {
-            return ServiceResult.success(probeDtos.get(0));
+            return ResultCommon.success(probeDtos.get(0));
         }
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @GetMapping("/batch")
@@ -106,7 +99,7 @@ public class ProbeManagerController {
     public ServiceResult<List<ProbeDto>> getByIds(@RequestParam String[] ids) {
 
         List<ProbeDto> probeDtos = probeService.listByIds(Arrays.asList(ids));
-        return ServiceResult.success(probeDtos);
+        return ResultCommon.success(probeDtos);
     }
 
     /**
@@ -127,7 +120,7 @@ public class ProbeManagerController {
             probeRequest.setScriptUrl(httpUrl);
         }
         probeService.addProbe(probeRequest);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -162,7 +155,7 @@ public class ProbeManagerController {
         }
 
         probeService.modifyProbe(probeRequest);
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 
@@ -173,7 +166,7 @@ public class ProbeManagerController {
     public ServiceResult deleteByIds(@RequestParam String[] ids) {
 
         int cnt = probeService.deleteByIds(Arrays.asList(ids));
-        return ServiceResult.success(cnt);
+        return ResultCommon.success(cnt);
     }
 
     @ApiOperation(value = "导入脚本文件，返回脚本内容", notes = "")
@@ -182,6 +175,6 @@ public class ProbeManagerController {
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {
         String content = probeScriptService.readScriptFileContent(file);
-        return ServiceResult.success(content);
+        return ResultCommon.success(content);
     }
 }

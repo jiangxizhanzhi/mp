@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -65,7 +66,7 @@ public class ElementMonitorController {
     public ServiceResult<ElementMonitorBasicInfo> getElementMonitorInfo(BaseSceneElementRequest baseRequest) {
         ElementMonitorBasicInfo elementMonitorBasicInfo = sceneElementMonitorService.getElementMonitorInfo(baseRequest, true);
 
-        return ServiceResult.success(elementMonitorBasicInfo);
+        return ResultCommon.success(elementMonitorBasicInfo);
     }
 
 
@@ -79,7 +80,7 @@ public class ElementMonitorController {
     @GetMapping("/rtinfo")
     public ServiceResult<ElementRTInfo> getElementRTInfo(BaseSceneElementRequest baseRequest) {
         ElementRTInfo rtInfo = sceneElementMonitorService.getElementRTInfo(baseRequest);
-        return ServiceResult.success(rtInfo);
+        return ResultCommon.success(rtInfo);
     }
 
 
@@ -87,7 +88,7 @@ public class ElementMonitorController {
     @GetMapping("/os")
     public ServiceResult<OS> getOS(BaseSceneElementRequest baseRequest) {
         OS os = sceneElementMonitorService.getOSInfo(baseRequest);
-        return ServiceResult.success(os);
+        return ResultCommon.success(os);
     }
 
 

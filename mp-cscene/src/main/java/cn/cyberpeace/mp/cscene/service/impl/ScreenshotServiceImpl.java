@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.config.BaseAppConfig;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -77,7 +78,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         try {
             filePath = FdfsCommon.upload(request.getFile().getInputStream(), suffix);
         } catch (IOException e) {
-            return ServiceResult.fail("Upload screenshot error");
+            return ResultCommon.fail("Upload screenshot error");
         }
 
         ScreenshotModel model = new ScreenshotModel();
@@ -91,7 +92,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 获取当前用户信息
         UserModel loginUser = UserUtils.getLoginUser();
         if (Objects.isNull(loginUser)) {
-            return ServiceResult.fail("Get login user info error");
+            return ResultCommon.fail("Get login user info error");
         }
         // 用户id
         model.setUserId(loginUser.getId());
@@ -116,7 +117,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         // 返回前端地址加上 /fdfs 前缀
         model.setFile(FdfsCommon.genHttpUrl(filePath));
 
-        return ServiceResult.success(model);
+        return ResultCommon.success(model);
     }
 
     /**
@@ -131,7 +132,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
             usedSpace = 0L;
         }
         ScreenshotUsedSpaceResponse response = new ScreenshotUsedSpaceResponse(usedSpace);
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     /**
@@ -163,7 +164,7 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
             deleteCount = ids.length;
         }
 
-        return ServiceResult.success(deleteCount);
+        return ResultCommon.success(deleteCount);
     }
 
     /**
@@ -178,10 +179,10 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
             // 异步删除文件服务器上文件
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
             bulkDelete(request.getIds().toArray(new String[0]));
-            return ServiceResult.success(screenshotModels.size());
+            return ResultCommon.success(screenshotModels.size());
         } else {
             log.error("Screenshot to delete not exist:{}", request.getIds());
-            return ServiceResult.fail("Screenshot to delete not exist");
+            return ResultCommon.fail("Screenshot to delete not exist");
         }
 
     }
@@ -200,10 +201,10 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
             // 异步删除文件服务器上文件
             asyncScreenshotModelService.batchDeleteScreenshot(screenshotModels);
             bulkDelete(idList.toArray(new String[0]));
-            return ServiceResult.success(screenshotModels.size());
+            return ResultCommon.success(screenshotModels.size());
         } else {
             log.warn("Screenshot to delete by csceneId not exist:{}", csceneId);
-            return ServiceResult.fail("Screenshot to delete by csceneId not exist");
+            return ResultCommon.fail("Screenshot to delete by csceneId not exist");
         }
 
     }

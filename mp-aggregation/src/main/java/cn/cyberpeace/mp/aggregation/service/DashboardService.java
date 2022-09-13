@@ -155,7 +155,7 @@ public class DashboardService {
         return response;
     }
 
-    public ServiceResult<UserResourceResponse> countUserResourceResponse() {
+    public UserResourceResponse countUserResourceResponse() {
         var userResource = UserResourceResponse
                 .builder()
                 .containerCount(0)
@@ -165,7 +165,7 @@ public class DashboardService {
                 .build();
         var user = UserCommon.getCurrentUser();
         if (user == null) {
-            return new ServiceResult<>(userResource);
+            return userResource;
         }
         var condition = new HumanCondition()
                 .filterEqual(CsceneInstanceModel::getDeleted, false)
@@ -177,7 +177,7 @@ public class DashboardService {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         if (csceneInstances.isEmpty()) {
-            return new ServiceResult<>(userResource);
+            return userResource;
         }
 
         userResource.setSceneCount(csceneInstances.size());
@@ -191,7 +191,7 @@ public class DashboardService {
         userResource.setVmCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE, 0L).intValue());
         userResource.setContainerCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER, 0L).intValue());
         userResource.setEntityCount(result.getOrDefault(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE, 0L).intValue());
-        return new ServiceResult<>(userResource);
+        return userResource;
     }
 
     public ServiceResult<SceneBusinessSummary> groupCountResourceByRole() {

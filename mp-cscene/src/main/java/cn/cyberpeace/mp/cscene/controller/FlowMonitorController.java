@@ -2,24 +2,19 @@ package cn.cyberpeace.mp.cscene.controller;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.dto.flow.*;
 import cn.cyberpeace.mp.cscene.request.common.AssetsStatisticsRequest;
 import cn.cyberpeace.mp.cscene.request.common.AttackCountRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
 import cn.cyberpeace.mp.cscene.request.common.BaseTimeRangeRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAnalysisSummary;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackDto;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTime;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowAttackTypeCount;
 import cn.cyberpeace.mp.cscene.request.flow.FlowCommonRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowRiskCount;
 import cn.cyberpeace.mp.cscene.request.flow.FlowSceneSimulationRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.FlowTrend;
 import cn.cyberpeace.mp.cscene.request.flow.FlowTrendRequest;
-import cn.cyberpeace.mp.cscene.dto.flow.TotalFlowAttackRatio;
 import cn.cyberpeace.mp.cscene.response.AssetsStatisticsResponse;
 import cn.cyberpeace.mp.cscene.service.CsceneCommonService;
 import cn.cyberpeace.mp.cscene.service.FlowMonitorService;
@@ -67,7 +62,7 @@ public class FlowMonitorController {
     public ServiceResult simulation(FlowSceneSimulationRequest request) {
         flowMonitorService.simulation(request);
 
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @Autowired
@@ -83,7 +78,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowTrend>> getSceneFlowTrend(FlowTrendRequest flowTrendRequest) {
         List<FlowTrend> flowTrends = flowMonitorService.getSceneFlowTrend(flowTrendRequest);
 
-        return ServiceResult.success(flowTrends);
+        return ResultCommon.success(flowTrends);
     }
 
     /**
@@ -96,7 +91,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowGroupPortWithProtocolVO>> getSceneAttackPort(FlowCommonRequest request) {
         List<FlowGroupPortWithProtocolVO> list = flowMonitorService.groupByDestinationPortWithProtocol(request);
 
-        return ServiceResult.success(list);
+        return ResultCommon.success(list);
     }
 
     /**
@@ -109,7 +104,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowGroupByDestinationIpAndSeverityVO>> getSceneTargetStatus(FlowCommonRequest request) {
         List<FlowGroupByDestinationIpAndSeverityVO> list = flowMonitorService.groupByDestinationIpAndSeverity(request);
 
-        return ServiceResult.success(list);
+        return ResultCommon.success(list);
     }
 
 
@@ -122,7 +117,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowTrend>> getElementFlowTrend(FlowTrendRequest flowTrendRequest) {
         List<FlowTrend> flowTrends = flowMonitorService.getElementFlowTrend(flowTrendRequest);
 
-        return ServiceResult.success(flowTrends);
+        return ResultCommon.success(flowTrends);
     }
 
 
@@ -132,7 +127,7 @@ public class FlowMonitorController {
         log.info("{}", baseRequest);
 
         FlowRiskCount riskCount = flowMonitorService.getFlowRiskCount(baseRequest);
-        return ServiceResult.success(riskCount);
+        return ResultCommon.success(riskCount);
     }
 
     @ApiOperation(value = "攻击流量各类别统计")
@@ -141,7 +136,7 @@ public class FlowMonitorController {
         log.info("attack_type_count params: {}", JsonCommon.stringify(baseRequest));
 
         List<FlowAttackTypeCount> attackTypeCounts = flowMonitorService.getAttackTypeCount(baseRequest);
-        return ServiceResult.success(attackTypeCounts);
+        return ResultCommon.success(attackTypeCounts);
     }
 
     @ApiOperation(value = "攻击次数各按ip统计", notes = "单个ip发起攻击或受到攻击的次数")
@@ -149,7 +144,7 @@ public class FlowMonitorController {
     public ServiceResult<List<FlowAttackTime>> getAttackTimes(AttackCountRequest request) {
         log.info("attack_times params: {}", JsonCommon.stringify(request));
         List<FlowAttackTime> attackTypeCounts = flowMonitorService.getAttackIpCount(request);
-        return ServiceResult.success(attackTypeCounts);
+        return ResultCommon.success(attackTypeCounts);
     }
 
     @ApiOperation(value = "攻击占比统计")
@@ -157,7 +152,7 @@ public class FlowMonitorController {
     public ServiceResult<TotalFlowAttackRatio> getAttackRatioCount(AttackCountRequest baseRequest) {
         log.info("attack_times params: {}", JsonCommon.stringify(baseRequest));
         TotalFlowAttackRatio attackTypeCounts = flowMonitorService.getAttackRatioCount(baseRequest);
-        return ServiceResult.success(attackTypeCounts);
+        return ResultCommon.success(attackTypeCounts);
     }
 
     @ApiOperation(value = "场景监控-流量分析: 统计场景流量，攻击流量，网络连接，带宽占用，攻击事件")
@@ -165,7 +160,7 @@ public class FlowMonitorController {
     public ServiceResult<FlowAnalysisSummary> getFlowAnalysisSummary(BaseTimeRangeRequest timeRangeRequest) {
         log.info("{}", timeRangeRequest);
         FlowAnalysisSummary summary = flowMonitorService.getFlowAnalysisSummary(timeRangeRequest);
-        return ServiceResult.success(summary);
+        return ResultCommon.success(summary);
     }
 
 
@@ -220,7 +215,7 @@ public class FlowMonitorController {
             responseList.add(response);
         });
 
-        return ServiceResult.success(responseList);
+        return ResultCommon.success(responseList);
     }
 
 

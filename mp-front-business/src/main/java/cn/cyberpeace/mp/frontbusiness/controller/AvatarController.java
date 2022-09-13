@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.service.AvatarService;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import io.swagger.annotations.Api;
@@ -35,7 +36,7 @@ public class AvatarController {
     @ResponseBody
     public ServiceResult<String> upload(MultipartFile file) {
         FileResponseData responseData = avatarService.upload(file);
-        return ServiceResult.success(responseData.getHttpUrl());
+        return ResultCommon.success(responseData.getHttpUrl());
     }
 
 

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.message.FormatMessage;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtImageInfo;
@@ -54,7 +55,7 @@ public class WebSocketNoticeController {
     public ServiceResult connection(@RequestParam String uuid){
         CloudPlatformPageResult<TargetConnection> connection = imagesService.connection(uuid);
         imagesConnectSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(connection.getList(),"MP-image-connection")), Arrays.asList(uuid));
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     @ApiOperation("根据镜像UUID获取靶标信息")
@@ -76,7 +77,7 @@ public class WebSocketNoticeController {
                 .extGateway(convertModel.getExtGateway()).extVm(convertModel.getExtVm()).extImageInfo(convertModel.getExtImageInfo())
                 .extDocker(convertModel.getExtDocker()).build();
         imagesByUuidSocketServer.batchSendInfo(JsonUtils.toUnderlineJSONString(new FormatMessage<>(pageVO,"MP-device-by-uuid")));
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 }

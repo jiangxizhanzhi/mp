@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -44,7 +45,7 @@ public class OrgController {
     @GetMapping("/bypath")
     public ServiceResult<OrgBO> getByPath(@RequestParam String path) {
         OrgBO orgBO = orgService.getByPath(path.trim());
-        return ServiceResult.success(orgBO);
+        return ResultCommon.success(orgBO);
     }
 
     @ApiOperation(value = "查询组织（树形结构，orgId为空就是查所有组织树形结构）", notes = "")

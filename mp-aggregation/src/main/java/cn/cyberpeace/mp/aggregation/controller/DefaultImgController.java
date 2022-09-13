@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.aggregation.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -59,7 +60,7 @@ public class DefaultImgController {
         }else{
             fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
         }
-        return new ServiceResult<>(fileNameList).asResult();
+        return ResultCommon.success(fileNameList);
     }
 
     /**

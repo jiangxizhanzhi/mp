@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.filter;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysCtlService;
@@ -39,7 +40,7 @@ public class SysAdminFilter extends OncePerRequestFilter {
             log.error("systime rollback error！");
             response.setContentType("application/json;charset=UTF-8");
             response.setStatus(HttpServletResponse.SC_OK);
-            ServiceResult serviceResult = ServiceResult.fail(AdminErrorCode.SYS_TIMESTAMP_ROLLBACK);
+            ServiceResult serviceResult = ResultCommon.fail(AdminErrorCode.SYS_TIMESTAMP_ROLLBACK);
             mapper = converter.getObjectMapper();
 
             PrintWriter writer = response.getWriter();

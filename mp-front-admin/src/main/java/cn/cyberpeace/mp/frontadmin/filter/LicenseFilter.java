@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.filter;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.config.FrontAdminConfig;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
@@ -71,7 +72,7 @@ public class LicenseFilter extends OncePerRequestFilter {
                     log.error("Activation status is error！");
                     response.setStatus(HttpServletResponse.SC_OK);
                     // todo message format
-                    ServiceResult serviceResult = ServiceResult.fail(AdminErrorCode.SYS_ACTIVATION_ERROR);
+                    ServiceResult serviceResult = ResultCommon.fail(AdminErrorCode.SYS_ACTIVATION_ERROR);
                     mapper = converter.getObjectMapper();
 
                     PrintWriter writer = response.getWriter();

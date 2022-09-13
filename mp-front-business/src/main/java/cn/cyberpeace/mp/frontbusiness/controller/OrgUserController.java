@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -18,12 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,7 +53,7 @@ public class OrgUserController {
     @GetMapping("/list/byorg")
     public ServiceResult<List<UserModel>> getByOrg(@RequestParam String orgId) {
         List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
-        return ServiceResult.success(users);
+        return ResultCommon.success(users);
     }
 
 
@@ -77,7 +73,7 @@ public class OrgUserController {
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
         boolean success = orgUserService.additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
         if (success) {
-            return ServiceResult.successful();
+            return ResultCommon.success();
         } else {
             log.error("bind org user failed!");
             throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
@@ -90,7 +86,7 @@ public class OrgUserController {
     @GetMapping("/allorgpath/byuser")
     public ServiceResult getAllOrgPath(@RequestParam String userId) {
         String allOrgPath = orgUserService.getAllOrgPathByUserId(userId);
-        return ServiceResult.success(allOrgPath);
+        return ResultCommon.success(allOrgPath);
     }
 
     @ApiOperation(value = "查询组织下的用户数量", notes = "")
@@ -98,7 +94,7 @@ public class OrgUserController {
     @GetMapping("/usercnt")
     public ServiceResult<Integer> getUserCnt(@RequestParam String orgId) {
         Integer userCnt = orgUserService.getUserCnt(orgId);
-        return ServiceResult.success(userCnt);
+        return ResultCommon.success(userCnt);
     }
 
 

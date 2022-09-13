@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopslog.controller;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -24,11 +25,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -64,7 +61,7 @@ public class OperateLogController {
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
         log.info("logRequest:{}", request);
         operateLogServiceFactory.create(request, LocaleContextHolder.getLocale());
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
 

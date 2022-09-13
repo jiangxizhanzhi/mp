@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
@@ -57,14 +58,14 @@ public class DashboardController {
     @GetMapping("/daily_user_activity")
     public ServiceResult<DailyUserActivityResponse> getDailyUserActivity() {
         DailyUserActivityResponse response = dashboardService.dailyUserActivity();
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     @ApiOperation("资源统计")
     @GetMapping("/resource_statistics")
     public ServiceResult<ResourceStatisticsResponse> getResourceStatistics() {
         ResourceStatisticsResponse response = dashboardService.resourceStatistics();
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
 
@@ -72,14 +73,14 @@ public class DashboardController {
     @GetMapping("/system_cluster_used")
     public ServiceResult<SystemClusterUsed> getSystemClusterUsed() {
         SystemClusterUsed response = mockService.mockSystemClusterUsed();
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     @ApiOperation("查询活动场景数")
     @GetMapping("/user_summary")
     public ServiceResult<UserSummarySceneResponse> userSummary() {
         UserSummarySceneResponse response = dashboardService.countActivityScene();
-        return ServiceResult.success(response);
+        return ResultCommon.success(response);
     }
 
     @ApiOperation(value = "用户在线记录", notes = "")
@@ -100,7 +101,8 @@ public class DashboardController {
     @ApiOperation(value = "用户资源")
     @GetMapping("/user_resource")
     public ServiceResult<UserResourceResponse> userResource() {
-        return dashboardService.countUserResourceResponse().asResult();
+        UserResourceResponse userResourceResponse = dashboardService.countUserResourceResponse();
+        return ResultCommon.success(userResourceResponse);
     }
 
 }

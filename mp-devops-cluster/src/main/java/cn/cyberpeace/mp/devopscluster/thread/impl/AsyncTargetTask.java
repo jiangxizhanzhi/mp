@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.thread.impl;
 
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
@@ -40,7 +41,7 @@ public class AsyncTargetTask implements ITask<ServiceResult<Integer>, List<Devic
         List<Integer> diffList =  bo.getNotExistedList();
 
         if (CollectionUtils.isEmpty(diffList)){
-            return ServiceResult.successful();
+            return ResultCommon.success();
         }
 
         List<Device> asyncDeviceList = deviceList.stream().filter(device -> diffList.contains(device.getId()))

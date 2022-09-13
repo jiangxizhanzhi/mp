@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
@@ -101,7 +102,7 @@ public class RoleController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.CREATE, title = "新增角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> add(@RequestBody @Validated RoleRequest createRequest) {
         RoleModel roleModel = roleService.add(createRequest);
-        return ServiceResult.success(roleModel);
+        return ResultCommon.success(roleModel);
     }
 
 
@@ -112,14 +113,14 @@ public class RoleController {
     @OperateLog(module = OpModuleEnums.ACCOUNT, type = OpTypeEnums.UPDATE, title = "修改角色", target = OpTargetEnums.ROLE)
     public ServiceResult<RoleModel> modify(@RequestBody @Validated RoleRequest modifyRequest) {
         RoleModel roleModel = roleService.modify(modifyRequest);
-        return ServiceResult.success(roleModel);
+        return ResultCommon.success(roleModel);
     }
 
     @ApiOperation(value = "查询所有角色", notes = "")
     @GetMapping("/all")
     public ServiceResult<List<RoleModel>> listAll() {
         List<RoleModel> roles = roleService.listAll();
-        return ServiceResult.success(roles);
+        return ResultCommon.success(roles);
     }
 
 }
