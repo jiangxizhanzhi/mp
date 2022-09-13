@@ -17,6 +17,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -105,6 +106,11 @@ public class HttpClient {
                     }
                 });
                 entity = multipartEntity.build();
+            } else if (data.textPlain()) {
+                var stringEntity = new StringEntity(data.toContent(), charset);
+                stringEntity.setContentEncoding(charset.toString());
+                stringEntity.setContentType(MediaType.TEXT_PLAIN_VALUE);
+                entity = stringEntity;
             } else {
                 var stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
