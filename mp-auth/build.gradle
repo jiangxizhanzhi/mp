@@ -1,14 +1,4 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.security:spring-security-test'
-    implementation 'com.auth0:java-jwt:3.15.0'
-    implementation 'com.github.jsqlparser:jsqlparser:0.9.5'
-    implementation 'com.alibaba:easyexcel'
-    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
-
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
-    testImplementation 'junit:junit:4.13.2'
-
     implementation project(':mp-base')
     implementation project(':mp-common')
     implementation project(':mp-auth-base')
