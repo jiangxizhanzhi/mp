@@ -9,7 +9,6 @@ bootJar {
 }
 
 dependencies {
-    implementation 'org.mitre.dsmiley.httpproxy:smiley-http-proxy-servlet:1.12.1'
     implementation project(':mp-base')
     gradle.ext.appmodules.each {
         implementation project(":${it}")
