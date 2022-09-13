@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.base.bo.IntervalSizeBO;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -142,7 +143,7 @@ public class FlowMonitorService {
         params.setShuffleCategory(request.getShuffleCategory());
         scenePluginCollectionSceneService.simulation(params);
 
-        return ServiceResult.successful();
+        return ResultCommon.success();
     }
 
     /**
