@@ -14,6 +14,7 @@ public class GuacamoleCreateConnectionData implements CloudHttpData {
     private String department;
     private String scene;
     private Boolean flag;
+    private String host;
     private ConnectionParams connectionParams;
 
     @Data
