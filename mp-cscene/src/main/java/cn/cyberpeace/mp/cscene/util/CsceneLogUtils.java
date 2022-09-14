@@ -15,11 +15,10 @@ import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.devopslog.service.OperationLogService;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -75,8 +74,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -91,8 +90,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -107,8 +106,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -135,8 +134,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -151,8 +150,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -167,8 +166,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }
@@ -183,8 +182,8 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operateLogServiceFactory = BeanCommon.getBean(OperateLogServiceFactory.class);
-            operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
         }

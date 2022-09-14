@@ -29,4 +29,13 @@ public class LogConstant {
 
 
     public static final String MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE = "runtime_log_type";
+
+    /**
+     * 日志存到es
+     */
+    public static final String LOG_DB_ES = "es";
+    /**
+     * 日志存到mysql
+     */
+    public static final String LOG_DB_MYSQL = "mysql";
 }

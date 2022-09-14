@@ -2,10 +2,10 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.response.login.LoginResp;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
@@ -22,11 +22,11 @@ import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
 import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.devopslog.service.OperationLogService;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -63,6 +63,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private OperationLogService operationLogService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -193,11 +196,11 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
         logModel.setUserId(user.getId());
         logModel.setUserName(user.getUsername());
         logModel.setUserType(LogConstant.USER_TYPE_USER);
-
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登录日志
-        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+//        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        operationLogService.create(logModel);
     }
 
 
