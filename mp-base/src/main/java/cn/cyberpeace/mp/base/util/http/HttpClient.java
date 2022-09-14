@@ -106,15 +106,14 @@ public class HttpClient {
                     }
                 });
                 entity = multipartEntity.build();
-            } else if (data.textPlain()) {
-                var stringEntity = new StringEntity(data.toContent(), charset);
-                stringEntity.setContentEncoding(charset.toString());
-                stringEntity.setContentType(MediaType.TEXT_PLAIN_VALUE);
-                entity = stringEntity;
             } else {
                 var stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
-                stringEntity.setContentType(contentType);
+                if(data.getContentType() != null){
+                    stringEntity.setContentType(data.getContentType());
+                }else{
+                    stringEntity.setContentType(contentType);
+                }
                 entity = stringEntity;
             }
             ((HttpEntityEnclosingRequestBase) request).setEntity(entity);

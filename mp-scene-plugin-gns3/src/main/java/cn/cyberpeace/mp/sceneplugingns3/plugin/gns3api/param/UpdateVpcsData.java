@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.sceneplugingns3.plugin.gns3api.param;
 import cn.cyberpeace.mp.sceneplugingns3.util.gns3http.Gns3HttpData;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.MediaType;
 
 @Setter
 @Getter
@@ -16,7 +17,8 @@ public class UpdateVpcsData implements Gns3HttpData {
     }
 
     @Override
-    public boolean textPlain() {
-        return true;
+    public String getContentType() {
+        return MediaType.TEXT_PLAIN_VALUE;
     }
+
 }

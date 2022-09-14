@@ -26,14 +26,6 @@ public interface HttpData {
     }
 
     /**
-     * 重写本方法返回true来表示body参数为纯文本类型
-     * @return
-     */
-    default boolean textPlain() {
-        return false;
-    }
-
-    /**
      * 序列化请求参数
      */
     default String toContent() {
@@ -45,6 +37,10 @@ public interface HttpData {
      */
     default Map<String, Object> toMultipart() {
         return toMultipart(this);
+    }
+
+    default String getContentType() {
+        return null;
     }
 
 }

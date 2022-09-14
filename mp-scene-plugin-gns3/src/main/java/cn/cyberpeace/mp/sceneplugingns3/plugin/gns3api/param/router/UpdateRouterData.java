@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.sceneplugingns3.util.gns3http.Gns3HttpData;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 
@@ -40,8 +41,8 @@ public class UpdateRouterData implements Gns3HttpData {
     }
 
     @Override
-    public boolean textPlain() {
-        return true;
+    public String getContentType() {
+        return MediaType.TEXT_PLAIN_VALUE;
     }
 
     @Setter
