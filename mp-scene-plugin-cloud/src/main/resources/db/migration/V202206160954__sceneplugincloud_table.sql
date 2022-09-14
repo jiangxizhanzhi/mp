@@ -1,2 +1,0 @@
-ALTER TABLE mp_sceneplugincloud_scene_element_port ADD COLUMN `entity_port` varchar(128) NOT NULL COMMENT '实体设备端口';
-ALTER TABLE mp_sceneplugincloud_scene_config_element_port ADD COLUMN `entity_port` varchar(128) NOT NULL COMMENT '实体设备端口';

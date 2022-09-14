@@ -1,7 +1,3 @@
-ip:
-  self: mp                      # mp自身地址
-port:
-  self-callback: 8080
 server:
   servlet:
     context-path: /api/mp
@@ -67,7 +63,19 @@ mybatis:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# 请求云平台组信息的url配置，必需填写
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, mappings, caches, env, scheduledtasks
+  info:
+    git:
+      mode: full
+  health:
+    elasticsearch:
+      enabled: false
+
+# 中台各模块相关配置
 mp:
   base:
     fdfs-tracker-servers:
@@ -151,6 +159,7 @@ mp:
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
+    url-ac-filter-exclude-urls: /api/mp/actuator/**
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
@@ -186,7 +195,7 @@ mp:
     wazuh-es-server: http://10.100.0.101:9205
     wazuh-godfs-server: http://10.100.7.1:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
-    wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
+    wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
     gns3-server: http://10.100.7.1:8088
   cscene:
@@ -207,17 +216,6 @@ mp:
     scene-process-save-realtime: true
     element-process-save-realtime: true
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, mappings, caches, env, scheduledtasks
-  info:
-    git:
-      mode: full
-  health:
-    elasticsearch:
-      enabled: false
 
 ---
 spring:

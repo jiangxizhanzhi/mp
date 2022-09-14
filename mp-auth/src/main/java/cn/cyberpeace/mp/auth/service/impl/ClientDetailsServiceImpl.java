@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.repository.ClientDetailsMapper;
 import cn.cyberpeace.mp.auth.service.ClientDetailsService;
 import cn.cyberpeace.mp.auth.service.fields.ClientDetailsFields;
+import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
@@ -34,6 +35,11 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_CLIENTS)
     public ClientDetailsModel getByClientId(String clientId) {
-        return getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
+        ClientDetailsModel model = getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
+        String secret = model.getClientSecret();
+        String decryptedSecret = PasswordUtils.desDecrypt(secret);
+        model.setClientSecret(decryptedSecret);
+        return model;
     }
+
 }

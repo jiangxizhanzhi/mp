@@ -10,5 +10,4 @@ dependencies {
     implementation project(':mp-situation-aware')
     implementation project(':mp-devops-log')
     implementation project(':mp-flow')
-    implementation 'com.github.pagehelper:pagehelper-spring-boot-starter:1.2.5'
 }

@@ -91,9 +91,24 @@ public class UrlACFilter extends OncePerRequestFilter {
 
             // 权限拦截是否开启
             if (Objects.nonNull(frontBusinessConfig.getUrlAcFilterAuthorityMatch()) && frontBusinessConfig.getUrlAcFilterAuthorityMatch()) {
-                boolean isAuthoritiesMatch = isAuthoritiesMatch(requestUrl);
 
-                if (!isAuthoritiesMatch) {
+                boolean isAuthoritiesMatchFlag = false;
+                // 判断是否是excludeUrls
+                List<String> excludeUrls = frontBusinessConfig.getUrlAcFilterExcludeUrls();
+                if (CollectionUtil.isNotEmpty(excludeUrls)) {
+                    for (String urlPattern : excludeUrls) {
+                        if (MATCHER.match(urlPattern, requestUrl)) {
+                            isAuthoritiesMatchFlag = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isAuthoritiesMatchFlag) {
+                    isAuthoritiesMatchFlag = isAuthoritiesMatch(requestUrl);
+                }
+
+                if (!isAuthoritiesMatchFlag) {
                     // 权限不匹配
                     log.error("###URLACFILTER -> referer:{}, url:{} access denied!", request.getHeaders("referer"), requestUrl);
                     result = new ServiceResult<>(null, FrontBizErrorCode.URL_AC_AUTHORITY_NOT_MATCH.format(requestUrl));

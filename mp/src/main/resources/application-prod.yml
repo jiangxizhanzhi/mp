@@ -1,7 +1,3 @@
-ip:
-  self: ${MP_SELF_IP:mp}                    # mp自身地址
-port:
-  self-callback: ${MP_SELF_PORT:8001}
 server:
   servlet:
     context-path: /api/mp
@@ -14,7 +10,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/mp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    url: jdbc:mysql://${MP_DB_IP:10.100.0.101}:${MP_DB_PORT:3306}/${MP_DB_DATABASE:mp}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
     username: ${MP_DB_USERNAME:root}
     password: ${MP_DB_PASSWORD:root}
     driver-class-name: org.mariadb.jdbc.Driver
@@ -67,7 +63,19 @@ mybatis:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
 
-# 请求云平台组信息的url配置，必需填写
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, mappings, caches, env, scheduledtasks
+  info:
+    git:
+      mode: full
+  health:
+    elasticsearch:
+      enabled: false
+
+# 中台各模块相关配置
 mp:
   base:
     fdfs-tracker-servers:
@@ -75,7 +83,7 @@ mp:
     fdfs-inner-http-server: http://${FDFS_IP:10.100.1.26}:${FDFS_INNER_FILE_SERVER_PORT:8888}
     fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
     run-init: true
-  # mp-devops-cluster 配置
+  # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
     public-net-proxy: ${MP_PUBLIC_NET_PROXY:false} #公网开关
@@ -121,14 +129,14 @@ mp:
     arkime-es-nodes: ${ARKIME_ES_IP:10.100.0.101}:${ARKIME_ES_PORT:9205}
     # es 日期格式
     es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
-  # mp-devops-log 模块配置
+  # mp-devops-log 模块
   devopslog:
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
     cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
     mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
-  # auth 模块配置
+  # mp-auth 模块配置
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
     logout-reset-secret: ${MP_AUTH_LOGOUT_RESET_SECRET:true}
@@ -141,16 +149,17 @@ mp:
     authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
-  # mp-front-admin 模块配置
+  # mp-front-admin 模块
   frontadmin:
     activ-enable: true
     license-dir: /home/mp/config/license
-  # mp-front-business 模块配置
+  # mp-front-business 模块
   frontbusiness:
     url-ac-filter-enabled: true
     url-ac-filter-method-match: true
     url-ac-filter-authority-match: true
     url-ac-filter-ignore-if-not-defined: false
+    url-ac-filter-exclude-urls: ${MP_FRONTBUSINESS_URLACFILTER_EXCLUDE_URLS:/api/mp/actuator/**}
   # mp-flow 模块配置
   flow:
     trex-image: ${TREX_IMAGE:tgn-trex}
@@ -186,7 +195,7 @@ mp:
     wazuh-es-server: http://${WAZUH_ES_IP:10.100.0.101}:9205
     wazuh-godfs-server: http://${WAZUH_IP:10.100.7.1}:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
-    wazuh-run-command-http-callback-url: http://${ip.self}:${port.self-callback}/api/mp/scene_plugin_collection/wazuh_run_command_result
+    wazuh-run-command-http-callback-url: http://${MP_SELF_IP:mp}:${MP_SELF_PORT:8001}/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
     gns3-server: http://${GNS3_IP:10.100.7.1}:${GNS3_PORT:8088}
   cscene:
@@ -206,18 +215,6 @@ mp:
     scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
     scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
     element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, mappings, caches, env, scheduledtasks
-  info:
-    git:
-      mode: full
-  health:
-    elasticsearch:
-      enabled: false
 
 
 ---
