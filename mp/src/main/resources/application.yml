@@ -196,6 +196,8 @@ mp:
     wazuh-godfs-server: http://10.100.7.1:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
+  sceneplugingns3:
+    gns3-server: http://10.100.7.1:8088
   cscene:
     has-own-recording-set: 213,214,236
     scene-error-creating-seconds: 3600

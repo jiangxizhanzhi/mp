@@ -39,4 +39,8 @@ public interface HttpData {
         return toMultipart(this);
     }
 
+    default String getContentType() {
+        return null;
+    }
+
 }

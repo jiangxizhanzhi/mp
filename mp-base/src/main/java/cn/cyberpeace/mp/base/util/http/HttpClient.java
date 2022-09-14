@@ -17,6 +17,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
+import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -108,7 +109,11 @@ public class HttpClient {
             } else {
                 var stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
-                stringEntity.setContentType(contentType);
+                if(data.getContentType() != null){
+                    stringEntity.setContentType(data.getContentType());
+                }else{
+                    stringEntity.setContentType(contentType);
+                }
                 entity = stringEntity;
             }
             ((HttpEntityEnclosingRequestBase) request).setEntity(entity);
