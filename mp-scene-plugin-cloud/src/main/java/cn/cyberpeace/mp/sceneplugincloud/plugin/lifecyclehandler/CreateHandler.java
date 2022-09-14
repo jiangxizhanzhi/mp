@@ -238,6 +238,7 @@ public class CreateHandler extends HandlerCommon {
             createData.setSubnet(subnet);
             var virtualSwitch = vsClient.create(createData);
             cloudElement.setVlanId(virtualSwitch.getSegmentationId());
+            connectedNetwork.network.setVlanId(virtualSwitch.getSegmentationId());
             connectedNetwork.network.setResourceId(virtualSwitch.getId());
             if (cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH) {
                 cloudElement.setResourceId(virtualSwitch.getId());

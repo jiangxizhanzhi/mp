@@ -1,1 +1,0 @@
-alter table mp_cscene_cscene_instance add column pass_through text comment '透传字段' ;
