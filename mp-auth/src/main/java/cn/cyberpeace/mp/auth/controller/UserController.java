@@ -202,19 +202,19 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
         log.error("login failed");
     }
 
-    @GetMapping("/ssoTest")
-    public void ssoLoginTest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        UserDto userDto = getModelService().getUserDto("3f655d87112f4ae094bbaf70830e20aa");
-        if (userDto != null) {
-            String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
-            log.info("===============jwt:{}", jwt);
-            response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
-            response.setHeader("Cache-Control", "no-cache");
-            response.setHeader("Location", "/");
-            response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
-            response.sendRedirect(redirectUrl);
-        }
-    }
+//    @GetMapping("/ssoTest")
+//    public void ssoLoginTest(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        UserDto userDto = getModelService().getUserDto("3f655d87112f4ae094bbaf70830e20aa");
+//        if (userDto != null) {
+//            String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(userDto.getId(), userDto.getUsername(), userDto.getTokenSecret()));
+//            log.info("===============jwt:{}", jwt);
+//            response.setStatus(HttpServletResponse.SC_MOVED_PERMANENTLY);
+//            response.setHeader("Cache-Control", "no-cache");
+//            response.setHeader("Location", "/");
+//            response.setHeader("Set-Cookie", "cr_jwttoken=" + jwt + "; SameSite=Lax; Path=/");
+//            response.sendRedirect(redirectUrl);
+//        }
+//    }
 
     private UserRequest convert2UserRequest(BaseUserInfo userInfo) {
         UserRequest userRequest = new UserRequest();
