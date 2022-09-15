@@ -197,7 +197,8 @@ mp:
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${MP_SELF_IP:mp}:${MP_SELF_PORT:8001}/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
-    gns3-server: http://${GNS3_IP:10.100.7.1}:${GNS3_PORT:8088}
+    gns3-server: http://${GNS3_IP:10.100.7.1}:${GNS3_PORT:13080}
+    gns3-image-uuids: ${MP_GNS3_IMAGE_UUIDS:854f7c24-060f-4dbd-b771-68eab207a071}
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
     scene-error-creating-seconds: ${MP_SCENE_ERROR_CREATING_SECONDS:3600}
