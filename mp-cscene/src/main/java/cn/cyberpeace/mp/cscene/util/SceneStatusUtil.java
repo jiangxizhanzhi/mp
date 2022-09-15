@@ -32,10 +32,10 @@ public class SceneStatusUtil {
                 Integer status = Integer.parseInt(optionModel.getCode());
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
-                // 添加删除中的场景实例状态
-                en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "deleting");
-                zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "删除中");
             });
+            // 添加删除中的场景实例状态
+            en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "deleting");
+            zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "删除中");
         }
         Integer sceneStatus;
         // 修正场景删除中状态
