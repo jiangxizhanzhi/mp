@@ -425,6 +425,13 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void correctData() {
         super.correctData();
+        // 纠正 role virtualType
+        if (getElementMap() != null) {
+            getElementMap().values().forEach(element -> {
+                Integer role = element.getRole();
+                correctElementRoleRelated(element.getSrcElement(), element, role);
+            });
+        }
         // 连接外部网络,而且开启公网映射,就打开端口映射
         if (CloudSingleton.cloudAppConfig.getPublicNetProxyServer()) {
             getElementMap().forEach((id, element) -> {
@@ -467,5 +474,15 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private String getModeKey(String protocol, String port, String user, String password) {
         return String.format("%s:%s:%s:%s", protocol, AccessMode.Protocol.CONSOLE.equals(protocol) ? StringUtils.EMPTY : port, user, password);
+    }
+
+    private void correctElementRoleRelated(SceneElementBO srcElement, CloudPluginSceneElementBO cloudElement,
+                                           Integer role) {
+        if (role == null) {
+            return;
+        }
+        if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+        }
     }
 }

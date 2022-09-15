@@ -128,7 +128,6 @@ public class ScenePluginCloudSceneService {
         private CloudPluginSceneElementBO cloudElement;
         private SceneBO srcScene;
         private CloudPluginSceneBO cloudScene;
-        private String host;
 
         public NodeConnectionBO toNewNodeConnection() {
             var nodeConnection = new NodeConnectionBO();
@@ -152,7 +151,6 @@ public class ScenePluginCloudSceneService {
             if (nodeIds != null && !nodeIds.isEmpty() && !nodeIds.contains(nodeId)) {
                 return;
             }
-            var host = cloudElement.getHost();
             var cloudPorts = pluginHandler.getPorts(cloudElement);
             cloudPorts.forEach(cloudPort -> {
                 var accessModes = cloudPort.getAccessModes();
@@ -166,7 +164,7 @@ public class ScenePluginCloudSceneService {
                     }
 
                     accessModeLinkInfoMap.put(accessModeId,
-                            new AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene, host));
+                            new AccessModeLinkInfo(accessModeId, accessMode, cloudPort, cloudElement, scene, cloudScene));
                 });
             });
         });
@@ -491,7 +489,6 @@ public class ScenePluginCloudSceneService {
         var cloudScene = accessModeInfo.getCloudScene();
         var cloudElement = accessModeInfo.getCloudElement();
         var portId = accessModeInfo.getCloudPort().getSrcPort().getId();
-        var host = accessModeInfo.getHost();
         var sceneConnectionParam = new CloudSceneConnectionCommon.SceneConnectionParam();
         sceneConnectionParam.setSceneId(sceneId);
         sceneConnectionParam.setSceneElementId(nodeId);
@@ -501,7 +498,6 @@ public class ScenePluginCloudSceneService {
         sceneConnectionParam.setCloudAccessMode(accessModeInfo.getAccessMode());
         sceneConnectionParam.setUserId(userId);
         sceneConnectionParam.setSceneName(srcScene.getName());
-        sceneConnectionParam.setHost(host);
         sceneConnectionParam.setSystemType(cloudElement.getSrcElement() == null ? StringUtils.EMPTY : cloudElement.getSrcElement().getSystemType());
         sceneConnectionParam.setDepartment(context == null ? StringUtils.EMPTY : context.getRequestUserOrg());
         sceneConnectionParam.setEntity(cloudElement.getVirtualType() != null && cloudElement.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
