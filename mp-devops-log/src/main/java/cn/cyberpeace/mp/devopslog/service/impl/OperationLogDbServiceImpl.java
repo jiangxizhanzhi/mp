@@ -132,7 +132,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         HumanCondition humanCondition = new HumanCondition();
 
         if (StringUtils.isNotBlank(request.getUserId())) {
-            humanCondition.filterEqual(OperationLogDbModel::getUserName, request.getUserId());
+            humanCondition.filterEqual(OperationLogDbModel::getUserId, request.getUserId());
         }
 
         if (Objects.nonNull(request.getModule())) {
