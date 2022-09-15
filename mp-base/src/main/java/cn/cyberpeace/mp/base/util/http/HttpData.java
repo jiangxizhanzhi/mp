@@ -39,7 +39,7 @@ public interface HttpData {
         return toMultipart(this);
     }
 
-    default String getContentType() {
+    default String contentType() {
         return null;
     }
 
