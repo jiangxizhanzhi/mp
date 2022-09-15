@@ -42,5 +42,5 @@ CREATE TABLE mp_devops_log_operation (
      PRIMARY KEY (`pk`),
      UNIQUE KEY (`id`),
      KEY (`op_module_id`, `op_type_id`, `user_name`, `op_target`, `create_time`),
-     KEY (`op_module_id`, `op_type_id`, `create_time`)
+     KEY (`user_id`, `create_time`)
 ) COMMENT '审计日志表';

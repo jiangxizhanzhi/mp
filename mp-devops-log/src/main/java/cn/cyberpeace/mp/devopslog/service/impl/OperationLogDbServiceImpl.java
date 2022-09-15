@@ -130,10 +130,16 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
     @Override
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
+
+        if (StringUtils.isNotBlank(request.getUserId())) {
+            humanCondition.filterEqual(OperationLogDbModel::getUserName, request.getUserId());
+        }
+
         if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperationLogDbModel::getOpModuleId, request.getModule());
         } else {
             List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            moduleOrdinals.add(-1);
             humanCondition.filterIn(OperationLogDbModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
 
@@ -141,6 +147,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
             humanCondition.filterEqual(OperationLogDbModel::getOpTypeId, request.getOpType());
         } else {
             List<Integer> opTypeOrdinals = Arrays.stream(OpTypeEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            opTypeOrdinals.add(-1);
             humanCondition.filterIn(OperationLogDbModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
         }
 
