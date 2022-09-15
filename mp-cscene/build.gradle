@@ -10,4 +10,5 @@ dependencies {
     implementation project(':mp-situation-aware')
     implementation project(':mp-devops-log')
     implementation project(':mp-flow')
+    implementation project(':mp-scene-plugin-gns3')
 }
