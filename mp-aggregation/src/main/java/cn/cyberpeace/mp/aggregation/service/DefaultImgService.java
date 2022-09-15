@@ -64,4 +64,15 @@ public class DefaultImgService {
         return fileList.stream().map(f -> endPathName.concat("/").concat(f.getName())).collect(Collectors.toList());
     }
 
+    public String getDefaultImgFilePath(String relativePath) {
+        for (String str : staticLocations) {
+            String filePath = StringUtils.joinWith("", str, relativePath);
+            File file = new File(filePath);
+            if (file.exists()) {
+                return filePath;
+            }
+        }
+        return null;
+    }
+
 }
