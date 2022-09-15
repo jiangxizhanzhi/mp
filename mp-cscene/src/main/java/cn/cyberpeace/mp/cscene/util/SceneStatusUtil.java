@@ -22,7 +22,8 @@ public class SceneStatusUtil {
     private static Map<Integer, String> en;
     private static Map<Integer, String> zh;
 
-    private static final String DELETING = "删除中";
+    private static final String DELETING_ZH = "删除中";
+    private static final String DELETING_EN = "deleting";
 
     public static SceneStatus getSceneStatus(Boolean deleted, Integer event, Integer eventStatus) {
         if (en == null || zh == null) {
@@ -39,13 +40,21 @@ public class SceneStatusUtil {
         Integer sceneStatus = eventStatus2SceneStatus(event, eventStatus);
         String sceneStatusDesc;
         if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
-            sceneStatusDesc = zh.get(sceneStatus);
+            // 修正场景删除中状态
+            if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
+                sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETED;
+                sceneStatusDesc = DELETING_ZH;
+            } else {
+                sceneStatusDesc = zh.get(sceneStatus);
+            }
         } else {
-            sceneStatusDesc = en.get(sceneStatus);
-        }
-        if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
-            sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETED;
-            sceneStatusDesc = DELETING;
+            // 修正场景删除中状态
+            if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
+                sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETED;
+                sceneStatusDesc = DELETING_EN;
+            } else {
+                sceneStatusDesc = en.get(sceneStatus);
+            }
         }
         return new SceneStatus(sceneStatus, sceneStatusDesc);
     }
