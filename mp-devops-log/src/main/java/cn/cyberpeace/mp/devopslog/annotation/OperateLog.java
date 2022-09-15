@@ -35,7 +35,7 @@ public @interface OperateLog {
      * 操作对象
      * @return
      */
-    OpTargetEnums target() default OpTargetEnums.DEFAULT;
+    OpTargetEnums target();
 
     /**
      * 操作标题，例如：新增用户

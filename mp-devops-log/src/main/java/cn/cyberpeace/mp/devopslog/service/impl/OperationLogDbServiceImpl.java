@@ -10,7 +10,6 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devopslog.model.OperationLogDbModel;
@@ -202,7 +201,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         }
 
         model.setOpTarget(request.getOpTarget());
-        model.setOpTargetId(getTidFromTarget(model.getOpTarget(), locale));
+        //model.setOpTargetId(getTidFromTarget(model.getOpTarget(), locale));
 
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
@@ -247,7 +246,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         }
     }
 
-    public Integer getTidFromTarget(String target, Locale locale) {
+    /*public Integer getTidFromTarget(String target, Locale locale) {
         OpTargetEnums[] opTargetEnums = OpTargetEnums.values();
         for (OpTargetEnums opTarget : opTargetEnums) {
             if (Objects.equals(target, getlocalizedMessage(locale, opTarget.getCode()))) {
@@ -255,5 +254,5 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
             }
         }
         return OpTargetEnums.DEFAULT.ordinal();
-    }
+    }*/
 }
