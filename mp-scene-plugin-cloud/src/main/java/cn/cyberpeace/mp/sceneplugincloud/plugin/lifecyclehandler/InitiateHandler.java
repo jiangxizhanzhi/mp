@@ -1053,6 +1053,9 @@ public class InitiateHandler extends HandlerCommon {
                 allnets.addAll(element.getAccessNetworks());
                 allnets.addAll(element.getDeriveNetworks());
                 for (var net : allnets) {
+                    if (Boolean.TRUE.equals(net.getNetwork().getExternal()) || StringUtils.isEmpty(net.getNetwork().getCidr())) {
+                        continue;
+                    }
                     List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true);
                     if (CollectionUtils.isNotEmpty(randomIps)) {
                         // 如果ip不够分了 只能走云平台默认逻辑
