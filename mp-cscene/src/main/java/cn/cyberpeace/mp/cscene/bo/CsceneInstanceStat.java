@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.bo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -19,6 +20,9 @@ public class CsceneInstanceStat {
     private Integer referenceType;
     @ApiModelProperty(value = "引用元数据")
     private String referenceMetaData;
+    @ApiModelProperty(value = "是否删除")
+    @JsonIgnore
+    private Boolean deleted;
     @ApiModelProperty(value = "虚拟机数量")
     private Integer vmCount;
     @ApiModelProperty(value = "容器数量")

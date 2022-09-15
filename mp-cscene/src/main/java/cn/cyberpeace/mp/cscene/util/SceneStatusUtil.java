@@ -22,7 +22,7 @@ public class SceneStatusUtil {
     private static Map<Integer, String> en;
     private static Map<Integer, String> zh;
 
-    public static SceneStatus getSceneStatus(Integer event, Integer eventStatus) {
+    public static SceneStatus getSceneStatus(Boolean deleted, Integer event, Integer eventStatus) {
         if (en == null || zh == null) {
             en = new HashMap<>();
             zh = new HashMap<>();
@@ -33,8 +33,17 @@ public class SceneStatusUtil {
                 en.put(status, optionModel.getEnName());
                 zh.put(status, optionModel.getZhName());
             });
+            // 添加删除中的场景实例状态
+            en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "deleting");
+            zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "删除中");
         }
-        Integer sceneStatus = eventStatus2SceneStatus(event, eventStatus);
+        Integer sceneStatus;
+        // 修正场景删除中状态
+        if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
+            sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETING;
+        } else {
+            sceneStatus = eventStatus2SceneStatus(event, eventStatus);
+        }
         String sceneStatusDesc;
         if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
             sceneStatusDesc = zh.get(sceneStatus);
