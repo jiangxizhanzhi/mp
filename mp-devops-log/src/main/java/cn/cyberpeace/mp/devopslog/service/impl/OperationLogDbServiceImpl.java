@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
@@ -31,9 +32,11 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -128,18 +131,28 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
     @Override
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
-        if (Objects.nonNull(request.getOpType())) {
-            humanCondition.filterEqual(OperationLogDbModel::getOpTypeId, request.getOpType());
-        }
         if (Objects.nonNull(request.getModule())) {
             humanCondition.filterEqual(OperationLogDbModel::getOpModuleId, request.getModule());
+        } else {
+            List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            humanCondition.filterIn(OperationLogDbModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
+
+        if (Objects.nonNull(request.getOpType())) {
+            humanCondition.filterEqual(OperationLogDbModel::getOpTypeId, request.getOpType());
+        } else {
+            List<Integer> opTypeOrdinals = Arrays.stream(OpTypeEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
+            humanCondition.filterIn(OperationLogDbModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
+        }
+
         if (Objects.nonNull(request.getUserNameOrOpTarget())) {
             humanCondition.filterOrStart()
-                    .orEqual(OperationLogDbModel::getOpTarget, request.getUserNameOrOpTarget())
                     .orEqual(OperationLogDbModel::getUserName, request.getUserNameOrOpTarget())
+                    .orEqual(OperationLogDbModel::getOpTarget, request.getUserNameOrOpTarget())
                     .filterOrEnd();
         }
+        String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
+        humanCondition.orderBy("-" + createTime);
         List<OperationLogDbModel> models = getModelMapper().list(humanCondition);
         List<OperationLogPageResponse> list = opModel2Response(models, locale);
         return new ListObjServiceResult(new ListObjResult<>(list, list.size()).asResult()).asResult();
