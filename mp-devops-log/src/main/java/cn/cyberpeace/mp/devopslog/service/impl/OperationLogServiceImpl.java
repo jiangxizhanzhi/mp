@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.config.DevopsLogConfig;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
+import cn.cyberpeace.mp.devopslog.enums.LogDBEnums;
 import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
 import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
@@ -40,9 +40,9 @@ public class OperationLogServiceImpl implements OperationLogService {
     public ServiceResult create(OperationLogRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
         String logDb = devopsLogConfig.getLogDb();
-        if (LogConstant.LOG_DB_ES.equals(logDb)) {
+        if (LogDBEnums.ES.getCode().equals(logDb)) {
             operateLogServiceFactory.create(request, locale);
-        } else if (LogConstant.LOG_DB_MYSQL.equals(logDb)) {
+        } else if (LogDBEnums.MYSQL.getCode().equals(logDb)) {
             operationLogDbService.create(request, locale);
         }
         return ResultCommon.success();
@@ -53,9 +53,9 @@ public class OperationLogServiceImpl implements OperationLogService {
         Locale locale = LocaleContextHolder.getLocale();
         String logDb = devopsLogConfig.getLogDb();
         ListObjServiceResult<OperationLogPageResponse> result = null;
-        if (LogConstant.LOG_DB_ES.equals(logDb)) {
+        if (LogDBEnums.ES.getCode().equals(logDb)) {
             result = operateLogServiceFactory.search(request, locale);
-        } else if (LogConstant.LOG_DB_MYSQL.equals(logDb)) {
+        } else if (LogDBEnums.MYSQL.getCode().equals(logDb)) {
             result = operationLogDbService.search(request, locale);
         }
         return result;
@@ -65,9 +65,9 @@ public class OperationLogServiceImpl implements OperationLogService {
     public void create(OperateLog operateLog, HttpServletRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
         String logDb = devopsLogConfig.getLogDb();
-        if (LogConstant.LOG_DB_ES.equals(logDb)) {
+        if (LogDBEnums.ES.getCode().equals(logDb)) {
             operateLogServiceFactory.create(operateLog, request, locale);
-        } else if (LogConstant.LOG_DB_MYSQL.equals(logDb))  {
+        } else if (LogDBEnums.MYSQL.getCode().equals(logDb))  {
             operationLogDbService.create(operateLog, request, locale);
         }
     }
