@@ -107,7 +107,7 @@ public class SceneExporter {
                         File logo = new File(filePath);
                         content = FileUtils.readFileToByteArray(logo);
                     } catch (Exception e) {
-                        log.error("failed to export logo {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
+                        log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
                         throw new MpRuntimeException(BaseErrorCode.ERROR);
                     }
                     if (this.isPng(content)) {
