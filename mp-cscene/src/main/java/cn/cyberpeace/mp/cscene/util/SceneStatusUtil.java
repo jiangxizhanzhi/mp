@@ -22,7 +22,9 @@ public class SceneStatusUtil {
     private static Map<Integer, String> en;
     private static Map<Integer, String> zh;
 
-    public static SceneStatus getSceneStatus(Integer event, Integer eventStatus) {
+    private static final String DELETING = "删除中";
+
+    public static SceneStatus getSceneStatus(Boolean deleted, Integer event, Integer eventStatus) {
         if (en == null || zh == null) {
             en = new HashMap<>();
             zh = new HashMap<>();
@@ -40,6 +42,10 @@ public class SceneStatusUtil {
             sceneStatusDesc = zh.get(sceneStatus);
         } else {
             sceneStatusDesc = en.get(sceneStatus);
+        }
+        if (Boolean.TRUE.equals(deleted) && SceneModel.Event.DELETE != event) {
+            sceneStatus = CsceneInstanceStatQueryParams.SceneStatus.DELETED;
+            sceneStatusDesc = DELETING;
         }
         return new SceneStatus(sceneStatus, sceneStatusDesc);
     }

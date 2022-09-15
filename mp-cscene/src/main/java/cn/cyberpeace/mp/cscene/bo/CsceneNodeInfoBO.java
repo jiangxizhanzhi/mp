@@ -27,4 +27,5 @@ public class CsceneNodeInfoBO {
     private String processMessage;
     private Integer sceneStatus;
     private String sceneStatusDesc;
+    private Boolean deleted;
 }
