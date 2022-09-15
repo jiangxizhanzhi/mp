@@ -25,6 +25,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.base.BaseSceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugingns3.constant.Gns3Singleton;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -843,7 +844,7 @@ public class CsceneDataModifier {
     }
 
     private static String getGns3RouterImageUuid() {
-        return "854f7c24-060f-4dbd-b771-68eab207a071";
+        return Gns3Singleton.gns3AppConfig.getGns3ImageUuids().get(0);
     }
 
     @Getter
