@@ -1,11 +1,16 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.ExtEntity;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.common.BaseCloudPlatformResult;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.service.RealEquipmentService;
+import cn.cyberpeace.mp.devopscluster.constant.DevopsClusterErrorCode;
 import cn.cyberpeace.mp.devopscluster.converter.bo.RealEquipmentBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
@@ -21,14 +26,12 @@ import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +51,8 @@ public class RealEquipmentConverter implements BaseConverter{
     private final DevopsTargetAuthService devopsTargetAuthService;
 
     private final TargetConverter targetConverter;
+
+    private final CsceneSpecialService csceneSpecialService;
 
     /**
      * 获取实装总数
@@ -75,6 +80,9 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = devopsTargetService.page(dto);
+        String[] imageNames = deviceTargetPOS.stream().map(DeviceTargetPO::getName).toArray(String[]::new);
+        var referStateMap = csceneSpecialService.statDeviceReferCscenes(imageNames).getSource();
+        var useStateMap = csceneSpecialService.statDeviceReferCsceneInstances(imageNames).getSource();
 
         List<Integer> ids = deviceTargetPOS.stream().map(DeviceTargetPO::getId).map(Integer::parseInt).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(ids)){
@@ -88,14 +96,19 @@ public class RealEquipmentConverter implements BaseConverter{
             return convertModel;
         }
 
-        Map<String, DeviceTargetPO> map = deviceTargetPOS.stream().collect(Collectors.toMap(DeviceTargetPO::getUuid, Function.identity()));
         List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
             RealEquipmentBO realEquipmentBO = convertDevice(device);
-            DeviceTargetPO deviceTargetPO = map.get(device.getUuid());
-            if (Objects.nonNull(deviceTargetPO)){
-                realEquipmentBO.setReferenceStatus(deviceTargetPO.getReferenceStatus());
-                realEquipmentBO.setUseStatus(deviceTargetPO.getUseStatus());
+            List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
+            List<DeviceReferCsceneInstanceStat> useStateList = new ArrayList<>();
+            String name = device.getName();
+            if (MapUtils.isNotEmpty(referStateMap)) {
+                referStateList = referStateMap.get(name);
             }
+            if (MapUtils.isNotEmpty(useStateMap)) {
+                useStateList = useStateMap.get(name);
+            }
+            realEquipmentBO.setReferenceStatus(CollectionUtils.isEmpty(referStateList) ? 0 : referStateList.size());
+            realEquipmentBO.setUseStatus(CollectionUtils.isEmpty(useStateList) ? StatusEnum.NO : StatusEnum.YES);
             return realEquipmentBO;
         }).collect(Collectors.toList());
 
@@ -122,6 +135,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     @Transactional
     public Device add(RealEquipmentRequest request) {
+        validRealEquipmentRequest(request);
         Device device = convertRequest(request);
         if (Objects.isNull(device)){
             return null;
@@ -141,6 +155,7 @@ public class RealEquipmentConverter implements BaseConverter{
      */
     @Transactional
     public Device update(RealEquipmentRequest request) {
+        validRealEquipmentRequest(request);
         Device device = convertRequest(request);
         Device result = realEquipmentService.update(request.getUuid(),device);
         devopsTargetService.updateById(result);
@@ -209,5 +224,19 @@ public class RealEquipmentConverter implements BaseConverter{
         device.setExtEntity(request.getExtEntity());
         device.setExtSystemInfo(request.getSystemInfo());
         return device;
+    }
+
+
+    /**
+     * 验证请求参数
+     * @param request
+     */
+    private void validRealEquipmentRequest(RealEquipmentRequest request) {
+        if (StringUtils.isNotEmpty(request.getName()) && request.getName().length() > 126) {
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_NAME_EXCEED_MAX_LENGTH);
+        }
+        if (StringUtils.isNotEmpty(request.getDescription()) && request.getDescription().length() > 1000) {
+            throw new MpRuntimeException(DevopsClusterErrorCode.IMAGE_DESCRIPTION_EXCEED_MAX_LENGTH);
+        }
     }
 }
