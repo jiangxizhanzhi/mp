@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.devopslog.service;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
@@ -8,11 +10,15 @@ import cn.cyberpeace.mp.devopslog.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.devopslog.model.OperationLogModel;
 import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
+import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.annotation.Async;
@@ -21,10 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -188,6 +191,27 @@ public class OperateLogServiceFactory {
      */
     public SearchResponse search(OperationLogPageRequest request){
        return operateLogServiceMap.get(request.getSiteType()).search(request);
+    }
+
+    public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale){
+        SearchResponse searchResponse = this.search(request);
+        SearchHits searchHits = searchResponse.getHits();
+        List<OperationLogPageResponse> list = new ArrayList<>(searchHits.getHits().length);
+        for (SearchHit hit : searchHits.getHits()) {
+            OperationLogPageResponse operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogPageResponse.class);
+            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpModuleID())) {
+                OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(operationLog.getOpModuleID());
+                String opModuleCode = this.getlocalizedMessage(locale, opModuleEnums.getCode());
+                operationLog.setOpModule(opModuleCode);
+            }
+            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpTypeID())) {
+                OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(operationLog.getOpTypeID());
+                String opTypeCode = this.getlocalizedMessage(locale, opTypeEnum.getCode());
+                operationLog.setOpType(opTypeCode);
+            }
+            list.add(operationLog);
+        }
+        return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
     }
 
     private void processDefaultContent(OperationLogModel model) {

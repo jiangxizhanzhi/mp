@@ -15,13 +15,12 @@ import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.devopslog.service.OperationLogService;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -46,7 +45,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserService userService;
 
     @Autowired
-    private OperateLogServiceFactory operateLogServiceFactory;
+    private OperationLogService operationLogService;
 
     @Autowired
     private AuthConfig authConfig;
@@ -110,6 +109,6 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登出日志
-        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
+        operationLogService.create(logModel);
     }
 }
