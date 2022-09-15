@@ -13,6 +13,7 @@ public class VirtualNic {
     private String networkId;
     private String vlanMode;
     private String fixedIp;
+    private String fwdnsInterfaceIp;
     private String macAddress;
     private List<QosRule> qosRules;
     private Boolean enableExternal;

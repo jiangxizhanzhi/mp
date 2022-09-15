@@ -1039,6 +1039,26 @@ public class InitiateHandler extends HandlerCommon {
                 reallocateIpPorts(networkElements);
             });
         }
+
+        // 分配 fwdnsInterfaceIp
+        for (var element : cloudElements) {
+            Integer virtualType = element.getVirtualType();
+            if (virtualType == null) {
+                continue;
+            }
+            if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                    virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                    virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
+                List<ConnectedNetworkBO> allnets = new ArrayList<>();
+                allnets.addAll(element.getAccessNetworks());
+                allnets.addAll(element.getDeriveNetworks());
+                for (var net : allnets) {
+                    String fwdnsInterfaceIp = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true).get(0);
+                    getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), fwdnsInterfaceIp);
+                    net.getNetwork().getExcloudIps().add(fwdnsInterfaceIp);
+                }
+            }
+        }
     }
 
     public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {

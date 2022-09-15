@@ -396,6 +396,7 @@ public class CreateHandler extends HandlerCommon {
         }
         for (ConnectedNetworkBO connectedNetwork : allNetworks) {
             VirtualNic virtualNic = this.genConnectedNetwork(connectedNetwork);
+            virtualNic.setFwdnsInterfaceIp(getHandlerUtils().getFwdnsInterfaceIp(cloudElement.getSrcElement().getId(), connectedNetwork.getNetwork().getId()));
             virtualNics.add(virtualNic);
         }
         return virtualNics;
@@ -1146,7 +1147,7 @@ public class CreateHandler extends HandlerCommon {
         var openDhcp = new RouterConfigCmdData();
         openDhcp.setSerialIp(port.getHost());
         openDhcp.setSerialPort(Integer.parseInt(port.getPort()));
-        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands());
+        openDhcp.setCmds(VyosNetworkCommandUtils.genOpenDhcpCommands(elementBO.getSrcElement().getPorts().size()));
         boolean openDhcpResult = false;
         boolean buildNetworkResult = false;
         int tryTimes = 5;
