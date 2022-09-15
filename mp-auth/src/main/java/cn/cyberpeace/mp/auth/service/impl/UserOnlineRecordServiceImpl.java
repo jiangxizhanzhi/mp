@@ -92,8 +92,10 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         PageHelper.startPage(req.getPage(), req.getPageSize());
         List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
-
-
+        List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
+        if (CollectionUtil.isEmpty(summaryDtos)) {
+            return pageInfo;
+        }
 
         Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
         for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
@@ -102,7 +104,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
         }
 
-        List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
         List<UserOnlineReportDto> reportDtos = new ArrayList<>();
         summaryDtos.forEach(r -> {
             UserOnlineReportDto reportDto = new UserOnlineReportDto();
