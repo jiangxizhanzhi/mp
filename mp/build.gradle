@@ -4,15 +4,15 @@ plugins {
 
 apply from: 'config.gradle'
 
-bootJar {
-    enabled = true
-}
-
 dependencies {
     implementation project(':mp-base')
     gradle.ext.appmodules.each {
         implementation project(":${it}")
     }
+}
+
+bootJar {
+    enabled = true
 }
 
 flyway {

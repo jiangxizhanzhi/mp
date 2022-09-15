@@ -9,9 +9,7 @@ dependencies {
     implementation project(':mp-scene-plugin-cloud')
     implementation project(':mp-auth-base')
     implementation project(':mp-situation-aware')
-
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-
 }
 
 compileJava {
