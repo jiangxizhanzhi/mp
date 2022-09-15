@@ -515,6 +515,7 @@ public class CreateHandler extends HandlerCommon {
                     return accessModeParam;
                 }).collect(Collectors.toList()));
             }
+            entityInterface.setFwdnsInterfaceIp(getHandlerUtils().getFwdnsInterfaceIp(srcElement.getId(), connectNetwork.getNetwork().getId()));
             entityInterfaces.add(entityInterface);
         }
 

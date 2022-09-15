@@ -1053,9 +1053,13 @@ public class InitiateHandler extends HandlerCommon {
                 allnets.addAll(element.getAccessNetworks());
                 allnets.addAll(element.getDeriveNetworks());
                 for (var net : allnets) {
-                    String fwdnsInterfaceIp = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true).get(0);
-                    getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), fwdnsInterfaceIp);
-                    net.getNetwork().getExcloudIps().add(fwdnsInterfaceIp);
+                    List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true);
+                    if (CollectionUtils.isNotEmpty(randomIps)) {
+                        // 如果ip不够分了 只能走云平台默认逻辑
+                        String fwdnsInterfaceIp = randomIps.get(0);
+                        getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), fwdnsInterfaceIp);
+                        net.getNetwork().getExcloudIps().add(fwdnsInterfaceIp);
+                    }
                 }
             }
         }
