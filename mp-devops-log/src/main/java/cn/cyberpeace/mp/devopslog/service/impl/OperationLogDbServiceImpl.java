@@ -146,8 +146,8 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
 
         if (Objects.nonNull(request.getUserNameOrOpTarget())) {
             humanCondition.filterOrStart()
-                    .orEqual(OperationLogDbModel::getUserName, request.getUserNameOrOpTarget())
-                    .orEqual(OperationLogDbModel::getOpTarget, request.getUserNameOrOpTarget())
+                    .orContains(OperationLogDbModel::getUserName, request.getUserNameOrOpTarget())
+                    .orContains(OperationLogDbModel::getOpTarget, request.getUserNameOrOpTarget())
                     .filterOrEnd();
         }
         String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
