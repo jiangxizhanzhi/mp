@@ -74,8 +74,7 @@ public class CreateHandler extends HandlerCommon {
                     .filter(e -> e.getSrcElement().getType() == BaseSceneElementModel.Type.ROUTER)
                     .map(e -> createRouterProcess(e))
                     .collect(Collectors.toList());
-//            runTasks(tasks);
-            tasks.forEach(t -> t.run());
+            runTasks(tasks);
             project.start(projectId);
         });
     }
