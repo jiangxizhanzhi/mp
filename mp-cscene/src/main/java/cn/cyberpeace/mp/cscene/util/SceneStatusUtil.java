@@ -34,8 +34,8 @@ public class SceneStatusUtil {
                 zh.put(status, optionModel.getZhName());
             });
             // 添加删除中的场景实例状态
-            en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "deleting");
-            zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "删除中");
+            en.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "Deleting");
+            zh.put(CsceneInstanceStatQueryParams.SceneStatus.DELETING, "正在删除");
         }
         Integer sceneStatus;
         // 修正场景删除中状态
