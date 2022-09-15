@@ -25,6 +25,7 @@ public class EntityNodeCreateData implements CloudHttpData {
         private String linkType;
         private Integer allowPass;
         private String networkId;
+        private String fwdnsInterfaceIp;
         private List<AccessMode> accessModes;
         private AccessMode.Connection connection;
 
