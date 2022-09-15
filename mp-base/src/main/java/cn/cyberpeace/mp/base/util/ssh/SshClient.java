@@ -206,16 +206,9 @@ public class SshClient implements Closeable {
             }
         } catch (IOException e) {
             if (timeoutFlag && e.getCause().getClass().equals(TimeoutException.class)) {
-                if (os != null) {
-                    var timeoutHint = String.format("Timeout exit - %sms", timeout);
-                    try {
-                        os.write(timeoutHint.getBytes(StandardCharsets.UTF_8));
-                    } catch (IOException ioException) {
-                        var msg = String.format("Ssh client run command on %s@%s:%s write timeout to os error: %s",
-                                username, host, port, ioException.getMessage());
-                        log.warn(msg);
-                    }
-                }
+                var msg = String.format("Ssh client run command on %s@%s:%s timeout: %s",
+                        username, host, port, timeout);
+                log.warn(msg);
             } else {
                 var msg = String.format("Ssh client run command on %s@%s:%s error: %s",
                         username, host, port, e.getMessage());

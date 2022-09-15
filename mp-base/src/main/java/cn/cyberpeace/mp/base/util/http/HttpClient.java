@@ -109,8 +109,8 @@ public class HttpClient {
             } else {
                 var stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
-                if(data.getContentType() != null){
-                    stringEntity.setContentType(data.getContentType());
+                if(!StringUtils.isEmpty(data.contentType())){
+                    stringEntity.setContentType(data.contentType());
                 }else{
                     stringEntity.setContentType(contentType);
                 }

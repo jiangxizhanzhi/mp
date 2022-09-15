@@ -62,47 +62,4 @@ public class ServiceResult<T> extends BaseServiceResult<T, T> {
             return new ServiceResult<>(source, serviceCode, detail);
         }
     }
-//
-//    /**
-//     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.success
-//     * 返回成功
-//     * @return
-//     */
-//    public static <T1> ServiceResult<T1> successful() {
-//        return ServiceResult.<T1>builder().build().asResult();
-//    }
-//
-//    /**
-//     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.success
-//     * 返回成功，带数据
-//     * @param source
-//     * @return
-//     */
-//    public static <T1> ServiceResult<T1> success(T1 source) {
-//        return ServiceResult.<T1>builder().source(source).build().asResult();
-//    }
-//
-//    /**
-//     * @Deprecated 不允许直接执行返回asResult, 请在controller层使用ResultCommon.fail
-//     * 返回失败
-//     * @param errorCode
-//     * @return
-//     */
-//    public static <T1> ServiceResult<T1> fail(ServiceCode errorCode) {
-//        return ServiceResult.<T1>builder().serviceCode(errorCode).build().asResult();
-//    }
-//
-//    /**
-//     * @Deprecated 不允许直接执行返回asResult, 不允许复用错误码, 请消除此类代码
-//     * 返回通用失败信息
-//     * @param msg
-//     * @return
-//     */
-//    public static <T1> ServiceResult<T1> fail(String msg) {
-//        var serviceResult = new ServiceResult<T1>();
-//        serviceResult.setCode(BaseErrorCode.ERROR.getCode());
-//        serviceResult.setMessage(msg);
-//        return serviceResult.asResult();
-//    }
-
 }
