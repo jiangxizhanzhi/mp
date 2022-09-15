@@ -17,7 +17,7 @@ public class UpdateVpcsData implements Gns3HttpData {
     }
 
     @Override
-    public String getContentType() {
+    public String contentType() {
         return MediaType.TEXT_PLAIN_VALUE;
     }
 

@@ -1,38 +1,27 @@
 package cn.cyberpeace.mp.devopslog.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devopslog.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
-import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
 import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.devopslog.service.OperationLogService;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
-import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 
 /**
  * 用户操作日志记录
@@ -44,14 +33,14 @@ import java.util.Objects;
 @Api(tags = "日志模块")
 public class OperateLogController {
 
-    private OperateLogServiceFactory operateLogServiceFactory;
+    private OperationLogService operationLogService;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @Autowired
-    public OperateLogController(OperateLogServiceFactory operateLogServiceFactory) {
-        this.operateLogServiceFactory = operateLogServiceFactory;
+    public OperateLogController(OperationLogService operationLogService) {
+        this.operationLogService = operationLogService;
     }
 
     @ApiOperation(value = "新增操作日志")
@@ -60,7 +49,7 @@ public class OperateLogController {
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
         log.info("logRequest:{}", request);
-        operateLogServiceFactory.create(request, LocaleContextHolder.getLocale());
+        operationLogService.create(request);
         return ResultCommon.success();
     }
 
@@ -68,25 +57,7 @@ public class OperateLogController {
     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
-        Locale locale = LocaleContextHolder.getLocale();
-        SearchResponse searchResponse = operateLogServiceFactory.search(request);
-        SearchHits searchHits = searchResponse.getHits();
-        List<OperationLogPageResponse> list = new ArrayList<>(searchHits.getHits().length);
-        for (SearchHit hit : searchHits.getHits()) {
-            OperationLogPageResponse operationLog = JSON.parseObject(hit.getSourceAsString(), OperationLogPageResponse.class);
-            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpModuleID())) {
-                OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(operationLog.getOpModuleID());
-                String opModuleCode = operateLogServiceFactory.getlocalizedMessage(locale, opModuleEnums.getCode());
-                operationLog.setOpModule(opModuleCode);
-            }
-            if (Objects.nonNull(operationLog) && Objects.nonNull(operationLog.getOpTypeID())) {
-                OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(operationLog.getOpTypeID());
-                String opTypeCode = operateLogServiceFactory.getlocalizedMessage(locale, opTypeEnum.getCode());
-                operationLog.setOpType(opTypeCode);
-            }
-            list.add(operationLog);
-        }
-        return new ListObjServiceResult(new ListObjResult<>(list, Integer.valueOf(String.valueOf(searchHits.getTotalHits().value)))).asResult();
+        return operationLogService.search(request);
     }
 
     @GetMapping("/modules")

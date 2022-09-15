@@ -136,6 +136,7 @@ mp:
     es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
     cp-url: http://${CP_IP:10.100.7.1}:11111 #云平台地址
     mp-ip: ${MP_API_IP:127.0.0.1}    # MP中台API地址
+    log-db: ${MP_DEVOPS_LOG_DB:es}
   # mp-auth 模块配置
   auth:
     max-import-user-size: ${MP_MAX_IMPORT_USER_SIZE:100}
@@ -197,7 +198,8 @@ mp:
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://${MP_SELF_IP:mp}:${MP_SELF_PORT:8001}/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
-    gns3-server: http://${GNS3_IP:10.100.7.1}:${GNS3_PORT:8088}
+    gns3-server: http://${GNS3_IP:10.100.7.1}:${GNS3_PORT:13080}
+    gns3-image-uuids: ${MP_GNS3_IMAGE_UUIDS:854f7c24-060f-4dbd-b771-68eab207a071}
   cscene:
     has-own-recording-set: ${HAS_OWN_RECORDING_SET:213,214,236}
     scene-error-creating-seconds: ${MP_SCENE_ERROR_CREATING_SECONDS:3600}

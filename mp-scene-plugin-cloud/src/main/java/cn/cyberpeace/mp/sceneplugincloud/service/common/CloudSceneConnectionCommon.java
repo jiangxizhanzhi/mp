@@ -46,7 +46,6 @@ public class CloudSceneConnectionCommon {
         private String userId;
         private String systemType;
         private Boolean entity;
-        private String host;
 
         //        private String username;
         private String sceneName;
@@ -168,7 +167,7 @@ public class CloudSceneConnectionCommon {
             guacamoleCreateConnectionData.setScene(param.getSceneName());
             guacamoleCreateConnectionData.setUsername(userId);
             guacamoleCreateConnectionData.setDepartment(param.getDepartment());
-            guacamoleCreateConnectionData.setHost(param.getHost());
+            guacamoleCreateConnectionData.setHost(param.getResourceHost());
             guacamoleCreateConnectionData.setFlag(false);
             var connectionParams = new GuacamoleCreateConnectionData.ConnectionParams();
             // 协议的特殊处理
