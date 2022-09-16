@@ -19,6 +19,8 @@ public class CsceneStat {
     private Integer firewallCount;
     @ApiModelProperty(value = "交换机数量")
     private Integer switchCount;
+    @ApiModelProperty(value = "npc数量")
+    private Integer npcCount;
     @ApiModelProperty(value = "测试场景数量")
     private Integer testSceneCount;
 }
