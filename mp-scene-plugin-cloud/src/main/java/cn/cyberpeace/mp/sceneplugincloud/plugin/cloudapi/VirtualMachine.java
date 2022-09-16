@@ -218,10 +218,11 @@ public class VirtualMachine extends CloudClient {
         return true;
     }
 
-    public SnapshotResultData snapshot(String instanceId, String image, String snapshotName,String desc, Map<String, Object> extInfo) {
+    public SnapshotResultData snapshot(String instanceId, String image, String imageUUid, String snapshotName, String desc, Map<String, Object> extInfo) {
         SnapshotParams params = new SnapshotParams();
         params.setDescription(StringUtils.EMPTY);
         params.setImageName(image);
+        params.setDeviceUUid(imageUUid);
         params.setInstanceUuid(instanceId);
         params.setName(snapshotName);
         params.setDescription(desc);

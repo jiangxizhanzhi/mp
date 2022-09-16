@@ -71,7 +71,8 @@ public class SnapshotHandler extends HandlerCommon {
     private void snapshot(CloudPluginSceneElementBO element, String snapshotId, String snapshotName, String description) {
         // 调用云平台接口 snapshot
         Map<String, Object> extInfo = Collections.singletonMap("sceneId", getPluginHandler().getSourceSceneId());
-        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(), snapshotName, description, extInfo);
+        var result = virtualMachine.snapshot(element.getResourceId(), element.getImage(),
+                element.getImageUuid(), snapshotName, description, extInfo);
         SceneElementSnapshotBO snapshotBO = new SceneElementSnapshotBO();
         snapshotBO.setId(snapshotId);
         snapshotBO.setName(snapshotName);
