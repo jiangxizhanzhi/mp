@@ -1112,6 +1112,9 @@ public class InitiateHandler extends HandlerCommon {
                         continue;
                     }
                     List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    if (StringUtils.isNotEmpty(network.network.getDhcpIp())) {
+                        possibleDhcpIps = new ArrayList<>();
+                    }
                     Map<String, String> changeIp = new HashMap<>();
                     List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
                     excludeIps.addAll(possibleDhcpIps);
