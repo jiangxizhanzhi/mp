@@ -56,7 +56,7 @@ public class SceneService {
             if (sceneHandler.getScene() != null) {
                 sceneHandler.getScene().setCreateTime(null);
             }
-            sceneHandler.reformTopo();
+//            sceneHandler.reformTopo();
             sceneHandler.save();
         } catch (SceneNotExistException e) {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
@@ -69,6 +69,37 @@ public class SceneService {
                 return;
             }
             sceneHandlerProxy.create();
+
+            var endTime = LocalDateTime.now();
+            var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
+            sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
+            sceneHandler.updateScene();
+        });
+
+        return new ServiceResult<>(sceneHandler.toData());
+    }
+
+    public ServiceResult<SceneDataBO> update(SceneDataBO sceneDataBO, SceneContextBO context) {
+        SceneHandler sceneHandler;
+        try {
+            sceneHandler = new SceneHandler(sceneDataBO, false, context);
+            sceneHandler.setRealTimeUpdate(true);
+            if (sceneHandler.getScene() != null) {
+                sceneHandler.getScene().setCreateTime(null);
+            }
+//            sceneHandler.reformTopo();
+            sceneHandler.save();
+        } catch (SceneNotExistException e) {
+            return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
+        }
+
+        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
+        SceneTaskPool.getInstance().executeTask(() -> {
+            var starTime = LocalDateTime.now();
+            if (!sceneHandlerProxy.initiate1(false)) {
+                return;
+            }
+            sceneHandlerProxy.create1();
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();

@@ -486,6 +486,24 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
+    public boolean initiate1(boolean isSave) {
+        prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.initiate();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.MODIFY, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        if (isSave) {
+            save();
+        }
+        return true;
+    }
+
     public boolean create() {
         prepareAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
         startAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
@@ -498,6 +516,22 @@ public class SceneHandler extends BaseSceneHandler<
             return false;
         }
         overAllEvent(SceneModel.Event.CREATE, SceneElementModel.Event.CREATE);
+        save();
+        return true;
+    }
+
+    public boolean create1() {
+        prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.create();
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.MODIFY, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         save();
         return true;
     }

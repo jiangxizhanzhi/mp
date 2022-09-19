@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
@@ -439,6 +440,40 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             CsceneDataModifier.correctName(csceneId, createContext.getReferenceMetaData(), csceneInstance, cscene, csceneHandler.getCscene(), createContext.getName());
         }
         return new ServiceResult<>(csceneHandler.createAppInstance(unique, csceneInstance));
+    }
+
+    public ServiceResult<CsceneInstanceBO> createAppInstance1(String csceneId, boolean unique,
+                                                             CsceneInstanceCreateContextBO createContext) {
+        if (createContext == null) {
+            return createAppInstance(csceneId, unique, new CsceneContextBO());
+        }
+        // checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
+
+        var csceneHandler = new CsceneInstanceHandler(csceneId, createContext.getContext());
+        var cscene = createContext.getCscene();
+        CsceneInstanceBO csceneInstance;
+        if (cscene == null) {
+            csceneInstance = csceneHandler.getCscene().export();
+        } else {
+            csceneInstance = cscene.exportToCsceneInstance();
+        }
+        if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
+            this.correctEnableRecording(csceneInstance);
+        }
+        if (createContext.getSceneAttr() != null) {
+            csceneInstance.setSceneAttr(createContext.getSceneAttr());
+        }
+        if (createContext.getSceneTtl() != null) {
+            csceneInstance.setSceneTtl(createContext.getSceneTtl());
+        }
+        if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
+            csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
+        }
+        if (createContext.getReferenceType() != null) {
+            csceneInstance.setReferenceType(createContext.getReferenceType());
+        }
+        csceneHandler.create1();
+        return new ServiceResult<>(csceneHandler.toData());
     }
 
     public ServiceResult<Boolean> updateElementImage(String id, String nodeId, String image) {

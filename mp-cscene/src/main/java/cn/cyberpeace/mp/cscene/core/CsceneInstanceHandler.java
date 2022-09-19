@@ -95,6 +95,17 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         cscene.fromModel(csceneObj);
     }
 
+    public void create1() {
+        var cscene = getCscene();
+        // 先保存设置id
+        // save();
+        cscene.setScene(sceneService.update(cscene.getScene(), generateSceneContext()).getSource());
+
+        var csceneObj = cscene.toModel();
+        getCsceneMapper().save(csceneObj);
+        cscene.fromModel(csceneObj);
+    }
+
     @Override
     public String getSceneId(CsceneInstanceModel csceneObj) {
         return csceneObj.getScene();

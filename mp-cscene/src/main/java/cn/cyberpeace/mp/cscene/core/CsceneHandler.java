@@ -150,6 +150,31 @@ public class CsceneHandler extends BaseCsceneHandler<
         return instanceHandler.toData();
     }
 
+    private CsceneInstanceBO createInstance1(int type, CsceneInstanceBO csceneInstance) {
+        if (csceneInstance == null) {
+            return null;
+        }
+        csceneInstance.setCscene(getCsceneId());
+        csceneInstance.setType(type);
+        if (type == CsceneInstanceModel.Type.TEST && csceneInstance.getScene() != null) {
+            // 测试模式下,需要默认可以有console登录协议
+            CsceneDataModifier.supplyProtocol(csceneInstance, AccessMode.Protocol.CONSOLE);
+        } else if (type == CsceneInstanceModel.Type.APP && csceneInstance.getScene() != null) {
+            // 非测试模式,核心路由器需要加上console登录协议
+            CsceneDataModifier.supplyProtocolForCoreRouter(csceneInstance, AccessMode.Protocol.CONSOLE);
+        }
+        this.checkVlanIds(getCscene());
+        var instanceHandler = new CsceneInstanceHandler(csceneInstance, getContext());
+        // 节点数量增加失败 说明已到达数量上限
+        NodeLimitUtils.UpdateResult updateResult = NodeLimitUtils.addLimitedNodeCount(instanceHandler);
+        if (!updateResult.isSuccess()) {
+            throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
+                    String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
+        }
+        instanceHandler.create1();
+        return instanceHandler.toData();
+    }
+
     public CsceneHandler(CsceneBO csceneBO, CsceneContextBO context) {
         init(csceneBO, context);
     }
@@ -263,6 +288,22 @@ public class CsceneHandler extends BaseCsceneHandler<
         }
 
         return createInstance(CsceneInstanceModel.Type.APP, csceneInstanceBO);
+    }
+
+    public CsceneInstanceBO createAppInstance1(boolean unique, CsceneInstanceBO csceneInstanceBO) {
+        if (csceneInstanceBO == null) {
+            return null;
+        }
+
+        if (unique) {
+            reloadCsceneInstances();
+            var appScenes = getCscene().getAppScenes();
+            if (appScenes != null && !appScenes.isEmpty()) {
+                return null;
+            }
+        }
+
+        return createInstance1(CsceneInstanceModel.Type.APP, csceneInstanceBO);
     }
 
     @Override
