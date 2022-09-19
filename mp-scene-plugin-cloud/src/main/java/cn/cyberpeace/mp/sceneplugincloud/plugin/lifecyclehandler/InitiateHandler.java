@@ -392,7 +392,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && Boolean.TRUE.equals(network.getDhcp())) {
                 List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
@@ -1085,7 +1085,7 @@ public class InitiateHandler extends HandlerCommon {
                         continue;
                     }
                     List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
-                    if (StringUtils.isNotEmpty(network.network.getDhcpIp())) {
+                    if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                         possibleDhcpIps = new ArrayList<>();
                     }
                     Map<String, String> changeIp = new HashMap<>();
