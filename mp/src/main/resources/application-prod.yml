@@ -83,6 +83,8 @@ mp:
     fdfs-inner-http-server: http://${FDFS_IP:10.100.1.26}:${FDFS_INNER_FILE_SERVER_PORT:8888}
     fdfs-outer-http-server: ${FDFS_FILE_SERVER_ADDR:/fdfs}
     run-init: true
+  aggregation:
+    static-locations: file:/root/.mp/resources/default_img
   # mp-devops-cluster模块
   devopscluster:
     cp-url: http://${CP_IP:10.100.7.1}:${CP_PORT:11111} #云平台地址
