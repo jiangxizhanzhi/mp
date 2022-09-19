@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler2;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
@@ -72,6 +73,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private HandlerUtils handlerUtils;
     private InitiateHandler initiateHandler;
+    private InitiateHandler2 initiateHandler2;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
 
@@ -116,8 +118,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         handlerUtils = new HandlerUtils(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
+        initiateHandler2 = new InitiateHandler2(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
+
     }
 
     @Override
@@ -484,5 +488,10 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
         }
+    }
+
+    @Override
+    public void modify() {
+        initiateHandler2.initiate();
     }
 }

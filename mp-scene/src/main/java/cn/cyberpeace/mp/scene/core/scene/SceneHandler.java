@@ -491,7 +491,7 @@ public class SceneHandler extends BaseSceneHandler<
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         try {
             for (var plugin : getPlugins()) {
-                plugin.initiate();
+                plugin.modify();
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.MODIFY, e.getMessage());
