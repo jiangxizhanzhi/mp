@@ -29,6 +29,7 @@ public class VirtualSwitchCreateData implements CloudHttpData {
         private String cidr;
         private String gatewayIp;
         private Boolean enableDhcp;
+        private String dhcpPortIp;
         private List<AllocationPool> allocationPools;
         private List<String> dnsNameservers;
         private List<HostRoute> hostRoutes;

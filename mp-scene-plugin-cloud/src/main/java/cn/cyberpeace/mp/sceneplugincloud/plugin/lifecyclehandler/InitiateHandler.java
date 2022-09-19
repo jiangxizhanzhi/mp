@@ -373,6 +373,9 @@ public class InitiateHandler extends HandlerCommon {
                         gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
                         excludeIps.add(gateway);
                         List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway);
+                        if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+                            possibleDhcpIps = new ArrayList<>();
+                        }
                         boolean conflict = false;
                         for (String possibleDhcpIp : possibleDhcpIps) {
                             if (existIps.contains(possibleDhcpIp)) {
@@ -389,7 +392,25 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            existIps.add(IpUtils.nextIp(network.getGateway()));
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway());
+                for (String possibleDhcpIp : possibleDhcpIps) {
+                    if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
+                        network.setDhcpIp(possibleDhcpIp);
+                        existIps.add(possibleDhcpIp);
+                        break;
+                    }
+                }
+                if (StringUtils.isEmpty(network.getDhcpIp())) {
+                    List<String> ipPool = IpUtils.newRandomIps(network.getCidr(), 1, new ArrayList<>(existIps), new ArrayList<>(), BoolUtils.bool(network.getDhcp()));
+                    if (CollectionUtils.isNotEmpty(ipPool)) {
+                        network.setDhcpIp(ipPool.get(0));
+                        existIps.add(ipPool.get(0));
+                    }
+                }
+            } else {
+                existIps.add(IpUtils.nextIp(network.getGateway()));
+            }
 
             Set<String> portIps = new HashSet<>();
             int requireCount = 0;
@@ -1064,6 +1085,9 @@ public class InitiateHandler extends HandlerCommon {
                         continue;
                     }
                     List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    if (StringUtils.isNotEmpty(network.network.getDhcpIp())) {
+                        possibleDhcpIps = new ArrayList<>();
+                    }
                     Map<String, String> changeIp = new HashMap<>();
                     List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
                     excludeIps.addAll(possibleDhcpIps);
@@ -1128,6 +1152,9 @@ public class InitiateHandler extends HandlerCommon {
                         continue;
                     }
                     List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+                        possibleDhcpIps = new ArrayList<>();
+                    }
                     List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
                     excludeIps.addAll(possibleDhcpIps);
                     for (var port : ports) {

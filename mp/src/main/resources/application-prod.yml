@@ -228,6 +228,7 @@ mp:
     public-net-proxy-ip: ${MP_PUBLIC_NET_PROXY_IP:}
     public-net-proxy-port: ${PUBLIC_NET_PROXY_PORT:}
     gateway_types: ${GATEWAY_TYPES:2,3}
+    dhcp_ip_allocate: ${MP_DHCP_IP_ALLOCATE:true}
   sceneplugincollection:
     wazuh-server-host: ${ip.wazuh}
     wazuh-api-server: http://${ip.wazuh}:15500

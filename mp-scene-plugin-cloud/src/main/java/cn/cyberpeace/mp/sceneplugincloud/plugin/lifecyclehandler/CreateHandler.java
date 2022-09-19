@@ -212,6 +212,7 @@ public class CreateHandler extends HandlerCommon {
             subnet.setGatewayIp(TextUtils.emptyNull(connectedNetwork.network.getGateway()));
             // 默认开启dhcp
             var dhcp = connectedNetwork.network.getDhcp();
+            subnet.setDhcpPortIp(TextUtils.emptyNull(connectedNetwork.network.getDhcpIp()));
             subnet.setEnableDhcp(dhcp == null || dhcp);
 
             var srcAllocationPools = connectedNetwork.network.getAllocationPools();

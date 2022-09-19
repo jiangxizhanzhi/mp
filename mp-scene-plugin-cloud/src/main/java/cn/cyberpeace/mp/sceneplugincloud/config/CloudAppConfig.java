@@ -162,6 +162,9 @@ public class CloudAppConfig {
     @Value("${mp.sceneplugincloud.gateway_types:2,3}")
     private String gatewayTypes;
 
+    @Value("${mp.sceneplugincloud.dhcp_ip_allocate:true}")
+    private Boolean dhcpIpAllocate;
+
     @Autowired
     private BaseAppConfig baseAppConfig;
 
