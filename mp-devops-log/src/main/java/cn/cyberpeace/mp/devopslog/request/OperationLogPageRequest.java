@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.enums.SiteTypeEnums;
-import cn.cyberpeace.mp.devopslog.model.OperationLogDbModel;
+import cn.cyberpeace.mp.devopslog.model.OperationLogModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -131,9 +131,9 @@ public class OperationLogPageRequest extends BasePageRequest{
     }
 
     public RangeQueryBuilder buildRangeQueryBuilder() {
-        // f构建范围查询start_date <= create_time and create_time <= end_date
-        String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
-        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(createTime);
+        // f构建范围查询start_date <= opTime and opTime <= end_date
+        String opTime = BeanUtils.getBeanGetterFieldName(OperationLogModel::getOpTime);
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(opTime);
         if (Objects.nonNull(this.getStartDate())) {
             rangeQueryBuilder.gte(this.getStartDate());
         }
@@ -149,8 +149,7 @@ public class OperationLogPageRequest extends BasePageRequest{
      */
     public SearchSourceBuilder buildSearchSourceBuilder(){
         return SearchSourceBuilder.searchSource()
-                .query(this.buildBoolQueryBuilder())
-                .query(this.buildRangeQueryBuilder())
+                .query(this.buildBoolQueryBuilder().must(this.buildRangeQueryBuilder()))
                 .sort("opTime", SortOrder.DESC)
                 .from(this.getOffset() - 1 > 0 ? (this.getOffset() - 1) * this.getLimit() : 0)
                 .size(this.getLimit());
