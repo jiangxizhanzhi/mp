@@ -60,13 +60,17 @@ public class ContainerFileUtils {
     }
 
     public static boolean prepareApkUnzip(Container containerClient, String containerId) {
-        var apkUnzipLocalFilepath = getApkUnzipLocalFilepath();
-        if (StringUtils.isEmpty(apkUnzipLocalFilepath)) {
-            return false;
+        var result = containerClient.executeCommand(containerId, "sh -c \"command -v apk\"");
+        if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("/apk")) {
+            var apkUnzipLocalFilepath = getApkUnzipLocalFilepath();
+            if (StringUtils.isEmpty(apkUnzipLocalFilepath)) {
+                return false;
+            }
+            var flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
+            containerClient.executeCommand(containerId, String.format("apk add %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
+            return flag;
         }
-        var flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
-        containerClient.executeCommand(containerId, String.format("apk add %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
-        return flag;
+        return false;
     }
 
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir) {

@@ -154,9 +154,9 @@ public class SceneParseResourceCenter {
                 id2Network.put(e.getId(), networkElementParseResult);
                 networks.add(networkElementParseResult);
                 if (pluginElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
-                    networkElementParseResult.setId("internet-" + networkIndex);
+                    networkElementParseResult.setId("internet-" + networkIndex++);
                 } else {
-                    networkElementParseResult.setId("network-" + networkIndex);
+                    networkElementParseResult.setId("network-" + networkIndex++);
                 }
             } else {
                 var nodeElementParseResult = this.buildNodeElementParseResult(e, pluginElement);

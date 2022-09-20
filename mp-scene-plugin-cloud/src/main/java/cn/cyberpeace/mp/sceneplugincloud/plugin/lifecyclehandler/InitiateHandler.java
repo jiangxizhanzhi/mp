@@ -391,7 +391,7 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && Boolean.TRUE.equals(network.getDhcp())) {
                 List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
@@ -1039,6 +1039,33 @@ public class InitiateHandler extends HandlerCommon {
                 reallocateIpPorts(networkElements);
             });
         }
+
+        // 分配 fwdnsInterfaceIp
+        for (var element : cloudElements) {
+            Integer virtualType = element.getVirtualType();
+            if (virtualType == null) {
+                continue;
+            }
+            if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE ||
+                    virtualType == BaseCloudPluginSceneElementModel.VirtualType.CONTAINER ||
+                    virtualType == BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE) {
+                List<ConnectedNetworkBO> allnets = new ArrayList<>();
+                allnets.addAll(element.getAccessNetworks());
+                allnets.addAll(element.getDeriveNetworks());
+                for (var net : allnets) {
+                    if (Boolean.TRUE.equals(net.getNetwork().getExternal()) || StringUtils.isEmpty(net.getNetwork().getCidr())) {
+                        continue;
+                    }
+                    List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true);
+                    if (CollectionUtils.isNotEmpty(randomIps)) {
+                        // 如果ip不够分了 只能走云平台默认逻辑
+                        String fwdnsInterfaceIp = randomIps.get(0);
+                        getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), fwdnsInterfaceIp);
+                        net.getNetwork().getExcloudIps().add(fwdnsInterfaceIp);
+                    }
+                }
+            }
+        }
     }
 
     public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
@@ -1085,6 +1112,9 @@ public class InitiateHandler extends HandlerCommon {
                         continue;
                     }
                     List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+                        possibleDhcpIps = new ArrayList<>();
+                    }
                     Map<String, String> changeIp = new HashMap<>();
                     List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
                     excludeIps.addAll(possibleDhcpIps);

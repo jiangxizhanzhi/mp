@@ -118,7 +118,7 @@ public class CsceneSpecialService {
 
         Map<String, CsceneStat> statMap = new HashMap<>();
         for (String id : ids) {
-            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0);
+            var csceneStat = new CsceneStat(id, 0, 0, 0, 0, 0, 0);
             statMap.put(id, csceneStat);
         }
 
@@ -146,6 +146,8 @@ public class CsceneSpecialService {
                 stat.setFirewallCount(elementStat.getElementTypeCount());
             } else if (elementType.equals(BaseSceneElementModel.Type.TERMINAL)) {
                 stat.setTerminalCount(elementStat.getElementTypeCount());
+            } else if (elementType.equals(BaseSceneElementModel.Type.NPC)) {
+                stat.setNpcCount(elementStat.getElementTypeCount());
             }
         });
 
@@ -203,6 +205,7 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getSceneAttr, CsceneInstanceStat::getSceneAttr)
                 .selectAs(CsceneInstanceModel::getSceneTtl, CsceneInstanceStat::getSceneTtl)
                 .selectAs(CsceneInstanceModel::getName, CsceneInstanceStat::getName)
+                .selectAs(CsceneInstanceModel::getDeleted, CsceneInstanceStat::getDeleted)
                 .currentLink(SceneModel.class)
                 .selectAs(SceneModel::getEvent, CsceneInstanceStat::getEvent)
                 .selectAs(SceneModel::getEventStatus, CsceneInstanceStat::getEventStatus)
@@ -371,9 +374,13 @@ public class CsceneSpecialService {
                         s.setSceneRunTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC) - s.getCreateTime().toEpochSecond(ZoneOffset.UTC));
                     }
                     // 转换场景实例状态
-                    var status = SceneStatusUtil.getSceneStatus(s.getEvent(), s.getEventStatus());
+                    var status = SceneStatusUtil.getSceneStatus(s.getDeleted(), s.getEvent(), s.getEventStatus());
                     s.setSceneStatus(status.getSceneStatus());
                     s.setSceneStatusDesc(status.getSceneStatusDesc());
+                    if (Boolean.TRUE.equals(s.getDeleted()) && SceneModel.Event.DELETE != s.getEvent()) {
+                        s.setEvent(SceneModel.Event.DELETE);
+                        s.setEventStatus(EventStatus.START);
+                    }
                 });
             }
             total = csceneInstanceMapper.total(humanCondition);
@@ -682,7 +689,7 @@ public class CsceneSpecialService {
         Map<String, CsceneNodeInfoBO> result = new HashMap<>();
         infos.forEach(info -> {
             // 转换场景实例状态
-            var status = SceneStatusUtil.getSceneStatus(info.getEvent(), info.getEventStatus());
+            var status = SceneStatusUtil.getSceneStatus(info.getDeleted(), info.getEvent(), info.getEventStatus());
             info.setSceneStatus(status.getSceneStatus());
             info.setSceneStatusDesc(status.getSceneStatusDesc());
             result.put(info.getResourceName(), info);
@@ -728,7 +735,8 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
                 .selectAs(CsceneInstanceModel::getCreateUser, CsceneNodeInfoBO::getUserId)
-                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
+                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName)
+                .selectAs(CsceneInstanceModel::getDeleted, CsceneNodeInfoBO::getDeleted);
         var result = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(result)) {
             return new ArrayList<>();
@@ -754,7 +762,8 @@ public class CsceneSpecialService {
                 .selectAs(CsceneInstanceModel::getScene, CsceneNodeInfoBO::getInternalSceneEid)
                 .selectAs(CsceneInstanceModel::getReferenceType, CsceneNodeInfoBO::getReferenceType)
                 .selectAs(CsceneInstanceModel::getCreateUser, CsceneNodeInfoBO::getUserId)
-                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName);
+                .selectAs(CsceneInstanceModel::getName, CsceneNodeInfoBO::getCsceneName)
+                .selectAs(CsceneInstanceModel::getDeleted, CsceneNodeInfoBO::getDeleted);
         var elementInfos = csceneInstanceMapper.list(condition, CsceneNodeInfoBO.class);
         if (CollectionUtils.isEmpty(elementInfos)) {
             return new ArrayList<>();

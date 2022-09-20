@@ -19,6 +19,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class SnapshotParams implements CloudHttpData {
     private String imageName;
+    private String deviceUUid;
     private String instanceUuid;
     private String name;
     private String description;

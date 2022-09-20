@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -36,9 +38,11 @@ public class ClientDetailsServiceImpl extends BaseModelServiceImpl<ClientDetails
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_CLIENTS)
     public ClientDetailsModel getByClientId(String clientId) {
         ClientDetailsModel model = getModelMapper().first(new HumanCondition().filterEqual("client_id", clientId));
-        String secret = model.getClientSecret();
-        String decryptedSecret = PasswordUtils.desDecrypt(secret);
-        model.setClientSecret(decryptedSecret);
+        if (Objects.nonNull(model)) {
+            String secret = model.getClientSecret();
+            String decryptedSecret = PasswordUtils.desDecrypt(secret);
+            model.setClientSecret(decryptedSecret);
+        }
         return model;
     }
 

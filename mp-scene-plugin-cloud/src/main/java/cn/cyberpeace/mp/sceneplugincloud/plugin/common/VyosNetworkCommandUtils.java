@@ -33,8 +33,12 @@ public class VyosNetworkCommandUtils {
         builderChains.add(new RouterNameCmdBuilder());
     }
 
-    public static List<String> genOpenDhcpCommands() {
-        return List.of("set interface ethernet eth0 address dhcp");
+    public static List<String> genOpenDhcpCommands(int ethSize) {
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < ethSize; i++) {
+            result.add("set interface ethernet eth" + i + " address dhcp");
+        }
+        return result;
     }
 
     public static List<String> genNetworkCmdList(CloudPluginSceneElementBO element, CloudScenePluginHandler pluginHandler) {

@@ -40,4 +40,9 @@ public class DevopsLogConfig {
      * MP中台地址
      */
     private String mpIp;
+
+    /**
+     * #日志存储数据库：es、mysql
+     */
+    private String logDb;
 }

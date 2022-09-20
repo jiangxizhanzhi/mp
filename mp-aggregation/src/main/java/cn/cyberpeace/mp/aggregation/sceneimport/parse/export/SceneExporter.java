@@ -1,8 +1,11 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
+import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
+import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -89,6 +92,24 @@ public class SceneExporter {
                     String logoUrl = StringUtils.replaceOnce(device.getLogo(), "/fdfs/", "");
                     byte[] content = FdfsCommon.downloadRawContent(logoUrl);
                     // 判断图片文件类型
+                    if (this.isPng(content)) {
+                        this.createFile(content, currentImageDir + "/logo.png");
+                        image.setLOGO("logo.png");
+                    } else {
+                        this.createFile(content, currentImageDir + "/logo.jpg");
+                        image.setLOGO("logo.jpg");
+                    }
+                } else if (device.getLogo().startsWith(CommonConstant.DefaultImagePrefix)) {
+                    String relativePath = StringUtils.replaceOnce(device.getLogo(), CommonConstant.DefaultImagePrefix, "");
+                    String filePath = BeanCommon.getBean(DefaultImgService.class).getDefaultImgFilePath(relativePath);
+                    byte[] content = null;
+                    try {
+                        File logo = new File(filePath);
+                        content = FileUtils.readFileToByteArray(logo);
+                    } catch (Exception e) {
+                        log.error("failed to export logo {} , {}", device.getLogo(), ExceptionUtils.getStackTrace(e));
+                        throw new MpRuntimeException(BaseErrorCode.ERROR);
+                    }
                     if (this.isPng(content)) {
                         this.createFile(content, currentImageDir + "/logo.png");
                         image.setLOGO("logo.png");

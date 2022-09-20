@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.devopslog.aop;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
 import cn.cyberpeace.mp.devopslog.config.DevopsLogConfig;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.devopslog.service.OperationLogService;
 import cn.cyberpeace.mp.devopslog.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
@@ -30,7 +29,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -60,12 +58,14 @@ public class RequestLogAspect {
 
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private OperateLogServiceFactory operateLogServiceFactory;
-
     @Autowired
-    public RequestLogAspect(OperateLogServiceFactory operateLogServiceFactory) {
-        this.operateLogServiceFactory = operateLogServiceFactory;
-    }
+    private OperationLogService operationLogService;
+//    private OperateLogServiceFactory operateLogServiceFactory;
+//
+//    @Autowired
+//    public RequestLogAspect(OperateLogServiceFactory operateLogServiceFactory) {
+//        this.operateLogServiceFactory = operateLogServiceFactory;
+//    }
 
     /**
      * 定义公共切面
@@ -145,12 +145,11 @@ public class RequestLogAspect {
             }
 
             OperateLog operateLog = getAnnotation(joinPoint,OperateLog.class);
-            Locale locale = LocaleContextHolder.getLocale();
 
             if (Objects.isNull(operateLog)){
                 return;
             }
-            operateLogServiceFactory.create(operateLog, request, locale);
+            operationLogService.create(operateLog, request);
 
         } catch (Exception e) {
             log.error("====插入操作日志异常:{}==",e.getMessage());

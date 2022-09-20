@@ -40,7 +40,7 @@ public class ClientAuthenticationFilter extends OncePerRequestFilter {
         String clientSecret = request.getHeader(CLIENT_SECRET_HEADER);
         if(StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
             ClientDetailsModel clientDetails = clientDetailsService.getByClientId(clientId);
-            if (clientDetails != null && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
+            if (Objects.nonNull(clientDetails) && Objects.equals(clientDetails.getType(), ClientDetailsModel.CLIENT_TYPE_UNAUTH)) {
                 // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
                 UserUtils.setLoginUser2RequestAttr(request, clientDetails.getId(), clientDetails.getClientId(), LogConstant.USER_TYPE_CLIENT);
                 request.setAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER, Boolean.TRUE);
