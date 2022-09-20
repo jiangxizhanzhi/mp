@@ -31,6 +31,7 @@ public class SceneElementModel extends BaseSceneElementModel implements BaseEven
     }
 
     public static class Event {
+        // 状态修改需要通知业务、前端
         public static final int DEFAULT = 0;
         public static final int INITIATE = 1;
         public static final int CREATE = 2;

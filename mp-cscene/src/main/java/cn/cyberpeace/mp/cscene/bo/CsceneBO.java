@@ -72,4 +72,13 @@ public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneR
         }
         return csceneInstance;
     }
+
+    public CsceneInstanceBO exportToCsceneInstance1() {
+        var csceneInstance = export(CsceneInstanceBO.class, CsceneInstaneRoleBO.class,
+                CsceneBO::getType, CsceneBO::getSceneConfig, CsceneBO::getTestScenes, CsceneBO::getAppScenes);
+        if (sceneConfig != null) {
+            csceneInstance.setScene(sceneConfig.exportToScene());
+        }
+        return csceneInstance;
+    }
 }

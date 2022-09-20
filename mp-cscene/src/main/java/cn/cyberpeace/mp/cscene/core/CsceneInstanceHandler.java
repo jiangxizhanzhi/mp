@@ -95,7 +95,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         cscene.fromModel(csceneObj);
     }
 
-    public void create1() {
+    public void update() {
         var cscene = getCscene();
         // 先保存设置id
         // save();
@@ -103,6 +103,7 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
 
         var csceneObj = cscene.toModel();
         getCsceneMapper().save(csceneObj);
+        csceneObj.setId(cscene.getId());
         cscene.fromModel(csceneObj);
     }
 

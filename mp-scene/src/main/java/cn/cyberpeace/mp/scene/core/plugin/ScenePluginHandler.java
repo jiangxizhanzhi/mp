@@ -85,6 +85,10 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
 
     }
 
+    public void create1() throws Exception {
+
+    }
+
     public void start() {
 
     }

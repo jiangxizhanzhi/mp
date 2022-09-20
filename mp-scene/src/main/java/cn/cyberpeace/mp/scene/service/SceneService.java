@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
@@ -96,6 +97,10 @@ public class SceneService {
         SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
         SceneTaskPool.getInstance().executeTask(() -> {
             var starTime = LocalDateTime.now();
+            sceneHandler.getElementMap().values().forEach(e -> {
+                e.setEvent(SceneElementModel.Event.DEFAULT);
+                e.setEventStatus(EventStatus.INITIAL);
+            });
             if (!sceneHandlerProxy.initiate1(false)) {
                 return;
             }

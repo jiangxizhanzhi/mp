@@ -171,7 +171,7 @@ public class CsceneHandler extends BaseCsceneHandler<
             throw new MpRuntimeException(CsceneErrorCode.SCENE_USING_NODE_LIMIT.format(String.valueOf(updateResult.getLimitNode()),
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
-        instanceHandler.create1();
+        instanceHandler.update();
         return instanceHandler.toData();
     }
 

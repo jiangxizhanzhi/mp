@@ -1,0 +1,49 @@
+package cn.cyberpeace.mp.cscene.controller.request;
+
+import cn.cyberpeace.mp.cscene.bo.CsceneBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceUpdateContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class CsceneUpdateInstanceRequest extends CsceneActionRequest {
+
+    @ApiModelProperty(value = "场景存活时间")
+    @JsonIgnore
+    private Integer sceneTtl;
+
+    @ApiModelProperty(value = "场景属性")
+    private Integer sceneAttr;
+
+    @ApiModelProperty(value = "场景引用元数据")
+    private String referenceMetaData;
+
+    @ApiModelProperty(value = "场景模板引用类型")
+    private Integer referenceType;
+
+    @ApiModelProperty(value = "场景名称")
+    private String name;
+
+    @ApiModelProperty(value = "场景模板数据")
+    private CsceneUpdateBO cscene;
+
+    @ApiModelProperty(value = "场景上下文数据")
+    private CsceneContextBO context;
+
+    public CsceneInstanceUpdateContextBO toCsceneInstanceUpdateContextBO() {
+        var csceneInstanceCreateContextBO = new CsceneInstanceUpdateContextBO();
+        csceneInstanceCreateContextBO.setSceneTtl(sceneTtl);
+        csceneInstanceCreateContextBO.setSceneAttr(sceneAttr);
+        csceneInstanceCreateContextBO.setReferenceMetaData(referenceMetaData);
+        csceneInstanceCreateContextBO.setReferenceType(referenceType);
+        csceneInstanceCreateContextBO.setCscene(cscene);
+        csceneInstanceCreateContextBO.setContext(context);
+        csceneInstanceCreateContextBO.setName(name);
+        return csceneInstanceCreateContextBO;
+    }
+
+}

@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneUpdateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -66,6 +67,14 @@ public class CsceneController implements BaseModelListControllerBase {
             request = new CsceneCreateInstanceRequest();
         }
         request = (CsceneCreateInstanceRequest) formatActionRequest(request, paramId);
+        return request;
+    }
+
+    private CsceneUpdateInstanceRequest formatUpdateInstanceRequest(CsceneUpdateInstanceRequest request, String paramId) {
+        if (request == null) {
+            request = new CsceneUpdateInstanceRequest();
+        }
+        request = (CsceneUpdateInstanceRequest) formatActionRequest(request, paramId);
         return request;
     }
 
@@ -220,11 +229,11 @@ public class CsceneController implements BaseModelListControllerBase {
     })
     @PostMapping(value = "/app_instance1")
     public ServiceResult<CsceneInstanceBO> createAppInstance1(
-            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneCreateInstanceRequest request) {
+            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneUpdateInstanceRequest request) {
         log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
-        request = formatCreateInstanceRequest(request, id);
-        correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createAppInstance1(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
+        request = formatUpdateInstanceRequest(request, id);
+//        correctRequestCsceneParamsForAppInstance(request.getCscene());
+        var result = modelService.createAppInstance1(request.getId(), false, request.toCsceneInstanceUpdateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
         return result;
     }

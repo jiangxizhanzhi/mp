@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -15,6 +14,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceUpdateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
@@ -443,37 +443,24 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public ServiceResult<CsceneInstanceBO> createAppInstance1(String csceneId, boolean unique,
-                                                             CsceneInstanceCreateContextBO createContext) {
+                                                              CsceneInstanceUpdateContextBO createContext) {
         if (createContext == null) {
             return createAppInstance(csceneId, unique, new CsceneContextBO());
         }
         // checkSceneUsingNodeLimit(csceneId, createContext.getCscene());
 
-        var csceneHandler = new CsceneInstanceHandler(csceneId, createContext.getContext());
         var cscene = createContext.getCscene();
-        CsceneInstanceBO csceneInstance;
-        if (cscene == null) {
-            csceneInstance = csceneHandler.getCscene().export();
-        } else {
-            csceneInstance = cscene.exportToCsceneInstance();
-        }
+        CsceneInstanceBO csceneInstance = cscene.exportToCsceneInstance1();
         if (this.need2UseSystemEnableRecording(CsceneInstanceModel.Type.APP, csceneInstance.getReferenceType())) {
             this.correctEnableRecording(csceneInstance);
-        }
-        if (createContext.getSceneAttr() != null) {
-            csceneInstance.setSceneAttr(createContext.getSceneAttr());
-        }
-        if (createContext.getSceneTtl() != null) {
-            csceneInstance.setSceneTtl(createContext.getSceneTtl());
         }
         if (createContext.getContext() != null && createContext.getContext().getPassThrough() != null) {
             csceneInstance.setPassThrough(createContext.getContext().getPassThrough());
         }
-        if (createContext.getReferenceType() != null) {
-            csceneInstance.setReferenceType(createContext.getReferenceType());
-        }
-        csceneHandler.create1();
-        return new ServiceResult<>(csceneHandler.toData());
+        csceneInstance.setId(csceneId);
+        var instanceHandler = new CsceneInstanceHandler(csceneInstance, createContext.getContext());
+        instanceHandler.update();
+        return new ServiceResult<>(instanceHandler.toData());
     }
 
     public ServiceResult<Boolean> updateElementImage(String id, String nodeId, String image) {

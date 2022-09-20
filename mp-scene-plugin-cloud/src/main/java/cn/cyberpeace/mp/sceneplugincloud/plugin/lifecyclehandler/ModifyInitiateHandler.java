@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementNetworkBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudErrorCode;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.common.CoreType;
@@ -39,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class InitiateHandler2 extends HandlerCommon {
+public class ModifyInitiateHandler extends HandlerCommon {
 
     public static class SceneProcess {
         public static final EventProcess INITIATE_BASE_PROPERTIES = new EventProcess("initiate_base_properties", "sceneplugincloud.event.initiate_base_properties");
@@ -391,7 +392,9 @@ public class InitiateHandler2 extends HandlerCommon {
                 }
             }
             existIps.add(network.getGateway());
-            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
+            if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && !getHandlerUtils().getCreatedNetworks().contains(connectedNetwork.network.getId())) {
+                // yi you de bu yong shezhi dhcpip
+                // zhege dhcp ip xuyao cunchu yixa
                 List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
@@ -444,11 +447,15 @@ public class InitiateHandler2 extends HandlerCommon {
                 }
             }
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
-                gatewayCount++;
+                if (!getHandlerUtils().getCreatedNetworks().contains(connectedNetwork.network.getId())) {
+                    gatewayCount++;
+                }
             }
             List<String> gatewayIpPool = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), gatewayCount, new ArrayList<>(existIps), network.getAllocationPools());
             if (Boolean.TRUE.equals(connectedNetwork.network.getAuxiliaryNetworkRouterOn())) {
-                connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
+                if (!getHandlerUtils().getCreatedNetworks().contains(connectedNetwork.network.getId())) {
+                    connectedNetwork.network.setAuxiliaryNetworkRouterIp(connectedNetwork.getNetwork().getGateway());
+                }
             }
             if (CollectionUtils.isNotEmpty(gatewayIpPool)) {
                 existIps.addAll(gatewayIpPool);
@@ -701,8 +708,8 @@ public class InitiateHandler2 extends HandlerCommon {
         }
     }
 
-    public InitiateHandler2(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.INITIATE);
+    public ModifyInitiateHandler(CloudScenePluginHandler pluginHandler) {
+        super(pluginHandler, InitiateTaskPool.getInstance(), SceneModel.Event.MODIFY);
     }
 
     /**
@@ -777,9 +784,8 @@ public class InitiateHandler2 extends HandlerCommon {
             }
         }
 
-        // 非外部资源 重置资源id
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
-            cloudElement.setResourceId(StringUtils.EMPTY);
+            return;
         }
         // defaultConnectedNetwork
         var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -934,7 +940,50 @@ public class InitiateHandler2 extends HandlerCommon {
         element.setCoreType(coreType);
     }
 
+    public void initiateNetwork() {
+        List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
+        Map<String, ConnectedNetworkBO> networkBOMap = new HashMap<>();
+        networks.forEach(network -> {
+            CloudPluginSceneElementNetworkBO networkBO = new CloudPluginSceneElementNetworkBO();
+            networkBO.fromModel(network);
+            ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBO, getHandlerUtils());
+            networkBOMap.put(networkBO.getId(), connectedNetworkBO);
+            getPluginHandler().getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
+        });
+        // 处理加入的网络
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            if (e.getSrcElement().getPorts() != null && e.getSrcElement().getPorts().size() > 0) {
+                e.getSrcElement().getPorts().forEach(p -> {
+                    var pluginPort = getPluginHandler().getPort(p.getId());
+                    var to = getHandlerUtils().getPortConnectedOpaqueSrcPort(p.getId());
+                    if (pluginPort != null) {
+                        if (StringUtils.isNotEmpty(pluginPort.getLogicNetworkId())) {
+                            // 自己构建网络直接加入
+                            if (networkBOMap.containsKey(pluginPort.getLogicNetworkId())) {
+                                networkBOMap.get(pluginPort.getLogicNetworkId()).addPort(p, to, true);
+                            }
+                        } else if (to != null) {
+                            // 未构建网络看对端端口
+                            var pluginToPort = getPluginHandler().getPort(to.getId());
+                            if (StringUtils.isNotEmpty(pluginToPort.getLogicNetworkId())) {
+                                if (networkBOMap.containsKey(pluginToPort.getLogicNetworkId())) {
+                                    ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBOMap.get(pluginToPort.getLogicNetworkId()).getNetwork(), getHandlerUtils());
+                                    connectedNetworkBO.addPort(p, to, false);
+                                    e.getAccessNetworks().add(connectedNetworkBO);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+        for (var net : networks) {
+            getHandlerUtils().getCreatedNetworks().add(net.getId());
+        }
+    }
+
     public void initiate() {
+        this.initiateNetwork();
         prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
 
         // 标记已设置的ip的端口
@@ -1053,6 +1102,9 @@ public class InitiateHandler2 extends HandlerCommon {
                 allnets.addAll(element.getAccessNetworks());
                 allnets.addAll(element.getDeriveNetworks());
                 for (var net : allnets) {
+                    if (getHandlerUtils().getCreatedNetworks().contains(net.network.getId())) {
+                        continue;
+                    }
                     if (Boolean.TRUE.equals(net.getNetwork().getExternal()) || StringUtils.isEmpty(net.getNetwork().getCidr())) {
                         continue;
                     }
@@ -1066,6 +1118,12 @@ public class InitiateHandler2 extends HandlerCommon {
                 }
             }
         }
+
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            if (StringUtils.isNotEmpty(e.getResourceId())) {
+                e.setExternal(true);
+            }
+        });
     }
 
     public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {

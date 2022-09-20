@@ -43,6 +43,8 @@ public class HandlerUtils {
 
     private Map<String, String> nodeNet2fwdnsInterfaceIp = new HashMap<>();
 
+    private Set<String> createdNetworks = new HashSet<>();
+
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
         nodeNet2fwdnsInterfaceIp.put(node + "_" + netId, fwdnsInterfaceIp);
     }
