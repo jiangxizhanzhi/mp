@@ -26,6 +26,10 @@ class Node2NodeConnectConverter implements IConverter {
     }
 
     public void convert2BO(ConvertDataContainer container) {
+        Set<String> networkIds = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
+            container.getNetworkElements().forEach(e -> networkIds.add(e.getId()));
+        }
         var node2NodePort = container.getNode2NodePort();
         Set<String> connection = new HashSet<>();
         Map<String, String> node2Nodes = new HashMap<>();
@@ -35,7 +39,7 @@ class Node2NodeConnectConverter implements IConverter {
             }
             for (var net : node.getNet()) {
                 // 和网络的连接已由 NetworkElementConverter 处理
-                if (StringUtils.startsWith(net.getId(), "network") || StringUtils.startsWith(net.getId(), "internet")) {
+                if (networkIds.contains(net.getId())) {
                     continue;
                 }
                 String key = node.getId() + "_" + net.getId();
