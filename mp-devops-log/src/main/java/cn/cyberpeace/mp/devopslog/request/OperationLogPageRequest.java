@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.devopslog.request;
 
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.devopslog.enums.SiteTypeEnums;
+import cn.cyberpeace.mp.devopslog.model.OperationLogDbModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -11,6 +13,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
@@ -127,12 +130,27 @@ public class OperationLogPageRequest extends BasePageRequest{
         return boolBuilder;
     }
 
+    public RangeQueryBuilder buildRangeQueryBuilder() {
+        // f构建范围查询start_date <= create_time and create_time <= end_date
+        String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
+        RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(createTime);
+        if (Objects.nonNull(this.getStartDate())) {
+            rangeQueryBuilder.gte(this.getStartDate());
+        }
+        if (Objects.nonNull(this.getEndDate())) {
+            rangeQueryBuilder.lte(this.getEndDate());
+        }
+        return rangeQueryBuilder;
+    }
+
     /**
      * 构建SearchSourceBuilder对象
      * @return
      */
     public SearchSourceBuilder buildSearchSourceBuilder(){
-        return SearchSourceBuilder.searchSource().query(this.buildBoolQueryBuilder())
+        return SearchSourceBuilder.searchSource()
+                .query(this.buildBoolQueryBuilder())
+                .query(this.buildRangeQueryBuilder())
                 .sort("opTime", SortOrder.DESC)
                 .from(this.getOffset() - 1 > 0 ? (this.getOffset() - 1) * this.getLimit() : 0)
                 .size(this.getLimit());

@@ -158,6 +158,12 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
                     .filterOrEnd();
         }
         String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
+        if (Objects.nonNull(request.getStartDate())) {
+            humanCondition.filterGreaterThanOrEqual(createTime, request.getStartDate());
+        }
+        if (Objects.nonNull(request.getEndDate())) {
+            humanCondition.filterLessThanOrEqual(createTime, request.getEndDate());
+        }
         humanCondition.orderBy("-" + createTime);
         List<OperationLogDbModel> models = getModelMapper().list(humanCondition);
         List<OperationLogPageResponse> list = opModel2Response(models, locale);
