@@ -64,7 +64,7 @@ public class DefaultImgUtil {
                     mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
 
             if (mappingModelOptional.isPresent()) {
-                path = mappingModelOptional.get().getRemoteFile();
+                path = FdfsCommon.genHttpUrl(mappingModelOptional.get().getRemoteFile());
             }
         }
 
