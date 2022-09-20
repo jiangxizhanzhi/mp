@@ -11,9 +11,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @Description: 默认图片工具类
@@ -37,6 +35,9 @@ public class DefaultImgUtil {
      */
     public static String pathToFdfsUrl(String path) {
         if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
+            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+            }
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
                     .filterEqual(LocalFileMappingModel::getName, splitToName(path));
@@ -58,6 +59,9 @@ public class DefaultImgUtil {
     public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
         if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX) &&
                 CollectionUtils.isNotEmpty(mappingModelList)) {
+            if (!path.startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+                path = AuthConstant.DEFAULT_IMAGE_PREFIX.concat(path);
+            }
             String group = splitToGroup(path);
             String name = splitToName(path);
             Optional<LocalFileMappingModel> mappingModelOptional =
@@ -99,6 +103,12 @@ public class DefaultImgUtil {
     public static List<LocalFileMappingModel> listByGroups(List<String> groupList) {
         List<LocalFileMappingModel> modelList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(groupList)) {
+            if (DefaultImgDirEnum.TARGET.getGroup().equals(groupList.get(0))) {
+                groupList = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM.getGroup(),
+                        DefaultImgDirEnum.NETWORK_EQUIPMENT.getGroup(),DefaultImgDirEnum.OPERATION_SYSTEM.getGroup(),
+                        DefaultImgDirEnum.SAFETY_EQUIPMENT.getGroup(), DefaultImgDirEnum.COMMON_TARGET.getGroup());
+            }
+
             HumanCondition humanCondition = new HumanCondition();
             humanCondition.filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
