@@ -34,7 +34,7 @@ public class ImageResourceController {
     @PostMapping("/export_image")
     public ServiceResult<ImageExportResult> exportImage(@RequestBody ImageExportRequest request) {
         ImageExportResult result = new ImageExportResult();
-        result.setSuccess(imageResourceService.exportImageByUuid(null, request));
+        result.setSuccess(imageResourceService.exportImageByUuid(request.getUuid(), request.getImagePath()));
         return new ServiceResult<>(result).asResult();
     }
 }

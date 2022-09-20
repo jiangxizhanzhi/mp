@@ -57,41 +57,23 @@ public class ImageResourceService {
     private static final String PNG = "logo.png";
     private static final String JPG = "logo.jpg";
 
-    public Boolean exportImageByUuid(String singleImagePath, ImageExportRequest request) {
-        if (StringUtils.isNotEmpty(request.getUuid())) {
-            var imageInfo = deviceTargetMapper.findByUuid(request.getUuid());
+    public Boolean exportImageByUuid(String uuid, String imagePath) {
+        if (StringUtils.isNotEmpty(uuid)) {
+            var imageInfo = deviceTargetMapper.findByUuid(uuid);
             if (ObjectUtil.isNull(imageInfo)) {
-                log.error("failed to get image information by uuid:{}", request.getUuid());
+                log.error("failed to get image information by uuid:{}", uuid);
                 throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
             }
-            if (StringUtils.isNotEmpty(singleImagePath)) {
-                exportImage(imageInfo.getName(), imageInfo.getLogo(), singleImagePath, new ArrayList<AccessMode>());
-            } else {
-                String currentImageDir = request.getImagePath() + "/" + imageInfo.getName();
-                exportImage(imageInfo.getName(), imageInfo.getLogo(), currentImageDir, new ArrayList<AccessMode>());
-            }
+            String currentImageDir = imagePath + "/" + imageInfo.getName();
+            exportImage(imageInfo.getName(), imageInfo.getLogo(), currentImageDir, new ArrayList<AccessMode>());
             return true;
         } else {
-            log.error("failed to get image information，uuid is {}", request.getUuid());
+            log.error("failed to get image information，uuid is {}", uuid);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
     }
 
-    public void exportImageByDevice(String imagePath, String singleImagePath, List<SceneParseResourceCenter.Device> devices) {
-        if (CollectionUtils.isNotEmpty(devices)) {
-            for (var device : devices) {
-                if (StringUtils.isNotEmpty(singleImagePath)) {
-                    exportImage(device.getImage(), device.getLogo(), singleImagePath, device.getAccessModes());
-                } else {
-                    String currentImageDir = imagePath + "/" + device.getImage();
-                    exportImage(device.getImage(), device.getLogo(), currentImageDir, device.getAccessModes());
-                }
-            }
-        }
-
-    }
-
-    private void exportImage(String imageName, String logoPath, String imagePath, List<AccessMode> deviceAccessModes) {
+    public void exportImage(String imageName, String logoPath, String imagePath, List<AccessMode> deviceAccessModes) {
 
         File file = new File(imagePath);
         if (!file.exists()) {
