@@ -10,11 +10,11 @@ import org.springframework.context.annotation.Configuration;
  * 约定：各模块的独立配置命名 {模块名}AppConfig
  */
 @Configuration
-@ConfigurationProperties(prefix = "mp.aggregation")
+@ConfigurationProperties(prefix = "spring")
 @Data
 public class AggregationConfig {
 
-    @Value("${mp.aggregation.static-locations}")
+    @Value("${spring.web.resources.static-locations}")
     private String staticLocation;
 
 }

@@ -82,8 +82,6 @@ mp:
         - 10.100.1.26:22122
     fdfs-inner-http-server: http://10.100.1.26:8888
     fdfs-outer-http-server: /fdfs
-  aggregation:
-    static-locations: file:${user.home}/img
 
   # mp-devops-cluster 配置
   devopscluster:
