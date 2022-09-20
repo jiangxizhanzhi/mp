@@ -38,6 +38,10 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
+    public final static String FDFS_PREFIX = "/fdfs";
+
+    public final static String DEFAULT_IMAGE_PREFIX = "/api/mp";
+
     /**
      * 逗号
      */

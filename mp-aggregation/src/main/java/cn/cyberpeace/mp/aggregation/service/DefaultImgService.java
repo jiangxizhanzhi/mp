@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
-import cn.cyberpeace.mp.aggregation.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +40,9 @@ public class DefaultImgService {
         }
 
         if (pathName.startsWith(startWithFile)) {
-            pathName = pathName.substring(5).trim().concat(endPathName);
+            pathName = pathName.substring(5).trim();
         }
+        pathName = pathName.concat(endPathName);
 
         var logFile = new File(pathName);
 

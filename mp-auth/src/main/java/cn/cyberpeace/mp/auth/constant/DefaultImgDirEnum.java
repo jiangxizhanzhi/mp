@@ -1,6 +1,4 @@
-package cn.cyberpeace.mp.aggregation.constant;
-
-import org.apache.commons.lang3.StringUtils;
+package cn.cyberpeace.mp.auth.constant;
 
 /**
  * 默认图片文件夹
@@ -45,13 +43,8 @@ public enum DefaultImgDirEnum  {
         return group;
     }
 
-    public static String getPathByGroup(String group) {
-        for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
-            if (imgDirEnum.getGroup().equals(group)) {
-                return CommonConstant.DefaultImagePrefix.concat(imgDirEnum.endPathName);
-            }
-        }
-
-        return StringUtils.EMPTY;
+    public String getCurrentPath() {
+        return AuthConstant.DEFAULT_IMAGE_PREFIX.concat(this.endPathName);
     }
+
 }

@@ -1,0 +1,139 @@
+package cn.cyberpeace.mp.auth.util;
+
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
+import cn.cyberpeace.mp.base.repository.LocalFileMappingMapper;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @Description: 默认图片工具类
+ * @Author qiaokang
+ * @Date：2022/9/19 15:49
+ */
+@Component
+@Slf4j
+public class DefaultImgUtil {
+
+    private static LocalFileMappingMapper localFileMappingMapper;
+
+    public DefaultImgUtil(LocalFileMappingMapper localFileMappingMapper) {
+        DefaultImgUtil.localFileMappingMapper = localFileMappingMapper;
+    }
+
+    /**
+     * 文件路径转fdfs的url
+     * @param path
+     * @return
+     */
+    public static String pathToFdfsUrl(String path) {
+        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX)) {
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual(LocalFileMappingModel::getGroup, splitToGroup(path))
+                    .filterEqual(LocalFileMappingModel::getName, splitToName(path));
+            List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
+            if (CollectionUtils.isNotEmpty(fileMappingModels)) {
+                path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+            }
+        }
+
+        return path;
+    }
+
+    /**
+     * fdfs地址转文件路径
+     * @param url
+     * @return
+     */
+    public static String fdfsUrlToPath(String url) {
+        if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
+            url = url.substring(5);
+
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, url);
+            List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
+            if (CollectionUtils.isNotEmpty(mappingModels)) {
+                url = getPathByGroup(mappingModels.get(0).getGroup());
+            }
+        }
+
+        return url;
+    }
+
+    /**
+     * 根据分组集合查询映射模型
+     * @param groupList
+     * @return
+     */
+    public static List<LocalFileMappingModel> listByGroups(List<String> groupList) {
+        List<LocalFileMappingModel> modelList = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(groupList)) {
+            HumanCondition humanCondition = new HumanCondition();
+            humanCondition.filterIn(LocalFileMappingModel::getGroup, groupList.toArray());
+            List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
+            if (CollectionUtils.isNotEmpty(fileMappingModels)) {
+                modelList = fileMappingModels;
+            }
+        }
+
+        return modelList;
+    }
+
+    /**
+     * 根据分组获取路径名
+     * @param group
+     * @return
+     */
+    public static String getPathByGroup(String group) {
+        for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
+            if (imgDirEnum.getGroup().equals(group)) {
+                return AuthConstant.DEFAULT_IMAGE_PREFIX.concat(imgDirEnum.getEndPathName());
+            }
+        }
+
+        return StringUtils.EMPTY;
+    }
+
+    /**
+     * 根据路径获取分组
+     * @param path 不带文件名
+     * @return
+     */
+    public static String getGroupByPath(String path) {
+        for (DefaultImgDirEnum imgDirEnum : DefaultImgDirEnum.values()) {
+            if (imgDirEnum.getCurrentPath().equals(path)) {
+                return imgDirEnum.getGroup();
+            }
+        }
+
+        return StringUtils.EMPTY;
+    }
+
+    /**
+     * url中拆分group
+     * @param url
+     * @return
+     */
+    public static String splitToGroup(String url) {
+        String path = url.substring(0, url.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR));
+        return getGroupByPath(path);
+    }
+
+    /**
+     * url中拆分文件名
+     * @param url
+     * @return
+     */
+    public static String splitToName(String url) {
+        return url.substring(url.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1);
+    }
+
+}

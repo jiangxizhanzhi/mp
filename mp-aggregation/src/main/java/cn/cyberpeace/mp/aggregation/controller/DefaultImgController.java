@@ -2,12 +2,15 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
-import cn.cyberpeace.mp.aggregation.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.aggregation.request.DefaultImgRequest;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +21,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,10 +59,36 @@ public class DefaultImgController {
                     DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
                     DefaultImgDirEnum.SAFETY_EQUIPMENT, DefaultImgDirEnum.COMMON_TARGET);
             fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
-        }else{
+        } else {
             fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
         }
         return ResultCommon.success(fileNameList);
+    }
+
+    @ApiOperation("批量获取默认图片")
+    @GetMapping("/list-default-imgs")
+    public ServiceResult<List<String>> listDefaultImgs(DefaultImgRequest request){
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
+        List<String> groupList = new ArrayList<>();
+        if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
+            List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
+                    DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
+                    DefaultImgDirEnum.SAFETY_EQUIPMENT, DefaultImgDirEnum.COMMON_TARGET);
+            for (DefaultImgDirEnum imgDirEnum : defaultImgDirEnums) {
+                groupList.add(imgDirEnum.getGroup());
+            }
+        } else {
+            groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
+        }
+
+        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+        List<String> urlList =
+                modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
+
+        return ResultCommon.success(urlList);
     }
 
     /**
