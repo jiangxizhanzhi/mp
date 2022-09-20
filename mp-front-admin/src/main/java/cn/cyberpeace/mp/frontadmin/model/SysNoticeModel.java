@@ -48,6 +48,10 @@ public class SysNoticeModel extends BaseModel {
     @DefaultInt(1)
     private Integer type;
 
+    @ApiModelProperty(value = "置顶数字，越大越靠前")
+    @DefaultInt(0)
+    private Integer top;
+
     @ApiModelProperty(value = "是否公开，对所有人可见  0:否 1:是 默认是0  (注意，如果传了1，则后台会忽略roleIds的内容)")
     @DefaultInt(0)
     private Integer isPublic;

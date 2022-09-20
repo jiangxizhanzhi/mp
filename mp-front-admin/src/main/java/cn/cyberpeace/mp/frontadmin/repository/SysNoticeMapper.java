@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.frontadmin.repository;
 
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -45,6 +45,13 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      * @return
      */
     int getUnreadCountByCurrentAdminUser(@Param("userId") String userId);
+
+    /**
+     * 查询top字段最大值
+     *
+     * @return
+     */
+    int selectMaxTopNum();
 
     /**
      * 普通用户消息推送列表

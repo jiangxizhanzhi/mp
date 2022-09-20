@@ -147,6 +147,20 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     }
 
+
+    @Override
+    public void top(String noticeId) {
+        SysNoticeModel noticeModel = getModelMapper().get(noticeId);
+        if (Objects.isNull(noticeModel)) {
+            throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(noticeId));
+        }
+        int maxTopNum = getModelMapper().selectMaxTopNum();
+        SysNoticeModel newModel = new SysNoticeModel();
+        newModel.setId(noticeModel.getId());
+        newModel.setTop(maxTopNum + 1);
+        getModelMapper().update(newModel);
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public SysNoticeModel add(SysNoticeRequest sysNoticeRequest) {

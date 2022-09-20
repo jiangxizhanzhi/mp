@@ -55,7 +55,7 @@
             </if>
             OR n.is_public = 1
         </where>
-        ORDER BY n.pk desc
+        ORDER BY n.top, n.pk desc
     </select>
 
 
@@ -151,6 +151,10 @@
         WHERE tabA.id not in
               (select notice_id from mp_sys_notice_read where user = #{userId} and (is_readed = 1 or is_need_push = 0))
         ORDER BY tabA.pk desc
+    </select>
+
+    <select id="selectMaxTopNum" resultType="int">
+        select max(top) from mp_sys_notice
     </select>
 
     <select id="listNoticeMessageByCurrentNormalUser" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
