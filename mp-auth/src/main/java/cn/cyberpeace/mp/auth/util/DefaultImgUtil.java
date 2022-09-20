@@ -55,10 +55,10 @@ public class DefaultImgUtil {
      */
     public static String fdfsUrlToPath(String url) {
         if (StringUtils.isNotBlank(url) && url.startsWith(AuthConstant.FDFS_PREFIX)) {
-            url = url.substring(6);
+            String tmpUrl = url.substring(6);
 
             HumanCondition humanCondition = new HumanCondition();
-            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, url);
+            humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
             List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(mappingModels)) {
                 url = getPathByGroup(mappingModels.get(0).getGroup());
