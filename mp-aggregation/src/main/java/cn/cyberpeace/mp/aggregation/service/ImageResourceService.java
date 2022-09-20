@@ -8,8 +8,8 @@ import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudHttpParam;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
@@ -32,6 +32,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,27 +52,55 @@ public class ImageResourceService {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public void createImage(String uuid, String imagePath) {
-        var imageInfo = deviceTargetMapper.findByUuid(uuid);
-        if (ObjectUtil.isNull(imageInfo)) {
-            return;
+    public Boolean exportImage(String uuid, String imagePath, String singlelogoPath, String singleImagePath,
+                               String deviceImage, String deviceLogo, List<AccessMode> deviceAccessModes) {
+        String imageName = null;
+        String logoName = null;
+
+        if (!(uuid == null || uuid.isEmpty())) {
+            // 按照uuid导出镜像
+            var imageInfo = deviceTargetMapper.findByUuid(uuid);
+            if (ObjectUtil.isNull(imageInfo)) {
+                log.error("failed to get image information by uuid:{}", uuid);
+                throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+            }
+            imageName = imageInfo.getName();
+            logoName = imageInfo.getLogo();
+        } else if (!(deviceImage == null || deviceImage.isEmpty())) {
+            // 通过传入的镜像名称导出镜像
+            imageName = deviceImage;
+            logoName = deviceLogo;
+        } else {
+            log.error("failed to get image information，uuid is {}, deviceImage is {}", uuid, deviceImage);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+
         String currentImageDir = null;
-        currentImageDir = imagePath + "/" + imageInfo.getName();
+        if (StringUtils.isNotEmpty(singleImagePath)) {
+            currentImageDir = singleImagePath;
+        } else {
+            currentImageDir = imagePath + "/" + imageName;
+        }
+
         File file = new File(currentImageDir);
         if (!file.exists()) {
             file.mkdirs();
         }
         // 生成镜像
         ExportImageParams params = new ExportImageParams();
-        params.setImageName(imageInfo.getName());
+        params.setImageName(imageName);
         params.setDestPath(currentImageDir);
         var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
         }, true);
         var image = result.getData();
 
         // 下载图片
-        String logoPath = imageInfo.getLogo();
+        String logoPath = null;
+        if (StringUtils.isNotEmpty(singlelogoPath)) {
+            logoPath = singlelogoPath;
+        } else {
+            logoPath = logoName;
+        }
         if (logoPath.startsWith("/fdfs") || logoPath.startsWith("group/")) {
             String logoUrl = StringUtils.replaceOnce(logoPath, "/fdfs/", "");
             byte[] content = FdfsCommon.downloadRawContent(logoUrl);
@@ -103,6 +132,35 @@ public class ImageResourceService {
             }
         }
 
+        // 生成service.yml
+        if (CollectionUtils.isNotEmpty(deviceAccessModes)) {
+            List<AccessModeParseResult> normal = new ArrayList<>();
+            List<AccessModeParseResult> manage = new ArrayList<>();
+            for (var m : deviceAccessModes) {
+                AccessModeParseResult accessModeParseResult = new AccessModeParseResult();
+                accessModeParseResult.setDesc(m.getDesc());
+                accessModeParseResult.setProtocol(m.getProtocol());
+                if (m.getPort() != null) {
+                    accessModeParseResult.setPort(String.valueOf(m.getPort()));
+                }
+                if (Boolean.TRUE.equals(m.getProxy())) {
+                    accessModeParseResult.setIsproxy("true");
+                }
+                accessModeParseResult.setPassword(m.getPassword());
+                accessModeParseResult.setUsername(m.getUsername());
+                if (Boolean.TRUE.equals(m.getManageMode())) {
+                    manage.add(accessModeParseResult);
+                } else {
+                    normal.add(accessModeParseResult);
+                }
+            }
+            if (CollectionUtils.isNotEmpty(normal)) {
+                image.set接入方式(normal);
+            }
+            if (CollectionUtils.isNotEmpty(manage)) {
+                image.set管理接入(manage);
+            }
+        }
         ServerYml serverYml = new ServerYml();
         Server server = new Server();
         server.setMpYmlImageNameToChange(image);
@@ -112,8 +170,9 @@ public class ImageResourceService {
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
         String content = yaml.dumpAs(serverYml, Tag.MAP, null);
-        content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", imageInfo.getName());
+        content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", imageName);
         this.createFile(content, currentImageDir + "/servers.yml");
+        return true;
     }
 
     private static class SceneRepresenter extends Representer {

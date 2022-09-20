@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.aggregation.dto.sceneimport.ImageExportRequest;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.ImageExportResult;
 import cn.cyberpeace.mp.aggregation.service.ImageResourceService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 
 /**
  * @Description
@@ -34,8 +36,8 @@ public class ImageResourceController {
     @PostMapping("/export_image")
     public ServiceResult<ImageExportResult> exportImage(@RequestBody ImageExportRequest request) {
         ImageExportResult result = new ImageExportResult();
-        result.setSuccess(true);
-        imageResourceService.createImage(request.getUuid(), request.getImagePath());
+        result.setSuccess(imageResourceService.exportImage(request.getUuid(), request.getImagePath(), null,
+                null, null, null, new ArrayList<AccessMode>()));
         return new ServiceResult<>(result).asResult();
     }
 }
