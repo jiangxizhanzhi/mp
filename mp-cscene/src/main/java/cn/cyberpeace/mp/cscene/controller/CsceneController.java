@@ -11,7 +11,9 @@ import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
+import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +105,13 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
+    @ApiOperation("授权场景模板")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
+    @PostMapping("/authorize")
+    public ServiceResult<Boolean> authorize(@RequestBody CsceneAuthorizeRequest request) {
+        return modelService.csceneAuthorize(request.getUserIds(), request.getIds(), request.getIsPublic()).asResult();
+    }
+
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
@@ -137,7 +147,12 @@ public class CsceneController implements BaseModelListControllerBase {
         if (isUpdate) {
             CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
         } else {
-            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+            var bo = result.getData();
+            CsceneLogUtils.recordSceneConfigLog(bo, OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+            // 新增模板时默认授权所有
+            if (CsceneModel.Type.TEMPLATE == bo.getType()) {
+                modelService.csceneAuthorize(new ArrayList<>(), List.of(bo.getId()), true);
+            }
         }
         return result;
     }

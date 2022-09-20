@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -18,9 +17,12 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneAuthMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
@@ -42,12 +44,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -61,6 +58,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneAppConfig csceneAppConfig;
 
     private CsceneInstanceMapper csceneInstanceMapper;
+
+    private CsceneAuthMapper csceneAuthMapper;
 
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
@@ -192,7 +191,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
                          CsceneSpecialService csceneSpecialService,
                          CsceneSnapshotService csceneSnapshotService,
-                         CsceneModelFields csceneModelFields) {
+                         CsceneModelFields csceneModelFields,
+                         CsceneAuthMapper csceneAuthMapper) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -202,6 +202,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneInstanceMapper(csceneInstanceMapper);
         setCsceneSpecialService(csceneSpecialService);
         setCsceneSnapshotService(csceneSnapshotService);
+        setCsceneAuthMapper(csceneAuthMapper);
     }
 
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
@@ -213,14 +214,60 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
+    public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> ids, Boolean isPublic) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return new ServiceResult<>(true);
+        }
+        List<CsceneAuthModel> models = new ArrayList<>();
+        // 先删除之前的授权信息
+        deleteCsceneAuthByIds(ids);
+        if (Boolean.TRUE.equals(isPublic)) {
+            ids.forEach(id -> {
+                CsceneAuthModel model = new CsceneAuthModel();
+                model.setTarget(id);
+                models.add(model);
+            });
+            csceneAuthMapper.bulkCreate(models);
+            return new ServiceResult<>(true);
+        }
+        if (CollectionUtils.isEmpty(userIds)) {
+            return new ServiceResult<>(true);
+        }
+        // 每个用户生成一条授权信息
+        for (String userId : userIds) {
+            for (String id : ids) {
+                CsceneAuthModel model = new CsceneAuthModel();
+                model.setOwner(userId);
+                model.setTarget(id);
+                models.add(model);
+            }
+        }
+        csceneAuthMapper.bulkCreate(models);
+        return new ServiceResult<>(true);
+    }
+
     public ListObjServiceResult<CsceneBO> listCsceneBO(CsceneQueryParams queryParams, boolean withInstance,
                                                        CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
-        //未指定排序方式时默认按创建时间倒序排列
+        // 查询场景模板的授权信息
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
+            List<String> ids = getCsceneIds();
+            if (CollectionUtils.isEmpty(ids)) {
+                return new ListObjServiceResult<>(new ArrayList<>(), 0);
+            }
+            if (Objects.nonNull(queryParams.getIds())) {
+                queryParams.setIds(Arrays.stream(queryParams.getIds())
+                        .filter(s -> ids.contains(s))
+                        .toArray(String[]::new));
+            } else {
+                queryParams.setIds(ids.toArray(new String[0]));
+            }
+        }
+        // 未指定排序方式时默认按创建时间倒序排列
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
             queryParams.setOrders(new String[]{"-createTime"});
         }
-        //指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
+        // 指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
         if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
             queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
         }
@@ -240,8 +287,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
             csceneBOMap.put(csceneId,csceneHandler.toData(withInstance));
         });
-        //转为Map后顺序被打乱，此时再次排序
-        listResult.getSource().getObjs().stream().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
+        // 转为Map后顺序被打乱，此时再次排序
+        listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
     }
@@ -490,5 +537,26 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 scenePluginDataBO.setScene(cpcloudPluginScene);
             }
         }
+    }
+
+    private List<String> getCsceneIds() {
+        var currentUser = UserCommon.getCurrentUser();
+        String userId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
+        HumanCondition humanCondition = new HumanCondition()
+                .filterOrStart()
+                .orEqual(CsceneAuthModel::getOwner, "default")
+                .orEqual(CsceneAuthModel::getOwner, userId)
+                .filterOrEnd();
+        return csceneAuthMapper.list(humanCondition).stream()
+                .map(m -> m.getTarget())
+                .collect(Collectors.toList());
+    }
+
+    private void deleteCsceneAuthByIds(List<String> csceceIds) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(CsceneAuthModel::getTarget, csceceIds.toArray());
+        csceneAuthMapper.bulkDelete(csceneAuthMapper.list(humanCondition).stream()
+                .map(m -> m.getId())
+                .toArray(String[]::new));
     }
 }
