@@ -26,14 +26,17 @@ import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeReadMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
+import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
@@ -63,6 +66,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private SysNoticeOrgMapper noticeOrgMapper;
+
+    @Autowired
+    private SysNoticeUserMapper noticeUserMapper;
+
+    @Autowired
+    private SysNoticeUserService sysNoticeUserService;
 
     @Autowired
     private SysNoticeRoleMapper noticeRoleMapper;
@@ -154,10 +163,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.isNull(noticeModel)) {
             throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(noticeId));
         }
-        int maxTopNum = getModelMapper().selectMaxTopNum();
         SysNoticeModel newModel = new SysNoticeModel();
         newModel.setId(noticeModel.getId());
-        newModel.setTop(maxTopNum + 1);
+        newModel.setTop(System.currentTimeMillis());
         getModelMapper().update(newModel);
     }
 
@@ -182,16 +190,29 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
         SysNoticeModel resultModel = result.getSource().getObj();
         // 组织
-        List<SysNoticeOrgModel> noticeGroupModelList = new ArrayList<>();
+        List<SysNoticeOrgModel> noticeOrgModelList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(sysNoticeRequest.getOrgIds())) {
             sysNoticeRequest.getOrgIds().forEach(orgId -> {
-                SysNoticeOrgModel noticeGroupModel = new SysNoticeOrgModel();
-                noticeGroupModel.setOrg(orgId);
-                noticeGroupModel.setNoticeId(resultModel.getId());
-                noticeGroupModelList.add(noticeGroupModel);
+                SysNoticeOrgModel sysNoticeOrgModel = new SysNoticeOrgModel();
+                sysNoticeOrgModel.setOrg(orgId);
+                sysNoticeOrgModel.setNoticeId(resultModel.getId());
+                noticeOrgModelList.add(sysNoticeOrgModel);
             });
         }
-        noticeOrgMapper.bulkCreate(noticeGroupModelList);
+        noticeOrgMapper.bulkCreate(noticeOrgModelList);
+
+
+        // 用户
+        List<SysNoticeUserModel> noticeUserModelList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getUserIds())) {
+            sysNoticeRequest.getUserIds().forEach(userId -> {
+                SysNoticeUserModel sysNoticeUserModel = new SysNoticeUserModel();
+                sysNoticeUserModel.setUser(userId);
+                sysNoticeUserModel.setNoticeId(resultModel.getId());
+                noticeUserModelList.add(sysNoticeUserModel);
+            });
+        }
+        noticeUserMapper.bulkCreate(noticeUserModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
         if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
@@ -235,6 +256,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 清除之前的绑定关系
         noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
+        sysNoticeUserService.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
         noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
 
         // 组织
@@ -249,6 +271,18 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             });
         }
         noticeOrgMapper.bulkCreate(noticeGroupModelList);
+
+        // 用户
+        List<SysNoticeUserModel> noticeUserModelList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(sysNoticeRequest.getUserIds())) {
+            sysNoticeRequest.getUserIds().forEach(userId -> {
+                SysNoticeUserModel sysNoticeUserModel = new SysNoticeUserModel();
+                sysNoticeUserModel.setUser(userId);
+                sysNoticeUserModel.setNoticeId(resultModel.getId());
+                noticeUserModelList.add(sysNoticeUserModel);
+            });
+        }
+        noticeUserMapper.bulkCreate(noticeUserModelList);
 
         // 角色，如果是公开的，则忽略角色字段内的值
         if (Objects.nonNull(sysNoticeRequest.getIsPublic()) && sysNoticeRequest.getIsPublic().equals(SysNoticeModel.NOTICE_NOT_PUBLIC)) {
@@ -284,21 +318,21 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     public PageInfo<SysNoticeModel> getCurrentUserNoticeMessagesPage(SysNoticePageRequest req) {
-        UserModel userModel = UserUtils.getLoginUser();
-        if (Objects.isNull(userModel)) {
+        UserModel currentUser = UserUtils.getLoginUser();
+        if (Objects.isNull(currentUser)) {
             log.error("user not login!");
             return new PageInfo<>();
         }
 
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
-        List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
+        List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
         boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
 
         // 管理员，查看所有公告消息
         if (isAdmin) {
             PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(userModel.getId());
+            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
             PageInfo pageInfo = new PageInfo(notices);
             convert2NoticeDtoPageInfo(pageInfo, true);
             return pageInfo;
@@ -309,7 +343,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(currentUser.getId());
         orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());
@@ -333,7 +367,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
         */
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
+        List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId());
         PageInfo pageInfo = new PageInfo(notices);
 
         convert2NoticeDtoPageInfo(pageInfo, true);
@@ -342,20 +376,20 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Override
     public int getCurrentUserNoticeMessagesUnreadCount() {
-        UserModel userModel = UserUtils.getLoginUser();
-        if (Objects.isNull(userModel)) {
+        UserModel currentUser = UserUtils.getLoginUser();
+        if (Objects.isNull(currentUser)) {
             log.error("user not login!");
             return 0;
         }
 
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
-        List<RoleModel> roleModels = userRoleService.listByUserId(userModel.getId());
+        List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
         boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
 
         // 管理员，查看所有公告消息
         if (isAdmin) {
-            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(userModel.getId());
+            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
             return totalCnt;
         }
 
@@ -364,7 +398,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(currentUser.getId());
         orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());
@@ -387,8 +421,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         4. 用户有角色，有组织
         (is_public = 1 or notice_role in roles) and (notice_org.org is null or notice_org.org in orgs)
         */
-        int totalCnt = getModelMapper().getUnreadCountByCurrentNormalUser(allOrgIds, allRoleIds, userModel.getId());
-
+        int totalCnt = getModelMapper().getUnreadCountByCurrentNormalUser(Arrays.asList(currentUser.getId()), allOrgIds, allRoleIds, currentUser.getId());
         return totalCnt;
     }
 

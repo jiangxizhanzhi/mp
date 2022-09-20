@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * @Description:
  * @Author zhouxinghuai
- * @Date：2021/9/20 11:13
+ * @Date：2022/9/20 11:13
  */
 @Component
 public class SysNoticeUserFields extends BaseModelFields {

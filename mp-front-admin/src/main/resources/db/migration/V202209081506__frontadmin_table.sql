@@ -25,7 +25,7 @@ CREATE TABLE `mp_sys_notice`
     `publisher`   varchar(64)  NOT NULL COMMENT '发布人',
     `is_public`   int(11)      NOT NULL DEFAULT 0 COMMENT '是否公开，对所有人可见  0:否 1:是 默认是0',
     `type`        int(11)      NOT NULL DEFAULT 1 COMMENT '公告类型 1:系统、2:课程、3:练习、4:考试',
-    `top`         int(11)     NOT NULL COMMENT '置顶数字(越大越靠前)',
+    `top`         bigint       NOT NULL COMMENT '置顶数字(采用当前时间戳，越大越靠前)',
     `create_time` datetime     NOT NULL COMMENT '创建时间',
     `update_time` datetime     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),

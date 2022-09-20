@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.frontadmin.model;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultInt;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModel;
@@ -48,9 +49,9 @@ public class SysNoticeModel extends BaseModel {
     @DefaultInt(1)
     private Integer type;
 
-    @ApiModelProperty(value = "置顶数字，越大越靠前")
-    @DefaultInt(0)
-    private Integer top;
+    @ApiModelProperty(value = "置顶数字(采用当前时间戳，越大越靠前)")
+    @DefaultLong(0)
+    private Long top;
 
     @ApiModelProperty(value = "是否公开，对所有人可见  0:否 1:是 默认是0  (注意，如果传了1，则后台会忽略roleIds的内容)")
     @DefaultInt(0)

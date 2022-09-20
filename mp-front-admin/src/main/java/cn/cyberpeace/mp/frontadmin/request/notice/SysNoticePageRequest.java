@@ -24,6 +24,9 @@ public class SysNoticePageRequest extends PageRequest {
     @ApiModelProperty(value = "组织ids")
     private List<String> orgIds;
 
+    //@ApiModelProperty(value = "用户ids")
+    //private List<String> userIds;
+
     @ApiModelProperty(value = "角色ids")
     private List<String> roleIds;
 
