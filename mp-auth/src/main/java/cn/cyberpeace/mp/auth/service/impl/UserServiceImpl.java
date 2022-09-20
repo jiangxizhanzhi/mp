@@ -165,7 +165,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (CollectionUtils.isNotEmpty(userDtos)) {
             List<LocalFileMappingModel> mappingModelList =
                     DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
+            String defaultAvatar = getDefaultUserAvatar();
             userDtos.forEach(userDto -> {
+                if (StringUtils.isEmpty(userDto.getAvatar())) {
+                    userDto.setAvatar(defaultAvatar);
+                }
                 String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
                 userDto.setAvatar(path);
             });
