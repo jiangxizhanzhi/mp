@@ -118,22 +118,22 @@ public class DefaultImgUtil {
     }
 
     /**
-     * url中拆分group
-     * @param url
+     * path中拆分group
+     * @param path
      * @return
      */
-    public static String splitToGroup(String url) {
-        String path = url.substring(0, url.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR));
+    public static String splitToGroup(String path) {
+        path = path.substring(0, path.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR));
         return getGroupByPath(path);
     }
 
     /**
-     * url中拆分文件名
-     * @param url
+     * path中拆分文件名
+     * @param path
      * @return
      */
-    public static String splitToName(String url) {
-        return url.substring(url.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1);
+    public static String splitToName(String path) {
+        return path.substring(path.lastIndexOf(AuthConstant.ORG_PATH_SEPARATOR) + 1);
     }
 
 }
