@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
+import cn.cyberpeace.mp.aggregation.dto.sceneimport.ImageExportRequest;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.export.SceneParseResourceCenter;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
@@ -52,65 +54,79 @@ public class ImageResourceService {
 
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
-    public Boolean exportImage(String uuid, String imagePath, String singlelogoPath, String singleImagePath,
-                               String deviceImage, String deviceLogo, List<AccessMode> deviceAccessModes) {
-        String imageName = null;
-        String logoName = null;
+    private static final String PNG = "logo.png";
+    private static final String JPG = "logo.jpg";
 
-        if (!(uuid == null || uuid.isEmpty())) {
-            // 按照uuid导出镜像
-            var imageInfo = deviceTargetMapper.findByUuid(uuid);
+    public Boolean exportImageByUuid(String singleImagePath, ImageExportRequest request) {
+        if (StringUtils.isNotEmpty(request.getUuid())) {
+            var imageInfo = deviceTargetMapper.findByUuid(request.getUuid());
             if (ObjectUtil.isNull(imageInfo)) {
-                log.error("failed to get image information by uuid:{}", uuid);
-                throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+                log.error("failed to get image information by uuid:{}", request.getUuid());
+                throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
             }
-            imageName = imageInfo.getName();
-            logoName = imageInfo.getLogo();
-        } else if (!(deviceImage == null || deviceImage.isEmpty())) {
-            // 通过传入的镜像名称导出镜像
-            imageName = deviceImage;
-            logoName = deviceLogo;
+            if (StringUtils.isNotEmpty(singleImagePath)) {
+                exportImage(imageInfo.getName(), imageInfo.getLogo(), singleImagePath, new ArrayList<AccessMode>());
+            } else {
+                String currentImageDir = request.getImagePath() + "/" + imageInfo.getName();
+                exportImage(imageInfo.getName(), imageInfo.getLogo(), currentImageDir, new ArrayList<AccessMode>());
+            }
+            return true;
         } else {
-            log.error("failed to get image information，uuid is {}, deviceImage is {}", uuid, deviceImage);
+            log.error("failed to get image information，uuid is {}", request.getUuid());
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+    }
 
-        String currentImageDir = null;
-        if (StringUtils.isNotEmpty(singleImagePath)) {
-            currentImageDir = singleImagePath;
-        } else {
-            currentImageDir = imagePath + "/" + imageName;
+    public void exportImageByDevice(String imagePath, String singleImagePath, List<SceneParseResourceCenter.Device> devices) {
+        if (CollectionUtils.isNotEmpty(devices)) {
+            for (var device : devices) {
+                if (StringUtils.isNotEmpty(singleImagePath)) {
+                    exportImage(device.getImage(), device.getLogo(), singleImagePath, device.getAccessModes());
+                } else {
+                    String currentImageDir = imagePath + "/" + device.getImage();
+                    exportImage(device.getImage(), device.getLogo(), currentImageDir, device.getAccessModes());
+                }
+            }
         }
 
-        File file = new File(currentImageDir);
+    }
+
+    private void exportImage(String imageName, String logoPath, String imagePath, List<AccessMode> deviceAccessModes) {
+
+        File file = new File(imagePath);
         if (!file.exists()) {
             file.mkdirs();
         }
         // 生成镜像
-        ExportImageParams params = new ExportImageParams();
-        params.setImageName(imageName);
-        params.setDestPath(currentImageDir);
-        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
-        }, true);
-        var image = result.getData();
+        var image = exportImage(imageName, imagePath);
 
         // 下载图片
-        String logoPath = null;
-        if (StringUtils.isNotEmpty(singlelogoPath)) {
-            logoPath = singlelogoPath;
-        } else {
-            logoPath = logoName;
-        }
+        image.setLOGO(exportLogo(logoPath, imagePath));
+
+        // 生成service.yml
+        createServiceYml(imageName, imagePath, image, deviceAccessModes);
+    }
+
+    private Image exportImage(String imageName, String imagePath) {
+        ExportImageParams params = new ExportImageParams();
+        params.setImageName(imageName);
+        params.setDestPath(imagePath);
+        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
+        }, true);
+        return result.getData();
+    }
+
+    private String exportLogo(String logoPath, String imagePath) {
         if (logoPath.startsWith("/fdfs") || logoPath.startsWith("group/")) {
             String logoUrl = StringUtils.replaceOnce(logoPath, "/fdfs/", "");
             byte[] content = FdfsCommon.downloadRawContent(logoUrl);
             // 判断图片文件类型
             if (this.isPng(content)) {
-                this.createFile(content, currentImageDir + "/logo.png");
-                image.setLOGO("logo.png");
+                this.createFile(content, imagePath + "/logo.png");
+                return PNG;
             } else {
-                this.createFile(content, currentImageDir + "/logo.jpg");
-                image.setLOGO("logo.jpg");
+                this.createFile(content, imagePath + "/logo.jpg");
+                return JPG;
             }
         } else if (logoPath.startsWith(CommonConstant.DefaultImagePrefix)) {
             String relativePath = StringUtils.replaceOnce(logoPath, CommonConstant.DefaultImagePrefix, "");
@@ -124,15 +140,19 @@ public class ImageResourceService {
                 throw new MpRuntimeException(BaseErrorCode.ERROR);
             }
             if (this.isPng(content)) {
-                this.createFile(content, currentImageDir + "/logo.png");
-                image.setLOGO("logo.png");
+                this.createFile(content, imagePath + "/logo.png");
+                return PNG;
             } else {
-                this.createFile(content, currentImageDir + "/logo.jpg");
-                image.setLOGO("logo.jpg");
+                this.createFile(content, imagePath + "/logo.jpg");
+                return JPG;
             }
+        } else {
+            log.error("failed to export logo {}", logoPath);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
+    }
 
-        // 生成service.yml
+    private void createServiceYml(String imageName, String imagePath, Image image, List<AccessMode> deviceAccessModes) {
         if (CollectionUtils.isNotEmpty(deviceAccessModes)) {
             List<AccessModeParseResult> normal = new ArrayList<>();
             List<AccessModeParseResult> manage = new ArrayList<>();
@@ -171,8 +191,7 @@ public class ImageResourceService {
         Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
         String content = yaml.dumpAs(serverYml, Tag.MAP, null);
         content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", imageName);
-        this.createFile(content, currentImageDir + "/servers.yml");
-        return true;
+        this.createFile(content, imagePath + "/servers.yml");
     }
 
     private static class SceneRepresenter extends Representer {
