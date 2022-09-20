@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -25,6 +26,7 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -37,6 +39,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -151,6 +154,21 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             }
 
             userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
+        }
+    }
+
+    /**
+     * 批量转换头像路径为fdfs地址
+     * @param userDtos
+     */
+    public void batchSetDefaultIfNoAvatar(List<UserDto> userDtos) {
+        if (CollectionUtils.isNotEmpty(userDtos)) {
+            List<LocalFileMappingModel> mappingModelList =
+                    DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
+            userDtos.forEach(userDto -> {
+                String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
+                userDto.setAvatar(path);
+            });
         }
     }
 
@@ -855,9 +873,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userDto.setIsSuperUser(0);
                 userDto.setIsAdmin(0);
             }
-            setDefaultIfNoAvatar(userDto);
             userDtos.add(userDto);
         }
+        this.batchSetDefaultIfNoAvatar(userDtos);
 
         return userDtos;
     }

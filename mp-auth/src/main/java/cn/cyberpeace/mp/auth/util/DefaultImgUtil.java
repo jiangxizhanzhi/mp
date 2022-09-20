@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Description: 默认图片工具类
@@ -42,6 +43,28 @@ public class DefaultImgUtil {
             List<LocalFileMappingModel> fileMappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(fileMappingModels)) {
                 path = FdfsCommon.genHttpUrl(fileMappingModels.get(0).getRemoteFile());
+            }
+        }
+
+        return path;
+    }
+
+    /**
+     * 批量映射文件中获取fdfs地址
+     * @param path
+     * @param mappingModelList
+     * @return
+     */
+    public static String pickPathToFdfsUrl(String path, List<LocalFileMappingModel> mappingModelList) {
+        if (StringUtils.isNotBlank(path) && !path.startsWith(AuthConstant.FDFS_PREFIX) &&
+                CollectionUtils.isNotEmpty(mappingModelList)) {
+            String group = splitToGroup(path);
+            String name = splitToName(path);
+            Optional<LocalFileMappingModel> mappingModelOptional =
+                    mappingModelList.stream().filter(model -> model.getGroup().equals(group) && model.getName().equals(name)).findFirst();
+
+            if (mappingModelOptional.isPresent()) {
+                path = mappingModelOptional.get().getRemoteFile();
             }
         }
 
