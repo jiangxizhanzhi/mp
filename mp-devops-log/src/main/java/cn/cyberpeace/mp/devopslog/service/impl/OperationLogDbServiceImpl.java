@@ -131,6 +131,9 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
 
+        humanCondition.setLimit(request.getPerPage());
+        humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
+
         if (StringUtils.isNotBlank(request.getUserId())) {
             humanCondition.filterEqual(OperationLogDbModel::getUserId, request.getUserId());
         }

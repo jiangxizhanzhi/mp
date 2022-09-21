@@ -57,6 +57,7 @@ public class OperateLogController {
     @ApiOperation(value = "查询操作日志")
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
+        request.ensure();
         return operationLogService.search(request);
     }
 
