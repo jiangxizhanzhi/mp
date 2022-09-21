@@ -137,7 +137,7 @@ mp:
     es-nodes: 10.100.0.101:9205
     cp-url: http://10.100.7.1:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
-    log-db: es #日志存储数据库：es、mysql
+    log-db: mysql #日志存储数据库：es、mysql
   # mp-auth 模块配置
   auth:
     max-import-user-size: 100
