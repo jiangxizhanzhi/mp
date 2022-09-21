@@ -49,4 +49,7 @@ public class SysNoticeRequest {
     @ApiModelProperty(value = "组织id列表")
     private List<String> orgIds;
 
+    @ApiModelProperty(value = "用户id列表")
+    private List<String> userIds;
+
 }

@@ -25,6 +25,7 @@ CREATE TABLE `mp_sys_notice`
     `publisher`   varchar(64)  NOT NULL COMMENT '发布人',
     `is_public`   int(11)      NOT NULL DEFAULT 0 COMMENT '是否公开，对所有人可见  0:否 1:是 默认是0',
     `type`        int(11)      NOT NULL DEFAULT 1 COMMENT '公告类型 1:系统、2:课程、3:练习、4:考试',
+    `top`         bigint       NOT NULL COMMENT '置顶数字(采用当前时间戳，越大越靠前)',
     `create_time` datetime     NOT NULL COMMENT '创建时间',
     `update_time` datetime     NOT NULL COMMENT '更新时间',
     PRIMARY KEY (`pk`),
@@ -83,6 +84,22 @@ CREATE TABLE `mp_sys_notice_role`
     UNIQUE KEY (`id`),
     KEY (`role`, `notice_id`)
 ) COMMENT ='系统公告角色关系表';
+
+
+
+CREATE TABLE `mp_sys_notice_user`
+(
+    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `id`          varchar(64) NOT NULL COMMENT 'ID',
+    `tenant`      varchar(64) NOT NULL COMMENT '租户',
+    `notice_id`   varchar(64) NOT NULL COMMENT '公告ID',
+    `user`        varchar(64) DEFAULT NULL COMMENT '用户ID',
+    `create_time` datetime    NOT NULL COMMENT '创建时间',
+    `update_time` datetime    NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`pk`),
+    UNIQUE KEY (`id`),
+    KEY (`user`, `notice_id`)
+) COMMENT ='系统公告用户关系表';
 
 
 

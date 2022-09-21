@@ -1,12 +1,9 @@
 package cn.cyberpeace.mp.auth.service.init;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
-import cn.cyberpeace.mp.auth.model.AuthenticationConfigModel;
-import cn.cyberpeace.mp.auth.repository.AuthenticationConfigMapper;
-import cn.cyberpeace.mp.auth.service.impl.AuthenticationConfigServiceImpl;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +12,6 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-
-import java.util.Objects;
 
 /**
  * @Description:
@@ -34,27 +29,14 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
     private AuthConfig authConfig;
 
     @Autowired
-    private AuthenticationConfigMapper authConfigMapper;
-
-    @Autowired
-    private AuthenticationConfigServiceImpl authConfigService;
+    private UserService userService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String jwtSecret = authConfig.getAuthenticateJwtSecret();
         if (StringUtils.isBlank(jwtSecret)) {
-            AuthenticationConfigModel authConfigModel = authConfigService.selectFirst();
-            if (Objects.isNull(authConfigModel)) {
-                jwtSecret = TextUtils.uuid();
-                authConfigModel = new AuthenticationConfigModel(jwtSecret);
-                boolean success = authConfigMapper.create(authConfigModel);
-                if (!success) {
-                    log.error("create authConfigModel:{} failed!", authConfigModel);
-                    throw new MpRuntimeException(BaseErrorCode.ERROR);
-                }
-            }
-
-            jwtSecret = authConfigModel.getJwtSecret();
+            log.error("jwtSecret is null!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
         authConfig.setAuthenticateJwtSecret(jwtSecret);
