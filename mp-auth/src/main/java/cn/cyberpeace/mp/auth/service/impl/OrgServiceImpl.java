@@ -24,7 +24,6 @@ import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -214,10 +213,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 List<String> pathList = new ArrayList<>();
                 pathList.add(orgModel.getName());
                 if (StringUtils.isNotBlank(orgModel.getParent())) {
-                    HumanCondition humanCondition = new HumanCondition();
-                    humanCondition.filterEqual(OrgModel::getTenant, orgModel.getTenant());
-                    List<OrgModel> allOrgModelList = getModelMapper().list(humanCondition);
-
+                    List<OrgModel> allOrgModelList = listByTenantId(orgModel.getTenant());
                     while (StringUtils.isNotBlank(orgModel.getParent())) {
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
@@ -309,9 +305,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgBO> listAll(String tenantId) {
-        HumanCondition humanCondition = new HumanCondition();
-        humanCondition.filterEqual(OrgModel::getTenant, tenantId);
-        List<OrgModel> orgs = getModelMapper().list(humanCondition);
+        List<OrgModel> orgs = listByTenantId(tenantId);
         List<OrgBO> orgBOS =
             orgs.stream().map(orgModel -> {
                 OrgBO orgBO = new OrgBO();
@@ -562,10 +556,16 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         return list;
     }
 
-    private List<OrgModel> listByParentIdAndName(@Param("parentId") String parentId, @Param("name") String name) {
+    private List<OrgModel> listByParentIdAndName(String parentId, String name) {
         HumanCondition humanCondition = new HumanCondition().
                 filterEqual(OrgModel::getParent, parentId).
                 filterEqual(OrgModel::getName, name);
+        return getModelMapper().list(humanCondition);
+    }
+
+    private List<OrgModel> listByTenantId(String tenantId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(OrgModel::getTenant, tenantId);
         return getModelMapper().list(humanCondition);
     }
 }

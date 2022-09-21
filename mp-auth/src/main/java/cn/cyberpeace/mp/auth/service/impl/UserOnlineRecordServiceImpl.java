@@ -172,12 +172,10 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
-        if (Objects.nonNull(userIds) && userIds.size() > 0) {
+        if (CollectionUtil.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
-        if (Objects.nonNull(fromTime)) {
-            humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
-        }
+        humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
         humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
         List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
         return onlineList;
@@ -188,12 +186,10 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         // 默认超过5分钟没有更新end_time既判定为离线
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
         HumanCondition humanCondition = new HumanCondition();
-        if (Objects.nonNull(userIds) && userIds.size() > 0) {
+        if (CollectionUtil.isNotEmpty(userIds)) {
             humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
         }
-        if (Objects.nonNull(fromTime)) {
-            humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
-        }
+        humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
         humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
         List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
         return onlineList;
