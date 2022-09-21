@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.service;
 
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.*;
 import cn.cyberpeace.mp.devopscluster.dto.ImageDeleteDTO;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.devopscluster.enums.PublicEnum;
 import cn.cyberpeace.mp.devopscluster.enums.StatusEnum;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +39,9 @@ public class DevopsTargetService {
      * @return
      */
     public List<DeviceTargetPO> page(ImagePageDTO dto) {
-        return deviceTargetMapper.page(dto);
+        List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
+        return deviceTargetPOS;
     }
 
     /**
@@ -141,7 +145,7 @@ public class DevopsTargetService {
         deviceTargetPO.setId(device.getId().toString());
         deviceTargetPO.setUuid(device.getUuid());
         deviceTargetPO.setName(device.getName());
-        deviceTargetPO.setLogo(device.getLogo());
+        deviceTargetPO.setLogo(DefaultImgUtil.fdfsUrlToPath(device.getLogo()));
         deviceTargetPO.setRole(device.getRole());
         deviceTargetPO.setMainCategory(device.getCategory());
         deviceTargetPO.setSubCategory(device.getSecondCategory());

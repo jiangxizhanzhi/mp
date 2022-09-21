@@ -2,11 +2,15 @@ package cn.cyberpeace.mp.devopslog.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.common.bo.OptionBO;
+import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.devopslog.bo.LogFileDownloadBO;
+import cn.cyberpeace.mp.devopslog.constant.LogConstant;
 import cn.cyberpeace.mp.devopslog.dto.LogDownloadDTO;
 import cn.cyberpeace.mp.devopslog.dto.LogReportDTO;
 import cn.cyberpeace.mp.devopslog.enums.LogReportTypeEnum;
 import cn.cyberpeace.mp.devopslog.request.BasePageRequest;
+import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +34,9 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class LogFileServiceFactory {
+
+    @javax.annotation.Resource(name = "sysOptionServiceImpl")
+    private OptionService optionService;
 
     private final List<LogFileService> fileServiceList;
 
@@ -53,9 +61,18 @@ public class LogFileServiceFactory {
                 result.addAll(logFileService.list(basePageRequest.getType().name()));
             }
         } else {
+            var res = optionService.getStrOptions(LogConstant.MP_COMMON_OPTION_TYPE_RUNTIME_LOG_TYPE);
+            List<OptionBO> options = res.getSource();
+            List<String> codes = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(options)) {
+                codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
+            }
+
             for (LogFileService logFileService : fileServiceList) {
-                var list = logFileService.list(null);
-                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+                if (codes.contains(logFileService.logReportType())) {
+                    var list = logFileService.list(null);
+                    result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+                }
             }
         }
 

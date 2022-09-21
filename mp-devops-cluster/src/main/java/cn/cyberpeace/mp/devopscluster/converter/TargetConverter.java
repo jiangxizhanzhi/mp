@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
@@ -15,6 +16,7 @@ import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,6 +58,7 @@ public class TargetConverter{
             return targetPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
+        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
         targetPageModel.setList(deviceTargetPOS);
         return targetPageModel;
     }
@@ -84,6 +87,7 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
+        POLogoUtils.changeDevicePathToUrl(model.getList());
         sceneConvertModel.setList(model.getList());
         return sceneConvertModel;
     }
@@ -104,7 +108,9 @@ public class TargetConverter{
      */
     public List<Device> getCommonTargets(String name) {
         CloudPlatformPageResult<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
-        return model.getList();
+        List<Device> deviceList = model.getList();
+        POLogoUtils.changeDevicePathToUrl(deviceList);
+        return deviceList;
     }
 
     /**
@@ -181,6 +187,8 @@ public class TargetConverter{
      * @return
      */
     public Device findByUuid(String uuid){
-        return deviceService.findByUuid(uuid);
+        Device device = deviceService.findByUuid(uuid);
+        device.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
+        return device;
     }
 }

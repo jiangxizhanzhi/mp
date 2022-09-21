@@ -6,7 +6,6 @@ package cn.cyberpeace.mp.aggregation.constant;
  * @Date 2021/12/18
  */
 public final class CommonConstant {
-    public final static String DefaultImagePrefix = "/api/mp";
 
     public interface DefaultImageUrl {
         String SWITCHER = "/api/mp/network-equipment/switcher.png";
