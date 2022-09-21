@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
 import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
@@ -17,25 +18,15 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TenantUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
-import cn.cyberpeace.mp.auth.util.ParamCheck;
-import cn.cyberpeace.mp.auth.util.PasswordUtils;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
-import cn.cyberpeace.mp.auth.util.UserUtils;
+import cn.cyberpeace.mp.auth.util.*;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -48,6 +39,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -58,20 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -129,7 +110,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Autowired
     private UserCacheService userCacheService;
 
-
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
         setModelMapper(modelMapper);
@@ -168,8 +148,31 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * @param userModel
      */
     public void setDefaultIfNoAvatar(UserModel userModel) {
-        if (Objects.nonNull(userModel) && StringUtils.isEmpty(userModel.getAvatar())) {
-            userModel.setAvatar(getDefaultUserAvatar());
+        if (Objects.nonNull(userModel)) {
+            if (StringUtils.isEmpty(userModel.getAvatar())) {
+                userModel.setAvatar(getDefaultUserAvatar());
+            }
+
+            userModel.setAvatar(DefaultImgUtil.pathToFdfsUrl(userModel.getAvatar()));
+        }
+    }
+
+    /**
+     * 批量转换头像路径为fdfs地址
+     * @param userDtos
+     */
+    public void batchSetDefaultIfNoAvatar(List<UserDto> userDtos) {
+        if (CollectionUtils.isNotEmpty(userDtos)) {
+            List<LocalFileMappingModel> mappingModelList =
+                    DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
+            String defaultAvatar = getDefaultUserAvatar();
+            userDtos.forEach(userDto -> {
+                if (StringUtils.isEmpty(userDto.getAvatar())) {
+                    userDto.setAvatar(defaultAvatar);
+                }
+                String path = DefaultImgUtil.pickPathToFdfsUrl(userDto.getAvatar(), mappingModelList);
+                userDto.setAvatar(path);
+            });
         }
     }
 
@@ -299,6 +302,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // 如果ident为空，设置为null
             userModel.setIdentifier(null);
         }
+        if (StringUtils.isNotBlank(userModel.getAvatar())) {
+            userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
+        }
 
         createCheckService.check(userModel);
 
@@ -363,6 +369,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         userModel.setTokenSecret(null);
 
         updateCheckService.check(userModel);
+        if (StringUtils.isNotBlank(userModel.getAvatar())) {
+            userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
+        }
 
         // udpate中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = update(userModel);
@@ -868,9 +877,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                 userDto.setIsSuperUser(0);
                 userDto.setIsAdmin(0);
             }
-            setDefaultIfNoAvatar(userDto);
             userDtos.add(userDto);
         }
+        this.batchSetDefaultIfNoAvatar(userDtos);
 
         return userDtos;
     }

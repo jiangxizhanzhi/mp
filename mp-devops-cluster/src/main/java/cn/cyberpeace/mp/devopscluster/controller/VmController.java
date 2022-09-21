@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.InstancePageRequest;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import io.swagger.annotations.Api;
@@ -73,6 +74,7 @@ public class VmController {
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
+        POLogoUtils.changePOPathToUrl(devopsResult);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());

@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.frontadmin.repository;
 
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -24,12 +24,6 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
                                      @Param("publisher") String publisher, @Param("type") Integer type);
 
 
-    @Deprecated
-    List<SysNoticeModel> listCurrentUserNotices(@Param("title") String title, @Param("ids") List<String> ids,
-                                                @Param("orgs") List<String> orgs, @Param("roles") List<String> roles,
-                                                @Param("publisher") String publisher, @Param("type") Integer type, @Param("userId") String userId);
-
-
     /**
      * 管理员消息推送列表
      *
@@ -46,6 +40,7 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      */
     int getUnreadCountByCurrentAdminUser(@Param("userId") String userId);
 
+
     /**
      * 普通用户消息推送列表
      *
@@ -54,7 +49,8 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      * @param userId
      * @return
      */
-    List<SysNoticeModel> listNoticeMessageByCurrentNormalUser(@Param("orgs") List<String> orgs,
+    List<SysNoticeModel> listNoticeMessageByCurrentNormalUser(@Param("userIds") List<String> userIds,
+                                                              @Param("orgs") List<String> orgs,
                                                               @Param("roles") List<String> roles,
                                                               @Param("userId") String userId);
 
@@ -67,7 +63,8 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
      * @param userId
      * @return
      */
-    int getUnreadCountByCurrentNormalUser(@Param("orgs") List<String> orgs,
+    int getUnreadCountByCurrentNormalUser(@Param("userIds") List<String> userIds,
+                                          @Param("orgs") List<String> orgs,
                                           @Param("roles") List<String> roles,
                                           @Param("userId") String userId);
 

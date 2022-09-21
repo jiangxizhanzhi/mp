@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.devopscluster.model.SnmpCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.SnmpInterfaceResourceCloudPlatform;
 import cn.cyberpeace.mp.devopscluster.model.common.TargetConnection;
 import cn.cyberpeace.mp.devopscluster.utils.JsonUtils;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
+        POLogoUtils.changeDevicePathToUrl(list);
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());

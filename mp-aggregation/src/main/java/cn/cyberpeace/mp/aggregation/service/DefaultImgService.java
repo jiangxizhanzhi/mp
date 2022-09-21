@@ -1,12 +1,11 @@
 package cn.cyberpeace.mp.aggregation.service;
 
-import cn.cyberpeace.mp.aggregation.constant.DefaultImgDirEnum;
+import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
+import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -25,10 +24,6 @@ import java.util.stream.Collectors;
 @Service
 public class DefaultImgService {
 
-
-    @Value("${spring.web.resources.static-locations:}")
-    private List<String> staticLocations;
-
     /**
      * 获取单个指定目录下的默认图片
      *
@@ -38,19 +33,16 @@ public class DefaultImgService {
     public List<String> getFileByDefaultImgDirEnum(DefaultImgDirEnum defaultImgDirEnum) {
         String endPathName = defaultImgDirEnum.getEndPathName();
         String startWithFile = "file:";
-        List<String> pathNameList = staticLocations.stream().map(s -> {
-            if (s.startsWith(startWithFile)) {
-                s = s.substring(5).trim();
-            }
-            return s;
-        }).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-
-        if (CollectionUtils.isEmpty(pathNameList)) {
+        String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
+        if (StringUtils.isBlank(pathName)) {
             log.error("==========default img config error==================");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
-        String pathName = pathNameList.get(0).concat(endPathName);
+        if (pathName.startsWith(startWithFile)) {
+            pathName = pathName.substring(5).trim();
+        }
+        pathName = pathName.concat(endPathName);
 
         var logFile = new File(pathName);
 
@@ -66,14 +58,17 @@ public class DefaultImgService {
 
     public String getDefaultImgFilePath(String relativePath) {
         String startWithFile = "file:";
-        List<String> pathNameList = staticLocations.stream().map(s -> {
-            if (s.startsWith(startWithFile)) {
-                s = s.substring(5).trim();
-            }
-            return s;
-        }).filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        for (String str : pathNameList) {
-            String filePath = StringUtils.joinWith("", str, relativePath);
+        String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
+        if (StringUtils.isBlank(pathName)) {
+            log.error("==========default img config error==================");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+
+        if (pathName.startsWith(startWithFile)) {
+            pathName = pathName.substring(5).trim();
+        }
+        if (StringUtils.isNotBlank(pathName)) {
+            String filePath = StringUtils.joinWith("", pathName, relativePath);
             File file = new File(filePath);
             if (file.exists()) {
                 return filePath;

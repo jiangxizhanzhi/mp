@@ -313,6 +313,9 @@
             <if test="name != null">
                 name = #{name},
             </if>
+            <if test="logo != null">
+                logo = #{logo},
+            </if>
             <if test="mainCategory != null">
                 main_category = #{mainCategory},
             </if>
