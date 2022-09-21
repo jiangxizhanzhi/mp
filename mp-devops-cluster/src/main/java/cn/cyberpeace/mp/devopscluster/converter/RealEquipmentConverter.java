@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.http.ParamUtils;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
@@ -23,6 +24,7 @@ import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
 import cn.cyberpeace.mp.devopscluster.request.RealEquipmentRequest;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,7 +33,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -95,7 +100,7 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-
+        POLogoUtils.changeDevicePathToUrl(model.getList());
         List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
             RealEquipmentBO realEquipmentBO = convertDevice(device);
             List<DeviceReferCsceneStat> referStateList = new ArrayList<>();
@@ -191,7 +196,7 @@ public class RealEquipmentConverter implements BaseConverter{
         }
 
         RealEquipmentBO convertModel = RealEquipmentBO.builder().uuid(device.getUuid())
-                .name(device.getName()).role(device.getRole()).logo(device.getLogo())
+                .name(device.getName()).role(device.getRole()).logo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()))
                 .mainCategory(device.getCategory()).subCategory(device.getSecondCategory())
                 .description(device.getDescription()).thirdCategory(device.getL3Category()).extEntityAccess(device.getExtEntityAccess()).build();
         convertModel.setSuccess(device.isSuccess());
@@ -215,7 +220,7 @@ public class RealEquipmentConverter implements BaseConverter{
         Device device = new Device();
         device.setName(request.getName());
         device.setDescription(request.getDescription());
-        device.setLogo(request.getLogo());
+        device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
         device.setRole(request.getRole());
         device.setCategory(request.getMainCategory());
         device.setSecondCategory(request.getSubCategory());

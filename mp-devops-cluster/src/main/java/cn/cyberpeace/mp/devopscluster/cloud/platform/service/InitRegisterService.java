@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.constants.BaseCloudPlatformConstant;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -74,6 +75,7 @@ public class InitRegisterService extends BaseCpService {
         List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
         List<String> uuids = deviceList.stream().map(device -> device.getUuid()).collect(Collectors.toList());
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
+        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
         List<String> existedUuids = deviceTargetPOS.stream().map(p -> p.getUuid()).collect(Collectors.toList());
         List<Device> notExistedList = new ArrayList<>();
         List<Device> existedList = new ArrayList<>();
