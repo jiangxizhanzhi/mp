@@ -200,21 +200,21 @@ public class CollectionTypeService {
     private CollectionType logEventApp(String code, Integer type) {
         CollectionType appType = CollectionType.builder().name("应用系统日志").code(code).type(-1).build();
 
-        CollectionType mailserver = CollectionType.builder().name("邮件服务器").code(code + "01").type(type).build();
+        CollectionType mailServer = CollectionType.builder().name("邮件服务器").code(code + "01").type(type).build();
         CollectionType webserver = CollectionType.builder().name("WEB服务器").code(code + "02").type(type).build();
         CollectionType database = CollectionType.builder().name("数据库").code(code + "03").type(type).build();
-        CollectionType networkserver = CollectionType.builder().name("网络服务").code(code + "04").type(type).build();
+        CollectionType networkServer = CollectionType.builder().name("网络服务").code(code + "04").type(type).build();
         CollectionType app = CollectionType.builder().name("应用软件").code(code + "05").type(type).build();
         CollectionType cloud = CollectionType.builder().name("云").code(code + "06").type(type).build();
         CollectionType loadbalancer = CollectionType.builder().name("负载均衡").code(code + "07").type(type).build();
-        CollectionType appframework = CollectionType.builder().name("应用框架").code(code + "08").type(type).build();
+        CollectionType appFramework = CollectionType.builder().name("应用框架").code(code + "08").type(type).build();
 
         CollectionType cron = CollectionType.builder().name("定时任务").code(code + "09").type(type).build();
         CollectionType ftp = CollectionType.builder().name("文件服务器").code(code + "10").type(type).build();
         CollectionType vmware = CollectionType.builder().name("虚拟机").code(code + "11").type(type).build();
 
-        List<CollectionType> appSubTypes = Arrays.asList(mailserver, webserver, database, networkserver,
-                app, cloud, loadbalancer, appframework, cron, ftp, vmware);
+        List<CollectionType> appSubTypes = Arrays.asList(mailServer, webserver, database, networkServer,
+                app, cloud, loadbalancer, appFramework, cron, ftp, vmware);
         appType.setChildren(appSubTypes);
 
         return appType;
@@ -229,20 +229,20 @@ public class CollectionTypeService {
 
         CollectionType av = CollectionType.builder().name("AV").code(code + "01").type(type).build();
         CollectionType fw = CollectionType.builder().name("FW").code(code + "02").type(type).build();
-        CollectionType ds_ips = CollectionType.builder().name("IDS/IPS").code(code + "03").type(type).build();
+        CollectionType idsIps = CollectionType.builder().name("IDS/IPS").code(code + "03").type(type).build();
         CollectionType vpn = CollectionType.builder().name("VPN").code(code + "04").type(type).build();
         CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
 
-        CollectionType access_control = CollectionType.builder().name("接入控制").code(code + "06").type(type).build();
+        CollectionType accessControl = CollectionType.builder().name("接入控制").code(code + "06").type(type).build();
         CollectionType errors = CollectionType.builder().name("错误").code(code + "07").type(type).build();
         CollectionType auth = CollectionType.builder().name("用户").code(code + "08").type(type).build();
         CollectionType remote = CollectionType.builder().name("远程登录").code(code + "09").type(type).build();
         CollectionType sca = CollectionType.builder().name("sca").code(code + "10").type(type).build();
         CollectionType attack = CollectionType.builder().name("攻击").code(code + "11").type(type).build();
-        CollectionType windows_security = CollectionType.builder().name("windows安全事件").code(code + "12").type(type).build();
+        CollectionType windowsSecurity = CollectionType.builder().name("windows安全事件").code(code + "12").type(type).build();
 
-        List<CollectionType> secSubTypes = Arrays.asList(av, fw, ds_ips, vpn, other,
-                access_control,errors,auth,remote,sca,attack,windows_security);
+        List<CollectionType> secSubTypes = Arrays.asList(av, fw, idsIps, vpn, other,
+                accessControl,errors,auth,remote,sca,attack,windowsSecurity);
         secSysType.setChildren(secSubTypes);
 
         return secSysType;

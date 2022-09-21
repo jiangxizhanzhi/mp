@@ -99,77 +99,74 @@ public class CollectionTemplateService {
         condition.setIds(ids);
         List<CollectionTemplatePageItemDto> templatePageItemDtos = templateMapper.listTemplateItemDtos(condition);
 
-        List<CollectionTemplateDto> templateDtoList =
-                templatePageItemDtos.stream().map(itemDto -> {
-                    CollectionTemplateDto templateDto = new CollectionTemplateDto();
-                    BeanUtils.copyProperties(itemDto, templateDto);
+        return templatePageItemDtos.stream().map(itemDto -> {
+            CollectionTemplateDto templateDto = new CollectionTemplateDto();
+            BeanUtils.copyProperties(itemDto, templateDto);
 
-                    List<CollectionTemplateProbeModel> basicProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateBasicInfoProbesCondition());
-                    List<CollectionTemplateProbeModel> eventProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateEventProbesCondition());
-                    List<CollectionTemplateProbeModel> logProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateLogProbesCondition());
-                    List<CollectionTemplateProbeModel> customProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateCustomProbesCondition());
+            List<CollectionTemplateProbeModel> basicProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateBasicInfoProbesCondition());
+            List<CollectionTemplateProbeModel> eventProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateEventProbesCondition());
+            List<CollectionTemplateProbeModel> logProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateLogProbesCondition());
+            List<CollectionTemplateProbeModel> customProbeModels = templateProbeMapper.listCollectionTemplateProbeModels(itemDto.getId(), generateCustomProbesCondition());
 
-                   /* customProbeModels.forEach(p -> {
-                        processParamsForColTempCustomProbeDto(p);
-                    });*/
+           /* customProbeModels.forEach(p -> {
+                processParamsForColTempCustomProbeDto(p);
+            });*/
 
-                    // 通用探针
-                    List<ColTempCommonProbeDto> basicProbeResps =
-                            basicProbeModels.stream().map(dto -> {
-                                        ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
-                                        BeanUtils.copyProperties(dto, commonDto);
-                                        commonDto.setId(dto.getProbeId());
-                                        return commonDto;
-                                    }
-                            ).collect(Collectors.toList());
+            // 通用探针
+            List<ColTempCommonProbeDto> basicProbeResps =
+                    basicProbeModels.stream().map(dto -> {
+                                ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
+                                BeanUtils.copyProperties(dto, commonDto);
+                                commonDto.setId(dto.getProbeId());
+                                return commonDto;
+                            }
+                    ).collect(Collectors.toList());
 
-                    // 事件采集
-                    List<ColTempCommonProbeDto> eventProbeResps =
-                            eventProbeModels.stream().map(dto -> {
-                                        ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
-                                        BeanUtils.copyProperties(dto, commonDto);
-                                        commonDto.setId(dto.getProbeId());
-                                        commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
-                                        return commonDto;
-                                    }
-                            ).collect(Collectors.toList());
+            // 事件采集
+            List<ColTempCommonProbeDto> eventProbeResps =
+                    eventProbeModels.stream().map(dto -> {
+                                ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
+                                BeanUtils.copyProperties(dto, commonDto);
+                                commonDto.setId(dto.getProbeId());
+                                commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
+                                return commonDto;
+                            }
+                    ).collect(Collectors.toList());
 
-                    // 日志采集
-                    List<ColTempCommonProbeDto> logProbeResps =
-                            logProbeModels.stream().map(dto -> {
-                                        ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
-                                        BeanUtils.copyProperties(dto, commonDto);
-                                        commonDto.setId(dto.getProbeId());
-                                        commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
-                                        return commonDto;
-                                    }
-                            ).collect(Collectors.toList());
+            // 日志采集
+            List<ColTempCommonProbeDto> logProbeResps =
+                    logProbeModels.stream().map(dto -> {
+                                ColTempCommonProbeDto commonDto = new ColTempCommonProbeDto();
+                                BeanUtils.copyProperties(dto, commonDto);
+                                commonDto.setId(dto.getProbeId());
+                                commonDto.setPaths(processColTempProbePaths(dto.getConfig()));
+                                return commonDto;
+                            }
+                    ).collect(Collectors.toList());
 
-                    // 自定义探针
-                    List<CollectionTemplateProbeDto> customProbeResps =
-                            customProbeModels.stream().map(p -> {
-                                CollectionTemplateProbeDto customDto = new CollectionTemplateProbeDto();
-                                        BeanUtils.copyProperties(p, customDto);
-                                        customDto.setId(p.getProbeId());
-                                        return customDto;
-                                    }
-                            ).collect(Collectors.toList());
+            // 自定义探针
+            List<CollectionTemplateProbeDto> customProbeResps =
+                    customProbeModels.stream().map(p -> {
+                        CollectionTemplateProbeDto customDto = new CollectionTemplateProbeDto();
+                                BeanUtils.copyProperties(p, customDto);
+                                customDto.setId(p.getProbeId());
+                                return customDto;
+                            }
+                    ).collect(Collectors.toList());
 
 
-                    // 国际化处理
-                    basicProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
-                    eventProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
-                    logProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+            // 国际化处理
+            basicProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+            eventProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
+            logProbeResps.forEach(probeDto -> processProbeDtoInternational(probeDto));
 
-                    templateDto.setBasicInfoProbes(basicProbeResps);
-                    templateDto.setEventProbes(eventProbeResps);
-                    templateDto.setLogProbes(logProbeResps);
-                    templateDto.setCustomProbes(customProbeResps);
+            templateDto.setBasicInfoProbes(basicProbeResps);
+            templateDto.setEventProbes(eventProbeResps);
+            templateDto.setLogProbes(logProbeResps);
+            templateDto.setCustomProbes(customProbeResps);
 
-                    return templateDto;
-                }).collect(Collectors.toList());
-
-        return templateDtoList;
+            return templateDto;
+        }).collect(Collectors.toList());
     }
 
     /**
