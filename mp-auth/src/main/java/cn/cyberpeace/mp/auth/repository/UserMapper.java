@@ -20,11 +20,9 @@ import java.util.List;
 @ModelClass(UserModel.class)
 public interface UserMapper extends BaseModelMapper<UserModel> {
 
-    int getUserCnt();
 
+    // 由于 identifier 如果为 null，使用 通用 mapper 的 update 方法更新，会设置为默认值
     int updateIdentToNull(@Param("id") String id);
-
-    List<UserModel> listByUserNames(List<String> userNames);
 
     List<UserOrgRoleDto> listByUserIds(String[] userIds);
 

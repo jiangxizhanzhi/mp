@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -37,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -211,8 +213,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 //        if (objResult == null || objResult.getObj() == null) {
 //            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 //        }
-
-        getModelMapper().deleteByUserId(userId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserRoleModel::getUser, userId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
@@ -220,13 +223,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public boolean deleteByRoleId(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
-//        var objResult = roleService.get(roleId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-//        }
-
-        getModelMapper().deleteByRoleId(roleId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserRoleModel::getRole, roleId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
@@ -253,7 +252,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 删除用户角色
-        getModelMapper().deleteByRoleIdAndUserIds(roleId, userIds);
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(UserRoleModel::getRole, roleId);
+        if (Objects.nonNull(userIds) && userIds.size() > 0) {
+            humanCondition.filterIn(UserRoleModel::getUser, userIds.toArray());
+        }
+        getModelMapper().filterDelete(humanCondition);
 
         userCacheService.evictAllUserCache();
         return true;

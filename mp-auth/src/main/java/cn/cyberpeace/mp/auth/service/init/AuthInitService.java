@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.init;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.model.AuthenticationConfigModel;
 import cn.cyberpeace.mp.auth.repository.AuthenticationConfigMapper;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.impl.AuthenticationConfigServiceImpl;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
@@ -34,16 +34,16 @@ public class AuthInitService implements ApplicationListener<ContextRefreshedEven
     private AuthConfig authConfig;
 
     @Autowired
-    private UserService userService;
+    private AuthenticationConfigMapper authConfigMapper;
 
     @Autowired
-    private AuthenticationConfigMapper authConfigMapper;
+    private AuthenticationConfigServiceImpl authConfigService;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         String jwtSecret = authConfig.getAuthenticateJwtSecret();
         if (StringUtils.isBlank(jwtSecret)) {
-            AuthenticationConfigModel authConfigModel = authConfigMapper.selectFirst();
+            AuthenticationConfigModel authConfigModel = authConfigService.selectFirst();
             if (Objects.isNull(authConfigModel)) {
                 jwtSecret = TextUtils.uuid();
                 authConfigModel = new AuthenticationConfigModel(jwtSecret);

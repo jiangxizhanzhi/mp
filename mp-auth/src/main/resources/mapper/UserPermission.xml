@@ -16,12 +16,4 @@
     </select>
 
 
-    <delete id="deleteByUserId">
-        delete from mp_auth_user_permission where owner = #{userId}
-    </delete>
-
-    <delete id="deleteByTargetId">
-        delete from mp_auth_user_permission where target = #{targetId}
-    </delete>
-
 </mapper>

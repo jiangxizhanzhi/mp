@@ -16,6 +16,6 @@ import org.springframework.stereotype.Repository;
 @ModelClass(AuthenticationConfigModel.class)
 public interface AuthenticationConfigMapper extends BaseModelMapper<AuthenticationConfigModel> {
 
-    AuthenticationConfigModel selectFirst();
+//    AuthenticationConfigModel selectFirst();
 
 }

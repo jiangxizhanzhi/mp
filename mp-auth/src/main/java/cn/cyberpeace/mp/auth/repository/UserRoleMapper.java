@@ -30,10 +30,4 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     List<UserRoleStatistic> getUserRoleStatistics();
 
-    int deleteByUserId(@Param("userId") String userId);
-
-    int deleteByRoleId(@Param("roleId") String roleId);
-
-    int deleteByRoleIdAndUserIds(@Param("roleId") String roleId, @Param("userIds") List<String> userIds);
-
 }

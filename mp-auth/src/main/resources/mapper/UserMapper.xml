@@ -2,21 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.UserMapper">
 
-    <select id="getUserCnt" resultType="int">
-        select count(id) from mp_auth_user
-    </select>
-
     <update id="updateIdentToNull">
         update mp_auth_user set identifier = null where id = #{id}
     </update>
 
-    <select id="listByUserNames" resultType="cn.cyberpeace.mp.auth.model.UserModel">
-        select * from mp_auth_user where
-        username in
-        <foreach item="userName" index="index" collection="userNames" open="(" separator="," close=")">
-            #{userName}
-        </foreach>
-    </select>
 
     <select id="listByUserIds" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select distinct u.*,

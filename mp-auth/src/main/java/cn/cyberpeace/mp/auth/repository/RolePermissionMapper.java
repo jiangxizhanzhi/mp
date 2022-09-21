@@ -25,8 +25,5 @@ public interface RolePermissionMapper extends BaseModelMapper<RolePermissionMode
 
     List<TargetRoleDto> listTargetRoleDtos(@Param("roleIds") List<String> roleIds);
 
-    int deleteByOwner(@Param("owner") String owner);
-
-    int deleteByTarget(@Param("target") String target);
 
 }

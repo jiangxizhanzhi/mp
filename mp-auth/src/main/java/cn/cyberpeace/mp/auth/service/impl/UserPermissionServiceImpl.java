@@ -22,6 +22,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -239,18 +240,17 @@ public class UserPermissionServiceImpl
 
     public boolean  deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-
-//        var objResult = userService.get(userId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-//        }
-        getModelMapper().deleteByUserId(userId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserPermissionModel::getOwner, userId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
-        getModelMapper().deleteByTargetId(targetId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserPermissionModel::getTarget, targetId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 

@@ -27,6 +27,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -252,8 +253,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
 
     @Override
     public Integer getUserCnt(String orgId) {
-        Integer userCnt = getModelMapper().selectUserCnt(orgId);
-
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgUserModel::getOrg, orgId);
+        Integer userCnt = getModelMapper().total(humanCondition);
         return userCnt;
     }
 
@@ -310,13 +312,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public boolean deleteByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-
-//        var objResult = userService.get(userId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-//        }
-
-        getModelMapper().deleteByUserId(userId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgUserModel::getUser, userId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
@@ -324,13 +322,9 @@ public class OrgUserServiceImpl extends BaseModelServiceImpl<OrgUserModel, OrgUs
     @Override
     public boolean deleteByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-
-//        var objResult = orgService.get(orgId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "org_not_existed");
-//        }
-
-        getModelMapper().deleteByOrgId(orgId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgUserModel::getOrg, orgId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
