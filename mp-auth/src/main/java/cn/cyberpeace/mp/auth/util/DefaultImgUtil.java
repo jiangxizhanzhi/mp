@@ -88,7 +88,7 @@ public class DefaultImgUtil {
             humanCondition.filterEqual(LocalFileMappingModel::getRemoteFile, tmpUrl);
             List<LocalFileMappingModel> mappingModels = localFileMappingMapper.list(humanCondition);
             if (CollectionUtils.isNotEmpty(mappingModels)) {
-                url = getPathByGroup(mappingModels.get(0).getGroup());
+                url = getPathByGroup(mappingModels.get(0).getGroup()).concat(mappingModels.get(0).getName());
             }
         }
 
