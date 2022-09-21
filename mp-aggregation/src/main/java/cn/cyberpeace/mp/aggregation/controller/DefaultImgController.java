@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,33 +39,33 @@ public class DefaultImgController {
     private DefaultImgService defaultImgService;
 
 
-//    /**
-//     * 获取默认图片
-//     *
-//     * @param request
-//     * @return
-//     */
-//    @ApiOperation("获取默认图片")
-//    @GetMapping("/list-default-imgs")
-//    public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
-//        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
-//            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
-//        }
-//        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
-//        List<String> fileNameList;
-//        if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
-//            List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
-//                    DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
-//                    DefaultImgDirEnum.SAFETY_EQUIPMENT, DefaultImgDirEnum.COMMON_TARGET);
-//            fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
-//        } else {
-//            fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
-//        }
-//        return ResultCommon.success(fileNameList);
-//    }
+    /**
+     * 获取默认图片
+     *
+     * @param request
+     * @return
+     */
+    @ApiOperation("获取默认图片")
+    @GetMapping("/get-default-img")
+    public ServiceResult<List<String>> getDefaultImg(DefaultImgRequest request){
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
+        List<String> fileNameList;
+        if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
+            List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
+                    DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
+                    DefaultImgDirEnum.SAFETY_EQUIPMENT, DefaultImgDirEnum.COMMON_TARGET);
+            fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
+        } else {
+            fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
+        }
+        return ResultCommon.success(fileNameList);
+    }
 
     @ApiOperation("批量获取默认图片")
-    @GetMapping("/get-default-img")
+    @GetMapping("/list-default-imgs")
     public ServiceResult<List<String>> listDefaultImgs(DefaultImgRequest request){
         if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
