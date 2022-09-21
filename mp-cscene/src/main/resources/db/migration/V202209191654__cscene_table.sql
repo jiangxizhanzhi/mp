@@ -15,3 +15,5 @@ CREATE TABLE `mp_cscene_cscene_auth`
     PRIMARY KEY (`pk`) USING BTREE,
     UNIQUE KEY (`id`)
 ) COMMENT ='场景模板授权信息表';
+
+ALTER table mp_cscene_cscene ADD column auth_count int(11) not NULL COMMENT '授权用户数量' after type;

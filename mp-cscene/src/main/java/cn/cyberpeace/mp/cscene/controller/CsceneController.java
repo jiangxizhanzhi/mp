@@ -109,7 +109,7 @@ public class CsceneController implements BaseModelListControllerBase {
     @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
     @PostMapping("/authorize")
     public ServiceResult<Boolean> authorize(@RequestBody CsceneAuthorizeRequest request) {
-        return modelService.csceneAuthorize(request.getUserIds(), request.getIds(), request.getIsPublic()).asResult();
+        return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
     }
 
     @GetMapping
@@ -151,7 +151,7 @@ public class CsceneController implements BaseModelListControllerBase {
             CsceneLogUtils.recordSceneConfigLog(bo, OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
             // 新增模板时默认授权所有
             if (CsceneModel.Type.TEMPLATE == bo.getType()) {
-                modelService.csceneAuthorize(new ArrayList<>(), List.of(bo.getId()), true);
+                modelService.csceneAuthorize(new ArrayList<>(), List.of(bo.getId()), CsceneAuthorizeRequest.AuthType.PUBLIC);
             }
         }
         return result;

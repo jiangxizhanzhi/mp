@@ -7,12 +7,17 @@ import java.util.List;
 
 @Data
 public class CsceneAuthorizeRequest {
-    @ApiModelProperty("用户id集合")
-    private List<String> userIds;
+    @ApiModelProperty("授权目标id集合")
+    private List<String> targetIds;
 
     @ApiModelProperty("场景id集合")
-    private List<String> ids;
+    private List<String> csceneIds;
 
-    @ApiModelProperty("是否授权所有")
-    private Boolean isPublic;
+    @ApiModelProperty("授权类型")
+    private Integer authType;
+
+    public static class AuthType {
+        public static int CUSTOM = 0;
+        public static int PUBLIC = 1;
+    }
 }

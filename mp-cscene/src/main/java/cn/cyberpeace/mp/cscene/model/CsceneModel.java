@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 public class CsceneModel extends BaseCsceneModel {
     @DefaultInt(Type.INSTANCE)
     private Integer type;
+    @DefaultInt
+    private Integer authCount;
     @DefaultStr
     private String logo;
     @DefaultStr

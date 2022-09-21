@@ -5,6 +5,7 @@ CREATE TABLE `mp_cscene_cscene`
     `id`                  varchar(64)   NOT NULL COMMENT 'ID',
     `name`                varchar(255)  NOT NULL DEFAULT '' COMMENT '名称',
     `type`                int(10)       NOT NULL COMMENT '综合场景模板类型',
+    `auth_count`          int(10)       NOT NULL COMMENT '授权用户数量',
     `reference_type`      int(10)       NOT NULL COMMENT '综合场景模板引用类型',
     `reference_meta_data` varchar(2048) NOT NULL COMMENT '综合场景模板引用元数据',
     `logo`                varchar(2048) NOT NULL COMMENT '综合场景模板logo',

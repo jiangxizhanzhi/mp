@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
@@ -205,6 +206,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneAuthMapper(csceneAuthMapper);
     }
 
+    @Override
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
         humanCondition.filterEqual(CsceneModel::getDeleted, false);
 
@@ -214,35 +216,65 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
-    public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> ids, Boolean isPublic) {
-        if (CollectionUtils.isEmpty(ids)) {
+    public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> csceneIds, Integer authType) {
+        if (CollectionUtils.isEmpty(csceneIds)) {
             return new ServiceResult<>(true);
         }
-        List<CsceneAuthModel> models = new ArrayList<>();
+        List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
+        List<CsceneModel> csceneModels = new ArrayList<>();
         // 先删除之前的授权信息
-        deleteCsceneAuthByIds(ids);
-        if (Boolean.TRUE.equals(isPublic)) {
-            ids.forEach(id -> {
-                CsceneAuthModel model = new CsceneAuthModel();
-                model.setTarget(id);
-                models.add(model);
+        deleteCsceneAuthByIds(csceneIds);
+        // 授权所有
+        if (authType == CsceneAuthorizeRequest.AuthType.PUBLIC) {
+            csceneIds.forEach(id -> {
+                CsceneAuthModel csceneAuthModel = new CsceneAuthModel();
+                csceneAuthModel.setTarget(id);
+                csceneAuthModels.add(csceneAuthModel);
+                CsceneModel csceneModel = new CsceneModel();
+                csceneModel.setId(id);
+                csceneModel.setAuthCount(-1);
+                csceneModels.add(csceneModel);
             });
-            csceneAuthMapper.bulkCreate(models);
-            return new ServiceResult<>(true);
-        }
-        if (CollectionUtils.isEmpty(userIds)) {
-            return new ServiceResult<>(true);
-        }
-        // 每个用户生成一条授权信息
-        for (String userId : userIds) {
-            for (String id : ids) {
-                CsceneAuthModel model = new CsceneAuthModel();
-                model.setOwner(userId);
-                model.setTarget(id);
-                models.add(model);
+        } else {
+            String currentUserId = UserCommon.getCurrentUser() == null ? StringUtils.EMPTY : UserCommon.getCurrentUser().getId();
+            // 私有
+            if (CollectionUtils.isEmpty(userIds)) {
+                if (StringUtils.isNotEmpty(currentUserId)) {
+                    for (String id : csceneIds) {
+                        CsceneAuthModel csceneAuthModel = new CsceneAuthModel();
+                        csceneAuthModel.setTarget(id);
+                        csceneAuthModel.setOwner(currentUserId);
+                        csceneAuthModels.add(csceneAuthModel);
+                        CsceneModel csceneModel = new CsceneModel();
+                        csceneModel.setId(id);
+                        csceneModel.setAuthCount(0);
+                        csceneModels.add(csceneModel);
+                    }
+                }
+            } else {
+                // 自定义授权
+                for (String id : csceneIds) {
+                    CsceneModel csceneModel = new CsceneModel();
+                    csceneModel.setId(id);
+                    csceneModel.setAuthCount(userIds.size());
+                    csceneModels.add(csceneModel);
+                }
+                if (StringUtils.isNotEmpty(currentUserId) && !userIds.contains(currentUserId)) {
+                    userIds.add(currentUserId);
+                }
+                // 每个用户生成一条授权信息
+                for (String userId : userIds) {
+                    for (String id : csceneIds) {
+                        CsceneAuthModel csceneAuthModel = new CsceneAuthModel();
+                        csceneAuthModel.setOwner(userId);
+                        csceneAuthModel.setTarget(id);
+                        csceneAuthModels.add(csceneAuthModel);
+                    }
+                }
             }
         }
-        csceneAuthMapper.bulkCreate(models);
+        csceneAuthMapper.bulkCreate(csceneAuthModels);
+        getModelMapper().bulkUpdate(csceneModels);
         return new ServiceResult<>(true);
     }
 
