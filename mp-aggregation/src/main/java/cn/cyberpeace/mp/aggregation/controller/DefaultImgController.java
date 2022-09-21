@@ -15,15 +15,17 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -52,31 +54,28 @@ public class DefaultImgController {
             throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
         }
         DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
-        List<String> fileNameList;
-        if (defaultImgDirEnum == DefaultImgDirEnum.TARGET){
-            List<DefaultImgDirEnum> defaultImgDirEnums = Arrays.asList(DefaultImgDirEnum.APPLICATION_SYSTEM,
-                    DefaultImgDirEnum.NETWORK_EQUIPMENT,DefaultImgDirEnum.OPERATION_SYSTEM,
-                    DefaultImgDirEnum.SAFETY_EQUIPMENT, DefaultImgDirEnum.COMMON_TARGET);
-            fileNameList = getFileByDefaultImgDirEnums(defaultImgDirEnums);
-        } else {
-            fileNameList = defaultImgService.getFileByDefaultImgDirEnum(defaultImgDirEnum);
-        }
-        return ResultCommon.success(fileNameList);
-    }
-
-    @ApiOperation("批量获取默认图片")
-    @GetMapping("/list-default-imgs")
-    public ServiceResult<List<String>> listDefaultImgs(DefaultImgRequest request){
-        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
-            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
-        }
-        DefaultImgDirEnum defaultImgDirEnum = request.getDefaultImgDirEnum();
         List<String> groupList = Collections.singletonList(defaultImgDirEnum.getGroup());
         List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
         List<String> urlList =
                 modelList.stream().map(model -> FsCommon.genHttpUrl(model.getRemoteFile())).collect(Collectors.toList());
 
         return ResultCommon.success(urlList);
+    }
+
+    @ApiOperation("获取系统图片")
+    @GetMapping("/get-sys-logo-img")
+    public ServiceResult<Map<String, String>> getSysLogoImg(){
+        if (StringUtils.isBlank(AggregationSingleton.aggregationConfig.getStaticLocation())){
+            throw new MpRuntimeException(BaseErrorCode.DATA_NOT_EXIST);
+        }
+        List<String> groupList = Collections.singletonList(DefaultImgDirEnum.SYS_LOGO.getGroup());
+        List<LocalFileMappingModel> modelList = DefaultImgUtil.listByGroups(groupList);
+        Map<String, String> urlMap = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(modelList)) {
+            modelList.forEach(model -> urlMap.put(model.getName(), FsCommon.genHttpUrl(model.getRemoteFile())));
+        }
+
+        return ResultCommon.success(urlMap);
     }
 
     /**
