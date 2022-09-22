@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
+import cn.cyberpeace.mp.devopscluster.model.RealEquipmentByParams;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,6 +34,19 @@ public class POLogoUtils {
         if (CollectionUtils.isNotEmpty(deviceList)) {
             List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
             deviceList.forEach(device -> device.setLogo(DefaultImgUtil.pickPathToFdfsUrl(device.getLogo(), mappingModelList)));
+        }
+    }
+
+    /**
+     * 实装设备对象path转fdfs地址
+     * @param deviceTargets
+     */
+    public static void changeRealPathToUrl(List<RealEquipmentByParams> deviceTargets) {
+        if (CollectionUtils.isNotEmpty(deviceTargets)) {
+            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
+            deviceTargets.forEach(device -> device.setLogo(DefaultImgUtil.pickPathToFdfsUrl(device.getLogo(), mappingModelList)));
+
+
         }
     }
     
