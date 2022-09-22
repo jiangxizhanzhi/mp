@@ -62,7 +62,12 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException {
-        UserModel user = JwtCommon.verifyToken(request);
+        UserModel user = null;
+        try {
+            user = JwtCommon.verifyToken(request);
+        } catch (Exception e) {
+            log.error("logout verify token error for {}", e.getMessage());
+        }
         String userName = null;
         if (Objects.nonNull(user)) {
             if (Objects.nonNull(authConfig.getLogoutResetSecret()) && authConfig.getLogoutResetSecret()) {

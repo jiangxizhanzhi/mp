@@ -2,7 +2,9 @@ package cn.cyberpeace.mp.auth.util;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -147,10 +149,10 @@ public class JwtUtils {
         return true;
     }
 
-    public static UserInfo validateToken(String token) throws TokenExpiredException {
+    public static UserInfo validateToken(String token) {
         var user = getUserInfo(token);
         if (user == null) {
-            return null;
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_DECODE_ERROR);
         }
 
         String jwtSecret = generateJwtSecret(user);
@@ -159,10 +161,10 @@ public class JwtUtils {
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
         } catch (TokenExpiredException e) {
-            throw e;
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         } catch (JWTVerificationException e) {
             log.error("Verify jwt token error: {}", e.getMessage());
-            return null;
+            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
         return user;
