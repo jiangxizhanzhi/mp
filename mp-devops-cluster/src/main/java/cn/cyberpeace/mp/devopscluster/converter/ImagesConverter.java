@@ -90,7 +90,7 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
-        POLogoUtils.changeDevicePathToUrl(deviceList);
+        POLogoUtils.changeLogoPathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){
             imageConvertPageModel.setList(Lists.newArrayList());

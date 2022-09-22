@@ -40,7 +40,7 @@ public class DevopsTargetService {
      */
     public List<DeviceTargetPO> page(ImagePageDTO dto) {
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
+        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
         return deviceTargetPOS;
     }
 

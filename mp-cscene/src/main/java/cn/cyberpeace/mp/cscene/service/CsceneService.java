@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.base.common.TaskCommon;
+import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
+import cn.cyberpeace.mp.base.common.StatCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -15,12 +16,16 @@ import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.core.CsceneHandler;
+import cn.cyberpeace.mp.cscene.core.common.UserCommon;
+import cn.cyberpeace.mp.cscene.model.CsceneAuthModel;
 import cn.cyberpeace.mp.cscene.model.CsceneInstanceModel;
 import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.model.CsceneRoleModel;
+import cn.cyberpeace.mp.cscene.repository.CsceneAuthMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneRoleMapper;
@@ -42,12 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -61,6 +61,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneAppConfig csceneAppConfig;
 
     private CsceneInstanceMapper csceneInstanceMapper;
+
+    private CsceneAuthMapper csceneAuthMapper;
 
     private ScenePluginCloudSceneService scenePluginCloudSceneService;
 
@@ -192,7 +194,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          ScenePluginCloudSceneConfigService scenePluginCloudSceneConfigService,
                          CsceneSpecialService csceneSpecialService,
                          CsceneSnapshotService csceneSnapshotService,
-                         CsceneModelFields csceneModelFields) {
+                         CsceneModelFields csceneModelFields,
+                         CsceneAuthMapper csceneAuthMapper) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -202,8 +205,10 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneInstanceMapper(csceneInstanceMapper);
         setCsceneSpecialService(csceneSpecialService);
         setCsceneSnapshotService(csceneSnapshotService);
+        setCsceneAuthMapper(csceneAuthMapper);
     }
 
+    @Override
     public void loadListFilterCondition(HumanCondition humanCondition, CsceneQueryParams queryParams) {
         humanCondition.filterEqual(CsceneModel::getDeleted, false);
 
@@ -213,14 +218,69 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
+    @Transactional
+    public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> csceneIds, Integer authType) {
+        if (authType != CsceneModel.AuthType.PUBLIC && authType != CsceneModel.AuthType.SHARED) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        if (CollectionUtils.isEmpty(csceneIds)) {
+            return new ServiceResult<>(true);
+        }
+        // 用户id为空且授权类型不为所有时 授权类型为私有
+        if (CollectionUtils.isEmpty(userIds) && authType != CsceneModel.AuthType.PUBLIC) {
+            authType = CsceneModel.AuthType.PRIVATE;
+        }
+        // 先删除之前的授权信息
+        deleteCsceneAuthByIds(csceneIds);
+        // 所有授权均需要更新场景模板授权类型
+        List<CsceneModel> csceneModels = new ArrayList<>();
+        for (String id : csceneIds) {
+            CsceneModel csceneModel = new CsceneModel();
+            csceneModel.setId(id);
+            csceneModel.setAuthType(authType);
+            csceneModels.add(csceneModel);
+        }
+        getModelMapper().bulkUpdate(csceneModels);
+        // 自定义授权 每个用户生成一条授权信息
+        if (CsceneModel.AuthType.SHARED == authType) {
+            // 用户id去重
+            userIds = userIds.stream().distinct().collect(Collectors.toList());
+            List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
+            for (String userId : userIds) {
+                for (String id : csceneIds) {
+                    CsceneAuthModel csceneAuthModel = new CsceneAuthModel();
+                    csceneAuthModel.setOwner(userId);
+                    csceneAuthModel.setTarget(id);
+                    csceneAuthModels.add(csceneAuthModel);
+                }
+            }
+            csceneAuthMapper.bulkCreate(csceneAuthModels);
+        }
+        return new ServiceResult<>(true);
+    }
+
     public ListObjServiceResult<CsceneBO> listCsceneBO(CsceneQueryParams queryParams, boolean withInstance,
                                                        CsceneContextBO context) {
         ListObjServiceResult<CsceneModel> listResult = null;
-        //未指定排序方式时默认按创建时间倒序排列
+        // 查询场景模板的授权信息
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
+            List<String> ids = getCsceneIds();
+            if (CollectionUtils.isEmpty(ids)) {
+                return new ListObjServiceResult<>(new ArrayList<>(), 0);
+            }
+            if (Objects.nonNull(queryParams.getIds())) {
+                queryParams.setIds(Arrays.stream(queryParams.getIds())
+                        .filter(s -> ids.contains(s))
+                        .toArray(String[]::new));
+            } else {
+                queryParams.setIds(ids.toArray(new String[0]));
+            }
+        }
+        // 未指定排序方式时默认按创建时间倒序排列
         if (queryParams.getOrders() == null || queryParams.getOrders().length == 0) {
             queryParams.setOrders(new String[]{"-createTime"});
         }
-        //指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
+        // 指定模糊查询但是未指定查询字段时默认查询字段为name和referenceMetaData
         if (queryParams.getSearch() != null && queryParams.getSearchFields() == null) {
             queryParams.setSearchFields(new String[]{"name", "referenceMetaData"});
         }
@@ -234,16 +294,33 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         var csceneRoleObjMap = readCsceneRoles(csceneObjMap.keySet()
                 .toArray(new String[0])).stream().collect(Collectors.groupingBy(CsceneRoleModel::getCscene));
         List<CsceneBO> csceneBOs = new ArrayList<>();
-        Map<String,CsceneBO> csceneBOMap = new HashMap<>();
+        Map<String, CsceneBO> csceneBOMap = new HashMap<>();
         csceneObjMap.forEach((csceneId, csceneObj) -> {
             var roleObjs = csceneRoleObjMap.getOrDefault(csceneId, new ArrayList<>());
             var csceneHandler = new CsceneHandler(csceneObj, roleObjs, context);
-            csceneBOMap.put(csceneId,csceneHandler.toData(withInstance));
+            csceneBOMap.put(csceneId, csceneHandler.toData(withInstance));
         });
-        //转为Map后顺序被打乱，此时再次排序
-        listResult.getSource().getObjs().stream().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
+        // 转为Map后顺序被打乱，此时再次排序
+        listResult.getSource().getObjs().forEach(m -> csceneBOs.add(csceneBOMap.get(m.getId())));
         return new ListObjServiceResult<>(new ListObjResult<>(csceneBOs, listResult.getSource().getTotal(),
                 listResult.getSource().getFields()));
+    }
+
+    public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
+        // 设置场景模板授权用户列表
+        if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
+            HumanCondition humanCondition = new HumanCondition()
+                    .filterIn(CsceneAuthModel::getTarget, csceneBOs.stream().map(BaseCsceneBO::getId).toArray());
+            var csceneAuthModels = csceneAuthMapper.list(humanCondition);
+            Map<String, List<String>> csceneId2UserIds = new HashMap<>();
+            for (var csceneAuthModel : csceneAuthModels) {
+                if (!csceneId2UserIds.containsKey(csceneAuthModel.getTarget())) {
+                    csceneId2UserIds.put(csceneAuthModel.getTarget(), new ArrayList<>());
+                }
+                csceneId2UserIds.get(csceneAuthModel.getTarget()).add(csceneAuthModel.getOwner());
+            }
+            csceneBOs.forEach(bo -> bo.setSharedUsers(csceneId2UserIds.getOrDefault(bo.getId(), new ArrayList<>())));
+        }
     }
 
     public ServiceResult<CsceneBO> getById(String id, boolean withInstance, CsceneContextBO context) {
@@ -490,5 +567,34 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 scenePluginDataBO.setScene(cpcloudPluginScene);
             }
         }
+    }
+
+    private List<String> getCsceneIds() {
+        var currentUser = UserCommon.getCurrentUser();
+        String currentUserId = currentUser == null ? StringUtils.EMPTY : currentUser.getId();
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CsceneAuthModel::getOwner, currentUserId);
+        List<String> csceneIds = csceneAuthMapper.list(humanCondition).stream()
+                .map(BasePermissionModel::getTarget).collect(Collectors.toList());
+        HumanCondition condition = new HumanCondition()
+                .filterOrStart()
+                .orEqual(CsceneModel::getAuthType, CsceneModel.AuthType.PUBLIC)
+                .orAndStart()
+                .andEqual(CsceneModel::getAuthType, CsceneModel.AuthType.PRIVATE)
+                .andEqual(CsceneModel::getCreateUser, currentUserId)
+                .orAndEnd()
+                .filterOrEnd();
+        csceneIds.addAll(getModelMapper().list(condition).stream()
+                .map(m -> m.getId())
+                .collect(Collectors.toList()));
+        return csceneIds;
+    }
+
+    private void deleteCsceneAuthByIds(List<String> csceceIds) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(CsceneAuthModel::getTarget, csceceIds.toArray());
+        csceneAuthMapper.bulkDelete(csceneAuthMapper.list(humanCondition).stream()
+                .map(m -> m.getId())
+                .toArray(String[]::new));
     }
 }

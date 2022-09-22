@@ -6,11 +6,16 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.authbase.context.LoginUserContext;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopslog.constant.LogConstant;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,6 +26,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.time.LocalDateTime;
@@ -40,6 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Resource(name = "authCacheManager_6H")
     private CacheManager cacheManager;
 
+    private final ObjectMapper mapper;
+
+    @Autowired
+    public JwtAuthenticationFilter(MappingJackson2HttpMessageConverter messageConverter) {
+        this.mapper = messageConverter.getObjectMapper();
+    }
+
     public static String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
     @Override
@@ -48,17 +61,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Object skipJwtFilter = request.getAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER);
         boolean skip = Objects.nonNull(skipJwtFilter) && (Boolean) skipJwtFilter;
         if (!skip) {
-            String token = JwtCommon.getToken(request);
-            if (StringUtils.isNotBlank(token)) {
-                UserModel user = JwtCommon.verifyToken(token);
-                if (Objects.nonNull(user)) {
-                    // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
-                    UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
+            try {
+                String token = JwtCommon.getToken(request);
+                if (StringUtils.isNotBlank(token)) {
+                    UserModel user = JwtCommon.verifyToken(token);
+                    if (Objects.nonNull(user)) {
+                        // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
+                        UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
 
-                    LoginUserContext loginUserContext = new LoginUserContext();
-                    loginUserContext.setValue(user.getId());
-                    refreshToken(response, token, user);
+                        LoginUserContext loginUserContext = new LoginUserContext();
+                        loginUserContext.setValue(user.getId());
+                        refreshToken(response, token, user);
+                    }
                 }
+            } catch (MpRuntimeException e) {
+                log.error("verify token failed for {}", e.getMessage());
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
+                PrintWriter writer = response.getWriter();
+                mapper.writeValue(writer, result);
+                writer.flush();
+                return;
             }
         }
 

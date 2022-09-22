@@ -259,7 +259,7 @@ public class SceneParseResourceCenter {
                 }
                 if (fileName2Index.containsKey(node.getFile())) {
                     int index = fileName2Index.get(node.getFile());
-                    node.setFile(node.getFile() + index);
+                    node.setFile(index + node.getFile());
                     fileName2Index.put(node.getFile(), index + 1);
                 } else {
                     fileName2Index.put(node.getFile(), 1);
