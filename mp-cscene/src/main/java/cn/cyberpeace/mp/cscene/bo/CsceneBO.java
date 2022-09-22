@@ -17,6 +17,8 @@ import java.util.List;
 public class CsceneBO extends BaseCsceneBO<CsceneModel, CsceneRoleModel, CsceneRoleBO, CsceneBO> {
     @ApiModelProperty(value = "场景模板类型")
     private Integer type;
+    @ApiModelProperty(value = "场景模板授权类型 0:授权所有 1:私有 2:共享")
+    private Integer authType;
     @ApiModelProperty(value = "场景模板授权用户列表")
     private List<String> sharedUsers;
     @ApiModelProperty(value = "场景模板引用类型")
