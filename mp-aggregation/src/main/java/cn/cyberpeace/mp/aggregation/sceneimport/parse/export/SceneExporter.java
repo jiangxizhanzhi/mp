@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
@@ -78,9 +79,13 @@ public class SceneExporter {
                 ExportDeviceYmlParams params = new ExportDeviceYmlParams();
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
-                var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
+                var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
                 }, true);
-                var image = result.getData();
+                var imageMap = result.getData();
+                if (imageMap.containsKey("Cloud-init")) {
+                    imageMap.put("cloudInit", imageMap.get("Cloud-init"));
+                }
+                var image = JsonCommon.mapToBean(imageMap, Image.class);
 
                 // 下载图片
                 if (device.getLogo().startsWith("/fdfs") || device.getLogo().startsWith("group/")) {
@@ -153,6 +158,7 @@ public class SceneExporter {
                 Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
+                content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
                 this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
@@ -321,6 +327,7 @@ public class SceneExporter {
         private String 自定义命令;
         private String 角色;
         private String 虚拟类型;
+        private Boolean cloudInit;
         private List<AccessModeParseResult> 接入方式;
         private List<AccessModeParseResult> 管理接入;
     }

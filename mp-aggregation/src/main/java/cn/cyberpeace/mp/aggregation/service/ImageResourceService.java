@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
@@ -86,9 +87,13 @@ public class ImageResourceService {
         ExportImageParams params = new ExportImageParams();
         params.setImageName(imageName);
         params.setDestPath(imagePath);
-        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Image>>() {
+        var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
         }, true);
-        return result.getData();
+        var imageMap = result.getData();
+        if (imageMap.containsKey("Cloud-init")) {
+            imageMap.put("cloudInit", imageMap.get("Cloud-init"));
+        }
+        return JsonCommon.mapToBean(imageMap, Image.class);
     }
 
     private String exportLogo(String logoPath, String imagePath) {
@@ -256,6 +261,7 @@ public class ImageResourceService {
         private String 自定义命令;
         private String 角色;
         private String 虚拟类型;
+        private Boolean cloudInit;
         private List<AccessModeParseResult> 接入方式;
         private List<AccessModeParseResult> 管理接入;
     }
