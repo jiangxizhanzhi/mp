@@ -47,7 +47,7 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/lists" + getParams, CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<Device> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),Device.class);
-        POLogoUtils.changeDevicePathToUrl(list);
+        POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<Device> model = new CloudPlatformPageResult<>();
         model.setList(list);
         model.setTotal(pageResult.getTotal());
@@ -127,7 +127,7 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformItemsPageResult pageResult =  super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/switch_map?switch_name=" + switchName,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
-        POLogoUtils.changeRealPathToUrl(list);
+        POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;
@@ -142,7 +142,7 @@ public class RealEquipmentService extends BaseCpService {
         CloudPlatformItemsPageResult pageResult = super.sendGet(CPCLOUD_DEVICE + URL_VERSION + ENTITY + "/ccm_map?ccm_server_name=" + serialPort,CloudPlatformItemsPageResult.class);
         super.checkResult(pageResult);
         List<RealEquipmentByParams> list = JSONObject.parseArray(JSONObject.toJSONString(pageResult.getItems()),RealEquipmentByParams.class);
-        POLogoUtils.changeRealPathToUrl(list);
+        POLogoUtils.changeLogoPathToUrl(list);
         CloudPlatformPageResult<RealEquipmentByParams> model = new CloudPlatformPageResult<>();
         model.setList(list);
         return model;

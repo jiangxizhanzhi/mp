@@ -100,7 +100,7 @@ public class RealEquipmentConverter implements BaseConverter{
             convertModel.setList(Lists.newArrayList());
             return convertModel;
         }
-        POLogoUtils.changeDevicePathToUrl(model.getList());
+        POLogoUtils.changeLogoPathToUrl(model.getList());
         List<RealEquipmentBO> modelList = model.getList().stream().map(device -> {
             RealEquipmentBO realEquipmentBO = convertDevice(device);
             List<DeviceReferCsceneStat> referStateList = new ArrayList<>();

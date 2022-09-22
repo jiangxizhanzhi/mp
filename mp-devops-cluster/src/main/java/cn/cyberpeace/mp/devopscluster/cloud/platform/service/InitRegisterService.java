@@ -75,7 +75,7 @@ public class InitRegisterService extends BaseCpService {
         List<Device> deviceList = JSON.parseArray(JSON.toJSONString(result.getItems()), Device.class);
         List<String> uuids = deviceList.stream().map(device -> device.getUuid()).collect(Collectors.toList());
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.findByUuids(uuids);
-        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
+        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
         List<String> existedUuids = deviceTargetPOS.stream().map(p -> p.getUuid()).collect(Collectors.toList());
         List<Device> notExistedList = new ArrayList<>();
         List<Device> existedList = new ArrayList<>();
