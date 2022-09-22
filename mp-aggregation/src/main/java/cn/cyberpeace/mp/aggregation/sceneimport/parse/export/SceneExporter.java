@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
-import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import cn.cyberpeace.mp.aggregation.service.DefaultImgService;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -29,12 +29,7 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * @Description
@@ -99,8 +94,8 @@ public class SceneExporter {
                         this.createFile(content, currentImageDir + "/logo.jpg");
                         image.setLOGO("logo.jpg");
                     }
-                } else if (device.getLogo().startsWith(CommonConstant.DefaultImagePrefix)) {
-                    String relativePath = StringUtils.replaceOnce(device.getLogo(), CommonConstant.DefaultImagePrefix, "");
+                } else if (device.getLogo().startsWith(AuthConstant.DEFAULT_IMAGE_PREFIX)) {
+                    String relativePath = StringUtils.replaceOnce(device.getLogo(), AuthConstant.DEFAULT_IMAGE_PREFIX, "");
                     String filePath = BeanCommon.getBean(DefaultImgService.class).getDefaultImgFilePath(relativePath);
                     byte[] content = null;
                     try {

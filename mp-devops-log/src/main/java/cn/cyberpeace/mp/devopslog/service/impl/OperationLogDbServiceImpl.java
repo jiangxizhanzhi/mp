@@ -131,6 +131,8 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
     public ListObjServiceResult<OperationLogPageResponse> search(OperationLogPageRequest request, Locale locale) {
         HumanCondition humanCondition = new HumanCondition();
 
+
+
         if (StringUtils.isNotBlank(request.getUserId())) {
             humanCondition.filterEqual(OperationLogDbModel::getUserId, request.getUserId());
         }
@@ -158,10 +160,23 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
                     .filterOrEnd();
         }
         String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
+        if (Objects.nonNull(request.getStartDate())) {
+            humanCondition.filterGreaterThanOrEqual(createTime, request.getStartDate());
+        }
+        if (Objects.nonNull(request.getEndDate())) {
+            humanCondition.filterLessThanOrEqual(createTime, request.getEndDate());
+        }
+        // 查询符合条件的条数
+        int total = getModelMapper().total(humanCondition);
         humanCondition.orderBy("-" + createTime);
+
+        // 设置分页条件、查询
+        humanCondition.setLimit(request.getPerPage());
+        humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
         List<OperationLogDbModel> models = getModelMapper().list(humanCondition);
+
         List<OperationLogPageResponse> list = opModel2Response(models, locale);
-        return new ListObjServiceResult(new ListObjResult<>(list, list.size()).asResult()).asResult();
+        return new ListObjServiceResult(new ListObjResult<>(list, total).asResult()).asResult();
     }
 
     private List<OperationLogPageResponse> opModel2Response(List<OperationLogDbModel> models, Locale locale) {

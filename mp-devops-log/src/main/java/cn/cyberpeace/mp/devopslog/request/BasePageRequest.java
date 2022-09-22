@@ -8,9 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * 基础的分页参数
@@ -19,20 +19,20 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BasePageRequest extends BaseRequest implements Serializable {
-
-    /**
-     * 每页条数
-     */
-    @Min(1)
-    @ApiModelProperty(value = "每页条数",required = false,hidden = true)
-    private Integer limit;
-
-    /**
-     * 页码，从1开始
-     */
-    @Min(1)
-    @ApiModelProperty(value = "页码",required = false,hidden = true)
-    private Integer offset;
+//
+//    /**
+//     * 每页条数
+//     */
+//    @Min(1)
+//    @ApiModelProperty(value = "每页条数",required = false,hidden = true)
+//    private Integer limit;
+//
+//    /**
+//     * 页码，从1开始
+//     */
+//    @Min(1)
+//    @ApiModelProperty(value = "页码",required = false,hidden = true)
+//    private Integer offset;
 
     /**
      * 页码
@@ -66,4 +66,15 @@ public class BasePageRequest extends BaseRequest implements Serializable {
     public Integer getOffset() {
         return page;
     }
+
+    public void ensure() {
+        if (Objects.isNull(perPage) || perPage <= 0) {
+            perPage = 10;
+        }
+
+        if (Objects.isNull(page) || page <= 0) {
+            page = 1;
+        }
+    }
+
 }

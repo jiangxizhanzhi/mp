@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.devopscluster.converter;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -28,6 +29,7 @@ import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.*;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetAuthService;
 import cn.cyberpeace.mp.devopscluster.service.DevopsTargetService;
+import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -88,6 +90,7 @@ public class ImagesConverter implements BaseConverter{
             return imageConvertPageModel;
         }
         List<Device> deviceList = this.findByIds(ids);
+        POLogoUtils.changeDevicePathToUrl(deviceList);
 
         if (CollectionUtils.isEmpty(deviceList)){
             imageConvertPageModel.setList(Lists.newArrayList());
@@ -380,7 +383,7 @@ public class ImagesConverter implements BaseConverter{
         Device device = new Device();
         device.setName(request.getName());
         device.setDescription(request.getDescription());
-        device.setLogo(request.getLogo());
+        device.setLogo(DefaultImgUtil.fdfsUrlToPath(request.getLogo()));
         Integer role  = request.getRole();
         device.setRole(role);
         device.setCategory(request.getCategory());
@@ -432,7 +435,7 @@ public class ImagesConverter implements BaseConverter{
         ImageConvertModel imageModel = new ImageConvertModel();
         imageModel.setUuid(device.getUuid());
         imageModel.setName(device.getName());
-        imageModel.setLogo(device.getLogo());
+        imageModel.setLogo(DefaultImgUtil.pathToFdfsUrl(device.getLogo()));
         imageModel.setMainCategory(device.getCategory());
         imageModel.setSubCategory(device.getSecondCategory());
         imageModel.setRole(device.getRole());
