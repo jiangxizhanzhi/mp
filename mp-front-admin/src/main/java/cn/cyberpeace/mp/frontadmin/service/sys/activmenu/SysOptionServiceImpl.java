@@ -91,7 +91,7 @@ public class SysOptionServiceImpl extends BaseModelServiceImpl<OptionModel, Opti
         while (iter.hasNext()) {
             String metaStr = iter.next().getMeta();
             OptionMetaModel metaModel = JsonCommon.parse(metaStr, OptionMetaModel.class);
-            if (Objects.equals(OptionMetaModel.OPTION_VISIBLE_NO, String.valueOf(metaModel.getVisible()))) {
+            if (Objects.equals(OptionMetaModel.OPTION_VISIBLE_NO, metaModel.getVisible())) {
                 iter.remove();
             }
         }
