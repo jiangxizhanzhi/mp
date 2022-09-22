@@ -243,6 +243,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         getModelMapper().bulkUpdate(csceneModels);
         // 自定义授权 每个用户生成一条授权信息
         if (CsceneModel.AuthType.SHARED == authType) {
+            // 用户id去重
+            userIds = userIds.stream().distinct().collect(Collectors.toList());
             List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
             for (String userId : userIds) {
                 for (String id : csceneIds) {
@@ -305,7 +307,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
-        // 设置场景模板共享用户数量
+        // 设置场景模板授权用户列表
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
             HumanCondition humanCondition = new HumanCondition()
                     .filterIn(CsceneAuthModel::getTarget, csceneBOs.stream().map(BaseCsceneBO::getId).toArray());
