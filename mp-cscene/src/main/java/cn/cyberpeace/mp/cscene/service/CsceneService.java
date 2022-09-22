@@ -225,12 +225,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         CsceneAuthorizeBO csceneAuthorizeBO = new CsceneAuthorizeBO();
         csceneAuthorizeBO.setAuthType(getModelMapper().get(csceneId).getAuthType());
         csceneAuthorizeBO.setSharedUsers(new ArrayList<>());
+        // 授权所有和私有无共享用户
+        if (csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PRIVATE || csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PUBLIC) {
+            return new ServiceResult<>(csceneAuthorizeBO);
+        }
         HumanCondition humanCondition = new HumanCondition()
                 .filterEqual(CsceneAuthModel::getTarget, csceneId);
         var csceneAuthModels = csceneAuthMapper.list(humanCondition);
-        // 授权所有和私有无共享用户
-        if (CollectionUtils.isEmpty(csceneAuthModels) || csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PRIVATE ||
-                csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PUBLIC) {
+        if (CollectionUtils.isEmpty(csceneAuthModels)) {
             return new ServiceResult<>(csceneAuthorizeBO);
         }
         List<String> userIds = csceneAuthModels.stream().map(m -> m.getOwner()).collect(Collectors.toList());
