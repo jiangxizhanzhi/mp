@@ -51,9 +51,5 @@ public interface OrgUserMapper extends BaseModelMapper<OrgUserModel> {
                                    @Param("currentDateTime") LocalDateTime currentDateTime
                                    );
 
-    Integer selectUserCnt(@Param("orgId") String orgId);
 
-    void deleteByUserId(@Param("userId") String userId);
-
-    void deleteByOrgId(@Param("orgId") String orgId);
 }

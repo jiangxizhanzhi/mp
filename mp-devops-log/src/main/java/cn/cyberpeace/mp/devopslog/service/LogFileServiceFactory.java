@@ -68,15 +68,33 @@ public class LogFileServiceFactory {
                 codes = options.stream().map(o -> (String) o.getCode()).collect(Collectors.toList());
             }
 
+
+            List<LogFileService> logFileServices = new ArrayList<>();
+            CollectionUtil.addAll(logFileServices, fileServiceList);
+            //processVisibleLogFileServices(logFileServices);
+
             for (LogFileService logFileService : fileServiceList) {
-                if (codes.contains(logFileService.logReportType())) {
+                if (isReportTypeMatch(logFileService.logReportType(), codes)) {
                     var list = logFileService.list(null);
                     result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
                 }
             }
+
+            var logservice = logFileServiceMap.get(LogReportTypeEnum.REPORT.name());
+            for (String code : codes) {
+                var list = logservice.list(code);
+                result.addAll(CollectionUtils.isNotEmpty(list) ? list : Lists.newArrayList());
+            }
         }
 
         return result;
+    }
+
+    private boolean isReportTypeMatch(String reportType, List<String> codes) {
+        if (codes.contains(reportType)) {
+            return true;
+        }
+        return false;
     }
 
     /**

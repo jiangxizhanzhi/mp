@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.auth.service.UserLogService;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
@@ -169,7 +171,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     @Override
     public List<UserOnlineRecordModel> listCurrentOnlined(List<String> userIds) {
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
-        List<UserOnlineRecordModel> onlineList = getModelMapper().listCurrentOnlined(userIds, fromTime);
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollectionUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+        }
+        humanCondition.filterGreaterThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
         return onlineList;
     }
 
@@ -177,8 +185,14 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     public List<UserOnlineRecordModel> listCurrentOfflined(List<String> userIds) {
         // 默认超过5分钟没有更新end_time既判定为离线
         LocalDateTime fromTime = LocalDateTime.now().minusMinutes(DEFAULT_MINUTES);
-        List<UserOnlineRecordModel> list = getModelMapper().listCurrentOfflined(userIds,fromTime);
-        return list;
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollectionUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserOnlineRecordModel::getUser, userIds.toArray());
+        }
+        humanCondition.filterLessThan(UserOnlineRecordModel::getEndTime, fromTime);
+        humanCondition.filterEqual(UserOnlineRecordModel::getStatus, AuthConstant.USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0);
+        List<UserOnlineRecordModel> onlineList = getModelMapper().list(humanCondition);
+        return onlineList;
     }
 
     /*

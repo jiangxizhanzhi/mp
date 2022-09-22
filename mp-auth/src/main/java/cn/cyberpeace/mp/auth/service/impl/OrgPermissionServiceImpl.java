@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.service.fields.OrgPermissionFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -114,14 +115,18 @@ public class OrgPermissionServiceImpl
     @Override
     public boolean deleteByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        getModelMapper().deleteByOrgId(orgId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgPermissionModel::getOwner, orgId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 
     @Override
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
-        getModelMapper().deleteByTargetId(targetId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(OrgPermissionModel::getTarget, targetId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 

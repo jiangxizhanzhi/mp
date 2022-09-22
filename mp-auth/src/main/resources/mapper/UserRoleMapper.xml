@@ -36,21 +36,4 @@
             order by userCnt desc
     </select>
 
-    <delete id="deleteByUserId">
-        delete from mp_auth_user_role where user = #{userId}
-    </delete>
-
-    <delete id="deleteByRoleId">
-        delete from mp_auth_user_role where role = #{roleId}
-    </delete>
-
-    <delete id="deleteByRoleIdAndUserIds">
-        delete from mp_auth_user_role where role = #{roleId}
-        <if test="userIds != null and userIds.size() > 0">
-            AND user IN
-            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                #{userId}
-            </foreach>
-        </if>
-    </delete>
 </mapper>

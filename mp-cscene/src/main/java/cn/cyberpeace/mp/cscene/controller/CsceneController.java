@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.cscene.bo.CsceneStat;
 import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -102,10 +103,19 @@ public class CsceneController implements BaseModelListControllerBase {
         this.baseAppConfig = baseAppConfig;
     }
 
+    @ApiOperation("授权场景模板")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = CsceneAuthorizeRequest.class)
+    @PostMapping("/authorize")
+    public ServiceResult<Boolean> authorize(@RequestBody CsceneAuthorizeRequest request) {
+        return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
+    }
+
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listCsceneBO(queryParams, false, null).asResult();
+        var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
+        getModelService().setSharedUser(result.getData().getList(), queryParams);
+        return result;
     }
 
     @ApiOperation("获取指定id场景模板")

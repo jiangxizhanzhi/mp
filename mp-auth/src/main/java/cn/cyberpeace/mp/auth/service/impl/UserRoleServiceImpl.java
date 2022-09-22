@@ -4,7 +4,6 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
@@ -12,14 +11,12 @@ import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
-import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -211,8 +208,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
 //        if (objResult == null || objResult.getObj() == null) {
 //            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
 //        }
-
-        getModelMapper().deleteByUserId(userId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserRoleModel::getUser, userId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
@@ -220,13 +218,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public boolean deleteByRoleId(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
-//        var objResult = roleService.get(roleId).getSource();
-//        if (objResult == null || objResult.getObj() == null) {
-//            new IllegalArgumentException(AuthConstant.ERROR_CODE_PREFIX + "account_not_existed");
-//        }
-
-        getModelMapper().deleteByRoleId(roleId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(UserRoleModel::getRole, roleId);
+        getModelMapper().filterDelete(humanCondition);
         userCacheService.evictAllUserCache();
         return true;
     }
@@ -253,7 +247,12 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         }
 
         // 删除用户角色
-        getModelMapper().deleteByRoleIdAndUserIds(roleId, userIds);
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(UserRoleModel::getRole, roleId);
+        if (CollectionUtil.isNotEmpty(userIds)) {
+            humanCondition.filterIn(UserRoleModel::getUser, userIds.toArray());
+        }
+        getModelMapper().filterDelete(humanCondition);
 
         userCacheService.evictAllUserCache();
         return true;

@@ -24,16 +24,6 @@
         </foreach>
     </select>
 
-    <delete id="deleteByOwner">
-        delete
-        from mp_auth_role_permission
-        where owner = #{owner}
-    </delete>
 
-    <delete id="deleteByTarget">
-        delete
-        from mp_auth_role_permission
-        where target = #{target}
-    </delete>
 
 </mapper>

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.dto.notice;
 
+import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -37,6 +38,9 @@ public class SysNoticeDto {
 
     @ApiModelProperty(value = "组织id集合")
     List<String> orgIds;
+
+    @ApiModelProperty(value = "用户简单信息集合")
+    List<UserSimpleDto> users;
 
     @ApiModelProperty(value = "组织，多个用逗号隔开")
     private String orgPaths;

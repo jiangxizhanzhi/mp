@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -28,12 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -145,7 +141,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         String parentId = obj.getParent();
         String name = obj.getName();
 
-        List<OrgModel> orgModelList = this.getModelMapper().listByParentIdAndName(parentId, name);
+        List<OrgModel> orgModelList = listByParentIdAndName(parentId, name);
         if (CollectionUtil.isNotEmpty(orgModelList)) {
             if (StringUtils.isNotBlank(obj.getId())) {
                 // 判断是否当前组织
@@ -217,8 +213,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
                 List<String> pathList = new ArrayList<>();
                 pathList.add(orgModel.getName());
                 if (StringUtils.isNotBlank(orgModel.getParent())) {
-                    List<OrgModel> allOrgModelList = this.getModelMapper().listAll(orgModel.getTenant());
-
+                    List<OrgModel> allOrgModelList = listByTenantId(orgModel.getTenant());
                     while (StringUtils.isNotBlank(orgModel.getParent())) {
                         String parentId = orgModel.getParent();
                         Optional<OrgModel> orgModelOptional =
@@ -248,7 +243,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Boolean> delete(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<OrgModel> children = getModelMapper().listByParentId(orgId);
+        List<OrgModel> children = listByParentId(orgId);
         if (CollectionUtil.isNotEmpty(children)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
         }
@@ -264,7 +259,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Transactional(rollbackFor = Exception.class)
     public ServiceResult<Integer> bulkDelete(String[] ids) {
         for (String id : ids) {
-            List<OrgModel> children = getModelMapper().listByParentId(id);
+            List<OrgModel> children = listByParentId(id);
             if (CollectionUtil.isNotEmpty(children)) {
                 throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_CHILD_EXISTED);
             }
@@ -278,7 +273,12 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgBO> listParents() {
-        List<OrgModel> orgs = getModelMapper().listParents();
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterOrStart()
+                        .orEqual(OrgModel::getParent, "")
+                        .orEqual(OrgModel::getParent, null)
+                                .filterOrEnd();
+        List<OrgModel> orgs = getModelMapper().list(humanCondition);
         List<OrgBO> orgBOS =
                 orgs.stream().map(orgModel -> {
                     OrgBO orgBO = new OrgBO();
@@ -292,7 +292,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgBO> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.ORG_PARENT);
-        List<OrgModel> orgs = getModelMapper().listByParentId(parentId);
+        List<OrgModel> orgs = listByParentId(parentId);
         List<OrgBO> orgBOS =
                 orgs.stream().map(orgModel -> {
                     OrgBO orgBO = new OrgBO();
@@ -305,7 +305,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
 
     @Override
     public List<OrgBO> listAll(String tenantId) {
-        List<OrgModel> orgs = getModelMapper().listAll(tenantId);
+        List<OrgModel> orgs = listByTenantId(tenantId);
         List<OrgBO> orgBOS =
             orgs.stream().map(orgModel -> {
                 OrgBO orgBO = new OrgBO();
@@ -396,7 +396,7 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
             for (int i = 0; i < pathArray.length; i++) {
                 String p = pathArray[i].trim();
                 OrgModel tmpModel;
-                List<OrgModel> orgModelList = this.getModelMapper().listByParentIdAndName(parentId, p);
+                List<OrgModel> orgModelList = listByParentIdAndName(parentId, p);
                 if (CollectionUtils.isNotEmpty(orgModelList)) {
                     tmpModel = orgModelList.get(0);
                     parentId = tmpModel.getId();
@@ -547,5 +547,25 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         });
 
         orgs.sort((o1, o2) -> o1.getPk() - o2.getPk());
+    }
+
+    private List<OrgModel> listByParentId(String parentId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(OrgModel::getParent, parentId);
+        List<OrgModel> list = getModelMapper().list(humanCondition);
+        return list;
+    }
+
+    private List<OrgModel> listByParentIdAndName(String parentId, String name) {
+        HumanCondition humanCondition = new HumanCondition().
+                filterEqual(OrgModel::getParent, parentId).
+                filterEqual(OrgModel::getName, name);
+        return getModelMapper().list(humanCondition);
+    }
+
+    private List<OrgModel> listByTenantId(String tenantId) {
+        HumanCondition humanCondition = new HumanCondition();
+        humanCondition.filterEqual(OrgModel::getTenant, tenantId);
+        return getModelMapper().list(humanCondition);
     }
 }

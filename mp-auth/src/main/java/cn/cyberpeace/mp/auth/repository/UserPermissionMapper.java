@@ -25,8 +25,4 @@ public interface UserPermissionMapper extends BaseModelMapper<UserPermissionMode
 
     List<UserModel> listUsersByTargetId(@Param("targetId") String targetId);
 
-    void deleteByUserId(@Param("userId") String userId);
-
-    void deleteByTargetId(@Param("targetId") String targetId);
-
 }

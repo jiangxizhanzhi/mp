@@ -30,12 +30,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @Description:
@@ -51,9 +46,6 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
     @Autowired
     private QueryChildTargetOperation queryChildTargetOperation;
-
-    @Autowired
-    private QueryParentTargetOperation queryParentTargetOperation;
 
     @Autowired
     private UserPermissionService userPermissionService;
@@ -116,8 +108,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     public List<TargetModel> listByParent(String parentId) {
         ParamCheck.notBlank(parentId, AuthBasei18nCode.TARGET_PARENT);
-        List<TargetModel> list = getModelMapper().listByParent(parentId);
-        return list;
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(TargetModel::getParent, parentId)
+                .filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        List<TargetModel> targetModels = getModelMapper().list(humanCondition);
+        return targetModels;
     }
 
     @Override
@@ -165,25 +160,50 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     @Override
     @Cacheable(cacheManager = AuthCacheConfig.CACHE_MANAGER_LONG, value = CACHE_VAL_TARGETS)
     public List<TargetModel> listAll(String tenant, Integer type) {
-        List<TargetModel> targets = getModelMapper().listAll(tenant, type);
+        HumanCondition humanCondition = new HumanCondition();
+        if (Objects.nonNull(type)) {
+            humanCondition.filterEqual(TargetModel::getType, type);
+        }
+        if (StringUtils.isNotBlank(tenant)) {
+            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+        }
+        humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }
 
     @Override
     public List<TargetModel> listAllIgnoreVisible(String tenant, Integer type) {
-        List<TargetModel> targets = getModelMapper().listAllIgnoreVisible(tenant, type);
+        HumanCondition humanCondition = new HumanCondition();
+        if (Objects.nonNull(type)) {
+            humanCondition.filterEqual(TargetModel::getType, type);
+        }
+        if (StringUtils.isNotBlank(tenant)) {
+            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+        }
+        List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }
 
     @Override
     public List<TargetModel> listByMultiTypes(String tenant, Integer[] types) {
-        List<TargetModel> targets = getModelMapper().listByMultiTypes(tenant, types);
+        HumanCondition humanCondition = new HumanCondition();
+        if (Objects.nonNull(types) && types.length > 0) {
+            humanCondition.filterIn(TargetModel::getType, types);
+        }
+        if (StringUtils.isNotBlank(tenant)) {
+            humanCondition.filterEqual(TargetModel::getTenant, tenant);
+        }
+        humanCondition.filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        List<TargetModel> targets = getModelMapper().list(humanCondition);
         return targets;
     }
 
     @Override
     public boolean deleteAll() {
-        int result = getModelMapper().deleteAll();
+        HumanCondition humanCondition = new HumanCondition()
+                .filterGreaterThan(TargetModel::getPk, AuthConstant.TARGET_FIELD_VALUE_PK_0);
+        int result = getModelMapper().filterDelete(humanCondition);
         log.info("deleted {} rows", result);
         return true;
     }
@@ -274,6 +294,16 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
         });
 
         targets.sort(Comparator.comparingInt(BaseModel::getPk));
+    }
+
+    // TargetMapper中的方法，没有使用
+    private List<TargetModel> listByTenantId(String tenantId) {
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(TargetModel::getTenant, tenantId)
+                .filterEqual(TargetModel::getVisible, AuthConstant.TARGET_FIELD_VALUE_VISIBLE_1);
+        List<TargetModel> targetModels = getModelMapper().list(humanCondition);
+        return targetModels;
+
     }
 
 }

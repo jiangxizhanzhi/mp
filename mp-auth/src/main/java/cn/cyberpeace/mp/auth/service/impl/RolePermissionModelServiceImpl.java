@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.hutool.core.collection.CollectionUtil;
@@ -109,11 +110,9 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Override
     public boolean deleteByRoleId(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
-//        var result = roleService.get(roleId);
-//        ResultUtils.throwExceptionIfError(result, AuthConstant.ERROR_CODE_PREFIX + "role_not_existed");
-
-        getModelMapper().deleteByOwner(roleId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RolePermissionModel::getOwner, roleId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 
@@ -121,7 +120,9 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     @Override
     public boolean deleteByTargetId(String targetId) {
         ParamCheck.notBlank(targetId, AuthBasei18nCode.TARGET_ID);
-        getModelMapper().deleteByTarget(targetId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RolePermissionModel::getTarget, targetId);
+        getModelMapper().filterDelete(humanCondition);
         return true;
     }
 

@@ -146,7 +146,7 @@ mp:
     # authenticate
     authenticate-cache-time: 30
     authenticate-use-individual-token-secret: true
-    authenticate-jwt-secret: 38effa66e5454c5d9dd79711fc6ffc4d
+    authenticate-jwt-secret: a668b6fec22144f38a6f72f8a5aa7326
     authenticate-jwt-expires: 604800
     authenticate-urls: /auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**
     authenticate-encoder-iterations:

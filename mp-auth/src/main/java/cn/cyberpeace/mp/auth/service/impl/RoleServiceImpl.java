@@ -5,9 +5,7 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
-import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
 import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -15,27 +13,26 @@ import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
-import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
-import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
-import cn.cyberpeace.mp.auth.service.RoleService;
-import cn.cyberpeace.mp.auth.service.TargetService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
+import cn.cyberpeace.mp.auth.request.role.RoleRequest;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.RoleFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -113,7 +110,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public List<RoleModel> listByTenantId(String tenantId) {
         ParamCheck.notBlank(tenantId, AuthBasei18nCode.TENANT_ID);
-        List<RoleModel> roles = getModelMapper().listByTenantId(tenantId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getTenant, tenantId);
+        List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;
     }
 
@@ -121,31 +120,40 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Override
     public List<RoleModel> listAll() {
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
-        List<RoleModel> roles = getModelMapper().listAll(excludeRoleIds);
+        HumanCondition humanCondition = new HumanCondition();
+        if (CollectionUtil.isNotEmpty(excludeRoleIds)) {
+            humanCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+        }
+        List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;
     }
 
     @Override
     public List<RoleModel> listByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-        List<RoleModel> roles = getModelMapper().listByOrgId(orgId);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getOrg, orgId);
+        List<RoleModel> roles = getModelMapper().list(humanCondition);
         return roles;
     }
 
     @Override
     public RoleModel getByIdent(String ident) {
         ParamCheck.notBlank(ident, AuthBasei18nCode.ROLE_IDENTIFIER);
-        RoleModel roleModel = getModelMapper().selectByIdent(ident); 
-        return roleModel;
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getIdentifier, ident);
+        RoleModel model = getModelMapper().first(humanCondition);
+        return model;
     }
 
     @Override
     @Cacheable(value = CACHE_VAL_ROLE_GETBY_NAME)
     public RoleModel getByName(String name) {
         ParamCheck.notBlank(name, AuthBasei18nCode.ROLE_NAME);
-
-        RoleModel roleModel = getModelMapper().selectByName(name);
-        return roleModel;
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(RoleModel::getName, name);
+        RoleModel model = getModelMapper().first(humanCondition);
+        return model;
     }
 
 
@@ -153,7 +161,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     @Cacheable(value = CACHE_VAL_ROLE_LISTBY_NAMES)
     public List<RoleModel> listByNames(List<String> names) {
         ParamCheck.notEmpty(names, AuthBasei18nCode.ROLE_NAME);
-        List<RoleModel> roleModels = getModelMapper().listByNames(names);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(RoleModel::getName, names.toArray());
+        List<RoleModel> roleModels = getModelMapper().list(humanCondition);
         return roleModels;
     }
 

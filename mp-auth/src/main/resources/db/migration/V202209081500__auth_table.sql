@@ -1,17 +1,4 @@
 # v5.3.5
-CREATE TABLE `mp_auth_authentication_config`
-(
-    `pk`          int(11)     NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `id`          varchar(64) NOT NULL COMMENT 'ID',
-    `jwt_secret`  varchar(128) NOT NULL COMMENT '秘钥',
-    `create_time` datetime    NOT NULL COMMENT '创建时间',
-    `update_time` datetime    NOT NULL COMMENT '更新时间',
-    PRIMARY KEY (`pk`),
-    UNIQUE KEY (`id`)
-) COMMENT ='系统认证配置表';
-
-
-
 CREATE TABLE `mp_auth_client_details`
 (
     `pk`                      int(11) NOT NULL AUTO_INCREMENT COMMENT '主键',

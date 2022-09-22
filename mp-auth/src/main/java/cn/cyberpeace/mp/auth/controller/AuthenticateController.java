@@ -11,7 +11,6 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import com.auth0.jwt.exceptions.TokenExpiredException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -52,12 +51,7 @@ public class AuthenticateController {
     private JwtUtils.UserInfo verifyToken(String token) {
         JwtUtils.UserInfo user = null;
         if (StringUtils.isNotBlank(token)) {
-            try {
-                user = JwtUtils.validateToken(token);
-            } catch (TokenExpiredException e) {
-                log.info("token has expired!");
-                throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-            }
+            user = JwtUtils.validateToken(token);
         }
 
         if (Objects.isNull(user)) {

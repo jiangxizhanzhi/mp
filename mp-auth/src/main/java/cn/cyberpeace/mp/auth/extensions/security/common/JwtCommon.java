@@ -1,10 +1,11 @@
 package cn.cyberpeace.mp.auth.extensions.security.common;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
 import cn.cyberpeace.mp.auth.util.UserUtils;
-import com.auth0.jwt.exceptions.TokenExpiredException;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -41,18 +42,10 @@ public class JwtCommon {
 
     public static UserModel verifyToken(String token) {
         if (token == null) {
-            return null;
+            throw new MpRuntimeException(AuthErrorCode.TOKEN_EMPTY_ERROR);
         }
 
-        JwtUtils.UserInfo user;
-        try {
-            user = JwtUtils.validateToken(token);
-        } catch (TokenExpiredException e) {
-            return null;
-        }
-        if (user == null) {
-            return null;
-        }
+        JwtUtils.UserInfo user = JwtUtils.validateToken(token);
 
         return UserUtils.getUser(user.getId());
     }

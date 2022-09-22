@@ -440,7 +440,9 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<UserModel> listByUserName(List<String> userNames) {
-        List<UserModel> userModels = getModelMapper().listByUserNames(userNames);
+        HumanCondition humanCondition = new HumanCondition()
+                .filterIn(UserModel::getUsername, userNames.toArray());
+        List<UserModel> userModels = getModelMapper().list(humanCondition);
         userModels.stream().forEach(userModel -> setDefaultIfNoAvatar(userModel));
         return userModels;
     }
@@ -947,7 +949,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public int totalUserCnt() {
-        return getModelMapper().getUserCnt();
+        int userCnt = getModelMapper().total(new HumanCondition());
+        return userCnt;
     }
 
 
@@ -1066,6 +1069,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             throw new MpRuntimeException(AuthErrorCode.OP_ERROR);
         }
     }
+
 
 
 }

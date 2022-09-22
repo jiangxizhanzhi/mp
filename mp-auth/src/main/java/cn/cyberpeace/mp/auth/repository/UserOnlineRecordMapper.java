@@ -26,22 +26,7 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
                                                        @Param("startTime") LocalDateTime startTime,
                                                        @Param("endTime") LocalDateTime endTime);
 
-    /**
-     * 判断在线的依据：
-     * end_time > (now() - 5m) && status = 0
-     *
-     * @return
-     */
-    List<UserOnlineRecordModel> listCurrentOnlined(@Param("userIds") List<String> userIds, @Param("fromTime") LocalDateTime fromTime);
 
-    /**
-     * 判断离线的依据:
-     * end_time <= (now() - 5m) && status = 0
-     *
-     * @param
-     * @return
-     */
-    List<UserOnlineRecordModel> listCurrentOfflined(@Param("userIds") List<String> userIds, @Param("fromTime") LocalDateTime fromTime);
 
 
     /**

@@ -22,7 +22,4 @@ public interface OrgPermissionMapper extends BaseModelMapper<OrgPermissionModel>
 
     List<TargetModel> listByOrgId(@Param("orgId") String orgId);
 
-    void deleteByOrgId(@Param("orgId") String orgId);
-
-    void deleteByTargetId(@Param("targetId") String targetId);
 }

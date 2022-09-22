@@ -27,37 +27,6 @@
         total_online_minutes desc
     </select>
 
-    <select id="listCurrentOnlined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select * from mp_auth_user_online_record
-        <where>
-            <if test="userIds != null and userIds.size() > 0">
-                AND user IN
-                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                    #{userId}
-                </foreach>
-            </if>
-            <if test="fromTime != null">
-                AND end_time &gt; #{fromTime}
-            </if>
-            AND status = 0
-        </where>
-    </select>
-
-    <select id="listCurrentOfflined" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select * from mp_auth_user_online_record
-        <where>
-            <if test="userIds != null and userIds.size() > 0">
-                AND user IN
-                <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                    #{userId}
-                </foreach>
-            </if>
-            <if test="fromTime != null">
-                AND end_time &lt; #{fromTime}
-            </if>
-            AND status = 0
-        </where>
-    </select>
 
     <!--
     <select id="listCurrentOnlinedUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
