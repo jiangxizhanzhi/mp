@@ -779,7 +779,11 @@ public class InitiateHandler extends HandlerCommon {
 
         // 非外部资源 重置资源id
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
-            cloudElement.setResourceId(StringUtils.EMPTY);
+            if (this.resetResourceId()) {
+                cloudElement.setResourceId(StringUtils.EMPTY);
+            } else {
+                return;
+            }
         }
         // defaultConnectedNetwork
         var network = new CloudPluginSceneElementNetworkBO(getPluginHandler().getSourceSceneId(), cloudElement.getSrcElement().getId());
@@ -935,7 +939,7 @@ public class InitiateHandler extends HandlerCommon {
     }
 
     public void initiate() {
-        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
+        this.prepareEventProcess();
 
         // 标记已设置的ip的端口
         if (getPluginHandler().getElementPortMap() != null) {
@@ -1066,6 +1070,14 @@ public class InitiateHandler extends HandlerCommon {
                 }
             }
         }
+    }
+
+    protected void prepareEventProcess() {
+        prepareEventProcess(SceneModel.Event.INITIATE, SceneProcess.class, ElementProcess.class);
+    }
+
+    protected boolean resetResourceId() {
+        return true;
     }
 
     public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {

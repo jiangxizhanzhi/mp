@@ -520,22 +520,6 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
-    public boolean create1() {
-        prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
-        startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
-        try {
-            for (var plugin : getPlugins()) {
-                plugin.create1();
-            }
-        } catch (Exception e) {
-            errorScene(SceneModel.Event.MODIFY, e.getMessage());
-            return false;
-        }
-        overAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
-        save();
-        return true;
-    }
-
     public void start() {
     }
 

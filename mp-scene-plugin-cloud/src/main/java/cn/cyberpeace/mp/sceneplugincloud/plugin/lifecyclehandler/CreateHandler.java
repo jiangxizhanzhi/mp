@@ -1015,7 +1015,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void create() {
-        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+        this.prepareEventProcess();
 
         long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
         long gatewayTasks = getPluginHandler().getGatewayElementMap().values().stream().count();
@@ -1068,6 +1068,10 @@ public class CreateHandler extends HandlerCommon {
         if (network2Info.values().size() > 0) {
             runSceneProgress(SceneProcess.CREATE_NPCS, () -> createNpcElements(new ArrayList<>(network2Info.values())));
         }
+    }
+
+    protected void prepareEventProcess() {
+        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
     }
 
     public void createNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {

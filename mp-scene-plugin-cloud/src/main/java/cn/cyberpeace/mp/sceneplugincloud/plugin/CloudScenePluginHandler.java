@@ -26,8 +26,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetwor
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.CreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.DeleteHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.InitiateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyCreateHandler;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyInitiateHandler;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ModifyHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.PauseHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RecreateHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.RestartHandler;
@@ -74,10 +73,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
 
     private HandlerUtils handlerUtils;
     private InitiateHandler initiateHandler;
-    private ModifyInitiateHandler modifyInitiateHandler;
     private CreateHandler createHandler;
     private DeleteHandler deleteHandler;
-    private ModifyCreateHandler modifyCreateHandler;
+    private ModifyHandler modifyHandler;
 
     private volatile boolean networksCreated = false;
 
@@ -120,10 +118,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         handlerUtils = new HandlerUtils(this);
         pluginModelHandler = new CloudScenePluginModelHandler(this);
         initiateHandler = new InitiateHandler(this);
-        modifyInitiateHandler = new ModifyInitiateHandler(this);
-        modifyCreateHandler = new ModifyCreateHandler(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
+        modifyHandler = new ModifyHandler(this);
     }
 
     @Override
@@ -252,11 +249,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     @Override
     public void create() {
         createHandler.create();
-    }
-
-    @Override
-    public void create1() {
-        modifyCreateHandler.create();
     }
 
     @Override
@@ -446,7 +438,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         if (getElementMap() != null) {
             getElementMap().values().forEach(element -> {
                 Integer role = element.getRole();
-                correctElementRoleRelated(element.getSrcElement(), element, role);
+                String imageType = element.getImageType();
+                correctElementRoleRelated(element.getSrcElement(), element, role, imageType);
+                correctElementImageTypeRelated(element.getSrcElement(), element, imageType);
             });
         }
         // 连接外部网络,而且开启公网映射,就打开端口映射
@@ -494,17 +488,103 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     private void correctElementRoleRelated(SceneElementBO srcElement, CloudPluginSceneElementBO cloudElement,
-                                           Integer role) {
+                                           Integer role, String imageType) {
         if (role == null) {
             return;
         }
+
+        // 网元类型暂时无法准确纠正
+        var isForceCorrectElementType = srcElement.getType() == null
+                || srcElement.getType().equals(BaseSceneElementModel.Type.OTHER);
+        // 虚拟化类型可能无法准确纠正，但必须纠正，不然无法正常虚拟化
+
         if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 虚拟二层网关就是默认交换机
+                srcElement.setType(BaseSceneElementModel.Type.SWITCH);
+            }
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_GATEWAY)) {
+            if (imageType != null && imageType.equals(BaseCloudPluginSceneElementModel.ImageType.SIMPLE)) {
+                if (isForceCorrectElementType) {
+                    // TODO 暂定 - 简易虚拟三层网关就是默认路由
+                    srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+                }
+                cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+            } else {
+                if (isForceCorrectElementType) {
+                    // TODO 暂定 - 其它虚拟三层网关就是仿真路由
+                    srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+                }
+            }
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
+            // 虚拟外部网络
+            srcElement.setType(BaseSceneElementModel.Type.SWITCH);
+            cloudElement.setExternal(true);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)) {
+            srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TRANSPARENT_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 虚拟透明网关就是默认防火墙
+                srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
+            }
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_FIREWALL);
+            cloudElement.setTransparent(true);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 虚拟网关就是仿真路由
+                srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            }
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        }  else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 三层镜像网关就是仿真路由
+                srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            }
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_ROUTER)) {
+            srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH)) {
+            srcElement.setType(BaseSceneElementModel.Type.SWITCH);
+            // 简单三层虚拟交换机用虚拟默认路由实现
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_FIREWALL)) {
+            srcElement.setType(BaseSceneElementModel.Type.FIREWALL);
+            // 简单三层虚拟防火墙用虚拟默认路由 + 防火墙实现
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_GATEWAY)) {
+            if (isForceCorrectElementType) {
+                // TODO 暂定 - 实体网关就是实体路由
+                srcElement.setType(BaseSceneElementModel.Type.ROUTER);
+            }
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
+            srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
+        }else if(role.equals(BaseCloudPluginSceneElementModel.Role.NPC)){
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
+        }
+    }
+
+    private void correctElementImageTypeRelated(SceneElementBO srcElement, CloudPluginSceneElementBO cloudElement,
+                                                String imageType) {
+        if (imageType == null) {
+            return;
+        }
+
+        if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.SIMPLE)) {
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.VM)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_MACHINE);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.CONTAINER)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER);
+        } else if (imageType.equals(BaseCloudPluginSceneElementModel.ImageType.ENTITY)) {
+            cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
         }
     }
 
     @Override
     public void modify() {
-        modifyInitiateHandler.initiate();
+        modifyHandler.modify();
     }
 }

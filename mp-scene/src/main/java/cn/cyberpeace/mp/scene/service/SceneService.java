@@ -94,22 +94,20 @@ public class SceneService {
             return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
         }
 
-        SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler);
         SceneTaskPool.getInstance().executeTask(() -> {
+            SceneHandler sceneHandler2 = new SceneHandler(sceneHandler.getSceneId(), null, context);
+            SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler2);
             var starTime = LocalDateTime.now();
-            sceneHandler.getElementMap().values().forEach(e -> {
+            sceneHandler2.getElementMap().values().forEach(e -> {
                 e.setEvent(SceneElementModel.Event.DEFAULT);
                 e.setEventStatus(EventStatus.INITIAL);
             });
-            if (!sceneHandlerProxy.initiate1(false)) {
-                return;
-            }
-            sceneHandlerProxy.create1();
+            sceneHandlerProxy.initiate1(false);
 
             var endTime = LocalDateTime.now();
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
-            sceneHandler.getScene().setCreateConsumeSeconds(consumeSeconds);
-            sceneHandler.updateScene();
+            sceneHandler2.getScene().setCreateConsumeSeconds(consumeSeconds);
+            sceneHandler2.updateScene();
         });
 
         return new ServiceResult<>(sceneHandler.toData());

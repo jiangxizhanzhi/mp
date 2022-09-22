@@ -45,6 +45,8 @@ public class HandlerUtils {
 
     private Set<String> createdNetworks = new HashSet<>();
 
+    private Set<String> createdNodes = new HashSet<>();
+
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
         nodeNet2fwdnsInterfaceIp.put(node + "_" + netId, fwdnsInterfaceIp);
     }
