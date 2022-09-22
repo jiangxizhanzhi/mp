@@ -171,6 +171,7 @@ public class ImageResourceService {
         Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
         String content = yaml.dumpAs(serverYml, Tag.MAP, null);
         content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", imageName);
+        content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
         this.createFile(content, imagePath + "/servers.yml");
     }
 
