@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CsceneModel extends BaseCsceneModel {
     @DefaultInt(Type.INSTANCE)
     private Integer type;
-    @DefaultInt
+    @DefaultInt(1)
     private Integer authType;
     @DefaultStr
     private String logo;
@@ -30,8 +30,12 @@ public class CsceneModel extends BaseCsceneModel {
     }
 
     public static class AuthType {
-        public static int PUBLIC = 0;
-        public static int PRIVATE = 1;
-        public static int SHARED = 2;
+        private AuthType() {
+
+        }
+
+        public static final int PRIVATE = 0;
+        public static final int PUBLIC = 1;
+        public static final int SHARED = 2;
     }
 }
