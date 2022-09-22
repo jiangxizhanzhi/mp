@@ -15,9 +15,4 @@ public class CsceneAuthorizeRequest {
 
     @ApiModelProperty("授权类型")
     private Integer authType;
-
-    public static class AuthType {
-        public static int CUSTOM = 0;
-        public static int PUBLIC = 1;
-    }
 }

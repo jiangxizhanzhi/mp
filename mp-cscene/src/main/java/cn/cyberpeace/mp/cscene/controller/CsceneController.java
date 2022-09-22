@@ -115,7 +115,9 @@ public class CsceneController implements BaseModelListControllerBase {
     @GetMapping
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
-        return getModelService().listCsceneBO(queryParams, false, null).asResult();
+        var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
+        getModelService().correctCsceneBO(result.getData().getList(), queryParams);
+        return result;
     }
 
     @ApiOperation("获取指定id场景模板")
@@ -149,10 +151,6 @@ public class CsceneController implements BaseModelListControllerBase {
         } else {
             var bo = result.getData();
             CsceneLogUtils.recordSceneConfigLog(bo, OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
-            // 新增模板时默认授权所有
-            if (CsceneModel.Type.TEMPLATE == bo.getType()) {
-                modelService.csceneAuthorize(new ArrayList<>(), List.of(bo.getId()), CsceneAuthorizeRequest.AuthType.PUBLIC);
-            }
         }
         return result;
     }

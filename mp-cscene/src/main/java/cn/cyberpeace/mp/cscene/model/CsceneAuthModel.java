@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Table("mp_cscene_cscene_auth")
 public class CsceneAuthModel extends BasePermissionModel {
-    @DefaultStr("default")
-    private String owner;
+
 }

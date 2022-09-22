@@ -16,7 +16,7 @@ public class CsceneModel extends BaseCsceneModel {
     @DefaultInt(Type.INSTANCE)
     private Integer type;
     @DefaultInt
-    private Integer authCount;
+    private Integer authType;
     @DefaultStr
     private String logo;
     @DefaultStr
@@ -27,5 +27,11 @@ public class CsceneModel extends BaseCsceneModel {
         public static final int INSTANCE = 2;
 
         private Type() {}
+    }
+
+    public static class AuthType {
+        public static int PUBLIC = 0;
+        public static int PRIVATE = 1;
+        public static int SHARED = 2;
     }
 }
