@@ -5,8 +5,8 @@ import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
 import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -105,6 +105,8 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     String getDefaultUserAvatar();
 
     void setDefaultIfNoAvatar(UserModel userModel);
+
+    void batchSetDefaultIfNoAvatar(List<UserDto> userDtos);
 
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 

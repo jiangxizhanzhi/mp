@@ -468,8 +468,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // user
         List<UserModel> userModels = noticeUserMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        userModels.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
+
         if (CollectionUtil.isNotEmpty(userModels)) {
-            //noticeDto.setUserIds(userModels.stream().map(UserModel::getId).collect(Collectors.toList()));
             List<UserSimpleDto> userSimpleDtos = userModels.stream().map(userModel -> {
                 UserSimpleDto userSimpleDto = new UserSimpleDto();
                 BeanUtils.copyProperties(userModel, userSimpleDto);
