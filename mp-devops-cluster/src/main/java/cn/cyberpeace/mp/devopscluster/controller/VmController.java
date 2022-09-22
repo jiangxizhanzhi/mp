@@ -74,7 +74,7 @@ public class VmController {
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
-        POLogoUtils.changePOPathToUrl(devopsResult);
+        POLogoUtils.changeLogoPathToUrl(devopsResult);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());

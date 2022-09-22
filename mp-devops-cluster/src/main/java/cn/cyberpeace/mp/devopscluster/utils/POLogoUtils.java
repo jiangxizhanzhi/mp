@@ -3,12 +3,10 @@ package cn.cyberpeace.mp.devopscluster.utils;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
-import cn.cyberpeace.mp.devopscluster.cloud.platform.model.base.Device;
-import cn.cyberpeace.mp.devopscluster.model.RealEquipmentByParams;
-import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,37 +14,25 @@ import java.util.List;
 public class POLogoUtils {
 
     /**
-     * PO对象path转fdfs地址
-     * @param deviceTargetPOS
+     * 对象path批量转fdfs地址
+     * @param targetList
+     * @param <T>
      */
-    public static void changePOPathToUrl(List<DeviceTargetPO> deviceTargetPOS) {
-        if (CollectionUtils.isNotEmpty(deviceTargetPOS)) {
+    public static <T> void changeLogoPathToUrl(List<T> targetList) {
+        if (CollectionUtils.isNotEmpty(targetList)) {
             List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
-            deviceTargetPOS.forEach(targetPO -> targetPO.setLogo(DefaultImgUtil.pickPathToFdfsUrl(targetPO.getLogo(), mappingModelList)));
-        }
-    }
-
-    /**
-     * device对象path转fdfs地址
-     * @param deviceList
-     */
-    public static void changeDevicePathToUrl(List<Device> deviceList) {
-        if (CollectionUtils.isNotEmpty(deviceList)) {
-            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
-            deviceList.forEach(device -> device.setLogo(DefaultImgUtil.pickPathToFdfsUrl(device.getLogo(), mappingModelList)));
-        }
-    }
-
-    /**
-     * 实装设备对象path转fdfs地址
-     * @param deviceTargets
-     */
-    public static void changeRealPathToUrl(List<RealEquipmentByParams> deviceTargets) {
-        if (CollectionUtils.isNotEmpty(deviceTargets)) {
-            List<LocalFileMappingModel> mappingModelList = DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.TARGET.getGroup()));
-            deviceTargets.forEach(device -> device.setLogo(DefaultImgUtil.pickPathToFdfsUrl(device.getLogo(), mappingModelList)));
-
-
+            targetList.forEach(target -> {
+                try {
+                    Class<?> curClass = target.getClass();
+                    Field logoField = curClass.getDeclaredField("logo");
+                    logoField.setAccessible(true);
+                    String logo = logoField.get(target).toString();
+                    String url = DefaultImgUtil.pickPathToFdfsUrl(logo, mappingModelList);
+                    logoField.set(target, url);
+                } catch (Exception e) {
+                    log.error("changePathToUrl error for {}:", target, e);
+                }
+            });
         }
     }
     
