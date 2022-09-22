@@ -14,7 +14,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 
 /**
- * @Description
+ * @Description 清理mp服务启动之前正在创建中的场景,仅修改状态
  * @Author zhanglin
  * @Date 2022/9/21
  */

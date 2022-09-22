@@ -204,6 +204,7 @@ mp:
     has-own-recording-set: 213,214,236
     scene-error-creating-seconds: 3600
     element-error-creating-seconds: 300
+    ignore-scene-creating-seconds: 60
     enable-scene-cron-job: true
     enable-command-change: false
     cron-job-expression: 0 0/15 * * * ?
