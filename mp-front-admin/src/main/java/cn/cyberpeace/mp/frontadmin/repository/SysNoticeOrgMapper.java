@@ -22,8 +22,4 @@ public interface SysNoticeOrgMapper extends BaseModelMapper<SysNoticeOrgModel> {
 
     List<OrgModel> listByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
-    int deleteByNoticeIds(@Param("noticeIds") List<String> noticeIds);
-
-    int deleteByOrg(@Param("orgId") String orgId);
-
 }

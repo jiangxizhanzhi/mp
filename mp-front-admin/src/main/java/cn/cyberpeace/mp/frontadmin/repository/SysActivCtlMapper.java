@@ -6,8 +6,6 @@ import cn.cyberpeace.mp.frontadmin.model.SysActivCtlModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * @Description:
  * @Author zhouxinghuai
@@ -17,13 +15,5 @@ import java.util.List;
 @Repository
 @ModelClass(SysActivCtlModel.class)
 public interface SysActivCtlMapper extends BaseModelMapper<SysActivCtlModel> {
-
-    List<SysActivCtlModel> selectAll();
-
-    SysActivCtlModel selectValid();
-
-    SysActivCtlModel selectUnused();
-
-    void invalidOtherExceptOne(String exceptedId);
 
 }

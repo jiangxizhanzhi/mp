@@ -15,5 +15,7 @@ public class AdminConstant {
 
     public static final String MENU_NO_AUTH = "no_auth";
 
+    public static final String SYS_NOTICE_READ_COUNT_DISTINCT_NOTICEID = "cnt";
+
     private AdminConstant() {}
 }

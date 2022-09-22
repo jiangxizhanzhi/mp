@@ -22,8 +22,4 @@ public interface SysNoticeRoleMapper extends BaseModelMapper<SysNoticeRoleModel>
 
     List<RoleModel> listByNoticeIds(@Param("noticeIds") List<String> noticeIds);
 
-    int deleteByNoticeIds(@Param("noticeIds") List<String> noticeIds);
-
-    int deleteByRole(@Param("roleId") String roleId);
-
 }

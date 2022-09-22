@@ -23,6 +23,14 @@ import lombok.NoArgsConstructor;
 @Table("mp_sys_notice_read")
 public class SysNoticeReadModel extends BaseModel {
 
+    public static final int NOTICE_READED = 1;
+
+    public static final int NOTICE_NOT_READED = 0;
+
+    public static final int NOTICE_NEED_PUSH = 1;
+
+    public static final int NOTICE_NOT_NEED_PUSH = 0;
+
     @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;

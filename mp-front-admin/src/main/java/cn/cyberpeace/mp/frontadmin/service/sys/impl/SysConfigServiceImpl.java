@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -74,14 +75,17 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
 
     @Override
     public List<SysConfigModel> listAll() {
-        return getModelMapper().selectAll();
+        List<SysConfigModel> sysConfigModels = getModelMapper().list(new HumanCondition());
+        return sysConfigModels;
     }
 
     @Override
     public SysConfigModel getByKeyName(String keyName) {
         ParamCheck.notEmpty(keyName, AdminBasei18nCode.SYS_CONFIG_KEY_NAME);
-
-        return getModelMapper().selectByKey(keyName);
+        HumanCondition condition = new HumanCondition()
+                .filterEqual(SysConfigModel::getKeyName, keyName);
+        SysConfigModel sysConfigModel = getModelMapper().first(condition);
+        return sysConfigModel;
     }
 
     @Override
@@ -95,9 +99,11 @@ public class SysConfigServiceImpl extends BaseModelServiceImpl<SysConfigModel, S
                 throw new MpRuntimeException(AdminErrorCode.SYS_CONFIG_CANNOT_CLOSE_AUDIT);
             }
         }
-
-        int cnt = getModelMapper().updateByKeyName(sysConfigModel.getKeyName(), sysConfigModel.getValue());
-
+        HumanCondition condition = new HumanCondition()
+                .filterEqual(SysConfigModel::getKeyName, sysConfigModel.getKeyName());
+        SysConfigModel newSysConfigModel = new SysConfigModel();
+        newSysConfigModel.setValue(sysConfigModel.getValue());
+        getModelMapper().filterUpdate(newSysConfigModel, condition);
         return true;
     }
 

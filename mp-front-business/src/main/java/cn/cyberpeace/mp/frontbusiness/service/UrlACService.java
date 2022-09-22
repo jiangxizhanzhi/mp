@@ -51,6 +51,9 @@ public class UrlACService {
     @Autowired
     private UrlACTargetMapper urlACTargetMapper;
 
+    @Autowired
+    private UrlACTargetService urlACTargetService;
+
 
     /**
      * 根据targetId批量查询
@@ -166,7 +169,7 @@ public class UrlACService {
             throw new MpRuntimeException("update urlac failed!");
         }
 
-        urlACTargetMapper.deleteByUrlACId(ArrayUtils.toArray(urlacId));
+        urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(urlacId));
         if (CollectionUtil.isNotEmpty(updateReq.getTargetIds())) {
             List<UrlACTargetModel> acTargetModels =
                     updateReq.getTargetIds().stream().map(tid -> {
@@ -187,7 +190,7 @@ public class UrlACService {
     @Transactional(rollbackFor = Exception.class)
     public int delete(String[] ids) {
         int cnt = urlACMapper.bulkDelete(ids).getSuccessCount();
-        urlACTargetMapper.deleteByUrlACId(ArrayUtils.toArray(ids));
+        urlACTargetService.deleteByUrlACId(ArrayUtils.toArray(ids));
         return cnt;
     }
 
