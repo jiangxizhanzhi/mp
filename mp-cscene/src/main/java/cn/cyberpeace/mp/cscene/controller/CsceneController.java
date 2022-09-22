@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneCreateInstanceRequest;
-import cn.cyberpeace.mp.cscene.model.CsceneModel;
 import cn.cyberpeace.mp.cscene.service.CsceneService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneQueryParams;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +114,7 @@ public class CsceneController implements BaseModelListControllerBase {
     public ListObjServiceResult<CsceneBO> list(CsceneQueryParams queryParams) {
         handleQueryParams("list", queryParams);
         var result = getModelService().listCsceneBO(queryParams, false, null).asResult();
-        getModelService().correctCsceneBO(result.getData().getList(), queryParams);
+        getModelService().setSharedUser(result.getData().getList(), queryParams);
         return result;
     }
 
@@ -149,8 +147,7 @@ public class CsceneController implements BaseModelListControllerBase {
         if (isUpdate) {
             CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
         } else {
-            var bo = result.getData();
-            CsceneLogUtils.recordSceneConfigLog(bo, OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
         }
         return result;
     }

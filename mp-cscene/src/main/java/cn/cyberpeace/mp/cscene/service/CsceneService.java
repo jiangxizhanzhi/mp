@@ -218,39 +218,32 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
+    @Transactional
     public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> csceneIds, Integer authType) {
+        if (authType != CsceneModel.AuthType.PUBLIC || authType != CsceneModel.AuthType.SHARED) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         if (CollectionUtils.isEmpty(csceneIds)) {
             return new ServiceResult<>(true);
         }
-        List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
-        List<CsceneModel> csceneModels = new ArrayList<>();
+        // 用户id为空且授权类型不为所有时 授权类型为私有
+        if (CollectionUtils.isEmpty(userIds) && authType != CsceneModel.AuthType.PUBLIC) {
+            authType = CsceneModel.AuthType.PRIVATE;
+        }
         // 先删除之前的授权信息
         deleteCsceneAuthByIds(csceneIds);
-        // 授权所有
-        if (authType == CsceneModel.AuthType.PUBLIC) {
-            csceneIds.forEach(id -> {
-                CsceneModel csceneModel = new CsceneModel();
-                csceneModel.setId(id);
-                csceneModel.setAuthType(CsceneModel.AuthType.PUBLIC);
-                csceneModels.add(csceneModel);
-            });
-        } else if (authType == CsceneModel.AuthType.PRIVATE) {
-            // 私有
-            for (String id : csceneIds) {
-                CsceneModel csceneModel = new CsceneModel();
-                csceneModel.setId(id);
-                csceneModel.setAuthType(CsceneModel.AuthType.PRIVATE);
-                csceneModels.add(csceneModel);
-            }
-        } else if (authType == CsceneModel.AuthType.SHARED) {
-            // 自定义授权
-            for (String id : csceneIds) {
-                CsceneModel csceneModel = new CsceneModel();
-                csceneModel.setId(id);
-                csceneModel.setAuthType(CsceneModel.AuthType.SHARED);
-                csceneModels.add(csceneModel);
-            }
-            // 每个用户生成一条授权信息
+        // 所有授权均需要更新场景模板授权类型
+        List<CsceneModel> csceneModels = new ArrayList<>();
+        for (String id : csceneIds) {
+            CsceneModel csceneModel = new CsceneModel();
+            csceneModel.setId(id);
+            csceneModel.setAuthType(authType);
+            csceneModels.add(csceneModel);
+        }
+        getModelMapper().bulkUpdate(csceneModels);
+        // 自定义授权 每个用户生成一条授权信息
+        if (CsceneModel.AuthType.SHARED == authType) {
+            List<CsceneAuthModel> csceneAuthModels = new ArrayList<>();
             for (String userId : userIds) {
                 for (String id : csceneIds) {
                     CsceneAuthModel csceneAuthModel = new CsceneAuthModel();
@@ -259,9 +252,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                     csceneAuthModels.add(csceneAuthModel);
                 }
             }
+            csceneAuthMapper.bulkCreate(csceneAuthModels);
         }
-        csceneAuthMapper.bulkCreate(csceneAuthModels);
-        getModelMapper().bulkUpdate(csceneModels);
         return new ServiceResult<>(true);
     }
 
@@ -312,17 +304,20 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                 listResult.getSource().getFields()));
     }
 
-    public void correctCsceneBO(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
+    public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
         // 设置场景模板共享用户数量
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
             HumanCondition humanCondition = new HumanCondition()
                     .filterIn(CsceneAuthModel::getTarget, csceneBOs.stream().map(BaseCsceneBO::getId).toArray());
-            String groupFiledName = BeanUtils.getBeanGetterFieldName(CsceneAuthModel::getTarget);
-            String countField = BeanUtils.getBeanGetterFieldName(CsceneAuthModel::getOwner);
-            countField = countField == null ? StringUtils.EMPTY : countField;
-            var groupResult = StatCommon.groupCount(csceneAuthMapper, humanCondition, groupFiledName,
-                    List.of(countField), true).get(countField);
-            csceneBOs.forEach(bo -> bo.setSharedCount(Math.toIntExact(groupResult.getOrDefault(bo.getId(), 0L))));
+            var csceneAuthModels = csceneAuthMapper.list(humanCondition);
+            Map<String, List<String>> csceneId2UserIds = new HashMap<>();
+            for (var csceneAuthModel : csceneAuthModels) {
+                if (!csceneId2UserIds.containsKey(csceneAuthModel.getTarget())) {
+                    csceneId2UserIds.put(csceneAuthModel.getTarget(), new ArrayList<>());
+                }
+                csceneId2UserIds.get(csceneAuthModel.getTarget()).add(csceneAuthModel.getOwner());
+            }
+            csceneBOs.forEach(bo -> bo.setSharedUsers(csceneId2UserIds.getOrDefault(bo.getId(), new ArrayList<>())));
         }
     }
 
