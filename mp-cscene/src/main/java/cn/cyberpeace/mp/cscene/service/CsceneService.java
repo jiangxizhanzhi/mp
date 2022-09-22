@@ -220,7 +220,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     @Transactional
     public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> csceneIds, Integer authType) {
-        if (authType != CsceneModel.AuthType.PUBLIC || authType != CsceneModel.AuthType.SHARED) {
+        if (authType != CsceneModel.AuthType.PUBLIC && authType != CsceneModel.AuthType.SHARED) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         if (CollectionUtils.isEmpty(csceneIds)) {
