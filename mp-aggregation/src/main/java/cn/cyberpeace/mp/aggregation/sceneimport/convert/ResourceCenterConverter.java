@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.devopscluster.converter.TargetConverter;
+import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
@@ -51,6 +52,21 @@ public class ResourceCenterConverter {
         // 依次执行链路
         converters.forEach(converter -> converter.convert2BO(container));
 
-        return container.toCsceneBO();
+        var csceneBO = container.toCsceneBO();
+        if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
+            csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
+                if (CollectionUtils.isNotEmpty(e.getPorts())) {
+                    String prefix = (e.getType() != null && e.getType() == BaseSceneElementModel.Type.TERMINAL) ? "eth0" : "E0";
+                    for (int i = 0; i < e.getPorts().size(); i++) {
+                        if (container.getEntityPortId2Name().containsKey(e.getPorts().get(i).getId())) {
+                            continue;
+                        }
+                        e.getPorts().get(i).setName(prefix + "/" + (i + 1));
+                    }
+                }
+            });
+        }
+
+        return csceneBO;
     }
 }
