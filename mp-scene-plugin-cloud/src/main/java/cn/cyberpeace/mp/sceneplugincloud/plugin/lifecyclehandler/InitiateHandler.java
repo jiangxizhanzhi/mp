@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.BoolUtils;
 import cn.cyberpeace.mp.base.util.basic.MapUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.event.base.EventProcess;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
@@ -1059,9 +1060,27 @@ public class InitiateHandler extends HandlerCommon {
                     List<String> randomIps = IpUtils.newRandomIps(net.getNetwork().getCidr(), 1, new ArrayList<>(net.getNetwork().getExcloudIps()), new ArrayList<>(), true);
                     if (CollectionUtils.isNotEmpty(randomIps)) {
                         // 如果ip不够分了 只能走云平台默认逻辑
-                        String fwdnsInterfaceIp = randomIps.get(0);
-                        getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), fwdnsInterfaceIp);
-                        net.getNetwork().getExcloudIps().add(fwdnsInterfaceIp);
+                        String distributedPortMappingIp = randomIps.get(0);
+                        if (CollectionUtils.isNotEmpty(net.getFromPorts())) {
+                            var srcPort = net.getFromPorts().get(0);
+                            var cloudPort = getPluginHandler().getPort(srcPort.getId());
+                            if (cloudPort != null) {
+                                if (CollectionUtils.isNotEmpty(cloudPort.getAccessModes())) {
+                                    for (var accessMode : cloudPort.getAccessModes()) {
+                                        // 除console协议的其他接入协议中,有需要端口映射的,那么需要分配一个分布式的端口映射ip
+                                        if (!AccessMode.Protocol.CONSOLE.equals(accessMode.getProtocol()) && Boolean.TRUE.equals(accessMode.getProxy())) {
+                                            cloudPort.setDistributedPortMappingIp(distributedPortMappingIp);
+                                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), distributedPortMappingIp);
+                                            net.getNetwork().getExcloudIps().add(distributedPortMappingIp);
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            getHandlerUtils().addFwdnsInterfaceIp(element.getSrcElement().getId(), net.getNetwork().getId(), distributedPortMappingIp);
+                            net.getNetwork().getExcloudIps().add(distributedPortMappingIp);
+                        }
                     }
                 }
             }

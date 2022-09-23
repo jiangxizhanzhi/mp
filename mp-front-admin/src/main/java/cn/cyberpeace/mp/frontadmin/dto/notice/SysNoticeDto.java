@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.dto.notice;
 
 import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -44,6 +45,10 @@ public class SysNoticeDto {
 
     @ApiModelProperty(value = "组织，多个用逗号隔开")
     private String orgPaths;
+
+    @ApiModelProperty(value = "置顶数字(大于0表示置顶)")
+    @DefaultLong(0)
+    private Long top;
 
     @ApiModelProperty(value = "是否公开，对所有人可见  0:否 1:是 默认是0  (注意，如果传了1，则后台会忽略roleIds的内容)")
     private Integer isPublic;

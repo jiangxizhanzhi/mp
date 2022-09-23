@@ -14,4 +14,7 @@ import lombok.NoArgsConstructor;
 public class CloudPluginSceneElementPortModel extends BaseCloudPluginSceneElementPortModel {
     @DefaultStr
     private String logicNetworkId;
+
+    @DefaultStr
+    private String distributedPortMappingIp;
 }
