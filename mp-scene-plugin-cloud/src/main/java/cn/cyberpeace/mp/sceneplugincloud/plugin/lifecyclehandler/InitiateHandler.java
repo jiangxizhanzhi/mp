@@ -511,7 +511,8 @@ public class InitiateHandler extends HandlerCommon {
                     if (fromIp == null) {
                         var pluginElement = getPluginHandler().getElement(port.getElement().getId());
                         Integer toVirtualType = pluginElement.getVirtualType();
-                        if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                        if (toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_SWITCH || toVirtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER ||
+                                this.isCoreRouter(cloudElement)) {
                             synchronized (ipPool) {
                                 if (fromIp == null) {
                                     fromIp = ipPool.remove(ipPool.size() - 1);
