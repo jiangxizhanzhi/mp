@@ -48,4 +48,10 @@ public class RealEquipmentPageRequest extends BasePageRequest{
      */
     @ApiModelProperty(value = "使用状态")
     private Integer useStatus;
+
+    /**
+     * 精确查找名称
+     */
+    @ApiModelProperty(value = "精确查找名称")
+    private String exactName;
 }
