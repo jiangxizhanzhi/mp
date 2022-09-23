@@ -3,13 +3,13 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NodeElementParseResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,7 +32,7 @@ class Node2NodeConnectConverter implements IConverter {
         }
         var node2NodePort = container.getNode2NodePort();
         Set<String> connection = new HashSet<>();
-        Map<String, String> node2Nodes = new HashMap<>();
+        List<Node2Node> node2Nodes = new ArrayList<>();
         for (var node : nodes) {
             if (CollectionUtils.isEmpty(node.getNet())) {
                 continue;
@@ -46,13 +46,16 @@ class Node2NodeConnectConverter implements IConverter {
                 if (!connection.contains(key)) {
                     connection.add(key);
                     connection.add(net.getId() + "_" + node.getId());
-                    node2Nodes.put(node.getId(), net.getId());
+                    Node2Node node2Node = new Node2Node();
+                    node2Node.setFrom(node.getId());
+                    node2Node.setTo(net.getId());
+                    node2Nodes.add(node2Node);
                 }
             }
         }
-        for (Map.Entry<String, String> node2Node : node2Nodes.entrySet()) {
-            String from = node2Node.getKey();
-            String to = node2Node.getValue();
+        for (var node2Node : node2Nodes) {
+            String from = node2Node.getFrom();
+            String to = node2Node.getTo();
             var portFrom = node2NodePort.get(from + "_" + to);
             var portTo = node2NodePort.get(to + "_" + from);
             // 创建连线
@@ -63,5 +66,12 @@ class Node2NodeConnectConverter implements IConverter {
             connectionBO.setName(portFrom.getName() + "_" + portTo.getName());
             container.addConnection(connectionBO);
         }
+    }
+
+    @Getter
+    @Setter
+    private static class Node2Node {
+        private String from;
+        private String to;
     }
 }
