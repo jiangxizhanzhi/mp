@@ -94,6 +94,10 @@ public abstract class AbstractClearJob<Q> {
             var scene = sceneMapper.first(new HumanCondition().filterEqual(SceneModel::getId, element.getScene()));
             if (scene != null && scene.getEventStatus() == EventStatus.OVER && scene.getEvent() == SceneElementModel.Event.DELETE) {
                 return true;
+            } else if (scene != null && scene.getEventStatus() == EventStatus.ABNORMAL && scene.getEvent() == SceneElementModel.Event.DELETE) {
+                return true;
+            } else if (scene != null && scene.getEventStatus() == EventStatus.ABNORMAL && scene.getEvent() == SceneElementModel.Event.CREATE) {
+                return true;
             }
             return false;
         }
