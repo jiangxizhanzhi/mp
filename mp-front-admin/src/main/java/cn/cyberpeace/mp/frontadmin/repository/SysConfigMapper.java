@@ -1,13 +1,10 @@
 package cn.cyberpeace.mp.frontadmin.repository;
 
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @Description:
@@ -18,12 +15,5 @@ import java.util.List;
 @Repository
 @ModelClass(SysConfigModel.class)
 public interface SysConfigMapper extends BaseModelMapper<SysConfigModel> {
-
-    List<SysConfigModel> selectAll();
-
-    SysConfigModel selectByKey(@Param("keyName") String keyName);
-
-    int updateByKeyName(@Param("key") String key, @Param("value") String value);
-
 
 }

@@ -36,7 +36,10 @@ import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
 import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
+import cn.cyberpeace.mp.frontadmin.service.SysNoticeReadService;
+import cn.cyberpeace.mp.frontadmin.service.SysNoticeRoleService;
 import cn.cyberpeace.mp.frontadmin.service.fields.SysNoticeFields;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeOrgService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeService;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysNoticeUserService;
 import cn.cyberpeace.mp.frontadmin.util.SQLUtils;
@@ -94,6 +97,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
     private UserService userService;
 
     @Autowired
+    private SysNoticeOrgService sysNoticeOrgService;
+
+    @Autowired
+    private SysNoticeReadService sysNoticeReadService;
+
+    @Autowired
+    private SysNoticeRoleService sysNoticeRoleService;
+
+    @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -115,7 +127,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         for (String noticeId : noticeIds) {
 
-            SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+            SysNoticeReadModel noticeReadModel = sysNoticeReadService.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
 
             if (Objects.isNull(noticeReadModel)) {
                 // 创建一个
@@ -145,7 +157,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(noticeId));
         }
 
-        SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
+        SysNoticeReadModel noticeReadModel = sysNoticeReadService.selectByUserIdAndNoticeId(userModel.getId(), noticeId);
 
         if (Objects.isNull(noticeReadModel)) {
             // 创建一个
@@ -153,7 +165,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             noticeReadMapper.create(noticeReadModelNew);
         } else {
             // increase read cound
-            noticeReadMapper.increaseReadCount(noticeReadModel.getId());
+            sysNoticeReadService.increaseReadCount(noticeReadModel.getId());
         }
 
     }
@@ -269,9 +281,10 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         SysNoticeModel resultModel = result.getSource().getObj();
 
         // 清除之前的绑定关系
-        noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
+
+        sysNoticeOrgService.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
         sysNoticeUserService.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
-        noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
+        sysNoticeRoleService.deleteByNoticeIds(CollectionUtil.toList(resultModel.getId()));
 
         // 组织
         List<SysNoticeOrgModel> noticeGroupModelList = new ArrayList<>();
@@ -446,8 +459,8 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         if (Objects.nonNull(ids) && ids.length > 0) {
             result = super.bulkDelete(ids);
 
-            noticeOrgMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
-            noticeRoleMapper.deleteByNoticeIds(CollectionUtil.toList(ids));
+            sysNoticeOrgService.deleteByNoticeIds(CollectionUtil.toList(ids));
+            sysNoticeRoleService.deleteByNoticeIds(CollectionUtil.toList(ids));
         }
 
         return result;
@@ -493,7 +506,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         // role
-        List<RoleModel> roleModels = noticeRoleMapper.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
+        List<RoleModel> roleModels = sysNoticeRoleService.listByNoticeIds(CollectionUtil.toList(noticeModel.getId()));
         if (CollectionUtil.isNotEmpty(roleModels)) {
             noticeDto.setRoleIds(roleModels.stream().map(RoleModel::getId).collect(Collectors.toList()));
             noticeDto.setRoleNames(roleModels.stream().map(RoleModel::getName).collect(Collectors.joining(",")));
@@ -504,7 +517,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
             UserModel userModel = UserUtils.getLoginUser();
             if (Objects.nonNull(userModel)) {
                 String currentUserId = userModel.getId();
-                SysNoticeReadModel noticeReadModel = noticeReadMapper.selectByUserIdAndNoticeId(currentUserId, noticeModel.getId());
+                SysNoticeReadModel noticeReadModel = sysNoticeReadService.selectByUserIdAndNoticeId(currentUserId, noticeModel.getId());
                 if (Objects.isNull(noticeReadModel)) {
                     // 未读
                     noticeDto.setIsRead(0);

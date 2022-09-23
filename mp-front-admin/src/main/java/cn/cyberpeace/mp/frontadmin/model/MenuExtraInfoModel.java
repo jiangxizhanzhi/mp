@@ -20,6 +20,8 @@ import lombok.NoArgsConstructor;
 @Table("mp_front_admin_menu_extra_info")
 public class MenuExtraInfoModel extends BaseModel {
 
+    public static Integer PK_DELETE_ALL_START = 0;
+
     @ApiModelProperty(value = "租户")
     @DefaultStr(AuthConstant.DEFAULT_TENANT)
     private String tenant;

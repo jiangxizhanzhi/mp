@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
 import cn.cyberpeace.mp.frontadmin.repository.MenuExtraInfoMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -32,11 +33,13 @@ public class MenuExtraInfoService {
     }
 
     public List<MenuExtraInfoModel> listAll() {
-        return menuExtraInfoMapper.listAll();
+        return menuExtraInfoMapper.list(new HumanCondition());
     }
 
     public boolean deleteAll() {
-        int result = menuExtraInfoMapper.deleteAll();
+        HumanCondition condition = new HumanCondition()
+                .filterGreaterThan(MenuExtraInfoModel::getPk, MenuExtraInfoModel.PK_DELETE_ALL_START);
+        int result = menuExtraInfoMapper.filterDelete(condition);
         return true;
     }
 

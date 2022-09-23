@@ -372,7 +372,10 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         if (StringUtils.isNotBlank(userModel.getAvatar())) {
             userModel.setAvatar(DefaultImgUtil.fdfsUrlToPath(userModel.getAvatar()));
         }
-
+        if (StringUtils.isBlank(userModel.getIdentifier())) {
+            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
+            userModel.setIdentifier("");
+        }
         // udpate中会对密码加密，外层不需要再次加密
         ObjServiceResult<UserModel> result = update(userModel);
 
@@ -384,10 +387,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
         log.info("user has been modified id:{}", userId);
-        if (StringUtils.isBlank(userModel.getIdentifier())) {
-            // 若identifier为空，则设置identifier为null @See http://10.10.10.10/biz/bug-view-2390.html
-            getModelMapper().updateIdentToNull(userId);
-        }
+
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
