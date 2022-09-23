@@ -358,7 +358,10 @@ public class CsceneDataModifier {
         for (Map.Entry<String, Map<String, Object>> entry : scenePluginDataBO.getElements().entrySet()) {
             var nodeId = entry.getKey();
             var cloudElement = entry.getValue();
-            if (cloudElement.containsKey("image_uuid") && cloudElement.get("image_uuid").toString().equals(getGns3RouterImageUuid())) {
+            if (cloudElement.containsKey("image_uuid") &&
+                    cloudElement.get("image_uuid").toString().equals(getGns3RouterImageUuid())
+                    || "854f7c24-060f-4dbd-b771-68eab207a072".equals(cloudElement.get("image_uuid"))
+                    || "854f7c24-060f-4dbd-b771-68eab207a073".equals(cloudElement.get("image_uuid"))) {
                 gns3Routers.add(nodeId);
             }
         }
@@ -840,6 +843,19 @@ public class CsceneDataModifier {
         c2691Router.setPlatform("c2691");
         c2691Router.setRam(198);
         result.put(getGns3RouterImageUuid(), c2691Router);
+
+        Gns3ImageInfo c3725Router = new Gns3ImageInfo();
+        c3725Router.setImage("c3725-adventerprisek9-mz.124-7.bin");
+        c3725Router.setPlatform("c3725");
+        c3725Router.setRam(198);
+        result.put("854f7c24-060f-4dbd-b771-68eab207a072", c3725Router);
+
+        Gns3ImageInfo c2900Router = new Gns3ImageInfo();
+        c3725Router.setImage("c2900-universalk9_npe-mz.SPA.151-3.T.bin");
+        c3725Router.setPlatform("c2900");
+        c3725Router.setRam(198);
+        result.put("854f7c24-060f-4dbd-b771-68eab207a073", c2900Router);
+
         return result;
     }
 
