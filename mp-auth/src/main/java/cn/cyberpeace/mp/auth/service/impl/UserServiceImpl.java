@@ -1091,23 +1091,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         HumanCondition orgUserCondition = new HumanCondition()
                 .filterIn(OrgUserModel::getUser, userIds)
                 .select(OrgUserModel::getUser)
-                .selectAs(GroupConcat.f(OrgUserModel::getOrg).distinct(), UserOrgRoleDto.ORGS)
+                .selectAs(GroupConcat.f(OrgUserModel::getOrg).distinct(), UserOrgRoleDto.FIELD_ORGS)
                 .groupBy(OrgUserModel::getUser);
         List<Map<String, Object>> orgs = orgUserMapper.originList(orgUserCondition);
         Map<String, String> orgMap = new HashMap<>();
         for (Map<String, Object> userOrg : orgs) {
-            orgMap.put((String) userOrg.get(UserOrgRoleDto.USER), (String) userOrg.get(UserOrgRoleDto.ORGS));
+            orgMap.put((String) userOrg.get(UserOrgRoleDto.FIELD_USER), (String) userOrg.get(UserOrgRoleDto.FIELD_ORGS));
         }
 
         HumanCondition userRoleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, userIds)
                 .select(UserRoleModel::getUser)
-                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleDto.ROLES)
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleDto.FIELD_ROLES)
                 .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> roles = userRoleMapper.originList(userRoleCondition);
         Map<String, String> roleMap = new HashMap<>();
         for (Map<String, Object> userRole : roles) {
-            roleMap.put((String) userRole.get(UserOrgRoleDto.USER), (String) userRole.get(UserOrgRoleDto.ROLES));
+            roleMap.put((String) userRole.get(UserOrgRoleDto.FIELD_USER), (String) userRole.get(UserOrgRoleDto.FIELD_ROLES));
         }
 
         List<UserOrgRoleDto> userOrgRoleDtos = new ArrayList<>();

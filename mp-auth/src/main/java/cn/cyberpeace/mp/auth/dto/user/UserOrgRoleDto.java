@@ -11,9 +11,9 @@ import lombok.Data;
 @Data
 public class UserOrgRoleDto extends UserModel {
 
-    public static String USER = "user";
-    public static String ORGS = "orgs";
-    public static String ROLES = "roles";
+    public static String FIELD_USER = "user";
+    public static String FIELD_ORGS = "orgs";
+    public static String FIELD_ROLES = "roles";
 
     private String orgs;
 
