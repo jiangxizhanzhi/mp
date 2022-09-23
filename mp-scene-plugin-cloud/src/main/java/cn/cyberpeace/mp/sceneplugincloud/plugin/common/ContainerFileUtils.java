@@ -67,7 +67,7 @@ public class ContainerFileUtils {
                 return false;
             }
             var flag = containerClient.copyFile(containerId, apkUnzipLocalFilepath, UNZIP_DST_PATH);
-            containerClient.executeCommand(containerId, String.format("apk add %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
+            containerClient.executeCommand(containerId, String.format("apk add --no-network %s", UNZIP_DST_PATH + APK_UNZIP_EXECUTOR_NAME));
             return flag;
         }
         return false;
