@@ -16,7 +16,9 @@ import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserFields;
@@ -28,6 +30,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
 import cn.cyberpeace.mp.base.model.LocalFileMappingModel;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Aggregation;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -35,6 +38,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.io.FileUtil;
@@ -53,6 +57,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -109,6 +114,12 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Autowired
     private UserCacheService userCacheService;
+
+    @Autowired
+    private OrgUserMapper orgUserMapper;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @Autowired
     public UserServiceImpl(UserMapper modelMapper, UserFields modelFields) {
@@ -936,7 +947,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     public List<UserDto> listByUserIds(String[] userIds) {
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listByUserIds(userIds);
+        List<UserOrgRoleDto> userOrgRoleDtos = getByUserIds(userIds);
         List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
         userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
         return userDtos;
@@ -1070,6 +1081,72 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
+    public List<UserOrgRoleDto> getByUserIds(String[] userIds) {
+        HumanCondition userCondition = new HumanCondition()
+                .filterIn(UserModel::getId, userIds)
+                .distinct()
+                .orderBy(UserModel::getPk);
+        List<UserModel> userModels = getModelMapper().list(userCondition);
 
+        HumanCondition orgUserCondition = new HumanCondition()
+                .filterIn(OrgUserModel::getUser, userIds)
+                .select(OrgUserModel::getUser)
+                .selectAs(GroupConcat.f(OrgUserModel::getOrg).distinct(), UserOrgRoleDto.ORGS)
+                .groupBy(OrgUserModel::getUser);
+        List<Map<String, Object>> orgs = orgUserMapper.originList(orgUserCondition);
+        Map<String, String> orgMap = new HashMap<>();
+        for (Map<String, Object> userOrg : orgs) {
+            orgMap.put((String) userOrg.get(UserOrgRoleDto.USER), (String) userOrg.get(UserOrgRoleDto.ORGS));
+        }
 
+        HumanCondition userRoleCondition = new HumanCondition()
+                .filterIn(UserRoleModel::getUser, userIds)
+                .select(UserRoleModel::getUser)
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleDto.ROLES)
+                .groupBy(UserRoleModel::getUser);
+        List<Map<String, Object>> roles = userRoleMapper.originList(userRoleCondition);
+        Map<String, String> roleMap = new HashMap<>();
+        for (Map<String, Object> userRole : roles) {
+            roleMap.put((String) userRole.get(UserOrgRoleDto.USER), (String) userRole.get(UserOrgRoleDto.ROLES));
+        }
+
+        List<UserOrgRoleDto> userOrgRoleDtos = new ArrayList<>();
+        for (UserModel userModel : userModels) {
+            UserOrgRoleDto userOrgRoleDto = new UserOrgRoleDto();
+            BeanUtils.copyProperties(userModel, userOrgRoleDto);
+            userOrgRoleDto.setOrgs(orgMap.get(userModel.getId()));
+            userOrgRoleDto.setRoles(roleMap.get(userModel.getId()));
+            userOrgRoleDtos.add(userOrgRoleDto);
+        }
+
+        return userOrgRoleDtos;
+    }
+}
+
+class GroupConcat extends Aggregation<GroupConcat> {
+
+    public static Function<String, String> genDistinct() {
+        return column -> String.format("distinct (%s)", column);
+    }
+
+    public GroupConcat distinct() {
+        addCalc(genDistinct());
+        return this;
+    }
+
+    public static GroupConcat f(String fieldName) {
+        var aggregation = new GroupConcat();
+        aggregation.setFieldName(fieldName);
+        return aggregation;
+    }
+
+    public static <T> GroupConcat f(SerializableFunction<T> getter) {
+        String fieldName = BeanUtils.getBeanGetterFieldName(getter);
+        return f(fieldName);
+    }
+
+    @Override
+    public String getFuncName() {
+        return "group_concat";
+    }
 }
