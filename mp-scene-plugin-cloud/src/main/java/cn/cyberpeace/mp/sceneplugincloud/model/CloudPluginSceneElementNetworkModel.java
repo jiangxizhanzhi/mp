@@ -26,6 +26,8 @@ public class CloudPluginSceneElementNetworkModel extends BasePluginSceneElementM
     @DefaultBool(true)
     private Boolean dhcp;
     @DefaultStr
+    private String dhcpIp;
+    @DefaultStr
     private String allocationPools;
     @DefaultStr
     private String hostRoutes;
