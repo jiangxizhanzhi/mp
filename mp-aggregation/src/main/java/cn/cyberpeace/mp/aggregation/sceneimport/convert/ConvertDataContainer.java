@@ -57,6 +57,8 @@ class ConvertDataContainer {
 
     private Map<String, SceneConfigElementPortBO> node2NodePort = new HashMap<>();
 
+    private Map<String, String> entityPortId2Name = new HashMap<>();
+
     private String sceneFilePath;
 
     public void putImageInfo(String image, ImageInfoParseResult result) {

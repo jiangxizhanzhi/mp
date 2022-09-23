@@ -107,7 +107,11 @@ class ImageInfoConverter implements IConverter {
                     container.putPluginElementPort(portBO.getId(), pluginPort);
                 }
                 SceneConfigElementPortBO portBO = element.getPorts().get(0);
-                portBO.setAccessModes(this.getManageAccessModes(imageInfo.getManageAccessModes()));
+                if (portBO.getAccessModes() == null) {
+                    portBO.setAccessModes(this.getManageAccessModes(imageInfo.getManageAccessModes()));
+                } else {
+                    portBO.getAccessModes().addAll(this.getManageAccessModes(imageInfo.getManageAccessModes()));
+                }
                 portBO.getAccessModes().addAll(this.getAccessModes(imageInfo.getAccessModes(),portBO.getAccessModes()));
                 portBO.getAccessModes().forEach(mode -> {
                     if (mode.getProxy() == null) {
@@ -116,7 +120,11 @@ class ImageInfoConverter implements IConverter {
                 });
                 CloudPluginSceneConfigElementPortBO pluginPort = pluginPorts.get(portBO.getId());
                 pluginPort.setNat(imageInfo.getNat());
-                pluginPort.setAccessModes(this.getManageCloudAccessModes(imageInfo.getManageAccessModes()));
+                if (pluginPort.getAccessModes() == null) {
+                    pluginPort.setAccessModes(this.getManageCloudAccessModes(imageInfo.getManageAccessModes()));
+                } else {
+                    pluginPort.getAccessModes().addAll(this.getManageCloudAccessModes(imageInfo.getManageAccessModes()));
+                }
                 pluginPort.getAccessModes().addAll(this.getCloudAccessModes(imageInfo.getAccessModes(), pluginPort.getAccessModes()));
                 pluginPort.getAccessModes().forEach(mode -> {
                     if (mode.getProxy() == null) {
