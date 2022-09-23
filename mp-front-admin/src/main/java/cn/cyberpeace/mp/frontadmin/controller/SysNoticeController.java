@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -84,10 +85,14 @@ public class SysNoticeController {
     }
 
     @ApiOperation("置顶公告接口")
-    @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class)
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "id", value = "公告ID", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "type", value = "公告置顶操作类型 1:置顶(默认)  0:取消置顶", dataTypeClass = Integer.class)
+    })
+
     @PostMapping("/top/{id}")
-    public ServiceResult top(@PathVariable String id) {
-        noticeService.top(id);
+    public ServiceResult top(@PathVariable String id, @RequestParam Integer type) {
+        noticeService.top(id, type);
         return ResultCommon.success();
     }
 

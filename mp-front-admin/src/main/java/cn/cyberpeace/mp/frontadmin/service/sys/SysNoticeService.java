@@ -22,7 +22,7 @@ public interface SysNoticeService extends BaseModelService<SysNoticeModel, Query
 
     void read(String noticeId);
 
-    void top(String noticeId);
+    void top(String noticeId, Integer type);
 
     SysNoticeModel add(SysNoticeRequest sysNoticeRequest);
 

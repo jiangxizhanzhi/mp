@@ -58,7 +58,7 @@ public class TargetConverter{
             return targetPageModel;
         }
         List<DeviceTargetPO> deviceTargetPOS = deviceTargetMapper.page(dto);
-        POLogoUtils.changePOPathToUrl(deviceTargetPOS);
+        POLogoUtils.changeLogoPathToUrl(deviceTargetPOS);
         targetPageModel.setList(deviceTargetPOS);
         return targetPageModel;
     }
@@ -87,7 +87,7 @@ public class TargetConverter{
             sceneConvertModel.setList(Lists.newArrayList());
             return sceneConvertModel;
         }
-        POLogoUtils.changeDevicePathToUrl(model.getList());
+        POLogoUtils.changeLogoPathToUrl(model.getList());
         sceneConvertModel.setList(model.getList());
         return sceneConvertModel;
     }
@@ -109,7 +109,7 @@ public class TargetConverter{
     public List<Device> getCommonTargets(String name) {
         CloudPlatformPageResult<Device> model = deviceService.page("?limit=9999&is_internal=true&name=" + name);
         List<Device> deviceList = model.getList();
-        POLogoUtils.changeDevicePathToUrl(deviceList);
+        POLogoUtils.changeLogoPathToUrl(deviceList);
         return deviceList;
     }
 

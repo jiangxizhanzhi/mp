@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.cscene.service;
 
+import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
+import cn.cyberpeace.mp.auth.service.impl.OrgUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
-import cn.cyberpeace.mp.base.common.StatCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.model.BaseModel;
@@ -12,10 +14,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCreateContextBO;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.bo.base.BaseCsceneBO;
 import cn.cyberpeace.mp.cscene.config.CsceneAppConfig;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
@@ -71,6 +70,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     private CsceneSpecialService csceneSpecialService;
 
     private CsceneSnapshotService csceneSnapshotService;
+
+    private OrgUserServiceImpl orgUserService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -195,7 +196,8 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneSpecialService csceneSpecialService,
                          CsceneSnapshotService csceneSnapshotService,
                          CsceneModelFields csceneModelFields,
-                         CsceneAuthMapper csceneAuthMapper) {
+                         CsceneAuthMapper csceneAuthMapper,
+                         OrgUserServiceImpl orgUserService) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -206,6 +208,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneSpecialService(csceneSpecialService);
         setCsceneSnapshotService(csceneSnapshotService);
         setCsceneAuthMapper(csceneAuthMapper);
+        setOrgUserService(orgUserService);
     }
 
     @Override
@@ -218,9 +221,43 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         }
     }
 
+    public ServiceResult<CsceneAuthorizeBO> getCsceneAuthorizeInfo(String csceneId) {
+        CsceneAuthorizeBO csceneAuthorizeBO = new CsceneAuthorizeBO();
+        csceneAuthorizeBO.setAuthType(getModelMapper().get(csceneId).getAuthType());
+        csceneAuthorizeBO.setSharedUsers(new ArrayList<>());
+        // 授权所有和私有无共享用户
+        if (csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PRIVATE || csceneAuthorizeBO.getAuthType() == CsceneModel.AuthType.PUBLIC) {
+            return new ServiceResult<>(csceneAuthorizeBO);
+        }
+        HumanCondition humanCondition = new HumanCondition()
+                .filterEqual(CsceneAuthModel::getTarget, csceneId);
+        var csceneAuthModels = csceneAuthMapper.list(humanCondition);
+        if (CollectionUtils.isEmpty(csceneAuthModels)) {
+            return new ServiceResult<>(csceneAuthorizeBO);
+        }
+        List<String> userIds = csceneAuthModels.stream().map(m -> m.getOwner()).collect(Collectors.toList());
+        OrgUserPageRequest request = new OrgUserPageRequest();
+        request.setIds(userIds.toArray(new String[0]));
+        request.setPage(1);
+        request.setPageSize(userIds.size());
+        var users = orgUserService.pageUsersByOrg(request);
+        Map<String, UserDto> userId2User = users.getList().stream().collect(Collectors.toMap(userDto -> userDto.getId(), userDto -> userDto));
+        for (String userId : userIds) {
+            CsceneAuthorizeBO.SharedUser sharedUser = new CsceneAuthorizeBO.SharedUser();
+            var user = userId2User.get(userId);
+            sharedUser.setId(userId);
+            sharedUser.setName(user.getName());
+            sharedUser.setOrganization(user.getOrgIds().get(0));
+            sharedUser.setOrganizationNameAll(StringUtils.join(user.getOrgpaths().get(0), "/"));
+            sharedUser.setUsername(user.getUsername());
+            csceneAuthorizeBO.getSharedUsers().add(sharedUser);
+        }
+        return new ServiceResult<>(csceneAuthorizeBO);
+    }
+
     @Transactional
     public ServiceResult<Boolean> csceneAuthorize(List<String> userIds, List<String> csceneIds, Integer authType) {
-        if (authType != CsceneModel.AuthType.PUBLIC || authType != CsceneModel.AuthType.SHARED) {
+        if (authType != CsceneModel.AuthType.PUBLIC && authType != CsceneModel.AuthType.SHARED) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         if (CollectionUtils.isEmpty(csceneIds)) {

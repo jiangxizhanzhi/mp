@@ -5,10 +5,7 @@ import cn.cyberpeace.mp.base.config.BaseAppConfig;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.cscene.bo.CsceneBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
-import cn.cyberpeace.mp.cscene.bo.CsceneStat;
-import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneStat;
+import cn.cyberpeace.mp.cscene.bo.*;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneActionRequest;
 import cn.cyberpeace.mp.cscene.controller.request.CsceneAuthorizeRequest;
@@ -108,6 +105,13 @@ public class CsceneController implements BaseModelListControllerBase {
     @PostMapping("/authorize")
     public ServiceResult<Boolean> authorize(@RequestBody CsceneAuthorizeRequest request) {
         return modelService.csceneAuthorize(request.getTargetIds(), request.getCsceneIds(), request.getAuthType()).asResult();
+    }
+
+    @ApiOperation("获取指定场景模板授权信息")
+    @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class)
+    @GetMapping("/get_authorize")
+    public ServiceResult<CsceneAuthorizeBO> getAuthorize(@RequestParam String id) {
+        return modelService.getCsceneAuthorizeInfo(id).asResult();
     }
 
     @GetMapping
