@@ -66,6 +66,9 @@ public class CsceneAppConfig {
     @Value("${mp.cscene.element-error-creating-seconds:300}")
     private Integer elementErrorCreatingSeconds;
 
+    @Value("${mp.cscene.ignore-scene-creating-seconds:60}")
+    private Integer ignoreSceneCreatingSeconds;
+
     @Value("${mp.cscene.enable-scene-cron-job:true}")
     private Boolean enableSceneCronJob;
 
