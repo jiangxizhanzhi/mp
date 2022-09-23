@@ -23,6 +23,7 @@ import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
+import cn.cyberpeace.mp.frontadmin.enums.NoticeTopTypeEnum;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
 import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
@@ -159,14 +160,26 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
 
     @Override
-    public void top(String noticeId) {
+    public void top(String noticeId, Integer type) {
         SysNoticeModel noticeModel = getModelMapper().get(noticeId);
         if (Objects.isNull(noticeModel)) {
             throw new MpRuntimeException(AdminErrorCode.SYS_NOTICE_NOT_EXISTED.format(noticeId));
         }
+
+        if (Objects.isNull(type)) {
+            type = 0;
+        }
+
         SysNoticeModel newModel = new SysNoticeModel();
         newModel.setId(noticeModel.getId());
-        newModel.setTop(System.currentTimeMillis());
+        if (NoticeTopTypeEnum.TOP.getCode().equals(type)) {
+            newModel.setTop(System.currentTimeMillis());
+        } else if (NoticeTopTypeEnum.UNTOP.getCode().equals(type)) {
+            newModel.setTop(0L);
+        } else {
+            log.error("unknow type:{}", type);
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
         getModelMapper().update(newModel);
     }
 
