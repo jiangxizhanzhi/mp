@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -197,7 +198,12 @@ public class ImagePageDTO extends BasePageDTO{
         this.setThirdCategory(request.getThirdCategory());
         this.setImageType(ImageTypeEnum.ENTITY.toValue());
         this.setUseStatus(request.getUseStatus());
-        this.setName(request.getName());
+        if (StringUtils.isNotEmpty(request.getExactName())) {
+            this.setName(request.getExactName());
+            this.setLikeName(false);
+        } else {
+            this.setName(request.getName());
+        }
         this.setInPosition(request.getInPosition());
         this.setOffset((request.getPage() - 1) * request.getPerPage());
         this.setLimit(request.getPerPage());
