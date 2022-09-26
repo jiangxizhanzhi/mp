@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.cscene.service;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.service.impl.OrgUserServiceImpl;
+import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -71,7 +71,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
 
     private CsceneSnapshotService csceneSnapshotService;
 
-    private OrgUserServiceImpl orgUserService;
+    private TenantUserServiceImpl tenantUserService;
 
     private List<CsceneRoleModel> readCsceneRoles(String[] csceneIds) {
         if (csceneIds == null || csceneIds.length == 0) {
@@ -197,7 +197,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
                          CsceneSnapshotService csceneSnapshotService,
                          CsceneModelFields csceneModelFields,
                          CsceneAuthMapper csceneAuthMapper,
-                         OrgUserServiceImpl orgUserService) {
+                         TenantUserServiceImpl tenantUserService) {
         setModelFields(csceneModelFields);
         setModelMapper(modelMapper);
         setCsceneRoleMapper(csceneRoleMapper);
@@ -208,7 +208,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         setCsceneSpecialService(csceneSpecialService);
         setCsceneSnapshotService(csceneSnapshotService);
         setCsceneAuthMapper(csceneAuthMapper);
-        setOrgUserService(orgUserService);
+        setTenantUserService(tenantUserService);
     }
 
     @Override
@@ -240,7 +240,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         request.setIds(userIds.toArray(new String[0]));
         request.setPage(1);
         request.setPageSize(userIds.size());
-        var users = orgUserService.pageUsersByOrg(request);
+        var users = tenantUserService.pageUsersByOrg(request);
         Map<String, UserDto> userId2User = users.getList().stream().collect(Collectors.toMap(userDto -> userDto.getId(), userDto -> userDto));
         for (String userId : userIds) {
             CsceneAuthorizeBO.SharedUser sharedUser = new CsceneAuthorizeBO.SharedUser();

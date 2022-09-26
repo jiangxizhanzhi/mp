@@ -10,13 +10,7 @@ import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
 import cn.cyberpeace.mp.auth.repository.UserPermissionMapper;
-import cn.cyberpeace.mp.auth.service.OrgPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
-import cn.cyberpeace.mp.auth.service.TargetService;
-import cn.cyberpeace.mp.auth.service.UserPermissionService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserPermissionFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
@@ -33,14 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,9 +54,6 @@ public class UserPermissionServiceImpl
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    private OrgUserService orgUserService;
 
     @Autowired
     private OrgPermissionService orgPermissionService;

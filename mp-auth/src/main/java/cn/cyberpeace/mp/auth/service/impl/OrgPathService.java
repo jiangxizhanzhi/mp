@@ -25,7 +25,7 @@ public class OrgPathService {
      * @param tenant
      * @return
      */
-    @Cacheable(value = OrgUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL)
+    @Cacheable(value = TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL)
     public List<OrgModel> listByTenant(String tenant) {
         HumanCondition humanCondition = new HumanCondition();
         humanCondition.filterEqual(OrgModel::getTenant, tenant);

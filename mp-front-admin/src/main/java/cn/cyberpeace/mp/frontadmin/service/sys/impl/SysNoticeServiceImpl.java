@@ -9,10 +9,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserRoleService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -83,10 +80,6 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private SysNoticeReadMapper noticeReadMapper;
-
-    @Autowired
-    private OrgUserService orgUserService;
-
     @Autowired
     private OrgService orgService;
 
@@ -104,6 +97,9 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
     @Autowired
     private SysNoticeRoleService sysNoticeRoleService;
+
+    @Autowired
+    private TenantUserService tenantUserService;
 
     @Autowired
     public SysNoticeServiceImpl(SysNoticeMapper modelMapper, SysNoticeFields modelFields) {
@@ -370,7 +366,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(currentUser.getId());
+        List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(currentUser.getId());
         orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());
@@ -425,7 +421,7 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
 
         // 根据当前登录用户查出所有的组织，包括组织的上级，直到顶级组织
         List<String> allOrgIds = new ArrayList<>();
-        List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(currentUser.getId());
+        List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(currentUser.getId());
         orgBOS.forEach(o -> {
             // 添加自己的id
             allOrgIds.add(o.getId());

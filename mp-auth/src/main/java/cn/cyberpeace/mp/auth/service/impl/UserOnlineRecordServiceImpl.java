@@ -11,12 +11,7 @@ import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserHeartbeatService;
-import cn.cyberpeace.mp.auth.service.UserLogService;
-import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserOnlineRecordFields;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
@@ -59,7 +54,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     private UserLogService userLogService;
 
     @Autowired
-    private OrgUserService orgUserService;
+    private TenantUserService tenantUserService;
 
     @Autowired
     private UserService userService;
@@ -150,7 +145,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
         // orgpaths
         List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
-        List<UserOrgDto> userOrgDtos = orgUserService.listUserOrgByUserIds(userIds);
+        List<UserOrgDto> userOrgDtos = tenantUserService.listUserOrgByUserIds(userIds);
         reportDtos.forEach(r -> {
             List<OrgBO> orgBOList =
                     userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {

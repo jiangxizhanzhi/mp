@@ -2,12 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetailsService;
-import cn.cyberpeace.mp.auth.service.impl.OrgUserServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.RolePermissionModelServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.TargetServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.UserPermissionServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.UserRoleServiceImpl;
-import cn.cyberpeace.mp.auth.service.impl.UserServiceImpl;
+import cn.cyberpeace.mp.auth.service.impl.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -29,8 +24,8 @@ public class UserCacheService {
             UserServiceImpl.CACHE_VAL_USERMODEL_BY_ID, UserServiceImpl.CACHE_VAL_USERMODEL_BY_USERNAME,
             UserServiceImpl.CACHE_VAL_USERDTO, UserServiceImpl.CACHE_VAL_ORGDTOS_TO_USERDTOS,
             AuthUserDetailsService.CACHE_USER_AUTHORITIES,
-            OrgUserServiceImpl.CACHE_VAL_ORGS_BY_USERID,
-            OrgUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL,
+            TenantUserServiceImpl.CACHE_VAL_ORGS_BY_USERID,
+            TenantUserServiceImpl.CACHE_VAL_ORGS_LIST_ALL,
             UserRoleServiceImpl.CACHE_VAL_ROLES,
             UserPermissionServiceImpl.CACHE_VAL_USER_TARGETS};
 

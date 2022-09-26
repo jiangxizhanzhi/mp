@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -32,7 +32,7 @@ public class UserImportService {
     private UserService userService;
 
     @Autowired
-    private OrgUserService orgUserService;
+    private TenantUserService tenantUserService;
 
     @Autowired
     private UserRoleService userRoleService;
@@ -45,10 +45,10 @@ public class UserImportService {
      * 导入用户
      * @param userModels
      * @param userRoleModels
-     * @param orgUserModels
+     * @param tenantUserModels
      */
     @Transactional(rollbackFor = Exception.class)
-    public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<OrgUserModel> orgUserModels) {
+    public void doImport(List<UserModel> userModels, List<UserRoleModel> userRoleModels, List<TenantUserModel> tenantUserModels) {
         if (CollectionUtil.isNotEmpty(userModels)) {
             ServiceResult<Integer> re = userService.bulkCreate(userModels);
             if (!Objects.equals(userModels.size(), re.getSource())) {
@@ -62,9 +62,9 @@ public class UserImportService {
                 throw new MpRuntimeException(AuthErrorCode.USER_ROLE_ADD_ERROR);
             }
 
-            ServiceResult<Integer> re2 = orgUserService.bulkCreate(orgUserModels);
-            if (!Objects.equals(orgUserModels.size(), re2.getSource())) {
-                log.error("orgUserModels.size:{} and re.getSource:{} not same!", orgUserModels.size(), re2.getSource());
+            ServiceResult<Integer> re2 = tenantUserService.bulkCreate(tenantUserModels);
+            if (!Objects.equals(tenantUserModels.size(), re2.getSource())) {
+                log.error("orgUserModels.size:{} and re.getSource:{} not same!", tenantUserModels.size(), re2.getSource());
                 throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
             }
         }

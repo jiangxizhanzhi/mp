@@ -6,7 +6,6 @@ import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.response.login.LoginResp;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
 import cn.cyberpeace.mp.auth.service.UserRoleService;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -54,9 +53,6 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     @Autowired
     private UserPermissionService userPermissionService;
-
-    @Autowired
-    private OrgUserService orgUserService;
 
     @Autowired
     private OperateLogServiceFactory operateLogServiceFactory;
