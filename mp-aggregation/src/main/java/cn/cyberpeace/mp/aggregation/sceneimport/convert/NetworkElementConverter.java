@@ -50,32 +50,7 @@ class NetworkElementConverter implements IConverter {
             // 不存在未连接的节点,不需要单独处理外部网络
             return;
         } else {
-            // 存在未连接的节点,需要默认连上一个内部网络
-            // 查找已配置的内部网络
-            NetworkElementParseResult externalNetworkResult = null;
-            if (CollectionUtils.isNotEmpty(results)) {
-                // 无外部网络则新建一个
-                externalNetworkResult = results.stream()
-                        .filter(network -> network.getId().toLowerCase().startsWith("network"))
-                        .findFirst().get();
-            }
-            if (externalNetworkResult == null) {
-                externalNetworkResult = new NetworkElementParseResult();
-                externalNetworkResult.setId("network_" + System.currentTimeMillis());
-                externalNetworkResult.setName("network");
-                this.results.add(externalNetworkResult);
-            }
-            // 给未连接的节点新建端口并与外部网络相连
-            NetworkElementParseResult finalExternalNetworkResult = externalNetworkResult;
-            container.getNoNetworkNodeElements().stream().forEach(elementBO -> {
-                SceneConfigElementPortBO portBO = new SceneConfigElementPortBO();
-                portBO.setId(IConverter.getPortId(elementBO.getId(), elementBO.getType(), elementBO.getPorts().size()));
-                elementBO.getPorts().add(portBO);
-                container.putNode2NetworkPorts(elementBO.getId(), finalExternalNetworkResult.getId(), portBO);
-
-                CloudPluginSceneConfigElementPortBO pluginPort = new CloudPluginSceneConfigElementPortBO();
-                container.putPluginElementPort(portBO.getId(), pluginPort);
-            });
+            // 未连接的节点 无需处理
         }
     }
 
@@ -120,7 +95,11 @@ class NetworkElementConverter implements IConverter {
             pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK);
             pluginElement.setImage(TargetConstant.DefaultTargetName.NETWORK_EXTERNAL);
         } else {
-            pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+            if (container.getSimpleLayer3Switch().contains(network.getId())) {
+                pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH);
+            } else {
+                pluginElement.setRole(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY);
+            }
             pluginElement.setImageType(BaseCloudPluginSceneElementModel.ImageType.SIMPLE);
             pluginElement.setImage(TargetConstant.DefaultTargetName.DEFAULT_NETWORK);
         }

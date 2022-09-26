@@ -39,6 +39,7 @@ public class ResourceCenterConverter {
         // 构建转换的责任链路
         List<IConverter> converters = new ArrayList<>();
         // 解析scene -> 解析node,创建端口 -> 解析network,创建端口,创建连线 -> 加载其余靶标信息 -> 加载来yml解析出的镜像信息
+        converters.add(new PrepareConverter(parseResult));
         converters.add(new SceneElementConverter(parseResult.getScene()));
         converters.add(new NodeElementConverter(parseResult.getNodes()));
         converters.add(new NetworkElementConverter(parseResult.getNetworks()));

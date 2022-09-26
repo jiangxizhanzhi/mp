@@ -136,8 +136,7 @@ public class SceneParseResourceCenter {
             var pluginElement = pluginHandler.getElement(e.getId());
             var role = pluginElement.getRole();
             if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK ||
-                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY ||
-                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
                 var networkElementParseResult = this.buildNetworkElementParseResultV2(e, pluginElement);
 
                 try {
@@ -157,6 +156,50 @@ public class SceneParseResourceCenter {
                     networkElementParseResult.setId("internet-" + networkIndex++);
                 } else {
                     networkElementParseResult.setId("network-" + networkIndex++);
+                }
+            } else if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                Integer virtualType = pluginElement.getVirtualType();
+                if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                    var networkElementParseResult = this.buildNetworkElementParseResultV2(e, pluginElement);
+
+                    try {
+                        if (StringUtils.isNotEmpty(e.getPosition2())) {
+                            Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                            if (position != null) {
+                                networkElementParseResult.setPosition(position.getX() + "," + position.getY());
+                            }
+                        }
+                    } catch (Exception exception) {
+                        // do nothing
+                    }
+
+                    id2Network.put(e.getId(), networkElementParseResult);
+                    networks.add(networkElementParseResult);
+                    if (pluginElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        networkElementParseResult.setId("internet-" + networkIndex++);
+                    } else {
+                        networkElementParseResult.setId("network-" + networkIndex++);
+                    }
+
+                    var nodeElementParseResult = new NodeElementParseResult();
+                    nodeElementParseResult.setId("router-" + networkElementParseResult.getId());
+                    id2Node.put(e.getId(), nodeElementParseResult);
+                    nodes.add(nodeElementParseResult);
+                } else {
+                    var nodeElementParseResult = this.buildNodeElementParseResult(e, pluginElement);
+                    try {
+                        if (StringUtils.isNotEmpty(e.getPosition2())) {
+                            Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                            if (position != null) {
+                                nodeElementParseResult.setPosition(position.getX() + "," + position.getY());
+                            }
+                        }
+                    } catch (Exception exception) {
+                        // do nothing
+                    }
+                    nodeElementParseResult.setId("server-" + serverIndex++);
+                    id2Node.put(e.getId(), nodeElementParseResult);
+                    nodes.add(nodeElementParseResult);
                 }
             } else {
                 var nodeElementParseResult = this.buildNodeElementParseResult(e, pluginElement);
@@ -286,6 +329,7 @@ public class SceneParseResourceCenter {
                     continue;
                 }
                 Device device = new Device();
+                device.setImageUuid(node.getImageUuid());
                 device.setImage(node.getImage());
                 device.setAccessModes(new ArrayList<>());
                 devices.add(device);
@@ -377,6 +421,7 @@ public class SceneParseResourceCenter {
     public static class Device {
         private String image;
         private String logo;
+        private String imageUuid;
         private List<AccessMode> accessModes;
     }
 
