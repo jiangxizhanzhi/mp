@@ -32,6 +32,7 @@ public class PauseHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess PAUSE_VIRTUAL_MACHINE = new EventProcess("pause_virtual_machine", "sceneplugincloud.event.pause_virtual_machine");
         public static final EventProcess PAUSE_CONTAINER = new EventProcess("pause_container", "sceneplugincloud.event.pause_container");
+        public static final EventProcess PAUSE_NODE = new EventProcess("pause_node", "sceneplugincloud.event.pause_node");
     }
 
     public PauseHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -66,6 +67,10 @@ public class PauseHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_CONTAINER, () -> {
                 closeAccessModes(element);
                 container.pause(instanceId);
+            });
+        } else {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.PAUSE, Arrays.asList(ElementProcess.PAUSE_NODE));
+            runElementProgress(nodeId, SceneElementModel.Event.PAUSE, ElementProcess.PAUSE_NODE, () -> {
             });
         }
     }

@@ -32,6 +32,7 @@ public class UnpauseHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess UNPAUSE_VIRTUAL_MACHINE = new EventProcess("unpause_virtual_machine", "sceneplugincloud.event.unpause_virtual_machine");
         public static final EventProcess UNPAUSE_CONTAINER = new EventProcess("unpause_container", "sceneplugincloud.event.unpause_container");
+        public static final EventProcess UNPAUSE_NODE = new EventProcess("unpause_node", "sceneplugincloud.event.unpause_node");
     }
 
     public UnpauseHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -66,6 +67,10 @@ public class UnpauseHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_CONTAINER, () -> {
                 container.unPause(instanceId);
                 checkAccessModes(element);
+            });
+        } else {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.UNPAUSE, Arrays.asList(ElementProcess.UNPAUSE_NODE));
+            runElementProgress(nodeId, SceneElementModel.Event.UNPAUSE, ElementProcess.UNPAUSE_NODE, () -> {
             });
         }
     }
