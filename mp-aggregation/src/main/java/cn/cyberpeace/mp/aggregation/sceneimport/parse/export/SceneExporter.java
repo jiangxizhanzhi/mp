@@ -52,7 +52,7 @@ public class SceneExporter {
         SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
         this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
 
-        SceneParseResourceCenter.Result parseResult = new SceneParseResourceCenter().parseAndLoadInfo(sceneId);
+        SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
         this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
 
         // 下载附件
@@ -71,7 +71,7 @@ public class SceneExporter {
         return exportResult;
     }
 
-    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenter.Device> devices) {
+    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
                 String currentImageDir = null;

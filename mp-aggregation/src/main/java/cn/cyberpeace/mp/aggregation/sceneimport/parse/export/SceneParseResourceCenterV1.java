@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @Author maojun
  * @Date 2022/8/20
  */
-public class SceneParseResourceCenterV1 {
+public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter{
 
     public Result parseAndLoadInfo(String sceneId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
@@ -79,7 +79,7 @@ public class SceneParseResourceCenterV1 {
         this.handleNodeFile(ymlParseResult.getNodes(), file2Download);
 
         // 处理节点镜像
-        List<SceneParseResourceCenter.Device> devices = new ArrayList<>();
+        List<SceneParseResourceCenterV2.Device> devices = new ArrayList<>();
         this.handleNodeImage(sceneConfigHandler, id2Node, devices);
 
         Result result = new Result();
@@ -207,65 +207,6 @@ public class SceneParseResourceCenterV1 {
         }
     }
 
-    private void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
-        Map<String, Integer> fileName2Index = new HashMap<>();
-        fileName2Index.put("file", 1);
-        for (var node : nodes) {
-            if (StringUtils.isNotEmpty(node.getFile())) {
-                String file = node.getFile();
-                // 获取name
-                int fileNameIndex = node.getFile().lastIndexOf("=");
-                if (fileNameIndex > -1) {
-                    node.setFile(StringUtils.substring(file, fileNameIndex, file.length()));
-                    node.setFile(StringUtils.replace(node.getFile(), "=", ""));
-                } else {
-                    node.setFile("file");
-                }
-                if (fileName2Index.containsKey(node.getFile())) {
-                    int index = fileName2Index.get(node.getFile());
-                    node.setFile(node.getFile() + index);
-                    fileName2Index.put(node.getFile(), index + 1);
-                } else {
-                    fileName2Index.put(node.getFile(), 1);
-                }
-                file2Download.put(node.getFile(), file);
-            }
-        }
-    }
-
-    private void handleNodeImage(SceneConfigHandler sceneHandler, Map<String, NodeElementParseResult> id2Node, List<SceneParseResourceCenter.Device> devices) {
-        CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        Set<String> existImage = new HashSet<>();
-        for (String nodeId : id2Node.keySet()) {
-            var node = pluginHandler.getElement(nodeId);
-            if (node != null) {
-                if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())
-                        && !BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.getImageType())) {
-                    continue;
-                }
-                if (StringUtils.isEmpty(node.getImage())) {
-                    continue;
-                }
-                if (!existImage.add(node.getImage())) {
-                    continue;
-                }
-                SceneParseResourceCenter.Device device = new SceneParseResourceCenter.Device();
-                device.setImage(node.getImage());
-                device.setAccessModes(new ArrayList<>());
-                devices.add(device);
-                var element = sceneHandler.getElement(nodeId);
-                device.setLogo(element.getIcon2());
-                if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                    for (var p : element.getPorts()) {
-                        if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
-                            device.getAccessModes().addAll(p.getAccessModes());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         if (BaseSceneElementModel.Type.SWITCH == e.getType()) {
@@ -383,7 +324,7 @@ public class SceneParseResourceCenterV1 {
 
         private Map<String, String> file2Download = new HashMap<>();
 
-        private List<SceneParseResourceCenter.Device> devices = new ArrayList<>();
+        private List<SceneParseResourceCenterV2.Device> devices = new ArrayList<>();
 
         private Map<String, String> idConvert = new HashMap<>();
     }
