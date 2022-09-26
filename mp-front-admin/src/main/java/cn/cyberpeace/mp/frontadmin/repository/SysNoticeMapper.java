@@ -43,7 +43,7 @@ public interface SysNoticeMapper extends BaseModelMapper<SysNoticeModel> {
 
     /**
      * 普通用户消息推送列表
-     *
+     * 条件判断 ( 角色匹配 AND 组织匹配 ） OR （指定用户) // http://10.10.10.10/biz/bug-view-10966.html
      * @param orgs
      * @param roles
      * @param userId

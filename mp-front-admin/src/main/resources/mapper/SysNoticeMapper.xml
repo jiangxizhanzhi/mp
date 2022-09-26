@@ -138,14 +138,8 @@
             left join mp_sys_notice_role nr on n.id = nr.notice_id
             left join mp_sys_notice_read nre on n.id = nre.notice_id
             <where>
+                ((
                 n.is_public = 1
-                <if test="userIds != null and userIds.size() > 0">
-                    OR
-                    nu.user in
-                    <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                        #{userId}
-                    </foreach>
-                </if>
                 <if test="roles != null and roles.size() > 0">
                     OR
                     nr.role in
@@ -153,12 +147,30 @@
                         #{role}
                     </foreach>
                 </if>
+                )
+                AND
+                (
                 <if test="orgs != null and orgs.size() > 0">
+                    no.org is null
                     OR
                     no.org in
                     <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
                         #{org}
                     </foreach>
+                </if>
+
+                <if test="orgs == null || orgs.size() == 0">
+                    no.org is null
+                </if>
+                ))
+                <if test="userIds != null and userIds.size() > 0">
+                    OR
+                    (
+                    nu.user in
+                    <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
+                        #{userId}
+                    </foreach>
+                    )
                 </if>
             </where>
             ) as tabA
