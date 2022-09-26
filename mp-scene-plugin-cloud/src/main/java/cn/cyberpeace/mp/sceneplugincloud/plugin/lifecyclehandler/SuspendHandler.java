@@ -32,6 +32,7 @@ public class SuspendHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess SUSPEND_VIRTUAL_MACHINE = new EventProcess("suspend_virtual_machine", "sceneplugincloud.event.suspend_virtual_machine");
         public static final EventProcess SUSPEND_CONTAINER = new EventProcess("suspend_container", "sceneplugincloud.event.suspend_container");
+        public static final EventProcess SUSPEND_NODE = new EventProcess("suspend_node", "sceneplugincloud.event.suspend_node");
     }
 
     public SuspendHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -66,6 +67,10 @@ public class SuspendHandler extends HandlerCommon {
             runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_CONTAINER, () -> {
                 closeAccessModes(element);
                 container.suspend(instanceId);
+            });
+        } else {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.SUSPEND, Arrays.asList(ElementProcess.SUSPEND_NODE));
+            runElementProgress(nodeId, SceneElementModel.Event.SUSPEND, ElementProcess.SUSPEND_NODE, () -> {
             });
         }
     }
