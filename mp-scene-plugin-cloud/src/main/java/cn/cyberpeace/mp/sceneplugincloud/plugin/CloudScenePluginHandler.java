@@ -587,4 +587,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     public void modify() {
         modifyHandler.modify();
     }
+
+    @Override
+    public void deleteElement(String nodeId) {
+        super.deleteElement(nodeId);
+    }
 }

@@ -186,6 +186,8 @@ public abstract class BaseSceneHandler<
     /** 网元对应节点插件关系，一个网元节点对于多个插件 */
     private final Map<String, List<P1>> elementIdPluginsMap = new ConcurrentHashMap<>();
 
+    private DiffTargets<E0> diffElements;
+
     private Object getPluginContext(String pluginKey) {
         if (context == null) {
             return null;
@@ -1340,6 +1342,7 @@ public abstract class BaseSceneHandler<
         DiffTargets<A0> diffAreas = saveAreas(existAreaMap);
         DiffTargets<P3> diffPieces = savePieces(existPieceMap);
         DiffTargets<E0> diffElements = saveElements(existElementMap);
+        this.diffElements = diffElements;
         DiffTargets<P0> diffElementPorts = saveElementPorts(existElementPortMap);
         // 此时可能存在已被删除的跨区域连接，可优化
         if (isAreaMode && !existElementPortConnectionMap.isEmpty()) {

@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -81,6 +82,7 @@ public class SceneService {
     }
 
     public ServiceResult<SceneDataBO> update(SceneDataBO sceneDataBO, SceneContextBO context) {
+        SceneHandler originSceneHandler = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), sceneDataBO.getTopology().getAreaId(), context);
         SceneHandler sceneHandler;
         try {
             sceneHandler = new SceneHandler(sceneDataBO, false, context);
@@ -108,6 +110,13 @@ public class SceneService {
             var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
             sceneHandler2.getScene().setCreateConsumeSeconds(consumeSeconds);
             sceneHandler2.updateScene();
+
+            var diff = sceneHandler.getDiffElements();
+            if (CollectionUtils.isNotEmpty(diff.getRemovingTargets())) {
+                diff.getRemovingTargets().forEach(e -> {
+                    originSceneHandler.deleteElements(e.getNodeId());
+                });
+            }
         });
 
         return new ServiceResult<>(sceneHandler.toData());

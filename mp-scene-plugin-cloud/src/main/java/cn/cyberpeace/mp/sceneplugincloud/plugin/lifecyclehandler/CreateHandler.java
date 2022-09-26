@@ -20,6 +20,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.base.FirewallRule;
 import cn.cyberpeace.mp.sceneplugincloud.constant.CloudSingleton;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.QosRuleDirection;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
@@ -1078,6 +1079,11 @@ public class CreateHandler extends HandlerCommon {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
         npcClient.create(npcCreateData);
+        for (var e : getPluginHandler().getTerminalElementMap().values()) {
+            if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                e.setResourceId(HandlerUtils.genResourceName(e.getSrcElement().getEid()));
+            }
+        }
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {

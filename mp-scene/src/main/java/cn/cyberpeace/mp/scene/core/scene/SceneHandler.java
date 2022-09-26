@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
-import cn.cyberpeace.mp.scene.config.SceneAppConfig;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedElementStatusBO;
@@ -50,7 +49,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -711,7 +709,8 @@ public class SceneHandler extends BaseSceneHandler<
     public void snapshotElement(String nodeId) {
     }
 
-    public void deleteElement(String nodeId) {
+    public void deleteElements(String... nodeId) {
+
     }
 
     public void modifyElement(String nodeId) {
