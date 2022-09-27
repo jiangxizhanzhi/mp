@@ -373,12 +373,14 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     @Transactional
     public ServiceResult<CsceneBO> clone(String id, CsceneContextBO context) {
         var csceneHandler = new CsceneHandler(id, context);
-        return sync(csceneHandler.toDataWithoutCorrectCsceneData(false).export(), context);
+        return sync(csceneHandler.toDataWithoutCorrectCsceneData(false).export(), context, true);
     }
 
     @Transactional
-    public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context) {
-        checkSceneEditNodeLimit(csceneBO);
+    public ServiceResult<CsceneBO> sync(CsceneBO csceneBO, CsceneContextBO context, boolean check) {
+        if (check) {
+            checkSceneEditNodeLimit(csceneBO);
+        }
         if (csceneBO.getSceneConfig() == null && StringUtils.isNotEmpty(csceneBO.getId())) {
             // 更新name
             var serviceResult = update(csceneBO.toModel());
