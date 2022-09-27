@@ -26,7 +26,6 @@ import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
-import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.ConnectedNetworkBO;
 import lombok.Getter;
@@ -36,10 +35,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +44,7 @@ import java.util.stream.Collectors;
  * @Author maojun
  * @Date 2022/8/20
  */
-public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter{
+public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
 
     public Result parseAndLoadInfo(String sceneId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
@@ -160,6 +157,9 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter{
                     nodeElementParseResult.setId("firewall-" + firewallIndex++);
                 } else {
                     nodeElementParseResult.setId("server-" + serverIndex++);
+                    if (pluginElement.getRole() == BaseCloudPluginSceneElementModel.Role.NPC) {
+                        nodeElementParseResult.setVirtualPlatform("npc");
+                    }
                 }
                 id2Node.put(element.getId(), nodeElementParseResult);
                 nodes.add(nodeElementParseResult);
@@ -229,6 +229,12 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter{
                 Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
                 if (position != null) {
                     networkElementParseResult.setPosition(position.getX() + "," + position.getY());
+                    Integer role = pluginElement.getRole();
+                    if (role != null) {
+                        if (role != BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                            networkElementParseResult.setPosition((position.getX() + 80) + "," + (position.getY() + 80));
+                        }
+                    }
                 }
             }
         } catch (Exception exception) {
