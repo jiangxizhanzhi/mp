@@ -211,7 +211,11 @@ public class SceneExporter {
     private void downloadNodeFile(String envPath, Map<String, String> file2Download) {
         for (var entry : file2Download.entrySet()) {
             // 下载附件
-            byte[] content = FdfsCommon.downloadRawContent(entry.getValue());
+            String fdfsFilePath = entry.getValue();
+            if (StringUtils.contains(entry.getValue(), "?")) {
+                fdfsFilePath = StringUtils.split(entry.getValue(), "?")[0];
+            }
+            byte[] content = FdfsCommon.downloadRawContent(fdfsFilePath);
             try {
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + entry.getKey()), content);
             } catch (IOException e) {
