@@ -1,46 +1,46 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="cn.cyberpeace.mp.auth.repository.OrgUserMapper">
+<mapper namespace="cn.cyberpeace.mp.auth.repository.TenantUserMapper">
 
 
     <select id="listUsersByOrgId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
         select distinct * from mp_auth_user where id in
-            (select user from mp_auth_org_user where org = #{orgId})
-            <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
-                AND id not in
-                (select distinct user from mp_auth_user_role where role in
-                <where>
-                    role in
-                    <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-                        #{roleId}
-                    </foreach>
-                    <if test="selfUserId != null and selfUserId != ''">
-                        and user != #{selfUserId}
-                    </if>
-                </where>
-                )
-            </if>
-            <if test="excludeUserIds != null and excludeUserIds.size() > 0">
-                AND id not in
-                <foreach item="excludeUserId" index="index" collection="excludeUserIds" open="(" separator="," close=")">
-                    #{excludeUserId}
+        (select user from mp_auth_tenant_user where org = #{orgId})
+        <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
+            AND id not in
+            (select distinct user from mp_auth_user_role where role in
+            <where>
+                role in
+                <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                    #{roleId}
                 </foreach>
-            </if>
-            order by -update_time, username
+                <if test="selfUserId != null and selfUserId != ''">
+                    and user != #{selfUserId}
+                </if>
+            </where>
+            )
+        </if>
+        <if test="excludeUserIds != null and excludeUserIds.size() > 0">
+            AND id not in
+            <foreach item="excludeUserId" index="index" collection="excludeUserIds" open="(" separator="," close=")">
+                #{excludeUserId}
+            </foreach>
+        </if>
+        order by -update_time, username
     </select>
 
     <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
         select distinct * from mp_auth_org where id in
-            (select org from mp_auth_org_user where user = #{userId})
-            order by mp_auth_org.pk
+        (select org from mp_auth_tenant_user where user = #{userId})
+        order by mp_auth_org.pk
     </select>
 
 
     <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto">
         select ou.user as userId, group_concat(distinct o.id separator ',') as orgIds,
-               group_concat(distinct o.name separator ',') as orgNames
+        group_concat(distinct o.name separator ',') as orgNames
         from mp_auth_org o
-        left join mp_auth_org_user ou
+        left join mp_auth_tenant_user ou
         on ou.org = o.id
         where ou.user != ''
         <if test="userIds != null and userIds.size() > 0">
@@ -54,9 +54,9 @@
 
     <select id="listUserOrgByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgDto">
         select distinct o.*, ou.user as userId
-            from mp_auth_org o
-        left join mp_auth_org_user ou
-            on ou.org = o.id
+        from mp_auth_org o
+        left join mp_auth_tenant_user ou
+        on ou.org = o.id
         where ou.user != ''
         <if test="userIds != null and userIds.size() > 0">
             AND ou.user in
@@ -68,15 +68,15 @@
 
     <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select
-            distinct u.*,
-            group_concat(distinct ou.org separator ',') as orgs,
-            group_concat(distinct ur.role separator ',') as roles
+        distinct u.*,
+        group_concat(distinct ou.org separator ',') as orgs,
+        group_concat(distinct ur.role separator ',') as roles
         from mp_auth_user u
-        left join mp_auth_org_user ou on u.id = ou.user
+        left join mp_auth_tenant_user ou on u.id = ou.user
         left join mp_auth_user_role ur on u.id = ur.user
         <where>
             <if test="orgIds != null and orgIds.size() > 0">
-                AND u.id in (select user from mp_auth_org_user where org in
+                AND u.id in (select user from mp_auth_tenant_user where org in
                 <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
                     #{orgId}
                 </foreach>
@@ -91,15 +91,15 @@
             <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
                 AND u.id not in
                 (select distinct user from mp_auth_user_role
-                    <where>
-                        role in
-                        <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-                            #{roleId}
-                        </foreach>
-                        <if test="selfUserId != null and selfUserId != ''">
-                            and user != #{selfUserId}
-                        </if>
-                    </where>
+                <where>
+                    role in
+                    <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
+                        #{roleId}
+                    </foreach>
+                    <if test="selfUserId != null and selfUserId != ''">
+                        and user != #{selfUserId}
+                    </if>
+                </where>
                 )
             </if>
             <if test="excludeUserIds != null and excludeUserIds.size() > 0">
@@ -132,5 +132,5 @@
             </foreach>
         </if>
     </select>
-
+    
 </mapper>

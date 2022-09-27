@@ -8,10 +8,7 @@ import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
-import cn.cyberpeace.mp.auth.service.OrgPermissionService;
-import cn.cyberpeace.mp.auth.service.OrgService;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
-import cn.cyberpeace.mp.auth.service.UserCacheService;
+import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.OrgFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -52,13 +49,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     private OrgPermissionService orgPermissionService;
 
     @Autowired
-    private OrgUserService orgUserService;
-
-    @Autowired
     private UserCacheService userCacheService;
 
     @Autowired
     private OrgPathService orgPathService;
+
+    @Autowired
+    private TenantUserService tenantUserService;
 
     @Autowired
     public OrgServiceImpl(OrgMapper modelMapper, OrgFields modelFields) {
@@ -524,13 +521,13 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
         }
 
         // 如果组织下有人员，不允许删除
-        List<UserModel> users = orgUserService.listUsersByOrgIdNoRestrict(orgId);
+        List<UserModel> users = tenantUserService.listUsersByOrgIdNoRestrict(orgId);
         if (CollectionUtil.isNotEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.ORG_CANNOT_DELETE_WITH_USER_EXISTED);
         }
 
         boolean deleteOrgPermissionSuccess = orgPermissionService.deleteByOrgId(orgId);
-        boolean deleteOrgUserSuccess = orgUserService.deleteByOrgId(orgId);
+        boolean deleteOrgUserSuccess = tenantUserService.deleteByOrgId(orgId);
 
         if(!deleteOrgPermissionSuccess || !deleteOrgUserSuccess) {
             log.info("deleteOrgPermissionSuccess:{}, deleteOrgUserSuccess:{}", deleteOrgPermissionSuccess, deleteOrgUserSuccess);

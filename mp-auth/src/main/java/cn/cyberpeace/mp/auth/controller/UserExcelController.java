@@ -55,9 +55,6 @@ import java.util.Objects;
 public class UserExcelController {
 
     @Autowired
-    private OrgUserService orgUserService;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
@@ -72,6 +69,9 @@ public class UserExcelController {
     @Autowired
     private AuthConfig authConfig;
 
+    @Autowired
+    private TenantUserService tenantUserService;
+
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
     @ApiImplicitParam(name = "exportRequest", value = "导出请求", dataTypeClass = UserExportRequest.class)
@@ -84,7 +84,7 @@ public class UserExcelController {
             userIds = CollectionUtil.toList(ids);
         }
 
-        List<UserModel> users = orgUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
+        List<UserModel> users = tenantUserService.listUsersByOrgAndUname(exportRequest.getOrg(), exportRequest.getUsername(), userIds);
 
         Locale locale = LocaleContextHolder.getLocale();
         String sheetName = MessageCommon.get(AuthBasei18nCode.EXCEL_EXPORT_NAME);

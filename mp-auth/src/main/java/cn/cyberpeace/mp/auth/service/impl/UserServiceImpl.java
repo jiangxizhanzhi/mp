@@ -12,11 +12,11 @@ import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
 import cn.cyberpeace.mp.auth.dto.org.OrgBO;
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
-import cn.cyberpeace.mp.auth.repository.OrgUserMapper;
+import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.repository.UserMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
@@ -98,9 +98,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private OrgService orgService;
 
     @Autowired
-    private OrgUserService orgUserService;
-
-    @Autowired
     private UserCreateCheckService createCheckService;
 
     @Autowired
@@ -116,7 +113,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     private UserCacheService userCacheService;
 
     @Autowired
-    private OrgUserMapper orgUserMapper;
+    private TenantUserMapper tenantUserMapper;
 
     @Autowired
     private UserRoleMapper userRoleMapper;
@@ -335,8 +332,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     log.error("org id:{} not existed!", id);
                     throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
-                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
-                var re = orgUserService.create(orgUserModel);
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
@@ -403,7 +400,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
             // 清除原来所有用户关联的组织
-            orgUserService.deleteByUserId(userId);
+            tenantUserService.deleteByUserId(userId);
 
             modifyRequest.getOrgIds().forEach(id -> {
                 boolean isOrgExist = orgService.exists(id);
@@ -411,8 +408,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
                     log.error("org id:{} not existed!", id);
                     throw new MpRuntimeException(AuthErrorCode.ORG_NOT_EXISTED.format(id));
                 }
-                OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(id).build();
-                var re = orgUserService.create(orgUserModel);
+                TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(id).build();
+                var re = tenantUserService.create(tenantUserModel);
                 ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
             });
         }
@@ -719,7 +716,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     public void importUsers(List<ImportUser> list) {
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
-        List<OrgUserModel> orgUserModels = new ArrayList<>();
+        List<TenantUserModel> tenantUserModels = new ArrayList<>();
         // 初始化默认头像信息
         for (ImportUser importUser : list) {
             log.info("importUser:{}", importUser);
@@ -746,19 +743,19 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
             // http://10.10.10.10/biz/bug-view-4861.html
             if (CollectionUtil.isNotEmpty(importUser.getOrgIdList())) {
                 importUser.getOrgIdList().forEach(oid -> {
-                    OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(oid).build();
-                            var re = orgUserService.create(orgUserModel);
+                    TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(oid).build();
+                            var re = tenantUserService.create(tenantUserModel);
                             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
                         }
                 );
-                List<OrgUserModel> orgUsers = importUser.getOrgIdList().stream().map(oid -> OrgUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
+                List<TenantUserModel> orgUsers = importUser.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(orgUsers)) {
-                    orgUserModels.addAll(orgUsers);
+                    tenantUserModels.addAll(orgUsers);
                 }
             }
         }
 
-        userImportService.doImport(userModels, userRoleModels, orgUserModels);
+        userImportService.doImport(userModels, userRoleModels, tenantUserModels);
     }
 
     @Override
@@ -907,7 +904,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         processExpiredStatus(userDto);
 
         if (needOrg) {
-            List<OrgBO> orgBOS = orgUserService.listOrgsByUserId(userModel.getId());
+            List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userModel.getId());
             List<String> orgIds = orgBOS.stream().map(BaseModel::getId).collect(Collectors.toList());
 
             //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
@@ -1012,7 +1009,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         ExportUser exportUser = ExportUser.builder().username(user.getUsername()).name(user.getName()).build();
 
         // org path
-        List<OrgBO> orgList = orgUserService.listOrgsByUserId(user.getId());
+        List<OrgBO> orgList = tenantUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
         Optional<OrgBO> optional = orgList.stream().max(Comparator.comparing(OrgBO::getPk));
         optional.ifPresent(o -> exportUser.setOrg(orgService.getPath(o)));
@@ -1071,7 +1068,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
 
         boolean cleanUserRolesSuccess = userRoleService.deleteByUserId(userId);
-        boolean cleanUserOrgsSuccess = orgUserService.deleteByUserId(userId);
+        boolean cleanUserOrgsSuccess = tenantUserService.deleteByUserId(userId);
         boolean cleanUserTargetsSuccess = userPermissionService.deleteByUserId(userId);
         boolean cleanUserTenantsSuccess = tenantUserService.deleteByUserId(userId);
 
@@ -1089,11 +1086,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         List<UserModel> userModels = getModelMapper().list(userCondition);
 
         HumanCondition orgUserCondition = new HumanCondition()
-                .filterIn(OrgUserModel::getUser, userIds)
-                .select(OrgUserModel::getUser)
-                .selectAs(GroupConcat.f(OrgUserModel::getOrg).distinct(), UserOrgRoleDto.FIELD_ORGS)
-                .groupBy(OrgUserModel::getUser);
-        List<Map<String, Object>> orgs = orgUserMapper.originList(orgUserCondition);
+                .filterIn(TenantUserModel::getUser, userIds)
+                .select(TenantUserModel::getUser)
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), UserOrgRoleDto.FIELD_ORGS)
+                .groupBy(TenantUserModel::getUser);
+        List<Map<String, Object>> orgs = tenantUserMapper.originList(orgUserCondition);
         Map<String, String> orgMap = new HashMap<>();
         for (Map<String, Object> userOrg : orgs) {
             orgMap.put((String) userOrg.get(UserOrgRoleDto.FIELD_USER), (String) userOrg.get(UserOrgRoleDto.FIELD_ORGS));

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.model.OrgUserModel;
+import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.register.RegisterRequest;
 import cn.cyberpeace.mp.auth.service.impl.UserCreateCheckService;
@@ -39,7 +39,7 @@ public class RegisterService {
     private UserCacheService userCacheService;
 
     @Autowired
-    private OrgUserService orgUserService;
+    private TenantUserService tenantUserService;
 
     @Transactional(rollbackFor = Exception.class)
     public ObjServiceResult<UserModel> register(RegisterRequest req) {
@@ -72,8 +72,8 @@ public class RegisterService {
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
 
-        OrgUserModel orgUserModel = OrgUserModel.builder().user(userId).org(AuthConstant.ROOT_ORG_ID).build();
-        var re = orgUserService.create(orgUserModel);
+        TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(AuthConstant.ROOT_ORG_ID).build();
+        var re = tenantUserService.create(tenantUserModel);
         ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
 
         userCacheService.evictAllUserCache();
