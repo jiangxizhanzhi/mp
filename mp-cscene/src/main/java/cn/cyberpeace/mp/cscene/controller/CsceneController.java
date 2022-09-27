@@ -147,7 +147,23 @@ public class CsceneController implements BaseModelListControllerBase {
         log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
         boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
         correctRequestCsceneParamsForSync(csceneBO);
-        var result = modelService.sync(csceneBO, null).asResult();
+        var result = modelService.sync(csceneBO, null, true).asResult();
+        if (isUpdate) {
+            CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
+        } else {
+            CsceneLogUtils.recordSceneConfigLog(result.getData(), OpTypeEnums.CREATE, CsceneLogUtils.CREATE_SCENE_CONFIG, csceneBO.getContext());
+        }
+        return result;
+    }
+
+    @ApiOperation(value = "业务服务端保存（创建/更新）场景模板", notes = "不会校验节点数量,请忽略test_scenes和app_scenes字段")
+    @ApiImplicitParam(name = "csceneBO", value = "请求体", dataTypeClass = CsceneBO.class)
+    @PostMapping("/server_api/sync")
+    public ServiceResult<CsceneBO> serverApiSync(@RequestBody CsceneBO csceneBO) {
+        log.info("scene sync,params is {}", JsonCommon.stringify(csceneBO));
+        boolean isUpdate = csceneBO != null && StringUtils.isNotEmpty(csceneBO.getId());
+        correctRequestCsceneParamsForSync(csceneBO);
+        var result = modelService.sync(csceneBO, null, false).asResult();
         if (isUpdate) {
             CsceneLogUtils.recordSceneConfigLog(csceneBO.getId(), OpTypeEnums.UPDATE, CsceneLogUtils.UPDATE_SCENE_CONFIG, csceneBO.getContext());
         } else {
