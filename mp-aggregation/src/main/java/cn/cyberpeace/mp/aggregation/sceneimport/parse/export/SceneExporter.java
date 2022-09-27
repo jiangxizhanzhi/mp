@@ -30,7 +30,12 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * @Description
@@ -43,16 +48,20 @@ public class SceneExporter {
     private static String EXPORT_DEVICE_YML = "/cpcloud/device/v1/image/export_device_yml";
 
     public ExportResult export(String sceneId, String envPath, String imagePath, String singleImagePath) {
-        SceneParseResourceCenter.Result parseResult = new SceneParseResourceCenter().parseAndLoadInfo(sceneId);
         // 生成topo.yml
-        this.createSceneYml(parseResult.getYmlResult(), envPath);
+        SceneParseResourceCenterV1.Result resultV1 = new SceneParseResourceCenterV1().parseAndLoadInfo(sceneId);
+        this.createSceneYml(resultV1.getYmlResult(), envPath, "topo");
+
+        SceneParseResourceCenterV2.Result parseResult = new SceneParseResourceCenterV2().parseAndLoadInfo(sceneId);
+        this.createSceneYml(parseResult.getYmlResult(), envPath, "topo2");
+
         // 下载附件
-        this.downloadNodeFile(envPath, parseResult.getFile2Download());
+        this.downloadNodeFile(envPath, resultV1.getFile2Download());
         // 生成server.yml与导出靶标
-        this.createImageAndServiceYml(imagePath, singleImagePath, parseResult.getDevices());
+        this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices());
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
-        parseResult.getIdConvert().forEach((k, v) -> {
+        resultV1.getIdConvert().forEach((k, v) -> {
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
             convertInfo.setId(v);
             convertInfo.setOriginId(k);
@@ -62,7 +71,7 @@ public class SceneExporter {
         return exportResult;
     }
 
-    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenter.Device> devices) {
+    private void createImageAndServiceYml(String imagePath, String singleImagePath, List<SceneParseResourceCenterV2.Device> devices) {
         if (CollectionUtils.isNotEmpty(devices)) {
             for (var device : devices) {
                 String currentImageDir = null;
@@ -211,7 +220,7 @@ public class SceneExporter {
         }
     }
 
-    private void createSceneYml(YmlParseResultV2 ymlParseResult, String envPath) {
+    private void createSceneYml(YmlParseResultV2 ymlParseResult, String envPath, String name) {
         DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         Yaml yaml = new Yaml(new SceneRepresenter(), dumperOptions);
@@ -220,7 +229,7 @@ public class SceneExporter {
             content = StringUtils.replace(content, e.getKey(), e.getValue());
         }
         try {
-            FileUtils.write(new File(envPath + "/topo.yml"), content, "utf8");
+            FileUtils.write(new File(envPath + "/" + name + ".yml"), content, "utf8");
         } catch (IOException e) {
             e.printStackTrace();
         }
