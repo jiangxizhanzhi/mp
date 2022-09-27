@@ -458,7 +458,9 @@ public class InitiateHandler extends HandlerCommon {
             ipPool.addAll(gatewayIpPool);
             if (!portIps.contains(network.getGateway())) {
                 // 网关未分配 则放入地址池的最后等待分配
-                ipPool.add(network.getGateway());
+                if (!Boolean.TRUE.equals(network.getGatewayOff())) {
+                    ipPool.add(network.getGateway());
+                }
             }
             network.getExcloudIps().addAll(existIps);
             network.getExcloudIps().addAll(ipPool);
@@ -1111,6 +1113,7 @@ public class InitiateHandler extends HandlerCommon {
         network.setAllocationPools(element.getAllocationPools());
         network.setDnsNameservers(element.getDnsNameservers());
         network.setGateway(element.getGateway());
+        network.setGatewayOff(element.getGatewayOff());
         network.setCidr(element.getCidr());
         network.setHostRoutes(element.getHostRoutes());
         network.setVlan(element.getVlan());

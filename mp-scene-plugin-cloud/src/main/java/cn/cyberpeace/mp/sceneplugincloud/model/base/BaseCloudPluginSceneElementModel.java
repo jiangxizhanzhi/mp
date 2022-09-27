@@ -57,6 +57,8 @@ public class BaseCloudPluginSceneElementModel extends BasePluginSceneElementMode
     private String cidr;
     @DefaultStr
     private String gateway;
+    @DefaultBool
+    private Boolean gatewayOff;
     @DefaultStr
     private String dnsNameservers;
     @DefaultBool(true)

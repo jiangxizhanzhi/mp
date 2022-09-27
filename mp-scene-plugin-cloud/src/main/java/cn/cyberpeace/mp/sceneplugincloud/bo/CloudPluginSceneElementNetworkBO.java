@@ -38,6 +38,8 @@ public class CloudPluginSceneElementNetworkBO extends ModelBO<CloudPluginSceneEl
     private String cidr;
     @ApiModelProperty(value = "虚拟交换机网关")
     private String gateway;
+    @ApiModelProperty(value = "关闭虚拟交换机网关的分配")
+    private Boolean gatewayOff;
     @ApiModelProperty(value = "虚拟交换机dns")
     private List<String> dnsNameservers;
     @ApiModelProperty(value = "虚拟交换机是否开启dhcp")
