@@ -344,6 +344,9 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
     }
 
     public void setSharedUser(List<CsceneBO> csceneBOs, CsceneQueryParams queryParams) {
+        if (CollectionUtils.isEmpty(csceneBOs)) {
+            return;
+        }
         // 设置场景模板授权用户列表
         if (Objects.nonNull(queryParams.getType()) && queryParams.getType() == CsceneModel.Type.TEMPLATE) {
             HumanCondition humanCondition = new HumanCondition()
