@@ -64,7 +64,7 @@ public class UserImportService {
 
             ServiceResult<Integer> re2 = tenantUserService.bulkCreate(tenantUserModels);
             if (!Objects.equals(tenantUserModels.size(), re2.getSource())) {
-                log.error("orgUserModels.size:{} and re.getSource:{} not same!", tenantUserModels.size(), re2.getSource());
+                log.error("tenantUserModels.size:{} and re.getSource:{} not same!", tenantUserModels.size(), re2.getSource());
                 throw new MpRuntimeException(AuthErrorCode.USER_ORG_ADD_ERROR);
             }
         }
