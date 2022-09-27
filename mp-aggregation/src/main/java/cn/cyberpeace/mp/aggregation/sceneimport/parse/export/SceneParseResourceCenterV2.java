@@ -12,17 +12,16 @@ import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2
 import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigAreaBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
-import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.sceneconfig.SceneConfigHandler;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleAction;
 import cn.cyberpeace.mp.sceneplugincloud.constant.FirewallRuleDirection;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudSceneConfigPluginHandler;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -30,10 +29,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -254,35 +251,43 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
                         node.getNet().add(netElementParseResult);
                         var pluginPort = pluginHandler.getPort(p.getId());
                         if (CollectionUtils.isNotEmpty(pluginPort.getFirewallRules())) {
-                            pluginPort.getFirewallRules().forEach(r -> {
-                                AclsInfo aclsInfo = new AclsInfo();
-                                aclsInfo.setProtocol(r.getProtocol());
-                                aclsInfo.setTargetPort(r.getDestinationPort());
-                                aclsInfo.setTargetIP(r.getDestinationIpAddress());
-                                aclsInfo.setSourcePort(r.getSourcePort());
-                                aclsInfo.setSourceIP(r.getSourceIpAddress());
-                                aclsInfo.setAction(r.getAction());
-                                if (FirewallRuleDirection.EGRESS.equals(r.getDirection())) {
-                                    aclsInfo.setDirection("up");
-                                } else if (FirewallRuleDirection.INGRESS.equals(r.getDirection())) {
-                                    aclsInfo.setDirection("down");
-                                } else if (FirewallRuleDirection.BOTH.equals(r.getDirection())) {
-                                    aclsInfo.setDirection("two-way");
-                                }
-
-                                if (FirewallRuleAction.DENY.equals(r.getAction())) {
-                                    aclsInfo.setAction("deny");
-                                } else if (FirewallRuleAction.ALLOW.equals(r.getAction())) {
-                                    aclsInfo.setAction("allow");
-                                } else if (FirewallRuleAction.REJECT.equals(r.getAction())) {
-                                    aclsInfo.setAction("reject");
-                                }
-                            });
+                            netElementParseResult.setAcls(this.buildAclsInfos(pluginPort));
                         }
                     }
                 });
             }
         }
+    }
+
+    private List<AclsInfo> buildAclsInfos(CloudPluginSceneConfigElementPortBO pluginPort) {
+        List<AclsInfo> aclsInfos = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(pluginPort.getFirewallRules())) {
+            for (var r : pluginPort.getFirewallRules()) {
+                AclsInfo aclsInfo = new AclsInfo();
+                aclsInfo.setProtocol(r.getProtocol());
+                aclsInfo.setTargetPort(r.getDestinationPort());
+                aclsInfo.setTargetIP(r.getDestinationIpAddress());
+                aclsInfo.setSourcePort(r.getSourcePort());
+                aclsInfo.setSourceIP(r.getSourceIpAddress());
+                aclsInfo.setAction(r.getAction());
+                if (FirewallRuleDirection.EGRESS.equals(r.getDirection())) {
+                    aclsInfo.setDirection("up");
+                } else if (FirewallRuleDirection.INGRESS.equals(r.getDirection())) {
+                    aclsInfo.setDirection("down");
+                } else if (FirewallRuleDirection.BOTH.equals(r.getDirection())) {
+                    aclsInfo.setDirection("two-way");
+                }
+                if (FirewallRuleAction.DENY.equals(r.getAction())) {
+                    aclsInfo.setAction("deny");
+                } else if (FirewallRuleAction.ALLOW.equals(r.getAction())) {
+                    aclsInfo.setAction("allow");
+                } else if (FirewallRuleAction.REJECT.equals(r.getAction())) {
+                    aclsInfo.setAction("reject");
+                }
+                aclsInfos.add(aclsInfo);
+            }
+        }
+        return aclsInfos;
     }
 
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneConfigElementBO e, CloudPluginSceneConfigElementBO pluginElement) {
@@ -333,10 +338,15 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
         nodeElementParseResult.setStaticRouters(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(pluginElement.getStaticRoutes())) {
             pluginElement.getStaticRoutes().forEach(s -> {
+                // staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
+                StaticRoutesResult resulta = new StaticRoutesResult();
+                resulta.setGateway(s.getNexthop());
+                resulta.setDestination(s.getDestination());
+                nodeElementParseResult.getStaticRoutes().add(resulta);
+
                 StaticRoutesResult result = new StaticRoutesResult();
                 result.setGateway(s.getNexthop());
                 result.setDestination(s.getDestination());
-                nodeElementParseResult.getStaticRoutes().add(result);
                 nodeElementParseResult.getStaticRouters().add(result);
             });
         }
