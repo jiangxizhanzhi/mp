@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneBO;
 import cn.cyberpeace.mp.scene.core.bo.*;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
@@ -18,8 +17,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -60,6 +61,8 @@ class ConvertDataContainer {
     private Map<String, String> entityPortId2Name = new HashMap<>();
 
     private String sceneFilePath;
+
+    private Set<String> simpleLayer3Switch = new HashSet<>();
 
     public void putImageInfo(String image, ImageInfoParseResult result) {
         this.imageInfos.put(image, result);
@@ -176,5 +179,9 @@ class ConvertDataContainer {
 
     public void addNode2NodePort(String fromNode, String toNode, SceneConfigElementPortBO fromPort) {
         this.node2NodePort.put(fromNode + "_" + toNode, fromPort);
+    }
+
+    public Set<String> getSimpleLayer3Switch() {
+        return simpleLayer3Switch;
     }
 }

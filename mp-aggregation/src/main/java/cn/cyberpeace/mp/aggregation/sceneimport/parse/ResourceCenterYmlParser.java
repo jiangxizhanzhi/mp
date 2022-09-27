@@ -26,11 +26,21 @@ public final class ResourceCenterYmlParser {
 
     public static YmlParseResult parseTopoYml(String filePath) {
         YmlParseResult result = null;
-        try {
-            result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
-        } catch (Exception e) {
-            YmlParseResultV2 resultV2 = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResultV2.class).parse();
-            result = resultV2.convert();
+        File topoV2 = new File(filePath + FILE_PATH_SEPARATOR + "topo2.yml");
+        if (topoV2.exists()) {
+            try {
+                result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo2.yml", YmlParseResult.class).parse();
+            } catch (Exception e) {
+                YmlParseResultV2 resultV2 = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo2.yml", YmlParseResultV2.class).parse();
+                result = resultV2.convert();
+            }
+        } else {
+            try {
+                result = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResult.class).parse();
+            } catch (Exception e) {
+                YmlParseResultV2 resultV2 = new FilePathYmlParser<>(filePath + FILE_PATH_SEPARATOR + "topo.yml", YmlParseResultV2.class).parse();
+                result = resultV2.convert();
+            }
         }
 
         if (CollectionUtils.isNotEmpty(result.getNodes())) {

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * @Author maojun
  * @Date 2022/8/20
  */
-public class SceneParseResourceCenter {
+public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
 
     public Result parseAndLoadInfo(String sceneId) {
         SceneConfigHandler sceneConfigHandler = new SceneConfigHandler(sceneId, null, false, null);
@@ -85,7 +85,6 @@ public class SceneParseResourceCenter {
         result.setIdConvert(idConvert);
         return result;
     }
-
 
     private void handlerShapes(SceneConfigHandler sceneHandler, List<SceneElementShape> shapes, Map<String, String> idConvert) {
         if (sceneHandler.getAreaMap() == null || sceneHandler.getAreaMap().isEmpty()) {
@@ -136,8 +135,7 @@ public class SceneParseResourceCenter {
             var pluginElement = pluginHandler.getElement(e.getId());
             var role = pluginElement.getRole();
             if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK ||
-                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY ||
-                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                    role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_2_GATEWAY) {
                 var networkElementParseResult = this.buildNetworkElementParseResultV2(e, pluginElement);
 
                 try {
@@ -157,6 +155,50 @@ public class SceneParseResourceCenter {
                     networkElementParseResult.setId("internet-" + networkIndex++);
                 } else {
                     networkElementParseResult.setId("network-" + networkIndex++);
+                }
+            } else if (role == BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_SIMPLE_SWITCH) {
+                Integer virtualType = pluginElement.getVirtualType();
+                if (virtualType == BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER) {
+                    var networkElementParseResult = this.buildNetworkElementParseResultV2(e, pluginElement);
+
+                    try {
+                        if (StringUtils.isNotEmpty(e.getPosition2())) {
+                            Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                            if (position != null) {
+                                networkElementParseResult.setPosition(position.getX() + "," + position.getY());
+                            }
+                        }
+                    } catch (Exception exception) {
+                        // do nothing
+                    }
+
+                    id2Network.put(e.getId(), networkElementParseResult);
+                    networks.add(networkElementParseResult);
+                    if (pluginElement.getRole() == BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        networkElementParseResult.setId("internet-" + networkIndex++);
+                    } else {
+                        networkElementParseResult.setId("network-" + networkIndex++);
+                    }
+
+                    var nodeElementParseResult = new NodeElementParseResult();
+                    nodeElementParseResult.setId("router-" + networkElementParseResult.getId());
+                    id2Node.put(e.getId(), nodeElementParseResult);
+                    nodes.add(nodeElementParseResult);
+                } else {
+                    var nodeElementParseResult = this.buildNodeElementParseResult(e, pluginElement);
+                    try {
+                        if (StringUtils.isNotEmpty(e.getPosition2())) {
+                            Origin position = JsonCommon.parse(e.getPosition2(), Origin.class);
+                            if (position != null) {
+                                nodeElementParseResult.setPosition(position.getX() + "," + position.getY());
+                            }
+                        }
+                    } catch (Exception exception) {
+                        // do nothing
+                    }
+                    nodeElementParseResult.setId("server-" + serverIndex++);
+                    id2Node.put(e.getId(), nodeElementParseResult);
+                    nodes.add(nodeElementParseResult);
                 }
             } else {
                 var nodeElementParseResult = this.buildNodeElementParseResult(e, pluginElement);
@@ -243,65 +285,6 @@ public class SceneParseResourceCenter {
         }
     }
 
-    private void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
-        Map<String, Integer> fileName2Index = new HashMap<>();
-        fileName2Index.put("file", 1);
-        for (var node : nodes) {
-            if (StringUtils.isNotEmpty(node.getFile())) {
-                String file = node.getFile();
-                // 获取name
-                int fileNameIndex = node.getFile().lastIndexOf("=");
-                if (fileNameIndex > -1) {
-                    node.setFile(StringUtils.substring(file, fileNameIndex, file.length()));
-                    node.setFile(StringUtils.replace(node.getFile(), "=", ""));
-                } else {
-                    node.setFile("file");
-                }
-                if (fileName2Index.containsKey(node.getFile())) {
-                    int index = fileName2Index.get(node.getFile());
-                    node.setFile(index + node.getFile());
-                    fileName2Index.put(node.getFile(), index + 1);
-                } else {
-                    fileName2Index.put(node.getFile(), 1);
-                }
-                file2Download.put(node.getFile(), file);
-            }
-        }
-    }
-
-    private void handleNodeImage(SceneConfigHandler sceneHandler, Map<String, NodeElementParseResult> id2Node, List<Device> devices) {
-        CloudSceneConfigPluginHandler pluginHandler = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
-        Set<String> existImage = new HashSet<>();
-        for (String nodeId : id2Node.keySet()) {
-            var node = pluginHandler.getElement(nodeId);
-            if (node != null) {
-                if (!BaseCloudPluginSceneElementModel.ImageType.VM.equals(node.getImageType())
-                        && !BaseCloudPluginSceneElementModel.ImageType.CONTAINER.equals(node.getImageType())) {
-                    continue;
-                }
-                if (StringUtils.isEmpty(node.getImage())) {
-                    continue;
-                }
-                if (!existImage.add(node.getImage())) {
-                    continue;
-                }
-                Device device = new Device();
-                device.setImage(node.getImage());
-                device.setAccessModes(new ArrayList<>());
-                devices.add(device);
-                var element = sceneHandler.getElement(nodeId);
-                device.setLogo(element.getIcon2());
-                if (CollectionUtils.isNotEmpty(element.getPorts())) {
-                    for (var p : element.getPorts()) {
-                        if (CollectionUtils.isNotEmpty(p.getAccessModes())) {
-                            device.getAccessModes().addAll(p.getAccessModes());
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneConfigElementBO e, CloudPluginSceneConfigElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         networkElementParseResult.setName(e.getName());
@@ -358,40 +341,5 @@ public class SceneParseResourceCenter {
             });
         }
         return nodeElementParseResult;
-    }
-
-    @Getter
-    @Setter
-    public static class Result {
-        private YmlParseResultV2 ymlResult;
-
-        private Map<String, String> file2Download = new HashMap<>();
-
-        private List<Device> devices = new ArrayList<>();
-
-        private Map<String, String> idConvert = new HashMap<>();
-    }
-
-    @Setter
-    @Getter
-    public static class Device {
-        private String image;
-        private String logo;
-        private List<AccessMode> accessModes;
-    }
-
-    @Getter
-    @Setter
-    private static class Position {
-        private Origin origin;
-        private double height;
-        private double width;
-    }
-
-    @Getter
-    @Setter
-    private static class Origin {
-        private double x;
-        private double y;
     }
 }
