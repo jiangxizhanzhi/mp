@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.auth.dto.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
-import cn.cyberpeace.mp.auth.service.OrgUserService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -35,14 +35,15 @@ import java.util.List;
 public class OrgUserController {
 
     @Autowired
-    private OrgUserService orgUserService;
+    private TenantUserService tenantUserService;
+
 
     @ApiOperation(value = "分页查询组织下所有用户信息（默认查询组织下所有层级子组织的用户，" +
             "可以通过设置showAllUnderLevel=false来关闭默认，只显示当前组织绑定的用户），附带组织，角色信息", notes = "")
     @GetMapping("/page/byorg")
     public ListObjServiceResult<Object> getPageByOrg(OrgUserPageRequest req) {
         req.ensure();
-        PageInfo pageInfo = orgUserService.pageUsersByOrg(req);
+        PageInfo pageInfo = tenantUserService.pageUsersByOrg(req);
 
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
@@ -52,7 +53,7 @@ public class OrgUserController {
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/list/byorg")
     public ServiceResult<List<UserModel>> getByOrg(@RequestParam String orgId) {
-        List<UserModel> users = orgUserService.listUsersByOrgId(orgId);
+        List<UserModel> users = tenantUserService.listUsersByOrgId(orgId);
         return ResultCommon.success(users);
     }
 
@@ -61,17 +62,16 @@ public class OrgUserController {
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/hierarchical/byuser")
     public ServiceResult listHierarchicalOrgs(@RequestParam String userId) {
-        List<OrgDto> orgDtos = orgUserService.listHierarchicalOrgsByUserId(userId);
+        List<OrgDto> orgDtos = tenantUserService.listHierarchicalOrgsByUserId(userId);
         return ServiceResult.builder().source(orgDtos).build().asResult();
     }
-
 
 
     @ApiOperation(value = "增量绑定组织-用户关系！", notes = "")
     @ApiImplicitParam(name = "bindOrgUsersReq", value = "绑定请求体", dataTypeClass = BindOrgUsersRequest.class)
     @PostMapping("/bind")
     public ServiceResult bindOrgUsersAdditional(@RequestBody @Validated BindOrgUsersRequest bindOrgUsersReq) {
-        boolean success = orgUserService.additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
+        boolean success = tenantUserService.additionalBindOrgUsers(bindOrgUsersReq.getOrgId(), bindOrgUsersReq.getUserIds());
         if (success) {
             return ResultCommon.success();
         } else {
@@ -85,7 +85,7 @@ public class OrgUserController {
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/allorgpath/byuser")
     public ServiceResult getAllOrgPath(@RequestParam String userId) {
-        String allOrgPath = orgUserService.getAllOrgPathByUserId(userId);
+        String allOrgPath = tenantUserService.getAllOrgPathByUserId(userId);
         return ResultCommon.success(allOrgPath);
     }
 
@@ -93,9 +93,7 @@ public class OrgUserController {
     @ApiImplicitParam(name = "orgId", value = "组织ID", dataTypeClass = String.class)
     @GetMapping("/usercnt")
     public ServiceResult<Integer> getUserCnt(@RequestParam String orgId) {
-        Integer userCnt = orgUserService.getUserCnt(orgId);
+        Integer userCnt = tenantUserService.getUserCnt(orgId);
         return ResultCommon.success(userCnt);
     }
-
-
 }
