@@ -247,6 +247,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
             var user = userId2User.get(userId);
             sharedUser.setId(userId);
             sharedUser.setName(user.getName());
+            // 目前用户只会有一个组织
             sharedUser.setOrganization(user.getOrgIds().get(0));
             sharedUser.setOrganizationNameAll(StringUtils.join(user.getOrgpaths().get(0), "/"));
             sharedUser.setUsername(user.getUsername());
