@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortConnectionBO;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.AllocationPool;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import lombok.Getter;
 import lombok.Setter;
@@ -79,8 +80,24 @@ class NetworkElementConverter implements IConverter {
         } else {
             pluginElement.setDhcp("on".equals(network.getDhcp()) || "true".equals(network.getDhcp()));
         }
-        // TODO: 设置地址池
-//        pluginElement.setAllocationPools();
+        if (StringUtils.isNotEmpty(network.getDhcpPool())) {
+            List<AllocationPool> allocationList = new ArrayList<>();
+            String[] allocationStrs = StringUtils.split(network.getDhcpPool(), ",");
+            if (allocationStrs != null && allocationStrs.length > 0) {
+                for (String dhcpStr : allocationStrs) {
+                    String[] dhcpStartAndEnd = StringUtils.split(dhcpStr, "-");
+                    if (dhcpStartAndEnd != null && dhcpStartAndEnd.length == 2) {
+                        AllocationPool allocationPool = new AllocationPool();
+                        allocationPool.setStart(dhcpStartAndEnd[0]);
+                        allocationPool.setEnd(dhcpStartAndEnd[1]);
+                        allocationList.add(allocationPool);
+                    }
+                }
+                if (CollectionUtils.isNotEmpty(allocationList)) {
+                    pluginElement.setAllocationPools(allocationList);
+                }
+            }
+        }
         if (!StringUtils.isEmpty(network.getDns())) {
             if (network.getDns().contains(",")) {
                 String[] dnsArray = StringUtils.split(network.getDns(), ",");
