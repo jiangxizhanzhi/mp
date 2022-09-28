@@ -32,7 +32,7 @@ public class NodeElementParseResult {
         return StringUtils.isNotEmpty(image) ? image : images;
     }
 
-    public List<StaticRoutesResult> getStaticRoutes() {
+    public List<StaticRoutesResult> getUsedStaticRoutes() {
         if (CollectionUtils.isNotEmpty(staticRoutes)) {
             return staticRoutes;
         } else if (CollectionUtils.isNotEmpty(staticRouters)) {

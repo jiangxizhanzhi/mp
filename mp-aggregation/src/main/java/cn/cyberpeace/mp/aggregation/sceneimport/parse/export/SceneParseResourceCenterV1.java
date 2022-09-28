@@ -272,10 +272,15 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
         nodeElementParseResult.setStaticRouters(new ArrayList<>());
         if (CollectionUtils.isNotEmpty(pluginElement.getStaticRoutes())) {
             pluginElement.getStaticRoutes().forEach(s -> {
+                // staticRoutes 和 staticRouters不能有相同对象,否则生成yml会多出特殊字符
+                StaticRoutesResult resulta = new StaticRoutesResult();
+                resulta.setGateway(s.getNexthop());
+                resulta.setDestination(s.getDestination());
+                nodeElementParseResult.getStaticRoutes().add(resulta);
+
                 StaticRoutesResult result = new StaticRoutesResult();
                 result.setGateway(s.getNexthop());
                 result.setDestination(s.getDestination());
-                nodeElementParseResult.getStaticRoutes().add(result);
                 nodeElementParseResult.getStaticRouters().add(result);
             });
         }

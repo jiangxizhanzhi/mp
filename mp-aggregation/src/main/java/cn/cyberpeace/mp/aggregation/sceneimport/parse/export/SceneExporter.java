@@ -244,7 +244,7 @@ public class SceneExporter {
         result.put("initCommands", "init_commands");
         result.put("dhcpPool", "dhcp-pool");
         result.put("staticRouters", "static-routers");
-        result.put("staticRoutes", "static-routers");
+        result.put("staticRoutes", "static-routes");
         result.put("sourceIp", "source-iP");
         result.put("sourcePort", "source-port");
         result.put("targetIP", "target-iP");

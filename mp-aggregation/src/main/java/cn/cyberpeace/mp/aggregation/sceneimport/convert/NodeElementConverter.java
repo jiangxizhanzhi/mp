@@ -125,8 +125,8 @@ class NodeElementConverter implements IConverter {
         container.putPluginElement(sceneConfigElementBO.getId(), pluginElement);
 
         // 路由器加入 static-routes
-        if (CollectionUtils.isNotEmpty(node.getStaticRoutes())) {
-            List<StaticRoute> routes = node.getStaticRoutes().stream()
+        if (CollectionUtils.isNotEmpty(node.getUsedStaticRoutes())) {
+            List<StaticRoute> routes = node.getUsedStaticRoutes().stream()
                     .map(s -> {
                         StaticRoute staticRoute = new StaticRoute();
                         staticRoute.setDestination(s.getDestination());
