@@ -372,7 +372,7 @@ public class InitiateHandler extends HandlerCommon {
                     for (int i = 0; i < 5; i++) {
                         gateway = IpUtils.newAllocateDefaultRouterIps(network.getCidr(), 1, excludeIps, network.getAllocationPools()).get(0);
                         excludeIps.add(gateway);
-                        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway);
+                        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, network.getCidr());
                         if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                             possibleDhcpIps = new ArrayList<>();
                         }
@@ -393,7 +393,7 @@ public class InitiateHandler extends HandlerCommon {
             }
             existIps.add(network.getGateway());
             if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate()) && Boolean.TRUE.equals(network.getDhcp())) {
-                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway());
+                List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getGateway(), network.getCidr());
                 for (String possibleDhcpIp : possibleDhcpIps) {
                     if (!existIps.contains(possibleDhcpIp) && !possibleDhcpIp.endsWith("255")) {
                         network.setDhcpIp(possibleDhcpIp);
@@ -1134,7 +1134,7 @@ public class InitiateHandler extends HandlerCommon {
                     if (CollectionUtils.isEmpty(ports)) {
                         continue;
                     }
-                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools(),network.getNetwork().getCidr());
                     if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                         possibleDhcpIps = new ArrayList<>();
                     }
@@ -1201,7 +1201,7 @@ public class InitiateHandler extends HandlerCommon {
                     if (CollectionUtils.isEmpty(ports)) {
                         continue;
                     }
-                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools());
+                    List<String> possibleDhcpIps = this.getPossibleDhcpIps(network.getNetwork().getGateway(), network.getNetwork().getAllocationPools(), network.getNetwork().getCidr());
                     if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                         possibleDhcpIps = new ArrayList<>();
                     }
@@ -1250,8 +1250,8 @@ public class InitiateHandler extends HandlerCommon {
     }
 
 
-    private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools) {
-        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway);
+    private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools,String cidr) {
+        List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, cidr);
         if (CollectionUtils.isNotEmpty(allocationPools)) {
             allocationPools.forEach(p -> {
                 if (StringUtils.isNotEmpty(p.getStart())) {
@@ -1262,10 +1262,19 @@ public class InitiateHandler extends HandlerCommon {
         return possibleDhcpIps;
     }
 
-    private List<String> getPossibleDhcpIps(String gateway) {
+    private List<String> getPossibleDhcpIps(String gateway, String cidr) {
         Set<String> possibleDhcpIps = new HashSet<>();
+        if (StringUtils.isNotEmpty(cidr)) {
+            String firstIp = IpUtils.beginIp(cidr);
+            possibleDhcpIps.add(IpUtils.nextIp(firstIp));
+        }
         if (gateway.endsWith(".254")) {
-            possibleDhcpIps.add(gateway.replace(".254", ".1"));
+            int index = StringUtils.lastIndexOf(gateway, ".");
+            String prefix = StringUtils.substring(gateway, 0, index);
+            String ip = StringUtils.joinWith(".", prefix, "1");
+            if (StringUtils.isNotEmpty(cidr) && IpUtils.newIsInCidr(ip, cidr)) {
+                possibleDhcpIps.add(ip);
+            }
         }
         possibleDhcpIps.add(IpUtils.nextIp(gateway));
         return new ArrayList<>(possibleDhcpIps);
