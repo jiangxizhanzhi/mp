@@ -64,6 +64,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -679,9 +680,14 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
-        var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
-        SceneInstanceLinkCacheUtil.tryStartCronRefresh();
-        return new ServiceResult<>(list);
+        try {
+            var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
+            SceneInstanceLinkCacheUtil.tryStartCronRefresh();
+            return new ServiceResult<>(list);
+        } catch (Exception e) {
+            log.error("failed get link status for scene {} , message is {}", sceneId, ExceptionUtils.getStackTrace(e));
+            return new ServiceResult<>(new ArrayList<>());
+        }
     }
 
     public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command) {
