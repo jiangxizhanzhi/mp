@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -221,6 +222,8 @@ public class SceneInstanceLinkCacheUtil {
                 }
             }
             if (CollectionUtils.isNotEmpty(tasks)) {
+                //避免极端情况下 部分节点不刷新
+                Collections.shuffle(tasks);
                 taskPool.runTasks(tasks);
             }
         } catch (Exception e) {
