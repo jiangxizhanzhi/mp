@@ -16,6 +16,7 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Remote;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusParams;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.LinkStatusResultData;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudhttp.CloudResponse;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -58,7 +59,7 @@ public class SceneInstanceLinkCacheUtil {
 
     private static LinkStatusTaskPool taskPool;
 
-    private static Set<String> existsNodeTask = new HashSet<>();
+    private static Set<String> existsNodeTask = new ConcurrentHashSet<>();
 
     public static void init() {
         if (!cacheInit) {
@@ -169,9 +170,10 @@ public class SceneInstanceLinkCacheUtil {
                     for (var p : n.getConnectionStatusList()) {
                         String taskKey = getKey(n.getResourceId(), p.getNetworkId());
                         // 已有相同任务,则不处理
-                        if (existsNodeTask.add(taskKey)) {
+                        if (!existsNodeTask.contains(taskKey)) {
                             tasks.add(() -> {
                                 try {
+                                    existsNodeTask.add(taskKey);
                                     LinkStatusParams params = new LinkStatusParams();
                                     params.setInstanceId(n.getResourceId());
                                     params.setNetworkId(p.getNetworkId());
@@ -196,7 +198,7 @@ public class SceneInstanceLinkCacheUtil {
                     }
                 } else if (StringUtils.isNotEmpty(n.getDefaultNetworkId())) {
                     String taskKey = getKey(n.getResourceId(), n.getDefaultNetworkId());
-                    if (existsNodeTask.add(taskKey)) {
+                    if (!existsNodeTask.contains(taskKey)) {
                         tasks.add(() -> {
                             try {
                                 existsNodeTask.add(taskKey);
