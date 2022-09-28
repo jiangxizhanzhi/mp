@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.cscene.dto.scene;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  * @Date 2022/1/20
  */
 @Slf4j
+@Getter
 public class SceneStateInfo {
     private SceneModel sceneModel;
 

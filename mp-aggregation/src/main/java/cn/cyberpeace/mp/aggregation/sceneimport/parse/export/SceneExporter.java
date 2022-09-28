@@ -140,6 +140,8 @@ public class SceneExporter {
                         }
                         if (Boolean.TRUE.equals(m.getProxy())) {
                             accessModeParseResult.setIsproxy("true");
+                        } else {
+                            accessModeParseResult.setIsproxy("false");
                         }
                         accessModeParseResult.setPassword(m.getPassword());
                         accessModeParseResult.setUsername(m.getUsername());
