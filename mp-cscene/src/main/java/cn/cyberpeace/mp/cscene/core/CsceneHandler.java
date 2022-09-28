@@ -147,7 +147,11 @@ public class CsceneHandler extends BaseCsceneHandler<
                     String.valueOf(updateResult.getExistNode()), String.valueOf(updateResult.getCurrentNode())));
         }
         instanceHandler.create();
-        return instanceHandler.toData();
+        var result = instanceHandler.toData();
+        if (result.getScene() != null && result.getScene().getTopology() != null && result.getScene().getTopology().getScene() != null) {
+            result.getScene().getTopology().getScene().setProgressPercentage(5);
+        }
+        return result;
     }
 
     public CsceneHandler(CsceneBO csceneBO, CsceneContextBO context) {
