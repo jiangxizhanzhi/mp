@@ -61,7 +61,7 @@ public class SceneExporter {
         this.createImageAndServiceYml(imagePath, singleImagePath, resultV1.getDevices());
         ExportResult exportResult = new ExportResult();
         List<ExportResult.ConvertInfo> convertInfos = new ArrayList<>();
-        resultV1.getIdConvert().forEach((k, v) -> {
+        parseResult.getIdConvert().forEach((k, v) -> {
             ExportResult.ConvertInfo convertInfo = new ExportResult.ConvertInfo();
             convertInfo.setId(v);
             convertInfo.setOriginId(k);
