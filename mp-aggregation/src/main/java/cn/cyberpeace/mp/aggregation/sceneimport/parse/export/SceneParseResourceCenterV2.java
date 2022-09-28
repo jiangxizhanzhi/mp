@@ -52,13 +52,13 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
         Map<String, NetworkElementParseResultV2> id2Network = new HashMap<>();
         Map<String, NodeElementParseResult> id2Node = new HashMap<>();
         this.parseNodeAndNet(sceneConfigHandler, ymlParseResult.getNetworks(), ymlParseResult.getNodes(), id2Network, id2Node);
-        // 建立nodeId和转换成yml之后id的映射关系
+        // 建立nodeId和转换成yml之后id的映射关系 先node 后 net
         Map<String, String> idConvert = new HashMap<>();
-        for (String nodeId : id2Network.keySet()) {
-            idConvert.put(nodeId, id2Network.get(nodeId).getId());
-        }
         for (String nodeId : id2Node.keySet()) {
             idConvert.put(nodeId, id2Node.get(nodeId).getId());
+        }
+        for (String nodeId : id2Network.keySet()) {
+            idConvert.put(nodeId, id2Network.get(nodeId).getId());
         }
 
         // 处理连线
