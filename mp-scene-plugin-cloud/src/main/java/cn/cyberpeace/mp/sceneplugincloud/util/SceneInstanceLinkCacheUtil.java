@@ -23,6 +23,7 @@ import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -159,31 +160,58 @@ public class SceneInstanceLinkCacheUtil {
     }
 
     private static void loadStatus(String sceneId, List<NodeLinkStatusBO> nodeLinkStatusList) {
-        List<Runnable> tasks = new ArrayList<>();
-        Remote remote = new Remote();
-        for (var n : nodeLinkStatusList) {
-            if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
-                for (var p : n.getConnectionStatusList()) {
-                    String taskKey = getKey(n.getResourceId(), p.getNetworkId());
-                    // 已有相同任务,则不处理
+        try {
+            List<Runnable> tasks = new ArrayList<>();
+            Remote remote = new Remote();
+            for (var n : nodeLinkStatusList) {
+                if (CollectionUtils.isNotEmpty(n.getConnectionStatusList())) {
+                    for (var p : n.getConnectionStatusList()) {
+                        String taskKey = getKey(n.getResourceId(), p.getNetworkId());
+                        // 已有相同任务,则不处理
+                        if (existsNodeTask.add(taskKey)) {
+                            tasks.add(() -> {
+                                try {
+                                    LinkStatusParams params = new LinkStatusParams();
+                                    params.setInstanceId(n.getResourceId());
+                                    params.setNetworkId(p.getNetworkId());
+                                    if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
+                                        var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
+                                        }, true);
+                                        if (result.isSuccess()) {
+                                            n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
+                                            p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? ONLINE : OFFLINE);
+                                        } else {
+                                            log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
+                                        }
+                                    } else {
+                                        n.setStatus(ONLINE);
+                                        p.setStatus(ONLINE);
+                                    }
+                                } finally {
+                                    existsNodeTask.remove(taskKey);
+                                }
+                            });
+                        }
+                    }
+                } else if (StringUtils.isNotEmpty(n.getDefaultNetworkId())) {
+                    String taskKey = getKey(n.getResourceId(), n.getDefaultNetworkId());
                     if (existsNodeTask.add(taskKey)) {
                         tasks.add(() -> {
                             try {
+                                existsNodeTask.add(taskKey);
                                 LinkStatusParams params = new LinkStatusParams();
                                 params.setInstanceId(n.getResourceId());
-                                params.setNetworkId(p.getNetworkId());
+                                params.setNetworkId(n.getDefaultNetworkId());
                                 if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
                                     var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
                                     }, true);
                                     if (result.isSuccess()) {
                                         n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
-                                        p.setStatus(Boolean.TRUE.equals(result.getData().getInstanceLinkStatus()) ? ONLINE : OFFLINE);
                                     } else {
                                         log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
                                     }
                                 } else {
                                     n.setStatus(ONLINE);
-                                    p.setStatus(ONLINE);
                                 }
                             } finally {
                                 existsNodeTask.remove(taskKey);
@@ -191,35 +219,12 @@ public class SceneInstanceLinkCacheUtil {
                         });
                     }
                 }
-            } else if (StringUtils.isNotEmpty(n.getDefaultNetworkId())) {
-                String taskKey = getKey(n.getResourceId(), n.getDefaultNetworkId());
-                if (existsNodeTask.add(taskKey)) {
-                    tasks.add(() -> {
-                        try {
-                            existsNodeTask.add(taskKey);
-                            LinkStatusParams params = new LinkStatusParams();
-                            params.setInstanceId(n.getResourceId());
-                            params.setNetworkId(n.getDefaultNetworkId());
-                            if (CloudSingleton.cloudAppConfig.getLinkStatusEnabled()) {
-                                var result = remote.cloudGet(CloudUrlConstant.LINK_STATUS, params, new TypeReference<CloudResponse<LinkStatusResultData>>() {
-                                }, true);
-                                if (result.isSuccess()) {
-                                    n.setStatus(Boolean.TRUE.equals(result.getData().getInstanceStatus()) ? ONLINE : OFFLINE);
-                                } else {
-                                    log.error("failed to get link status , sceneId is {} , result is {}", sceneId, JsonCommon.stringify(result));
-                                }
-                            } else {
-                                n.setStatus(ONLINE);
-                            }
-                        } finally {
-                            existsNodeTask.remove(taskKey);
-                        }
-                    });
-                }
             }
-        }
-        if (CollectionUtils.isNotEmpty(tasks)) {
-            taskPool.runTasks(tasks);
+            if (CollectionUtils.isNotEmpty(tasks)) {
+                taskPool.runTasks(tasks);
+            }
+        } catch (Exception e) {
+            log.error("failed to load status for scene {}, message is {}", sceneId, ExceptionUtils.getStackTrace(e));
         }
     }
 
