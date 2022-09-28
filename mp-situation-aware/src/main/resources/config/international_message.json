@@ -210,9 +210,9 @@
     "en_name": "hardware information"
   },
   {
-    "name": "板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
-    "zh_name": "板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
-    "en_name": "Board serial number, CPU name, number of CPU cores, CPU frequency, total memory size, remaining memory, memory usage, total hard disk size, hard disk usage"
+    "name": "主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
+    "zh_name": "主板序列号、CPU名称、CPU核数、CPU主频、内存总大小、内存剩余、内存使用率、硬盘总大小、硬盘使用率",
+    "en_name": "Motherboard serial number, CPU name, number of CPU cores, CPU frequency, total memory size, remaining memory, memory usage, total hard disk size, hard disk usage"
   },
   {
     "name": "操作系统信息",
@@ -270,8 +270,8 @@
     "en_name": "registry change event"
   },
   {
-    "name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持HKEY_CURRENT_USER目录）",
-    "zh_name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持HKEY_CURRENT_USER目录）",
+    "name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）",
+    "zh_name": "包含size、mtime、inode、md5、sha1、sha256的变更（当监控目录时监控到5级子目录，不支持 HKEY_CURRENT_USER目录）",
     "en_name": "Including the changes of size, mtime, inode, md5, sha1, sha256 (when monitoring the directory, the level 5 subdirectory is monitored, and the HKEY_CURRENT_USER directory is not supported)"
   },
   {
