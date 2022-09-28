@@ -28,9 +28,9 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -228,6 +228,8 @@ public class SceneInstanceLinkCacheUtil {
                 Collections.shuffle(tasks);
                 taskPool.runTasks(tasks);
             }
+        } catch (RejectedExecutionException e) {
+            // do nothing
         } catch (Exception e) {
             log.error("failed to load status for scene {}, message is {}", sceneId, ExceptionUtils.getStackTrace(e));
         }
