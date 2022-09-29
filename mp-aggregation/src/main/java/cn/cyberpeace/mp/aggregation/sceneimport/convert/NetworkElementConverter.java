@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 import cn.cyberpeace.mp.aggregation.constant.CommonConstant;
 import cn.cyberpeace.mp.aggregation.constant.TargetConstant;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.NetworkElementParseResult;
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
@@ -11,9 +12,13 @@ import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +88,12 @@ class NetworkElementConverter implements IConverter {
         List<SceneConfigElementPortBO> ports = new ArrayList<>();
         sceneConfigElementBO.setPorts(ports);
 
+        if (StringUtils.isNotEmpty(network.getPosition())) {
+            String[] xy = network.getPosition().split(",");
+            Origin origin = new Origin(formatDouble(xy[0]), formatDouble(xy[1]));
+            sceneConfigElementBO.setPosition2(JsonCommon.stringify(origin));
+        }
+
         CloudPluginSceneConfigElementBO pluginElement = new CloudPluginSceneConfigElementBO();
         pluginElement.setCidr(network.getCidr());
         pluginElement.setGateway(network.getGateway());
@@ -144,5 +155,21 @@ class NetworkElementConverter implements IConverter {
             container.addConnection(connection);
         }
 
+    }
+
+    private double formatDouble(String number) {
+        return new BigDecimal(number).setScale(6, RoundingMode.HALF_DOWN).doubleValue();
+    }
+
+    @Getter
+    @Setter
+    private static class Origin {
+        private double x;
+        private double y;
+
+        public Origin(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
     }
 }
