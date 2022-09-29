@@ -224,6 +224,7 @@ public class CsceneController implements BaseModelListControllerBase {
         correctRequestCsceneParamsForAppInstance(request.getCscene());
         var result = modelService.createTestInstance(request.getId(), false, request.toCsceneInstanceCreateContextBO()).asResult();
         CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
+        log.error("test_instance_result , {}", JsonCommon.stringify(result));
         return result;
     }
 
