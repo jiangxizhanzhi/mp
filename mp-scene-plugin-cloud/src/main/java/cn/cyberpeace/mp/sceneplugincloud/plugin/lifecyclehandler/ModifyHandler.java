@@ -13,20 +13,27 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class ModifyHandler extends HandlerCommon {
 
     private ModifyInitiateHandler modifyInitiateHandler;
     private ModifyCreateHandler modifyCreateHandler;
+    private ModifyDeleteHandler modifyDeleteHandler;
 
-    public ModifyHandler(CloudScenePluginHandler pluginHandler) {
-        super(pluginHandler, CreateTaskPool.getInstance(), SceneModel.Event.CREATE);
-        this.modifyCreateHandler = new ModifyCreateHandler(pluginHandler, getTaskPool());
-        this.modifyInitiateHandler = new ModifyInitiateHandler(pluginHandler, getTaskPool());
+    public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin) {
+        super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
+        this.modifyInitiateHandler = new ModifyInitiateHandler(newPlugin, getTaskPool());
+        this.modifyCreateHandler = new ModifyCreateHandler(newPlugin, getTaskPool());
+        Set<String> originNodeIds = originPlugin.getSceneHandler().getElementMap().keySet();
+        Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
+        originNodeIds.removeAll(newNodeIds);
+        this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
     }
 
     public void modify() {
+        this.modifyDeleteHandler.delete();
         this.modifyInitiateHandler.initiate();
         this.modifyCreateHandler.create();
     }
@@ -122,6 +129,35 @@ public class ModifyHandler extends HandlerCommon {
                 return;
             }
             super.createElementProcess(cloudElement);
+        }
+    }
+
+    private static class ModifyDeleteHandler extends DeleteHandler {
+        private Set<String> deletedNodeIds;
+
+        public ModifyDeleteHandler(Set<String> deletedNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
+            super(pluginHandler);
+            setEvent(SceneModel.Event.MODIFY);
+            setTaskPool(taskPool);
+            this.deletedNodeIds = deletedNodeIds;
+        }
+
+        @Override
+        protected void prepareEventProcess() {
+            prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
+        }
+
+        protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
+            if (deletedNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                super.deleteElementProcess(cloudElement);
+            }
+        }
+
+        @Override
+        public void deleteAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {
+            if (deletedNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                super.deleteAuxiliaryNetworkProcess(cloudElement);
+            }
         }
     }
 }

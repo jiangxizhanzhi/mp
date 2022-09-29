@@ -304,8 +304,9 @@ public class DeleteHandler extends HandlerCommon {
         super(pluginHandler, DeleteTaskPool.getInstance(), SceneModel.Event.DELETE);
     }
 
+
     public void delete() {
-        prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
+        prepareEventProcess();
         // 优先删除实体设备
         List<CloudPluginSceneElementBO> entities = new ArrayList<>();
         getPluginHandler().getElementMap().values().forEach(e -> {
@@ -393,7 +394,7 @@ public class DeleteHandler extends HandlerCommon {
                 () -> deleteAuxiliaryNetwork(cloudElement));
     }
 
-    private void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
+    protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
         if (Boolean.TRUE.equals(cloudElement.getExternal()) && !ElementTypeUtils.isExternalTerminal(cloudElement)) {
             return;
         }
@@ -462,5 +463,9 @@ public class DeleteHandler extends HandlerCommon {
             result.addAll(connectionIds);
         }
         return result;
+    }
+
+    protected void prepareEventProcess() {
+        prepareEventProcess(SceneModel.Event.DELETE, SceneProcess.class, ElementProcess.class);
     }
 }

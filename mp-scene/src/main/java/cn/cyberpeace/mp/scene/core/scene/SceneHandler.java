@@ -484,21 +484,23 @@ public class SceneHandler extends BaseSceneHandler<
         return true;
     }
 
-    public boolean initiate1(boolean isSave) {
+    public boolean modify(SceneHandler originSceneHandler) {
         prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+
+        originSceneHandler.prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        originSceneHandler.startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+
         try {
             for (var plugin : getPlugins()) {
-                plugin.modify();
+                plugin.modify(originSceneHandler);
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.MODIFY, e.getMessage());
             return false;
         }
         overAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
-        if (isSave) {
-            save();
-        }
+        save();
         return true;
     }
 

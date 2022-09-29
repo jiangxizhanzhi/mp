@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.plugin.ScenePluginHandler;
 import cn.cyberpeace.mp.scene.core.plugin.stereotype.PluginKey;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneBO;
@@ -120,7 +121,6 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         initiateHandler = new InitiateHandler(this);
         createHandler = new CreateHandler(this);
         deleteHandler = new DeleteHandler(this);
-        modifyHandler = new ModifyHandler(this);
     }
 
     @Override
@@ -537,7 +537,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
                 srcElement.setType(BaseSceneElementModel.Type.ROUTER);
             }
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.VIRTUAL_ROUTER);
-        }  else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_LAYER_3_IMAGE_GATEWAY)) {
             if (isForceCorrectElementType) {
                 // TODO 暂定 - 三层镜像网关就是仿真路由
                 srcElement.setType(BaseSceneElementModel.Type.ROUTER);
@@ -562,7 +562,7 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
         } else if (role.equals(BaseCloudPluginSceneElementModel.Role.ENTITY_TERMINAL)) {
             srcElement.setType(BaseSceneElementModel.Type.TERMINAL);
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.ENTITY_NODE);
-        }else if(role.equals(BaseCloudPluginSceneElementModel.Role.NPC)){
+        } else if (role.equals(BaseCloudPluginSceneElementModel.Role.NPC)) {
             cloudElement.setVirtualType(BaseCloudPluginSceneElementModel.VirtualType.NPC);
         }
     }
@@ -584,8 +584,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void modify() {
-        modifyHandler.modify();
+    public void modify(SceneHandler originSceneHandler) {
+        new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this).modify();
     }
 
     @Override

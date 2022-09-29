@@ -2,7 +2,6 @@ package cn.cyberpeace.mp.scene.service;
 
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.scene.constant.SceneErrorCode;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
@@ -11,16 +10,15 @@ import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
+import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxy;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -28,7 +26,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -81,45 +78,29 @@ public class SceneService {
         return new ServiceResult<>(sceneHandler.toData());
     }
 
-    public ServiceResult<SceneDataBO> update(SceneDataBO sceneDataBO, SceneContextBO context) {
-        SceneHandler originSceneHandler = new SceneHandler(sceneDataBO.getTopology().getScene().getEid(), sceneDataBO.getTopology().getAreaId(), context);
-        SceneHandler sceneHandler;
-        try {
-            sceneHandler = new SceneHandler(sceneDataBO, false, context);
-            sceneHandler.setRealTimeUpdate(true);
-            if (sceneHandler.getScene() != null) {
-                sceneHandler.getScene().setCreateTime(null);
-            }
-//            sceneHandler.reformTopo();
-            sceneHandler.save();
-        } catch (SceneNotExistException e) {
-            return new ServiceResult<>(null, SceneErrorCode.SCENE_NOT_EXIST);
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
+        SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
+        SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
+        updatedSceneHandler.setRealTimeUpdate(true);
+        if (updatedSceneHandler.getScene() != null) {
+            updatedSceneHandler.getScene().setCreateTime(null);
         }
-
+        updatedSceneHandler.save();
         SceneTaskPool.getInstance().executeTask(() -> {
-            SceneHandler sceneHandler2 = new SceneHandler(sceneHandler.getSceneId(), null, context);
-            SceneHandler sceneHandlerProxy = SceneHandlerProxyBuilder.build(sceneHandler2);
-            var starTime = LocalDateTime.now();
-            sceneHandler2.getElementMap().values().forEach(e -> {
+            updatedSceneHandler.getElementMap().values().forEach(e -> {
                 e.setEvent(SceneElementModel.Event.DEFAULT);
                 e.setEventStatus(EventStatus.INITIAL);
             });
-            sceneHandlerProxy.initiate1(false);
 
-            var endTime = LocalDateTime.now();
-            var consumeSeconds = Duration.between(starTime, endTime).toSeconds();
-            sceneHandler2.getScene().setCreateConsumeSeconds(consumeSeconds);
-            sceneHandler2.updateScene();
-
-            var diff = sceneHandler.getDiffElements();
-            if (CollectionUtils.isNotEmpty(diff.getRemovingTargets())) {
-                diff.getRemovingTargets().forEach(e -> {
-                    originSceneHandler.deleteElements(e.getNodeId());
-                });
-            }
+            originSceneHandler.getElementMap().values().forEach(e -> {
+                e.setEvent(SceneElementModel.Event.DEFAULT);
+                e.setEventStatus(EventStatus.INITIAL);
+            });
+            SceneHandlerProxyBuilder.build(updatedSceneHandler);
+            SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
+            proxy.modify(originSceneHandler);
         });
-
-        return new ServiceResult<>(sceneHandler.toData());
+        return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
     public ServiceResult<SceneDataBO> createFromSceneConfig(SceneConfigDataBO sceneConfigDataBO,

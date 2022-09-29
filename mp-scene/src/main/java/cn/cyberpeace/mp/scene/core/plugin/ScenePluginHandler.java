@@ -124,7 +124,7 @@ public abstract class ScenePluginHandler<S extends BasePluginSceneBO<?, S, Scene
     /**
      * TODO: 修改场景
      */
-    public void modify() {
+    public void modify(SceneHandler updatedSceneHandler) {
 
     }
 
