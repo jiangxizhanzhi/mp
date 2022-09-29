@@ -222,22 +222,6 @@ public class CsceneController implements BaseModelListControllerBase {
         return result;
     }
 
-    @ApiOperation("创建场景模板应用实例")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
-    })
-    @PostMapping(value = "/app_instance1")
-    public ServiceResult<CsceneInstanceBO> createAppInstance1(
-            @RequestParam(required = false) String id, @RequestBody(required = false) CsceneUpdateInstanceRequest request) {
-        log.info("app_instance params,id:{},request:{}", id, JsonCommon.stringify(request));
-        request = formatUpdateInstanceRequest(request, id);
-//        correctRequestCsceneParamsForAppInstance(request.getCscene());
-        var result = modelService.createAppInstance1(request.getId(), false, request.toCsceneInstanceUpdateContextBO()).asResult();
-        CsceneLogUtils.recordSceneInstanceLog(result == null ? null : result.getData(), OpTypeEnums.START, CsceneLogUtils.START_SCENE, request.getContext());
-        return result;
-    }
-
     @ApiOperation("获取场景模板统计数据")
     @ApiImplicitParam(name = "ids", value = "请求参数", dataTypeClass = String[].class)
     @GetMapping("/stat")

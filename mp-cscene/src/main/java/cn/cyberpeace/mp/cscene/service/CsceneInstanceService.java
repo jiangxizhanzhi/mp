@@ -20,12 +20,11 @@ import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceCountByReferenceTypeBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateV2BO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -39,11 +38,17 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
 import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
+import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
+import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
@@ -1211,6 +1216,91 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         } else {
             return null;
         }
+    }
+
+
+    public ServiceResult<CsceneInstanceBO> instanceModify(CsceneUpdateV2BO csceneBO) {
+        CsceneInstanceBO newData = csceneBO.exportToCsceneInstance();
+        CsceneInstanceHandler originHandler = new CsceneInstanceHandler(csceneBO.getCsceneInstanceId(), null);
+        CsceneInstanceBO originData = originHandler.toData();
+
+        // 合并下数据
+        CsceneInstanceBO instance = this.mergeInstance(csceneBO.getCsceneInstanceId(), newData, originData);
+        var instanceHandler = new CsceneInstanceHandler(instance, null);
+        instanceHandler.update();
+        return new ServiceResult<>(instanceHandler.toData());
+    }
+
+    private CsceneInstanceBO mergeInstance(String instanceId, CsceneInstanceBO newData, CsceneInstanceBO originData) {
+        CsceneInstanceBO instance = new CsceneInstanceBO();
+        instance.setId(instanceId);
+        instance.setCscene(originData.getCscene());
+        instance.setPassThrough(newData.getPassThrough());
+
+        SceneDataBO sceneDataBO = new SceneDataBO();
+        instance.setScene(sceneDataBO);
+
+        SceneTopologyBO sceneTopologyBO = new SceneTopologyBO();
+        sceneTopologyBO.setScene(originData.getScene().getTopology().getScene());
+        sceneTopologyBO.setAreas(originData.getScene().getTopology().getAreas());
+        sceneTopologyBO.setPieces(originData.getScene().getTopology().getPieces());
+        sceneTopologyBO.setAreaId(originData.getScene().getTopology().getAreaId());
+        sceneTopologyBO.setConnections(newData.getScene().getTopology().getConnections());
+        sceneTopologyBO.setElements(mergeElements(newData.getScene().getTopology().getElements(), originData.getScene().getTopology().getElements()));
+        sceneDataBO.setTopology(sceneTopologyBO);
+
+        Map<String, ScenePluginDataBO> plugins = new HashMap<>();
+        Set<String> pluginKeys = newData.getScene().getPlugins().keySet();
+        for (String key : pluginKeys) {
+            var newPlugin = newData.getScene().getPlugins().get(key);
+            var originPlugin = originData.getScene().getPlugins().get(key);
+            plugins.put(key, this.mergePluginDatas(newPlugin, originPlugin));
+        }
+        sceneDataBO.setPlugins(plugins);
+
+        return instance;
+    }
+
+    private List<SceneElementBO> mergeElements(List<SceneElementBO> newElements, List<SceneElementBO> originElements) {
+        Set<String> originElementIds = new HashSet<>();
+        originElements.forEach(e -> originElementIds.add(e.getId()));
+        Set<String> newElementIds = new HashSet<>();
+        newElements.forEach(e -> newElementIds.add(e.getId()));
+        List<SceneElementBO> result = new ArrayList<>();
+        for (var e : originElements) {
+            if (newElementIds.contains(e.getId())) {
+                result.add(e);
+            }
+        }
+        newElementIds.removeAll(originElementIds);
+        for (var e : newElements) {
+            result.add(e);
+        }
+        return result;
+    }
+
+    private ScenePluginDataBO mergePluginDatas(ScenePluginDataBO newData, ScenePluginDataBO originData) {
+        ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
+        scenePluginDataBO.setScene(originData.getScene());
+        scenePluginDataBO.setElements(this.mergeMap(newData.getElements(), originData.getElements()));
+        scenePluginDataBO.setElementPorts(this.mergeMap(newData.getElementPorts(), originData.getElementPorts()));
+        return scenePluginDataBO;
+    }
+
+    private Map<String, Map<String, Object>> mergeMap(Map<String, Map<String, Object>> newData, Map<String, Map<String, Object>> originData) {
+        Set<String> originElementIds = originData.keySet();
+        Set<String> newElementIds = newData.keySet();
+        Map<String, Map<String, Object>> result = new HashMap<>();
+        originData.entrySet().forEach(entry -> {
+            if (newElementIds.contains(entry.getKey())) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        });
+        newElementIds.removeAll(originElementIds);
+        newData.entrySet().forEach(entry -> {
+            result.put(entry.getKey(), entry.getValue());
+        });
+        return result;
     }
 
 }
