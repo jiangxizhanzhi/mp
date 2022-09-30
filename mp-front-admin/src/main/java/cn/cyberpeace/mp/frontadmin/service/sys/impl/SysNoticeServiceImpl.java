@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -493,12 +493,12 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         userModels.stream().forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
 
         if (CollectionUtil.isNotEmpty(userModels)) {
-            List<UserSimpleDto> userSimpleDtos = userModels.stream().map(userModel -> {
-                UserSimpleDto userSimpleDto = new UserSimpleDto();
-                BeanUtils.copyProperties(userModel, userSimpleDto);
-                return userSimpleDto;
+            List<UserSimpleBo> userSimpleBos = userModels.stream().map(userModel -> {
+                UserSimpleBo userSimpleBo = new UserSimpleBo();
+                BeanUtils.copyProperties(userModel, userSimpleBo);
+                return userSimpleBo;
             }).collect(Collectors.toList());
-            noticeDto.setUsers(userSimpleDtos);
+            noticeDto.setUsers(userSimpleBos);
         }
 
         // role

@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.role.UserRoleStatisticBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -26,8 +26,8 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     List<RoleModel> listRolesByUserIds(@Param("userIds") List<String> userIds);
 
-    List<UserOrgRoleDto> listUsersByRoleId(@Param("roleId") String roleId);
+    List<UserOrgRoleBo> listUsersByRoleId(@Param("roleId") String roleId);
 
-    List<UserRoleStatistic> getUserRoleStatistics();
+    List<UserRoleStatisticBo> getUserRoleStatistics();
 
 }

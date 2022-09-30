@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.role;
+package cn.cyberpeace.mp.auth.bo.role;
 
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RoleDto extends RoleModel {
+public class RoleBo extends RoleModel {
 
     @ApiModelProperty(value = "角色绑定的用户数量")
     private Integer userCnt;

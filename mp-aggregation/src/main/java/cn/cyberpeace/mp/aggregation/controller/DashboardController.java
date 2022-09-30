@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
-import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorDto;
+import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
@@ -85,9 +85,9 @@ public class DashboardController {
 
     @ApiOperation(value = "用户在线记录", notes = "")
     @GetMapping("/user_online_record")
-    public ListObjServiceResult<UserOnlineReportMonitorDto> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
+    public ListObjServiceResult<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo<UserOnlineReportMonitorDto> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
+        PageInfo<UserOnlineReportMonitorBo> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 

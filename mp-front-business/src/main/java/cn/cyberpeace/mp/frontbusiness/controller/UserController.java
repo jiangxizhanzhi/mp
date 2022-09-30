@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineCntBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.ResetPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.ResetSelfPwdRequest;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
@@ -129,15 +129,15 @@ public class UserController {
     @GetMapping("/olreport")
     public ServiceResult onlineReport(UserOnlineRecordSummaryPageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo<UserOnlineReportDto> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
+        PageInfo<UserOnlineReportBo> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     @ApiOperation(value = "在线用户数量", notes = "")
     @GetMapping("/olUserCnt")
-    public ServiceResult<UserOnlineCntDto> onlineUserCnt() {
-        UserOnlineCntDto userOnlineCntDto = userOnlineRecordService.onlineUserCnt();
-        return ResultCommon.success(userOnlineCntDto);
+    public ServiceResult<UserOnlineCntBo> onlineUserCnt() {
+        UserOnlineCntBo userOnlineCntBo = userOnlineRecordService.onlineUserCnt();
+        return ResultCommon.success(userOnlineCntBo);
     }
 
 }

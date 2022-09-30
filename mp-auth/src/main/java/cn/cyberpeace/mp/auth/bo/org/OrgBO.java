@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.org;
+package cn.cyberpeace.mp.auth.bo.org;
 
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import io.swagger.annotations.ApiModelProperty;

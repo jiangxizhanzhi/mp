@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOlReportCntBo;
 import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.service.BaseModelService;
@@ -18,7 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public interface UserHeartbeatService extends BaseModelService<UserHeartbeatModel, QueryParams> {
 
-    List<UserOlReportCntDto> groupCntByUserId(LocalDateTime time);
+    List<UserOlReportCntBo> groupCntByUserId(LocalDateTime time);
 
     void heartbeat();
 

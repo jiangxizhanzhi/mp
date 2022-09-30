@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -32,23 +32,23 @@ public interface TenantUserMapper extends BaseModelMapper<TenantUserModel> {
 
     List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
-    List<UserOrgMapDto> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
+    List<UserOrgMapBo> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
 
-    List<UserOrgDto> listUserOrgByUserIds(@Param("userIds") List<String> userIds);
+    List<UserOrgBo> listUserOrgByUserIds(@Param("userIds") List<String> userIds);
 
     /**
      * @param orgIds
      * @param userIds
      * @return
      */
-    List<UserOrgRoleDto> listUsers(@Param("orgIds") List<String> orgIds,
-                                   @Param("userIds") List<String> userIds,
-                                   @Param("orders") List<String> orders,
-                                   @Param("userCondition") UserDto userDto,
-                                   @Param("selfUserId") String selfUserId,
-                                   @Param("excludeRoleIds") List<String> excludeRoleIds,
-                                   @Param("excludeUserIds") List<String> excludeUserIds,
-                                   @Param("currentDateTime") LocalDateTime currentDateTime
+    List<UserOrgRoleBo> listUsers(@Param("orgIds") List<String> orgIds,
+                                  @Param("userIds") List<String> userIds,
+                                  @Param("orders") List<String> orders,
+                                  @Param("userCondition") UserBo userBo,
+                                  @Param("selfUserId") String selfUserId,
+                                  @Param("excludeRoleIds") List<String> excludeRoleIds,
+                                  @Param("excludeUserIds") List<String> excludeUserIds,
+                                  @Param("currentDateTime") LocalDateTime currentDateTime
     );
 
 }

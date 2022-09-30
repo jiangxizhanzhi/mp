@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.role.RoleDto;
+import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.OperateRolePermissionService;
@@ -82,8 +82,8 @@ public class RoleController {
     @ApiOperation(value = "查询指定id数据，附带权限集合", notes = "")
     @ApiImplicitParam(name="id", value="角色ID",dataTypeClass = String.class)
     public ObjServiceResult get(@PathVariable String id) {
-        RoleDto roleDto = roleService.getRoleDto(id);
-        return ResultUtils.obj2ObjServiceResult(roleDto);
+        RoleBo roleBo = roleService.getRoleDto(id);
+        return ResultUtils.obj2ObjServiceResult(roleBo);
     }
 
     @ApiOperation("获取指定id数据")

@@ -3,7 +3,7 @@
 <mapper namespace="cn.cyberpeace.mp.auth.repository.RoleMapper">
 
 
-    <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.dto.role.RoleDto">
+    <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.bo.role.RoleBo">
         select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from
         mp_auth_role r
         <where>

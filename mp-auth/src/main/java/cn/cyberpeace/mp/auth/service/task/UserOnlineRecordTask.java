@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.service.task;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;

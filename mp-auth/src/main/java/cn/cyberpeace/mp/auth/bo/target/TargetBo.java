@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.target;
+package cn.cyberpeace.mp.auth.bo.target;
 
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetOperation;
@@ -13,13 +13,13 @@ import java.util.List;
  * @Date：2021/8/31 11:13
  */
 @Data
-public class TargetDto extends TargetModel {
+public class TargetBo extends TargetModel {
 
     @ApiModelProperty(value = "上级组织")
-    TargetDto parentTarget;
+    TargetBo parentTarget;
 
     @ApiModelProperty(value = "下级组织")
-    List<TargetDto> children;
+    List<TargetBo> children;
 
     public <T> T execute(TargetOperation<T> operation) {
         return operation.doExecute(this);

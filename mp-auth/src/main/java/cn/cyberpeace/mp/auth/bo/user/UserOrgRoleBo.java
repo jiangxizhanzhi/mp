@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.bo.user;
 
 import cn.cyberpeace.mp.auth.model.UserModel;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2022/7/22 09:43
  */
 @Data
-public class UserOrgRoleDto extends UserModel {
+public class UserOrgRoleBo extends UserModel {
 
     public static String FIELD_USER = "user";
     public static String FIELD_ORGS = "orgs";

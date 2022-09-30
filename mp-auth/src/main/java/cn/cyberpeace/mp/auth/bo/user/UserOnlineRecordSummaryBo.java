@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.bo.user;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserOnlineRecordSummaryDto {
+public class UserOnlineRecordSummaryBo {
 
     @ApiModelProperty(value = "用户id")
     private String user;

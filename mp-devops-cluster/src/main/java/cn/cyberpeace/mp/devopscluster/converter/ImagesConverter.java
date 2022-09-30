@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.converter;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.DefaultImgUtil;
@@ -256,7 +256,7 @@ public class ImagesConverter implements BaseConverter{
      * @param uuid
      * @return
      */
-    public List<UserDto> findUsersByUuid(String uuid){
+    public List<UserBo> findUsersByUuid(String uuid){
         List<DeviceTargetAuthPO> deviceTargetAuthPOS = devopsTargetAuthService.findByTarget(uuid);
         if (CollectionUtils.isEmpty(deviceTargetAuthPOS)){
             return Lists.newArrayList();

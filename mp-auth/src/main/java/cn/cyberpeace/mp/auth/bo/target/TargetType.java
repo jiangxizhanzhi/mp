@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.target;
+package cn.cyberpeace.mp.auth.bo.target;
 
 /**
  * @Description:

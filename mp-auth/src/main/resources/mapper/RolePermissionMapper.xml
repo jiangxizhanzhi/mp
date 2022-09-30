@@ -14,7 +14,7 @@
           and visible = 1
     </select>
 
-    <select id="listTargetRoleDtos" resultType="cn.cyberpeace.mp.auth.dto.target.TargetRoleDto">
+    <select id="listTargetRoleDtos" resultType="cn.cyberpeace.mp.auth.bo.target.TargetRoleBo">
         select t.*, r.id roleId from mp_auth_role_permission rp
         left join mp_auth_role r on r.id = rp.owner
         left join mp_auth_target t on rp.target = t.id

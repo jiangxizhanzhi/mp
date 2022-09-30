@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.org;
+package cn.cyberpeace.mp.auth.bo.org;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @Date：2022/8/26 09:47
  */
 @Data
-public class UserOrgMapDto {
+public class UserOrgMapBo {
 
     private String userId;
 

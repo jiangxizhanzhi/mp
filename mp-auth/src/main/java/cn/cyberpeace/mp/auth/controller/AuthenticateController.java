@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.JwtUtils;
@@ -44,8 +44,8 @@ public class AuthenticateController {
     public ServiceResult<UserModel> authenticate(@RequestParam String token) {
         JwtUtils.UserInfo user = verifyToken(token);
         UserModel userModel = UserUtils.getUser(user.getId());
-        UserDto userDto = userService.userModel2UserDtoWithoutOrg(userModel);
-        return ResultCommon.success(userDto);
+        UserBo userBo = userService.userModel2UserDtoWithoutOrg(userModel);
+        return ResultCommon.success(userBo);
     }
 
     private JwtUtils.UserInfo verifyToken(String token) {

@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.auth.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserSimpleDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -79,9 +79,9 @@ public class UserController {
             @ApiImplicitParam(name="fields", value="需要返回的字段",dataTypeClass = String[].class),
     })
     @GetMapping("/{id}")
-    public ObjServiceResult<UserDto> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        UserDto userDto = userService.getUserDto(id);
-        return ResultUtils.obj2ObjServiceResult(userDto);
+    public ObjServiceResult<UserBo> get(@PathVariable String id, @RequestParam(required = false) String[] fields) {
+        UserBo userBo = userService.getUserDto(id);
+        return ResultUtils.obj2ObjServiceResult(userBo);
     }
 
 
@@ -90,12 +90,12 @@ public class UserController {
             @ApiImplicitParam(name="id", paramType="path", value="数据id",dataTypeClass = String.class)
     })
     @GetMapping("/no_restrict/{id}")
-    public ObjServiceResult<UserSimpleDto> get(@PathVariable String id) {
-        UserDto userDto = userService.getUserDtoNoRestrict(id);
-        if (Objects.nonNull(userDto)) {
-            UserSimpleDto userSimpleDto = new UserSimpleDto();
-            BeanUtils.copyProperties(userDto, userSimpleDto);
-            return ResultUtils.obj2ObjServiceResult(userSimpleDto);
+    public ObjServiceResult<UserSimpleBo> get(@PathVariable String id) {
+        UserBo userBo = userService.getUserDtoNoRestrict(id);
+        if (Objects.nonNull(userBo)) {
+            UserSimpleBo userSimpleBo = new UserSimpleBo();
+            BeanUtils.copyProperties(userBo, userSimpleBo);
+            return ResultUtils.obj2ObjServiceResult(userSimpleBo);
         }
 
         return new ObjServiceResult(null).asResult();
@@ -104,9 +104,9 @@ public class UserController {
 
     @ApiOperation(value = "查询当前登录用户信息 附带组织，角色信息", notes = "")
     @GetMapping("/current")
-    public ServiceResult<UserDto> getCurrentUser() {
-        UserDto userDto = userService.getCurrentUserDto();
-        return ResultCommon.success(userDto);
+    public ServiceResult<UserBo> getCurrentUser() {
+        UserBo userBo = userService.getCurrentUserDto();
+        return ResultCommon.success(userBo);
     }
 
 

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOlReportCntBo;
 import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserHeartbeatMapper;
@@ -37,8 +37,8 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
         setModelFields(modelFields);
     }
 
-    public List<UserOlReportCntDto> groupCntByUserId(LocalDateTime time) {
-        List<UserOlReportCntDto> list = getModelMapper().groupCntByUserId(time);
+    public List<UserOlReportCntBo> groupCntByUserId(LocalDateTime time) {
+        List<UserOlReportCntBo> list = getModelMapper().groupCntByUserId(time);
         return list;
     }
 

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
-import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
+import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
@@ -41,9 +41,9 @@ public class RoleController {
     })
     @GetMapping("/perm/{id}")
     public ObjServiceResult getRolePerm(@PathVariable String id, @RequestParam(required = false) String[] fields) {
-        RolePermDto rolePermDto = roleService.getRolePermDto(id);
+        RolePermBo rolePermBo = roleService.getRolePermDto(id);
 
-        return ResultUtils.obj2ObjServiceResult(rolePermDto);
+        return ResultUtils.obj2ObjServiceResult(rolePermBo);
     }
 
     @ApiOperation(value = "分页查询角色列表（附加权限信息，绑定的用户信息）", notes = "")

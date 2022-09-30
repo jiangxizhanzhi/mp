@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.bo.user;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,7 +11,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel
-public class UserOlReportCntDto {
+public class UserOlReportCntBo {
 
     @ApiModelProperty("用户id")
     private String uid;

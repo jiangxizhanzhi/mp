@@ -6,7 +6,7 @@
         select count(*) from mp_auth_user_heartbeat where user = #{userId} and create_time > #{time}
     </select>
 
-    <select id="groupCntByUserId" resultType="cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto">
+    <select id="groupCntByUserId" resultType="cn.cyberpeace.mp.auth.bo.user.UserOlReportCntBo">
         select u.id uid, u.username username, u.name uname, count(h.id) cnt
         from mp_auth_user u
                  left join

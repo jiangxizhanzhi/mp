@@ -4,10 +4,10 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.role.RoleDto;
-import cn.cyberpeace.mp.auth.dto.role.RolePermDto;
-import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
-import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
+import cn.cyberpeace.mp.auth.bo.role.RoleBo;
+import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
+import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
+import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
@@ -184,7 +184,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
-        List<RoleDto> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
+        List<RoleBo> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
         PageInfo pageInfo = new PageInfo(roleDtos);
         List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
 
@@ -203,10 +203,10 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
         if (CollectionUtil.isNotEmpty(roleIds)) {
-            List<TargetRoleDto> targetRoleDtos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
-            if (CollectionUtil.isNotEmpty(targetRoleDtos)) {
+            List<TargetRoleBo> targetRoleBos = rolePermissionService.listTargetRoleDtosByRoleIds(roleIds);
+            if (CollectionUtil.isNotEmpty(targetRoleBos)) {
                 roleDtos.forEach(r -> {
-                    List<TargetModel> targetModels = targetRoleDtos.stream().map(tr -> {
+                    List<TargetModel> targetModels = targetRoleBos.stream().map(tr -> {
                         if (Objects.equals(tr.getRoleId(), r.getId())) {
                             TargetModel targetModel = new TargetModel();
                             BeanUtils.copyProperties(tr, targetModel);
@@ -223,27 +223,27 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
     @Override
-    public RoleDto getRoleDto(String id) {
+    public RoleBo getRoleDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }
         RoleModel roleModel = getModelMapper().get(id);
-        RoleDto roleDto = roleModel2RoleDto(roleModel);
+        RoleBo roleDto = roleModel2RoleDto(roleModel);
         return roleDto;
     }
 
     @Override
-    public RolePermDto getRolePermDto(String id) {
+    public RolePermBo getRolePermDto(String id) {
         ParamCheck.notBlank(id, AuthBasei18nCode.ROLE_ID);
         List<String> excludeRoleIds = opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles();
         if (excludeRoleIds.contains(id.trim())) {
             return null;
         }
         RoleModel roleModel = getModelMapper().get(id);
-        RolePermDto rolePermDto = roleModel2RolePermDto(roleModel);
-        return rolePermDto;
+        RolePermBo rolePermBo = roleModel2RolePermDto(roleModel);
+        return rolePermBo;
     }
 
     @Override
@@ -335,33 +335,33 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
     }
 
 
-    private RoleDto roleModel2RoleDto(RoleModel roleModel) {
+    private RoleBo roleModel2RoleDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
             return null;
         }
 
-        RoleDto roleDto = new RoleDto();
-        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, roleDto);
+        RoleBo roleBo = new RoleBo();
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, roleBo);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 
-        roleDto.setTargets(targets);
-        return roleDto;
+        roleBo.setTargets(targets);
+        return roleBo;
     }
 
 
-    private RolePermDto roleModel2RolePermDto(RoleModel roleModel) {
+    private RolePermBo roleModel2RolePermDto(RoleModel roleModel) {
         if (Objects.isNull(roleModel)) {
             return null;
         }
 
-        RolePermDto rolePermDto = new RolePermDto();
-        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, rolePermDto);
+        RolePermBo rolePermBo = new RolePermBo();
+        cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(roleModel, rolePermBo);
 
         List<TargetModel> targets = getRoleTargets(roleModel);
 
-        rolePermDto.setTargets(targetModel2PermissionDto(targets));
-        return rolePermDto;
+        rolePermBo.setTargets(targetModel2PermissionDto(targets));
+        return rolePermBo;
     }
 
     private List<TargetModel> getRoleTargets(RoleModel roleModel) {
@@ -375,16 +375,16 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         return targets;
     }
 
-    private List<PermissionDto> targetModel2PermissionDto(List<TargetModel> targets) {
-        List<PermissionDto> permissionDtos =
+    private List<PermissionBo> targetModel2PermissionDto(List<TargetModel> targets) {
+        List<PermissionBo> permissionBos =
                 targets.stream().map(t -> {
-                    PermissionDto permissionDto = new PermissionDto();
-                    BeanUtils.copyProperties(t, permissionDto);
-                    permissionDto.setPerm("R/W/X");
-                    permissionDto.setIsEnabled(1);
-                    return permissionDto;
+                    PermissionBo permissionBo = new PermissionBo();
+                    BeanUtils.copyProperties(t, permissionBo);
+                    permissionBo.setPerm("R/W/X");
+                    permissionBo.setIsEnabled(1);
+                    return permissionBo;
                 }).collect(Collectors.toList());
-        return permissionDtos;
+        return permissionBos;
     }
 
 

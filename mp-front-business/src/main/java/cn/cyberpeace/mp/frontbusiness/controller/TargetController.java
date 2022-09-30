@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import io.swagger.annotations.Api;
@@ -38,7 +38,7 @@ public class TargetController {
     })
     @GetMapping("/tree")
     public ServiceResult getTree(@RequestParam(required = false) String targetId, @RequestParam(required = false) Integer type) {
-        List<TargetDto> tree = targetService.getTree(targetId, type);
+        List<TargetBo> tree = targetService.getTree(targetId, type);
         return ServiceResult.builder().source(tree).build().asResult();
     }
 

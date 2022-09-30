@@ -4,8 +4,8 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
-import cn.cyberpeace.mp.auth.dto.target.TargetType;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
+import cn.cyberpeace.mp.auth.bo.target.TargetType;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.OrgPermissionService;
@@ -122,7 +122,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     @Override
-    public List<TargetDto> getTree(String parentId, Integer type) {
+    public List<TargetBo> getTree(String parentId, Integer type) {
         if (Objects.isNull(type)) {
             // 默认查询菜单树
             type = TargetModel.TYPE_MENU;
@@ -134,7 +134,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
             if (CollectionUtil.isEmpty(targets)) {
                 return new ArrayList<>();
             }
-            List<TargetDto> tree = toTree(targets);
+            List<TargetBo> tree = toTree(targets);
 
             // 父节点根据pk做排序
 //            tree.sort((o1, o2) -> o1.getPk() - o2.getPk());
@@ -150,11 +150,11 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
             throw new MpRuntimeException(AuthErrorCode.TARGET_NOT_EXISTED.format(parentId));
         }
 
-        TargetDto targetDto = new TargetDto();
-        BeanUtils.copyProperties(parentTarget, targetDto);
-        targetDto.execute(queryChildTargetOperation);
+        TargetBo targetBo = new TargetBo();
+        BeanUtils.copyProperties(parentTarget, targetBo);
+        targetBo.execute(queryChildTargetOperation);
 
-        return CollectionUtil.toList(targetDto);
+        return CollectionUtil.toList(targetBo);
     }
 
     @Override
@@ -227,25 +227,25 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
 
 
-    private List<TargetDto> toTree(List<TargetModel> targets) {
+    private List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
-        Map<String, TargetDto> mapTmp = new HashMap<>();
+        Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
         for (TargetModel targetm : targets) {
-            TargetDto targetDto = new TargetDto();
-            BeanUtils.copyProperties(targetm, targetDto);
-            mapTmp.put(targetDto.getId(), targetDto);
+            TargetBo targetBo = new TargetBo();
+            BeanUtils.copyProperties(targetm, targetBo);
+            mapTmp.put(targetBo.getId(), targetBo);
         }
 
         //loop and assign parent/child relationships
-        for (Map.Entry<String, TargetDto> entry : mapTmp.entrySet()) {
-            TargetDto current = entry.getValue();
+        for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
+            TargetBo current = entry.getValue();
             String parentId = current.getParent();
 
             if (StringUtils.isNotBlank(parentId)) {
-                TargetDto parent = mapTmp.get(parentId);
+                TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
                     //                    current.(parent);
                     if (parent.getChildren() == null) {
@@ -258,9 +258,9 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
 
         }
 
-        List<TargetDto> parentTargets = new ArrayList<>();
+        List<TargetBo> parentTargets = new ArrayList<>();
         //get the root
-        for (TargetDto node : mapTmp.values()) {
+        for (TargetBo node : mapTmp.values()) {
             if(StringUtils.isBlank(node.getParent())) {
                 parentTargets.add(node);
             }
@@ -286,7 +286,7 @@ public class TargetServiceImpl extends BaseModelServiceImpl<TargetModel, TargetM
     }
 
     // 权限树排序
-    private void sortTree(List<TargetDto> targets) {
+    private void sortTree(List<TargetBo> targets) {
         targets.forEach(t -> {
             if (CollectionUtil.isNotEmpty(t.getChildren())) {
                 sortTree(t.getChildren());

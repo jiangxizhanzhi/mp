@@ -6,9 +6,9 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
-import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
 import cn.cyberpeace.mp.auth.service.*;
@@ -94,10 +94,10 @@ public class UserExcelController {
 
         if (Objects.equals(locale, Locale.US)) {
             dataLst = userService.exportExcelEn(users);
-            exportClz = ExportUserEn.class;
+            exportClz = ExportUserEnBo.class;
         } else {
             dataLst = userService.exportExcel(users);
-            exportClz = ExportUser.class;
+            exportClz = ExportUserBo.class;
         }
 
         response.setContentType("application/vnd.ms-excel");
@@ -117,7 +117,7 @@ public class UserExcelController {
         ParamCheck.notNull(file, AuthBasei18nCode.REQUEST_PARAMS);
         ExcelCheck.check(file.getInputStream(), file.getOriginalFilename());
         try {
-            EasyExcel.read(file.getInputStream(), ImportUser.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
+            EasyExcel.read(file.getInputStream(), ImportUserBo.class, new UploadDataListener(userService, roleService, orgService, opUserPermCheckService, authConfig))
                     .headRowNumber(2).sheet().doRead();
         } catch (ExcelCommonException | ExcelAnalysisException | ExcelDataConvertException | ExcelGenerateException ex) {
             log.error("ex:{}", ExceptionUtil.stacktraceToString(ex));

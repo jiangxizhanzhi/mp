@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.excel;
+package cn.cyberpeace.mp.auth.bo.excel;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ImportUser {
+public class ImportUserBo {
 
     // 用户名，不能重复
     private String username;

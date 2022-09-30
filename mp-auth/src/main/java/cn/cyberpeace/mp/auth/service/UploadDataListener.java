@@ -2,8 +2,8 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.util.PasswordUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -23,14 +23,14 @@ import java.util.*;
  * @Date：2021/8/31 11:13
  */
 @Slf4j
-public class UploadDataListener extends AnalysisEventListener<ImportUser> {
+public class UploadDataListener extends AnalysisEventListener<ImportUserBo> {
 
     /**
      * 每隔5条存储数据库，实际使用中可以3000条，然后清理list ，方便内存回收
      */
     private static final int BATCH_COUNT = 100;
 
-    List<ImportUser> list = new ArrayList<ImportUser>();
+    List<ImportUserBo> list = new ArrayList<ImportUserBo>();
     /**
      * 假设这个是一个DAO，当然有业务逻辑这个也可以是一个service。当然如果不用存储这个对象没用。
      */
@@ -66,7 +66,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * @param context
      */
     @Override
-    public void invoke(ImportUser data, AnalysisContext context) {
+    public void invoke(ImportUserBo data, AnalysisContext context) {
         list.add(data);
     }
 
@@ -105,13 +105,13 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
 
 
 
-    private void checkImportUsers(List<ImportUser> users) {
+    private void checkImportUsers(List<ImportUserBo> users) {
         if (CollectionUtil.isEmpty(users)) {
             throw new MpRuntimeException(AuthErrorCode.EXCEL_USER_LIST_EMPTY);
         }
 
         for (int i = 0; i < users.size(); i++) {
-            ImportUser user = users.get(i);
+            ImportUserBo user = users.get(i);
             int index = i + 1;
             if (Objects.nonNull(user)) {
                 checkUserName(user.getUsername(), index);
@@ -187,7 +187,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * @param
      * @param index
      */
-    private void checkRole(ImportUser user, int index) {
+    private void checkRole(ImportUserBo user, int index) {
         String roles = user.getRoles();
         if (StringUtils.isBlank(roles)) {
             log.error("No {} row error! roles:{} is empty! ", index, roles);
@@ -223,7 +223,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * @param
      * @param index
      */
-    private void checkOrgs(ImportUser user, int index) {
+    private void checkOrgs(ImportUserBo user, int index) {
         String orgPaths = user.getOrgpath();
         if (StringUtils.isBlank(orgPaths)) {
             // 组织路径不存在，默认都存一级组织
@@ -252,7 +252,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     }
 
 
-    private void preProcessImportUsers(List<ImportUser> users) {
+    private void preProcessImportUsers(List<ImportUserBo> users) {
         preProcessOrgs(users);
         preProcessRoles(users);
     }
@@ -262,9 +262,9 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 导入excel暂时不用对密码进行预处理
      * 预处理密码
      */
-    private void preProcessPwd(List<ImportUser> users) {
+    private void preProcessPwd(List<ImportUserBo> users) {
         Map<String, String> pwdMap = new HashMap<>();
-        for (ImportUser user : users) {
+        for (ImportUserBo user : users) {
             if (StringUtils.isEmpty(pwdMap.get(user.getPassword()))) {
                 pwdMap.put(user.getPassword(), PasswordUtils.encode(user.getPassword().trim()));
             }
@@ -276,7 +276,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
     /**
      * 预处理组织
      */
-    private void preProcessOrgs(List<ImportUser> users) {
+    private void preProcessOrgs(List<ImportUserBo> users) {
         Map<String, OrgBO> orgPath2ModelMap = new HashMap<>();
         List<OrgBO> orgBOS = orgService.listParents();
         OrgBO defaultTopOrg = orgBOS.get(0);
@@ -285,7 +285,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         }
 
         for (int i = 0; i < users.size(); i++) {
-            ImportUser user = users.get(i);
+            ImportUserBo user = users.get(i);
             int index = i + 1;
             String orgPaths = user.getOrgpath();
             if (StringUtils.isBlank(orgPaths)) {
@@ -312,11 +312,11 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
         }
     }
 
-    private void preProcessRoles(List<ImportUser> users) {
+    private void preProcessRoles(List<ImportUserBo> users) {
         List<String> allRoleNames = new ArrayList<>();
         Map<String, RoleModel> roleName2ModelMap = new HashMap<>();
         for (int i = 0; i < users.size(); i++) {
-            ImportUser user = users.get(i);
+            ImportUserBo user = users.get(i);
             int index = i + 1;
 
             String roles = user.getRoles();

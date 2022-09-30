@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.service.OrgDtoOperation;
 import cn.cyberpeace.mp.auth.service.OrgService;
 import org.springframework.beans.BeanUtils;

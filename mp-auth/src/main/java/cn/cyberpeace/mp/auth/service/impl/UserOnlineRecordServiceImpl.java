@@ -2,11 +2,11 @@ package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineCntBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineRecordSummaryBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
@@ -79,7 +79,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
     @Override
-    public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
+    public PageInfo<UserOnlineReportBo> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
 
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
         List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
@@ -87,9 +87,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
 
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryBo> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
-        List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
+        List<UserOnlineRecordSummaryBo> summaryDtos = pageInfo.getList();
         if (CollectionUtil.isEmpty(summaryDtos)) {
             return pageInfo;
         }
@@ -101,9 +101,9 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
             }
         }
 
-        List<UserOnlineReportDto> reportDtos = new ArrayList<>();
+        List<UserOnlineReportBo> reportDtos = new ArrayList<>();
         summaryDtos.forEach(r -> {
-            UserOnlineReportDto reportDto = new UserOnlineReportDto();
+            UserOnlineReportBo reportDto = new UserOnlineReportBo();
             BeanUtils.copyProperties(r, reportDto);
 
             reportDto.setTotalOnlineHours(0.0);
@@ -144,11 +144,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
         // orgpaths
-        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
-        List<UserOrgDto> userOrgDtos = tenantUserService.listUserOrgByUserIds(userIds);
+        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryBo::getUser).collect(Collectors.toList());
+        List<UserOrgBo> userOrgBos = tenantUserService.listUserOrgByUserIds(userIds);
         reportDtos.forEach(r -> {
             List<OrgBO> orgBOList =
-                    userOrgDtos.stream().filter(userOrgDto -> Objects.equals(userOrgDto.getUserId(), r.getUser())).map(dto-> {
+                    userOrgBos.stream().filter(userOrgBo -> Objects.equals(userOrgBo.getUserId(), r.getUser())).map(dto-> {
                         OrgBO orgBO = new OrgBO();
                         BeanUtils.copyProperties(dto, orgBO);
                         return orgBO;
@@ -224,7 +224,7 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     @Cacheable(value = CACHE_KEY_USER_OL_CNT)
-    public UserOnlineCntDto onlineUserCnt() {
+    public UserOnlineCntBo onlineUserCnt() {
         LocalDateTime now = LocalDateTime.now();
         int olcnt = 0;
         int mapcnt = heartbeatService.getHeartbeatMap().size();
@@ -232,11 +232,11 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
         olcnt = Math.max(mapcnt, dbcnt);
         int totalUser = userService.totalUserCnt();
 
-        UserOnlineCntDto userOnlineCntDto = new UserOnlineCntDto();
-        userOnlineCntDto.setOnlineUser(olcnt);
-        userOnlineCntDto.setTotalUser(totalUser);
+        UserOnlineCntBo userOnlineCntBo = new UserOnlineCntBo();
+        userOnlineCntBo.setOnlineUser(olcnt);
+        userOnlineCntBo.setTotalUser(totalUser);
 
-        return userOnlineCntDto;
+        return userOnlineCntBo;
     }
 
 }

@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.bo.user;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
  * @Date：2021/10/26 10:32
  */
 @Data
-public class UserOnlineReportDto {
+public class UserOnlineReportBo {
 
     @ApiModelProperty(value = "用户id")
     private String user;

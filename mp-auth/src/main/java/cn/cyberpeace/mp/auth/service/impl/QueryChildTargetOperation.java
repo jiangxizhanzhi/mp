@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetOperation;
 import cn.cyberpeace.mp.auth.service.TargetService;
@@ -18,28 +18,28 @@ import java.util.ArrayList;
  */
 @Component
 @Scope("prototype")
-public class QueryChildTargetOperation implements TargetOperation<TargetDto> {
+public class QueryChildTargetOperation implements TargetOperation<TargetBo> {
 
     @Autowired
     private TargetService targetService;
 
 
     @Override
-    public TargetDto doExecute(TargetDto targetDto) {
+    public TargetBo doExecute(TargetBo targetBo) {
 //        if (StringUtils.isBlank(targetDto.getParent())) {
 //            return targetDto;
 //        }
 
-        var list = targetService.listByParent(targetDto.getId());
+        var list = targetService.listByParent(targetBo.getId());
         var childList = new ArrayList();
         for (TargetModel target : list) {
-            TargetDto childDto = new TargetDto();
+            TargetBo childDto = new TargetBo();
             BeanUtils.copyProperties(target, childDto);
             childDto.execute(this);
             childList.add(childDto);
         }
-        targetDto.setChildren(childList);
+        targetBo.setChildren(childList);
 
-        return targetDto;
+        return targetBo;
     }
 }

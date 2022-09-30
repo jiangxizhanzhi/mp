@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.response.login.LoginResp;
@@ -93,9 +93,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             } else {
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
-                UserDto userDto = userService.userModel2UserDto(userResult.getObj());
+                UserBo userBo = userService.userModel2UserDto(userResult.getObj());
                 LoginResp loginResp = new LoginResp();
-                loginResp.setUser(userDto);
+                loginResp.setUser(userBo);
                 loginResp.setToken(jwt);
 
                 // 角色

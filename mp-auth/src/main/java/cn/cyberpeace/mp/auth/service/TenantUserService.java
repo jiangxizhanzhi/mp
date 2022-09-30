@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
@@ -49,14 +49,14 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
      * @param userIds
      * @return
      */
-    List<UserOrgMapDto> listUserOrgMapDtosByUserIds(List<String> userIds);
+    List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds);
 
     /**
      * 批量查询用户组织对应关系
      * @param userIds
      * @return
      */
-    List<UserOrgDto> listUserOrgByUserIds(List<String> userIds);
+    List<UserOrgBo> listUserOrgByUserIds(List<String> userIds);
 
     /**
      * 列出用户所在组织的层级关系，查出组织，上级组织直到顶级组织
@@ -70,7 +70,7 @@ public interface TenantUserService extends BaseModelService<TenantUserModel, Que
 
     Integer getUserCnt(String orgId);
 
-    PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req);
+    PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req);
 
     // 清除用户所有组织
     boolean deleteByUserId(String userId);

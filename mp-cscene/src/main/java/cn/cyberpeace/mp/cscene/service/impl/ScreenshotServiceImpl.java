@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
@@ -96,18 +96,18 @@ public class ScreenshotServiceImpl extends BaseModelServiceImpl<ScreenshotModel,
         }
         // 用户id
         model.setUserId(loginUser.getId());
-        UserDto userDto = userService.getUserDto(loginUser.getId());
+        UserBo userBo = userService.getUserDto(loginUser.getId());
         // 姓名
-        if (StringUtils.isEmpty(userDto.getName())) {
+        if (StringUtils.isEmpty(userBo.getName())) {
             // 姓名为空时，使用用户名
-            model.setUserName(userDto.getUsername());
+            model.setUserName(userBo.getUsername());
         } else {
-            model.setUserName(userDto.getName());
+            model.setUserName(userBo.getName());
         }
 
-        if (CollectionUtils.isNotEmpty(userDto.getOrgs())) {
+        if (CollectionUtils.isNotEmpty(userBo.getOrgs())) {
             // 封装组织名称，多个以逗号分隔
-            List<String> nameList = userDto.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
+            List<String> nameList = userBo.getOrgs().stream().map(OrgModel::getName).collect(Collectors.toList());
             String userOrgName = Joiner.on(",").join(nameList);
             model.setUserOrgName(userOrgName);
         }

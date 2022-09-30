@@ -1,6 +1,6 @@
-package cn.cyberpeace.mp.auth.dto.role;
+package cn.cyberpeace.mp.auth.bo.role;
 
-import cn.cyberpeace.mp.auth.dto.target.PermissionDto;
+import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -8,11 +8,11 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class RolePermDto extends RoleModel {
+public class RolePermBo extends RoleModel {
 
     @ApiModelProperty(value = "角色绑定的用户数量")
     private Integer userCnt;
 
     @ApiModelProperty(value = "角色绑定的permssiondto列表 为保持兼容，命名为targets")
-    private List<PermissionDto> targets;
+    private List<PermissionBo> targets;
 }

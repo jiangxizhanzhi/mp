@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.role.RoleDto;
+import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -22,6 +22,6 @@ public interface RoleMapper extends BaseModelMapper<RoleModel> {
 
 
 
-    List<RoleDto> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders, @Param("excludeRoleIds") List<String> excludeRoleIds);
+    List<RoleBo> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders, @Param("excludeRoleIds") List<String> excludeRoleIds);
 
 }

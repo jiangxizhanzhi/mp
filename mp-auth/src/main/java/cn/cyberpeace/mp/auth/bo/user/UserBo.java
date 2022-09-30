@@ -1,8 +1,8 @@
-package cn.cyberpeace.mp.auth.dto.user;
+package cn.cyberpeace.mp.auth.bo.user;
 
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -16,20 +16,11 @@ import java.util.List;
  */
 @Data
 @ApiModel
-public class UserSimpleDto {
+public class UserBo extends UserModel {
 
-    @ApiModelProperty(value = "ID")
-    private String id;
-
-    @ApiModelProperty(value = "用户姓名")
-    @DefaultStr
-    private String name;
-
-    @ApiModelProperty(value = "头像")
-    private String avatar;
-
-    @ApiModelProperty(value = "用户名")
-    private String username;
+    // 1：已过期  0：未过期，数据库中没有该字段，由expiredtime字段判断
+    @ApiModelProperty(value = "1：已过期 0：未过期")
+    private Integer isExpired;
 
     @ApiModelProperty(value = "是否是管理员 1：是 0：否")
     private Integer isAdmin;

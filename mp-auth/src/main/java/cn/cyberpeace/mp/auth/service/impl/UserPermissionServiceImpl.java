@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -126,12 +126,12 @@ public class UserPermissionServiceImpl
     }
 
 
-    public List<TargetDto> getTreeByUserId(String userId) {
+    public List<TargetBo> getTreeByUserId(String userId) {
         List<TargetModel> targets = listTargetsByUserId(userId);
         if (CollectionUtil.isEmpty(targets)) {
             return new ArrayList<>();
         }
-        List<TargetDto> tree = toTree(targets);
+        List<TargetBo> tree = toTree(targets);
         return tree;
     }
 
@@ -171,25 +171,25 @@ public class UserPermissionServiceImpl
     }
 
 
-    public List<TargetDto> toTree(List<TargetModel> targets) {
+    public List<TargetBo> toTree(List<TargetModel> targets) {
         ParamCheck.notEmpty(targets, AuthBasei18nCode.TARGET_LIST);
         Map<String, List<TargetModel>> map = new HashMap<>();
-        Map<String, TargetDto> mapTmp = new HashMap<>();
+        Map<String, TargetBo> mapTmp = new HashMap<>();
 
         //Save all nodes to a map
         for (TargetModel targetModel : targets) {
-            TargetDto targetDto = new TargetDto();
-            BeanUtils.copyProperties(targetModel, targetDto);
-            mapTmp.put(targetDto.getId(), targetDto);
+            TargetBo targetBo = new TargetBo();
+            BeanUtils.copyProperties(targetModel, targetBo);
+            mapTmp.put(targetBo.getId(), targetBo);
         }
 
         //loop and assign parent/child relationships
-        for (Map.Entry<String, TargetDto> entry : mapTmp.entrySet()) {
-            TargetDto current = entry.getValue();
+        for (Map.Entry<String, TargetBo> entry : mapTmp.entrySet()) {
+            TargetBo current = entry.getValue();
             String parentId = current.getParent();
 
             if (StringUtils.isNotBlank(parentId)) {
-                TargetDto parent = mapTmp.get(parentId);
+                TargetBo parent = mapTmp.get(parentId);
                 if (parent != null) {
                     //                    current.(parent);
                     if (parent.getChildren() == null) {
@@ -203,9 +203,9 @@ public class UserPermissionServiceImpl
 
         }
 
-        List<TargetDto> parentMenus = new ArrayList<>();
+        List<TargetBo> parentMenus = new ArrayList<>();
         //get the root
-        for (TargetDto node : mapTmp.values()) {
+        for (TargetBo node : mapTmp.values()) {
             if(StringUtils.isBlank(node.getParent())) {
                 parentMenus.add(node);
             }

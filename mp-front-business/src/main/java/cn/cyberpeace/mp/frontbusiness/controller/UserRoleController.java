@@ -3,8 +3,8 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.role.UserRoleStatisticBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.request.role.RoleUsersRequest;
 import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
@@ -50,14 +50,14 @@ public class UserRoleController {
 
     @ApiOperation(value = "分页查询 根据roleId查询角色绑定的所有用户", notes = "")
     @GetMapping("/users/page/byrole")
-    public ListObjServiceResult<UserDto> getUsersByRole(UserRolePageRequest pageRequest) {
-        PageInfo<UserDto> pageInfo = userRoleService.pageByRoleId(pageRequest);
+    public ListObjServiceResult<UserBo> getUsersByRole(UserRolePageRequest pageRequest) {
+        PageInfo<UserBo> pageInfo = userRoleService.pageByRoleId(pageRequest);
         return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
     }
 
     @ApiOperation(value = "查询所有角色以及绑定的用户数量", notes = "")
     @GetMapping("/statistics")
-    public ServiceResult<List<UserRoleStatistic>> getUserRoleStatistics() {
+    public ServiceResult<List<UserRoleStatisticBo>> getUserRoleStatistics() {
         List statistics = userRoleService.getUserRoleStatistics();
         return ResultUtils.objList2ListObjServiceResult(statistics, statistics.size());
     }
