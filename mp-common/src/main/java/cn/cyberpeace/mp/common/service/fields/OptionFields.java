@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.common.fields;
+package cn.cyberpeace.mp.common.service.fields;
 
 import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
 import org.springframework.stereotype.Component;
