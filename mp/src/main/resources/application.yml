@@ -130,8 +130,8 @@ mp:
     arkime-es-nodes: 10.100.0.101:9205
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
-  # mp-devops-log 模块配置
-  devopslog:
+  # mp-log 模块配置
+  log:
     exclude-urls: /login
     exclude-methods: OPTIONS
     es-nodes: 10.100.0.101:9205

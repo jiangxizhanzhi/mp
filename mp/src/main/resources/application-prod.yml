@@ -129,8 +129,8 @@ mp:
     arkime-es-nodes: ${ARKIME_ES_IP:10.100.0.101}:${ARKIME_ES_PORT:9205}
     # es 日期格式
     es-date-pattern: ${ES_DATE_PATTERN:yyyy-MM-dd'T'HH:mm:ss.SSSZ}
-  # mp-devops-log 模块
-  devopslog:
+  # mp-log 模块
+  log:
     exclude-urls: ${DEVOPS_LOG_EXCLUDE_URLS:/login}
     exclude-methods: ${DEVOPS_LOG_EXCLUDE_METHODS:OPTIONS}
     es-nodes: ${LOG_ES_IP:10.100.0.101}:${LOG_ES_PORT:9205}
