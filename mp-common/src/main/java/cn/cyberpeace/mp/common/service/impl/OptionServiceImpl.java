@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
-import cn.cyberpeace.mp.common.fields.OptionFields;
+import cn.cyberpeace.mp.common.service.fields.OptionFields;
 import cn.cyberpeace.mp.common.model.OptionModel;
 import cn.cyberpeace.mp.common.repository.OptionMapper;
 import cn.cyberpeace.mp.common.service.OptionService;
