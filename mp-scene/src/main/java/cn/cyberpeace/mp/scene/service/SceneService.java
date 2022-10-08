@@ -9,6 +9,7 @@ import cn.cyberpeace.mp.scene.core.bo.SceneConfigDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneContextBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.event.SceneElementEventTransition;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
 import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
@@ -127,6 +128,31 @@ public class SceneService {
         } else {
             return new ServiceResult<>(result);
         }
+    }
+
+    public ServiceResult<SceneDataBO> modify(String sceneId, SceneDataBO updatedSceneData, SceneContextBO context) {
+        SceneHandler originSceneHandler = new SceneHandler(sceneId, null, false, context);
+        SceneHandler updatedSceneHandler = new SceneHandler(updatedSceneData, context);
+        updatedSceneHandler.setRealTimeUpdate(true);
+        if (updatedSceneHandler.getScene() != null) {
+            updatedSceneHandler.getScene().setCreateTime(null);
+        }
+        updatedSceneHandler.save();
+        SceneTaskPool.getInstance().executeTask(() -> {
+            updatedSceneHandler.getElementMap().values().forEach(e -> {
+                e.setEvent(SceneElementModel.Event.DEFAULT);
+                e.setEventStatus(EventStatus.INITIAL);
+            });
+
+            originSceneHandler.getElementMap().values().forEach(e -> {
+                e.setEvent(SceneElementModel.Event.DEFAULT);
+                e.setEventStatus(EventStatus.INITIAL);
+            });
+            SceneHandlerProxyBuilder.build(updatedSceneHandler);
+            SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
+            proxy.modify(originSceneHandler);
+        });
+        return new ServiceResult<>(updatedSceneHandler.toData());
     }
 
     public ServiceResult<Boolean> pause(String id, SceneContextBO context) {

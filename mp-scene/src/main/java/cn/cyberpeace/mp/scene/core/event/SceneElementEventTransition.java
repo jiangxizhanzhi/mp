@@ -308,7 +308,7 @@ public class SceneElementEventTransition {
                     SceneElementModel.Event.DELETE
             ),
                     EventTransition.genKey(SceneElementModel.Event.MODIFY, EventStatus.START), List.of(
-                    SceneElementModel.Event.DELETE
+                    SceneElementModel.Event.DELETE,SceneElementModel.Event.MODIFY
             ),
                     EventTransition.genKey(SceneElementModel.Event.MODIFY, EventStatus.IN_PROGRESS), List.of(
                     SceneElementModel.Event.DELETE
