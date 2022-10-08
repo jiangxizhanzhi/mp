@@ -529,13 +529,12 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     @ApiOperation("更新场景实例")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "场景模板id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "request", value = "新增数据请求体", dataTypeClass = CsceneCreateInstanceRequest.class)
+            @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = CsceneUpdateBO.class)
     })
     @PostMapping(value = "/modify")
-    public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO csceneBO) {
-        log.info("app_instance params,request:{}", JsonCommon.stringify(csceneBO));
-        var result = modelService.instanceModify(csceneBO).asResult();
+    public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
+        log.info("app_instance params,request:{}", JsonCommon.stringify(request));
+        var result = modelService.instanceModify(request).asResult();
         return result;
     }
 
