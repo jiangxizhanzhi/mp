@@ -511,6 +511,27 @@ public class SceneHandler extends BaseSceneHandler<
     public void restart() {
     }
 
+    // 入参重新考虑下？
+    public boolean modify(SceneHandler originSceneHandler) {
+        prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+
+        originSceneHandler.prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        originSceneHandler.startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+
+        try {
+            for (var plugin : getPlugins()) {
+                plugin.modify(originSceneHandler);
+            }
+        } catch (Exception e) {
+            errorScene(SceneModel.Event.MODIFY, e.getMessage());
+            return false;
+        }
+        overAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
+        save();
+        return true;
+    }
+
     public boolean pause() {
         prepareAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);
         startAllEvent(SceneModel.Event.PAUSE, SceneElementModel.Event.PAUSE);

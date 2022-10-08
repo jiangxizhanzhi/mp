@@ -126,6 +126,16 @@ public class CsceneInstanceHandler extends BaseCsceneHandler<
         }
     }
 
+    public void update() {
+        var cscene = getCscene();
+        cscene.setScene(sceneService.modify(getSceneId(), cscene.getScene(), generateSceneContext()).getSource());
+
+        var csceneObj = cscene.toModel();
+        getCsceneMapper().save(csceneObj);
+        csceneObj.setId(cscene.getId());
+        cscene.fromModel(csceneObj);
+    }
+
     public boolean pause() {
         String sceneId = this.getSceneId();
         if (sceneId == null) {

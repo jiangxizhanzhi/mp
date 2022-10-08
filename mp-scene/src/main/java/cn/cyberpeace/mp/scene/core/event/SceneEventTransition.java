@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.scene.core.event;
 
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.event.base.EventTransition;
+import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import org.apache.commons.collections4.MapUtils;
 
@@ -288,7 +289,7 @@ public class SceneEventTransition {
                             SceneModel.Event.DELETE
                     ),
                     EventTransition.genKey(SceneModel.Event.MODIFY, EventStatus.START), List.of(
-                            SceneModel.Event.DELETE
+                            SceneModel.Event.DELETE, SceneElementModel.Event.MODIFY
                     ),
                     EventTransition.genKey(SceneModel.Event.MODIFY, EventStatus.IN_PROGRESS), List.of(
                             SceneModel.Event.DELETE
