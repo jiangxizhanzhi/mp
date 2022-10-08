@@ -785,8 +785,6 @@ public class InitiateHandler extends HandlerCommon {
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
             if (this.resetResourceId()) {
                 cloudElement.setResourceId(StringUtils.EMPTY);
-            } else {
-                return;
             }
         }
         // defaultConnectedNetwork
