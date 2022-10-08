@@ -1015,7 +1015,7 @@ public class CreateHandler extends HandlerCommon {
     }
 
     public void create() {
-        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+        this.prepareEventProcess();
 
         long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
         long gatewayTasks = getPluginHandler().getGatewayElementMap().values().stream().count();
@@ -1074,10 +1074,20 @@ public class CreateHandler extends HandlerCommon {
         }
     }
 
+    protected void prepareEventProcess() {
+        prepareEventProcess(SceneModel.Event.CREATE, SceneProcess.class, ElementProcess.class);
+    }
+
     public void createNpcElements(List<BaseNpcData.NetWorkNpcInfo> list) {
         NpcCreateData npcCreateData = new NpcCreateData();
         npcCreateData.setNetWorkNpcInfos(list);
         npcClient.create(npcCreateData);
+        // todo npc其实没有resourceId
+        for (var e : getPluginHandler().getTerminalElementMap().values()) {
+            if (e.getVirtualType() != null && e.getVirtualType() == BaseCloudPluginSceneElementModel.VirtualType.NPC) {
+                e.setResourceId(HandlerUtils.genResourceName(e.getSrcElement().getEid()));
+            }
+        }
     }
 
     public void createAuxiliaryNetworkProcess(CloudPluginSceneElementBO cloudElement) {

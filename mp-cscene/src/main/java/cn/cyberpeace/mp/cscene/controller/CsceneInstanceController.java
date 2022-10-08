@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.controller;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -524,6 +525,17 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     public ServiceResult<Map<String, List<DeviceReferCsceneInstanceStat>>> statDeviceReferCsceneInstances(
             @RequestParam String[] images) {
         return csceneSpecialService.statDeviceReferCsceneInstances(images).asResult();
+    }
+
+    @ApiOperation("更新场景实例")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "request", value = "更新数据请求体", dataTypeClass = CsceneUpdateBO.class)
+    })
+    @PostMapping(value = "/modify")
+    public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
+        log.info("app_instance params,request:{}", JsonCommon.stringify(request));
+        var result = modelService.instanceModify(request).asResult();
+        return result;
     }
 
     @ApiOperation("暂停场景实例")
