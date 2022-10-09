@@ -8,7 +8,7 @@
         (select user from mp_auth_tenant_user where org = #{orgId})
         <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
             AND id not in
-            (select distinct user from mp_auth_user_role where role in
+            (select distinct user from mp_auth_user_role
             <where>
                 role in
                 <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
