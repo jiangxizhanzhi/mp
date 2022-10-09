@@ -1,0 +1,110 @@
+package cn.cyberpeace.mp.flow.v2.bo;
+
+import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.service.bo.ModelBO;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.flow.v2.model.FlowModel;
+import com.fasterxml.jackson.core.type.TypeReference;
+import lombok.Data;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.Map;
+
+@Data
+public class FlowBO extends ModelBO<FlowModel, FlowBO> {
+    private String name;
+    private String description;
+    private Integer category;
+    private Integer interactiveType;
+    private Integer resourceType;
+    private List<String> protocols;
+    private String pcapFile;
+    private List<ProtocolConfig> protocolConfigs;
+    private List<ProtocolFlowUnit> protocolFlowUnits;
+    private String scriptType;
+    private String scriptFile;
+    private List<ScriptParam> scriptParams;
+    private String ixiaFLowName;
+
+    @Override
+    public FlowBO fromModel(FlowModel obj, String... ignoreFields) {
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocols),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocolConfigs),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocolFlowUnits),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getScriptParams)));
+        protocols = StringUtils.isEmpty(obj.getProtocols()) ? null
+                : JsonCommon.parse(obj.getProtocols(), new TypeReference<>(){});
+        protocolConfigs = StringUtils.isEmpty(obj.getProtocolConfigs()) ? null
+                : JsonCommon.parse(obj.getProtocolConfigs(), new TypeReference<>(){});
+        protocolFlowUnits = StringUtils.isEmpty(obj.getProtocolFlowUnits()) ? null
+                : JsonCommon.parse(obj.getProtocolFlowUnits(), new TypeReference<>(){});
+        scriptParams = StringUtils.isEmpty(obj.getScriptParams()) ? null
+                : JsonCommon.parse(obj.getScriptParams(), new TypeReference<>(){});
+        return this;
+    }
+
+    @Override
+    public FlowModel toModel(String... ignoreFields) {
+        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocols),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocolConfigs),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getProtocolFlowUnits),
+                BeanUtils.getBeanGetterFieldName(FlowModel::getScriptParams)));
+        if (protocols != null) {
+            obj.setProtocols(JsonCommon.stringify(protocols));
+        }
+        if (protocolConfigs != null) {
+            obj.setProtocolConfigs(JsonCommon.stringify(protocolConfigs));
+        }
+        if (protocolFlowUnits != null) {
+            obj.setProtocolFlowUnits(JsonCommon.stringify(protocolFlowUnits));
+        }
+        if (scriptParams != null) {
+            obj.setScriptParams(JsonCommon.stringify(scriptParams));
+        }
+        return obj;
+    }
+
+
+    @Override
+    public FlowModel createModel() {
+        return new FlowModel();
+    }
+
+    @Data
+    public static class ProtocolConfig {
+        private String name;
+        private Map<String, String> config;
+    }
+
+    @Data
+    public static class ProtocolFlowUnit {
+        private String name;
+        private Integer seq;
+        private String protocolName;
+        private String source;
+        private Map<String, String> params;
+    }
+
+    @Data
+    public static class ScriptParam {
+        private Boolean required;
+        private String name;
+        private String desc;
+        private String argName;
+        private String argShortName;
+        private String valueType;
+        private String defaultValue;
+    }
+
+    public static class ScriptParamValueType {
+        public static final String STRING = "string";
+        public static final String NUMBER = "number";
+
+        private ScriptParamValueType() {}
+    }
+
+}
