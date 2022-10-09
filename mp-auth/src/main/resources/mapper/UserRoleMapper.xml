@@ -4,12 +4,12 @@
 
     <select id="listRolesByUserId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select distinct * from mp_auth_role where id in
-            (select role from mp_auth_user_role where user = #{userId})
+            (select role from mp_auth_user_role where "USER" = #{userId})
     </select>
 
     <select id="listRolesByUserIds" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select distinct * from mp_auth_role where id in
-        (select role from mp_auth_user_role where user in
+        (select role from mp_auth_user_role where "USER" in
             <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
              #{userId}
             </foreach>
@@ -24,7 +24,7 @@
                  left join mp_auth_tenant_user ou on u.id = ou.user
                  left join mp_auth_user_role ur on u.id = ur.user
         where u.id in
-              (select user from mp_auth_user_role where role = #{roleId})
+              (select user from mp_auth_user_role where "ROLE" = #{roleId})
         group by u.id
         order by -u.update_time, u.username
     </select>

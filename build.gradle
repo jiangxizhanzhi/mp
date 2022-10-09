@@ -95,7 +95,7 @@ subprojects {
         implementation 'com.github.oshi:oshi-core:5.3.6'
         implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
         implementation 'org.mariadb.jdbc:mariadb-java-client:2.7.2'
-        implementation 'com.dameng:DmJdbcDriver17:8.1.2.141'
+        implementation 'com.dameng:DmJdbcDriver18:8.1.2.79'
         annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
         annotationProcessor 'org.projectlombok:lombok'
         compileOnly 'org.projectlombok:lombok'
