@@ -13,6 +13,7 @@ import lombok.Setter;
 public class AccessModeParseResult {
     private String protocol;
     private String port;
+    private String path;
     private String username;
     private String password;
     private String desc;
