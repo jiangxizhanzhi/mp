@@ -12,10 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 public class ModifyHandler extends HandlerCommon {
@@ -26,31 +23,29 @@ public class ModifyHandler extends HandlerCommon {
 
     public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin) {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
-        this.modifyInitiateHandler = new ModifyInitiateHandler(newPlugin, getTaskPool());
-        this.modifyCreateHandler = new ModifyCreateHandler(newPlugin, getTaskPool());
         Set<String> originNodeIds = originPlugin.getSceneHandler().getElementMap().keySet();
+        Set<String> createdNodeIds = new HashSet<>(originNodeIds);
+        this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, getTaskPool());
+        this.modifyCreateHandler = new ModifyCreateHandler(createdNodeIds, newPlugin, getTaskPool());
         Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
         originNodeIds.removeAll(newNodeIds);
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
     }
 
     public void modify() {
-        getPluginHandler().getElementMap().values().forEach(e -> {
-            if (StringUtils.isNotEmpty(e.getResourceId())) {
-                getHandlerUtils().getCreatedNodes().add(e.getSrcElement().getId());
-            }
-        });
         this.modifyDeleteHandler.delete();
         this.modifyInitiateHandler.initiate();
         this.modifyCreateHandler.create();
     }
 
     private static class ModifyInitiateHandler extends InitiateHandler {
+        private Set<String> createdNodeIds;
 
-        public ModifyInitiateHandler(CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
+        public ModifyInitiateHandler(Set<String> createdNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
             super(pluginHandler);
             setTaskPool(taskPool);
             setEvent(SceneModel.Event.MODIFY);
+            this.createdNodeIds = createdNodeIds;
         }
 
         @Override
@@ -71,7 +66,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
-            if (getHandlerUtils().getCreatedNodes().contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
                 return;
             }
             super.initiateElementBasePropertiesProcess(cloudElement);
@@ -124,15 +119,18 @@ public class ModifyHandler extends HandlerCommon {
     }
 
     private static class ModifyCreateHandler extends CreateHandler {
-        public ModifyCreateHandler(CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
+        private Set<String> createdNodeIds;
+
+        public ModifyCreateHandler(Set<String> createdNodeIds, CloudScenePluginHandler pluginHandler, TaskPool taskPool) {
             super(pluginHandler);
             setEvent(SceneModel.Event.MODIFY);
             setTaskPool(taskPool);
+            this.createdNodeIds = createdNodeIds;
         }
 
         @Override
         protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
-            if (getHandlerUtils().getCreatedNodes().contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
                 return;
             }
             super.createAuxiliaryNetwork(cloudElement);
@@ -145,7 +143,7 @@ public class ModifyHandler extends HandlerCommon {
 
         @Override
         public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
-            if (getHandlerUtils().getCreatedNodes().contains(cloudElement.getSrcElement().getId())) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
                 // 已存在的节点无需再次创建
                 return;
             }
