@@ -253,6 +253,8 @@ public class InitiateHandler extends HandlerCommon {
                 // 外部已存在的网络设置网络id
                 network.setResourceId(cloudElement.getResourceId());
                 continue;
+            } else if (getHandlerUtils().getCreatedNetworks().contains(network.getId())) {
+                continue;
             }
             network.setResourceId(StringUtils.EMPTY);
             if (StringUtils.isEmpty(network.getCidr())) {
@@ -713,7 +715,7 @@ public class InitiateHandler extends HandlerCommon {
      * 初始化节点
      * @param cloudElement 网元节点
      */
-    private void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
+    protected void initiateElementBaseProperties(CloudPluginSceneElementBO cloudElement) {
         // 外部网络预先初始化
         var role = cloudElement.getRole();
         if (role != null && role.equals(BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK)) {
@@ -785,8 +787,6 @@ public class InitiateHandler extends HandlerCommon {
         if (!Boolean.TRUE.equals(cloudElement.getExternal())) {
             if (this.resetResourceId()) {
                 cloudElement.setResourceId(StringUtils.EMPTY);
-            } else {
-                return;
             }
         }
         // defaultConnectedNetwork

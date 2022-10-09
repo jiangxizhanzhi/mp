@@ -346,7 +346,7 @@ public class SceneHandler extends BaseSceneHandler<
 
     public void reportElementUpdated(String nodeId) {
         // 辅助节点无需通知
-        if (Boolean.TRUE.equals(getElement(nodeId).getIsAuxiliary())) {
+        if (getElement(nodeId) == null || Boolean.TRUE.equals(getElement(nodeId).getIsAuxiliary())) {
             return;
         }
         var collectedSceneElement = getCollectedSceneElementBO(nodeId);
