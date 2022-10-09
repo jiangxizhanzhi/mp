@@ -45,9 +45,6 @@ public class HandlerUtils {
 
     private Set<String> createdNetworks = new HashSet<>();
 
-    // todo 可以移到对应的 modify handler 里面
-    private Set<String> createdNodes = new HashSet<>();
-
     private Set<String> toDeleteNodes = new HashSet<>();
 
     public void addFwdnsInterfaceIp(String node, String netId, String fwdnsInterfaceIp) {
