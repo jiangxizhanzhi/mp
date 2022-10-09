@@ -63,7 +63,6 @@ subprojects {
         implementation 'com.hierynomus:sshj:0.34.0'
         implementation 'com.squareup.okhttp3:okhttp:3.14.6'
         implementation 'commons-codec:commons-codec:1.15'
-        implementation 'commons-io:commons-io:2.6'
         implementation 'commons-io:commons-io:2.11.0'
         implementation 'commons-net:commons-net:3.6'
         implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
