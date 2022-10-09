@@ -181,7 +181,7 @@ public class CreateHandler extends HandlerCommon {
                 accessMode.getPassword());
     }
 
-    private void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+    protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
         List<ConnectedNetworkBO> networks = cloudElement.getDeriveNetworks();
         int index = 1;
         for (ConnectedNetworkBO connectedNetwork : networks) {

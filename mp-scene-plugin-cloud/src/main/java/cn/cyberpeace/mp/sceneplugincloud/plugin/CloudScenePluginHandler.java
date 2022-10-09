@@ -134,6 +134,9 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
             CloudPluginSceneElementNetworkBO networkBO = new CloudPluginSceneElementNetworkBO();
             networkBO.fromModel(network);
             ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBO, handlerUtils);
+            if (this.getElement(networkBO.getSceneElement()) == null) {
+                return;
+            }
             networkBOMap.put(networkBO.getId(), connectedNetworkBO);
             this.getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
         });

@@ -96,6 +96,10 @@ public class CloudScenePluginModelHandler extends BasePluginModelHandler<
         return this.cloudPluginSceneElementNetworkMapper.bulkCreate(deriveNetworks.stream().map(d -> d.getNetwork().toModel()).collect(Collectors.toList())).getSuccessCount();
     }
 
+    public void deleteElementNetworks(String... networkIds) {
+        this.cloudPluginSceneElementNetworkMapper.bulkDelete(networkIds);
+    }
+
     public int updateElementNetworks(String sceneElement) {
         var deriveNetworks = this.pluginHandler.getElement(sceneElement).getDeriveNetworks();
         var existNetworks = this.readElementNetworks(sceneElement);

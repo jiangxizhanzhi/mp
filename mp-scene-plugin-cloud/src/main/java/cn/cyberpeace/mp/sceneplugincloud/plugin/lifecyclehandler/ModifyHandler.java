@@ -8,8 +8,10 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementNetworkMod
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.lifecyclehandler.taskpool.CreateTaskPool;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +35,11 @@ public class ModifyHandler extends HandlerCommon {
     }
 
     public void modify() {
+        getPluginHandler().getElementMap().values().forEach(e -> {
+            if (StringUtils.isNotEmpty(e.getResourceId())) {
+                getHandlerUtils().getCreatedNodes().add(e.getSrcElement().getId());
+            }
+        });
         this.modifyDeleteHandler.delete();
         this.modifyInitiateHandler.initiate();
         this.modifyCreateHandler.create();
@@ -50,11 +57,6 @@ public class ModifyHandler extends HandlerCommon {
         public void initiate() {
             this.initiateNetwork();
             super.initiate();
-            getPluginHandler().getElementMap().values().forEach(e -> {
-                if (StringUtils.isNotEmpty(e.getResourceId())) {
-                    getHandlerUtils().getCreatedNodes().add(e.getSrcElement().getId());
-                }
-            });
         }
 
         @Override
@@ -67,6 +69,14 @@ public class ModifyHandler extends HandlerCommon {
             return false;
         }
 
+        @Override
+        public void initiateElementBasePropertiesProcess(CloudPluginSceneElementBO cloudElement) {
+            if (getHandlerUtils().getCreatedNodes().contains(cloudElement.getSrcElement().getId())) {
+                return;
+            }
+            super.initiateElementBasePropertiesProcess(cloudElement);
+        }
+
         public void initiateNetwork() {
             List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
             Map<String, ConnectedNetworkBO> networkBOMap = new HashMap<>();
@@ -74,6 +84,9 @@ public class ModifyHandler extends HandlerCommon {
                 CloudPluginSceneElementNetworkBO networkBO = new CloudPluginSceneElementNetworkBO();
                 networkBO.fromModel(network);
                 ConnectedNetworkBO connectedNetworkBO = new ConnectedNetworkBO(networkBO, getHandlerUtils());
+                if (getPluginHandler().getElement(networkBO.getSceneElement()) == null) {
+                    return;
+                }
                 networkBOMap.put(networkBO.getId(), connectedNetworkBO);
                 getPluginHandler().getElement(networkBO.getSceneElement()).getDeriveNetworks().add(connectedNetworkBO);
             });
@@ -118,6 +131,14 @@ public class ModifyHandler extends HandlerCommon {
         }
 
         @Override
+        protected void createAuxiliaryNetwork(CloudPluginSceneElementBO cloudElement) {
+            if (getHandlerUtils().getCreatedNodes().contains(cloudElement.getSrcElement().getId())) {
+                return;
+            }
+            super.createAuxiliaryNetwork(cloudElement);
+        }
+
+        @Override
         protected void prepareEventProcess() {
             prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
         }
@@ -140,6 +161,22 @@ public class ModifyHandler extends HandlerCommon {
             setEvent(SceneModel.Event.MODIFY);
             setTaskPool(taskPool);
             this.deletedNodeIds = deletedNodeIds;
+        }
+
+        @Override
+        public void delete() {
+            super.delete();
+            // 删除网络信息
+            List<CloudPluginSceneElementNetworkModel> networks = getPluginHandler().getPluginModelHandler().readNetworks();
+            List<String> deleteNets = new ArrayList<>();
+            for (var net : networks) {
+                if (deletedNodeIds.contains(net.getSceneElement())) {
+                    deleteNets.add(net.getId());
+                }
+            }
+            if (CollectionUtils.isNotEmpty(deleteNets)) {
+                getPluginHandler().getPluginModelHandler().deleteElementNetworks(deleteNets.toArray(new String[]{}));
+            }
         }
 
         @Override
