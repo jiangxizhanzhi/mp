@@ -4,7 +4,7 @@
 
 
     <select id="listWithUserCnt" resultType="cn.cyberpeace.mp.auth.dto.role.RoleDto">
-        select r.*, (select count(distinct user) from mp_auth_user_role ru where r.id = ru.role) userCnt from
+        select r.*, (select count(distinct "USER") from mp_auth_user_role ru where r.id = ru."ROLE") userCnt from
         mp_auth_role r
         <where>
             <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">

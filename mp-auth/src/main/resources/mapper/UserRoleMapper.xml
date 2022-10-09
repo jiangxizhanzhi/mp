@@ -4,12 +4,12 @@
 
     <select id="listRolesByUserId" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select distinct * from mp_auth_role where id in
-            (select role from mp_auth_user_role where "USER" = #{userId})
+            (select "ROLE" from mp_auth_user_role where "USER" = #{userId})
     </select>
 
     <select id="listRolesByUserIds" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
         select distinct * from mp_auth_role where id in
-        (select role from mp_auth_user_role where "USER" in
+        (select "ROLE" from mp_auth_user_role where "USER" in
             <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
              #{userId}
             </foreach>
@@ -19,21 +19,21 @@
     <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select distinct u.*,
         group_concat(distinct ou.org separator ',') as orgs,
-        group_concat(distinct ur.role separator ',') as roles
+        group_concat(distinct ur."ROLE" separator ',') as roles
         from mp_auth_user u
-                 left join mp_auth_tenant_user ou on u.id = ou.user
-                 left join mp_auth_user_role ur on u.id = ur.user
+                 left join mp_auth_tenant_user ou on u.id = ou."USER"
+                 left join mp_auth_user_role ur on u.id = ur."USER"
         where u.id in
-              (select user from mp_auth_user_role where "ROLE" = #{roleId})
+              (select "USER" from mp_auth_user_role where "ROLE" = #{roleId})
         group by u.id
-        order by -u.update_time, u.username
+        order by u.update_time DESC, u.username ASC
     </select>
 
     <select id="getUserRoleStatistics" resultType="cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic">
         select tabA.rid roleId, tabR.name roleName, tabA.cnt userCnt
-            from (select role rid, count(user) cnt from mp_auth_user_role group by role) as tabA
+            from (select "ROLE" rid, count("USER") cnt from mp_auth_user_role group by "ROLE") as tabA
                      left join mp_auth_role tabR on tabA.rid = tabR.id
-            order by userCnt desc
+            order by userCnt DESC
     </select>
 
 </mapper>

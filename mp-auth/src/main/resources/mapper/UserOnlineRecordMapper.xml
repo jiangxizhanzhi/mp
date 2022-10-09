@@ -5,20 +5,20 @@
     <select id="listRecordSummary" resultType="cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto">
         select user, sum(duration_minutes) total_online_minutes, sum(status = 0) unCompleteCnt, mp_auth_user.username, mp_auth_user.name
         from mp_auth_user_online_record
-        left join mp_auth_user on mp_auth_user_online_record.user = mp_auth_user.id
+        left join mp_auth_user on mp_auth_user_online_record."USER" = mp_auth_user.id
         <where>
             mp_auth_user.username is not null
             <if test="userIds != null and userIds.size() > 0">
-                AND user IN
+                AND "USER" IN
                 <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
                     #{userId}
                 </foreach>
             </if>
         </where>
-        group by user
+        group by "USER"
         order by unCompleteCnt desc,
         <if test="priorityUserIds != null and priorityUserIds.size() > 0">
-            (case when user IN
+            (case when "USER" IN
                 <foreach item="priorityUserId" index="index" collection="priorityUserIds" open="(" separator="," close=")">
                     #{priorityUserId}
                 </foreach>
@@ -72,14 +72,14 @@
                        (select pk
                         from mp_auth_user_online_record
                         where start_time >= #{endTime} or end_time &lt;= #{startTime})
-                 group by user
+                 group by "USER"
              ) as tabA
     </select>
 
     <select id="listOnlineHistoryTrackByUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
         select *
         from mp_auth_user_online_record
-        where user = #{userId}
+        where "USER" = #{userId}
           and pk not in
               (select pk from mp_auth_user_online_record where start_time >= #{endTime} or end_time &lt;= #{startTime})
     </select>

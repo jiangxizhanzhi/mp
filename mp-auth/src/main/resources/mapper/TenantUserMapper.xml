@@ -5,17 +5,17 @@
 
     <select id="listUsersByOrgId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
         select distinct * from mp_auth_user where id in
-        (select user from mp_auth_tenant_user where org = #{orgId})
+        (select "USER" from mp_auth_tenant_user where org = #{orgId})
         <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
             AND id not in
-            (select distinct user from mp_auth_user_role
+            (select distinct "USER" from mp_auth_user_role
             <where>
-                role in
+                "ROLE" in
                 <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
                     #{roleId}
                 </foreach>
                 <if test="selfUserId != null and selfUserId != ''">
-                    and user != #{selfUserId}
+                    and "USER" != #{selfUserId}
                 </if>
             </where>
             )
@@ -26,40 +26,40 @@
                 #{excludeUserId}
             </foreach>
         </if>
-        order by -update_time, username
+        order by update_time DESC, username ASC
     </select>
 
     <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
         select distinct * from mp_auth_org where id in
-        (select org from mp_auth_tenant_user where user = #{userId})
+                                                 (select org from mp_auth_tenant_user where "USER" = #{userId})
         order by mp_auth_org.pk
     </select>
 
 
     <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto">
-        select ou.user as userId, group_concat(distinct o.id separator ',') as orgIds,
+        select ou."USER" as userId, group_concat(distinct o.id separator ',') as orgIds,
         group_concat(distinct o.name separator ',') as orgNames
         from mp_auth_org o
         left join mp_auth_tenant_user ou
         on ou.org = o.id
-        where ou.user != ''
+        where ou."USER" != ''
         <if test="userIds != null and userIds.size() > 0">
-            AND ou.user in
+            AND ou."USER" in
             <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
                 #{userId}
             </foreach>
         </if>
-        group by ou.user
+        group by ou."USER"
     </select>
 
     <select id="listUserOrgByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgDto">
-        select distinct o.*, ou.user as userId
+        select distinct o.*, ou."USER" as userId
         from mp_auth_org o
         left join mp_auth_tenant_user ou
         on ou.org = o.id
-        where ou.user != ''
+        where ou."USER" != ''
         <if test="userIds != null and userIds.size() > 0">
-            AND ou.user in
+            AND ou."USER" in
             <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
                 #{userId}
             </foreach>
@@ -69,14 +69,14 @@
     <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select
         distinct u.*,
-        group_concat(distinct ou.org separator ',') as orgs,
-        group_concat(distinct ur.role separator ',') as roles
+        wm_concat(ou.org) as orgs,
+        wm_concat(ur."ROLE") as roles
         from mp_auth_user u
-        left join mp_auth_tenant_user ou on u.id = ou.user
-        left join mp_auth_user_role ur on u.id = ur.user
+        left join mp_auth_tenant_user ou on u.id = ou."USER"
+        left join mp_auth_user_role ur on u.id = ur."USER"
         <where>
             <if test="orgIds != null and orgIds.size() > 0">
-                AND u.id in (select user from mp_auth_tenant_user where org in
+                AND u.id in (select "USER" from mp_auth_tenant_user where org in
                 <foreach item="orgId" index="index" collection="orgIds" open="(" separator="," close=")">
                     #{orgId}
                 </foreach>
@@ -90,14 +90,14 @@
             </if>
             <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
                 AND u.id not in
-                (select distinct user from mp_auth_user_role
+                (select distinct "USER" from mp_auth_user_role
                 <where>
-                    role in
+                    "ROLE" in
                     <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
                         #{roleId}
                     </foreach>
                     <if test="selfUserId != null and selfUserId != ''">
-                        and user != #{selfUserId}
+                        and "USER" != #{selfUserId}
                     </if>
                 </where>
                 )
@@ -132,5 +132,5 @@
             </foreach>
         </if>
     </select>
-    
+
 </mapper>
