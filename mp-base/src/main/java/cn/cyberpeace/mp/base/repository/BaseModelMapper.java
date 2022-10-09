@@ -28,7 +28,11 @@ import java.lang.reflect.Proxy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public interface BaseModelMapper<M extends BaseModel> {
@@ -142,12 +146,17 @@ public interface BaseModelMapper<M extends BaseModel> {
             return null;
         }
 
+        Map<String, Object> newMap = new HashMap<String, Object>();
+        map.entrySet().forEach(entry -> {
+            newMap.put(entry.getKey().toLowerCase(), entry.getValue());
+        });
+
         Class<M> actualModelClass = getModelClass();
         if (actualModelClass == null) {
             return null;
         }
 
-        return mapToObj(map, actualModelClass);
+        return mapToObj(newMap, actualModelClass);
     }
 
     private Object[] convertCreateParams(List<M> objs) {
