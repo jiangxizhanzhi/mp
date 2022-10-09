@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.situationaware.listener;
+package cn.cyberpeace.mp.situationaware.init;
 
 import cn.cyberpeace.mp.situationaware.constant.SituationalAwareConstant;
 import cn.cyberpeace.mp.situationaware.service.NetworkTrafficGroupService;
@@ -36,7 +36,7 @@ public class SituationAwareInitListener implements ApplicationListener<Applicati
         SituationalAwareConstant.wazuhToken = CacheBuilder.newBuilder()
                 .maximumSize(1)
                 .expireAfterWrite(14, TimeUnit.MINUTES)
-                .build(new CacheLoader<String, String>() {
+                .build(new CacheLoader<>() {
                     @Override
                     public String load(String key) {
                         String token = securityService.authenticate();
