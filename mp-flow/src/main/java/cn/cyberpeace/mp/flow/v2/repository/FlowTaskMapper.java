@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 @Mapper
-@Repository
+@Repository(value = "v2FlowTaskMapper")
 @ModelClass(FlowTaskModel.class)
 public interface FlowTaskMapper extends BaseModelMapper<FlowTaskModel>  {
 }

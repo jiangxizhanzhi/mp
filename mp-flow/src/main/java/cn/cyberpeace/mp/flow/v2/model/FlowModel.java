@@ -40,10 +40,10 @@ public class FlowModel extends BaseModel {
     private String ixiaFLowName;
 
     public static class ResourceType {
-        public static final Integer PCAP = 0;
-        public static final Integer SCRIPT = 1;
-        public static final Integer PROTOCOL_FLOW = 2;
-        public static final Integer IXIA_FLOW = 3;
+        public static final int PCAP = 0;
+        public static final int SCRIPT = 1;
+        public static final int PROTOCOL_FLOW = 2;
+        public static final int IXIA_FLOW = 3;
 
         private ResourceType() {}
     }

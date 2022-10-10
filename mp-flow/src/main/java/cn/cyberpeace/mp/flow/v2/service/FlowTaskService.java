@@ -8,12 +8,13 @@ import cn.cyberpeace.mp.flow.v2.repository.FlowTaskMapper;
 import cn.cyberpeace.mp.flow.v2.service.fields.FlowTaskFields;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowTaskQueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FlowTaskService extends BaseModelServiceImpl<FlowTaskModel, FlowTaskMapper, FlowTaskFields, FlowTaskQueryParams> {
     @Autowired
-    public FlowTaskService(FlowTaskMapper modelMapper, FlowTaskFields modelFields) {
+    public FlowTaskService(@Qualifier("v2FlowTaskMapper") FlowTaskMapper modelMapper, @Qualifier("v2FlowTaskFields") FlowTaskFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
     }

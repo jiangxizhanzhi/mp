@@ -27,6 +27,8 @@ public class FlowGeneratorModel extends BaseModel {
     private String password;
     @DefaultStr
     private String token;
+    @DefaultStr
+    private String nics;
 
     public static class Type {
         public static final String CPCLOUD_TREX = "cpcloud_trex";

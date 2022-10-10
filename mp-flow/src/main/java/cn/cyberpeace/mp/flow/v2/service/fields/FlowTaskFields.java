@@ -6,7 +6,7 @@ import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskModel;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component(value = "v2FlowTaskFields")
 public class FlowTaskFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowTaskModel.class));
 
