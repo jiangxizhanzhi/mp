@@ -18,8 +18,8 @@
 
     <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select distinct u.*,
-        group_concat(distinct ou.org separator ',') as orgs,
-        group_concat(distinct ur."ROLE" separator ',') as roles
+        wm_concat(distinct ou.org) as orgs,
+        wm_concat(distinct ur."ROLE") as roles
         from mp_auth_user u
                  left join mp_auth_tenant_user ou on u.id = ou."USER"
                  left join mp_auth_user_role ur on u.id = ur."USER"

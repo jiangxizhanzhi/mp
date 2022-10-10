@@ -7,7 +7,7 @@
                         ua.url,
                         ua.is_pattern,
                         ua.methods                               as methodStr,
-                        group_concat(mauat.target separator ',') as targetsStr
+                        wm_concat(mauat.target) as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id
@@ -21,7 +21,7 @@
                ua.url,
                ua.is_pattern,
                ua.methods as methodStr,
-               group_concat(mauat.target separator ',') as targetsStr
+               wm_concat(mauat.target) as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id
@@ -36,7 +36,7 @@
                      ua.url,
                      ua.is_pattern,
                      ua.methods as methodStr,
-                     group_concat(mauat.target separator ',') as targetsStr
+                     wm_concat(mauat.target) as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id
@@ -51,7 +51,7 @@
             ua.url,
             ua.is_pattern,
             ua.methods as methodStr,
-            group_concat(mauat.target separator ',') as targetsStr
+            wm_concat(mauat.target) as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id
@@ -72,7 +72,7 @@
             ua.url,
             ua.is_pattern,
             ua.methods as methodStr,
-        group_concat(mauat.target separator ',') as targetsStr
+            wm_concat(mauat.target) as targetsStr
         FROM mp_auth_url_ac ua
         left join mp_auth_url_ac_target mauat
         on ua.id = mauat.urlac_id

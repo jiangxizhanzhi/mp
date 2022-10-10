@@ -37,8 +37,9 @@
 
 
     <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto">
-        select ou."USER" as userId, group_concat(distinct o.id separator ',') as orgIds,
-        group_concat(distinct o.name separator ',') as orgNames
+        select ou."USER" as userId,
+        wm_concat(distinct o.id) as orgIds,
+        wm_concat(distinct o.name) as orgNames
         from mp_auth_org o
         left join mp_auth_tenant_user ou
         on ou.org = o.id
@@ -69,8 +70,8 @@
     <select id="listUsers" resultType="cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto">
         select
         distinct u.*,
-        wm_concat(ou.org) as orgs,
-        wm_concat(ur."ROLE") as roles
+        wm_concat(distinct ou.org) as orgs,
+        wm_concat(distinct ur."ROLE") as roles
         from mp_auth_user u
         left join mp_auth_tenant_user ou on u.id = ou."USER"
         left join mp_auth_user_role ur on u.id = ur."USER"
