@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.ClassUtils;
 import cn.cyberpeace.mp.base.util.basic.CollectionUtils;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
+import cn.cyberpeace.mp.base.util.dm.ReserveWordsUtils;
 import lombok.Data;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -184,7 +185,17 @@ public interface BaseModelMapper<M extends BaseModel> {
             createFieldValuesList[i] = createFieldValues;
         }
 
+        processReservedFields(createColumnFields);
+
         return new Object[]{ createColumnFields, createFieldValuesList };
+    }
+
+
+    private void processReservedFields(String[] fields) {
+        for (int i = 0; i < fields.length; i++) {
+            String convertedField = ReserveWordsUtils.convert(fields[i]);
+            fields[i] = convertedField;
+        }
     }
 
     private Object[] convertUpdateParams(List<M> objs) {
@@ -222,6 +233,8 @@ public interface BaseModelMapper<M extends BaseModel> {
             }
             updateFieldValuesList[i] = updateFieldValues;
         }
+
+        processReservedFields(updateColumnFields.toArray(new String[0]));
 
         return new Object[]{ updateColumnFields.toArray(new String[0]), updateFieldValuesList };
     }
