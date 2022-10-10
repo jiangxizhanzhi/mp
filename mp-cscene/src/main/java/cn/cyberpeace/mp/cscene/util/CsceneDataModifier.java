@@ -850,11 +850,11 @@ public class CsceneDataModifier {
         c3725Router.setRam(198);
         result.put("854f7c24-060f-4dbd-b771-68eab207a072", c3725Router);
 
-        Gns3ImageInfo c2900Router = new Gns3ImageInfo();
-        c3725Router.setImage("c2900-universalk9_npe-mz.SPA.151-3.T.bin");
-        c3725Router.setPlatform("c2900");
-        c3725Router.setRam(198);
-        result.put("854f7c24-060f-4dbd-b771-68eab207a073", c2900Router);
+        Gns3ImageInfo c2600Router = new Gns3ImageInfo();
+        c2600Router.setImage("c2600-ik9s-mz.123-19.bin");
+        c2600Router.setPlatform("c2600");
+        c2600Router.setRam(198);
+        result.put("854f7c24-060f-4dbd-b771-68eab207a073", c2600Router);
 
         return result;
     }
