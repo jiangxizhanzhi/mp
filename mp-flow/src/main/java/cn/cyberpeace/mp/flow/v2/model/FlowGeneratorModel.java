@@ -33,7 +33,7 @@ public class FlowGeneratorModel extends BaseModel {
     public static class Type {
         public static final String CPCLOUD_TREX = "cpcloud_trex";
         public static final String CPCLOUD_IXIA = "cpcloud_ixia";
-        public static final String DRAGON_TEST = "dragon test";
+        public static final String DRAGON_TEST = "dragon_test";
 
         private Type() {}
     }

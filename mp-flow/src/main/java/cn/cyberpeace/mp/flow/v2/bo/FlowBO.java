@@ -9,15 +9,21 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Map;
 
 @Data
 public class FlowBO extends ModelBO<FlowModel, FlowBO> {
+    @NotEmpty(message = "name can not be empty")
     private String name;
+    @NotEmpty(message = "description can not be empty")
     private String description;
+    @NotEmpty(message = "category can not be empty")
     private Integer category;
+    @NotEmpty(message = "interactiveType can not be empty")
     private Integer interactiveType;
+    @NotEmpty(message = "resourceType can not be empty")
     private Integer resourceType;
     private List<String> protocols;
     private String pcapFile;
@@ -26,7 +32,7 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private String scriptType;
     private String scriptFile;
     private List<ScriptParam> scriptParams;
-    private String ixiaFLowName;
+    private String ixiaFlowName;
 
     @Override
     public FlowBO fromModel(FlowModel obj, String... ignoreFields) {

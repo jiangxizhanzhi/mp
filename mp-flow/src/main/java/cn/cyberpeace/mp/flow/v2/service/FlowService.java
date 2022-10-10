@@ -9,6 +9,8 @@ import cn.cyberpeace.mp.flow.v2.service.param.FlowQueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, FlowFields, FlowQueryParams> {
     @Autowired
@@ -27,6 +29,11 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
         var resourceTypes = queryParams.getResourceTypes();
         if (resourceTypes != null && !resourceTypes.isEmpty()) {
             humanCondition.filterIn(FlowModel::getResourceType, resourceTypes.toArray());
+        }
+
+        Integer interactiveType = queryParams.getInteractiveType();
+        if (Objects.nonNull(interactiveType)) {
+            humanCondition.filterEqual(FlowModel::getInteractiveType, interactiveType);
         }
     }
 

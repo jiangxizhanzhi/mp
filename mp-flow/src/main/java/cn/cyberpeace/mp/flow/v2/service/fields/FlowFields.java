@@ -22,7 +22,7 @@ public class FlowFields extends BaseModelFields {
     public static final DynamicFields readonlyFields = new DynamicFields().merge(BaseModelFields.readonlyFields);
 
     public static final DynamicFields searchFields = new DynamicFields(
-            FlowModel::getName, FlowModel::getDescription
+            FlowModel::getName, FlowModel::getDescription, FlowModel::getInteractiveType
     );
 
     public static final DynamicFields orderFields = new DynamicFields(

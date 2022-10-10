@@ -79,7 +79,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
         private String scriptType;
         private String scriptFile;
         private List<ScriptParam> scriptParams;
-        private String ixiaFLowName;
+        private String ixiaFlowName;
 
         private Integer delay;
         private Integer weight;
