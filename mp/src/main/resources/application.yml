@@ -10,8 +10,8 @@ server:
 
 spring:
   datasource:
-    url: jdbc:dm://192.168.5.135:9306?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
-    username: TEST
+    url: jdbc:dm://10.100.2.8:9306?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&allowMultiQueries=true
+    username: MP
     password: ycxx123##
     driver-class-name: dm.jdbc.driver.DmDriver
     hikari:
@@ -29,7 +29,7 @@ spring:
       max-file-size: 1000MB
       max-request-size: 10000MB
   rabbitmq:
-    host: 10.100.0.101
+    host: 10.100.0.111
     port: 5673
     username: guest
     password: guest
@@ -79,23 +79,23 @@ management:
 mp:
   base:
     fdfs-tracker-servers:
-        - 10.100.1.26:22122
+      - 10.100.1.26:22122
     fdfs-inner-http-server: http://10.100.1.26:8888
     fdfs-outer-http-server: /fdfs
 
   # mp-devops-cluster 配置
   devopscluster:
-    # cp-url: http://10.100.7.1:111 #云平台地址
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    # cp-url: http://10.100.7.2:111 #云平台地址
+    cp-url: http://10.100.7.2:11111 #云平台地址
     public-net-proxy: false #公网开关
-    public-net-proxy-ip: 10.100.7.1 #公网ip
+    public-net-proxy-ip: 10.100.7.2 #公网ip
     public-net-proxy-port: 11111 #公网端口
     public-net-proxy-server: false
     public-net-proxy-exclude-protocols: console,vnc,ssh,telnet,rdp
     hostname: controller  #主机名称
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
     disk-alarm-percent: 80 # 磁盘空间告警阈值
-    cp-ip: 10.100.7.1                # 云平台适配层接口地址
+    cp-ip: 10.100.7.2                # 云平台适配层接口地址
     mp-ip: 10.100.1.12:8001          # MP中台地址
   # mp-situationaware 模块配置
   situationaware:
@@ -107,35 +107,35 @@ mp:
     monitor-cp-cloud-restart-restrict:
     monitor-business-restart-restrict:
     # arkime
-    arkime-cpcloud-container-create-url: http://10.100.7.1:11111/v1
-    arkime-cpcloud-network-mirror-url: http://10.100.7.1:11111/cpcloud/sdn_app/v1
-    arkime-es-host: 10.100.0.101
+    arkime-cpcloud-container-create-url: http://10.100.7.2:11111/v1
+    arkime-cpcloud-network-mirror-url: http://10.100.7.2:11111/cpcloud/sdn_app/v1
+    arkime-es-host: 10.100.0.111
     arkime-es-port: 9205
     arkime-image-name: centos-arkime_arkime:v2
     arkime-username: api
     arkime-password: api
     #wazuh 开放接口地址开放接口用户名密码
-    wazuh-base-url: http://10.100.7.1:15500
+    wazuh-base-url: http://10.100.7.2:15500
     wazuh-username: wazuh
     wazuh-password: Abcd123#
-    wazuh-flow-table-url: http://10.100.7.1:9999/knapsack/probe/v1
+    wazuh-flow-table-url: http://10.100.7.2:9999/knapsack/probe/v1
     # wazuh-probe-manager
     probe-mgr-url: http://10.100.0.111:8002
     probe-mgr-agent-script-linux-path: /var/ossec/etc/shared/scripts/
     probe-mgr-agent-script-windows-path: C:\ossec-agent\shared\scripts\
     probe-mgr-task-enable: false
     # wazuh es节点地址
-    wazuh-es-nodes: 10.100.0.101:9205
+    wazuh-es-nodes: 10.100.0.111:9205
     # arkime es 地址
-    arkime-es-nodes: 10.100.0.101:9205
+    arkime-es-nodes: 10.100.0.111:9205
     # es 日期格式
     es-date-pattern: yyyy-MM-dd'T'HH:mm:ss.SSSZ
   # mp-devops-log 模块配置
   devopslog:
     exclude-urls: /login
     exclude-methods: OPTIONS
-    es-nodes: 10.100.0.101:9205
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    es-nodes: 10.100.0.111:9205
+    cp-url: http://10.100.7.2:11111 #云平台地址
     mp-ip: 10.100.1.12:8001       # MP中台地址
     log-db: mysql #日志存储数据库：es、mysql
   # mp-auth 模块配置
@@ -165,9 +165,9 @@ mp:
   # mp-flow 模块配置
   flow:
     trex-image: tgn-trex
-    cp-url: http://10.100.7.1:11111 #云平台地址
+    cp-url: http://10.100.7.2:11111 #云平台地址
   sceneplugincloud:
-    cpcloud-server: http://10.100.7.1:11111
+    cpcloud-server: http://10.100.7.2:11111
     delete-retry-times: 2
     default-core-router-name: Router
     enable-reallocate-ip-ports: false
@@ -191,15 +191,15 @@ mp:
     scene-create-install-unzip-apk: true
     dhcp-ip_allocate: true
   sceneplugincollection:
-    wazuh-server-host: 10.100.7.1
-    wazuh-api-server: http://10.100.7.1:15500
+    wazuh-server-host: 10.100.7.2
+    wazuh-api-server: http://10.100.7.2:15500
     wazuh-api-pass: Abcd123#
-    wazuh-es-server: http://10.100.0.101:9205
-    wazuh-godfs-server: http://10.100.7.1:11888
+    wazuh-es-server: http://10.100.0.111:9205
+    wazuh-godfs-server: http://10.100.7.2:11888
     wazuh-godfs-outer-http-server: /mp_scene_collection_godfs
     wazuh-run-command-http-callback-url: http://mp:8080/api/mp/scene_plugin_collection/wazuh_run_command_result
   sceneplugingns3:
-    gns3-server: http://10.100.7.1:8088
+    gns3-server: http://10.100.7.2:8088
   cscene:
     has-own-recording-set: 213,214,236
     scene-error-creating-seconds: 3600
@@ -209,7 +209,7 @@ mp:
     enable-command-change: false
     cron-job-expression: 0 0/15 * * * ?
     enable-node-limit-db-check: true
-    cp-ip: 10.100.7.1
+    cp-ip: 10.100.7.2
   scene:
     scene-pool-size: 100
     scene-hold-size: 10000
