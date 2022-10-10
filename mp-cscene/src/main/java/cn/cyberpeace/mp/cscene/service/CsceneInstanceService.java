@@ -1253,7 +1253,11 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         for (String key : pluginKeys) {
             var newPlugin = newData.getScene().getPlugins().get(key);
             var originPlugin = originData.getScene().getPlugins().get(key);
-            plugins.put(key, this.mergePluginDatas(newPlugin, originPlugin));
+            if (cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(key)) {
+                plugins.put(key, this.mergePluginDatas(newPlugin, originPlugin));
+            } else {
+                plugins.put(key, originPlugin);
+            }
         }
         sceneDataBO.setPlugins(plugins);
 
@@ -1292,15 +1296,13 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         Set<String> originElementIds = originData.keySet();
         Set<String> newElementIds = newData.keySet();
         Map<String, Map<String, Object>> result = new HashMap<>();
-        originData.entrySet().forEach(entry -> {
-            if (newElementIds.contains(entry.getKey())) {
-                result.put(entry.getKey(), entry.getValue());
+        originData.forEach((key, value) -> {
+            if (newElementIds.contains(key)) {
+                result.put(key, value);
             }
         });
         newElementIds.removeAll(originElementIds);
-        newData.entrySet().forEach(entry -> {
-            result.put(entry.getKey(), entry.getValue());
-        });
+        newData.forEach((key, value) -> result.put(key, value));
         return result;
     }
 

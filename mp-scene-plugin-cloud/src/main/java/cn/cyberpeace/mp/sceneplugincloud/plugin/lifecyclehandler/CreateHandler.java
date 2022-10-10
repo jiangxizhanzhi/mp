@@ -835,13 +835,6 @@ public class CreateHandler extends HandlerCommon {
             });
             createData.setRoutes(staticRoutes);
         }
-        List<VirtualNic> virtualNics = new ArrayList<>();
-        // 添加管理网卡
-        if (Boolean.TRUE.equals(cloudElement.getEnableMgmt())) {
-            var virtualNic = new VirtualNic();
-            virtualNic.setNetworkId(CloudSingleton.cloudAppConfig.getMgmtNetId());
-            virtualNics.add(virtualNic);
-        }
         createData.setNetworks(CollectionUtils.emptyNull(
                 this.genVirutalNics(cloudElement)
         ));
@@ -1018,9 +1011,9 @@ public class CreateHandler extends HandlerCommon {
         this.prepareEventProcess();
 
         long networkTasks = getPluginHandler().getElementMap().values().stream().filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty()).count();
-        long gatewayTasks = getPluginHandler().getGatewayElementMap().values().stream().count();
-        long firewallTasks = getPluginHandler().getFirewallElementMap().values().stream().count();
-        long terminalTasks = getPluginHandler().getTerminalElementMap().values().stream().count();
+        long gatewayTasks = getPluginHandler().getGatewayElementMap().values().size();
+        long firewallTasks = getPluginHandler().getFirewallElementMap().values().size();
+        long terminalTasks = getPluginHandler().getTerminalElementMap().values().size();
         int stepPercentage = (int) (100 / Math.max(networkTasks + gatewayTasks + firewallTasks + terminalTasks, 1));
 
         // 先创建辅助网络(包含虚拟交换机)

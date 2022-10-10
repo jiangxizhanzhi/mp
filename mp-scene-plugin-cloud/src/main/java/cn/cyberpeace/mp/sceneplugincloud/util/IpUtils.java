@@ -224,6 +224,7 @@ public class IpUtils {
             }
             ips.add(previousIp);
         }
+        Collections.reverse(ips);
         return ips;
     }
 
