@@ -2,16 +2,19 @@ package cn.cyberpeace.mp.flow.v2.controller;
 
 import cn.cyberpeace.mp.base.controller.*;
 import cn.cyberpeace.mp.base.controller.stereotype.ModelBOClass;
+import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskModel;
 import cn.cyberpeace.mp.flow.v2.service.FlowTaskService;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowTaskQueryParams;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,4 +39,9 @@ public class FlowTaskController implements
         setModelService(modelService);
     }
 
+    @ApiOperation("新增流量任务")
+    @Override
+    public ObjServiceResult<FlowTaskBO> create(@Validated FlowTaskBO bo, String[] fields) {
+        return BaseModelCreateBOController.super.create(bo, fields);
+    }
 }

@@ -9,15 +9,22 @@ import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
 public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
+    @NotEmpty(message = "name can not be empty")
     private String name;
     private String description;
+    @NotNull(message = "category can not be empty")
     private Integer category;
+    @NotNull(message = "bandwidth can not be empty")
     private Integer bandwidth;
+    @NotEmpty(message = "loadMode can not be empty")
     private String loadMode;
+    @NotNull(message = "filterProtocols can not be empty")
     private List<String> filterProtocols;
     private List<TaskFlow> flows;
 

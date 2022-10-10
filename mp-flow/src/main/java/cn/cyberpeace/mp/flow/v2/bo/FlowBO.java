@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.flow.v2.bo;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.v2.model.FlowModel;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
@@ -10,8 +12,10 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
 public class FlowBO extends ModelBO<FlowModel, FlowBO> {
@@ -19,11 +23,11 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private String name;
     @NotEmpty(message = "description can not be empty")
     private String description;
-    @NotEmpty(message = "category can not be empty")
+    @NotNull(message = "category can not be empty")
     private Integer category;
-    @NotEmpty(message = "interactiveType can not be empty")
+    @NotNull(message = "interactiveType can not be empty")
     private Integer interactiveType;
-    @NotEmpty(message = "resourceType can not be empty")
+    @NotNull(message = "resourceType can not be empty")
     private Integer resourceType;
     private List<String> protocols;
     private String pcapFile;
@@ -111,6 +115,23 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
         public static final String NUMBER = "number";
 
         private ScriptParamValueType() {}
+    }
+
+    /**
+     * 参数校验
+     */
+    public void paramCheck(boolean checkId) {
+        if (checkId) {
+            if (StringUtils.isBlank(this.getId())) {
+                throw new MpRuntimeException(FlowErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("id"));
+            }
+        }
+
+        if (Objects.equals(resourceType, FlowModel.ResourceType.PCAP)) {
+            if (StringUtils.isBlank(pcapFile)) {
+                throw new MpRuntimeException(FlowErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("pcapFile"));
+            }
+        }
     }
 
 }
