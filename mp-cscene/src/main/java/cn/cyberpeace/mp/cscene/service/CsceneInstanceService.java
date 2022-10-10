@@ -1249,7 +1249,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         sceneDataBO.setTopology(sceneTopologyBO);
 
         Map<String, ScenePluginDataBO> plugins = new HashMap<>();
-        Set<String> pluginKeys = newData.getScene().getPlugins().keySet();
+        Set<String> pluginKeys = originData.getScene().getPlugins().keySet();
         for (String key : pluginKeys) {
             var newPlugin = newData.getScene().getPlugins().get(key);
             var originPlugin = originData.getScene().getPlugins().get(key);
