@@ -382,6 +382,7 @@ public class InitiateHandler extends HandlerCommon {
                         for (String possibleDhcpIp : possibleDhcpIps) {
                             if (existIps.contains(possibleDhcpIp)) {
                                 conflict = true;
+                                break;
                             }
                         }
                         if (!conflict) {
@@ -1217,8 +1218,6 @@ public class InitiateHandler extends HandlerCommon {
                     if (Boolean.TRUE.equals(CloudSingleton.cloudAppConfig.getDhcpIpAllocate())) {
                         possibleDhcpIps = new ArrayList<>();
                     }
-                    List<String> excludeIps = new ArrayList<>(network.getNetwork().getExcloudIps());
-                    excludeIps.addAll(possibleDhcpIps);
                     for (var port : ports) {
                         if (StringUtils.isNotEmpty(port.getIp()) && possibleDhcpIps.contains(port.getIp())) {
                             if (getHandlerUtils().isManualConfigIpPort(port)) {
@@ -1262,7 +1261,7 @@ public class InitiateHandler extends HandlerCommon {
     }
 
 
-    private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools,String cidr) {
+    private List<String> getPossibleDhcpIps(String gateway, List<AllocationPool> allocationPools, String cidr) {
         List<String> possibleDhcpIps = this.getPossibleDhcpIps(gateway, cidr);
         if (CollectionUtils.isNotEmpty(allocationPools)) {
             allocationPools.forEach(p -> {

@@ -182,6 +182,7 @@ public class ModifyHandler extends HandlerCommon {
             prepareEventProcess(SceneModel.Event.MODIFY, SceneProcess.class, ElementProcess.class);
         }
 
+        @Override
         protected void deleteElementProcess(CloudPluginSceneElementBO cloudElement) {
             if (deletedNodeIds.contains(cloudElement.getSrcElement().getId())) {
                 super.deleteElementProcess(cloudElement);
