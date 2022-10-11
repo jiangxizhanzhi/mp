@@ -19,7 +19,7 @@ public class RolePageRequest extends PageRequest {
         if (super.getOrders() == null || super.getOrders().length == 0) {
             String updateTime = BeanUtils.getBeanGetterFieldName(RoleModel::getUpdateTime);
             updateTime = StrUtil.toUnderlineCase(updateTime);
-            super.setOrders(new String[]{"-" + updateTime});
+            super.setOrders(new String[]{updateTime + " desc"});
         }
     }
 }

@@ -47,7 +47,7 @@ public class OrgUserPageRequest extends PageRequest {
             updateTime = StrUtil.toUnderlineCase(updateTime);
             username = StrUtil.toUnderlineCase(username);
 
-            super.setOrders(new String[]{"-u." + updateTime, "u." + username});
+            super.setOrders(new String[]{"u." + updateTime + " desc", "u." + username});
         }
     }
 }
