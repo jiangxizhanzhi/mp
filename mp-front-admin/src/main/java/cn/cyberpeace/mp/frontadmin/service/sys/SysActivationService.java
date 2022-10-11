@@ -249,6 +249,7 @@ public class SysActivationService {
      */
     private void processActivedStatus() {
         if (Objects.nonNull(ACTIVATION_CONTENT)) {
+            /*
             //默认状态为未激活
             LocalDate expireDate = LocalDate.parse(ACTIVATION_CONTENT.getExpiredDate(), dateFormatter);
             expireDate = expireDate.plusDays(1);
@@ -296,6 +297,8 @@ public class SysActivationService {
                 sysActivCtlService.update(updateActivCtlModel);
             }
 
+            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
+            */
             ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
         }
     }
