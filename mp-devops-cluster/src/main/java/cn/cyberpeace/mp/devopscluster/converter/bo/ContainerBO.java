@@ -14,6 +14,11 @@ import java.util.List;
 public class ContainerBO {
 
     /**
+     * 实例对应的云平台的id
+     */
+    private String id;
+
+    /**
      * 容器名称
      */
     private String name;

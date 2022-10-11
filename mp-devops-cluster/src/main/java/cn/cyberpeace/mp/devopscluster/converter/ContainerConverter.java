@@ -65,6 +65,7 @@ public class ContainerConverter implements BaseConverter {
         }
         return containers.stream().map(containerModel -> {
             ContainerBO response = ContainerBO.builder()
+                        .id(containerModel.getId())
                         .name(containerModel.getName()).image(containerModel.getImage())
                         .node(containerModel.getHost())
                         .status(containerModel.getStatus())

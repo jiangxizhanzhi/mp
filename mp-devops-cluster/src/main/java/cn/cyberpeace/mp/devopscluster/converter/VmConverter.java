@@ -34,10 +34,11 @@ public class VmConverter implements BaseConverter{
      */
     public BasePageBO<InstanceBO> page(InstancePageDTO dto, String... ignoreFields) {
         ignoreFields = CollectionUtils.isEmpty(Arrays.asList(ignoreFields)) ? this.getDefaultPageIgnoreField() : ignoreFields;
-        String getParams = ParamUtils.wrapperGetParamsByObject(dto,ignoreFields);
+        String getParams = ParamUtils.wrapperGetParamsByObject(dto, ignoreFields);
         CloudPlatformPageResult<InstanceModel> model = vmService.page(getParams);
         List<InstanceBO> list = model.getList().stream().map(instanceModel ->
                 InstanceBO.builder().name(instanceModel.getName()).node(instanceModel.getHost())
+                        .id(instanceModel.getId())
                         .runningTime(instanceModel.getRunningTime())
                         .addressList(instanceModel.getAddresses().stream().map(InstanceModel.Address::getIp)
                                 .collect(Collectors.toList()))

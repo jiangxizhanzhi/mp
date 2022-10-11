@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.dto.user.UserDto;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -13,6 +15,7 @@ import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
 import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
 import cn.cyberpeace.mp.devopscluster.vo.ContainerPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -42,6 +46,54 @@ public class ContainerController {
     private final CsceneSpecialService csceneSpecialService;
 
     private final UserService userService;
+
+    /**
+     * 重启
+     * @param id
+     * @return
+     */
+    @ApiOperation("重启容器")
+    @PostMapping("/restart")
+    public ServiceResult<Boolean> restart(String id) {
+        if (StringUtils.isEmpty(id)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        Container container = new Container();
+        container.restart(id);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    /**
+     * 暂停
+     * @param id
+     * @return
+     */
+    @ApiOperation("暂停容器")
+    @PostMapping("/pause")
+    public ServiceResult<Boolean> pause(String id) {
+        if (StringUtils.isEmpty(id)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        Container container = new Container();
+        container.pause(id);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    /**
+     * 恢复
+     * @param id
+     * @return
+     */
+    @ApiOperation("恢复容器")
+    @PostMapping("/unpause")
+    public ServiceResult<Boolean> unpause(String id) {
+        if (StringUtils.isEmpty(id)) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        Container container = new Container();
+        container.unPause(id);
+        return new ServiceResult<>(true).asResult();
+    }
 
     /**
      * 分页查询容器列表
@@ -96,6 +148,7 @@ public class ContainerController {
 
             return ContainerPageVO.builder().name(containerModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                    .id(containerModel.getId())
                     .image(containerModel.getImage()).node(containerModel.getNode())
                     .status(containerModel.getStatus()).addressList(containerModel.getAddressList())
                     .createdAt(containerModel.getCreatedAt())
