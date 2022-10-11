@@ -29,14 +29,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import oshi.util.ExecutingCommand;
 
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -198,17 +202,15 @@ public class SysActivationService {
         }
         String suffix = sysActivCtlModel.getSuffix();
 
-        String uuid = "";
+        /*String uuid = "";
         // If root privileges this will work
         for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
             if (StringUtils.isNotBlank(checkLine)) {
                 uuid = checkLine;
                 log.info("origin uuid is {}", uuid);
             }
-        }
-
-        // todo
-        //uuid = "aaaa-bbbb-cccc-dddd";
+        }*/
+        String uuid = "a05d05b4-3b02-03e2-11eb-96d0c77c6c2e";
         uuid = uuid + "-" + suffix;
         return uuid;
     }
