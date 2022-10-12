@@ -24,6 +24,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -54,7 +55,7 @@ public class ContainerController {
      */
     @ApiOperation("重启容器")
     @PostMapping("/restart")
-    public ServiceResult<Boolean> restart(String id) {
+    public ServiceResult<Boolean> restart(@RequestBody(required = false) String id) {
         if (StringUtils.isEmpty(id)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -70,7 +71,7 @@ public class ContainerController {
      */
     @ApiOperation("暂停容器")
     @PostMapping("/pause")
-    public ServiceResult<Boolean> pause(String id) {
+    public ServiceResult<Boolean> pause(@RequestBody(required = false) String id) {
         if (StringUtils.isEmpty(id)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
@@ -86,7 +87,7 @@ public class ContainerController {
      */
     @ApiOperation("恢复容器")
     @PostMapping("/unpause")
-    public ServiceResult<Boolean> unpause(String id) {
+    public ServiceResult<Boolean> unpause(@RequestBody(required = false) String id) {
         if (StringUtils.isEmpty(id)) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
