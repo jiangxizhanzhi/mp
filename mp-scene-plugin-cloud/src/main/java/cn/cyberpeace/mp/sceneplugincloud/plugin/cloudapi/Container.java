@@ -15,6 +15,8 @@ import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerNewDelet
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerRestartData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerResumeData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStartData;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerStopData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerSuspendData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.ContainerUnPauseData;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.param.NameQueryParam;
@@ -116,6 +118,14 @@ public class Container extends CloudClient {
 
     public boolean unPause(String instanceId) {
         return this.doAction(instanceId, new ContainerUnPauseData());
+    }
+
+    public boolean start(String instanceId) {
+        return this.doAction(instanceId, new ContainerStartData());
+    }
+
+    public boolean stop(String instanceId) {
+        return this.doAction(instanceId, new ContainerStopData());
     }
 
     public boolean suspend(String instanceId) {

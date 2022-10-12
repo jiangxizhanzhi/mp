@@ -95,6 +95,36 @@ public class ContainerController {
     }
 
     /**
+     * 开启
+     * @param request
+     * @return
+     */
+    @ApiOperation("开启容器")
+    @PostMapping("/start")
+    public ServiceResult<Boolean> start(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        Container container = new Container();
+        return new ServiceResult<>(container.start(request.getId())).asResult();
+    }
+
+    /**
+     * 关闭
+     * @param request
+     * @return
+     */
+    @ApiOperation("关闭容器")
+    @PostMapping("/stop")
+    public ServiceResult<Boolean> stop(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        Container container = new Container();
+        return new ServiceResult<>(container.stop(request.getId())).asResult();
+    }
+
+    /**
      * 分页查询容器列表
      * @param request
      * @return
