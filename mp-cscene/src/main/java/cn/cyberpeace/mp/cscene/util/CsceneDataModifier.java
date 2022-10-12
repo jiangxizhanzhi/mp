@@ -758,6 +758,12 @@ public class CsceneDataModifier {
                             if (p.getEgress() == null) {
                                 p.setEgress(-1);
                             }
+                            if (p.getDelay() == null) {
+                                p.setDelay(0);
+                            }
+                            if (p.getLoss() == null) {
+                                p.setLoss(0);
+                            }
                         });
                     }
                 });

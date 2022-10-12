@@ -21,6 +21,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneInstanceService;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
+import cn.cyberpeace.mp.cscene.util.CsceneDataModifier;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
 import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -534,6 +535,9 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @PostMapping(value = "/modify")
     public ServiceResult<CsceneInstanceBO> instanceModify(@RequestBody(required = true) CsceneUpdateBO request) {
         log.info("app_instance params,request:{}", JsonCommon.stringify(request));
+        CsceneBO csceneBO = new CsceneBO();
+        csceneBO.setSceneConfig(request.getSceneConfig());
+        CsceneDataModifier.checkIngressAndEgress(csceneBO);
         var result = modelService.instanceModify(request).asResult();
         return result;
     }

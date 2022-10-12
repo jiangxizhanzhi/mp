@@ -588,8 +588,8 @@ public class CloudScenePluginHandler extends ScenePluginHandler<CloudPluginScene
     }
 
     @Override
-    public void modify(SceneHandler originSceneHandler) {
-        new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this).modify();
+    public void modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
+        new ModifyHandler(originSceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY), this, updateElementIds).modify();
     }
 
 }

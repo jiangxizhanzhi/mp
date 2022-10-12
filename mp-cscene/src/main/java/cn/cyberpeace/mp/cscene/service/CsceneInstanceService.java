@@ -49,7 +49,9 @@ import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
+import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.service.SceneSnapshotService;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
@@ -1239,13 +1241,14 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         SceneDataBO sceneDataBO = new SceneDataBO();
         instance.setScene(sceneDataBO);
 
+        List<String> updateElementIds = new ArrayList<>();
         SceneTopologyBO sceneTopologyBO = new SceneTopologyBO();
         sceneTopologyBO.setScene(originData.getScene().getTopology().getScene());
         sceneTopologyBO.setAreas(originData.getScene().getTopology().getAreas());
         sceneTopologyBO.setPieces(originData.getScene().getTopology().getPieces());
         sceneTopologyBO.setAreaId(originData.getScene().getTopology().getAreaId());
         sceneTopologyBO.setConnections(newData.getScene().getTopology().getConnections());
-        sceneTopologyBO.setElements(mergeElements(newData.getScene().getTopology().getElements(), originData.getScene().getTopology().getElements()));
+        sceneTopologyBO.setElements(mergeElements(newData.getScene().getTopology().getElements(), originData.getScene().getTopology().getElements(), updateElementIds));
         sceneDataBO.setTopology(sceneTopologyBO);
 
         Map<String, ScenePluginDataBO> plugins = new HashMap<>();
@@ -1254,7 +1257,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             var newPlugin = newData.getScene().getPlugins().get(key);
             var originPlugin = originData.getScene().getPlugins().get(key);
             if (cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant.PLUGIN_KEY.equals(key)) {
-                plugins.put(key, this.mergePluginDatas(newPlugin, originPlugin));
+                plugins.put(key, this.mergePluginDatas(newPlugin, originPlugin, updateElementIds));
             } else {
                 plugins.put(key, originPlugin);
             }
@@ -1264,13 +1267,27 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return instance;
     }
 
-    private List<SceneElementBO> mergeElements(List<SceneElementBO> newElements, List<SceneElementBO> originElements) {
+    private List<SceneElementBO> mergeElements(List<SceneElementBO> newElements, List<SceneElementBO> originElements, List<String> updateElementIds) {
         Set<String> originElementIds = new HashSet<>();
-        originElements.forEach(e -> originElementIds.add(e.getId()));
+        originElements.forEach(e -> {
+            if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
+                updateElementIds.add(e.getId());
+                e.getPorts().forEach(p -> {
+                    if (StringUtils.isNotEmpty(p.getId())) {
+                        updateElementIds.add(p.getId());
+                    }
+                });
+                return;
+            }
+            originElementIds.add(e.getId());
+        });
         Set<String> newElementIds = new HashSet<>();
         newElements.forEach(e -> newElementIds.add(e.getId()));
         List<SceneElementBO> result = new ArrayList<>();
         for (var e : originElements) {
+            if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
+                continue;
+            }
             if (newElementIds.contains(e.getId())) {
                 result.add(e);
             }
@@ -1284,19 +1301,23 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
         return result;
     }
 
-    private ScenePluginDataBO mergePluginDatas(ScenePluginDataBO newData, ScenePluginDataBO originData) {
+    private ScenePluginDataBO mergePluginDatas(ScenePluginDataBO newData, ScenePluginDataBO originData, List<String> updateElementIds) {
         ScenePluginDataBO scenePluginDataBO = new ScenePluginDataBO();
         scenePluginDataBO.setScene(originData.getScene());
-        scenePluginDataBO.setElements(this.mergeMap(newData.getElements(), originData.getElements()));
-        scenePluginDataBO.setElementPorts(this.mergeMap(newData.getElementPorts(), originData.getElementPorts()));
+        scenePluginDataBO.setElements(this.mergeMap(newData.getElements(), originData.getElements(), updateElementIds));
+        scenePluginDataBO.setElementPorts(this.mergeMap(newData.getElementPorts(), originData.getElementPorts(), updateElementIds));
         return scenePluginDataBO;
     }
 
-    private Map<String, Map<String, Object>> mergeMap(Map<String, Map<String, Object>> newData, Map<String, Map<String, Object>> originData) {
-        Set<String> originElementIds = originData.keySet();
+    private Map<String, Map<String, Object>> mergeMap(Map<String, Map<String, Object>> newData, Map<String, Map<String, Object>> originData, List<String> updateElementIds) {
+        Set<String> originElementIds = new HashSet<>(originData.keySet());
         Set<String> newElementIds = newData.keySet();
         Map<String, Map<String, Object>> result = new HashMap<>();
         originData.forEach((key, value) -> {
+            if (updateElementIds.contains(key)) {
+                originElementIds.remove(key);
+                return;
+            }
             if (newElementIds.contains(key)) {
                 result.put(key, value);
             }
