@@ -21,7 +21,9 @@ import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,49 +58,49 @@ public class VmController {
 
     /**
      * 重启
-     * @param id
+     * @param request
      * @return
      */
     @ApiOperation("重启虚拟机")
-    @PostMapping("/restart")
-    public ServiceResult<Boolean> restart(@RequestBody(required = false) String id) {
-        if (StringUtils.isEmpty(id)) {
+    @PostMapping(value = "/restart")
+    public ServiceResult<Boolean> restart(@RequestBody(required = false) OperationVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.restart(id);
+        virtualMachine.restart(request.getId());
         return new ServiceResult<>(true).asResult();
     }
 
     /**
      * 暂停
-     * @param id
+     * @param request
      * @return
      */
     @ApiOperation("暂停虚拟机")
     @PostMapping("/pause")
-    public ServiceResult<Boolean> pause(@RequestBody(required = false) String id) {
-        if (StringUtils.isEmpty(id)) {
+    public ServiceResult<Boolean> pause(@RequestBody(required = false) OperationVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.pause(id);
+        virtualMachine.pause(request.getId());
         return new ServiceResult<>(true).asResult();
     }
 
     /**
      * 恢复
-     * @param id
+     * @param request
      * @return
      */
     @ApiOperation("恢复虚拟机")
     @PostMapping("/unpause")
-    public ServiceResult<Boolean> unpause(@RequestBody(required = false) String id) {
-        if (StringUtils.isEmpty(id)) {
+    public ServiceResult<Boolean> unpause(@RequestBody(required = false) OperationVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.unpause(id);
+        virtualMachine.unpause(request.getId());
         return new ServiceResult<>(true).asResult();
     }
 
@@ -190,5 +192,11 @@ public class VmController {
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
+    }
+
+    @Setter
+    @Getter
+    private static class OperationVmRequest {
+        private String id;
     }
 }
