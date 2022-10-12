@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.log.repository;
 
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
-import cn.cyberpeace.mp.log.model.OperationLogDbModel;
+import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
@@ -13,6 +13,6 @@ import org.springframework.stereotype.Repository;
  */
 @Mapper
 @Repository
-@ModelClass(OperationLogDbModel.class)
-public interface OperationLogDbMapper extends BaseModelMapper<OperationLogDbModel> {
+@ModelClass(OperateLogSqlModel.class)
+public interface OperateLogSqlMapper extends BaseModelMapper<OperateLogSqlModel> {
 }

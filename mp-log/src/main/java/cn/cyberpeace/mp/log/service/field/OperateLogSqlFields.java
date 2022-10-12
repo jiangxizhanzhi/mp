@@ -7,5 +7,5 @@ import cn.cyberpeace.mp.base.service.fields.BaseModelFields;
  * @Author shgang
  * @Date 2022/9/13
  */
-public class OperationLogDbFields extends BaseModelFields {
+public class OperateLogSqlFields extends BaseModelFields {
 }

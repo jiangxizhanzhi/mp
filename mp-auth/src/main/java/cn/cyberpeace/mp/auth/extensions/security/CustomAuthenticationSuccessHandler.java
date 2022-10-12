@@ -1,8 +1,8 @@
 package cn.cyberpeace.mp.auth.extensions.security;
 
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.response.login.LoginResp;
@@ -20,8 +20,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
-import cn.cyberpeace.mp.log.service.OperateLogServiceFactory;
-import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -55,13 +54,10 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
     private UserPermissionService userPermissionService;
 
     @Autowired
-    private OperateLogServiceFactory operateLogServiceFactory;
-
-    @Autowired
     private UserService userService;
 
     @Autowired
-    private OperationLogService operationLogService;
+    private OperateLogService operateLogService;
 
     @Autowired
     public CustomAuthenticationSuccessHandler(MappingJackson2HttpMessageConverter messageConverter) {
@@ -167,6 +163,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
     /**
      * 检查系统激活状态
+     *
      * @return
      */
     private boolean checkSysActivationStatus() {
@@ -196,7 +193,7 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
 
         // 记录登录日志
 //        operateLogServiceFactory.create(logModel, LocaleContextHolder.getLocale());
-        operationLogService.create(logModel);
+        operateLogService.create(logModel);
     }
 
 

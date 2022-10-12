@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.log.aop;
 import cn.cyberpeace.mp.base.util.ServletUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.config.LogConfig;
-import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -59,13 +59,7 @@ public class RequestLogAspect {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
-    private OperationLogService operationLogService;
-//    private OperateLogServiceFactory operateLogServiceFactory;
-//
-//    @Autowired
-//    public RequestLogAspect(OperateLogServiceFactory operateLogServiceFactory) {
-//        this.operateLogServiceFactory = operateLogServiceFactory;
-//    }
+    private OperateLogService operateLogService;
 
     /**
      * 定义公共切面
@@ -149,7 +143,7 @@ public class RequestLogAspect {
             if (Objects.isNull(operateLog)){
                 return;
             }
-            operationLogService.create(operateLog, request);
+            operateLogService.create(operateLog, request);
 
         } catch (Exception e) {
             log.error("====插入操作日志异常:{}==",e.getMessage());

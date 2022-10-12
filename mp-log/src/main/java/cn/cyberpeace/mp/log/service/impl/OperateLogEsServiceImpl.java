@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.log.service;
+package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
@@ -11,6 +11,8 @@ import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
+import cn.cyberpeace.mp.log.service.MpOperateLogService;
+import cn.cyberpeace.mp.log.service.OperateLogDbService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -37,25 +40,26 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class OperateLogServiceFactory {
+@ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_ES)
+public class OperateLogEsServiceImpl implements OperateLogDbService {
 
     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 
-    private Map<SiteTypeEnums,OperateLogService> operateLogServiceMap = new ConcurrentHashMap();
+    private Map<SiteTypeEnums, MpOperateLogService> operateLogServiceMap = new ConcurrentHashMap();
 
-    private List<OperateLogService> operateLogServiceList;
+    private List<MpOperateLogService> mpOperateLogServiceList;
 
     @Autowired
     private MessageSource messageSource;
 
     @PostConstruct
     public void init(){
-        operateLogServiceMap = operateLogServiceList.stream().collect(Collectors.toMap(OperateLogService::siteType, Function.identity()));
+        operateLogServiceMap = mpOperateLogServiceList.stream().collect(Collectors.toMap(MpOperateLogService::siteType, Function.identity()));
     }
 
     @Autowired
-    public OperateLogServiceFactory(List<OperateLogService> operateLogServiceList) {
-        this.operateLogServiceList = operateLogServiceList;
+    public OperateLogEsServiceImpl(List<MpOperateLogService> mpOperateLogServiceList) {
+        this.mpOperateLogServiceList = mpOperateLogServiceList;
     }
 
     /**
@@ -64,11 +68,10 @@ public class OperateLogServiceFactory {
      * @return
      */
     @Async
-    public IndexResponse create(OperationLogRequest request, Locale locale){
+    public void create(OperationLogRequest request, Locale locale){
         OperationLogModel model = new OperationLogModel();
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
-
         if (Objects.nonNull(request.getOpModule())) {
             OpModuleEnums opModuleEnum = OpModuleEnums.fromValue(request.getOpModule());
             if (Objects.nonNull(opModuleEnum)) {
@@ -77,8 +80,6 @@ public class OperateLogServiceFactory {
                 model.setOpModuleID(opModuleEnum.ordinal());
             }
         }
-
-
         if (Objects.nonNull(request.getOpType())) {
             OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(request.getOpType());
             if (Objects.nonNull(opTypeEnum)) {
@@ -87,9 +88,7 @@ public class OperateLogServiceFactory {
                 model.setOpTypeID(opTypeEnum.ordinal());
             }
         }
-
         model.setOpTarget(request.getOpTarget());
-
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
         model.setUserName(request.getUserName());
@@ -97,15 +96,12 @@ public class OperateLogServiceFactory {
         model.setDescription(request.getDescription());
         model.setOpIp(request.getOpIp());
         model.setContent(request.getContent());
-
         processDefaultContent(model);
-
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
-            return null;
+            return;
         }
-
-        return this.create(model);
+        this.create(model);
     }
 
     /**
@@ -114,48 +110,40 @@ public class OperateLogServiceFactory {
      * @return
      */
     @Async
-    public IndexResponse create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
+    public void create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
         Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
-
         OperationLogModel model = new OperationLogModel();
         if (Objects.nonNull(userId)) {
             model.setUserId(userId.toString());
         }
-
         if (Objects.nonNull(userName)) {
             model.setUserName(userName.toString());
         }
-
         if (Objects.nonNull(userType)) {
             model.setUserType(userType.toString());
         }
-
         //站点类型
         model.setSiteType(SiteTypeEnums.MP);
-
         if (Objects.nonNull(operateLog.module())) {
             //操作模块
             model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode()));
             //操作模块ID
             model.setOpModuleID(operateLog.module().ordinal());
         }
-
         if (Objects.nonNull(operateLog.type())) {
             //操作类型
             model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode()));
             //操作类型ID
             model.setOpTypeID(operateLog.type().ordinal());
         }
-
         if (Objects.nonNull(operateLog.target())) {
             //操作对象
             model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode()));
             //操作ID
             model.setOpTargetID(operateLog.target().ordinal());
         }
-
         //操作主题
         model.setTitle(operateLog.title());
         //操作描述
@@ -164,14 +152,13 @@ public class OperateLogServiceFactory {
         model.setOpTime(LocalDateTime.now());
         //请求IP
         model.setOpIp(SnUtils.getRealRemoteIp(request));
-
+        //操作内容
         processDefaultContent(model);
-
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
-            return null;
+            return;
         }
-        return this.create(model);
+        this.create(model);
     }
 
 
@@ -218,7 +205,6 @@ public class OperateLogServiceFactory {
         if (StringUtils.isNotBlank(model.getContent())) {
             return;
         }
-
         String content = "";
 
         if (Objects.equals(model.getOpModuleID(), OpModuleEnums.SYSTEM.ordinal())) {
@@ -226,7 +212,6 @@ public class OperateLogServiceFactory {
         } else {
             content = model.getOpType() + ":" + model.getOpModule() + ", IP: " + model.getOpIp();
         }
-
         model.setContent(content);
     }
 

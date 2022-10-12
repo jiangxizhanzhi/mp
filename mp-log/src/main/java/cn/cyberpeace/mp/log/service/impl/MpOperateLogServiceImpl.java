@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
 import cn.cyberpeace.mp.log.model.OperationLogModel;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.service.BasEsLogService;
-import cn.cyberpeace.mp.log.service.OperateLogService;
+import cn.cyberpeace.mp.log.service.MpOperateLogService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
@@ -22,7 +22,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
-public class MpOperateLogServiceImpl extends BasEsLogService implements OperateLogService {
+public class MpOperateLogServiceImpl extends BasEsLogService implements MpOperateLogService {
 
     private static final String INDEX_MP_OPERATE_LOG = "mp_operate_log";
 
