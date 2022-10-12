@@ -73,7 +73,7 @@
     <select id="getUnreadCountByCurrentAdminUser" resultType="int">
         select count(*)
         from (
-                 select distinct n.*
+                 select distinct n.id
                  from mp_sys_notice n
                           left join mp_sys_notice_read nre on n.id = nre.notice_id
              ) as tabA
@@ -132,7 +132,7 @@
 
     <select id="getUnreadCountByCurrentNormalUser" resultType="int">
         select count(*) from (
-            select distinct n.* from mp_sys_notice n
+            select distinct n.id from mp_sys_notice n
             left join mp_sys_notice_org no on n.id = no.notice_id
             left join mp_sys_notice_user nu on n.id = nu.notice_id
             left join mp_sys_notice_role nr on n.id = nr.notice_id
