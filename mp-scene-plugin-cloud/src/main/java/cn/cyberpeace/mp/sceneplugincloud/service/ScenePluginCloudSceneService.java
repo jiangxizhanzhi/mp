@@ -810,7 +810,12 @@ public class ScenePluginCloudSceneService {
                                 VirtualMachinePrivateOperateData result = new VirtualMachineUploadFileData();
                                 result.setNetworkId(networkId);
                                 result.setUsername(mode.getUsername());
-                                result.setPassword(mode.getPassword());
+                                if (Boolean.TRUE.equals(mode.getPrivateKeyEnable())) {
+                                    result.setPrivateKeyPath(mode.getPrivateKeyPath());
+                                } else {
+                                    result.setPassword(mode.getPassword());
+                                }
+                                result.setPort(mode.getPort() != null ? mode.getPort() : AccessMode.Protocol.DEFAULT_PORT_MAP.get(AccessMode.Protocol.SSH));
                                 result.setInstanceIp(port.getIp());
                                 return result;
                             }

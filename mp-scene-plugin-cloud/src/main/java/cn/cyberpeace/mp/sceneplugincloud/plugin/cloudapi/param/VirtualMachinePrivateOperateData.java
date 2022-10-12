@@ -13,4 +13,6 @@ public class VirtualMachinePrivateOperateData implements CloudHttpData {
     private String instanceIp;
     private String username;
     private String password;
+    private String privateKeyPath;
+    private Integer port;
 }
