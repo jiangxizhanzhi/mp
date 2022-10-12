@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.common.stereotype.BeanFieldClasses;
 import cn.cyberpeace.mp.base.util.basic.stereotype.ClassFieldClasses;
 import cn.cyberpeace.mp.base.util.thread.taskpool.DelayTaskPool;
-import cn.cyberpeace.mp.scene.config.SceneAppConfig;
 import cn.cyberpeace.mp.scene.constant.SceneSingleton;
 import cn.cyberpeace.mp.scene.core.base.BaseSceneHandler;
 import cn.cyberpeace.mp.scene.core.bo.CollectedElementStatusBO;
@@ -50,7 +49,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -512,7 +510,7 @@ public class SceneHandler extends BaseSceneHandler<
     }
 
     // 入参重新考虑下？
-    public boolean modify(SceneHandler originSceneHandler) {
+    public boolean modify(SceneHandler originSceneHandler, List<String> updateElementIds) {
         prepareAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
         startAllEvent(SceneModel.Event.MODIFY, SceneElementModel.Event.MODIFY);
 
@@ -521,7 +519,7 @@ public class SceneHandler extends BaseSceneHandler<
 
         try {
             for (var plugin : getPlugins()) {
-                plugin.modify(originSceneHandler);
+                plugin.modify(originSceneHandler, updateElementIds);
             }
         } catch (Exception e) {
             errorScene(SceneModel.Event.MODIFY, e.getMessage());

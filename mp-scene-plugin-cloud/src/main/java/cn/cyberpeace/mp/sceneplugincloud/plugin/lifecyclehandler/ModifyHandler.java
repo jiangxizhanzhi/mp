@@ -12,7 +12,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 public class ModifyHandler extends HandlerCommon {
@@ -21,14 +25,18 @@ public class ModifyHandler extends HandlerCommon {
     private ModifyCreateHandler modifyCreateHandler;
     private ModifyDeleteHandler modifyDeleteHandler;
 
-    public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin) {
+    public ModifyHandler(CloudScenePluginHandler originPlugin, CloudScenePluginHandler newPlugin, List<String> updateElementIds) {
         super(newPlugin, CreateTaskPool.getInstance(), SceneModel.Event.MODIFY);
-        Set<String> originNodeIds = originPlugin.getSceneHandler().getElementMap().keySet();
+        Set<String> originNodeIds = new HashSet<>(originPlugin.getSceneHandler().getElementMap().keySet());
         Set<String> createdNodeIds = new HashSet<>(originNodeIds);
+        createdNodeIds.removeAll(updateElementIds);
         this.modifyInitiateHandler = new ModifyInitiateHandler(createdNodeIds, newPlugin, getTaskPool());
         this.modifyCreateHandler = new ModifyCreateHandler(createdNodeIds, newPlugin, getTaskPool());
         Set<String> newNodeIds = newPlugin.getSceneHandler().getElementMap().keySet();
         originNodeIds.removeAll(newNodeIds);
+        if (CollectionUtils.isNotEmpty(updateElementIds)) {
+            originNodeIds.addAll(updateElementIds);
+        }
         this.modifyDeleteHandler = new ModifyDeleteHandler(originNodeIds, originPlugin, getTaskPool());
     }
 
@@ -142,12 +150,57 @@ public class ModifyHandler extends HandlerCommon {
         }
 
         @Override
-        public void createElementProcess(CloudPluginSceneElementBO cloudElement) {
+        protected void createVirtualRouter(CloudPluginSceneElementBO cloudElement) {
             if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
                 // 已存在的节点无需再次创建
                 return;
             }
-            super.createElementProcess(cloudElement);
+            super.createVirtualRouter(cloudElement);
+        }
+
+        @Override
+        protected void createVirtualFirewall(CloudPluginSceneElementBO cloudElement) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                // 已存在的节点无需再次创建
+                return;
+            }
+            super.createVirtualFirewall(cloudElement);
+        }
+
+        @Override
+        protected void createVirtualMachine(CloudPluginSceneElementBO cloudElement) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                // 已存在的节点无需再次创建
+                return;
+            }
+            super.createVirtualMachine(cloudElement);
+        }
+
+        @Override
+        protected void createContainer(CloudPluginSceneElementBO cloudElement) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                // 已存在的节点无需再次创建
+                return;
+            }
+            super.createContainer(cloudElement);
+        }
+
+        @Override
+        protected void createEntityNode(CloudPluginSceneElementBO cloudElement) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                // 已存在的节点无需再次创建
+                return;
+            }
+            super.createEntityNode(cloudElement);
+        }
+
+        @Override
+        protected void recordNpcNode(CloudPluginSceneElementBO cloudElement) {
+            if (this.createdNodeIds.contains(cloudElement.getSrcElement().getId())) {
+                // 已存在的节点无需再次创建
+                return;
+            }
+            super.recordNpcNode(cloudElement);
         }
     }
 
