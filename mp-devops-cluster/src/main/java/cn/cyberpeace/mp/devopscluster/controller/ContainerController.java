@@ -13,14 +13,13 @@ import cn.cyberpeace.mp.devopscluster.converter.bo.ContainerBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
 import cn.cyberpeace.mp.devopscluster.request.ContainerPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.vo.ContainerPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.Container;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -57,13 +56,12 @@ public class ContainerController {
      */
     @ApiOperation("重启容器")
     @PostMapping("/restart")
-    public ServiceResult<Boolean> restart(@RequestBody(required = false) OperationContainerRequest request) {
+    public ServiceResult<Boolean> restart(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Container container = new Container();
-        container.restart(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(container.restart(request.getId())).asResult();
     }
 
     /**
@@ -73,13 +71,12 @@ public class ContainerController {
      */
     @ApiOperation("暂停容器")
     @PostMapping("/pause")
-    public ServiceResult<Boolean> pause(@RequestBody(required = false) OperationContainerRequest request) {
+    public ServiceResult<Boolean> pause(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Container container = new Container();
-        container.pause(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(container.pause(request.getId())).asResult();
     }
 
     /**
@@ -89,13 +86,12 @@ public class ContainerController {
      */
     @ApiOperation("恢复容器")
     @PostMapping("/unpause")
-    public ServiceResult<Boolean> unpause(@RequestBody(required = false) OperationContainerRequest request) {
+    public ServiceResult<Boolean> unpause(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         Container container = new Container();
-        container.unPause(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(container.unPause(request.getId())).asResult();
     }
 
     /**
@@ -165,11 +161,5 @@ public class ContainerController {
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .vlanIdList(containerModel.getVlanIdList()).build();
         }).collect(Collectors.toList());
-    }
-
-    @Setter
-    @Getter
-    private static class OperationContainerRequest {
-        private String id;
     }
 }

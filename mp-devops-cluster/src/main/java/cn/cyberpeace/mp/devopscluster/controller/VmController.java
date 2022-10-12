@@ -15,15 +15,14 @@ import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.InstancePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -62,14 +61,13 @@ public class VmController {
      * @return
      */
     @ApiOperation("重启虚拟机")
-    @PostMapping(value = "/restart")
-    public ServiceResult<Boolean> restart(@RequestBody(required = false) OperationVmRequest request) {
+    @PostMapping("/restart")
+    public ServiceResult<Boolean> restart(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.restart(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(virtualMachine.restart(request.getId())).asResult();
     }
 
     /**
@@ -79,13 +77,12 @@ public class VmController {
      */
     @ApiOperation("暂停虚拟机")
     @PostMapping("/pause")
-    public ServiceResult<Boolean> pause(@RequestBody(required = false) OperationVmRequest request) {
+    public ServiceResult<Boolean> pause(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.pause(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(virtualMachine.pause(request.getId())).asResult();
     }
 
     /**
@@ -95,13 +92,12 @@ public class VmController {
      */
     @ApiOperation("恢复虚拟机")
     @PostMapping("/unpause")
-    public ServiceResult<Boolean> unpause(@RequestBody(required = false) OperationVmRequest request) {
+    public ServiceResult<Boolean> unpause(@RequestBody ReviseContainerOrVmRequest request) {
         if (StringUtils.isEmpty(request.getId())) {
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
         VirtualMachine virtualMachine = new VirtualMachine();
-        virtualMachine.unpause(request.getId());
-        return new ServiceResult<>(true).asResult();
+        return new ServiceResult<>(virtualMachine.unpause(request.getId())).asResult();
     }
 
     /**
@@ -192,11 +188,5 @@ public class VmController {
                     .processMessage(csceneNodeInfoBO.getProcessMessage())
                     .status(instanceModel.getStatus()).createTime(instanceModel.getCreateTime()).build();
         }).collect(Collectors.toList());
-    }
-
-    @Setter
-    @Getter
-    private static class OperationVmRequest {
-        private String id;
     }
 }
