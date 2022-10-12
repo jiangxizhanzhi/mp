@@ -20,6 +20,12 @@ import java.util.List;
 public class ContainerPageVO extends BaseVO {
 
     /**
+     * 实例对应的云平台的id
+     */
+    @ApiModelProperty("实例对应的云平台的id")
+    private String id;
+
+    /**
      * 容器名称
      */
     @ApiModelProperty("容器名称")

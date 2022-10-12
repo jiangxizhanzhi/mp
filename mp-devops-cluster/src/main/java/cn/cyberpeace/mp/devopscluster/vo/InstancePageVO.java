@@ -20,6 +20,12 @@ import java.util.List;
 public class InstancePageVO extends BaseVO {
 
     /**
+     * 实例对应的云平台的id
+     */
+    @ApiModelProperty("实例对应的云平台的id")
+    private String id;
+
+    /**
      * 实例名称
      */
     @ApiModelProperty("实例名称")
@@ -30,7 +36,6 @@ public class InstancePageVO extends BaseVO {
      */
     @ApiModelProperty("场景名称")
     private String sceneName;
-
 
     /**
      * 节点名称

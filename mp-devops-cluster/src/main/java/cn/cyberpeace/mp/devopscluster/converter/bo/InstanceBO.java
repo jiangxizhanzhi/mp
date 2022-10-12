@@ -14,6 +14,11 @@ import java.util.List;
 public class InstanceBO {
 
     /**
+     * 实例对应的云平台的id
+     */
+    private String id;
+
+    /**
      * 实例名称
      */
     private String name;
