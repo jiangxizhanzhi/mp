@@ -106,9 +106,9 @@ public class VmController {
      * @param request
      * @return
      */
-        @ApiOperation("分页查询虚拟机信息")
+    @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
-    public PageResult<InstancePageVO> page(InstancePageRequest request){
+    public PageResult<InstancePageVO> page(InstancePageRequest request) {
         BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
         List<InstancePageVO> list = convertBOToPageVO(model);
         return new PageResult<>(list, model.getTotal());
