@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
@@ -61,12 +61,12 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
     }
 
     @Override
-    public List<TargetRoleDto> listTargetRoleDtosByRoleIds(List<String> roleIds) {
+    public List<TargetRoleBo> listTargetRoleDtosByRoleIds(List<String> roleIds) {
         if (CollectionUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
-        List<TargetRoleDto> targetRoleDtos = getModelMapper().listTargetRoleDtos(roleIds);
-        return targetRoleDtos;
+        List<TargetRoleBo> targetRoleBos = getModelMapper().listTargetRoleDtos(roleIds);
+        return targetRoleBos;
     }
 
 

@@ -2,7 +2,7 @@ dependencies {
     implementation project(':mp-base')
     implementation project(':mp-common')
     implementation project(':mp-auth-base')
-    implementation project(':mp-devops-log')
+    implementation project(':mp-log')
 }
 
 tasks.test {

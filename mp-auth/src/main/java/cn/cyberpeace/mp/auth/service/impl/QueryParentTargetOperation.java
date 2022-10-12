@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetOperation;
 import cn.cyberpeace.mp.auth.service.TargetService;
@@ -18,30 +18,30 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Scope("prototype")
-public class QueryParentTargetOperation implements TargetOperation<TargetDto> {
+public class QueryParentTargetOperation implements TargetOperation<TargetBo> {
 
     @Autowired
     private TargetService targetService;
 
 
     @Override
-    public TargetDto doExecute(TargetDto targetDto) {
-        if (StringUtils.isBlank(targetDto.getParent())) {
-            return targetDto;
+    public TargetBo doExecute(TargetBo targetBo) {
+        if (StringUtils.isBlank(targetBo.getParent())) {
+            return targetBo;
         }
 
-        var objSrvResult = targetService.get(targetDto.getParent());
+        var objSrvResult = targetService.get(targetBo.getParent());
         ObjResult<TargetModel> result = objSrvResult.getSource();
         if (result != null) {
             TargetModel parentTarget = result.getObj();
             if (parentTarget != null) {
-                TargetDto parentTargetDto = new TargetDto();
-                BeanUtils.copyProperties(parentTarget, parentTargetDto);
-                targetDto.setParentTarget(parentTargetDto);
-                parentTargetDto.execute(this);
+                TargetBo parentTargetBo = new TargetBo();
+                BeanUtils.copyProperties(parentTarget, parentTargetBo);
+                targetBo.setParentTarget(parentTargetBo);
+                parentTargetBo.execute(this);
             }
         }
 
-        return targetDto;
+        return targetBo;
     }
 }

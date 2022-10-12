@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserPermissionModel;
@@ -22,7 +22,6 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
      * TYPE_API = 2;
      * TYPE_DATA = 3;
      * @param userId
-     * @param targetType
      * @return
      */
     List<TargetModel> listTargetsByUserId(String userId);
@@ -31,7 +30,7 @@ public interface UserPermissionService extends BaseModelService<UserPermissionMo
 
     List<TargetModel> listMenusByUserId(String userId);
 
-    List<TargetDto> getTreeByUserId(String userId);
+    List<TargetBo> getTreeByUserId(String userId);
 
     boolean bindUserTargets(String userId, List<String> targetIds, boolean cleanOldTargets);
 

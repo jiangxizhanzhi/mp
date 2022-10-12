@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineRecordSummaryBo;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -21,10 +21,10 @@ import java.util.List;
 @ModelClass(UserOnlineRecordModel.class)
 public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecordModel> {
 
-    List<UserOnlineRecordSummaryDto> listRecordSummary(@Param("userIds") List<String> userIds,
-                                                       @Param("priorityUserIds") List<String> priorityUserIds,
-                                                       @Param("startTime") LocalDateTime startTime,
-                                                       @Param("endTime") LocalDateTime endTime);
+    List<UserOnlineRecordSummaryBo> listRecordSummary(@Param("userIds") List<String> userIds,
+                                                      @Param("priorityUserIds") List<String> priorityUserIds,
+                                                      @Param("startTime") LocalDateTime startTime,
+                                                      @Param("endTime") LocalDateTime endTime);
 
 
 

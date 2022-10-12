@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOlReportCntDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOlReportCntBo;
 import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
@@ -35,7 +35,7 @@ public interface UserHeartbeatMapper extends BaseModelMapper<UserHeartbeatModel>
      * @param time
      * @return
      */
-    List<UserOlReportCntDto> groupCntByUserId(@Param("time") LocalDateTime time);
+    List<UserOlReportCntBo> groupCntByUserId(@Param("time") LocalDateTime time);
 
 
 }

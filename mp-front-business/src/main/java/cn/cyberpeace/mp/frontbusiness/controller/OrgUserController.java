@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.org.BindOrgUsersRequest;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;

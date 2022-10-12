@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.auth.util;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.ClientDetailsModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.util.ServletUtils;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
+import cn.cyberpeace.mp.log.constant.LogConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -117,7 +117,7 @@ public class UserUtils {
 
 
 
-    public static UserDto getLoginUserDtoWithoutOrg() {
+    public static UserBo getLoginUserDtoWithoutOrg() {
         UserModel currentUserModel = getLoginUser();
         if (Objects.isNull(currentUserModel)) {
             return null;

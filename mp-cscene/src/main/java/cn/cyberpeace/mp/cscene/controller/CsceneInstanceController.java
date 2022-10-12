@@ -22,7 +22,7 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceQueryParams;
 import cn.cyberpeace.mp.cscene.service.param.CsceneInstanceStatQueryParams;
 import cn.cyberpeace.mp.cscene.util.CsceneLogUtils;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeConnectionBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeRecordingBO;
 import cn.cyberpeace.mp.sceneplugincloud.service.param.RecordingQueryParams;

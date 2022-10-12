@@ -1,9 +1,9 @@
 package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.devopslog.controller.OperateLogController;
-import cn.cyberpeace.mp.devopslog.request.OperationLogPageRequest;
-import cn.cyberpeace.mp.devopslog.response.OperationLogPageResponse;
+import cn.cyberpeace.mp.log.controller.OperateLogController;
+import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

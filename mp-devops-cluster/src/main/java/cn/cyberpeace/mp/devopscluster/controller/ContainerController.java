@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
@@ -67,18 +67,18 @@ public class ContainerController {
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(nameList);
         Map<String, CsceneNodeInfoBO> source = serviceResult.getSource();
 
-        List<UserDto> userDtoList = new ArrayList<>();
+        List<UserBo> userBoList = new ArrayList<>();
         if (Objects.nonNull(source)) {
             List<CsceneNodeInfoBO> values = new ArrayList<>(source.values());
             if (CollectionUtils.isNotEmpty(values)) {
                 List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    userDtoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    userBoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
                 }
             }
         }
 
-        List<UserDto> tmpUserDtoList = userDtoList;
+        List<UserBo> tmpUserBoList = userBoList;
         return modelList.stream().map(containerModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
             if (Objects.nonNull(source.get(containerModel.getName()))) {
@@ -87,8 +87,8 @@ public class ContainerController {
             String userName = "";
             String userId = csceneNodeInfoBO.getUserId();
             if (StringUtils.isNotBlank(userId)) {
-                Optional<UserDto> optional =
-                        tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
+                Optional<UserBo> optional =
+                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
                 }

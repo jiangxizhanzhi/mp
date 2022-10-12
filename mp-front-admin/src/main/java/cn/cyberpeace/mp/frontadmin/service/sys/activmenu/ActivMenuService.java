@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.dto.target.TargetActivDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
@@ -297,7 +297,7 @@ public class ActivMenuService {
         }
     }
 
-    private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivDto> activDtos) {
+    private List<TargetModel> targetActivDtos2TargetModels(List<TargetActivBo> activDtos) {
         List<TargetModel> targetModels =
                 activDtos.stream().map(a -> {
                     TargetModel model = new TargetModel();
@@ -361,7 +361,7 @@ public class ActivMenuService {
 
                 for (String activKey : activKeys) {
                     // 包含no_auth的菜单
-                    if (Objects.equals(activKey.trim(), TargetActivDto.NO_AUTH)) {
+                    if (Objects.equals(activKey.trim(), TargetActivBo.NO_AUTH)) {
                         itemMatch = true;
                     }
                 }

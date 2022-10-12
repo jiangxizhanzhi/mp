@@ -1,10 +1,10 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
-import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserRequest;
 import cn.cyberpeace.mp.auth.service.param.UserQueryParams;
@@ -22,11 +22,11 @@ import java.util.List;
  */
 public interface UserService extends BaseModelService<UserModel, UserQueryParams> {
 
-    UserDto getUserDto(String id);
+    UserBo getUserDto(String id);
 
-    UserDto getUserDtoNoRestrict(String id);
+    UserBo getUserDtoNoRestrict(String id);
 
-    UserDto getCurrentUserDto();
+    UserBo getCurrentUserDto();
 
     UserModel add(UserRequest createRequest);
 
@@ -74,29 +74,29 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void downloadExcelTemplate();
 
-    void importUsers(List<ImportUser> list);
+    void importUsers(List<ImportUserBo> list);
 
-    List<ExportUser> exportExcel(List<UserModel> users);
+    List<ExportUserBo> exportExcel(List<UserModel> users);
 
-    List<ExportUserEn> exportExcelEn(List<UserModel> users);
+    List<ExportUserEnBo> exportExcelEn(List<UserModel> users);
 
     boolean updateAvatar(String userId, MultipartFile multipartFile) throws MpRuntimeException;
 
-    void processExpiredStatus(UserDto user);
+    void processExpiredStatus(UserBo user);
 
     // userModel转换为userdto，附加组织，角色信息
-    UserDto userModel2UserDto(UserModel userModel);
+    UserBo userModel2UserDto(UserModel userModel);
 
     // userModel转换为userdto，附加角色信息，不包括组织相关信息
-    UserDto userModel2UserDtoWithoutOrg(UserModel userModel);
+    UserBo userModel2UserDtoWithoutOrg(UserModel userModel);
 
-    List<UserDto> userOrgRoleDtos2UserDtos(List<UserOrgRoleDto> userOrgRoleDtos);
+    List<UserBo> userOrgRoleDtos2UserDtos(List<UserOrgRoleBo> userOrgRoleBos);
 
-    UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole);
+    UserBo doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole);
 
     List<UserModel> listNotAudited();
 
-    List<UserDto> listByUserIds(String[] userIds);
+    List<UserBo> listByUserIds(String[] userIds);
 
     List<UserModel> listByIds(String[] userIds);
 
@@ -106,7 +106,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
 
     void setDefaultIfNoAvatar(UserModel userModel);
 
-    void batchSetDefaultIfNoAvatar(List<UserDto> userDtos);
+    void batchSetDefaultIfNoAvatar(List<UserBo> userBos);
 
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
 

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 
 /**
  * @Description:
@@ -9,5 +9,5 @@ import cn.cyberpeace.mp.auth.dto.target.TargetDto;
  */
 public interface TargetOperation<T> {
 
-    T doExecute(TargetDto targetDto);
+    T doExecute(TargetBo targetBo);
 }

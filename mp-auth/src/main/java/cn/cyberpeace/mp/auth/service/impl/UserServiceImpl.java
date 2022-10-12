@@ -6,12 +6,12 @@ import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.DefaultImgDirEnum;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUser;
-import cn.cyberpeace.mp.auth.dto.excel.ExportUserEn;
-import cn.cyberpeace.mp.auth.dto.excel.ImportUser;
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -135,20 +135,20 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Cacheable(value = CACHE_VAL_USERDTO)
-    public UserDto getUserDto(String id) {
+    public UserBo getUserDto(String id) {
         opUserPermCheckService.checkByTargetUserIdsForSearching(Arrays.asList(id));
         UserModel userModel = getModelMapper().get(id);
         setDefaultIfNoAvatar(userModel);
-        UserDto userDto = userModel2UserDto(userModel);
-        return userDto;
+        UserBo userBo = userModel2UserDto(userModel);
+        return userBo;
     }
 
     @Override
-    public UserDto getUserDtoNoRestrict(String id) {
+    public UserBo getUserDtoNoRestrict(String id) {
         UserModel userModel = getModelMapper().get(id);
         setDefaultIfNoAvatar(userModel);
-        UserDto userDto = userModel2UserDto(userModel);
-        return userDto;
+        UserBo userBo = userModel2UserDto(userModel);
+        return userBo;
     }
 
     /**
@@ -167,14 +167,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     /**
      * 批量转换头像路径为fdfs地址
-     * @param userDtos
+     * @param userBos
      */
-    public void batchSetDefaultIfNoAvatar(List<UserDto> userDtos) {
-        if (CollectionUtils.isNotEmpty(userDtos)) {
+    public void batchSetDefaultIfNoAvatar(List<UserBo> userBos) {
+        if (CollectionUtils.isNotEmpty(userBos)) {
             List<LocalFileMappingModel> mappingModelList =
                     DefaultImgUtil.listByGroups(Collections.singletonList(DefaultImgDirEnum.AVATAR.getGroup()));
             String defaultAvatar = getDefaultUserAvatar();
-            userDtos.forEach(userDto -> {
+            userBos.forEach(userDto -> {
                 if (StringUtils.isEmpty(userDto.getAvatar())) {
                     userDto.setAvatar(defaultAvatar);
                 }
@@ -186,14 +186,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    public UserDto getCurrentUserDto() {
+    public UserBo getCurrentUserDto() {
         UserModel userModel = UserUtils.getLoginUser();
         if (Objects.isNull(userModel)) {
             throw new MpRuntimeException(AuthErrorCode.ACCOUNT_NOT_LOGIN);
         }
         setDefaultIfNoAvatar(userModel);
-        UserDto userDto = userModel2UserDto(userModel);
-        return userDto;
+        UserBo userBo = userModel2UserDto(userModel);
+        return userBo;
     }
 
     @Override
@@ -713,15 +713,15 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public void importUsers(List<ImportUser> list) {
+    public void importUsers(List<ImportUserBo> list) {
         List<UserModel> userModels = new ArrayList<>();
         List<UserRoleModel> userRoleModels = new ArrayList<>();
         List<TenantUserModel> tenantUserModels = new ArrayList<>();
         // 初始化默认头像信息
-        for (ImportUser importUser : list) {
-            log.info("importUser:{}", importUser);
+        for (ImportUserBo importUserBo : list) {
+            log.info("importUser:{}", importUserBo);
             // 1.保存用户信息
-            UserModel userModel = importUser2UserModel(importUser);
+            UserModel userModel = importUser2UserModel(importUserBo);
             if (Objects.isNull(userModel)) {
                 continue;
             }
@@ -732,8 +732,8 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // http://10.10.10.10/biz/bug-view-4861.html
             // 2. 保存用户-角色关系 之前的步骤已经处理过roleIdList了
-            if (CollectionUtil.isNotEmpty(importUser.getRoleIdList())) {
-                List<UserRoleModel> userRoles = importUser.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
+            if (CollectionUtil.isNotEmpty(importUserBo.getRoleIdList())) {
+                List<UserRoleModel> userRoles = importUserBo.getRoleIdList().stream().map(rid -> UserRoleModel.builder().user(userId).role(rid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(userRoles)) {
                     userRoleModels.addAll(userRoles);
                 }
@@ -741,14 +741,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             // 3. 保存组织-用户关系
             // http://10.10.10.10/biz/bug-view-4861.html
-            if (CollectionUtil.isNotEmpty(importUser.getOrgIdList())) {
-                importUser.getOrgIdList().forEach(oid -> {
+            if (CollectionUtil.isNotEmpty(importUserBo.getOrgIdList())) {
+                importUserBo.getOrgIdList().forEach(oid -> {
                     TenantUserModel tenantUserModel = TenantUserModel.builder().user(userId).org(oid).build();
                             var re = tenantUserService.create(tenantUserModel);
                             ResultUtils.throwExceptionIfError(re, AuthErrorCode.USER_ORG_ADD_ERROR);
                         }
                 );
-                List<TenantUserModel> orgUsers = importUser.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
+                List<TenantUserModel> orgUsers = importUserBo.getOrgIdList().stream().map(oid -> TenantUserModel.builder().user(userId).org(oid).build()).collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(orgUsers)) {
                     tenantUserModels.addAll(orgUsers);
                 }
@@ -759,14 +759,14 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public List<ExportUser> exportExcel(List<UserModel> users) {
-        List<ExportUser> exportUserList = users.stream().map(this::user2ExportUser).filter(Objects::nonNull).collect(Collectors.toList());
-        return exportUserList;
+    public List<ExportUserBo> exportExcel(List<UserModel> users) {
+        List<ExportUserBo> exportUserBoList = users.stream().map(this::user2ExportUser).filter(Objects::nonNull).collect(Collectors.toList());
+        return exportUserBoList;
     }
 
     @Override
-    public List<ExportUserEn> exportExcelEn(List<UserModel> users) {
-        List<ExportUserEn> exportUserList = users.stream().map(this::user2ExportUserEn).filter(Objects::nonNull).collect(Collectors.toList());
+    public List<ExportUserEnBo> exportExcelEn(List<UserModel> users) {
+        List<ExportUserEnBo> exportUserList = users.stream().map(this::user2ExportUserEn).filter(Objects::nonNull).collect(Collectors.toList());
         return exportUserList;
     }
 
@@ -813,7 +813,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
      * @param user
      */
     @Override
-    public void processExpiredStatus(UserDto user) {
+    public void processExpiredStatus(UserBo user) {
         if (Objects.isNull(user) || Objects.isNull(user.getExpiredTime())) {
             return;
         }
@@ -828,7 +828,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    public UserDto userModel2UserDto(UserModel userModel) {
+    public UserBo userModel2UserDto(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
         }
@@ -837,7 +837,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
 
     @Override
-    public UserDto userModel2UserDtoWithoutOrg(UserModel userModel) {
+    public UserBo userModel2UserDtoWithoutOrg(UserModel userModel) {
         if (Objects.isNull(userModel)) {
             return null;
         }
@@ -846,62 +846,62 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
     @Override
     @Cacheable(value = CACHE_VAL_ORGDTOS_TO_USERDTOS)
-    public List<UserDto> userOrgRoleDtos2UserDtos(List<UserOrgRoleDto> userOrgRoleDtos) {
-        if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
+    public List<UserBo> userOrgRoleDtos2UserDtos(List<UserOrgRoleBo> userOrgRoleBos) {
+        if (CollectionUtil.isEmpty(userOrgRoleBos)) {
             return Collections.emptyList();
         }
         List<OrgBO> allOrgs = orgService.listAll(AuthConstant.DEFAULT_TENANT);
         List<RoleModel> allRoles = roleService.listByTenantId(AuthConstant.DEFAULT_TENANT);
-        List<UserDto> userDtos = new ArrayList<>();
-        for (UserOrgRoleDto userOrgRoleDto : userOrgRoleDtos) {
-            UserDto userDto = new UserDto();
-            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(userOrgRoleDto, userDto);
+        List<UserBo> userBos = new ArrayList<>();
+        for (UserOrgRoleBo userOrgRoleBo : userOrgRoleBos) {
+            UserBo userBo = new UserBo();
+            cn.cyberpeace.mp.base.util.basic.BeanUtils.copyProperties(userOrgRoleBo, userBo);
             // 过期状态处理
-            processExpiredStatus(userDto);
+            processExpiredStatus(userBo);
 
-            if (StringUtils.isNotBlank(userOrgRoleDto.getOrgs())) {
-                List<String> userOrgIds = Arrays.asList(userOrgRoleDto.getOrgs().split(","));
+            if (StringUtils.isNotBlank(userOrgRoleBo.getOrgs())) {
+                List<String> userOrgIds = Arrays.asList(userOrgRoleBo.getOrgs().split(","));
                 List<OrgBO> userOrgModels = allOrgs.stream().filter(o -> userOrgIds.contains(o.getId())).collect(Collectors.toList());
                 //List<List<String>> allorgpath = orgService.getBathPathToList(userOrgModels);
                 List<List<String>> allorgpath = userOrgModels.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-                userDto.setOrgs(userOrgModels);
-                userDto.setOrgIds(userOrgIds);
-                userDto.setOrgpaths(allorgpath);
+                userBo.setOrgs(userOrgModels);
+                userBo.setOrgIds(userOrgIds);
+                userBo.setOrgpaths(allorgpath);
             } else {
-                userDto.setOrgs(Collections.emptyList());
-                userDto.setOrgIds(Collections.emptyList());
-                userDto.setOrgpaths(Collections.emptyList());
+                userBo.setOrgs(Collections.emptyList());
+                userBo.setOrgIds(Collections.emptyList());
+                userBo.setOrgpaths(Collections.emptyList());
             }
 
-            if (StringUtils.isNotBlank(userOrgRoleDto.getRoles())) {
-                List<String> userRoleIds = Arrays.asList(userOrgRoleDto.getRoles().split(","));
+            if (StringUtils.isNotBlank(userOrgRoleBo.getRoles())) {
+                List<String> userRoleIds = Arrays.asList(userOrgRoleBo.getRoles().split(","));
                 List<RoleModel> userRoleModels = allRoles.stream().filter(r -> userRoleIds.contains(r.getId())).collect(Collectors.toList());
-                userDto.setRoles(userRoleModels);
+                userBo.setRoles(userRoleModels);
 
                 boolean isAdmin = userRoleIds.stream().anyMatch(rid -> Objects.equals(rid, AuthConstant.ROLE_ADMIN_ID));
-                boolean isSuperUser = Objects.equals(userOrgRoleDto.getId(), AuthConstant.ROOT_USER_ID);
+                boolean isSuperUser = Objects.equals(userOrgRoleBo.getId(), AuthConstant.ROOT_USER_ID);
 
-                processIsAdminSuperUser(userDto, isAdmin, isSuperUser);
+                processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
             } else {
-                userDto.setRoles(Collections.emptyList());
-                userDto.setIsSuperUser(0);
-                userDto.setIsAdmin(0);
+                userBo.setRoles(Collections.emptyList());
+                userBo.setIsSuperUser(0);
+                userBo.setIsAdmin(0);
             }
-            userDtos.add(userDto);
+            userBos.add(userBo);
         }
-        this.batchSetDefaultIfNoAvatar(userDtos);
+        this.batchSetDefaultIfNoAvatar(userBos);
 
-        return userDtos;
+        return userBos;
     }
 
     @Override
-    public UserDto doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
+    public UserBo doModel2Dto(UserModel userModel, boolean needOrg, boolean needRole) {
         ParamCheck.notBlank(userModel.getId(), AuthBasei18nCode.USER_ID);
 
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userModel, userDto);
+        UserBo userBo = new UserBo();
+        BeanUtils.copyProperties(userModel, userBo);
         // 过期状态处理
-        processExpiredStatus(userDto);
+        processExpiredStatus(userBo);
 
         if (needOrg) {
             List<OrgBO> orgBOS = tenantUserService.listOrgsByUserId(userModel.getId());
@@ -909,23 +909,23 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
             //List<List<String>> allorgpath = orgService.getBathPathToList(orgs);
             List<List<String>> allorgpath = orgBOS.stream().map(o -> CollectionUtil.toList(StringUtils.split(o.getPath(), AuthConstant.ORG_PATH_SEPARATOR))).collect(Collectors.toList());
-            userDto.setOrgs(orgBOS);
-            userDto.setOrgIds(orgIds);
-            userDto.setOrgpaths(allorgpath);
+            userBo.setOrgs(orgBOS);
+            userBo.setOrgIds(orgIds);
+            userBo.setOrgpaths(allorgpath);
         }
 
 
         if(needRole) {
             List<RoleModel> roles = userRoleService.listByUserId(userModel.getId());
-            userDto.setRoles(roles);
+            userBo.setRoles(roles);
 
             boolean isAdmin = roles.stream().anyMatch(r -> Objects.equals(r.getId(), AuthConstant.ROLE_ADMIN_ID));
             boolean isSuperUser = Objects.equals(userModel.getId(), AuthConstant.ROOT_USER_ID);
 
-            processIsAdminSuperUser(userDto, isAdmin, isSuperUser);
+            processIsAdminSuperUser(userBo, isAdmin, isSuperUser);
         }
 
-        return userDto;
+        return userBo;
     }
 
 
@@ -943,11 +943,11 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
     @Override
-    public List<UserDto> listByUserIds(String[] userIds) {
-        List<UserOrgRoleDto> userOrgRoleDtos = getByUserIds(userIds);
-        List<UserDto> userDtos = userOrgRoleDtos2UserDtos(userOrgRoleDtos);
-        userDtos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
-        return userDtos;
+    public List<UserBo> listByUserIds(String[] userIds) {
+        List<UserOrgRoleBo> userOrgRoleBos = getByUserIds(userIds);
+        List<UserBo> userBos = userOrgRoleDtos2UserDtos(userOrgRoleBos);
+        userBos.stream().forEach(userDto -> setDefaultIfNoAvatar(userDto));
+        return userBos;
     }
 
     @Override
@@ -974,84 +974,84 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     }
 
 
-    private void processIsAdminSuperUser(UserDto userDto, boolean isAdmin, boolean isSuperUser) {
+    private void processIsAdminSuperUser(UserBo userBo, boolean isAdmin, boolean isSuperUser) {
         if (isAdmin) {
-            userDto.setIsAdmin(1);
+            userBo.setIsAdmin(1);
         } else {
-            userDto.setIsAdmin(0);
+            userBo.setIsAdmin(0);
         }
 
         if (isSuperUser) {
-            userDto.setIsSuperUser(1);
+            userBo.setIsSuperUser(1);
         } else {
-            userDto.setIsSuperUser(0);
+            userBo.setIsSuperUser(0);
         }
     }
 
-    private UserModel importUser2UserModel(ImportUser importUser) {
-        if (Objects.isNull(importUser)) {
+    private UserModel importUser2UserModel(ImportUserBo importUserBo) {
+        if (Objects.isNull(importUserBo)) {
             return null;
         }
         UserModel userModel =
-                UserModel.builder().username(importUser.getUsername())
-                        .name(importUser.getName())
+                UserModel.builder().username(importUserBo.getUsername())
+                        .name(importUserBo.getName())
                         // 此处不需要加密，后面的create()方法会加密
-                        .password(importUser.getPassword())
+                        .password(importUserBo.getPassword())
                         .build();
         return userModel;
     }
 
 
-    private ExportUser user2ExportUser(UserModel user) {
+    private ExportUserBo user2ExportUser(UserModel user) {
         if (Objects.isNull(user)) {
             return null;
         }
-        ExportUser exportUser = ExportUser.builder().username(user.getUsername()).name(user.getName()).build();
+        ExportUserBo exportUserBo = ExportUserBo.builder().username(user.getUsername()).name(user.getName()).build();
 
         // org path
         List<OrgBO> orgList = tenantUserService.listOrgsByUserId(user.getId());
         // 调整为跟前端逻辑一样，如果存在多个组织，则选择主键最大的一个
         Optional<OrgBO> optional = orgList.stream().max(Comparator.comparing(OrgBO::getPk));
-        optional.ifPresent(o -> exportUser.setOrg(orgService.getPath(o)));
+        optional.ifPresent(o -> exportUserBo.setOrg(orgService.getPath(o)));
 
         String statusNormal = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NORMAL);
         String statusForbidden = MessageCommon.get(AuthBasei18nCode.USER_STATUS_FORBIDDEN);
         String statusExpired = MessageCommon.get(AuthBasei18nCode.USER_STATUS_EXPIRED);
         String statusNotAudit = MessageCommon.get(AuthBasei18nCode.USER_STATUS_NOT_AUDIT);
-        exportUser.setStat(statusNormal);
+        exportUserBo.setStat(statusNormal);
         // 状态展示优先级 禁用 > 过期 > 待审核
         if (user.getIsAudited().equals(UserModel.Status.NOT_AUDITED)) {
-            exportUser.setStat(statusNotAudit);
+            exportUserBo.setStat(statusNotAudit);
         }
 
         // 过期
         LocalDateTime now = LocalDateTime.now();
         if (Objects.nonNull(user.getExpiredTime()) && now.isAfter(user.getExpiredTime())) {
-            exportUser.setStat(statusExpired);
+            exportUserBo.setStat(statusExpired);
         }
 
         // 禁用
         if (user.getIsEnabled().equals(UserModel.Status.DISABLED)) {
-            exportUser.setStat(statusForbidden);
+            exportUserBo.setStat(statusForbidden);
         }
 
         // role
         List<RoleModel> roleList = userRoleService.listByUserId(user.getId());
         String roles = roleList.stream().map(RoleModel::getName).collect(Collectors.joining("/"));
         log.info("roles:{}", roles);
-        exportUser.setRoles(roles);
+        exportUserBo.setRoles(roles);
 
-        return exportUser;
+        return exportUserBo;
     }
 
 
-    private ExportUserEn user2ExportUserEn(UserModel userModel) {
-        ExportUser exportUser = user2ExportUser(userModel);
+    private ExportUserEnBo user2ExportUserEn(UserModel userModel) {
+        ExportUserBo exportUserBo = user2ExportUser(userModel);
 
-        if (Objects.nonNull(exportUser)) {
-            ExportUserEn exportUserEn = ExportUserEn.builder().build();
-            BeanUtils.copyProperties(exportUser, exportUserEn);
-            return exportUserEn;
+        if (Objects.nonNull(exportUserBo)) {
+            ExportUserEnBo exportUserEnBo = ExportUserEnBo.builder().build();
+            BeanUtils.copyProperties(exportUserBo, exportUserEnBo);
+            return exportUserEnBo;
         }
         return null;
     }
@@ -1078,7 +1078,7 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         }
     }
 
-    public List<UserOrgRoleDto> getByUserIds(String[] userIds) {
+    public List<UserOrgRoleBo> getByUserIds(String[] userIds) {
         HumanCondition userCondition = new HumanCondition()
                 .filterIn(UserModel::getId, userIds)
                 .distinct()
@@ -1088,35 +1088,35 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
         HumanCondition orgUserCondition = new HumanCondition()
                 .filterIn(TenantUserModel::getUser, userIds)
                 .select(TenantUserModel::getUser)
-                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), UserOrgRoleDto.FIELD_ORGS)
+                .selectAs(GroupConcat.f(TenantUserModel::getOrg).distinct(), UserOrgRoleBo.FIELD_ORGS)
                 .groupBy(TenantUserModel::getUser);
         List<Map<String, Object>> orgs = tenantUserMapper.originList(orgUserCondition);
         Map<String, String> orgMap = new HashMap<>();
         for (Map<String, Object> userOrg : orgs) {
-            orgMap.put((String) userOrg.get(UserOrgRoleDto.FIELD_USER), (String) userOrg.get(UserOrgRoleDto.FIELD_ORGS));
+            orgMap.put((String) userOrg.get(UserOrgRoleBo.FIELD_USER), (String) userOrg.get(UserOrgRoleBo.FIELD_ORGS));
         }
 
         HumanCondition userRoleCondition = new HumanCondition()
                 .filterIn(UserRoleModel::getUser, userIds)
                 .select(UserRoleModel::getUser)
-                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleDto.FIELD_ROLES)
+                .selectAs(GroupConcat.f(UserRoleModel::getRole).distinct(), UserOrgRoleBo.FIELD_ROLES)
                 .groupBy(UserRoleModel::getUser);
         List<Map<String, Object>> roles = userRoleMapper.originList(userRoleCondition);
         Map<String, String> roleMap = new HashMap<>();
         for (Map<String, Object> userRole : roles) {
-            roleMap.put((String) userRole.get(UserOrgRoleDto.FIELD_USER), (String) userRole.get(UserOrgRoleDto.FIELD_ROLES));
+            roleMap.put((String) userRole.get(UserOrgRoleBo.FIELD_USER), (String) userRole.get(UserOrgRoleBo.FIELD_ROLES));
         }
 
-        List<UserOrgRoleDto> userOrgRoleDtos = new ArrayList<>();
+        List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>();
         for (UserModel userModel : userModels) {
-            UserOrgRoleDto userOrgRoleDto = new UserOrgRoleDto();
-            BeanUtils.copyProperties(userModel, userOrgRoleDto);
-            userOrgRoleDto.setOrgs(orgMap.get(userModel.getId()));
-            userOrgRoleDto.setRoles(roleMap.get(userModel.getId()));
-            userOrgRoleDtos.add(userOrgRoleDto);
+            UserOrgRoleBo userOrgRoleBo = new UserOrgRoleBo();
+            BeanUtils.copyProperties(userModel, userOrgRoleBo);
+            userOrgRoleBo.setOrgs(orgMap.get(userModel.getId()));
+            userOrgRoleBo.setRoles(roleMap.get(userModel.getId()));
+            userOrgRoleBos.add(userOrgRoleBo);
         }
 
-        return userOrgRoleDtos;
+        return userOrgRoleBos;
     }
 }
 

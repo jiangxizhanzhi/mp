@@ -4,9 +4,9 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.role.UserRoleStatistic;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.role.UserRoleStatisticBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
@@ -88,13 +88,13 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     @Override
     public List<UserModel> listUsersByRoleIdNoRestrict(String roleId) {
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsersByRoleId(roleId);
-        if (CollectionUtil.isEmpty(userOrgRoleDtos)) {
+        List<UserOrgRoleBo> userOrgRoleBos = getModelMapper().listUsersByRoleId(roleId);
+        if (CollectionUtil.isEmpty(userOrgRoleBos)) {
             return Collections.emptyList();
         }
 
         List<UserModel> userModels =
-            userOrgRoleDtos.stream().map(uor -> {
+            userOrgRoleBos.stream().map(uor -> {
                 UserModel userModel = new UserModel();
                 BeanUtils.copyProperties(uor, userModel);
                 userService.setDefaultIfNoAvatar(userModel);
@@ -118,7 +118,7 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public PageInfo<UserDto> pageByRoleId(UserRolePageRequest pageRequest) {
+    public PageInfo<UserBo> pageByRoleId(UserRolePageRequest pageRequest) {
         pageRequest.ensure();
         ParamCheck.notBlank(pageRequest.getRoleId(), AuthBasei18nCode.ROLE_ID);
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
@@ -126,10 +126,10 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
             new PageInfo<>(Collections.emptyList());
         }
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
-        PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
-        List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
-        pageInfo.setList(userDtos);
+        List<UserOrgRoleBo> userOrgRoleBos = getModelMapper().listUsersByRoleId(pageRequest.getRoleId());
+        PageInfo pageInfo = new PageInfo(userOrgRoleBos);
+        List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
+        pageInfo.setList(userBos);
         return pageInfo;
     }
 
@@ -226,8 +226,8 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     }
 
     @Override
-    public List<UserRoleStatistic> getUserRoleStatistics() {
-        List<UserRoleStatistic> statistics = getModelMapper().getUserRoleStatistics();
+    public List<UserRoleStatisticBo> getUserRoleStatistics() {
+        List<UserRoleStatisticBo> statistics = getModelMapper().getUserRoleStatistics();
         return statistics;
     }
 

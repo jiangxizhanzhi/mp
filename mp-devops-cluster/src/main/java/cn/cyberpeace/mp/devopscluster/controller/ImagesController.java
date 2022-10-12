@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
@@ -38,10 +38,10 @@ import cn.cyberpeace.mp.devopscluster.vo.ImagesPageVO;
 import cn.cyberpeace.mp.devopscluster.vo.TargetUploadVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
-import cn.cyberpeace.mp.devopslog.annotation.OperateLog;
-import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.sceneplugincloud.util.cloudmessageconvert.CloudMessageConvertUtil;
 import cn.hutool.core.util.URLUtil;
 import io.swagger.annotations.Api;
@@ -241,9 +241,9 @@ public class ImagesController {
     @ApiOperation("根据uuid查询授权用户信息")
     @ApiImplicitParam(name = "uuid", value = "请求参数", dataTypeClass = String.class)
     @GetMapping("/auth-users")
-    public Result<List<UserDto>> authUsers(@RequestParam("uuid") String uuid ){
-        List<UserDto> userDtos = imagesConverter.findUsersByUuid(uuid);
-        return new Result<>(userDtos);
+    public Result<List<UserBo>> authUsers(@RequestParam("uuid") String uuid ){
+        List<UserBo> userBos = imagesConverter.findUsersByUuid(uuid);
+        return new Result<>(userBos);
     }
 
     /**

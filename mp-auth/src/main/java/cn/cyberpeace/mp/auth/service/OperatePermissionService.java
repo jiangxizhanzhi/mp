@@ -2,11 +2,11 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
+import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -30,10 +30,10 @@ public class OperatePermissionService {
      * @return
      */
     public boolean isLoginUserAdmin() {
-        UserDto currentUserDto = UserUtils.getLoginUserDtoWithoutOrg();
-        if (Objects.nonNull(currentUserDto)) {
+        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
+        if (Objects.nonNull(currentUserBo)) {
             // 超级用户拥有管理员权限
-            if (Objects.equals(1, currentUserDto.getIsAdmin()) || Objects.equals(1, currentUserDto.getIsSuperUser())) {
+            if (Objects.equals(1, currentUserBo.getIsAdmin()) || Objects.equals(1, currentUserBo.getIsSuperUser())) {
                 return true;
             }
         }
@@ -53,9 +53,9 @@ public class OperatePermissionService {
      * @return
      */
     public boolean isLoginUserSuperUser() {
-        UserDto currentUserDto = UserUtils.getLoginUserDtoWithoutOrg();
-        if (Objects.nonNull(currentUserDto)) {
-            if (Objects.equals(1, currentUserDto.getIsSuperUser())) {
+        UserBo currentUserBo = UserUtils.getLoginUserDtoWithoutOrg();
+        if (Objects.nonNull(currentUserBo)) {
+            if (Objects.equals(1, currentUserBo.getIsSuperUser())) {
                 return true;
             }
         }

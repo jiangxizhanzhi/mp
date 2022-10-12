@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 
 /**
  * @Description:

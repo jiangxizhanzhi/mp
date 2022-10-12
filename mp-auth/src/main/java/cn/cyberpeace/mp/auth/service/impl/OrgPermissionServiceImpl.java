@@ -3,7 +3,7 @@ package cn.cyberpeace.mp.auth.service.impl;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.model.OrgPermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.OrgPermissionMapper;

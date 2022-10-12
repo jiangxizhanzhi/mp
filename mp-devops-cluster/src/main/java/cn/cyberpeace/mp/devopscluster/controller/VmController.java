@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.devopscluster.controller;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
@@ -70,7 +70,7 @@ public class VmController {
     private List<InstancePageVO> convertBOToPageVO(BasePageBO<InstanceBO> model){
         List<InstanceBO> instances = model.getList();
         List<String> instanceNames = instances.stream().map(InstanceBO::getName).collect(Collectors.toList());
-        List<UserDto> userDtoList = new ArrayList<>();
+        List<UserBo> userBoList = new ArrayList<>();
         Map<String, String> uuid2UserId = new HashMap<>();
         ServiceResult<Map<String, CsceneNodeInfoBO>> serviceResult = csceneSpecialService.getSceneInfoByNodeResourceName(instanceNames);
         var devopsResult = deviceTargetMapper.findByUuids(instanceNames);
@@ -81,7 +81,7 @@ public class VmController {
             if (CollectionUtils.isNotEmpty(values)) {
                 List<String> userIdList = values.stream().map(CsceneNodeInfoBO::getUserId).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(userIdList)) {
-                    userDtoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
+                    userBoList = userService.listByUserIds(userIdList.toArray(new String[]{}));
                 }
             }
         }
@@ -95,10 +95,10 @@ public class VmController {
                     .filter(deviceTargetPO -> StringUtils.isNotEmpty(deviceTargetPO.getInstanceCreateUser()))
                     .collect(Collectors.toMap(DeviceTargetPO::getUuid, DeviceTargetPO::getInstanceCreateUser));
             if (CollectionUtils.isNotEmpty(userIdList)) {
-                userDtoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
+                userBoList.addAll(userService.listByUserIds(userIdList.toArray(new String[]{})));
             }
         }
-        List<UserDto> tmpUserDtoList = userDtoList;
+        List<UserBo> tmpUserBoList = userBoList;
         Map<String, String> uuid2User = uuid2UserId;
         return instances.stream().map(instanceModel -> {
             CsceneNodeInfoBO csceneNodeInfoBO = new CsceneNodeInfoBO();
@@ -108,15 +108,15 @@ public class VmController {
             String userName = "";
             String userId = csceneNodeInfoBO.getUserId();
             if (StringUtils.isNotBlank(userId)) {
-                Optional<UserDto> optional =
-                        tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
+                Optional<UserBo> optional =
+                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(userId)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
                 }
             } else if (StringUtils.isNotEmpty(uuid2User.get(instanceModel.getName()))) {
                 String createUser = uuid2User.get(instanceModel.getName());
-                Optional<UserDto> optional =
-                        tmpUserDtoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
+                Optional<UserBo> optional =
+                        tmpUserBoList.stream().filter(userDto -> userDto.getId().equals(createUser)).findFirst();
                 if (optional.isPresent()) {
                     userName = optional.get().getUsername();
                 }

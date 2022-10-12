@@ -1,12 +1,12 @@
 package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
-import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorDto;
+import cn.cyberpeace.mp.aggregation.dto.dashboard.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.response.DailyUserActivityResponse;
 import cn.cyberpeace.mp.aggregation.response.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.response.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.response.UserSummarySceneResponse;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.bo.user.UserOnlineReportBo;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -226,28 +226,28 @@ public class DashboardService {
     /**
      * 整合在线报告和节点监控
      */
-    public PageInfo<UserOnlineReportMonitorDto> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
-        PageInfo<UserOnlineReportDto> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
-        List<UserOnlineReportDto> userOnlineReportDtoList = pageInfo.getList();
+    public PageInfo<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
+        PageInfo<UserOnlineReportBo> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
+        List<UserOnlineReportBo> userOnlineReportBoList = pageInfo.getList();
 
         //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
-        List<String> onlinedUserIds = userOnlineReportDtoList.stream().map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        List<String> onlinedUserIds = userOnlineReportBoList.stream().map(UserOnlineReportBo::getUser).collect(Collectors.toList());
         List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
         if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
             ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
             userConnectionNumBOList = result.getSource();
         }
 
-        List<UserOnlineReportMonitorDto> monitorDtoList = new ArrayList<>();
-        for (UserOnlineReportDto userOnlineReportDto : userOnlineReportDtoList) {
-            UserOnlineReportMonitorDto monitorDto = new UserOnlineReportMonitorDto();
-            BeanUtils.copyProperties(userOnlineReportDto, monitorDto);
+        List<UserOnlineReportMonitorBo> monitorDtoList = new ArrayList<>();
+        for (UserOnlineReportBo userOnlineReportBo : userOnlineReportBoList) {
+            UserOnlineReportMonitorBo monitorDto = new UserOnlineReportMonitorBo();
+            BeanUtils.copyProperties(userOnlineReportBo, monitorDto);
 
             monitorDto.setNodeSessionCnt(0);
             monitorDto.setHasNodeSession(false);
 
             if (CollectionUtil.isNotEmpty(userConnectionNumBOList)) {
-                Optional<UserConnectionNumBO> boOptional = userConnectionNumBOList.stream().filter(bo -> Objects.equals(bo.getUser(), userOnlineReportDto.getUser())).findFirst();
+                Optional<UserConnectionNumBO> boOptional = userConnectionNumBOList.stream().filter(bo -> Objects.equals(bo.getUser(), userOnlineReportBo.getUser())).findFirst();
                 if (boOptional.isPresent() && boOptional.get().getConnectionNum() > 0) {
                     monitorDto.setNodeSessionCnt(boOptional.get().getConnectionNum());
                     monitorDto.setHasNodeSession(true);
@@ -257,7 +257,7 @@ public class DashboardService {
             monitorDtoList.add(monitorDto);
         }
 
-        PageInfo<UserOnlineReportMonitorDto> newPageInfo = new PageInfo();
+        PageInfo<UserOnlineReportMonitorBo> newPageInfo = new PageInfo();
         BeanUtils.copyProperties(pageInfo, newPageInfo);
         newPageInfo.setList(monitorDtoList);
         return newPageInfo;

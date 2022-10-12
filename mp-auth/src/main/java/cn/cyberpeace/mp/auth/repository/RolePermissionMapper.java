@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.auth.repository;
 
-import cn.cyberpeace.mp.auth.dto.target.TargetRoleDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
@@ -23,7 +23,7 @@ public interface RolePermissionMapper extends BaseModelMapper<RolePermissionMode
 
     List<TargetModel> listTargetsByRoleIds(@Param("tenant") String tenant, @Param("roleIds") List<String> roleIds);
 
-    List<TargetRoleDto> listTargetRoleDtos(@Param("roleIds") List<String> roleIds);
+    List<TargetRoleBo> listTargetRoleDtos(@Param("roleIds") List<String> roleIds);
 
 
 }

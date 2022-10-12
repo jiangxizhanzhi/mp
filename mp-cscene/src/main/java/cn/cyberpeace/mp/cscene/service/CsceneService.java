@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.impl.TenantUserServiceImpl;
 import cn.cyberpeace.mp.authbase.model.BasePermissionModel;
@@ -241,7 +241,7 @@ public class CsceneService extends BaseModelServiceImpl<CsceneModel, CsceneMappe
         request.setPage(1);
         request.setPageSize(userIds.size());
         var users = tenantUserService.pageUsersByOrg(request);
-        Map<String, UserDto> userId2User = users.getList().stream().collect(Collectors.toMap(userDto -> userDto.getId(), userDto -> userDto));
+        Map<String, UserBo> userId2User = users.getList().stream().collect(Collectors.toMap(userDto -> userDto.getId(), userDto -> userDto));
         for (String userId : userIds) {
             CsceneAuthorizeBO.SharedUser sharedUser = new CsceneAuthorizeBO.SharedUser();
             var user = userId2User.get(userId);

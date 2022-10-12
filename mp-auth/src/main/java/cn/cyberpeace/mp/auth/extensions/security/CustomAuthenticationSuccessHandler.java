@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.auth.extensions.security;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.extensions.security.service.AuthUserDetails;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.response.login.LoginResp;
@@ -15,14 +15,14 @@ import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.service.result.ObjResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
-import cn.cyberpeace.mp.devopslog.enums.OpModuleEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTargetEnums;
-import cn.cyberpeace.mp.devopslog.enums.OpTypeEnums;
-import cn.cyberpeace.mp.devopslog.request.OperationLogRequest;
-import cn.cyberpeace.mp.devopslog.service.OperateLogServiceFactory;
-import cn.cyberpeace.mp.devopslog.service.OperationLogService;
-import cn.cyberpeace.mp.devopslog.utils.SnUtils;
+import cn.cyberpeace.mp.log.constant.LogConstant;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.cyberpeace.mp.log.request.OperationLogRequest;
+import cn.cyberpeace.mp.log.service.OperateLogServiceFactory;
+import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,9 +93,9 @@ public class CustomAuthenticationSuccessHandler extends SavedRequestAwareAuthent
             } else {
                 String jwt = JwtUtils.generateToken(new JwtUtils.UserInfo(user.getId(), user.getUsername(), user.getTokenSecret()));
                 ObjResult<UserModel> userResult = new ObjResult(user, new UserFields().getAvailableFields());
-                UserDto userDto = userService.userModel2UserDto(userResult.getObj());
+                UserBo userBo = userService.userModel2UserDto(userResult.getObj());
                 LoginResp loginResp = new LoginResp();
-                loginResp.setUser(userDto);
+                loginResp.setUser(userBo);
                 loginResp.setToken(jwt);
 
                 // 角色

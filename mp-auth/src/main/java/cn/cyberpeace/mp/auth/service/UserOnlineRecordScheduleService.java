@@ -1,7 +1,7 @@
 package cn.cyberpeace.mp.auth.service;
 
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordStatusCheckTask;
-import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordTask;
+import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordStatusCheckTask;
+import cn.cyberpeace.mp.auth.service.task.UserOnlineRecordTask;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;

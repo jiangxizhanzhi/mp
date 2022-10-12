@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.core.common;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
@@ -45,8 +45,8 @@ public class UserCommon {
         return getUser(context.getAccessUserId());
     }
 
-    public static UserDto getUserDetail(String userId) {
-        UserDto user = null;
+    public static UserBo getUserDetail(String userId) {
+        UserBo user = null;
         try {
             user = userService.getUserDtoNoRestrict(userId);
         } catch (Exception e) {

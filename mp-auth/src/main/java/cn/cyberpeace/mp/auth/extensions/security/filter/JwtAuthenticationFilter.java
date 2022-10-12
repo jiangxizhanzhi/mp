@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.authbase.context.LoginUserContext;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.devopslog.constant.LogConstant;
+import cn.cyberpeace.mp.log.constant.LogConstant;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.frontbusiness.controller;
 
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.dto.target.TargetDto;
+import cn.cyberpeace.mp.auth.bo.target.TargetBo;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.request.target.BindUserTargetsRequest;
 import cn.cyberpeace.mp.auth.service.UserPermissionService;
@@ -47,7 +47,7 @@ public class UserPermissionController {
     @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
     @GetMapping("/tree/byuser")
     public ServiceResult getTargetsTreeByUser(@RequestParam String userId) {
-        List<TargetDto> tree = userPermissionService.getTreeByUserId(userId);
+        List<TargetBo> tree = userPermissionService.getTreeByUserId(userId);
         return ServiceResult.builder().source(tree).build().asResult();
     }
 

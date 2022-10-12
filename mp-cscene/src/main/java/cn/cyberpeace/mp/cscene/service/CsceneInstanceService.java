@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.cscene.service;
 
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.common.JsonCommon;
@@ -636,7 +636,7 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
             }
         });
         if (!existUserIds.isEmpty()) {
-            List<UserDto> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
+            List<UserBo> users = userService.listByUserIds(existUserIds.toArray(new String[]{}));
             if (CollectionUtils.isNotEmpty(users)) {
                 Map<String, String> userId2Name = new HashMap<>();
                 users.forEach(user -> userId2Name.put(user.getId(), user.getName()));

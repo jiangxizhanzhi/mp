@@ -4,12 +4,12 @@ import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
-import cn.cyberpeace.mp.auth.dto.org.OrgBO;
-import cn.cyberpeace.mp.auth.dto.org.OrgDto;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgDto;
-import cn.cyberpeace.mp.auth.dto.org.UserOrgMapDto;
-import cn.cyberpeace.mp.auth.dto.user.UserDto;
-import cn.cyberpeace.mp.auth.dto.user.UserOrgRoleDto;
+import cn.cyberpeace.mp.auth.bo.org.OrgBO;
+import cn.cyberpeace.mp.auth.bo.org.OrgDto;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
+import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
+import cn.cyberpeace.mp.auth.bo.user.UserBo;
+import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
@@ -113,7 +113,7 @@ public class TenantUserServiceImpl
             orgIds.addAll(childOrgDtos.stream().map(OrgDto::getId).collect(Collectors.toList()));
         }
         String likeUname = SQLUtils.escapeLike(uname);
-        UserDto userCondition = new UserDto();
+        UserBo userCondition = new UserBo();
         userCondition.setUsername(likeUname);
 
         UserModel selfUser = UserUtils.getLoginUser();
@@ -125,7 +125,7 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleDto> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        List<UserOrgRoleBo> users = getModelMapper().listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
@@ -155,21 +155,21 @@ public class TenantUserServiceImpl
 
     @Override
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
-    public List<UserOrgMapDto> listUserOrgMapDtosByUserIds(List<String> userIds) {
+    public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgMapDto> userOrgMapDtos = getModelMapper().listUserOrgMapDtosByUserIds(userIds);
-        return userOrgMapDtos;
+        List<UserOrgMapBo> userOrgMapBos = getModelMapper().listUserOrgMapDtosByUserIds(userIds);
+        return userOrgMapBos;
     }
 
     @Override
-    public List<UserOrgDto> listUserOrgByUserIds(List<String> userIds) {
+    public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgDto> userOrgDtos = getModelMapper().listUserOrgByUserIds(userIds);
-        for (UserOrgDto userOrgDto : userOrgDtos) {
-            String path = orgService.getPath(userOrgDto);
-            userOrgDto.setPath(path);
+        List<UserOrgBo> userOrgBos = getModelMapper().listUserOrgByUserIds(userIds);
+        for (UserOrgBo userOrgBo : userOrgBos) {
+            String path = orgService.getPath(userOrgBo);
+            userOrgBo.setPath(path);
         }
-        return userOrgDtos;
+        return userOrgBos;
     }
 
     @Override
@@ -252,7 +252,7 @@ public class TenantUserServiceImpl
     }
 
     @Override
-    public PageInfo<UserDto> pageUsersByOrg(OrgUserPageRequest req) {
+    public PageInfo<UserBo> pageUsersByOrg(OrgUserPageRequest req) {
         List<String> idsList = null;
         if (Objects.nonNull(req.getIds()) && req.getIds().length > 0) {
             idsList = Arrays.asList(req.getIds());
@@ -276,7 +276,7 @@ public class TenantUserServiceImpl
         }
 
         String likeUsername = SQLUtils.escapeLike(req.getUsername());
-        UserDto userCondition = new UserDto();
+        UserBo userCondition = new UserBo();
         userCondition.setUsername(likeUsername);
         userCondition.setIsEnabled(req.getIsEnabled());
         userCondition.setIsAudited(req.getIsAudited());
@@ -292,11 +292,11 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleDto> userOrgRoleDtos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
-        PageInfo pageInfo = new PageInfo(userOrgRoleDtos);
-        List<UserDto> userDtos = userService.userOrgRoleDtos2UserDtos(userOrgRoleDtos);
+        List<UserOrgRoleBo> userOrgRoleBos = getModelMapper().listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        PageInfo pageInfo = new PageInfo(userOrgRoleBos);
+        List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
 
-        pageInfo.setList(userDtos);
+        pageInfo.setList(userBos);
         return pageInfo;
     }
 
