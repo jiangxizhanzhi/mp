@@ -2,6 +2,8 @@ package cn.cyberpeace.mp.devopscluster.controller;
 
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.service.UserService;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.bo.CsceneNodeInfoBO;
 import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
@@ -13,9 +15,11 @@ import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
 import cn.cyberpeace.mp.devopscluster.po.DeviceTargetPO;
 import cn.cyberpeace.mp.devopscluster.repository.DeviceTargetMapper;
 import cn.cyberpeace.mp.devopscluster.request.InstancePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ReviseContainerOrVmRequest;
 import cn.cyberpeace.mp.devopscluster.utils.POLogoUtils;
 import cn.cyberpeace.mp.devopscluster.vo.InstancePageVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.cloudapi.VirtualMachine;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,13 +56,58 @@ public class VmController {
     private final DeviceTargetMapper deviceTargetMapper;
 
     /**
+     * 重启
+     * @param request
+     * @return
+     */
+    @ApiOperation("重启虚拟机")
+    @PostMapping("/restart")
+    public ServiceResult<Boolean> restart(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        VirtualMachine virtualMachine = new VirtualMachine();
+        return new ServiceResult<>(virtualMachine.restart(request.getId())).asResult();
+    }
+
+    /**
+     * 暂停
+     * @param request
+     * @return
+     */
+    @ApiOperation("暂停虚拟机")
+    @PostMapping("/pause")
+    public ServiceResult<Boolean> pause(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        VirtualMachine virtualMachine = new VirtualMachine();
+        return new ServiceResult<>(virtualMachine.pause(request.getId())).asResult();
+    }
+
+    /**
+     * 恢复
+     * @param request
+     * @return
+     */
+    @ApiOperation("恢复虚拟机")
+    @PostMapping("/unpause")
+    public ServiceResult<Boolean> unpause(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        VirtualMachine virtualMachine = new VirtualMachine();
+        return new ServiceResult<>(virtualMachine.unpause(request.getId())).asResult();
+    }
+
+    /**
      * 分页查询虚拟机信息
      * @param request
      * @return
      */
     @ApiOperation("分页查询虚拟机信息")
     @GetMapping("/page")
-    public PageResult<InstancePageVO> page(InstancePageRequest request){
+    public PageResult<InstancePageVO> page(InstancePageRequest request) {
         BasePageBO<InstanceBO> model = vmConverter.page(new InstancePageDTO(request));
         List<InstancePageVO> list = convertBOToPageVO(model);
         return new PageResult<>(list, model.getTotal());
@@ -124,6 +175,7 @@ public class VmController {
 
             return InstancePageVO.builder().name(instanceModel.getName())
                     .sceneName(StringUtils.isBlank(csceneNodeInfoBO.getCsceneName()) ? "" : csceneNodeInfoBO.getCsceneName())
+                    .id(instanceModel.getId())
                     .node(instanceModel.getNode())
                     .addressList(instanceModel.getAddressList())
                     .userName(userName)
