@@ -122,25 +122,25 @@ public class TypeController {
                 "        \"first_type_list\": [\n" +
                 "            {\n" +
                 "                \"id\": 1,\n" +
-                "                \"name\": \"Operating System\",\n" +
+                "                \"name\": \"操作系统\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": null\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 2,\n" +
-                "                \"name\": \"Application System\",\n" +
+                "                \"name\": \"应用系统\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": null\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 3,\n" +
-                "                \"name\": \"Network Equipment\",\n" +
+                "                \"name\": \"网络设备\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": null\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 4,\n" +
-                "                \"name\": \"Security Equipment\",\n" +
+                "                \"name\": \"安全设备\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": null\n" +
                 "            }\n" +
@@ -178,109 +178,109 @@ public class TypeController {
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 30,\n" +
-                "                \"name\": \"Network Service\",\n" +
+                "                \"name\": \"网络服务\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 31,\n" +
-                "                \"name\": \"Middleware\",\n" +
+                "                \"name\": \"中间件\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 32,\n" +
-                "                \"name\": \"Database\",\n" +
+                "                \"name\": \"数据库\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 33,\n" +
-                "                \"name\": \"Software Development\",\n" +
+                "                \"name\": \"软件开发\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 34,\n" +
-                "                \"name\": \"Basis Image\",\n" +
+                "                \"name\": \"基础镜像\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 35,\n" +
-                "                \"name\": \"O&M Tools\",\n" +
+                "                \"name\": \"运维工具\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 36,\n" +
-                "                \"name\": \"Mail Server\",\n" +
+                "                \"name\": \"邮件服务器\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 37,\n" +
-                "                \"name\": \"File Server\",\n" +
+                "                \"name\": \"文件服务器\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 38,\n" +
-                "                \"name\": \"Enterprise Office\",\n" +
+                "                \"name\": \"企业办公\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 39,\n" +
-                "                \"name\": \"Statistical Analysis\",\n" +
+                "                \"name\": \"统计分析\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 40,\n" +
-                "                \"name\": \"Load Balancing\",\n" +
+                "                \"name\": \"负载均衡\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 41,\n" +
-                "                \"name\": \"Application Framework\",\n" +
+                "                \"name\": \"应用框架\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 42,\n" +
-                "                \"name\": \"Web Server\",\n" +
+                "                \"name\": \"Web服务器\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 43,\n" +
-                "                \"name\": \"Other\",\n" +
+                "                \"name\": \"其他\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 2\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 50,\n" +
-                "                \"name\": \"Switch\",\n" +
+                "                \"name\": \"交换机\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 3\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 51,\n" +
-                "                \"name\": \"Router\",\n" +
+                "                \"name\": \"路由器\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 3\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 52,\n" +
-                "                \"name\": \"Firewall\",\n" +
+                "                \"name\": \"防火墙\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 3\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 53,\n" +
-                "                \"name\": \"External Network\",\n" +
+                "                \"name\": \"外部网络\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 3\n" +
                 "            },\n" +
@@ -310,19 +310,19 @@ public class TypeController {
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 503,\n" +
-                "                \"name\": \"Behavior Management\",\n" +
+                "                \"name\": \"行为管理\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 4\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 504,\n" +
-                "                \"name\": \"Security Audit\",\n" +
+                "                \"name\": \"安全审计\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 4\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 505,\n" +
-                "                \"name\": \"Firewall\",\n" +
+                "                \"name\": \"防火墙\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 4\n" +
                 "            },\n" +
@@ -340,7 +340,7 @@ public class TypeController {
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 508,\n" +
-                "                \"name\": \"Other\",\n" +
+                "                \"name\": \"其他\",\n" +
                 "                \"l2_parent_id\": null,\n" +
                 "                \"l1_parent_id\": 4\n" +
                 "            }\n" +
@@ -498,7 +498,7 @@ public class TypeController {
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 314,\n" +
-                "                \"name\": \"Other\",\n" +
+                "                \"name\": \"其他\",\n" +
                 "                \"l2_parent_id\": 2,\n" +
                 "                \"l1_parent_id\": 1\n" +
                 "            },\n" +
@@ -578,36 +578,36 @@ public class TypeController {
                 "        \"role\": [\n" +
                 "            {\n" +
                 "                \"id\": 3,\n" +
-                "                \"name\": \"External Network\",\n" +
+                "                \"name\": \"外部网络\",\n" +
                 "                \"parent_id\": null,\n" +
                 "                \"child\": null\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 4,\n" +
-                "                \"name\": \"Terminal Node\",\n" +
+                "                \"name\": \"终端节点\",\n" +
                 "                \"parent_id\": null,\n" +
                 "                \"child\": null\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": 6,\n" +
-                "                \"name\": \"Gateway Node\",\n" +
+                "                \"name\": \"网关节点\",\n" +
                 "                \"parent_id\": null,\n" +
                 "                \"child\": [\n" +
                 "                    {\n" +
                 "                        \"id\": 21,\n" +
-                "                        \"name\": \"Router\",\n" +
+                "                        \"name\": \"路由器\",\n" +
                 "                        \"parent_id\": 6,\n" +
                 "                        \"child\": null\n" +
                 "                    },\n" +
                 "                    {\n" +
                 "                        \"id\": 22,\n" +
-                "                        \"name\": \"Switch\",\n" +
+                "                        \"name\": \"交换机\",\n" +
                 "                        \"parent_id\": 6,\n" +
                 "                        \"child\": null\n" +
                 "                    },\n" +
                 "                    {\n" +
                 "                        \"id\": 23,\n" +
-                "                        \"name\": \"Firewall\",\n" +
+                "                        \"name\": \"防火墙\",\n" +
                 "                        \"parent_id\": 6,\n" +
                 "                        \"child\": null\n" +
                 "                    }\n" +
@@ -627,11 +627,11 @@ public class TypeController {
                 "        \"image_type\": [\n" +
                 "            {\n" +
                 "                \"id\": \"vm\",\n" +
-                "                \"name\": \"VM\"\n" +
+                "                \"name\": \"虚拟机\"\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": \"container\",\n" +
-                "                \"name\": \"Container\"\n" +
+                "                \"name\": \"容器\"\n" +
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": \"entity\",\n" +
@@ -639,7 +639,7 @@ public class TypeController {
                 "            },\n" +
                 "            {\n" +
                 "                \"id\": \"simple\",\n" +
-                "                \"name\": \"Simple\"\n" +
+                "                \"name\": \"简易型\"\n" +
                 "            }\n" +
                 "        ],\n" +
                 "        \"language\": null,\n" +
