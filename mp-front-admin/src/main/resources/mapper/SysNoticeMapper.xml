@@ -60,27 +60,28 @@
 
 
     <select id="listNoticeMessageByCurrentAdminUser" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
-        select *
+        select distinct *
         from (
-                 select distinct n.* from mp_sys_notice n left join mp_sys_notice_org nor on n.id = nor.notice_id
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_org nor on n.id = nor.notice_id
                  union
-                 select distinct n.* from mp_sys_notice n left join mp_sys_notice_role nro on n.id = nro.notice_id
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_role nro on n.id = nro.notice_id
                  union
-                 select distinct n.* from mp_sys_notice n where n.id not in (select notice_id from mp_sys_notice_user where user != #{userId})
-            ) as tabA
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_user nus on (n.id = nus.notice_id and user = #{userId})
+             ) as tabA
         WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and is_need_push = 0)
-        ORDER BY tabA.top desc, tabA.pk desc
+        ORDER BY tabA.top desc, tabA.pk desc;
     </select>
 
     <select id="getUnreadCountByCurrentAdminUser" resultType="int">
-        select count(*)
+        select count(distinct *)
         from (
-                 select distinct n.*
-                 from mp_sys_notice n
-                          left join mp_sys_notice_read nre on n.id = nre.notice_id
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_org nor on n.id = nor.notice_id
+                 union
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_role nro on n.id = nro.notice_id
+                 union
+                 select distinct n.id from mp_sys_notice n join mp_sys_notice_user nus on (n.id = nus.notice_id and user = #{userId})
              ) as tabA
-        WHERE tabA.id not in
-              (select notice_id from mp_sys_notice_read where user = #{userId} and (is_readed = 1 or is_need_push = 0))
+        WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and (is_readed = 1 or is_need_push = 0))
     </select>
 
 
