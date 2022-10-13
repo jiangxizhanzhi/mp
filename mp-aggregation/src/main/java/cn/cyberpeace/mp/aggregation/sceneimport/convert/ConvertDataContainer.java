@@ -57,6 +57,7 @@ class ConvertDataContainer {
     // 存区域信息
     private List<SceneConfigAreaBO> areaBOS = new ArrayList<>();
     private Map<String, SceneConfigElementPortBO> node2NodePort = new HashMap<>();
+    private Map<String, String> entityPortId2Name = new HashMap<>();
     private String sceneFilePath;
     private Set<String> simpleLayer3Switch = new HashSet<>();
 
