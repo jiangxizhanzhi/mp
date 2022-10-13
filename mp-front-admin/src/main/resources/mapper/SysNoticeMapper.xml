@@ -73,7 +73,7 @@
     </select>
 
     <select id="getUnreadCountByCurrentAdminUser" resultType="int">
-        select count(distinct n.id)
+        select count(distinct id)
         from (
                  select distinct n.id from mp_sys_notice n join mp_sys_notice_org nor on n.id = nor.notice_id
                  union
