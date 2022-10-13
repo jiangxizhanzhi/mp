@@ -33,6 +33,7 @@ import cn.cyberpeace.mp.situationaware.service.wazuh.AgentService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.NumberUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -210,6 +211,12 @@ public class HostStateService {
         // 默认值
         if (Objects.isNull(endTime)) {
             endTime = LocalDateTime.now();
+            if (CollectionUtils.isNotEmpty(sceneIds)) {
+                var result = csceneSpecialService.getSceneStateInfo(sceneIds.get(0));
+                if (!result.getSource().isRunning() && result.getSource().getSceneModel() != null) {
+                    endTime = result.getSource().getSceneModel().getUpdateTime();
+                }
+            }
         }
 
         if (Objects.isNull(startTime)) {
