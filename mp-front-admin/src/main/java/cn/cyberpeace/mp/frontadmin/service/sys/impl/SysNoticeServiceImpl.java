@@ -1,15 +1,17 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.impl;
 
-import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UserRoleService;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.auth.util.UserUtils;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
@@ -21,16 +23,8 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
 import cn.cyberpeace.mp.frontadmin.dto.notice.SysNoticeDto;
 import cn.cyberpeace.mp.frontadmin.enums.NoticeTopTypeEnum;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeOrgModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeReadModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeRoleModel;
-import cn.cyberpeace.mp.frontadmin.model.SysNoticeUserModel;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeOrgMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeReadMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeRoleMapper;
-import cn.cyberpeace.mp.frontadmin.repository.SysNoticeUserMapper;
+import cn.cyberpeace.mp.frontadmin.model.*;
+import cn.cyberpeace.mp.frontadmin.repository.*;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticePageRequest;
 import cn.cyberpeace.mp.frontadmin.request.notice.SysNoticeRequest;
 import cn.cyberpeace.mp.frontadmin.service.SysNoticeReadService;
@@ -350,16 +344,16 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
-
-        // 管理员，查看所有公告消息
-        if (isAdmin) {
-            PageHelper.startPage(req.getPage(), req.getPageSize());
-            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
-            PageInfo pageInfo = new PageInfo(notices);
-            convert2NoticeDtoPageInfo(pageInfo, true);
-            return pageInfo;
-        }
+//        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
+//
+//        // 管理员，查看所有公告消息
+//        if (isAdmin) {
+//            PageHelper.startPage(req.getPage(), req.getPageSize());
+//            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
+//            PageInfo pageInfo = new PageInfo(notices);
+//            convert2NoticeDtoPageInfo(pageInfo, true);
+//            return pageInfo;
+//        }
 
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
@@ -408,13 +402,13 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         // 查找当前用户所有的角色
         // 是否是管理员，管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
-        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
-
-        // 管理员，查看所有公告消息
-        if (isAdmin) {
-            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
-            return totalCnt;
-        }
+//        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
+//
+//        // 管理员，查看所有公告消息
+//        if (isAdmin) {
+//            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
+//            return totalCnt;
+//        }
 
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
