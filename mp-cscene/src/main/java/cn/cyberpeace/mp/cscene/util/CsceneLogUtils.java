@@ -15,7 +15,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
-import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -74,7 +74,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -90,7 +90,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -106,7 +106,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -134,7 +134,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -150,7 +150,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -166,7 +166,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);
@@ -182,7 +182,7 @@ public class CsceneLogUtils {
                 return;
             }
             // 记录登录日志
-            var operationLogService = BeanCommon.getBean(OperationLogService.class);
+            var operationLogService = BeanCommon.getBean(OperateLogService.class);
             operationLogService.create(logModel);
         } catch (Exception e) {
             log.error("failed to record audit log", e);

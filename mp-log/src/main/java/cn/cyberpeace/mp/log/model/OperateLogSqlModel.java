@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("mp_devops_log_operation")
-public class OperationLogDbModel extends BaseModel {
+public class OperateLogSqlModel extends BaseModel {
 
     /**
      * 站点类型：应用、中台、前端、平台

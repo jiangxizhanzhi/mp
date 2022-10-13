@@ -15,7 +15,7 @@ import cn.cyberpeace.mp.scene.core.event.dispatch.SceneHandlerProxyBuilder;
 import cn.cyberpeace.mp.scene.core.exception.SceneNotExistException;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
-import cn.cyberpeace.mp.scene.model.SceneElementSnapshotModel;
+import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.repository.SceneElementSnapshotMapper;
 import cn.cyberpeace.mp.scene.service.taskpool.ElementTaskPool;
 import cn.cyberpeace.mp.scene.service.taskpool.SceneTaskPool;
@@ -138,6 +138,13 @@ public class SceneService {
             updatedSceneHandler.getScene().setCreateTime(null);
         }
         updatedSceneHandler.save();
+        // 获取配置更新的节点
+        List<String> updateElementIds = new ArrayList<>();
+        originSceneHandler.getElementMap().values().forEach(e -> {
+            if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
+                updateElementIds.add(e.getId());
+            }
+        });
         SceneTaskPool.getInstance().executeTask(() -> {
             updatedSceneHandler.getElementMap().values().forEach(e -> {
                 e.setEvent(SceneElementModel.Event.DEFAULT);
@@ -150,7 +157,7 @@ public class SceneService {
             });
             SceneHandlerProxyBuilder.build(updatedSceneHandler);
             SceneHandler proxy = SceneHandlerProxyBuilder.build(updatedSceneHandler);
-            proxy.modify(originSceneHandler);
+            proxy.modify(originSceneHandler, updateElementIds);
         });
         return new ServiceResult<>(updatedSceneHandler.toData());
     }

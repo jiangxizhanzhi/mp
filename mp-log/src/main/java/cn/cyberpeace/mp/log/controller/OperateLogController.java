@@ -10,7 +10,7 @@ import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
-import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -33,14 +33,14 @@ import java.util.List;
 @Api(tags = "日志模块")
 public class OperateLogController {
 
-    private OperationLogService operationLogService;
+    private OperateLogService operateLogService;
 
     @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @Autowired
-    public OperateLogController(OperationLogService operationLogService) {
-        this.operationLogService = operationLogService;
+    public OperateLogController(OperateLogService operateLogService) {
+        this.operateLogService = operateLogService;
     }
 
     @ApiOperation(value = "新增操作日志")
@@ -49,7 +49,7 @@ public class OperateLogController {
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
         log.info("logRequest:{}", request);
-        operationLogService.create(request);
+        operateLogService.create(request);
         return ResultCommon.success();
     }
 
@@ -58,7 +58,7 @@ public class OperateLogController {
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
         request.ensure();
-        return operationLogService.search(request);
+        return operateLogService.search(request);
     }
 
     @GetMapping("/modules")
@@ -72,6 +72,5 @@ public class OperateLogController {
     public ServiceResult<List<OptionBO>> getTypes() {
         return optionService.getIntOptions(LogConstant.MP_COMMON_OPTION_TYPE_LOG_OP_TYPE);
     }
-
 
 }

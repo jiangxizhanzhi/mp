@@ -15,7 +15,7 @@ import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
-import cn.cyberpeace.mp.log.service.OperationLogService;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
     private final UserService userService;
 
     @Autowired
-    private OperationLogService operationLogService;
+    private OperateLogService operateLogService;
 
     @Autowired
     private AuthConfig authConfig;
@@ -114,6 +114,6 @@ public class HttpLogoutSuccessHandler implements LogoutSuccessHandler {
         logModel.setOpIp(SnUtils.getRealRemoteIp(request));
 
         // 记录登出日志
-        operationLogService.create(logModel);
+        operateLogService.create(logModel);
     }
 }

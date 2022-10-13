@@ -101,6 +101,36 @@ public class VmController {
     }
 
     /**
+     * 开启
+     * @param request
+     * @return
+     */
+    @ApiOperation("开启虚拟机")
+    @PostMapping("/start")
+    public ServiceResult<Boolean> start(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        VirtualMachine virtualMachine = new VirtualMachine();
+        return new ServiceResult<>(virtualMachine.start(request.getId())).asResult();
+    }
+
+    /**
+     * 关闭
+     * @param request
+     * @return
+     */
+    @ApiOperation("关闭虚拟机")
+    @PostMapping("/stop")
+    public ServiceResult<Boolean> stop(@RequestBody ReviseContainerOrVmRequest request) {
+        if (StringUtils.isEmpty(request.getId())) {
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
+        VirtualMachine virtualMachine = new VirtualMachine();
+        return new ServiceResult<>(virtualMachine.stop(request.getId())).asResult();
+    }
+
+    /**
      * 分页查询虚拟机信息
      * @param request
      * @return
