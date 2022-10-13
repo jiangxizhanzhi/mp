@@ -5,36 +5,32 @@ import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.constant.LogConstant;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import cn.cyberpeace.mp.log.enums.SiteTypeEnums;
-import cn.cyberpeace.mp.log.model.OperationLogDbModel;
-import cn.cyberpeace.mp.log.repository.OperationLogDbMapper;
+import cn.cyberpeace.mp.log.model.OperateLogSqlModel;
+import cn.cyberpeace.mp.log.repository.OperateLogSqlMapper;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
-import cn.cyberpeace.mp.log.service.OperationLogDbService;
-import cn.cyberpeace.mp.log.service.field.OperationLogDbFields;
+import cn.cyberpeace.mp.log.service.OperateLogDbService;
+import cn.cyberpeace.mp.log.service.field.OperateLogSqlFields;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -44,67 +40,61 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLogDbModel, OperationLogDbMapper, OperationLogDbFields, QueryParams>
-        implements OperationLogDbService {
+@ConditionalOnProperty(prefix = "mp.log", name = "log-db", havingValue = LogConstant.LOG_DB_SQL)
+public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSqlModel, OperateLogSqlMapper, OperateLogSqlFields, QueryParams>
+        implements OperateLogDbService {
     private static final String DEFAULT_LANGUAGE_TAG = "zh-CN";
 
     @Autowired
-    public OperationLogDbServiceImpl(OperationLogDbMapper operationLogDbMapper) {
-        setModelMapper(operationLogDbMapper);
+    public OperateLogSqlServiceImpl(OperateLogSqlMapper operateLogSqlMapper) {
+        setModelMapper(operateLogSqlMapper);
     }
 
     @Autowired
     private MessageSource messageSource;
 
     @Override
-    public ObjServiceResult<OperationLogDbModel> create(OperationLogRequest request, Locale locale) {
-        OperationLogDbModel model = opRequest2Model(request, locale);
-        return this.create(model);
+    public void create(OperationLogRequest request, Locale locale) {
+        OperateLogSqlModel model = opRequest2Model(request, locale);
+        this.create(model);
     }
 
     @Override
-    public ObjServiceResult<OperationLogDbModel> create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
+    public void create(OperateLog operateLog, HttpServletRequest request, Locale locale) {
         Object userId = request.getAttribute(LogConstant.USER_ID_KEY);
         Object userName = request.getAttribute(LogConstant.USER_NAME_KEY);
         Object userType = request.getAttribute(LogConstant.USER_TYPE_KEY);
 
-        OperationLogDbModel model = new OperationLogDbModel();
+        OperateLogSqlModel model = new OperateLogSqlModel();
         if (Objects.nonNull(userId)) {
             model.setUserId(userId.toString());
         }
-
         if (Objects.nonNull(userName)) {
             model.setUserName(userName.toString());
         }
-
         if (Objects.nonNull(userType)) {
             model.setUserType(userType.toString());
         }
-
         //站点类型
         model.setSiteType(SiteTypeEnums.MP.toValue());
-
         if (Objects.nonNull(operateLog.module())) {
             //操作模块
             model.setOpModule(getlocalizedMessage(locale, operateLog.module().getCode()));
             //操作模块ID
             model.setOpModuleId(operateLog.module().ordinal());
         }
-
         if (Objects.nonNull(operateLog.type())) {
             //操作类型
             model.setOpType(getlocalizedMessage(locale, operateLog.type().getCode()));
             //操作类型ID
             model.setOpTypeId(operateLog.type().ordinal());
         }
-
         if (Objects.nonNull(operateLog.target())) {
             //操作对象
             model.setOpTarget(getlocalizedMessage(locale, operateLog.target().getCode()));
             //操作ID
             model.setOpTargetId(operateLog.target().ordinal());
         }
-
         //操作主题
         model.setTitle(operateLog.title());
         //操作描述
@@ -117,14 +107,13 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         model.setLogType(operateLog.type().ordinal());
         // 操作来源
         model.setFrom(request.getRequestURI());
-
+        // 操作内容
         processDefaultContent(model);
-
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
-            return null;
+            return;
         }
-        return this.create(model);
+        this.create(model);
     }
 
     @Override
@@ -132,34 +121,33 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         HumanCondition humanCondition = new HumanCondition();
 
 
-
         if (StringUtils.isNotBlank(request.getUserId())) {
-            humanCondition.filterEqual(OperationLogDbModel::getUserId, request.getUserId());
+            humanCondition.filterEqual(OperateLogSqlModel::getUserId, request.getUserId());
         }
 
         if (Objects.nonNull(request.getModule())) {
-            humanCondition.filterEqual(OperationLogDbModel::getOpModuleId, request.getModule());
+            humanCondition.filterEqual(OperateLogSqlModel::getOpModuleId, request.getModule());
         } else {
             List<Integer> moduleOrdinals = Arrays.stream(OpModuleEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
             moduleOrdinals.add(-1);
-            humanCondition.filterIn(OperationLogDbModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
+            humanCondition.filterIn(OperateLogSqlModel::getOpModuleId, moduleOrdinals.toArray(new Integer[0]));
         }
 
         if (Objects.nonNull(request.getOpType())) {
-            humanCondition.filterEqual(OperationLogDbModel::getOpTypeId, request.getOpType());
+            humanCondition.filterEqual(OperateLogSqlModel::getOpTypeId, request.getOpType());
         } else {
             List<Integer> opTypeOrdinals = Arrays.stream(OpTypeEnums.values()).map(m -> m.ordinal()).collect(Collectors.toList());
             opTypeOrdinals.add(-1);
-            humanCondition.filterIn(OperationLogDbModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
+            humanCondition.filterIn(OperateLogSqlModel::getOpTypeId, opTypeOrdinals.toArray(new Integer[0]));
         }
 
         if (Objects.nonNull(request.getUserNameOrOpTarget())) {
             humanCondition.filterOrStart()
-                    .orContains(OperationLogDbModel::getUserName, request.getUserNameOrOpTarget())
-                    .orContains(OperationLogDbModel::getOpTarget, request.getUserNameOrOpTarget())
+                    .orContains(OperateLogSqlModel::getUserName, request.getUserNameOrOpTarget())
+                    .orContains(OperateLogSqlModel::getOpTarget, request.getUserNameOrOpTarget())
                     .filterOrEnd();
         }
-        String createTime = BeanUtils.getBeanGetterFieldName(OperationLogDbModel::getCreateTime);
+        String createTime = BeanUtils.getBeanGetterFieldName(OperateLogSqlModel::getCreateTime);
         if (Objects.nonNull(request.getStartDate())) {
             humanCondition.filterGreaterThanOrEqual(createTime, request.getStartDate());
         }
@@ -173,15 +161,15 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         // 设置分页条件、查询
         humanCondition.setLimit(request.getPerPage());
         humanCondition.setOffset((request.getPage() - 1) * request.getPerPage());
-        List<OperationLogDbModel> models = getModelMapper().list(humanCondition);
+        List<OperateLogSqlModel> models = getModelMapper().list(humanCondition);
 
         List<OperationLogPageResponse> list = opModel2Response(models, locale);
         return new ListObjServiceResult(new ListObjResult<>(list, total).asResult()).asResult();
     }
 
-    private List<OperationLogPageResponse> opModel2Response(List<OperationLogDbModel> models, Locale locale) {
+    private List<OperationLogPageResponse> opModel2Response(List<OperateLogSqlModel> models, Locale locale) {
         List<OperationLogPageResponse> list = new ArrayList<>(models.size());
-        for (OperationLogDbModel model : models) {
+        for (OperateLogSqlModel model : models) {
             OperationLogPageResponse response = JSON.parseObject(JSONObject.toJSON(model).toString(), OperationLogPageResponse.class);
             if (Objects.nonNull(response) && Objects.nonNull(response.getOpModuleID())) {
                 OpModuleEnums opModuleEnums = OpModuleEnums.fromValue(response.getOpModuleID());
@@ -198,8 +186,8 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         return list;
     }
 
-    private OperationLogDbModel opRequest2Model(OperationLogRequest request, Locale locale) {
-        OperationLogDbModel model = new OperationLogDbModel();
+    private OperateLogSqlModel opRequest2Model(OperationLogRequest request, Locale locale) {
+        OperateLogSqlModel model = new OperateLogSqlModel();
         model.setFrom(request.getFrom());
         model.setLogType(request.getLogType());
 
@@ -211,8 +199,6 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
                 model.setOpModuleId(opModuleEnum.ordinal());
             }
         }
-
-
         if (Objects.nonNull(request.getOpType())) {
             OpTypeEnums opTypeEnum = OpTypeEnums.fromValue(request.getOpType());
             if (Objects.nonNull(opTypeEnum)) {
@@ -221,10 +207,8 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
                 model.setOpTypeId(opTypeEnum.ordinal());
             }
         }
-
         model.setOpTarget(request.getOpTarget());
         //model.setOpTargetId(getTidFromTarget(model.getOpTarget(), locale));
-
         model.setTitle(request.getTitle());
         model.setUserId(request.getUserId());
         model.setUserName(request.getUserName());
@@ -232,9 +216,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         model.setDescription(request.getDescription());
         model.setOpIp(request.getOpIp());
         model.setContent(request.getContent());
-
         processDefaultContent(model);
-
         if (StringUtils.isBlank(model.getUserName())) {
             log.error("operationlog, username cannot be null. {}", model);
             return null;
@@ -242,7 +224,7 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         return model;
     }
 
-    private void processDefaultContent(OperationLogDbModel model) {
+    private void processDefaultContent(OperateLogSqlModel model) {
         if (StringUtils.isNotBlank(model.getContent())) {
             return;
         }
@@ -268,13 +250,4 @@ public class OperationLogDbServiceImpl extends BaseModelServiceImpl<OperationLog
         }
     }
 
-    /*public Integer getTidFromTarget(String target, Locale locale) {
-        OpTargetEnums[] opTargetEnums = OpTargetEnums.values();
-        for (OpTargetEnums opTarget : opTargetEnums) {
-            if (Objects.equals(target, getlocalizedMessage(locale, opTarget.getCode()))) {
-                return opTarget.ordinal();
-            }
-        }
-        return OpTargetEnums.DEFAULT.ordinal();
-    }*/
 }
