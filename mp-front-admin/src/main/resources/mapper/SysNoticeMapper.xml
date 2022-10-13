@@ -62,12 +62,14 @@
     <select id="listNoticeMessageByCurrentAdminUser" resultType="cn.cyberpeace.mp.frontadmin.model.SysNoticeModel">
         select *
         from (
-                 select distinct n.*
-                 from mp_sys_notice n
-                          left join mp_sys_notice_read nre on n.id = nre.notice_id
-             ) as tabA
+                 select distinct n.* from mp_sys_notice n left join mp_sys_notice_org nor on n.id = nor.notice_id
+                 union
+                 select distinct n.* from mp_sys_notice n left join mp_sys_notice_role nro on n.id = nro.notice_id
+                 union
+                 select distinct n.* from mp_sys_notice n where n.id not in (select notice_id from mp_sys_notice_user where user != #{userId})
+            ) as tabA
         WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and is_need_push = 0)
-        ORDER BY tabA.top desc, tabA.pk desc
+        ORDER BY tabA.top desc, tabA.pk desc;
     </select>
 
     <select id="getUnreadCountByCurrentAdminUser" resultType="int">
