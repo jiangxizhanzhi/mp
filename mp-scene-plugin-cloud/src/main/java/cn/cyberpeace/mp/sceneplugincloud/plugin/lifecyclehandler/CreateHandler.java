@@ -1023,7 +1023,9 @@ public class CreateHandler extends HandlerCommon {
                 .filter(cloudElement -> !cloudElement.getDeriveNetworks().isEmpty())
                 .map(cloudElement -> (Runnable) () -> {
                     createAuxiliaryNetworkProcess(cloudElement);
-                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    }
                 })
                 .collect(Collectors.toList());
         if (!createAuxiliaryNetworkTasks.isEmpty()) {
@@ -1034,7 +1036,9 @@ public class CreateHandler extends HandlerCommon {
         var createGatewayTasks = getPluginHandler().getGatewayElementMap().values().stream()
                 .map(cloudElement -> (Runnable) () -> {
                     createElementProcess(cloudElement);
-                    getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    if (cloudElement.getRole() == null || cloudElement.getRole() != BaseCloudPluginSceneElementModel.Role.VIRTUAL_EXTERNAL_NETWORK) {
+                        getPluginHandler().getSceneHandler().addProgressPercentage(stepPercentage);
+                    }
                 }).collect(Collectors.toList());
         if (!createGatewayTasks.isEmpty()) {
             runSceneProgress(SceneProcess.CREATE_GATEWAYS, () -> runTasks(createGatewayTasks));
