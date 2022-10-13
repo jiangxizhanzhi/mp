@@ -15,6 +15,7 @@ import cn.cyberpeace.mp.devopscluster.vo.TypeAllVO;
 import cn.cyberpeace.mp.devopscluster.vo.TypeL2AllVO;
 import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -92,6 +93,7 @@ public class TypeController {
     @ApiImplicitParam(name = "isAll", value = "是否全部", dataTypeClass = Boolean.class)
     @GetMapping("/image-mg-categories")
     public Result<TypeAllVO> imageCategories(Boolean isAll){
+        /*
         if (Objects.isNull(isAll)){
             isAll = Boolean.FALSE;
         }
@@ -109,8 +111,592 @@ public class TypeController {
         allResponse.setHwVifModelList(typeConverter.findHwVifModel());
         allResponse.setHwVideoModelList(typeConverter.findHwVideoModel());
         allResponse.setDiskFormat(Objects.nonNull(diskFormat) ? diskFormat.getIdStringModelList() : null);
+        */
+
+        TypeAllVO allResponse = mockTypeVOs();
         return new Result<>(allResponse);
     }
+
+    private TypeAllVO mockTypeVOs() {
+        String arrStr = "{\n" +
+                "        \"first_type_list\": [\n" +
+                "            {\n" +
+                "                \"id\": 1,\n" +
+                "                \"name\": \"Operating System\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": null\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 2,\n" +
+                "                \"name\": \"Application System\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": null\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 3,\n" +
+                "                \"name\": \"Network Equipment\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": null\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 4,\n" +
+                "                \"name\": \"Security Equipment\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": null\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"second_type_list\": [\n" +
+                "            {\n" +
+                "                \"id\": 1,\n" +
+                "                \"name\": \"WINDOWS\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 2,\n" +
+                "                \"name\": \"LINUX\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 3,\n" +
+                "                \"name\": \"UNIX\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 4,\n" +
+                "                \"name\": \"BSD\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 5,\n" +
+                "                \"name\": \"OTHER\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 30,\n" +
+                "                \"name\": \"Network Service\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 31,\n" +
+                "                \"name\": \"Middleware\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 32,\n" +
+                "                \"name\": \"Database\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 33,\n" +
+                "                \"name\": \"Software Development\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 34,\n" +
+                "                \"name\": \"Basis Image\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 35,\n" +
+                "                \"name\": \"O&M Tools\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 36,\n" +
+                "                \"name\": \"Mail Server\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 37,\n" +
+                "                \"name\": \"File Server\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 38,\n" +
+                "                \"name\": \"Enterprise Office\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 39,\n" +
+                "                \"name\": \"Statistical Analysis\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 40,\n" +
+                "                \"name\": \"Load Balancing\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 41,\n" +
+                "                \"name\": \"Application Framework\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 42,\n" +
+                "                \"name\": \"Web Server\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 43,\n" +
+                "                \"name\": \"Other\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 2\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 50,\n" +
+                "                \"name\": \"Switch\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 3\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 51,\n" +
+                "                \"name\": \"Router\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 3\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 52,\n" +
+                "                \"name\": \"Firewall\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 3\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 53,\n" +
+                "                \"name\": \"External Network\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 3\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 54,\n" +
+                "                \"name\": \"NPC\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 3\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 500,\n" +
+                "                \"name\": \"IDS\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 501,\n" +
+                "                \"name\": \"WAF\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 502,\n" +
+                "                \"name\": \"VPN\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 503,\n" +
+                "                \"name\": \"Behavior Management\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 504,\n" +
+                "                \"name\": \"Security Audit\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 505,\n" +
+                "                \"name\": \"Firewall\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 506,\n" +
+                "                \"name\": \"IPS\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 507,\n" +
+                "                \"name\": \"SIEM\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 508,\n" +
+                "                \"name\": \"Other\",\n" +
+                "                \"l2_parent_id\": null,\n" +
+                "                \"l1_parent_id\": 4\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"third_type_list\": [\n" +
+                "            {\n" +
+                "                \"id\": 97,\n" +
+                "                \"name\": \"WindowsXP\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 98,\n" +
+                "                \"name\": \"Windows-Server2016\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 99,\n" +
+                "                \"name\": \"Windows8\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 100,\n" +
+                "                \"name\": \"Windows-Server2008\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 101,\n" +
+                "                \"name\": \"Windows-Server2003\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 102,\n" +
+                "                \"name\": \"Windows Vista\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 103,\n" +
+                "                \"name\": \"Windows-Server2019\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 104,\n" +
+                "                \"name\": \"Windows-Server2012\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 105,\n" +
+                "                \"name\": \"Windows-Server2010\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 106,\n" +
+                "                \"name\": \"Windows10\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 107,\n" +
+                "                \"name\": \"Windows7\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 108,\n" +
+                "                \"name\": \"Windows-Server2000\",\n" +
+                "                \"l2_parent_id\": 1,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 301,\n" +
+                "                \"name\": \"Gentoo\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 302,\n" +
+                "                \"name\": \"Mint\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 303,\n" +
+                "                \"name\": \"Arch\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 304,\n" +
+                "                \"name\": \"Ubuntu\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 305,\n" +
+                "                \"name\": \"Deepin\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 306,\n" +
+                "                \"name\": \"CentOS\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 307,\n" +
+                "                \"name\": \"Debian\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 308,\n" +
+                "                \"name\": \"Rocky\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 309,\n" +
+                "                \"name\": \"Kali\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 310,\n" +
+                "                \"name\": \"Fedora\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 311,\n" +
+                "                \"name\": \"Android\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 312,\n" +
+                "                \"name\": \"Redhat\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 313,\n" +
+                "                \"name\": \"SUSE\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 314,\n" +
+                "                \"name\": \"Other\",\n" +
+                "                \"l2_parent_id\": 2,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 1,\n" +
+                "                \"name\": \"AIX\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 2,\n" +
+                "                \"name\": \"HP-UX\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 3,\n" +
+                "                \"name\": \"Solaris\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 4,\n" +
+                "                \"name\": \"IRIX\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 5,\n" +
+                "                \"name\": \"A/UX\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 6,\n" +
+                "                \"name\": \"Xenix\",\n" +
+                "                \"l2_parent_id\": 3,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 201,\n" +
+                "                \"name\": \"FreeBSD\",\n" +
+                "                \"l2_parent_id\": 4,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 202,\n" +
+                "                \"name\": \"OpenBSD\",\n" +
+                "                \"l2_parent_id\": 4,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 203,\n" +
+                "                \"name\": \"NetBSD\",\n" +
+                "                \"l2_parent_id\": 4,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 204,\n" +
+                "                \"name\": \"DragonFly BSD\",\n" +
+                "                \"l2_parent_id\": 4,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 401,\n" +
+                "                \"name\": \"IOS\",\n" +
+                "                \"l2_parent_id\": 5,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 402,\n" +
+                "                \"name\": \"MacOS\",\n" +
+                "                \"l2_parent_id\": 5,\n" +
+                "                \"l1_parent_id\": 1\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"role\": [\n" +
+                "            {\n" +
+                "                \"id\": 3,\n" +
+                "                \"name\": \"External Network\",\n" +
+                "                \"parent_id\": null,\n" +
+                "                \"child\": null\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 4,\n" +
+                "                \"name\": \"Terminal Node\",\n" +
+                "                \"parent_id\": null,\n" +
+                "                \"child\": null\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 6,\n" +
+                "                \"name\": \"Gateway Node\",\n" +
+                "                \"parent_id\": null,\n" +
+                "                \"child\": [\n" +
+                "                    {\n" +
+                "                        \"id\": 21,\n" +
+                "                        \"name\": \"Router\",\n" +
+                "                        \"parent_id\": 6,\n" +
+                "                        \"child\": null\n" +
+                "                    },\n" +
+                "                    {\n" +
+                "                        \"id\": 22,\n" +
+                "                        \"name\": \"Switch\",\n" +
+                "                        \"parent_id\": 6,\n" +
+                "                        \"child\": null\n" +
+                "                    },\n" +
+                "                    {\n" +
+                "                        \"id\": 23,\n" +
+                "                        \"name\": \"Firewall\",\n" +
+                "                        \"parent_id\": 6,\n" +
+                "                        \"child\": null\n" +
+                "                    }\n" +
+                "                ]\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": 7,\n" +
+                "                \"name\": \"NPC\",\n" +
+                "                \"parent_id\": null,\n" +
+                "                \"child\": null\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"entity_role\": null,\n" +
+                "        \"category\": null,\n" +
+                "        \"deploy_type\": null,\n" +
+                "        \"install_mode\": null,\n" +
+                "        \"image_type\": [\n" +
+                "            {\n" +
+                "                \"id\": \"vm\",\n" +
+                "                \"name\": \"VM\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"container\",\n" +
+                "                \"name\": \"Container\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"entity\",\n" +
+                "                \"name\": \"Entity\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"simple\",\n" +
+                "                \"name\": \"Simple\"\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"language\": null,\n" +
+                "        \"system_architecure\": null,\n" +
+                "        \"disk_format\": [\n" +
+                "            {\n" +
+                "                \"id\": \"qcow2\",\n" +
+                "                \"name\": \"disk_format_qcow2\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"vmdk\",\n" +
+                "                \"name\": \"disk_format_vmdk\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"vdi\",\n" +
+                "                \"name\": \"disk_format_vdi\"\n" +
+                "            },\n" +
+                "            {\n" +
+                "                \"id\": \"raw\",\n" +
+                "                \"name\": \"disk_format_raw\"\n" +
+                "            }\n" +
+                "        ],\n" +
+                "        \"access_type\": null,\n" +
+                "        \"service_categories\": null,\n" +
+                "        \"service_start_types\": null,\n" +
+                "        \"installer_platforms\": null,\n" +
+                "        \"access_protocols_ports\": null,\n" +
+                "        \"switch_convert_models\": null,\n" +
+                "        \"serial_port_respons\": null,\n" +
+                "        \"snmp_versions\": null,\n" +
+                "        \"hw_disk_bus_list\": [\n" +
+                "            \"ide\",\n" +
+                "            \"scsi\",\n" +
+                "            \"uml\",\n" +
+                "            \"usb\",\n" +
+                "            \"virtio\",\n" +
+                "            \"xen\"\n" +
+                "        ],\n" +
+                "        \"hw_vif_model_list\": [\n" +
+                "            \"e1000\",\n" +
+                "            \"ne2k_pci\",\n" +
+                "            \"pcnet\",\n" +
+                "            \"rtl8139\",\n" +
+                "            \"virtio\"\n" +
+                "        ],\n" +
+                "        \"hw_video_model_list\": [\n" +
+                "            \"cirrus\",\n" +
+                "            \"qxl\",\n" +
+                "            \"vga\",\n" +
+                "            \"vmvga\",\n" +
+                "            \"xen\"\n" +
+                "        ]\n" +
+                "    }";
+        TypeAllVO typeAllVO = JSONObject.parseObject(arrStr, TypeAllVO.class);
+        return typeAllVO;
+    }
+
 
     /**
      * 查询所有分类
