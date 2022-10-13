@@ -69,7 +69,7 @@
                  select distinct n.* from mp_sys_notice n where n.id not in (select notice_id from mp_sys_notice_user where user != #{userId})
             ) as tabA
         WHERE tabA.id not in (select notice_id from mp_sys_notice_read where user = #{userId} and is_need_push = 0)
-        ORDER BY tabA.top desc, tabA.pk desc;
+        ORDER BY tabA.top desc, tabA.pk desc
     </select>
 
     <select id="getUnreadCountByCurrentAdminUser" resultType="int">
