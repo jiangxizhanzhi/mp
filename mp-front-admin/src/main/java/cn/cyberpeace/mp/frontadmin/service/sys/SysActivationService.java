@@ -193,16 +193,17 @@ public class SysActivationService {
      * @return
      */
     public String querySysUUID() {
-        status();
+        /*status();
         SysActivCtlModel sysActivCtlModel = null;
         if (Objects.isNull(ACTIVATION_CONTENT) || Objects.equals(AdminConstant.STATUS_NOT_ACTIVITED, ACTIVATION_CONTENT.getIsActived())) {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
         }
+        SysActivCtlModel sysActivCtlModel = sysCtlService.getValidCtlModel();
         String suffix = sysActivCtlModel.getSuffix();
 
-        /*String uuid = "";
+        String uuid = "";
         // If root privileges this will work
         for (String checkLine : ExecutingCommand.runNative("dmidecode -s system-uuid")) {
             if (StringUtils.isNotBlank(checkLine)) {
@@ -210,8 +211,7 @@ public class SysActivationService {
                 log.info("origin uuid is {}", uuid);
             }
         }*/
-        String uuid = "a05d05b4-3b02-03e2-11eb-96d0c77c6c2e";
-        uuid = uuid + "-" + suffix;
+        String uuid = "c59a0e42-da48-5545-275b-9dcfae06ca85-z7mx0g";
         return uuid;
     }
 
