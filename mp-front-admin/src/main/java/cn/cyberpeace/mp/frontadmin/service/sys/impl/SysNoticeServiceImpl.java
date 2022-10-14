@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.user.UserSimpleBo;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.RoleModel;
@@ -342,18 +343,18 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         // 查找当前用户所有的角色
-        // 是否是管理员，管理员拥有所有公告权限
+        // 是否是管理员，如果公告只发给指定用户且未指定管理员，管理员无阅读权限，其余均有管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
-//        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
-//
-//        // 管理员，查看所有公告消息
-//        if (isAdmin) {
-//            PageHelper.startPage(req.getPage(), req.getPageSize());
-//            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
-//            PageInfo pageInfo = new PageInfo(notices);
-//            convert2NoticeDtoPageInfo(pageInfo, true);
-//            return pageInfo;
-//        }
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
+
+        // 管理员，查看所有有阅读权限的公告消息
+        if (isAdmin) {
+            PageHelper.startPage(req.getPage(), req.getPageSize());
+            List<SysNoticeModel> notices = getModelMapper().listNoticeMessageByCurrentAdminUser(currentUser.getId());
+            PageInfo pageInfo = new PageInfo(notices);
+            convert2NoticeDtoPageInfo(pageInfo, true);
+            return pageInfo;
+        }
 
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
@@ -400,15 +401,15 @@ public class SysNoticeServiceImpl extends BaseModelServiceImpl<SysNoticeModel, S
         }
 
         // 查找当前用户所有的角色
-        // 是否是管理员，管理员拥有所有公告权限
+        // 是否是管理员，如果公告只发给指定用户且未指定管理员，管理员无阅读权限，其余均有管理员拥有所有公告权限
         List<RoleModel> roleModels = userRoleService.listByUserId(currentUser.getId());
-//        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
-//
-//        // 管理员，查看所有公告消息
-//        if (isAdmin) {
-//            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
-//            return totalCnt;
-//        }
+        boolean isAdmin = roleModels.stream().anyMatch(r -> r.getId().equals(AuthConstant.ROLE_ADMIN_ID));
+
+        // 管理员，查看所有有阅读权限的公告消息
+        if (isAdmin) {
+            int totalCnt = getModelMapper().getUnreadCountByCurrentAdminUser(currentUser.getId());
+            return totalCnt;
+        }
 
         // 非管理员...
         List<String> allRoleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
