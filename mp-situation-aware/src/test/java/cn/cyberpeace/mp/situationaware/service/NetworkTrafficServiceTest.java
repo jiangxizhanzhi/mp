@@ -3,32 +3,32 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.situationaware.TestSituationAwareApplciation;
 import cn.cyberpeace.mp.situationaware.model.SPIViewRequest;
 import cn.cyberpeace.mp.situationaware.model.SessionRequest;
-import java.time.LocalDateTime;
 import org.assertj.core.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.LocalDateTime;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
-@RunWith(SpringRunner.class)
 public class NetworkTrafficServiceTest {
 
     @Autowired
     private NetworkTrafficService service;
 
     @Test
-    public void testQuerySessionByGroup(){
+    public void testQuerySessionByGroup() {
         SessionRequest sessionRequest = new SessionRequest();
         sessionRequest.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
         sessionRequest.setEndTime(LocalDateTime.now());
         sessionRequest.setGroupList(Lists.newArrayList("default"));
         service.querySessionListWithGroup(sessionRequest);
-    };
+    }
+
+    ;
 
     @Test
-    public void testQuerySessionBySourceIp(){
+    public void testQuerySessionBySourceIp() {
         SessionRequest sessionRequest = new SessionRequest();
         sessionRequest.setStartTime(LocalDateTime.of(2021, 5, 21, 0, 0));
         sessionRequest.setEndTime(LocalDateTime.now());
@@ -40,12 +40,12 @@ public class NetworkTrafficServiceTest {
 
 
     @Test
-    public void testQuerySPIView(){
+    public void testQuerySPIView() {
         SPIViewRequest spiViewRequest = new SPIViewRequest();
         spiViewRequest.setStartTime(1622678706L);
         spiViewRequest.setStopTime(1622682306L);
         spiViewRequest.setGroupId("9787c63b-d79f-4644-8027-b268f89aa8a9");
         String spires = service.querySPIView(spiViewRequest);
-        System.out.println("spires: "+ spires);
+        System.out.println("spires: " + spires);
     }
 }
