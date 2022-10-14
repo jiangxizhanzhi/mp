@@ -11,18 +11,31 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devopscluster.converter.*;
-import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
+import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devopscluster.converter.FirewallConverter;
+import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
+import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
+import cn.cyberpeace.mp.devopscluster.converter.NpcConverter;
+import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devopscluster.converter.RouterConverter;
+import cn.cyberpeace.mp.devopscluster.converter.SwitchConverter;
+import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.VirtualRealSwitchBO;
-import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorStatisticsConvertModel;
-import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
-import cn.cyberpeace.mp.devopscluster.dto.*;
+import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.HypervisorActionDTO;
+import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
-import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
-import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devopscluster.request.*;
+import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.HypervisorRequest;
+import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorPageVO;
@@ -33,7 +46,6 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
-import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -43,13 +55,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -179,7 +194,7 @@ public class CloudPlatformMonitorController {
     @ApiOperation("节点管理")
     @GetMapping("/hypervisor/page")
     public PageResult<HypervisorPageVO> page(BasePageRequest request){
-        BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
+        /*BasePageBO<HypervisorBO> model = hypervisorConverter.page(new BasePageDTO(request.getLimit(),request.getOffset()));
         if (Objects.isNull(model) || CollectionUtils.isEmpty(model.getList())){
             return new PageResult<>(Lists.newArrayList(), NumberUtils.INTEGER_ZERO);
         }
@@ -208,9 +223,9 @@ public class CloudPlatformMonitorController {
                 v.setWeight(weightAndMaxInstances.getWeight());
                 v.setMaxInstances(weightAndMaxInstances.getMaxInstances());
             }
-        });
+        });*/
 
-        return new PageResult<>(hypervisorPageRespons, model.getTotal());
+        return new PageResult();
     }
 
     /**

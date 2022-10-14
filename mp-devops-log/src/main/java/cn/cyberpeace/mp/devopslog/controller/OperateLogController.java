@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devopslog.controller;
 
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -17,7 +18,11 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +63,8 @@ public class OperateLogController {
     @GetMapping("/page")
     public ListObjServiceResult<OperationLogPageResponse> page(OperationLogPageRequest request) {
         request.ensure();
-        return operationLogService.search(request);
+        //return operationLogService.search(request);
+        return new ListObjServiceResult(new ListObjResult()).asResult();
     }
 
     @GetMapping("/modules")

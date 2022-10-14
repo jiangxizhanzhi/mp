@@ -11,12 +11,11 @@ import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
 import cn.cyberpeace.mp.auth.request.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
-import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -87,8 +86,9 @@ public class DashboardController {
     @GetMapping("/user_online_record")
     public ListObjServiceResult<UserOnlineReportMonitorDto> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
         pageRequest.ensure();
-        PageInfo<UserOnlineReportMonitorDto> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
-        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        //PageInfo<UserOnlineReportMonitorDto> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
+        //return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+        return new ListObjServiceResult(new ListObjResult()).asResult();
     }
 
     @ApiOperation(value = "用户监控会话", notes = "")
