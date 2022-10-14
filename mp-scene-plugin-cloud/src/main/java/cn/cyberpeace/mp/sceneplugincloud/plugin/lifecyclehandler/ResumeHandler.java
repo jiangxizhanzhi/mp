@@ -32,6 +32,7 @@ public class ResumeHandler extends HandlerCommon {
     public static class ElementProcess {
         public static final EventProcess RESUME_VIRTUAL_MACHINE = new EventProcess("resume_virtual_machine", "sceneplugincloud.event.resume_virtual_machine");
         public static final EventProcess RESUME_CONTAINER = new EventProcess("resume_container", "sceneplugincloud.event.resume_container");
+        public static final EventProcess RESUME_NODE = new EventProcess("resume_node", "sceneplugincloud.event.resume_node");
     }
 
     public ResumeHandler(CloudScenePluginHandler pluginHandler, int event) {
@@ -61,11 +62,15 @@ public class ResumeHandler extends HandlerCommon {
                 virtualMachine.resume(instanceId);
                 checkAccessModes(element);
             });
-        }else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
+        } else if (virtualType.equals(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER)) {
             getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_CONTAINER));
             runElementProgress(nodeId, SceneElementModel.Event.RESUME, ElementProcess.RESUME_CONTAINER, () -> {
                 container.resume(instanceId);
                 checkAccessModes(element);
+            });
+        } else {
+            getPluginHandler().prepareElementProcess(nodeId, SceneElementModel.Event.RESUME, Arrays.asList(ElementProcess.RESUME_NODE));
+            runElementProgress(nodeId, SceneElementModel.Event.RESUME, ElementProcess.RESUME_NODE, () -> {
             });
         }
     }

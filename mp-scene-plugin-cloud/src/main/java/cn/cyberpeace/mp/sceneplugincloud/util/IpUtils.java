@@ -358,7 +358,7 @@ public class IpUtils {
      * @param cidr cidr
      * @return 第一个ip地址
      */
-    private static String beginIp(String cidr) {
+    public static String beginIp(String cidr) {
         String[] param = StrUtil.split(cidr, Ipv4Util.IP_MASK_SPLIT_MARK);
         return Ipv4Util.getBeginIpStr(param[0], Integer.parseInt(param[1]));
     }
