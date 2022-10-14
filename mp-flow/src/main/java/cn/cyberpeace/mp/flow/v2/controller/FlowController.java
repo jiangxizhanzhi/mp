@@ -43,11 +43,8 @@ public class FlowController implements
     @Override
     public ObjServiceResult<FlowBO> create(@Validated FlowBO bo, String[] fields) {
         bo.paramCheck(false);
-        ObjServiceResult<FlowModel> objServiceResult = this.getModelService().create(bo.toModel(), fields);
 
-        FlowBO resultBo = new FlowBO();
-        resultBo = resultBo.fromModel(objServiceResult.getSource().getObj());
-        return new ObjServiceResult<>(resultBo, null).asResult();
+        return BaseModelCreateBOController.super.create(bo, fields);
     }
 
     @ApiOperation("更新流量信息")
@@ -55,11 +52,7 @@ public class FlowController implements
     public ObjServiceResult<FlowBO> update(String id, @Validated FlowBO bo, String[] fields) {
         bo.setId(id);
         bo.paramCheck(true);
-        ObjServiceResult<FlowModel> objServiceResult = this.getModelService().update(bo.toModel(), fields);
-
-        FlowBO resultBo = new FlowBO();
-        resultBo = resultBo.fromModel(objServiceResult.getSource().getObj());
-        return new ObjServiceResult<>(resultBo, null).asResult();
+        return BaseModelUpdateBOController.super.update(bo, fields);
     }
 
 }
