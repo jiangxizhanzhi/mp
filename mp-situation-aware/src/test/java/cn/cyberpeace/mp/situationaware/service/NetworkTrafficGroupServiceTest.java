@@ -11,18 +11,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.google.common.collect.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest(classes = TestSituationAwareApplciation.class)
-@RunWith(SpringRunner.class)
 public class NetworkTrafficGroupServiceTest {
     @Autowired
     private NetworkTrafficGroupService networkTrafficGroupService;

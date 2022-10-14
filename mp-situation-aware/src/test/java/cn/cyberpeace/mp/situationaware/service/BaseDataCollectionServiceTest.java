@@ -16,11 +16,9 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Assert;
 
 import javax.annotation.Resource;
@@ -31,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 //@SpringBootTest(classes = TestSituationAwareApplciation.class)
-@RunWith(SpringRunner.class)
 @SpringBootTest
 //@ActiveProfiles("prod")
 public class BaseDataCollectionServiceTest {
