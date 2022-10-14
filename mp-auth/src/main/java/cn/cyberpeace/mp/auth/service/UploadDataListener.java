@@ -10,10 +10,8 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.event.AnalysisEventListener;
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,12 +71,7 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      */
     @Override
     public void invoke(ImportUser data, AnalysisContext context) {
-        log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
-
-        if (list.size() > MAX_COUNT) {
-            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format("100"));
-        }
     }
 
     /**
@@ -103,8 +96,10 @@ public class UploadDataListener extends AnalysisEventListener<ImportUser> {
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        log.info("list size:{}！", list.size());
-
+        if (list.size() > MAX_COUNT) {
+            log.info("list size:{}！", list.size());
+            throw new MpRuntimeException(AuthErrorCode.EXCEL_LIST_SIZE_OVER.format("100"));
+        }
         // 校验字段是否合法
         checkImportUsers(list);
 
