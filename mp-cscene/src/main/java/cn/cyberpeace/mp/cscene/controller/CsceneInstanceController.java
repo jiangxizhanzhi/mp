@@ -4,14 +4,32 @@ import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.controller.BaseModelListControllerBase;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.cscene.bo.*;
+import cn.cyberpeace.mp.cscene.bo.CsceneCollectionFlowBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneContextBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
+import cn.cyberpeace.mp.cscene.bo.CsceneInstanceStat;
+import cn.cyberpeace.mp.cscene.bo.CsceneUpdateBO;
+import cn.cyberpeace.mp.cscene.bo.DeviceReferCsceneInstanceStat;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneConstant;
-import cn.cyberpeace.mp.cscene.controller.request.*;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeAccessModeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeCommandActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeConnectionActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeDelSnapshotRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowRecordsRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeFlowsActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeProbeActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodeSnapshotRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstanceNodesActionRequest;
+import cn.cyberpeace.mp.cscene.controller.request.CsceneInstancesActionRequest;
 import cn.cyberpeace.mp.cscene.core.common.UserCommon;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -42,7 +60,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -186,7 +210,8 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
     @GetMapping("/list_stat")
     public ListObjServiceResult<CsceneInstanceStat> listStat(CsceneInstanceStatQueryParams queryParams) {
         handleQueryParams("listStat", queryParams);
-        return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
+        //return csceneSpecialService.listCsceneInstanceStats(queryParams).asResult();
+        return new ListObjServiceResult(new ListObjResult()).asResult();
     }
 
     @ApiOperation("获取指定id场景实例")
