@@ -16,26 +16,26 @@ public class ContainerFileUtils {
 
     public static final String CONTAINER_HELP_INSTALLER_GROUP = "container_installer";
 
-    public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_NAME = "unzip_download.sh";
+    public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_NAME = "unzip_version.sh";
 
     public static final String CONTAINER_COPY_FILE_PREFIX = "container_copy_file:";
 
     public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_PATH = "/tmp";
 
-    public static String unzipDownloadScriptFilePath = null;
+    public static String unzipVersionScriptFilePath = null;
 
-    public static String getUnzipDownloadScriptLocalFilepath() {
-        if (!StringUtils.isEmpty(unzipDownloadScriptFilePath)) {
-            return unzipDownloadScriptFilePath;
+    public static String getUnzipVersionScriptLocalFilepath() {
+        if (!StringUtils.isEmpty(unzipVersionScriptFilePath)) {
+            return unzipVersionScriptFilePath;
         }
 
         LocalFileMappingModel mapping = LocalFileMappingCommon.getMapping(CONTAINER_HELP_INSTALLER_GROUP, UNZIP_DOWNLOAD_SCRIPT_FILE_NAME);
-        unzipDownloadScriptFilePath = mapping != null ? mapping.getLocalFile() : null;
-        return unzipDownloadScriptFilePath;
+        unzipVersionScriptFilePath = mapping != null ? mapping.getLocalFile() : null;
+        return unzipVersionScriptFilePath;
     }
 
     public static boolean prepareUnzip(Container containerClient, String containerId) {
-        var unzipDownloadScriptFilePath = getUnzipDownloadScriptLocalFilepath();
+        var unzipDownloadScriptFilePath = getUnzipVersionScriptLocalFilepath();
         if (StringUtils.isEmpty(unzipDownloadScriptFilePath)) {
             return false;
         }
