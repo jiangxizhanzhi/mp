@@ -29,7 +29,7 @@ public class ContainerFileUtils {
 
     public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_NAME = "unzip_download.sh";
 
-    public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_PATH = "/tmp/" + UNZIP_DOWNLOAD_SCRIPT_FILE_NAME;
+    public static final String UNZIP_DOWNLOAD_SCRIPT_FILE_PATH = "/tmp";
 
     public static final String APK_UNZIP_EXECUTOR_NAME = "unzip.apk";
 
@@ -105,7 +105,7 @@ public class ContainerFileUtils {
                             return StringUtils.joinWith("=", e.getKey(), finalUrl);
                         })
                         .collect(Collectors.toList());
-        String cmd = String.format("sh %s %s", UNZIP_DOWNLOAD_SCRIPT_FILE_PATH, StringUtils.join(params, " "));
+        String cmd = String.format("sh %s %s", UNZIP_DOWNLOAD_SCRIPT_FILE_PATH + "/" + UNZIP_DOWNLOAD_SCRIPT_FILE_NAME, StringUtils.join(params, " "));
         containerClient.executeCommand(containerId, cmd);
         return flag;
     }
