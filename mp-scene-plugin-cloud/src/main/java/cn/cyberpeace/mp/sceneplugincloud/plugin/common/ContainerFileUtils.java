@@ -45,6 +45,8 @@ public class ContainerFileUtils {
         UnzipFileInstaller unzipFileInstaller = new DefaultUnzipFileInstaller();
         if (StringUtils.isNotEmpty(cmdResult.getOutput())) {
             String unzipExecutorName = cmdResult.getOutput();
+            unzipExecutorName = unzipExecutorName.trim();
+            unzipExecutorName = StringUtils.replace(unzipExecutorName, "\n", "");
             if (ApkUnzipFileInstaller.UNZIP_EXECUTOR_NAME.equals(unzipExecutorName)) {
                 unzipFileInstaller = new ApkUnzipFileInstaller();
             } else if (Centos6UnzipFileInstaller.UNZIP_EXECUTOR_NAME.equals(unzipExecutorName)) {
