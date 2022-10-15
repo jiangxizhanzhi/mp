@@ -624,7 +624,7 @@ public class CreateHandler extends HandlerCommon {
 
         // 准备容器的unzip工具,需要尝试apk的安装,而且容器本身可能自带,所以忽略失败
         try {
-            ContainerFileUtils.prepareUnzip(containerClient, containerId);
+            ContainerFileUtils.prepareUnzipV2(containerClient, containerId);
         } catch (Exception e) {
             log.warn("Scene({}) cloud container({}) element prepare unzip failed: ", sceneId, containerId, e);
         }
