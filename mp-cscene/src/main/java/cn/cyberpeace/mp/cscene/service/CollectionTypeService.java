@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -56,6 +57,8 @@ public class CollectionTypeService {
         types.add(sourceLogFile("01", CollectionType.TYPE_LOG_FILE));
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
+
+        types.forEach(type -> processCollectionType(type));
 
         return types;
     }
@@ -220,12 +223,30 @@ public class CollectionTypeService {
 
         CollectionType av = CollectionType.builder().name("AV").code(code + "01").type(type).build();
         CollectionType fw = CollectionType.builder().name("FW").code(code + "02").type(type).build();
-        CollectionType ds_ips = CollectionType.builder().name("DS/IPS").code(code + "03").type(type).build();
+        CollectionType idsIps = CollectionType.builder().name("IDS/IPS").code(code + "03").type(type).build();
         CollectionType vpn = CollectionType.builder().name("VPN").code(code + "04").type(type).build();
         CollectionType other = CollectionType.builder().name("其他").code(code + "05").type(type).build();
-        List<CollectionType> secSubTypes = Arrays.asList(av, fw, ds_ips, vpn, other);
+        List<CollectionType> secSubTypes = Arrays.asList(av, fw, idsIps, vpn, other);
         secSysType.setChildren(secSubTypes);
 
         return secSysType;
+    }
+
+    private void processCollectionType(CollectionType type) {
+        // 国际化处理
+        String name = MessageCommonUtil.convertMessage(type.getName());
+        type.setName(name);
+        processCollectionTypeChildren(type);
+    }
+
+    private void processCollectionTypeChildren(CollectionType type) {
+        if (CollectionUtils.isEmpty(type.getChildren())) {
+            return;
+        }
+        type.getChildren().forEach(t -> {
+            String childrenName = MessageCommonUtil.convertMessage(t.getName());
+            t.setName(childrenName);
+            processCollectionTypeChildren(t);
+        });
     }
 }
