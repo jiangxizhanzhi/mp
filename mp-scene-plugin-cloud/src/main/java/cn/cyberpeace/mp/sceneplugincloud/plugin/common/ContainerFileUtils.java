@@ -22,11 +22,15 @@ public class ContainerFileUtils {
 
     public static final String APK_UNZIP_EXECUTOR_NAME = "unzip.apk";
 
+    public static final String CENTOS6_UNZIP_EXECUTOR_NAME = "unzip_centos6.x86_64.rpm";
+
     public static final String CONTAINER_COPY_FILE_PREFIX = "container_copy_file:";
 
     public static String unzipLocalFilepath = null;
 
     public static String apkUnzipLocalFilepath = null;
+
+    public static String centos6UnzipLocalFilepath = null;
 
     public static String getUnzipLocalFilepath() {
         if (!StringUtils.isEmpty(unzipLocalFilepath)) {
@@ -48,15 +52,30 @@ public class ContainerFileUtils {
         return apkUnzipLocalFilepath;
     }
 
+    public static String getCentos6UnzipLocalFilepath() {
+        if (!StringUtils.isEmpty(centos6UnzipLocalFilepath)) {
+            return centos6UnzipLocalFilepath;
+        }
+
+        LocalFileMappingModel mapping = LocalFileMappingCommon.getMapping(CONTAINER_HELP_INSTALLER_GROUP, CENTOS6_UNZIP_EXECUTOR_NAME);
+        centos6UnzipLocalFilepath = mapping != null ? mapping.getLocalFile() : null;
+        return centos6UnzipLocalFilepath;
+    }
+
 
     public static boolean prepareUnzip(Container containerClient, String containerId) {
-        var unzipLocalFilepath = getUnzipLocalFilepath();
-        if (StringUtils.isEmpty(unzipLocalFilepath)) {
-            return false;
+        var result = containerClient.executeCommand(containerId, "cat /etc/system-release");
+        if (result.getExitCode() != null && result.getExitCode() == 0 && StringUtils.isNotEmpty(result.getOutput()) && result.getOutput().contains("CentOS release 6")) {
+            return prepareCentos6Unzip(containerClient, containerId);
+        } else {
+            var unzipLocalFilepath = getUnzipLocalFilepath();
+            if (StringUtils.isEmpty(unzipLocalFilepath)) {
+                return false;
+            }
+            var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
+            containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
+            return flag;
         }
-        var flag = containerClient.copyFile(containerId, unzipLocalFilepath, UNZIP_DST_PATH);
-        containerClient.executeCommand(containerId, String.format("chmod +x %s", UNZIP_DST_PATH + UNZIP_EXECUTOR_NAME));
-        return flag;
     }
 
     public static boolean prepareApkUnzip(Container containerClient, String containerId) {
@@ -71,6 +90,16 @@ public class ContainerFileUtils {
             return flag;
         }
         return false;
+    }
+
+    public static boolean prepareCentos6Unzip(Container containerClient, String containerId) {
+        var unzipLocalFilepath = getCentos6UnzipLocalFilepath();
+        if (StringUtils.isEmpty(unzipLocalFilepath)) {
+            return false;
+        }
+        var flag = containerClient.copyFile(containerId, unzipLocalFilepath, "/tmp");
+        containerClient.executeCommand(containerId, String.format("rpm -ivh %s", "/tmp/" + CENTOS6_UNZIP_EXECUTOR_NAME));
+        return flag;
     }
 
     public static boolean prepareZipFile(Container containerClient, String containerId, String fileUrl, String unzipDir) {
