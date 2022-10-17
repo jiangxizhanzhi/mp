@@ -18,8 +18,8 @@ public class FlowModel extends BaseModel {
     private String description;
     /**
      * 流量类型
-     * 攻击：0 DDos,1 蠕虫，2 垃圾邮件，3 DNS污染，4 BGP劫持，5 缓冲区溢出，6 SQL注入，7 XSS，8 病毒
-     * 背景：0 移动互联网，1 典型互联网，2 城市供水控制网，3 城市管网，4 电力调度网，5 轨道交通运行控制网，6 物联网，7 广播电视网，8 金融网等行业网络
+     * 攻击流量：0 DDos,1 蠕虫，2 垃圾邮件，3 DNS污染，4 BGP劫持，5 缓冲区溢出，6 SQL注入，7 XSS，8 病毒
+     * 普通流量：0 移动互联网，1 典型互联网，2 城市供水控制网，3 城市管网，4 电力调度网，5 轨道交通运行控制网，6 物联网，7 广播电视网，8 金融网等行业网络
      */
     @DefaultInt
     private Integer category;
