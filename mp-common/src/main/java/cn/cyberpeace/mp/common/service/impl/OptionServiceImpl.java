@@ -47,11 +47,13 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
     private List<OptionBO> getOptionsByType(String type, boolean intFlag) {
         List<OptionModel> models = findByType(type);
         Function<String, ?> function = null;
+
         if (intFlag) {
             function = Integer::parseInt;
         } else {
             function = s -> s;
         }
+
         return flatModels2NestedBos(models, function);
     }
 
@@ -61,7 +63,6 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         condition.filterEqual(OptionModel::getType, type);
         condition.orderBy(OptionModel::getSort);
         List<OptionModel> optionModels = getModelMapper().list(condition);
-        filterByVisibility(optionModels);
         return optionModels;
     }
 
@@ -70,72 +71,10 @@ public class OptionServiceImpl extends BaseModelServiceImpl<OptionModel, OptionM
         return new ServiceResult<>(getOptionsByType(type, false)).asResult();
     }
 
+
     @Override
     public ServiceResult<List<OptionBO>> getIntOptions(String type) {
         return new ServiceResult<>(getOptionsByType(type, true)).asResult();
-    }
-
-
-    @Override
-    public void resetMeta(Map<String, String> activeItemMap) {
-        if (CollectionUtil.isEmpty(activeItemMap)) {
-            return;
-        }
-
-        List<String> activedKeys = activeItemMap.entrySet().stream().filter(entry -> Objects.equals(entry.getValue(), "1")).map(Map.Entry::getKey).collect(Collectors.toList());
-        HumanCondition condition = new HumanCondition();
-        condition.setLimit(999);
-        List<OptionModel> optionModels = getModelMapper().list(condition);
-
-        List<OptionModel> toUpdateList = new ArrayList<>();
-        LocalDateTime updatime = LocalDateTime.now();
-
-        for (OptionModel optionModel : optionModels) {
-            String metaStr = optionModel.getMeta();
-            OptionModel.MetaModel metaModel = JsonCommon.parse(metaStr, OptionModel.MetaModel.class);
-            if (StringUtils.isEmpty(metaModel.getActivKeys())) {
-                continue;
-            }
-            String[] metaActiveKeyArr = metaModel.getActivKeys().split(",");
-            List<String> metaActiveKeyList = Arrays.asList(metaActiveKeyArr);
-            boolean isNoAuth = metaActiveKeyList.stream().filter(key -> Objects.equals(key, CommonConstant.OPTION_ACTIVE_KEY_NO_AUTH)).findAny().isPresent();
-            if (isNoAuth) {
-                continue;
-            }
-
-            if (CollectionUtil.isEmpty(activedKeys)) {
-                metaModel.setVisible(0);
-            } else {
-                boolean isVisible = metaActiveKeyList.stream().filter(key -> activedKeys.contains(key)).findAny().isPresent();
-                if (isVisible) {
-                    metaModel.setVisible(1);
-                } else {
-                    metaModel.setVisible(0);
-                }
-            }
-
-            OptionModel toUpdateOptionModel = new OptionModel();
-            toUpdateOptionModel.setId(optionModel.getId());
-            String toUpdateMetaStr = JsonCommon.stringify(metaModel);
-            toUpdateOptionModel.setMeta(toUpdateMetaStr);
-            toUpdateOptionModel.setUpdateTime(updatime);
-            toUpdateList.add(toUpdateOptionModel);
-        }
-
-        if (CollectionUtil.isNotEmpty(toUpdateList)) {
-            getModelMapper().bulkUpdate(toUpdateList);
-        }
-    }
-
-    private void filterByVisibility(List<OptionModel> optionModels) {
-        Iterator<OptionModel> iter = optionModels.iterator();
-        while (iter.hasNext()) {
-            String metaStr = iter.next().getMeta();
-            OptionModel.MetaModel metaModel = JsonCommon.parse(metaStr, OptionModel.MetaModel.class);
-            if (Objects.equals(0, metaModel.getVisible())) {
-                iter.remove();
-            }
-        }
     }
 
     private List<OptionBO> flatModels2NestedBos(List<OptionModel> models, Function<String, ?> function) {

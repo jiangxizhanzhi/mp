@@ -16,12 +16,6 @@ import java.util.Map;
  */
 public interface OptionService extends BaseModelService<OptionModel, QueryParams> {
     /**
-     * 根据激活配置项重置所有类型可见属性
-     * @param activeItemMap
-     */
-    void resetMeta(Map<String, String> activeItemMap);
-
-    /**
      * 根据类型查询选项
      *
      * @param type
@@ -36,6 +30,7 @@ public interface OptionService extends BaseModelService<OptionModel, QueryParams
      * @return
      */
     ServiceResult<List<OptionBO>> getStrOptions(String type);
+
 
     /**
      * 获取 bo 的 code 字段为 int 类型

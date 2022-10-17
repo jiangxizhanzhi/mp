@@ -26,7 +26,7 @@ public class SceneStatusUtil {
         if (en == null || zh == null) {
             en = new HashMap<>();
             zh = new HashMap<>();
-            var optionService = BeanCommon.getBean(OptionService.class);
+            var optionService = (OptionService) BeanCommon.getBean("sysOptionServiceImpl");
             var optionModels = optionService.findByType(CsceneConstant.MP_COMMON_OPTION_TYPE_CSCENE_INSTANCE_STATUS);
             optionModels.forEach(optionModel -> {
                 Integer status = Integer.parseInt(optionModel.getCode());
