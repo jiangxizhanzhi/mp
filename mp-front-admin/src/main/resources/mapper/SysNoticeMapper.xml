@@ -104,20 +104,28 @@
                 </if>
                 )
                 AND
-                (
-                <if test="orgs != null and orgs.size() > 0">
+                ((
                     no.org is null
+                )
+                <if test="orgs != null and orgs.size() > 0">
                     OR
                     no.org in
                     <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
                         #{org}
                     </foreach>
                 </if>
-
-                <if test="orgs == null || orgs.size() == 0">
-                    no.org is null
-                </if>
                 ))
+                <if test="orgs != null and orgs.size() > 0">
+                    OR
+                    (
+                    nr.role is null
+                    AND
+                    no.org in
+                    <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
+                        #{org}
+                    </foreach>
+                    )
+                </if>
                 <if test="userIds != null and userIds.size() > 0">
                 OR
                     (
@@ -152,20 +160,28 @@
                 </if>
                 )
                 AND
-                (
-                <if test="orgs != null and orgs.size() > 0">
+                ((
                     no.org is null
+                )
+                <if test="orgs != null and orgs.size() > 0">
                     OR
                     no.org in
                     <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
                         #{org}
                     </foreach>
                 </if>
-
-                <if test="orgs == null || orgs.size() == 0">
-                    no.org is null
-                </if>
                 ))
+                <if test="orgs != null and orgs.size() > 0">
+                    OR
+                    (
+                    nr.role is null
+                    AND
+                    no.org in
+                    <foreach item="org" index="index" collection="orgs" open="(" separator="," close=")">
+                        #{org}
+                    </foreach>
+                    )
+                </if>
                 <if test="userIds != null and userIds.size() > 0">
                     OR
                     (
