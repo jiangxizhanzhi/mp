@@ -909,7 +909,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             scriptParamIp.setFlowId(flowInfoModel.getId());
                             scriptParamIp.setParamKey("ip");
                             scriptParamIp.setParamType(1);
-                            scriptParamIp.setParamDesc("流量发生目标地址");
+                            scriptParamIp.setParamDesc(MessageCommon.get("flow.error_code.target_ip"));
                             scriptParamModelList.add(scriptParamIp);
 
                             FlowScriptParamModel scriptParamPort = new FlowScriptParamModel();
@@ -917,7 +917,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             scriptParamPort.setParamKey("port");
                             scriptParamPort.setParamValue("80");
                             scriptParamPort.setParamType(2);
-                            scriptParamPort.setParamDesc("流量发生目标端口");
+                            scriptParamPort.setParamDesc(MessageCommon.get("flow.error_code.target_port"));
                             scriptParamModelList.add(scriptParamPort);
                         });
 
