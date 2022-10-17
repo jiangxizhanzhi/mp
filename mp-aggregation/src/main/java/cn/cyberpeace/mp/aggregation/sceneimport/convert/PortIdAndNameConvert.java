@@ -45,14 +45,17 @@ public class PortIdAndNameConvert implements IConverter {
                 String source = conn.getSource();
                 String target = conn.getTarget();
                 Map<String, String[]> newName = new HashMap<>(4);
-                newName.put("source", new String[]{ this.getNewName(source) });
-                newName.put("target", new String[]{ this.getNewName(target) });
+                newName.put("source", new String[]{ this.getNewName(source, container) });
+                newName.put("target", new String[]{ this.getNewName(target, container) });
                 conn.setName(JsonCommon.stringify(newName));
             });
         }
     }
 
-    private String getNewName(String name) {
+    private String getNewName(String name, ConvertDataContainer container) {
+        if (container.getEntityPortId2Name().containsKey(name)) {
+            return container.getEntityPortId2Name().get(name);
+        }
         int from = name.lastIndexOf("_");
         String suffix = name.substring(from + 1);
         if (name.contains("_electrical_")) {

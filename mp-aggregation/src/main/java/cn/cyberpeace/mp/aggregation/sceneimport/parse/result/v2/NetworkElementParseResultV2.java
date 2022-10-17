@@ -22,7 +22,7 @@ public class NetworkElementParseResultV2 {
     private String dhcp;
     private String dhcpPool;
     private List<String> dns;
-
+    private String position;
     public NetworkElementParseResult convert() {
         NetworkElementParseResult result = new NetworkElementParseResult();
         result.setId(id);
@@ -31,6 +31,7 @@ public class NetworkElementParseResultV2 {
         result.setGateway(gateway);
         result.setDhcp(dhcp);
         result.setDhcpPool(dhcpPool);
+        result.setPosition(position);
         result.setDns(StringUtils.join(dns, ","));
         return result;
     }
