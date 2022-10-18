@@ -746,8 +746,8 @@ public class CsceneDataModifier {
     }
 
     public static void checkName(CsceneBO csceneBO) {
-        if (csceneBO.getName().length() > 255) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_FLOWS_DATA_TOO_LONG);
+        if (csceneBO.getSceneConfig().getTopology().getScene().getName().length() > 255) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_TOO_LONG);
         }
     }
 
