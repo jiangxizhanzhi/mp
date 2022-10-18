@@ -745,9 +745,19 @@ public class CsceneDataModifier {
         }
     }
 
-    public static void checkName(CsceneBO csceneBO) {
-        if (csceneBO.getSceneConfig().getTopology().getScene().getName().length() > 255) {
-            throw new MpRuntimeException(CsceneErrorCode.PARAMS_TOO_LONG);
+    public static void check(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getScene() != null) {
+            if (csceneBO.getSceneConfig().getTopology().getScene().getName() != null) {
+                if (csceneBO.getSceneConfig().getTopology().getScene().getName().length() > 255) {
+                    throw new MpRuntimeException(CsceneErrorCode.PARAMS_NAME_TOO_LONG);
+                }
+            }
+
+            if (csceneBO.getSceneConfig().getTopology().getScene().getDescription() != null) {
+                if (csceneBO.getSceneConfig().getTopology().getScene().getDescription().length() > 255) {
+                    throw new MpRuntimeException(CsceneErrorCode.PARAMS_DESCRIPTION_TOO_LONG);
+                }
+            }
         }
     }
 
