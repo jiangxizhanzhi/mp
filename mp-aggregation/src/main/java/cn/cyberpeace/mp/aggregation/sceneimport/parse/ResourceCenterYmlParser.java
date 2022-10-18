@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.YmlParseResult;
+import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +70,8 @@ public final class ResourceCenterYmlParser {
         File file = new File(envServerYmlPath);
         if (file.exists()) {
             ImageParseResult imageParseResult = new FilePathYmlParser<>(envServerYmlPath, ImageParseResult.class).parse();
+            var servers = imageParseResult.getServers();
+            addAllPrivateKey(servers, envServerYmlPath);
             results.add(imageParseResult);
         }
         return results;
@@ -88,6 +92,8 @@ public final class ResourceCenterYmlParser {
         File file = new File(envServerYmlPath);
         if (file.exists()) {
             ImageParseResult imageParseResult = new FilePathYmlParser<>(envServerYmlPath, ImageParseResult.class).parse();
+            var servers = imageParseResult.getServers();
+            addAllPrivateKey(servers, envServerYmlPath);
             results.add(imageParseResult);
         }
         return results;
@@ -113,26 +119,36 @@ public final class ResourceCenterYmlParser {
                 .collect(Collectors.toList());
 
         for (int i = 0; i < imageParseResult.size(); i++) {
-            var accessModes = imageParseResult.get(i).getServers().entrySet().iterator().next().getValue().getAccessModes();
-            var manageAccessModes = imageParseResult.get(i).getServers().entrySet().iterator().next().getValue().getManageAccessModes();
+            var servers = imageParseResult.get(i).getServers();
+            var path = serversYmlPaths.get(i);
+            addAllPrivateKey(servers, path);
+        }
+
+        return imageParseResult;
+    }
+
+    private static void addAllPrivateKey(Map<String, ImageInfoParseResult> servers, String path) {
+        if (!servers.isEmpty()) {
+            var accessModes = servers.values().stream().findFirst().get().getAccessModes();
+            var manageAccessModes = servers.values().stream().findFirst().get().getManageAccessModes();
+
             if (CollectionUtils.isNotEmpty(accessModes)) {
                 for (var accessMode : accessModes) {
                     if (StringUtils.isNotEmpty(accessMode.getPrivateKey())) {
                         //上传了秘钥,保存秘钥文件地址
-                        accessMode.setPrivateKeyPath(serversYmlPaths.get(i).replace("servers.yml", "") + accessMode.getPrivateKey());
+                        accessMode.setPrivateKeyPath(StringUtils.replace(path, "servers.yml", "") + accessMode.getPrivateKey());
                     }
                 }
             }
+
             if (CollectionUtils.isNotEmpty(manageAccessModes)) {
                 for (var manageAccessMode : manageAccessModes) {
                     if (StringUtils.isNotEmpty(manageAccessMode.getPrivateKey())) {
                         //上传了秘钥,保存秘钥文件地址
-                        manageAccessMode.setPrivateKeyPath(serversYmlPaths.get(i).replace("servers.yml", "") + manageAccessMode.getPrivateKey());
+                        manageAccessMode.setPrivateKeyPath(StringUtils.replace(path, "servers.yml", "") + manageAccessMode.getPrivateKey());
                     }
                 }
             }
         }
-
-        return imageParseResult;
     }
 }
