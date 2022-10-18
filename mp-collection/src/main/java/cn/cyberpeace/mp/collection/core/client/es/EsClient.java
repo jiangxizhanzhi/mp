@@ -1,38 +1,53 @@
 package cn.cyberpeace.mp.collection.core.client.es;
 
 import cn.cyberpeace.mp.base.common.JsonCommon;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.collection.config.CollectionCacheConfig;
-import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
-import cn.cyberpeace.mp.collection.constant.SicLaunchConstant;
-import cn.cyberpeace.mp.collection.util.ConvertModelUtil;
-import cn.cyberpeace.mp.collection.core.model.*;
-import cn.cyberpeace.mp.collection.core.model.sic.BaseChangeCountOutput;
-import cn.cyberpeace.mp.collection.core.model.sic.BaseInput;
-import cn.cyberpeace.mp.collection.core.model.sic.HostStateOutput;
-import cn.cyberpeace.mp.collection.core.model.sic.Launch;
+import cn.cyberpeace.mp.collection.core.config.EsDateFormatConfig;
+import cn.cyberpeace.mp.collection.core.constant.CollectionErrorCodeConstant;
+import cn.cyberpeace.mp.collection.core.constant.SicLaunchConstant;
+import cn.cyberpeace.mp.collection.core.exception.MpCollectionRuntimeException;
+import cn.cyberpeace.mp.collection.core.model.es.event.*;
+import cn.cyberpeace.mp.collection.core.model.es.hostmonitor.WazuhHostState;
+import cn.cyberpeace.mp.collection.core.model.es.hostmonitor.WazuhMonitorRoot;
+import cn.cyberpeace.mp.collection.core.model.es.hostmonitor.WazuhNetworkConnection;
+import cn.cyberpeace.mp.collection.core.model.es.hostmonitor.WazuhProcess;
+import cn.cyberpeace.mp.collection.core.model.es.sic.BaseChangeCountOutput;
+import cn.cyberpeace.mp.collection.core.model.es.sic.BaseInput;
+import cn.cyberpeace.mp.collection.core.model.es.sic.HostStateOutput;
+import cn.cyberpeace.mp.collection.core.model.es.sic.Launch;
+import cn.cyberpeace.mp.collection.core.model.es.vulnerability.WazuhVulnerabilityInfo;
+import cn.cyberpeace.mp.collection.core.model.es.vulnerability.WazuhVulnerabilityInfoCount;
 import cn.cyberpeace.mp.collection.core.request.WazuhEventRequest;
 import cn.cyberpeace.mp.collection.core.request.WazuhHostMonitorPageRequest;
 import cn.cyberpeace.mp.collection.core.response.WazuhSystemUserResponse;
-import cn.cyberpeace.mp.collection.util.AgentNameUtils;
-import cn.cyberpeace.mp.collection.util.EsResponseParseUtils;
+import cn.cyberpeace.mp.collection.core.result.ListObjResult;
+import cn.cyberpeace.mp.collection.core.util.AgentNameUtil;
+import cn.cyberpeace.mp.collection.core.util.ConvertModelUtil;
+import cn.cyberpeace.mp.collection.core.util.EsResponseParseUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.HttpHost;
+import org.apache.http.util.Asserts;
 import org.apache.lucene.queryparser.flexible.standard.QueryParserUtil;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.action.support.IndicesOptions;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.core.TimeValue;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -50,8 +65,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
-import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.util.ObjectUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -61,30 +75,24 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static cn.cyberpeace.mp.collection.constant.CacheKeyConstant.*;
-
-@CacheConfig(cacheManager = CollectionCacheConfig.CACHE_MANAGER)
+@Slf4j
 public class EsClient {
-    private RestHighLevelClientImpl restHighLevelClient;
+    private RestHighLevelClient restHighLevelClient;
 
     public static class EsClientBuilder {
-        private RestHighLevelClientImpl.RestHighLevelClientBuilder restHighLevelClientBuilder;
-
-        private EsClientBuilder() {
-            this.restHighLevelClientBuilder = RestHighLevelClientImpl.builder();
-        }
+        private String esServer;
 
         public void configEs(String esServer) {
-            restHighLevelClientBuilder.configEs(esServer);
+            this.esServer = esServer;
         }
 
         public EsClient build() {
-            return new EsClient(restHighLevelClientBuilder.build());
+            return new EsClient(esServer);
         }
     }
 
-    private EsClient(RestHighLevelClientImpl restHighLevelClient) {
-        this.restHighLevelClient = restHighLevelClient;
+    private EsClient(String esServer) {
+        this.restHighLevelClient = new RestHighLevelClient(RestClient.builder(createHttpHost(esServer)));
     }
 
     public static EsClientBuilder builder() {
@@ -98,48 +106,56 @@ public class EsClient {
     /**
      * 查询采集事件分页
      * @param request
-     * @return ListObjResult<FileEventModel>
+     * @return ListObjResult<Event>
      */
-    @Cacheable(value = CACHE_KEY_FILE_EVENTS)
-    public ListObjResult<FileEvent> queryFileEvents(WazuhEventRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+    public ListObjResult<Event> queryEvents(WazuhEventRequest request) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            var wazuhFileRootList = EsResponseParseUtil.parseResponse(response, WazuhFileRoot.class);
+            List<Event> fileEventModelList = wazuhFileRootList.stream().map((ConvertModelUtil::getFileEvent)).collect(Collectors.toList());
 
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        var wazuhFileRootList = EsResponseParseUtils.parseResponse(response, WazuhFileRoot.class);
-        List<FileEvent> fileEventModelList = wazuhFileRootList.stream().map((ConvertModelUtil::getFileEvent)).collect(Collectors.toList());
+            String responseScrollId = response.getScrollId();
+            if (request.isScroll()) {
+                fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
+            }
 
-        String responseScrollId = response.getScrollId();
-        if (request.isScroll()) {
-            fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
+            long total = 0L;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult<>(fileEventModelList, BigDecimal.valueOf(total).intValue());
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es query events error");
         }
-
-        long total = 0L;
-        if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
-            total = response.getHits().getTotalHits().value;
-        }
-        return new ListObjResult<>(fileEventModelList, BigDecimal.valueOf(total).intValue());
     }
 
     /**
      * 滚动分页查询采集事件
      * @return ListObjResult<FileEventModel>
      */
-    public ListObjResult<FileEvent> scrollFileEvents(String scrollId) {
+    public ListObjResult<Event> scrollEvents(String scrollId) {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
-        SearchResponse response = restHighLevelClient.scroll(scrollRequest);
-        var wazuhFileRootList = EsResponseParseUtils.parseResponse(response, WazuhFileRoot.class);
-        List<FileEvent> fileEventModelList = wazuhFileRootList.stream().map((ConvertModelUtil::getFileEvent)).collect(Collectors.toList());
+        try {
+            SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
+            var wazuhFileRootList = EsResponseParseUtil.parseResponse(response, WazuhFileRoot.class);
+            List<Event> fileEventModelList = wazuhFileRootList.stream().map((ConvertModelUtil::getFileEvent)).collect(Collectors.toList());
 
-        String responseScrollId = response.getScrollId();
-        fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
-        return new ListObjResult<>(fileEventModelList, (int) response.getHits().getTotalHits().value);
+            String responseScrollId = response.getScrollId();
+            fileEventModelList.forEach(model -> model.setScrollId(responseScrollId));
+            return new ListObjResult<>(fileEventModelList, (int) response.getHits().getTotalHits().value);
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es scroll events error");
+        }
     }
 
     /**
@@ -147,41 +163,46 @@ public class EsClient {
      * @param request
      * @return ListObjResult<WazuhProbeCommonModel>
      */
-    @Cacheable(value = CACHE_KEY_CUSTOM_PROBES)
     public ListObjResult<WazuhProbeCommon> queryCustomProbeData(WazuhEventRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
 
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<WazuhProbeCommon> wazuhModelList = new ArrayList<>();
-        if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
-            return new ListObjResult<>(wazuhModelList, 0);
-        }
-        for (var hit : response.getHits().getHits()) {
-            WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
-                    new TypeReference<>() {
-                    });
-            if (Objects.nonNull(wazuhMonitorRoot.getData()) && Objects.nonNull(wazuhMonitorRoot.getData().getOutput())) {
-                String output = JsonCommon.stringify(wazuhMonitorRoot.getData().getOutput());
-                WazuhProbeCommon wazuhProbeCommon = new WazuhProbeCommon();
-                wazuhProbeCommon.setRawOutPut(output);
-                wazuhProbeCommon.setAgentId(wazuhMonitorRoot.getAgent().getId());
-                wazuhProbeCommon.setAgentName(wazuhMonitorRoot.getAgent().getName());
-                wazuhProbeCommon.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
-                wazuhProbeCommon.setProbeId(wazuhMonitorRoot.getData().getId());
-                wazuhModelList.add(wazuhProbeCommon);
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<WazuhProbeCommon> wazuhModelList = new ArrayList<>();
+            if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
+                return new ListObjResult<>(wazuhModelList, 0);
             }
-        }
+            for (var hit : response.getHits().getHits()) {
+                WazuhMonitorRoot<Launch<Object, BaseInput>> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
+                        new TypeReference<>() {
+                        });
+                if (Objects.nonNull(wazuhMonitorRoot.getData()) && Objects.nonNull(wazuhMonitorRoot.getData().getOutput())) {
+                    String output = JsonCommon.stringify(wazuhMonitorRoot.getData().getOutput());
+                    WazuhProbeCommon wazuhProbeCommon = new WazuhProbeCommon();
+                    wazuhProbeCommon.setRawOutPut(output);
+                    wazuhProbeCommon.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                    wazuhProbeCommon.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                    wazuhProbeCommon.setAgentIp(wazuhMonitorRoot.getAgent().getIp());
+                    wazuhProbeCommon.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
+                    wazuhProbeCommon.setProbeId(wazuhMonitorRoot.getData().getId());
+                    wazuhModelList.add(wazuhProbeCommon);
+                }
+            }
 
-        long total = 0L;
-        if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
-            total = response.getHits().getTotalHits().value;
+            long total = 0L;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult(wazuhModelList, BigDecimal.valueOf(total).intValue());
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es query custom probe data error");
         }
-        return new ListObjResult(wazuhModelList, BigDecimal.valueOf(total).intValue());
     }
 
     /**
@@ -189,38 +210,42 @@ public class EsClient {
      * @param request
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
-    @Cacheable(value = CACHE_KEY_VUL_INFOS)
     public ListObjResult<WazuhVulnerabilityInfo> queryVulnerabilityInfo(WazuhEventRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
         var sourceBuilder = buildSearchSourceBuilder(request);
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<WazuhVulnerabilityInfo> wazuhModelList = new ArrayList<>();
-        for (var hit : response.getHits().getHits()) {
-            WazuhMonitorRoot<WazuhVulnerabilityInfo> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
-                    new TypeReference<>() {
-                    });
-            if (Objects.nonNull(wazuhMonitorRoot.getData())) {
-                var vul = wazuhMonitorRoot.getData().getVulnerability();
-                if (Objects.nonNull(vul)) {
-                    WazuhVulnerabilityInfo vulnerability = new WazuhVulnerabilityInfo();
-                    vulnerability.setVulnerability(vul);
-                    vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
-                    vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
-                    vulnerability.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
-                    wazuhModelList.add(vulnerability);
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            List<WazuhVulnerabilityInfo> wazuhModelList = new ArrayList<>();
+            for (var hit : response.getHits().getHits()) {
+                WazuhMonitorRoot<WazuhVulnerabilityInfo> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
+                        new TypeReference<>() {
+                        });
+                if (Objects.nonNull(wazuhMonitorRoot.getData())) {
+                    var vul = wazuhMonitorRoot.getData().getVulnerability();
+                    if (Objects.nonNull(vul)) {
+                        WazuhVulnerabilityInfo vulnerability = new WazuhVulnerabilityInfo();
+                        vulnerability.setVulnerability(vul);
+                        vulnerability.setAgentId(wazuhMonitorRoot.getAgent().getId());
+                        vulnerability.setAgentName(wazuhMonitorRoot.getAgent().getName());
+                        vulnerability.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
+                        wazuhModelList.add(vulnerability);
+                    }
                 }
             }
-        }
 
-        long total = 0L;
-        if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
-            total = response.getHits().getTotalHits().value;
+            long total = 0L;
+            if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
+                total = response.getHits().getTotalHits().value;
+            }
+            return new ListObjResult<>(wazuhModelList, BigDecimal.valueOf(total).intValue());
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es query vulnerability info error");
         }
-        return new ListObjResult<>(wazuhModelList, BigDecimal.valueOf(total).intValue());
     }
 
     /**
@@ -230,10 +255,9 @@ public class EsClient {
      * @param fieldName 字段名称
      * @return List<WazuhVulnerabilityInfoCountModel>
      */
-    @Cacheable(value = CACHE_KEY_VUL_COUNTS)
     public List<WazuhVulnerabilityInfoCount> queryVulnerabilityCountInfo(WazuhEventRequest request,
                                                                          String fieldPath, String fieldName) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return new ArrayList<>();
         }
         var sourceBuilder = buildSearchSourceBuilder(request);
@@ -241,21 +265,26 @@ public class EsClient {
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
         List<WazuhVulnerabilityInfoCount> vulnerabilityInfoCounts;
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        long totalHits = response.getHits().getTotalHits().value;
-        if (totalHits == 0) {
-            return new ArrayList<>();
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            long totalHits = response.getHits().getTotalHits().value;
+            if (totalHits == 0) {
+                return new ArrayList<>();
+            }
+            Aggregations aggregations = response.getAggregations();
+            ParsedTerms parsedTerms = aggregations.get(fieldName);
+            List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+            vulnerabilityInfoCounts = buckets.stream().map(bucket -> {
+                WazuhVulnerabilityInfoCount infoCount = new WazuhVulnerabilityInfoCount();
+                infoCount.setFieldName(bucket.getKeyAsString());
+                infoCount.setCount(bucket.getDocCount());
+                return infoCount;
+            }).collect(Collectors.toList());
+            return vulnerabilityInfoCounts;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es query vulnerability count info error");
         }
-        Aggregations aggregations = response.getAggregations();
-        ParsedTerms parsedTerms = aggregations.get(fieldName);
-        List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
-        vulnerabilityInfoCounts = buckets.stream().map(bucket -> {
-            WazuhVulnerabilityInfoCount infoCount = new WazuhVulnerabilityInfoCount();
-            infoCount.setFieldName(bucket.getKeyAsString());
-            infoCount.setCount(bucket.getDocCount());
-            return infoCount;
-        }).collect(Collectors.toList());
-        return vulnerabilityInfoCounts;
     }
 
     /**
@@ -263,9 +292,8 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_HOST_STATE)
     public ListObjResult<WazuhHostState> queryHostStateEventsWithTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return new ListObjResult<>(new ArrayList<>(), 0);
         }
         SearchResponse response = querySICLaunchEventsWithTimeRange(request, SicLaunchConstant.LAUNCH_ID_HOST_STATE);
@@ -298,9 +326,8 @@ public class EsClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_NET_CONN)
     public List<WazuhNetworkConnection> queryNetConnEventsWithTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return Collections.emptyList();
         }
         // 每个agent取1条数据，做假分页处理
@@ -321,7 +348,8 @@ public class EsClient {
                 JSONObject data = arr.getJSONObject(i);
                 WazuhNetworkConnection netConnModel = JSON.toJavaObject(data, WazuhNetworkConnection.class);
                 netConnModel.setTime((LocalDateTime) jsonObject.get("time"));
-                netConnModel.setDescription("CMD LAUNCH LOG");
+                netConnModel.setAgentIp((String) jsonObject.get("agent_ip"));
+                netConnModel.setAgentName((String) jsonObject.get("agent_name"));
                 list.add(netConnModel);
             }
         }
@@ -333,9 +361,8 @@ public class EsClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_PROCESS)
     public List<WazuhProcess> queryProcessesWithTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return Collections.emptyList();
         }
         // 每个agent取1条数据，做假分页处理
@@ -358,7 +385,6 @@ public class EsClient {
                 processModel.setTime((LocalDateTime) jsonObject.get("time"));
                 processModel.setAgentIp((String) jsonObject.get("agent_ip"));
                 processModel.setAgentName((String) jsonObject.get("agent_name"));
-                processModel.setDescription("PROCESS");
                 list.add(processModel);
             }
         }
@@ -370,9 +396,8 @@ public class EsClient {
      * @param
      * @return
      */
-    @Cacheable(value = CACHE_KEY_USERS)
     public WazuhSystemUserResponse querySystemUserWithTimeRange(WazuhHostMonitorPageRequest wazuhMonitorEventsRequest) {
-        if (AgentNameUtils.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(wazuhMonitorEventsRequest.getAgentNames())) {
             return null;
         }
         // 取agent个数条数据，做假分页处理
@@ -402,9 +427,8 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_ENV_VAR_CHANGED_COUNT)
     public int sumEnvVarChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
         }
         return aggsChangedCountWithTimeRange(request, SicLaunchConstant.LAUNCH_ID_ENV_VAR);
@@ -415,9 +439,8 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT)
     public int sumSysUsersChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
         }
         return aggsChangedCountWithTimeRange(request, SicLaunchConstant.LAUNCH_ID_SYSTEM_USERS);
@@ -428,9 +451,8 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_PROCESS_CHANGED_COUNT)
     public int sumProcessesChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
         }
         return aggsChangedCountWithTimeRange(request, SicLaunchConstant.LAUNCH_ID_PROCESSES);
@@ -441,9 +463,8 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_NET_CONNS_CHANGED_COUNT)
     public int sumNetConnsChangedCountByTimeRange(WazuhHostMonitorPageRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
         }
         return aggsChangedCountWithTimeRange(request, SicLaunchConstant.LAUNCH_ID_NET_CONNS);
@@ -455,14 +476,12 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
-    public Map<String, Long> countByAgentNamesBucket(WazuhEventRequest request) {
-        Map<String, Long> map = new LinkedHashMap<>();
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
-            return map;
+    public List<EventCount> countEventByAgentNames(WazuhEventRequest request) {
+        List<EventCount> eventCountList = new ArrayList<>();
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
+            return eventCountList;
         }
         String aggregationName = "aggs_count_by_agent_name";
-        request.getAgentNames().forEach(a -> map.put(a, 0L));
         var boolQueryBuilder = buildBoolQueryBuilder(request);
         var sourceBuilder = buildSearchSourceBuilder(request);
         sourceBuilder.size(0);
@@ -471,12 +490,21 @@ public class EsClient {
                 .field("agent.name");
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        if (Objects.nonNull(response.getAggregations())) {
-            Terms terms = response.getAggregations().get(aggregationName);
-            terms.getBuckets().forEach(b -> map.put(b.getKeyAsString(), b.getDocCount()));
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (Objects.nonNull(response.getAggregations())) {
+                Terms terms = response.getAggregations().get(aggregationName);
+                terms.getBuckets().forEach(b -> {
+                    EventCount eventCount = new EventCount();
+                    eventCount.setAgentName(b.getKeyAsString());
+                    eventCount.setCount(b.getDocCount());
+                });
+            }
+            return eventCountList;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es count event by agent names error");
         }
-        return map;
     }
 
     /**
@@ -484,11 +512,10 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
-    public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest request) {
-        Map<String, Long> map = new LinkedHashMap<>();
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
-            return map;
+    public List<RuleCount> countRuleIdByAgentName(WazuhEventRequest request) {
+        List<RuleCount> ruleCountList = new ArrayList<>();
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
+            return ruleCountList;
         }
         String aggregationName = "aggs_ruleids_by_agent_name";
         var boolQueryBuilder = buildBoolQueryBuilder(request);
@@ -499,12 +526,22 @@ public class EsClient {
                 .field("rule.id").size(100);
         sourceBuilder.aggregation(aggregation);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        if (Objects.nonNull(response.getAggregations())) {
-            Terms terms = response.getAggregations().get(aggregationName);
-            terms.getBuckets().forEach(b -> map.put(b.getKeyAsString(), b.getDocCount()));
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (Objects.nonNull(response.getAggregations())) {
+                Terms terms = response.getAggregations().get(aggregationName);
+                terms.getBuckets().forEach(b -> {
+                    RuleCount ruleCount = new RuleCount();
+                    ruleCount.setRuleId(b.getKeyAsString());
+                    ruleCount.setCount(b.getDocCount());
+                    ruleCountList.add(ruleCount);
+                });
+            }
+            return ruleCountList;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es count rule id by agent name error");
         }
-        return map;
     }
 
     /**
@@ -512,14 +549,18 @@ public class EsClient {
      * @param request
      * @return
      */
-    @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
-    public Long countByAgentNames(WazuhEventRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+    public Long countTotalEventByAgentNames(WazuhEventRequest request) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0L;
         }
         CountRequest countRequest = buildCountRequest(request);
-        CountResponse response = restHighLevelClient.count(countRequest);
-        return response.getCount();
+        try {
+            CountResponse response = restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
+            return response.getCount();
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es count total events by agent names error");
+        }
     }
 
     /**
@@ -527,12 +568,17 @@ public class EsClient {
      * @param request
      */
     public Long deleteDocByAgentNames(WazuhEventRequest request) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0L;
         }
         DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
-        BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteRequest);
-        return response.getUpdated();
+        try {
+            BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+            return response.getUpdated();
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es delete doc by agent names error");
+        }
     }
 
     /**
@@ -542,7 +588,7 @@ public class EsClient {
      * @return
      */
     private int aggsChangedCountWithTimeRange(WazuhHostMonitorPageRequest request, String launchId) {
-        if (AgentNameUtils.isAgentNamesEmpty(request.getAgentNames())) {
+        if (AgentNameUtil.isAgentNamesEmpty(request.getAgentNames())) {
             return 0;
         }
 
@@ -565,14 +611,19 @@ public class EsClient {
         sourceBuilder.size(0);
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
         int changedCount = 0;
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        if (Objects.nonNull(response.getAggregations())) {
-            ParsedNested nested = response.getAggregations().get(aggregationNested);
-            ParsedSum sum = nested.getAggregations().get(aggregationSum);
-            changedCount = (int) sum.getValue();
-        }
+        try {
+            SearchResponse response = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+            if (Objects.nonNull(response.getAggregations())) {
+                ParsedNested nested = response.getAggregations().get(aggregationNested);
+                ParsedSum sum = nested.getAggregations().get(aggregationSum);
+                changedCount = (int) sum.getValue();
+            }
 
-        return changedCount;
+            return changedCount;
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es aggs changed count with time range error");
+        }
     }
 
     /**
@@ -625,7 +676,12 @@ public class EsClient {
             boolQueryBuilder.must(QueryBuilders.termQuery(CUSTOM_PROBE_ID_PATH, launchId));
         }
         var searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-        return restHighLevelClient.search(searchRequest);
+        try {
+            return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (Exception e) {
+            log.error("{}", ExceptionUtils.getStackTrace(e));
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es query sic launch events with time range error");
+        }
     }
 
     private LocalDateTime getUtcTime(LocalDateTime time) {
@@ -642,8 +698,13 @@ public class EsClient {
         // 时间为空时返回所有相关索引
         if (Objects.isNull(start) || Objects.isNull(end)) {
             GetIndexRequest getIndexRequest = new GetIndexRequest(WAZUH_ALERT_INDEX_PREFIX + "*");
-            var result = restHighLevelClient.getIndices(getIndexRequest);
-            return result.getIndices();
+            try {
+                GetIndexResponse result = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
+                return result.getIndices();
+            } catch (Exception e) {
+                log.error("{}", ExceptionUtils.getStackTrace(e));
+                throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.ES, "es get index error");
+            }
         }
         List<String> indexList = indexListBuilder(getUtcTime(start), getUtcTime(end));
         var indexArray = new String[indexList.size()];
@@ -897,5 +958,19 @@ public class EsClient {
         } else {
             sourceBuilder.size(hostMonitorRequest.getPageSize());
         }
+    }
+
+    private static HttpHost[] createHttpHost(String esAddress) {
+        Asserts.check(!ObjectUtils.isEmpty(esAddress), "ElasticSearch cluster ip address cannot empty");
+        String[] ipArray = esAddress.split(",");
+        var httpHosts = new HttpHost[ipArray.length];
+        for (int i = 0, len = ipArray.length; i < len; i++) {
+            var ipAddress = ipArray[i];
+            String[] values = ipAddress.split(":");
+            String ip = values[0];
+            var port = Integer.parseInt(values[1]);
+            httpHosts[i] = new HttpHost(ip, port, "http");
+        }
+        return httpHosts;
     }
 }

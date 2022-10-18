@@ -1,16 +1,13 @@
 package cn.cyberpeace.mp.collection.core.client.wazuh;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
+import cn.cyberpeace.mp.collection.core.constant.CollectionErrorCodeConstant;
+import cn.cyberpeace.mp.collection.core.exception.MpCollectionRuntimeException;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -28,7 +25,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Slf4j
-public class WazuhHttpsUtils {
+class WazuhHttpsUtils {
     public static CloseableHttpClient createIgnoreSSLHttpClient() {
         try {
             var sslContext = new SSLContextBuilder().loadTrustMaterial(null, (TrustStrategy) (chain, authType) -> true).build();
@@ -36,7 +33,7 @@ public class WazuhHttpsUtils {
             return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         } catch (Exception e) {
             log.error("", e);
-            throw new MpRuntimeException("createIgnoreSSLHttpClient error");
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "createIgnoreSSLHttpClient error");
         }
     }
 
@@ -68,16 +65,16 @@ public class WazuhHttpsUtils {
             StatusLine sl2 = response.getStatusLine();
             if (sl2.getStatusCode() != 200) {
                 log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
-                throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
+                throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh connection fail!");
             }
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
+        } catch (UncheckedExecutionException | IOException | MpCollectionRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh connection fail!");
         } catch (Exception e) {
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException("wazuh api query error!");
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh api query error!");
         }
     }
 
@@ -105,22 +102,21 @@ public class WazuhHttpsUtils {
             StatusLine sl2 = response.getStatusLine();
             if (sl2.getStatusCode() != 200) {
                 log.error("get wazuh token error!:{}", EntityUtils.toString(response.getEntity(), "UTF-8"));
-                throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
+                throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh connection fail!");
             }
 
             return EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (UncheckedExecutionException | IOException | MpRuntimeException e) {
+        } catch (UncheckedExecutionException | IOException | MpCollectionRuntimeException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh connection fail!");
         } catch (Exception e) {
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException("wazuh api query error!");
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh api query error!");
         }
     }
 
     /**
      * get请求
-     *
      * @param url
      * @return
      * @throws IOException
@@ -139,10 +135,10 @@ public class WazuhHttpsUtils {
             return EntityUtils.toString(response.getEntity(), "UTF-8");
         } catch (UncheckedExecutionException | IOException e) {
             log.error("connected exception: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException(CollectionErrorCode.CONNECTION_FAIL);
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh api query error!");
         } catch (Exception e) {
             log.error("wazuh api error: {}", ExceptionUtil.stacktraceToString(e));
-            throw new MpRuntimeException("wazuh api query error!");
+            throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "wazuh api query error!");
         }
     }
 }

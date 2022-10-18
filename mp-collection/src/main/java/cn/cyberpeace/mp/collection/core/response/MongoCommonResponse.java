@@ -7,5 +7,6 @@ import org.bson.Document;
 @Data
 public class MongoCommonResponse {
     private FindIterable<Document> findIterable;
+
     private long total;
 }

@@ -1,29 +1,26 @@
 package cn.cyberpeace.mp.collection.core.client.wazuh;
 
-import cn.cyberpeace.mp.base.exception.MpRuntimeException;
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.collection.config.CollectionCacheConfig;
-import cn.cyberpeace.mp.collection.constant.CollectionErrorCode;
+import cn.cyberpeace.mp.collection.core.constant.CollectionErrorCodeConstant;
+import cn.cyberpeace.mp.collection.core.exception.MpCollectionRuntimeException;
 import cn.cyberpeace.mp.collection.core.model.wazuh.agent.Agent;
 import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.NetAddr;
 import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.Netiface;
 import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.OS;
 import cn.cyberpeace.mp.collection.core.model.wazuh.syscollector.Port;
-import cn.cyberpeace.mp.collection.core.request.wazuh.AgentRequest;
-import cn.cyberpeace.mp.collection.core.request.wazuh.BaseRequest;
-import cn.cyberpeace.mp.collection.core.request.wazuh.BaseResponse;
-import cn.cyberpeace.mp.collection.core.request.wazuh.CollectorBaseRequest;
+import cn.cyberpeace.mp.collection.core.request.wazuh.*;
+import cn.cyberpeace.mp.collection.core.result.ListObjResult;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.cache.impl.TimedCache;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.URLUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.google.common.base.Joiner;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
-import org.springframework.cache.annotation.Cacheable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Slf4j
-public class WazuhClient extends RequestProcessor{
+public class WazuhClient {
     private String wazuhUsername;
 
     private String wazuhPassword;
@@ -64,29 +61,8 @@ public class WazuhClient extends RequestProcessor{
         return new WazuhClientBuilder();
     }
 
-    private static final String CACHE_KEY_AGENTS = "agents";
-
     // expires in 10 minutes
     private static final TimedCache<String, String> TIMED_CACHE = CacheUtil.newTimedCache(10 * 60 * 1000L);
-
-    /**
-     * 查询所有agent信息
-     * @param agentRequest
-     * @return
-     */
-    @Cacheable(cacheManager = CollectionCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
-    public ListObjResult<Agent> pageAgents(AgentRequest agentRequest) {
-        agentRequest.ensure();
-        var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
-        List<NameValuePair> params = this.processRequestParams(agentRequest);
-        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
-        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
-        BaseResponse<Agent> result = JSON.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
-        });
-        List<Agent> agents = result.getData().getAffectedItems();
-
-        return new ListObjResult<>(agents, result.getData().getTotalAffectedItems());
-    }
 
     /**
      * 查询端口
@@ -101,7 +77,7 @@ public class WazuhClient extends RequestProcessor{
         }
         var requestUrl = wazuhUrl + String.format(WazuhUrlConstant.PORT_INFO_URL, agentId);
 
-        List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
+        List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
@@ -125,7 +101,7 @@ public class WazuhClient extends RequestProcessor{
         }
         var requestUrl = wazuhUrl + String.format(WazuhUrlConstant.NETIFACE_INFO_URL, agentId);
 
-        List<NameValuePair> params = super.processRequestParams(collectorBaseRequest);
+        List<NameValuePair> params = processRequestParams(collectorBaseRequest);
 
         String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
         var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
@@ -145,6 +121,7 @@ public class WazuhClient extends RequestProcessor{
 
     /**
      * 查询操作系统信息
+     *
      * @param agentName
      * @return
      */
@@ -176,6 +153,7 @@ public class WazuhClient extends RequestProcessor{
 
     /**
      * 查询wazuhToken防止token失效
+     *
      * @return
      */
     private String authenticate() {
@@ -232,7 +210,7 @@ public class WazuhClient extends RequestProcessor{
 
             if (agents.size() > 1) {
                 log.error("agentName:{} is not unique! {}", agentName, agents);
-                throw new MpRuntimeException(CollectionErrorCode.WAZUH_AGENTS_QUERY_ERROR);
+                throw new MpCollectionRuntimeException(CollectionErrorCodeConstant.WAZUH, "agent size is not unique");
             }
 
             return agents.get(0).getId();
@@ -241,14 +219,33 @@ public class WazuhClient extends RequestProcessor{
         return null;
     }
 
-    private List<Agent> listAgents(AgentRequest agentRequest) {
-        var result = pageAgents(agentRequest);
-        return result.getObjs();
+    /**
+     * 查询所有agent信息
+     *
+     * @param agentRequest
+     * @return
+     */
+    private ListObjResult<Agent> pageAgents(AgentRequest agentRequest) {
+        agentRequest.ensure();
+        var requestUrl = wazuhUrl + WazuhUrlConstant.ALL_AGENT_URL;
+        List<NameValuePair> params = this.processAgentRequestParams(agentRequest);
+        String wazuhToken = getWazuhTokenWithUrl(wazuhUrl);
+        var res = WazuhHttpsUtils.sendGetWithAuthToken(requestUrl, params, wazuhToken);
+        BaseResponse<Agent> result = JSON.parseObject(res, new TypeReference<BaseResponse<Agent>>() {
+        });
+        List<Agent> agents = result.getData().getAffectedItems();
+
+        return new ListObjResult<>(agents, result.getData().getTotalAffectedItems());
     }
 
-    private List<NameValuePair> processRequestParams(AgentRequest agentRequest) {
+    private List<Agent> listAgents(AgentRequest agentRequest) {
+        var result = pageAgents(agentRequest);
+        return result.getList();
+    }
 
-        List<NameValuePair> params = super.processRequestParams(agentRequest);
+    private List<NameValuePair> processAgentRequestParams(AgentRequest agentRequest) {
+
+        List<NameValuePair> params = processRequestParams(agentRequest);
 
         if (StringUtils.isNotBlank(agentRequest.getName())) {
             params.add(new BasicNameValuePair("name", agentRequest.getName()));
@@ -262,6 +259,67 @@ public class WazuhClient extends RequestProcessor{
             params.add(new BasicNameValuePair("status", agentRequest.getStatus()));
         }
 
+        return params;
+    }
+
+    private List<NameValuePair> processRequestParams(BasePageRequest pageRequest) {
+
+        List<NameValuePair> params = new ArrayList<>();
+        if (Objects.isNull(pageRequest)) {
+            params = defaultParams();
+            return params;
+        }
+
+        if (Objects.isNull(pageRequest.getPageSize()) || pageRequest.getPageSize() <= 0) {
+            pageRequest.setPageSize(10);
+        }
+
+        if (Objects.isNull(pageRequest.getPage()) || pageRequest.getPage() < 1) {
+            pageRequest.setPage(1);
+        }
+
+        if (Objects.nonNull(pageRequest.getPageSize())) {
+            params.add(new BasicNameValuePair("limit", String.valueOf(pageRequest.getPageSize())));
+            Integer offset = (pageRequest.getPage() - 1) * pageRequest.getPageSize();
+            params.add(new BasicNameValuePair("offset", String.valueOf(offset)));
+        }
+
+        if (ArrayUtil.isNotEmpty(pageRequest.getSelect())) {
+            params.add(new BasicNameValuePair("select", Joiner.on(",").join(pageRequest.getSelect())));
+        }
+
+        if (ArrayUtil.isNotEmpty(pageRequest.getSort())) {
+            params.add(new BasicNameValuePair("sort", Joiner.on(",").join(pageRequest.getSelect())));
+        }
+
+        return params;
+    }
+
+    private List<NameValuePair> processRequestParams(BaseRequest baseRequest) {
+        List<NameValuePair> params = defaultParams();
+
+        if (Objects.isNull(baseRequest)) {
+            return params;
+        }
+
+        if (Objects.nonNull(baseRequest.getLimit())) {
+            params.add(new BasicNameValuePair("limit", String.valueOf(baseRequest.getLimit())));
+        }
+
+        if (Objects.nonNull(baseRequest.getOffset())) {
+            params.add(new BasicNameValuePair("offset", String.valueOf(baseRequest.getOffset())));
+        }
+
+        if (StringUtils.isNotBlank(baseRequest.getSelect())) {
+            params.add(new BasicNameValuePair("select", String.valueOf(baseRequest.getSelect())));
+        }
+
+        return params;
+    }
+
+    private List<NameValuePair> defaultParams() {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("limit", "10"));
         return params;
     }
 }

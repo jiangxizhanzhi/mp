@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.collection.core.model.wazuh.syscollector;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -11,7 +9,6 @@ import lombok.Data;
  * @Date：2022/2/24 11:27
  */
 @Data
-@ApiModel("端口信息")
 public class Port {
 
     private Local local;
@@ -20,56 +17,38 @@ public class Port {
 
     private Scan scan;
 
-    @ApiModelProperty(value = "inode")
     private Integer inode;
 
-    @ApiModelProperty(value = "父进程ID")
     private Integer pid;
 
-    @ApiModelProperty(value = "接收队列中的数据包")
     @JSONField(name = "rx_queue")
     private Integer rxQueue;
 
-    @ApiModelProperty(value = "待传输的数据包")
     @JSONField(name = "tx_queue")
     private String txQueue;
 
-    @ApiModelProperty(value = "协议")
     private String protocol;
 
-    @ApiModelProperty(value = "状态")
     private String state;
 
-    @ApiModelProperty(value = "进程")
     private String process;
 
-    @ApiModelProperty(value = "代理ID")
     @JSONField(name = "agent_id")
     private String agentId;
 
-    @ApiModelProperty(value = "主机ip")
-    private String agentIp;
-
-
     @Data
-    @ApiModel("本地端口")
     public static class Local {
 
-        @ApiModelProperty("本地IP")
         private String ip;
 
-        @ApiModelProperty("本地端口")
         private Integer port;
     }
 
     @Data
-    @ApiModel("远程端口")
     public static class Remote {
 
-        @ApiModelProperty("远程IP")
         private String ip;
 
-        @ApiModelProperty("远程端口")
         private Integer port;
     }
 

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.collection.core.client.wazuh;
 
-public class WazuhUrlConstant {
+class WazuhUrlConstant {
     public static final String AUTHENTICATE_URL = "/security/user/authenticate?raw=true";
 
     public static final String ALL_AGENT_URL = "/agents";

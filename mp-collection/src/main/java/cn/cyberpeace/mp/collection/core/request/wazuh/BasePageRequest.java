@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.collection.core.request.wazuh;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,22 +16,17 @@ import java.util.Objects;
 @AllArgsConstructor
 public class BasePageRequest {
 
-    @ApiModelProperty(value = "当前页")
     private Integer page;
 
-    @ApiModelProperty(value = "每页数量")
     private Integer pageSize;
 
-    @ApiModelProperty(value = "分页每页条数(兼容)")
     private Integer perPage;
 
-    @ApiModelProperty(value = "返回字段")
     private String[] select;
 
     /**
      * @Deprecated 排序字段
      */
-    @ApiModelProperty(value = "排序字段(兼容)")
     private String[] sort;
 
 
@@ -48,10 +42,6 @@ public class BasePageRequest {
         if (Objects.isNull(pageSize)) {
             pageSize = 10;
         }
-
-//        if (sort != null && sort.length > 0) {
-//            orders = sort;
-//        }
     }
 
 }

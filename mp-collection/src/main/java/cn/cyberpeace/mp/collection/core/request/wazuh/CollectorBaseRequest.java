@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.collection.core.request.wazuh;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 /**
@@ -10,10 +8,8 @@ import lombok.Data;
  * @Date：2022/2/24 16:12
  */
 @Data
-@ApiModel("系统清单请求")
 public class CollectorBaseRequest extends BasePageRequest {
 
-    @ApiModelProperty(value = "代理名称")
     private String agentName;
 
     public CollectorBaseRequest() {
