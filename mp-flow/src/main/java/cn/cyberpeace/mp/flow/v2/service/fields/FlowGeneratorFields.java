@@ -13,7 +13,7 @@ public class FlowGeneratorFields extends BaseModelFields {
     public static final DynamicFields availableFields = new DynamicFields(
             FlowGeneratorModel::getName, FlowGeneratorModel::getType, FlowGeneratorModel::getIp,
             FlowGeneratorModel::getServer, FlowGeneratorModel::getUsername, FlowGeneratorModel::getPassword,
-            FlowGeneratorModel::getToken
+            FlowGeneratorModel::getToken, FlowGeneratorModel::getResourceId
     ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);

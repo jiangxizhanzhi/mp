@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.flow.v2.controller;
 
 import cn.cyberpeace.mp.base.controller.*;
+import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.ModelBOClass;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.v2.bo.FlowBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowModel;
@@ -15,8 +17,12 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(value = "流量信息管理接口", tags = "流量信息管理接口")
 @Slf4j
@@ -53,6 +59,15 @@ public class FlowController implements
         bo.setId(id);
         bo.paramCheck(true);
         return BaseModelUpdateBOController.super.update(bo, fields);
+    }
+
+    @ApiOperation(value = "流量包解析", notes = "获取流量包包含的协议集合")
+    @PostMapping("/analyse")
+    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
+        // TODO 解析流量包包含的协议内容
+        List<String> protocols = new ArrayList<>();
+
+        return ResultCommon.success(protocols);
     }
 
 }
