@@ -745,6 +745,12 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void checkName(CsceneBO csceneBO) {
+        if (csceneBO.getName().length() > 255) {
+            throw new MpRuntimeException(CsceneErrorCode.PARAMS_FLOWS_DATA_TOO_LONG);
+        }
+    }
+
     public static void checkIngressAndEgress(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getElements() != null) {
             var elements = csceneBO.getSceneConfig().getTopology().getElements();
