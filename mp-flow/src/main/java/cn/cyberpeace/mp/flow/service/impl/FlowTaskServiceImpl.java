@@ -172,8 +172,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<FlowTaskModel> addFlowTask(AddFlowTaskRequest request) {
-        log.info("add flow task request:{}", request.toString());
-
         if (StringUtils.isBlank(request.getOriginIps())) {
             // 设置默认来源ip
             request.setOriginIps("127.0.0.1-127.0.0.1");

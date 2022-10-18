@@ -167,7 +167,6 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
      * @param operationLogModel
      */
     private IndexResponse create(OperationLogModel operationLogModel){
-        log.info("{}", operationLogModel);
        return operateLogServiceMap.get(operationLogModel.getSiteType()).create(operationLogModel);
     }
 

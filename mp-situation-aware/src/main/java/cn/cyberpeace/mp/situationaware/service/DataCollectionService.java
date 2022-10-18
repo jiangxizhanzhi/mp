@@ -134,7 +134,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -194,7 +193,6 @@ public class DataCollectionService extends CollectionBaseService {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
-        log.info("elasticsearch scroll query, scrollId:\n{}", scrollId);
         try {
             SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
@@ -218,7 +216,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<WazuhProbeCommonModel>
      */
     public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -280,7 +277,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -349,7 +345,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
                                                                               boolean isTop, String fieldPath, String fieldName) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ArrayList<>();
         }
@@ -1008,7 +1003,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
@@ -1064,7 +1058,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
     public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
@@ -1119,7 +1112,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0;
         }
@@ -1154,7 +1146,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @param wazuhEventRequest
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0L;
         }
@@ -1437,7 +1428,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        log.info("startTime:{}, endTime:{}", startTime, endTime);
         LocalDate startDate = startTime.toLocalDate();
         LocalDate endDate = endTime.toLocalDate();
         List<String> dayList = new ArrayList<>();
