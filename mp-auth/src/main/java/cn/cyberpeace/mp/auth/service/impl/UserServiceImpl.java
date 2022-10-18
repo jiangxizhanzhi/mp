@@ -439,7 +439,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
     public UserModel getByUserName(String userName) {
-        log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
         setDefaultIfNoAvatar(userModel);
         return userModel;

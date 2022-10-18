@@ -74,8 +74,6 @@ public class SysActivationService {
      * @param activationRequest
      */
     public void activate(ActivationRequest activationRequest) {
-        log.info("activationRequest:{}", activationRequest);
-
         ActivationResponse content = status();
         SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
         boolean isSysActivited = false;
@@ -305,7 +303,6 @@ public class SysActivationService {
     private void generateEncryptedFile(ActivationRequest activationRequest) {
         String verifyCode = activationRequest.getVerifyCode();
         String encryptedVerifyCode = EncryptUtils.desEncrypt(verifyCode);
-        log.info("generate encrypted file activationRequest:{}", activationRequest);
         ActivationResponse activationResponse = new ActivationResponse();
         BeanUtils.copyProperties(activationRequest, activationResponse);
         String expiredDateStr = getExpiredDateStr(activationRequest.getDeadline());
@@ -417,7 +414,6 @@ public class SysActivationService {
      */
     private void processActivCtlWhenReActiveWithOldLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr) {
         // 不更新first_active_date
-        log.info("activeDateStr:{}", activeDateStr);
         updateSysActivCtlModel.setFirstActiveDate(null);
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         sysActivCtlService.update(updateSysActivCtlModel);
@@ -431,7 +427,6 @@ public class SysActivationService {
      * @param expiredDateStr
      */
     private void processActivCtlWhenReActiveWithNewLicense(String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
-        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         SysActivCtlModel newSysActivCtlModel = new SysActivCtlModel();
         Long currTs = System.currentTimeMillis();
         newSysActivCtlModel.setSysTimestamp(currTs);
@@ -458,7 +453,6 @@ public class SysActivationService {
      * @param expiredDateStr
      */
     private void processActivCtlWhenFirstActiveWithNewLicense(SysActivCtlModel updateSysActivCtlModel, String activeDateStr, String expiredDateStr, String encryptedLicenseCode) {
-        log.info("activeDateStr:{}, expiredDateStr:{}", activeDateStr, expiredDateStr);
         updateSysActivCtlModel.setFirstActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setLastActiveDate(EncryptUtils.desEncrypt(activeDateStr));
         updateSysActivCtlModel.setExpireDate(EncryptUtils.desEncrypt(expiredDateStr));

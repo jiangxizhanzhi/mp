@@ -45,7 +45,6 @@ public class SysActivCtlServiceImpl extends BaseModelServiceImpl<SysActivCtlMode
 
     @Override
     public void invalidOtherExceptOne(String exceptedId) {
-        log.info("invalidOtherExceptOne exceptedId:{}", exceptedId);
         HumanCondition humanCondition = new HumanCondition()
                 .filterNotEqual(SysActivCtlModel::getId, exceptedId);
         SysActivCtlModel model = new SysActivCtlModel();

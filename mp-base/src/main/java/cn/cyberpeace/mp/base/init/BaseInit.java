@@ -28,10 +28,7 @@ public class BaseInit implements ApplicationRunner {
         FileUtil.mkdir(homeDir);
         FileUtil.mkdir(resourcesDir);
         FileUtil.mkdir(fileServerDir);
-        log.info("Home dir: {}", homeDir);
-        log.info("Resource dir: {}", resourcesDir);
-        log.info("Local file server dir: {}", fileServerDir);
-
+        log.info("Home dir: {}\nResource dir: {}\nLocal file server dir: {}", homeDir, resourcesDir, fileServerDir);
         if (Boolean.TRUE.equals(baseAppConfig.getEnableLocalCall())) {
             TaskCommon.executeTask(() -> LocalCallServerListener.initStart(baseAppConfig, BeanCommon.getContext()));
         }

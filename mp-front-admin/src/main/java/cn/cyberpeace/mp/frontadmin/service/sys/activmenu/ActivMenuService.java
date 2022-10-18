@@ -315,9 +315,6 @@ public class ActivMenuService {
      * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
      */
     private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
-        log.info("targetModels:{}", targetModels);
-        log.info("menuExtraInfos:{}", menuExtraInfos);
-        log.info("activationResponse:{}", activationResponse);
         List<ActivationItem> items = activationResponse.getItems();
 
         String edition = String.valueOf(activationResponse.getEdition());

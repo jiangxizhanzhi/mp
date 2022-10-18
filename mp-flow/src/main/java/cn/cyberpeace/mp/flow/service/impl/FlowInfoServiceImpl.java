@@ -939,7 +939,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
-        log.info("flow file import request: {}", request);
         String filePath = request.getPath();
         File fileFolder = new File(filePath);
         if (fileFolder.exists()) {
