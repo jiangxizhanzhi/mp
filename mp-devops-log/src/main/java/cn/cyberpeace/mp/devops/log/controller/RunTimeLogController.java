@@ -46,7 +46,7 @@ public class RunTimeLogController {
 
     private final LogFileServiceFactory logFileServiceFactory;
 
-    @Autowired
+    @javax.annotation.Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @GetMapping("/logs")

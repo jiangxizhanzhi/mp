@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         setModelService(flowInfoService);
     }
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
     /**
      * 删除流量信息
