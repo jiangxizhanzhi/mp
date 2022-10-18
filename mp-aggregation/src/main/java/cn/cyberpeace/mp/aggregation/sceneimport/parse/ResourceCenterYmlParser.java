@@ -108,8 +108,31 @@ public final class ResourceCenterYmlParser {
             return new ArrayList<>();
         }
         // 解析所有的 servers.yml
-        return serversYmlPaths.stream()
+        var imageParseResult = serversYmlPaths.stream()
                 .map(serversYmlPath -> new FilePathYmlParser<>(serversYmlPath, ImageParseResult.class).parse())
                 .collect(Collectors.toList());
+
+        for (int i = 0; i < imageParseResult.size(); i++) {
+            var accessModes = imageParseResult.get(i).getServers().entrySet().iterator().next().getValue().getAccessModes();
+            var manageAccessModes = imageParseResult.get(i).getServers().entrySet().iterator().next().getValue().getManageAccessModes();
+            if (CollectionUtils.isNotEmpty(accessModes)) {
+                for (var accessMode : accessModes) {
+                    if (StringUtils.isNotEmpty(accessMode.getPrivateKey())) {
+                        //上传了秘钥,保存秘钥文件地址
+                        accessMode.setPrivateKeyPath(serversYmlPaths.get(i).replace("servers.yml", "") + accessMode.getPrivateKey());
+                    }
+                }
+            }
+            if (CollectionUtils.isNotEmpty(manageAccessModes)) {
+                for (var manageAccessMode : manageAccessModes) {
+                    if (StringUtils.isNotEmpty(manageAccessMode.getPrivateKey())) {
+                        //上传了秘钥,保存秘钥文件地址
+                        manageAccessMode.setPrivateKeyPath(serversYmlPaths.get(i).replace("servers.yml", "") + manageAccessMode.getPrivateKey());
+                    }
+                }
+            }
+        }
+
+        return imageParseResult;
     }
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.aggregation.sceneimport.convert;
 
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.ImageInfoParseResult;
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
@@ -9,6 +10,7 @@ import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.hutool.core.io.FileUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -209,7 +211,16 @@ class ImageInfoConverter implements IConverter {
         accessMode.setDesc(result.getDesc());
         accessMode.setPath(result.getPath());
         accessMode.setProxy(result.getIsproxy() == null ? true : Boolean.valueOf(result.getIsproxy()));
-        accessMode.setPassword(result.getPassword());
+        if (StringUtils.isNotEmpty(result.getPrivateKey())) {
+            if (FileUtil.exist(result.getPrivateKeyPath())) {
+                String fdfsPath = FsCommon.upload(result.getPrivateKeyPath());
+                accessMode.setPrivateKeyEnable(true);
+                accessMode.setPrivateKeyPath(fdfsPath);
+                accessMode.setPrivateKeyFileName(result.getPrivateKey());
+            }
+        } else {
+            accessMode.setPassword(result.getPassword());
+        }
         if (NumberUtils.isCreatable(result.getPort())) {
             accessMode.setPort(Integer.valueOf(result.getPort()));
         }
