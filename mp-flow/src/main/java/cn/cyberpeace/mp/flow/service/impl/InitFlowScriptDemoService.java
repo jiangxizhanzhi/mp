@@ -45,7 +45,6 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
         try {
             List<FlowScriptDemoModel> demoList = flowScriptDemoService.listAll(null);
             if (CollectionUtils.isEmpty(demoList)) {
-                log.info("============ init script demo start ==============");
                 pyDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/flow/demo_py.py"));
                 shDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/flow/demo_sh.sh"));
 
@@ -78,8 +77,6 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
                 addDemoList.add(probePyModel);
                 addDemoList.add(probeBatModel);
                 flowScriptDemoService.bulkCreate(addDemoList);
-
-                log.info("============ init script demo end ==============");
             } else {
                 log.info("============ no need to init script demo ==============");
             }

@@ -451,7 +451,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Consumer<String> errorCallback) {
-        log.info("=========== Start actuator flow:[{}] ===============", flowTaskId);
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
         if (Objects.isNull(flowTaskResult)) {
@@ -806,7 +805,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> batchActuator(BatchActuatorTaskRequest request) {
-        log.info("=========== Batch actuator flow tasks start: {}", request.getTaskIds());
         // 流量任务存在校验
         QueryParams queryParams = new QueryParams();
         queryParams.setIds(request.getTaskIds().toArray(new String[0]));
@@ -883,8 +881,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.info("refresh task status error: ", e);
             }
         });
-
-        log.info("=========== Batch actuator flow tasks end ===============");
         return ResultCommon.success(true);
     }
 

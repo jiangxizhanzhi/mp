@@ -828,20 +828,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<Boolean> batchImportFlowInfo() {
         String pcapPath = PRE_PATH + "/pcap";
-        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
         File pcapFile = new File(pcapPath);
         if (!this.doImport(pcapFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入pcap文件结束");
 
         String scriptPath = PRE_PATH + "/scripts";
-        log.info("导入script文件开始,scriptPath:{}", scriptPath);
         File scriptFile = new File(scriptPath);
         if (!this.doImport(scriptFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入script文件结束");
 
         return new ServiceResult<>(true);
     }

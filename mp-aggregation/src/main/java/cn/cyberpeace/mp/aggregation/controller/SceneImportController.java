@@ -41,7 +41,6 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = SceneImportRequest.class)
     @PostMapping("/import_resource_center")
     public ServiceResult<String> importResourceCenter(@RequestBody SceneImportRequest request) {
-        log.info("start import scene topo , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
@@ -60,7 +59,6 @@ public class SceneImportController {
     @PostMapping("/mount")
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = MoundRequest.class)
     public ServiceResult<Boolean> mount(@RequestBody MoundRequest request) {
-        log.info("mount nfs , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getHost()) || StringUtils.isEmpty(request.getPath())) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }
@@ -71,7 +69,6 @@ public class SceneImportController {
     @ApiImplicitParam(name = "request", value = "请求", dataTypeClass = MoundRequest.class)
     @PostMapping("/umount")
     public ServiceResult<Boolean> umount(@RequestBody MoundRequest request) {
-        log.info("unmount nfs , input params is {}", JsonCommon.stringify(request));
         if (StringUtils.isEmpty(request.getPath())) {
             return ResultCommon.fail(BaseErrorCode.PARAMS_INVALID);
         }

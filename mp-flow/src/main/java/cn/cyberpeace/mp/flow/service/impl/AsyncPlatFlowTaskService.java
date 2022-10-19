@@ -429,7 +429,6 @@ public class AsyncPlatFlowTaskService {
      * @param uuid
      */
     private void addFlowExecutor(String uuid, String trexName, List<FlowNetworkInfo> networkInfos) {
-        log.info("================ Add vm instance start ==================");
         // 获取外部networkId，用于管理端口
         String externalNetId = "";
         try {
@@ -520,8 +519,6 @@ public class AsyncPlatFlowTaskService {
             log.error("add vm instance error", e);
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
-
-        log.info("================ Add vm instance end ==================");
     }
 
 

@@ -372,7 +372,6 @@ public class SysActivationService {
      * @param activationRequest
      */
     private void processActivCtlAfterActivationSuccess(ActivationRequest activationRequest) {
-        log.info("update activ ctl config info");
         SysActivCtlModel oldSysActivCtlModel = sysCtlService.getUnusedActivCtlModel();
         SysActivCtlModel updateSysActivCtlModel = new SysActivCtlModel();
         updateSysActivCtlModel.setId(oldSysActivCtlModel.getId());
