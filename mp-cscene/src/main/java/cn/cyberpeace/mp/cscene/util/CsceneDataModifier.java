@@ -745,6 +745,21 @@ public class CsceneDataModifier {
         }
     }
 
+    public static void check(CsceneBO csceneBO) {
+        if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getScene() != null) {
+            var name = csceneBO.getSceneConfig().getTopology().getScene().getName();
+            var description = csceneBO.getSceneConfig().getTopology().getScene().getDescription();
+
+            if (name != null && name.length() > 255) {
+                throw new MpRuntimeException(CsceneErrorCode.PARAMS_NAME_TOO_LONG);
+            }
+
+            if (description != null && description.length() > 2048) {
+                throw new MpRuntimeException(CsceneErrorCode.PARAMS_DESCRIPTION_TOO_LONG);
+            }
+        }
+    }
+
     public static void checkIngressAndEgress(CsceneBO csceneBO) {
         if (csceneBO.getSceneConfig() != null && csceneBO.getSceneConfig().getTopology() != null && csceneBO.getSceneConfig().getTopology().getElements() != null) {
             var elements = csceneBO.getSceneConfig().getTopology().getElements();

@@ -20,8 +20,9 @@ public enum CsceneErrorCode implements ErrorCode {
     PARAMS_SHOULD_NOT_NULL("MP-110291", "params_should_not_null"),
     PARAMS_SHOULD_NOT_EMPTY("MP-110292", "params_should_not_empty"),
     PARAMS_FLOWS_DATA_TOO_LONG("MP-110293", "params_flows_data_too_long"),
-    PARAMS_FIRE_RULES_OUT_OF_LIMIT("MP-110294", "params_fire_rules_out_of_limit");
-
+    PARAMS_FIRE_RULES_OUT_OF_LIMIT("MP-110294", "params_fire_rules_out_of_limit"),
+    PARAMS_NAME_TOO_LONG("MP-110295", "params_name_too_long"),
+    PARAMS_DESCRIPTION_TOO_LONG("MP-110296", "params_description_too_long");
 
     CsceneErrorCode(String code, String message) {
         setCode(code, "cscene.error_code." + message);
