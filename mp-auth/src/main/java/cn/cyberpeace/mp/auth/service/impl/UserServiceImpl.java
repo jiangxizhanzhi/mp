@@ -394,8 +394,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
-        log.info("user has been modified id:{}", userId);
-
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {

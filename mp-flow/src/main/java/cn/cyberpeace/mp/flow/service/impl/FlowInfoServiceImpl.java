@@ -39,6 +39,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -359,7 +360,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         try {
             filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
         } catch (IOException e) {
-            log.error("upload pcap file error", e);
+            log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
             return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
         }
         addRequest.setPcapFilePath(filePath);
@@ -449,7 +450,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 String filePath = FsCommon.upload(is, suffix);
                 addRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
-                log.error("add attack flow error", e);
+                log.error("add attack flow error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
             } finally {
                 IOUtils.closeQuietly(is);
@@ -490,7 +491,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             try {
                 filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
-                log.error("attack upload pcap file error", e);
+                log.error("attack upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             addRequest.setPcapFilePath(filePath);
@@ -545,7 +546,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             try {
                 filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
-                log.error("upload pcap file for update error", e);
+                log.error("upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             modifyRequest.setPcapFilePath(filePath);
@@ -630,7 +631,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         String filePath = FsCommon.upload(is, suffix);
                         modifyRequest.setFilePath(filePath);
                     } catch (MpRuntimeException e) {
-                        log.error("modify attack flow error", e);
+                        log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                         return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                     } finally {
                         IOUtils.closeQuietly(is);
@@ -657,7 +658,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     String filePath = FsCommon.upload(is, suffix);
                     modifyRequest.setFilePath(filePath);
                 } catch (MpRuntimeException e) {
-                    log.error("modify attack flow error", e);
+                    log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                 } finally {
                     IOUtils.closeQuietly(is);
@@ -699,7 +700,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 try {
                     filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
                 } catch (IOException e) {
-                    log.error("attack upload pcap file for update error", e);
+                    log.error("attack upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
                 }
                 modifyRequest.setPcapFilePath(filePath);
@@ -828,20 +829,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<Boolean> batchImportFlowInfo() {
         String pcapPath = PRE_PATH + "/pcap";
-        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
         File pcapFile = new File(pcapPath);
         if (!this.doImport(pcapFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入pcap文件结束");
 
         String scriptPath = PRE_PATH + "/scripts";
-        log.info("导入script文件开始,scriptPath:{}", scriptPath);
         File scriptFile = new File(scriptPath);
         if (!this.doImport(scriptFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入script文件结束");
 
         return new ServiceResult<>(true);
     }
@@ -976,10 +973,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             // 过滤空行数据
                             readmeList = readmeList.stream().filter(text -> StringUtils.isNotBlank(text)).collect(Collectors.toList());
                         } catch (FileNotFoundException e) {
-                            log.error("flow info import error for FileNotFoundException", e);
+                            log.error("flow info import error for FileNotFoundException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
                         } catch (IOException e) {
-                            log.error("flow info import error for IOException", e);
+                            log.error("flow info import error for IOException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
                         } finally {
                             IOUtils.closeQuietly(fileReader);

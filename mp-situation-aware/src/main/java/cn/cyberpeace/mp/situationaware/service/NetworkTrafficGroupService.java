@@ -70,7 +70,7 @@ public class NetworkTrafficGroupService {
         try {
             result = HttpUtils.sendGet(situationAwareConfig.getArkimeCpcloudContainerCreateUrl() + "/containers");
         } catch (IOException e) {
-            log.error("query cloud containers error");
+            log.error("query cloud containers error, {}", ExceptionUtils.getStackTrace(e));
         }
         JSONArray networkList = (JSONArray) JSONPath.eval(JSON.parse(result), "$.data.list");
         AtomicReference<String> containerId = new AtomicReference<>("");
@@ -88,7 +88,7 @@ public class NetworkTrafficGroupService {
             HttpUtils.sendDelete(deleteUrl, deleteParam.toJSONString());
 
         } catch (IOException e) {
-            log.error("deleete  arkime Image instance error");
+            log.error("deleete  arkime Image instance error, {}",ExceptionUtils.getStackTrace(e));
             log.error(SituationalAwareErrorCode.ARKIME_DELETE_ERROR.getMessage(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.ARKIME_DELETE_ERROR, ExceptionUtils.getStackTrace(e));
         }
@@ -172,7 +172,7 @@ public class NetworkTrafficGroupService {
             String res = HttpUtils.sendPost(url, paramObject.toJSONString());
             log.info("dobind Network traffic mirror message {}", res);
         } catch (IOException e) {
-            log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
+            log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -193,7 +193,7 @@ public class NetworkTrafficGroupService {
             String res  = HttpUtils.sendDelete(url, paramObject.toJSONString());
             log.info("delete Network traffic mirror message {}", res);
         } catch (IOException e) {
-            log.error("binding mirror error param:{}", networkTrafficMirrorRequest);
+            log.error("binding mirror error param:{}, {}", networkTrafficMirrorRequest, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.BINDING_MIRROR_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }

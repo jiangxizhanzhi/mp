@@ -103,8 +103,6 @@ public class ActivMenuService {
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-        log.info("targetModels.size:{}", targetModels.size());
-
         boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
         evictCache();
         return success;
@@ -118,7 +116,6 @@ public class ActivMenuService {
      * @return
      */
     public boolean resetMenusVisibility(ActivationResponse content) {
-        log.info("resetMenusVisibility...");
         if (Objects.isNull(content)) {
             return false;
         }
@@ -140,7 +137,6 @@ public class ActivMenuService {
      * @return
      */
     public void resetOptionsVisibility(ActivationResponse content) {
-        log.info("resetOptionsVisibility...");
         if (Objects.isNull(content)) {
             return;
         }

@@ -35,7 +35,7 @@ public class DefaultImgService {
         String startWithFile = "file:";
         String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
         if (StringUtils.isBlank(pathName)) {
-            log.error("==========default img config error==================");
+            log.error("default img config error, pathName[{}] is blank", pathName);
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 
@@ -60,7 +60,7 @@ public class DefaultImgService {
         String startWithFile = "file:";
         String pathName = AggregationSingleton.aggregationConfig.getStaticLocation();
         if (StringUtils.isBlank(pathName)) {
-            log.error("==========default img config error==================");
+            log.error("default img config error, pathName is blank");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
         }
 

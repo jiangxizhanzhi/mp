@@ -35,6 +35,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -434,7 +435,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.error("delete flow file response error");
             }
         } catch (Exception e) {
-            log.error("delete file from flow actuator platform error");
+            log.error("delete file from flow actuator platform error, {}", ExceptionUtils.getStackTrace(e));
         }
 
         return false;
@@ -451,7 +452,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> actuator(String flowTaskId, int taskAction, Runnable callback, Consumer<String> errorCallback) {
-        log.info("=========== Start actuator flow:[{}] ===============", flowTaskId);
         // 流量任务存在校验
         ObjResult<FlowTaskModel> flowTaskResult = get(flowTaskId).getSource();
         if (Objects.isNull(flowTaskResult)) {
@@ -566,7 +566,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                         return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                     }
                 } catch (Exception e) {
-                    log.error("add app task error", e);
+                    log.error("add app task error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                 }
             }
@@ -592,7 +592,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                         return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                     }
                 } catch (Exception e) {
-                    log.error("add standard task error", e);
+                    log.error("add standard task error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.ACTUATOR_TASK_ERROR);
                 }
             }
@@ -685,7 +685,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                     flowRecordsList = flowRecordsArray.toJavaList(FlowRecords.class);
                 }
             } catch (Exception e) {
-                log.error("queryFlowRecords parse result error:", e);
+                log.error("queryFlowRecords parse result error:{}", ExceptionUtils.getStackTrace(e));
             }
             response.setFlowRecordsList(flowRecordsList);
             response.setStatus(status);
@@ -730,7 +730,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.error("query task status failed");
             }
         } catch (Exception e) {
-            log.error("query task status error", e);
+            log.error("query task status error, {}", ExceptionUtils.getStackTrace(e));
         }
 
         return rows;
@@ -806,7 +806,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
      * @return
      */
     public ServiceResult<Boolean> batchActuator(BatchActuatorTaskRequest request) {
-        log.info("=========== Batch actuator flow tasks start: {}", request.getTaskIds());
         // 流量任务存在校验
         QueryParams queryParams = new QueryParams();
         queryParams.setIds(request.getTaskIds().toArray(new String[0]));
@@ -871,7 +870,7 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 return ResultCommon.success(false);
             }
         } catch (IOException e) {
-            log.error("batch actuator tasks error", e);
+            log.error("batch actuator tasks error, {}", ExceptionUtils.getStackTrace(e));
             return ResultCommon.success(false);
         }
 
@@ -883,8 +882,6 @@ public class FlowTaskServiceImpl extends BaseModelServiceImpl<FlowTaskModel, Flo
                 log.info("refresh task status error: ", e);
             }
         });
-
-        log.info("=========== Batch actuator flow tasks end ===============");
         return ResultCommon.success(true);
     }
 

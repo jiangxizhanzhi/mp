@@ -18,6 +18,7 @@ import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -97,7 +98,7 @@ public class ResourceCenterService {
         try {
             Process process = Runtime.getRuntime().exec(shell);
         } catch (Exception e) {
-            log.error("Exec shell error! command=[{}], catch error:", shell, e);
+            log.error("Exec shell error! command=[{}], catch error:{}", shell, ExceptionUtils.getStackTrace(e));
         }
         log.info("End exec shell!");
     }

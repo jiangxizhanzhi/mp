@@ -6,6 +6,7 @@ import cn.cyberpeace.mp.situationaware.constant.SituationalAwareErrorCode;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -36,7 +37,7 @@ public class WazuhHttpsUtils {
             var sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
             return HttpClients.custom().setSSLSocketFactory(sslConnectionSocketFactory).build();
         } catch (Exception e) {
-            log.error("{}", e);
+            log.error("{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException("createIgnoreSSLHttpClient error");
         }
     }

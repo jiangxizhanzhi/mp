@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -146,7 +147,7 @@ public class RequestLogAspect {
             operateLogService.create(operateLog, request);
 
         } catch (Exception e) {
-            log.error("====插入操作日志异常:{}==",e.getMessage());
+            log.error("====插入操作日志异常:{}==", ExceptionUtils.getStackTrace(e));
         }
     }
 
