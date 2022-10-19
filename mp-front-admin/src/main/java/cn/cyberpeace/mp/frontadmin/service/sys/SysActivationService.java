@@ -36,7 +36,12 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @Description: 系统激活相关service
@@ -75,64 +80,69 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         ActivationResponse content = status();
-        SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
         boolean isSysActivited = false;
         if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
             log.error("content status is actived!");
             isSysActivited = true;
         }
-        if (Objects.nonNull(validModel)) {
-            log.error("valid model existed!");
-            isSysActivited = true;
-        }
-        if (isSysActivited) {
-            log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
-        }
 
+        synchronized (this) {
+            if (!isSysActivited) {
+                SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
+                if (Objects.nonNull(validModel)) {
+                    log.error("valid model existed!");
+                    isSysActivited = true;
+                }
+            }
 
-        SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
-        if (Objects.isNull(unusedActivCtlModel)) {
-            log.error("unused activctl not existed!");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
-        }
+            if (isSysActivited) {
+                log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
+            }
 
-        String localSysUUID = querySysUUID();
-        if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
-            log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
-        }
+            SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
+            if (Objects.isNull(unusedActivCtlModel)) {
+                log.error("unused activctl not existed!");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+            }
 
-        // 拼接json串，调用licenseService验证
-        ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
-        verifyInfo.setDeadline(activationRequest.getDeadline());
-        verifyInfo.setMachinecode(activationRequest.getMachineCode());
+            String localSysUUID = querySysUUID();
+            if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
+                log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
+            }
 
-        // 自定义信息
-        Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
-        verifyInfo.setInfo(infoMap);
+            // 拼接json串，调用licenseService验证
+            ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
+            verifyInfo.setDeadline(activationRequest.getDeadline());
+            verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
-        String verifyStr = JSON.toJSONString(verifyInfo);
-        String verifyCode = activationRequest.getVerifyCode();
+            // 自定义信息
+            Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+            verifyInfo.setInfo(infoMap);
 
-        // 校验激活码和激活配置项，是否匹配
-        boolean success = licenseService.verify(verifyStr, verifyCode);
+            String verifyStr = JSON.toJSONString(verifyInfo);
+            String verifyCode = activationRequest.getVerifyCode();
 
-        if (success) {
-            // 校验通过，生成加密文件存储磁盘
-            ACTIVATION_CONTENT = null;
-            generateEncryptedFile(activationRequest);
+            // 校验激活码和激活配置项，是否匹配
+            boolean success = licenseService.verify(verifyStr, verifyCode);
 
-            // 更新数据库激活限制配置
-            processActivCtlAfterActivationSuccess(activationRequest);
+            if (success) {
+                // 校验通过，生成加密文件存储磁盘
+                ACTIVATION_CONTENT = null;
+                generateEncryptedFile(activationRequest);
 
-            ACTIVATION_CONTENT = status();
-            log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
-            activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
-            activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
-        } else {
-            log.error("license verify failed！");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+                // 更新数据库激活限制配置
+                processActivCtlAfterActivationSuccess(activationRequest);
+
+                ACTIVATION_CONTENT = status();
+                log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
+                activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+                activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
+            } else {
+                log.error("license verify failed！");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+            }
         }
 
     }
