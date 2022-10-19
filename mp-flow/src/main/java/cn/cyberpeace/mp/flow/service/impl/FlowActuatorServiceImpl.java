@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.service.FlowActuatorService;
 import cn.cyberpeace.mp.flow.service.field.FlowActuatorFields;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +56,7 @@ public class FlowActuatorServiceImpl extends BaseModelServiceImpl<FlowActuatorMo
                 log.info("delete vm instance success!");
             }
         } catch (Exception e) {
-            log.error("delete vm instance error", e);
+            log.error("delete vm instance error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
 

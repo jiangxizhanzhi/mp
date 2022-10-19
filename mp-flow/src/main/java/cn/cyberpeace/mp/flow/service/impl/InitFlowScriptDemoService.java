@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -81,7 +82,7 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
                 log.info("============ no need to init script demo ==============");
             }
         } catch (Exception e) {
-            log.error("init flow script demo error", e);
+            log.error("init flow script demo error, {}", ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(pyDemo);
             IOUtils.closeQuietly(shDemo);

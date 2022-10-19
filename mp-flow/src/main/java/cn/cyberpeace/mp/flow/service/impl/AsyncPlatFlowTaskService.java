@@ -31,6 +31,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 import joptsimple.internal.Strings;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -399,7 +400,7 @@ public class AsyncPlatFlowTaskService {
             // 删除流量网口信息
             flowPortMapper.bulkDelete(flowPortIds.toArray(new String[0]));
         } catch (Exception e) {
-            log.error("delete task from flow actuator platform error");
+            log.error("delete task from flow actuator platform error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
 
@@ -440,7 +441,7 @@ public class AsyncPlatFlowTaskService {
                 externalNetId = networkObj.getString("external_net_id");
             }
         } catch (IOException e) {
-            log.error("get network error", e);
+            log.error("get network error,{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.GET_OUTER_NETWORK_ERROR);
         }
 
@@ -513,10 +514,10 @@ public class AsyncPlatFlowTaskService {
                 throw new MpRuntimeException(addVmObj.getString(BaseConstants.STR_DETAIL));
             }
         } catch (MpRuntimeException e) {
-            log.error("add vm instance error", e);
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
             throw e;
         } catch (Exception e) {
-            log.error("add vm instance error", e);
+            log.error("add vm instance error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.ADD_FLOW_EXECUTOR_ERROR);
         }
     }
@@ -555,7 +556,7 @@ public class AsyncPlatFlowTaskService {
                     }
                 }
             } catch (Exception e) {
-                log.error("del port error", e);
+                log.error("del port error, {}", ExceptionUtils.getStackTrace(e));
             }
         });
     }
@@ -594,7 +595,7 @@ public class AsyncPlatFlowTaskService {
                 });
             }
         } catch (Exception e) {
-            log.error("delete flow file error", e);
+            log.error("delete flow file error, {}", ExceptionUtils.getStackTrace(e));
         }
     }
 

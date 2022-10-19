@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.flow.service.ScheduleMethod;
 import cn.cyberpeace.mp.flow.util.ResponseUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public class FlowExecuteScheduleMethodImpl implements ScheduleMethod {
                 log.error("actuator task failed:[{}]", request.getTaskId());
             }
         } catch (Exception e) {
-            log.error("actuator task error:[{}]", request.getTaskId(), e);
+            log.error("actuator task error:[{}, {}]", request.getTaskId(), ExceptionUtils.getStackTrace(e));
         }
     }
 }

@@ -178,7 +178,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult(fileEventModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryFileEvents error: {} ", e);
+            log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -264,7 +264,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryCustomProbeData error", e);
+            log.error("es queryCustomProbeData error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -328,7 +328,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult<>(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryVulnerabilityInfo error:", e);
+            log.error("es queryVulnerabilityInfo error:{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -384,7 +384,7 @@ public class DataCollectionService extends CollectionBaseService {
             }).collect(Collectors.toList());
             return vulnerabilityInfoCounts;
         } catch (IOException e) {
-            log.error("es queryVulnerabilityCountInfo error:", e);
+            log.error("es queryVulnerabilityCountInfo error:{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -449,7 +449,7 @@ public class DataCollectionService extends CollectionBaseService {
                 return new ListObjResult<>(Lists.newArrayList(), wazuhModelList.size());
             }
         } catch (IOException e) {
-            log.error("es 查询监控事件分页失败 {}", e);
+            log.error("es 查询监控事件分页失败 {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -494,7 +494,7 @@ public class DataCollectionService extends CollectionBaseService {
                 return dataCollectionEventModel;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -862,7 +862,7 @@ public class DataCollectionService extends CollectionBaseService {
 
             return changedCount;
         } catch (IOException e) {
-            log.error("es queryMonitorEventsWithTimeRange error: {}", e);
+            log.error("es queryMonitorEventsWithTimeRange error: {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1045,7 +1045,7 @@ public class DataCollectionService extends CollectionBaseService {
             return map;
 
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1099,7 +1099,7 @@ public class DataCollectionService extends CollectionBaseService {
             return map;
 
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1136,7 +1136,7 @@ public class DataCollectionService extends CollectionBaseService {
             long count = response.getCount();
             return count;
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1168,7 +1168,7 @@ public class DataCollectionService extends CollectionBaseService {
             BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
             return response.getUpdated();
         } catch (IOException e) {
-            log.error("es delete by query error: {} ", e);
+            log.error("es delete by query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }

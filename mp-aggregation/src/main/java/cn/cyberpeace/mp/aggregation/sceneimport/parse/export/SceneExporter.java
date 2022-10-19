@@ -196,7 +196,7 @@ public class SceneExporter {
         try {
             FileUtils.writeByteArrayToFile(new File(filePath), content);
         } catch (Exception e) {
-            log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
+            log.error("failed to write file:{} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
     }
@@ -205,7 +205,7 @@ public class SceneExporter {
         try {
             FileUtils.write(new File(filePath), content, "utf8");
         } catch (Exception e) {
-            log.error("failed to write yml file , yml content is {}", content, ExceptionUtils.getStackTrace(e));
+            log.error("failed to write yml file , yml content is {}, {}", content, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
     }

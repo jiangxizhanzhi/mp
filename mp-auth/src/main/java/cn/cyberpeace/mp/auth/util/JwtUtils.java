@@ -18,6 +18,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -79,7 +80,7 @@ public class JwtUtils {
             //mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
             mac.init(new SecretKeySpec(jwtUtils.authConfig.getAuthenticateJwtSecret().getBytes(StandardCharsets.UTF_8), algorithm));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Generate Jwt Secret error: {}", e.getMessage());
+            log.error("Generate Jwt Secret error: {}", ExceptionUtils.getStackTrace(e));
             return jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
 
@@ -123,7 +124,7 @@ public class JwtUtils {
             return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
                     .withClaim("username", user.getUsername()).withClaim("key", secret).sign(algorithm);
         } catch (JWTCreationException e) {
-            log.error("Create jwt token error: {}", e.getMessage());
+            log.error("Create jwt token error: {}", ExceptionUtils.getStackTrace(e));
             return null;
         }
     }
@@ -163,7 +164,7 @@ public class JwtUtils {
         } catch (TokenExpiredException e) {
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         } catch (JWTVerificationException e) {
-            log.error("Verify jwt token error: {}", e.getMessage());
+            log.error("Verify jwt token error: {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
         }
 
@@ -184,7 +185,7 @@ public class JwtUtils {
         try {
             jwt = JWT.decode(token);
         } catch (JWTDecodeException e) {
-            log.error("Decode jwt token {} error: {}", token, e.getMessage());
+            log.error("Decode jwt token {} error: {}", token, ExceptionUtils.getStackTrace(e));
             return null;
         }
 

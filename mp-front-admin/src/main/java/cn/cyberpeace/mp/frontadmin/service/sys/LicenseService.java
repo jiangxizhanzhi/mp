@@ -7,6 +7,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -71,7 +72,7 @@ public class LicenseService {
                 INSTANCE = (Awesome) Native.loadLibrary(frontAdminConfig.getLicenseDir() + File.separator + "license.so", Awesome.class);
                 log.info("load license.so success!");
             } catch (Exception e) {
-                log.error("load license.so error!");
+                log.error("load license.so error, {}", ExceptionUtils.getStackTrace(e));
                 throw e;
             }
         }

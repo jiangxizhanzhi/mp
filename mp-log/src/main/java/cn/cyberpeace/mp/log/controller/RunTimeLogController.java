@@ -19,6 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -64,7 +65,7 @@ public class RunTimeLogController {
             bo = logFileServiceFactory.downLoad(new LogDownloadDTO(request));
             resource = new InputStreamResource(bo.getInputStream());
         } catch (Exception e) {
-            log.error("download log error", e);
+            log.error("download log error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(LogErrorCode.DOWNLOAD_LOG_FILE_ERROR);
         }
 

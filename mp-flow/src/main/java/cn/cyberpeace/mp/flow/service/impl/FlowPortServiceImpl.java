@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.flow.util.CommonUtil;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -141,7 +142,7 @@ public class FlowPortServiceImpl extends BaseModelServiceImpl<FlowPortModel, Flo
             taskInitRsp = HttpUtils.sendPost(CommonUtil.getHostUrl(flowActuatorModel.getIp()) + "/tasks/init",
                     taskInitObj.toJSONString());
         } catch (IOException e) {
-            log.error("tasks init error", e);
+            log.error("tasks init error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(FlowErrorCode.ADD_PORT_ERROR);
         }
         JSONObject taskResultObj = JSONObject.parseObject(taskInitRsp);

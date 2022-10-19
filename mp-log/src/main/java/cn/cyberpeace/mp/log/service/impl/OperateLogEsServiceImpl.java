@@ -17,6 +17,7 @@ import cn.cyberpeace.mp.log.utils.SnUtils;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -223,7 +224,7 @@ public class OperateLogEsServiceImpl implements OperateLogDbService {
             return messageSource.getMessage(msgKey, params, locale);
         } catch (Exception e) {
             log.error("Get message by key `{}` params `{}` on locale {} failed: {}", msgKey, params,
-                    locale, e.getMessage());
+                    locale, ExceptionUtils.getStackTrace(e));
             return msgKey;
         }
     }
