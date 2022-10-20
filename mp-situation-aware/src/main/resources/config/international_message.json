@@ -413,5 +413,777 @@
     "name": "自定义采集",
     "zh_name": "自定义采集",
     "en_name": "custom collection"
+  },
+
+
+  {
+    "name": "cloudmusic",
+    "zh_name": "cloudmusic",
+    "en_name": "cloudmusic"
+  },
+  {
+    "name": "百度网盘",
+    "zh_name": "百度网盘",
+    "en_name": "Baidu network disk"
+  },
+  {
+    "name": "160WiFi",
+    "zh_name": "160WiFi",
+    "en_name": "160WiFi"
+  },
+  {
+    "name": "桌面日历",
+    "zh_name": "桌面日历",
+    "en_name": "desktop calendar"
+  },
+  {
+    "name": "飞鸽传书",
+    "zh_name": "飞鸽传书",
+    "en_name": "flying pigeon biography"
+  },
+  {
+    "name": "千牛工作台",
+    "zh_name": "千牛工作台",
+    "en_name": "Thousand cattle workbench"
+  },
+  {
+    "name": "1905影音",
+    "zh_name": "1905影音",
+    "en_name": "1905 Video"
+  },
+  {
+    "name": "vnc",
+    "zh_name": "vnc",
+    "en_name": "vnc"
+  },
+  {
+    "name": "钉钉上传文件数据包",
+    "zh_name": "钉钉上传文件数据包",
+    "en_name": "DingTalk upload file data package"
+  },
+  {
+    "name": "叶子猪手游模拟",
+    "zh_name": "叶子猪手游模拟",
+    "en_name": "Leaf pig mobile game simulation"
+  },
+  {
+    "name": "weibo1",
+    "zh_name": "weibo1",
+    "en_name": "weibo1"
+  },
+  {
+    "name": "净网专家",
+    "zh_name": "净网专家",
+    "en_name": "Net net expert"
+  },
+  {
+    "name": "光影看图",
+    "zh_name": "光影看图",
+    "en_name": "light and shadow"
+  },
+  {
+    "name": "腾讯手游助手",
+    "zh_name": "腾讯手游助手",
+    "en_name": "Tencent mobile game assistant"
+  },
+  {
+    "name": "5902",
+    "zh_name": "5902",
+    "en_name": "5902"
+  },
+  {
+    "name": "baidu",
+    "zh_name": "baidu",
+    "en_name": "baidu"
+  },
+  {
+    "name": "斗鱼直播",
+    "zh_name": "斗鱼直播",
+    "en_name": "Douyu Live"
+  },
+  {
+    "name": "有道云笔记",
+    "zh_name": "有道云笔记",
+    "en_name": "YouDao Cloud Note"
+  },
+  {
+    "name": "全面K歌",
+    "zh_name": "全面K歌",
+    "en_name": "Comprehensive K song"
+  },
+  {
+    "name": "EditPlus",
+    "zh_name": "EditPlus",
+    "en_name": "EditPlus"
+  },
+  {
+    "name": "小米随身WiFi",
+    "zh_name": "小米随身WiFi",
+    "en_name": "Xiaomi Portable WiFi"
+  },
+  {
+    "name": "火狐",
+    "zh_name": "火狐",
+    "en_name": "Firefox"
+  },
+  {
+    "name": "人人影视",
+    "zh_name": "人人影视",
+    "en_name": "Everyone Video"
+  },
+  {
+    "name": "火萤桌面",
+    "zh_name": "火萤桌面",
+    "en_name": "firefly desktop"
+  },
+  {
+    "name": "小米助手",
+    "zh_name": "小米助手",
+    "en_name": "Xiaomi Assistant"
+  },
+  {
+    "name": "winSCP下载文件SFTP",
+    "zh_name": "winSCP下载文件SFTP",
+    "en_name": "winSCP download file SFTP"
+  },
+  {
+    "name": "WINscp下载文件SCP",
+    "zh_name": "WINscp下载文件SCP",
+    "en_name": "WINscp download file SCP"
+  },
+  {
+    "name": "百度文库下载文档数据包",
+    "zh_name": "百度文库下载文档数据包",
+    "en_name": "Baidu library download document data package"
+  },
+  {
+    "name": "迅雷下载MSDNwin10镜像数据包",
+    "zh_name": "迅雷下载MSDNwin10镜像数据包",
+    "en_name": "Thunder download MSDN win10 mirror data package"
+  },
+  {
+    "name": "ysyy",
+    "zh_name": "ysyy",
+    "en_name": "ysyy"
+  },
+  {
+    "name": "WiFi共享大师",
+    "zh_name": "WiFi共享大师",
+    "en_name": "WiFi Sharing Master"
+  },
+  {
+    "name": "TecentVideo",
+    "zh_name": "TecentVideo",
+    "en_name": "TecentVideo"
+  },
+  {
+    "name": "优酷视屏",
+    "zh_name": "优酷视屏",
+    "en_name": "Youku Video"
+  },
+  {
+    "name": "RDP",
+    "zh_name": "RDP",
+    "en_name": "RDP"
+  },
+  {
+    "name": "虎牙直播直播数据包",
+    "zh_name": "虎牙直播直播数据包",
+    "en_name": "Huya live broadcast data package"
+  },
+  {
+    "name": "飞火动态壁纸",
+    "zh_name": "飞火动态壁纸",
+    "en_name": "Flying Fire Live Wallpaper"
+  },
+  {
+    "name": "光明网",
+    "zh_name": "光明网",
+    "en_name": "Bright Net"
+  },
+  {
+    "name": "wegame",
+    "zh_name": "wegame",
+    "en_name": "wegame"
+  },
+  {
+    "name": "qq邮箱上传文件数据包",
+    "zh_name": "qq邮箱上传文件数据包",
+    "en_name": "QQ mailbox upload file data package"
+  },
+  {
+    "name": "风行播放器",
+    "zh_name": "风行播放器",
+    "en_name": "popular player"
+  },
+  {
+    "name": "小智双核浏览器",
+    "zh_name": "小智双核浏览器",
+    "en_name": "Xiaozhi Dual Core Browser"
+  },
+  {
+    "name": "ftp",
+    "zh_name": "ftp",
+    "en_name": "ftp"
+  },
+  {
+    "name": "简书网页",
+    "zh_name": "简书网页",
+    "en_name": "Jianshu webpage"
+  },
+  {
+    "name": "youtube",
+    "zh_name": "youtube",
+    "en_name": "youtube"
+  },
+  {
+    "name": "wechat_kZQXz70",
+    "zh_name": "wechat_kZQXz70",
+    "en_name": "wechat_kZQXz70"
+  },
+  {
+    "name": "traffic",
+    "zh_name": "traffic",
+    "en_name": "traffic"
+  },
+  {
+    "name": "盒子游戏大厅",
+    "zh_name": "盒子游戏大厅",
+    "en_name": "box game hall"
+  },
+  {
+    "name": "暗黑大天使",
+    "zh_name": "暗黑大天使",
+    "en_name": "Dark Archangel"
+  },
+  {
+    "name": "XT800_个人版",
+    "zh_name": "XT800_个人版",
+    "en_name": "XT800_Personal Edition"
+  },
+  {
+    "name": "爱奇艺pps",
+    "zh_name": "爱奇艺pps",
+    "en_name": "iQIYI pps"
+  },
+  {
+    "name": "企业QQ",
+    "zh_name": "企业QQ",
+    "en_name": "Enterprise QQ"
+  },
+  {
+    "name": "靠谱助手",
+    "zh_name": "靠谱助手",
+    "en_name": "Reliable assistant"
+  },
+  {
+    "name": "世界之窗",
+    "zh_name": "世界之窗",
+    "en_name": "window of the world"
+  },
+  {
+    "name": "FirefoxPortable",
+    "zh_name": "FirefoxPortable",
+    "en_name": "FirefoxPortable"
+  },
+  {
+    "name": "酷狗直播",
+    "zh_name": "酷狗直播",
+    "en_name": "Kugou Live"
+  },
+  {
+    "name": "YY语音",
+    "zh_name": "YY语音",
+    "en_name": "YY voice"
+  },
+  {
+    "name": "QQ",
+    "zh_name": "QQ",
+    "en_name": "QQ"
+  },
+  {
+    "name": "小度WiFi",
+    "zh_name": "小度WiFi",
+    "en_name": "Xiaodu WiFi"
+  },
+  {
+    "name": "dns",
+    "zh_name": "dns",
+    "en_name": "dns"
+  },
+  {
+    "name": "Internet_Download_Manager",
+    "zh_name": "Internet_Download_Manager",
+    "en_name": "Internet_Download_Manager"
+  },
+  {
+    "name": "搜狗音乐",
+    "zh_name": "搜狗音乐",
+    "en_name": "Sogou Music"
+  },
+  {
+    "name": "比特精灵",
+    "zh_name": "比特精灵",
+    "en_name": "Bit Genie"
+  },
+  {
+    "name": "广告拦截大师",
+    "zh_name": "广告拦截大师",
+    "en_name": "Ad Blocker"
+  },
+  {
+    "name": "上证指数东方财富网",
+    "zh_name": "上证指数东方财富网",
+    "en_name": "Shanghai Index Oriental Fortune Network"
+  },
+  {
+    "name": "WinSCP-SSHv2协议",
+    "zh_name": "WinSCP-SSHv2协议",
+    "en_name": "WinSCP-SSHv2 protocol"
+  },
+  {
+    "name": "云橙图片压缩软件",
+    "zh_name": "云橙图片压缩软件",
+    "en_name": "Cloud Orange Image Compression Software"
+  },
+  {
+    "name": "腾讯网游加速器",
+    "zh_name": "腾讯网游加速器",
+    "en_name": "Tencent Online Game Accelerator"
+  },
+  {
+    "name": "茄子快传",
+    "zh_name": "茄子快传",
+    "en_name": "Eggplant Express"
+  },
+  {
+    "name": "iTOOLS",
+    "zh_name": "iTOOLS",
+    "en_name": "iTOOLS"
+  },
+  {
+    "name": "驱动精灵",
+    "zh_name": "驱动精灵",
+    "en_name": "drive wizard"
+  },
+  {
+    "name": "酷我游戏",
+    "zh_name": "酷我游戏",
+    "en_name": "cool me game"
+  },
+  {
+    "name": "PP视频",
+    "zh_name": "PP视频",
+    "en_name": "PP video"
+  },
+  {
+    "name": "腾讯软件管理下载安装包数据包",
+    "zh_name": "腾讯软件管理下载安装包数据包",
+    "en_name": "Tencent software management download installation package data package"
+  },
+  {
+    "name": "搜狗搜索",
+    "zh_name": "搜狗搜索",
+    "en_name": "Sogou search"
+  },
+  {
+    "name": "金山打字通",
+    "zh_name": "金山打字通",
+    "en_name": "Kingsoft Typing Pass"
+  },
+  {
+    "name": "看图啦",
+    "zh_name": "看图啦",
+    "en_name": "Look at the picture"
+  },
+  {
+    "name": "酷我K歌",
+    "zh_name": "酷我K歌",
+    "en_name": "Cool me K song"
+  },
+  {
+    "name": "芒果TV极速版",
+    "zh_name": "芒果TV极速版",
+    "en_name": "Mango TV Speed ​​Edition"
+  },
+  {
+    "name": "阿里旺旺",
+    "zh_name": "阿里旺旺",
+    "en_name": "Ali Wangwang"
+  },
+  {
+    "name": "极光压缩",
+    "zh_name": "极光压缩",
+    "en_name": "Aurora Compression"
+  },
+  {
+    "name": "千千音乐",
+    "zh_name": "千千音乐",
+    "en_name": "Thousands of Music"
+  },
+  {
+    "name": "dingding",
+    "zh_name": "dingding",
+    "en_name": "dingding"
+  },
+  {
+    "name": "网易uu加速器",
+    "zh_name": "网易uu加速器",
+    "en_name": "Netease uu accelerator"
+  },
+  {
+    "name": "暴雪战网",
+    "zh_name": "暴雪战网",
+    "en_name": "Blizzard Battle.net"
+  },
+  {
+    "name": "2344游戏盒",
+    "zh_name": "2344游戏盒",
+    "en_name": "2344 game box"
+  },
+  {
+    "name": "网易手游助手",
+    "zh_name": "网易手游助手",
+    "en_name": "Netease mobile game assistant"
+  },
+  {
+    "name": "奇游电竞加速器",
+    "zh_name": "奇游电竞加速器",
+    "en_name": "Qiyou e-sports accelerator"
+  },
+  {
+    "name": "虎牙直播",
+    "zh_name": "虎牙直播",
+    "en_name": "Huya Live"
+  },
+  {
+    "name": "WinSCP-FTP协议_rBG7xDL",
+    "zh_name": "WinSCP-FTP协议_rBG7xDL",
+    "en_name": "WinSCP-FTP protocol_rBG7xDL"
+  },
+  {
+    "name": "QQ影像",
+    "zh_name": "QQ影像",
+    "en_name": "QQ image"
+  },
+  {
+    "name": "baidunetdisk",
+    "zh_name": "baidunetdisk",
+    "en_name": "baidunetdisk"
+  },
+  {
+    "name": "steam",
+    "zh_name": "steam",
+    "en_name": "steam"
+  },
+  {
+    "name": "OBS_Studio",
+    "zh_name": "OBS_Studio",
+    "en_name": "OBS_Studio"
+  },
+  {
+    "name": "爱拍",
+    "zh_name": "爱拍",
+    "en_name": "love to shoot"
+  },
+  {
+    "name": "iTunes",
+    "zh_name": "iTunes",
+    "en_name": "iTunes"
+  },
+  {
+    "name": "腾讯会议",
+    "zh_name": "腾讯会议",
+    "en_name": "Tencent Conference"
+  },
+  {
+    "name": "arp",
+    "zh_name": "arp",
+    "en_name": "arp"
+  },
+  {
+    "name": "37abc浏览器",
+    "zh_name": "37abc浏览器",
+    "en_name": "37abc browser"
+  },
+  {
+    "name": "悦书PDF阅读器",
+    "zh_name": "悦书PDF阅读器",
+    "en_name": "Yueshu PDF Reader"
+  },
+  {
+    "name": "WinSCP-FTP协议",
+    "zh_name": "WinSCP-FTP协议",
+    "en_name": "WinSCP-FTP Protocol"
+  },
+  {
+    "name": "vivo手机助手",
+    "zh_name": "vivo手机助手",
+    "en_name": "vivo mobile phone assistant"
+  },
+  {
+    "name": "qq邮箱下载文件数据包",
+    "zh_name": "qq邮箱下载文件数据包",
+    "en_name": "QQ mailbox download file data package"
+  },
+  {
+    "name": "WinSCP",
+    "zh_name": "WinSCP",
+    "en_name": "WinSCP"
+  },
+  {
+    "name": "快手直播伴侣",
+    "zh_name": "快手直播伴侣",
+    "en_name": "Kuaishou Live Companion"
+  },
+  {
+    "name": "雷神NN加速器",
+    "zh_name": "雷神NN加速器",
+    "en_name": "Thor NN Accelerator"
+  },
+  {
+    "name": "失易得数据恢复6",
+    "zh_name": "失易得数据恢复6",
+    "en_name": "Lost data recovery 6"
+  },
+  {
+    "name": "易信",
+    "zh_name": "易信",
+    "en_name": "Credulity"
+  },
+  {
+    "name": "搜索Everything",
+    "zh_name": "搜索Everything",
+    "en_name": "Search Everything"
+  },
+  {
+    "name": "花样直播",
+    "zh_name": "花样直播",
+    "en_name": "Live Streaming"
+  },
+  {
+    "name": "qq音乐",
+    "zh_name": "qq音乐",
+    "en_name": "qq music"
+  },
+  {
+    "name": "猎豹轻桌面",
+    "zh_name": "猎豹轻桌面",
+    "en_name": "Cheetah Light Desktop"
+  },
+  {
+    "name": "QQ音乐音乐播放数据包",
+    "zh_name": "QQ音乐音乐播放数据包",
+    "en_name": "QQ music music playback data package"
+  },
+  {
+    "name": "影音先锋",
+    "zh_name": "影音先锋",
+    "en_name": "Audio and Video Pioneer"
+  },
+  {
+    "name": "YaHoo",
+    "zh_name": "YaHoo",
+    "en_name": "YaHoo"
+  },
+  {
+    "name": "快玩游戏盒",
+    "zh_name": "快玩游戏盒",
+    "en_name": "Quick Play Game Box"
+  },
+  {
+    "name": "咕米视频",
+    "zh_name": "咕米视频",
+    "en_name": "Gummy Video"
+  },
+  {
+    "name": "bd_g5JeKw0",
+    "zh_name": "bd_g5JeKw0",
+    "en_name": "bd_g5JeKw0"
+  },
+  {
+    "name": "redis",
+    "zh_name": "redis",
+    "en_name": "redis"
+  },
+  {
+    "name": "金山文档",
+    "zh_name": "金山文档",
+    "en_name": "Kingsoft Documentation"
+  },
+  {
+    "name": "FileZilla",
+    "zh_name": "FileZilla",
+    "en_name": "FileZilla"
+  },
+  {
+    "name": "腾讯课堂",
+    "zh_name": "腾讯课堂",
+    "en_name": "Tencent Classroom"
+  },
+  {
+    "name": "腾讯游戏盒子",
+    "zh_name": "腾讯游戏盒子",
+    "en_name": "Tencent game box"
+  },
+  {
+    "name": "潭州课堂",
+    "zh_name": "潭州课堂",
+    "en_name": "Tanzhou Classroom"
+  },
+  {
+    "name": "美团官网数据缓存数据包",
+    "zh_name": "美团官网数据缓存数据包",
+    "en_name": "Meituan official website data cache data package"
+  },
+  {
+    "name": "爱思助手",
+    "zh_name": "爱思助手",
+    "en_name": "Aisi Assistant"
+  },
+  {
+    "name": "向日葵客户端",
+    "zh_name": "向日葵客户端",
+    "en_name": "sunflower client"
+  },
+  {
+    "name": "腾讯视频",
+    "zh_name": "腾讯视频",
+    "en_name": "Tencent Video"
+  },
+  {
+    "name": "百度网盘_hXmS4Bm",
+    "zh_name": "百度网盘_hXmS4Bm",
+    "en_name": "Baidu network disk_hXmS4Bm"
+  },
+  {
+    "name": "Amazon",
+    "zh_name": "Amazon",
+    "en_name": "Amazon"
+  },
+  {
+    "name": "央视影音",
+    "zh_name": "央视影音",
+    "en_name": "CCTV audio and video"
+  },
+  {
+    "name": "2345加速浏览器",
+    "zh_name": "2345加速浏览器",
+    "en_name": "2345 accelerated browser"
+  },
+  {
+    "name": "网易云音乐",
+    "zh_name": "网易云音乐",
+    "en_name": "NetEase Cloud Music"
+  },
+  {
+    "name": "WINscp下载文件FTP",
+    "zh_name": "WINscp下载文件FTP",
+    "en_name": "WINscp download file FTP"
+  },
+  {
+    "name": "腾讯会议_D1Ma1aw",
+    "zh_name": "腾讯会议_D1Ma1aw",
+    "en_name": "Tencent Conference_D1Ma1aw"
+  },
+  {
+    "name": "小白一键重装系统",
+    "zh_name": "小白一键重装系统",
+    "en_name": "Xiaobai one-key reinstall system"
+  },
+  {
+    "name": "虾米音乐",
+    "zh_name": "虾米音乐",
+    "en_name": "Xiami Music"
+  },
+  {
+    "name": "twitter",
+    "zh_name": "twitter",
+    "en_name": "twitter"
+  },
+  {
+    "name": "QQ浏览器",
+    "zh_name": "QQ浏览器",
+    "en_name": "QQ browser"
+  },
+  {
+    "name": "GoLink",
+    "zh_name": "GoLink",
+    "en_name": "GoLink"
+  },
+  {
+    "name": "同城游",
+    "zh_name": "同城游",
+    "en_name": "same city tour"
+  },
+  {
+    "name": "fakeCms3",
+    "zh_name": "fakeCms3",
+    "en_name": "fakeCms3"
+  },
+  {
+    "name": "realFlow",
+    "zh_name": "realFlow",
+    "en_name": "realFlow"
+  },
+  {
+    "name": "fakePWN1",
+    "zh_name": "fakePWN1",
+    "en_name": "fakePWN1"
+  },
+  {
+    "name": "fakePwn",
+    "zh_name": "fakePwn",
+    "en_name": "fakePwn"
+  },
+  {
+    "name": "运维靶场自动化攻击",
+    "zh_name": "运维靶场自动化攻击",
+    "en_name": "Operation and maintenance shooting range automation attack"
+  },
+  {
+    "name": "fakeHTTP2",
+    "zh_name": "fakeHTTP2",
+    "en_name": "fakeHTTP2"
+  },
+  {
+    "name": "fakePwn2",
+    "zh_name": "fakePwn2",
+    "en_name": "fakePwn2"
+  },
+  {
+    "name": "fakeCmd1",
+    "zh_name": "fakeCmd1",
+    "en_name": "fakeCmd1"
+  },
+  {
+    "name": "fakeXSS1",
+    "zh_name": "fakeXSS1",
+    "en_name": "fakeXSS1"
+  },
+  {
+    "name": "fakeXSS",
+    "zh_name": "fakeXSS",
+    "en_name": "fakeXSS"
+  },
+  {
+    "name": "synflood",
+    "zh_name": "synflood",
+    "en_name": "synflood"
+  },
+  {
+    "name": "fakeCMD",
+    "zh_name": "fakeCMD",
+    "en_name": "fakeCMD"
+  },
+  {
+    "name": "udpflood",
+    "zh_name": "udpflood",
+    "en_name": "udpflood"
+  },
+  {
+    "name": "fakeCSRF",
+    "zh_name": "fakeCSRF",
+    "en_name": "fakeCSRF"
   }
 ]

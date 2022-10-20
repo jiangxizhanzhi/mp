@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -246,6 +247,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                                         return scriptParam;
                                     }).filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
                         }
+                        this.internationalize(model);
                         FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
                         return response;
                     })
@@ -253,6 +255,23 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+    }
+
+    /**
+     * 流量包国际化处理
+     * @param flowInfoModel
+     */
+    private void internationalize(FlowInfoModel flowInfoModel) {
+        flowInfoModel.setFileName(MessageCommonUtil.convertMessage(flowInfoModel.getFileName()));
+        flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
+        String fileName = flowInfoModel.getFileName();
+        if (fileName.endsWith(".pcap")) {
+            fileName = fileName.substring(0, fileName.length() - 5);
+            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+        } else if (fileName.endsWith(".py")) {
+            fileName = fileName.substring(0, fileName.length() - 3);
+            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".py"));
+        }
     }
 
     /**
@@ -289,6 +308,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
+            this.internationalize(flowInfoModel);
             if (InteractiveTypeEnum.BACKGROUND.toValue() != flowInfoModel.getInteractiveType()) {
                 return ServiceResult.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
@@ -312,6 +332,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
+            this.internationalize(flowInfoModel);
             if (InteractiveTypeEnum.ATTACK.toValue() != flowInfoModel.getInteractiveType()) {
                 return ServiceResult.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
