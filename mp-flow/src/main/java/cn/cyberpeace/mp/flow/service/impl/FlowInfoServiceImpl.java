@@ -262,7 +262,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @param flowInfoModel
      */
     private void internationalize(FlowInfoModel flowInfoModel) {
-        flowInfoModel.setFileName(MessageCommonUtil.convertMessage(flowInfoModel.getFileName()));
+        flowInfoModel.setTitle(MessageCommonUtil.convertMessage(flowInfoModel.getTitle()));
         flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
         String fileName = flowInfoModel.getFileName();
         if (fileName.endsWith(".pcap")) {
