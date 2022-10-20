@@ -5,7 +5,6 @@ import cn.cyberpeace.mp.base.annotation.LocalCallFunc;
 import cn.cyberpeace.mp.base.annotation.LocalCallServer;
 import cn.cyberpeace.mp.collection.core.es.CollectionClient;
 import cn.cyberpeace.mp.collection.core.wazuh.WazuhClientProxy;
-import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collectionapi.config.GroupConfig;
 import cn.cyberpeace.mp.collectionapi.init.CollectionApiInit;
 import cn.cyberpeace.mp.collectionapi.util.GroupUtil;
@@ -32,9 +31,6 @@ public class CollectionApiService {
 
     @Resource
     private CollectionClient collectionClient;
-
-    @Resource(name = "flowInfoServiceImpl")
-    FlowInfoService flowInfoService;
 
     private static Integer day = 3;
 
