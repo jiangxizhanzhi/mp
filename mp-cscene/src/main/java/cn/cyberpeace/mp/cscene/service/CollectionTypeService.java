@@ -10,6 +10,7 @@ import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
 import cn.cyberpeace.mp.sceneplugincollection.service.ScenePluginCollectionSceneService;
 import cn.cyberpeace.mp.situationaware.model.WazuhEventRequest;
 import cn.cyberpeace.mp.situationaware.service.DataCollectionService;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,20 +50,18 @@ public class CollectionTypeService {
     private ScenePluginCollectionSceneService scenePluginCollectionSceneService;
 
     public List<CollectionType> typeTrees(BaseSceneElementRequest baseRequest) {
-        log.info("baseRequest:{}", baseRequest);
-
         List<CollectionType> types = new ArrayList<>();
         types.add(changeEvent("00", null));
         types.add(sourceLogFile("01", CollectionType.TYPE_LOG_FILE));
         types.add(logEvent("02", CollectionType.TYPE_LOG_EVENT));
         types.add(customCollect("03", CollectionType.TYPE_CUSTOM_COLLECT));
 
+        types.forEach(type -> processCollectionType(type));
         return types;
     }
 
 
     public List<CollectionApp> getAppNames(CollectionAppRequest appRequest) {
-        log.info("baseRequest:{}", appRequest);
         BaseRequestUtil.checkBaseRequestWithSceneId(appRequest);
 
         List<String> agentNames = csceneCommonService.getAgentNamesBySceneIdAndElementIds(appRequest.getSceneId(), appRequest.getElementIds());
@@ -103,8 +102,8 @@ public class CollectionTypeService {
         ServiceResult<Map<String, String>> result = scenePluginCollectionSceneService.getRuleId2FileByIds(filteredRuleIds);
         Map<String, String> ruleId2FileMap = result.getSource();
         Set<String> ruleFiles = new HashSet(ruleId2FileMap.values());
-        log.info("ruleFiles:{}", ruleFiles);
-        List<CollectionApp> apps = ruleFiles.stream().sorted().map(r -> {
+
+        return ruleFiles.stream().sorted().map(r -> {
             ServiceResult<String> appNameResult = scenePluginCollectionSceneService.ruleFile2AppName(r);
             String appName = appNameResult.getSource();
             CollectionApp app = null;
@@ -114,9 +113,6 @@ public class CollectionTypeService {
             }
             return app;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        log.info("apps:{}", apps);
-        return apps;
     }
 
     /**
@@ -245,5 +241,23 @@ public class CollectionTypeService {
         secSysType.setChildren(secSubTypes);
 
         return secSysType;
+    }
+
+    private void processCollectionType(CollectionType type) {
+        // 国际化处理
+        String name = MessageCommonUtil.convertMessage(type.getName());
+        type.setName(name);
+        processCollectionTypeChildren(type);
+    }
+
+    private void processCollectionTypeChildren(CollectionType type) {
+        if (CollectionUtils.isEmpty(type.getChildren())) {
+            return;
+        }
+        type.getChildren().forEach(t -> {
+            String childrenName = MessageCommonUtil.convertMessage(t.getName());
+            t.setName(childrenName);
+            processCollectionTypeChildren(t);
+        });
     }
 }

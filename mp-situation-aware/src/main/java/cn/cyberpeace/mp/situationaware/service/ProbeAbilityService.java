@@ -3,10 +3,10 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.situationaware.constant.SituationBase18nCode;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeAbilityDto;
-import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeDto;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbePageQueryRequest;
 import cn.cyberpeace.mp.situationaware.model.dto.probe.ProbeSearchCondition;
 import cn.cyberpeace.mp.situationaware.repository.ProbeAbilityMapper;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
@@ -44,10 +44,22 @@ public class ProbeAbilityService {
         BeanUtils.copyProperties(pageRequest, condition);
         PageHelper.startPage(pageRequest.getPage(), pageRequest.getPageSize());
         List<ProbeAbilityDto> dtos = probeAbilityMapper.listProbeAbilityDtos(condition);
-        dtos.forEach(dto -> processProbeDtoOsTypes(dto));
-        dtos.forEach(dto -> processAbilityEngine(dto));
+        dtos.forEach(dto -> {
+            processProbeDtoOsTypes(dto);
+            processAbilityEngine(dto);
+            processInternationalMessage(dto);
+        });
         PageInfo<ProbeAbilityDto> pageInfo = new PageInfo(dtos);
         return pageInfo;
+    }
+
+    private void processInternationalMessage(ProbeAbilityDto dto) {
+        String probeName = MessageCommonUtil.convertMessage(dto.getProbeName());
+        String name = MessageCommonUtil.convertMessage(dto.getName());
+        String description = MessageCommonUtil.convertMessage(dto.getDescription());
+        dto.setProbeName(probeName);
+        dto.setName(name);
+        dto.setDescription(description);
     }
 
     private void processAbilityEngine(ProbeAbilityDto dto) {
