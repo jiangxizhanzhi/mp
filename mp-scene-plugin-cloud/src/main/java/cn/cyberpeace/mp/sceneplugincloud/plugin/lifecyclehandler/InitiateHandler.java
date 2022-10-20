@@ -576,8 +576,9 @@ public class InitiateHandler extends HandlerCommon {
                     synchronized (ipPool) {
                         if (ipPool.size() > 0) {
                             port.setIp(ipPool.remove(ipPool.size() - 1));
+                        } else {
+                            log.error("failed to get ip from ip pool , port eid:{}", port.getEid());
                         }
-                        log.error("failed to get ip from ip pool , port eid:{}", port.getEid());
                     }
                 } else {
                     synchronized (ipPool) {
