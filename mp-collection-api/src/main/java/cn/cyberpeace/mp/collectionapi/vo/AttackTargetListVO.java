@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.collectionapi.vo;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -13,4 +12,10 @@ public class AttackTargetListVO {
 
     @ApiModelProperty(value = "设备攻击次数列表")
     private List<AttackTargetVO> attackTargets;
+    
+    @ApiModelProperty(value = "设备被攻击手法top5")
+    private List<AttackTypeVO> attackTypes;
+    
+    @ApiModelProperty(value = "设备类型")
+    private Integer useType;
 }

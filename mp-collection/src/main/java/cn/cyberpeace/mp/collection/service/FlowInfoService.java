@@ -17,6 +17,8 @@ import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.admin.indices.stats.IndicesStatsRequest;
@@ -28,6 +30,11 @@ import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.Aggregations;
+import org.elasticsearch.search.aggregations.BucketOrder;
+import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
@@ -39,7 +46,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +208,10 @@ public class FlowInfoService {
 
     private void buildRuleEndTimeQuery(Long endTime, BoolQueryBuilder boolQueryBuilder) {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
+    }
+    
+    private void buildSeverityQuery(Long severity, BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.rangeQuery("suricata.severity").gt(severity));
     }
 
     private DeleteByQueryRequest buildDeleteRequest(LocalDateTime startTime, LocalDateTime endTime) {
@@ -380,4 +390,114 @@ public class FlowInfoService {
         log.info("dayList:{}", dayList);
         return dayList;
     }
+    
+	/**
+	 * 特定ip设备被攻击总次数
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public long queryEquipmentAttackCount(List<String> ips) {
+		log.info("{}", ips);
+
+		String[] indexArray = getFlowIndex();
+		var searchRequest = new SearchRequest(indexArray);
+		var boolQueryBuilder = QueryBuilders.boolQuery();
+		var sourceBuilder = new SearchSourceBuilder();
+
+		if (CollectionUtil.isNotEmpty(ips)) {
+			buildRuleTargetIpQuery(ips, boolQueryBuilder);
+		}
+		buildSeverityQuery(0L, boolQueryBuilder);
+		sourceBuilder.size(0);
+		sourceBuilder.trackTotalHits(true);
+		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+		SearchResponse response = restHighLevelClient.search(searchRequest);
+
+		return response.getHits().getTotalHits().value;
+	}
+
+	/**
+	 * 特定ip设备被攻击总次数
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public Map<String, Long> queryEquipmentAttackCountInfo(List<String> ips) {
+		log.info("{}", ips);
+
+		String[] indexArray = getFlowIndex();
+		var searchRequest = new SearchRequest(indexArray);
+		var boolQueryBuilder = QueryBuilders.boolQuery();
+		var sourceBuilder = new SearchSourceBuilder();
+
+		if (CollectionUtil.isNotEmpty(ips)) {
+			buildRuleTargetIpQuery(ips, boolQueryBuilder);
+		}
+		buildSeverityQuery(0L, boolQueryBuilder);
+
+		String DES_IP_COUNT_TERM = "des_ip_count";
+		sourceBuilder.size(0);
+		sourceBuilder.trackTotalHits(true);
+		sourceBuilder.aggregation(AggregationBuilders.terms(DES_IP_COUNT_TERM).field("destination.ip"));
+
+		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+
+		Map<String, Long> ipCountMap = Maps.newHashMap();
+		SearchResponse response = restHighLevelClient.search(searchRequest);
+		Aggregations aggregations = response.getAggregations();
+		ParsedTerms parsedTerms = aggregations.get(DES_IP_COUNT_TERM);
+		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+		buckets.forEach(bucket -> {
+			ipCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());
+		});
+
+		return ipCountMap;
+	}
+
+	/**
+	 * 设备被攻击手法top5
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public Map<String, Long> queryEquipmentAttackTypeTop5(List<String> ips) {
+		log.info("{}", ips);
+
+		String[] indexArray = getFlowIndex();
+		var searchRequest = new SearchRequest(indexArray);
+		var boolQueryBuilder = QueryBuilders.boolQuery();
+		var sourceBuilder = new SearchSourceBuilder();
+
+		if (CollectionUtil.isNotEmpty(ips)) {
+			buildRuleTargetIpQuery(ips, boolQueryBuilder);
+		}
+		buildSeverityQuery(0L, boolQueryBuilder);
+
+		String CATE_COUNT_TERM = "cate_count";
+		sourceBuilder.size(0);
+		sourceBuilder.trackTotalHits(true);
+		sourceBuilder.aggregation(AggregationBuilders.terms(CATE_COUNT_TERM).field("suricata.category")
+				.order(BucketOrder.count(false)).size(5));
+
+		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
+		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+
+		Map<String, Long> typeCountMap = Maps.newLinkedHashMap();
+		SearchResponse response = restHighLevelClient.search(searchRequest);
+		Aggregations aggregations = response.getAggregations();
+		ParsedTerms parsedTerms = aggregations.get(CATE_COUNT_TERM);
+		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
+		buckets.forEach(bucket -> {
+			typeCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());
+		});
+
+		return typeCountMap;
+	}
+    
 }

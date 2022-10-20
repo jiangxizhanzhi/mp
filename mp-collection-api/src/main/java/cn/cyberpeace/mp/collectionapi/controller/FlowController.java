@@ -1,8 +1,9 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
-import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
+import cn.cyberpeace.mp.collectionapi.config.ContestConfig;
 import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetListVO;
@@ -17,7 +18,15 @@ import cn.cyberpeace.mp.collectionapi.vo.TeamAttackVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamFlowAggVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
 import org.springframework.web.bind.annotation.*;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -28,7 +37,7 @@ public class FlowController {
 
     @Resource
     private FlowInfoService flowInfoService;
-
+    
     @GetMapping("flow_attack_info")
     @ApiOperation(value = "查询每个设备的被攻击次数、流量大小、攻击手法占比")
     public ListObjServiceResult<FlowAttackVO> flowAttackInfo() {
@@ -109,24 +118,79 @@ public class FlowController {
         return new ListObjServiceResult<>();
     }
 
-    @GetMapping("equipment_attack_count")
-    @ApiOperation(value = "设备被攻击次数")
-    public ServiceResult<AttackTargetVO> equipmentAttackCount() {
-        // todo 分为全部商用设备 全部拟态设备 具体的商用设备 具体的拟态设备 都会有多个ip 需要合并数据
-        return new ServiceResult<>();
-    }
+	@GetMapping("equipment_attack_count")
+	@ApiOperation(value = "设备被攻击次数")
+	public ListObjServiceResult<AttackTargetVO> equipmentAttackCount(@RequestParam(required = false) String type) {
+		// todo 分为全部商用设备 全部拟态设备 具体的商用设备 具体的拟态设备 都会有多个ip 需要合并数据
+		List<AttackTargetVO> vos = Lists.newArrayList();
+		for (int useType = 0; useType < 2; useType++) {
+			// 0:商用 1:拟态
+			AttackTargetVO vo = new AttackTargetVO();
+			vo.setName(type);
+			vo.setUseType(useType);
+			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)));
+			vos.add(vo);
+		}
 
-    @GetMapping("equipment_attack_count_list")
-    @ApiOperation(value = "设备被攻击次数列表")
-    public ServiceResult<AttackTargetListVO> equipmentAttackCountInfo() {
-        // todo 分为商用设备和拟态设备
-        return new ServiceResult<>();
-    }
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+	}
+
+	@GetMapping("equipment_attack_count_list")
+	@ApiOperation(value = "设备被攻击次数列表")
+	public ListObjServiceResult<AttackTargetListVO> equipmentAttackCountInfo() {
+		// todo 分为商用设备和拟态设备
+		List<AttackTargetListVO> vos = Lists.newArrayList();
+		for (int useType = 0; useType < 2; useType++) {
+			// 0:商用 1:拟态
+			List<String> ips = ContestConfig.getIpsByType(null, useType);
+			// 设备被攻击次数
+			Map<String, Long> ipCountMap = flowInfoService.queryEquipmentAttackCountInfo(ips);
+			Map<String, Long> typeCountMap = Maps.newHashMap();
+			ipCountMap.entrySet().forEach(entry -> {
+				String type = ContestConfig.getTpyeByIp(entry.getKey());
+				if (type == null) {
+					return;
+				}
+				Long count = typeCountMap.get(type);
+				typeCountMap.put(type, count == null ? entry.getValue() : entry.getValue() + count);
+			});
+
+			final int USE_TYPE = useType;
+			List<AttackTargetVO> attackTargets = typeCountMap.entrySet().stream().map(entry -> {
+				AttackTargetVO vo = new AttackTargetVO();
+				vo.setName(entry.getKey());
+				vo.setCount(entry.getValue());
+				vo.setUseType(USE_TYPE);
+				return vo;
+			}).collect(Collectors.toList());
+
+			// 设备被攻击手法top5
+			Map<String, Long> attackTypeCountMap = flowInfoService.queryEquipmentAttackTypeTop5(ips);
+			double totalAttack = attackTypeCountMap.values().stream().reduce(Long::sum).orElse(0L);
+			List<AttackTypeVO> attackTypes = attackTypeCountMap.entrySet().stream().map(entry -> {
+				AttackTypeVO vo = new AttackTypeVO();
+				vo.setZhName(entry.getKey());
+				vo.setCount(entry.getValue());
+				vo.setPercent(entry.getValue() / totalAttack);
+				return vo;
+			}).collect(Collectors.toList());
+
+			AttackTargetListVO vo = new AttackTargetListVO();
+			vo.setUseType(useType);
+			vo.setAttackTargets(attackTargets);
+			vo.setCount(attackTargets.stream().mapToLong(AttackTargetVO::getCount).sum());
+			vo.setAttackTypes(attackTypes);
+			vos.add(vo);
+		}
+
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+	}
 
     @GetMapping("equipment_attack_type")
     @ApiOperation(value = "设备被攻击手法top5")
-    public ListObjServiceResult<AttackTypeVO> equipmentAttackType() {
+    public ListObjServiceResult<AttackTypeVO> equipmentAttackType(Integer useType) {
         // todo 分为商用设备和拟态设备
         return new ListObjServiceResult<>();
     }
+    
 }

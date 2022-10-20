@@ -10,4 +10,7 @@ public class AttackTargetVO {
 
     @ApiModelProperty(value = "攻击次数")
     private long count;
+    
+    @ApiModelProperty(value = "设备类型")
+    private Integer useType;
 }
