@@ -554,12 +554,12 @@
   {
     "name": "百度文库下载文档数据包",
     "zh_name": "百度文库下载文档数据包",
-    "en_name": "Baidu library download document data package"
+    "en_name": "Baidu document data package"
   },
   {
     "name": "迅雷下载MSDNwin10镜像数据包",
     "zh_name": "迅雷下载MSDNwin10镜像数据包",
-    "en_name": "Thunder download MSDN win10 mirror data package"
+    "en_name": "Thunder win10 data package"
   },
   {
     "name": "ysyy",
@@ -779,7 +779,7 @@
   {
     "name": "腾讯软件管理下载安装包数据包",
     "zh_name": "腾讯软件管理下载安装包数据包",
-    "en_name": "Tencent software management download installation package data package"
+    "en_name": "Tencent installation package data"
   },
   {
     "name": "搜狗搜索",
@@ -1034,7 +1034,7 @@
   {
     "name": "美团官网数据缓存数据包",
     "zh_name": "美团官网数据缓存数据包",
-    "en_name": "Meituan official website data cache data package"
+    "en_name": "Meituan official cache data package"
   },
   {
     "name": "爱思助手",
@@ -1139,7 +1139,7 @@
   {
     "name": "运维靶场自动化攻击",
     "zh_name": "运维靶场自动化攻击",
-    "en_name": "Operation and maintenance shooting range automation attack"
+    "en_name": "Cyber range automation attack"
   },
   {
     "name": "fakeHTTP2",
