@@ -31,7 +31,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Api(tags = "流量任务管理接口")
-@RestController
+//@RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/task")
 public class FlowTaskController extends BaseModelController<FlowTaskModel, QueryParams, FlowTaskService> {
 
