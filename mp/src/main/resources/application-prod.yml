@@ -71,7 +71,7 @@ mybatis:
 mp:
   situationaware:
     #moloch es节点地址
-    es-nodes: ${ip.moloch}:${MOLOCH_PORT:9205}
+    es-node: ${ip.moloch}:${MOLOCH_PORT:9205}
     wazuh:
       #wazuh 开放接口地址
       base-url: http://${ip.wazuh}:${WAZUH_PORT:15500}

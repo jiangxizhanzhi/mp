@@ -25,7 +25,7 @@ public class CollectionInitListener implements ApplicationListener<ApplicationRe
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        RestHighLevelClientImpl.initClientMap();
+//        RestHighLevelClientImpl.initClientMap();
         WazuhClientProxy.init(wazuhUsername, wazuhPassword);
     }
 

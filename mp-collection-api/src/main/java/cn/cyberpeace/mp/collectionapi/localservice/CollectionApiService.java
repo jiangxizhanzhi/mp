@@ -59,7 +59,7 @@ public class CollectionApiService {
             GroupUtil.updateGroupConfig(groupConfig);
             CollectionApiInit.init(groupConfig);
             // 更新esClient
-            RestHighLevelClientImpl.updateClientMap();
+//            RestHighLevelClientImpl.updateClientMap();
             //  更新wazuhClient
             WazuhClientProxy.updateClientMap(wazuhUsername, wazuhPassword);
         } catch (Exception e) {

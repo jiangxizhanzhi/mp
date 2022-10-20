@@ -8,6 +8,9 @@ import java.util.List;
 
 @Data
 public class FlowAttackVO {
+    @ApiModelProperty("设备名称")
+    private String equipment;
+
     @ApiModelProperty(value = "攻击次数")
     private long attackCount;
 

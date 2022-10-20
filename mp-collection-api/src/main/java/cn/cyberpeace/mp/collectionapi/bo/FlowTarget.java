@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collectionapi.BO;
+package cn.cyberpeace.mp.collectionapi.bo;
 
 import lombok.Data;
 

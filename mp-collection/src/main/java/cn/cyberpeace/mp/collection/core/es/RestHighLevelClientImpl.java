@@ -24,6 +24,7 @@ import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,32 +32,35 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 @Slf4j
 public class RestHighLevelClientImpl implements IRestHighLevelClient{
-    private static volatile boolean init = false;
+//    private static volatile boolean init = false;
 
-    private static Map<String, RestHighLevelClient> restHighLevelClientMap;
+    @Resource(name = "restHighLevelClient")
+    private RestHighLevelClient restHighLevelClient;
 
-    public static void updateClientMap() {
-        init = false;
-        initClientMap();
-    }
-
-    public static void initClientMap() {
-        if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
-            restHighLevelClientMap = new ConcurrentHashMap<>();
-            ClusterConfig.nodes.forEach(node ->
-                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAddress())));
-            init = true;
-        }
-    }
-
-    public static RestHighLevelClient restHighLevelClient(String esAddress) {
-        return new RestHighLevelClient(RestClient.builder(createHttpHost(esAddress)));
-    }
+//    private static Map<String, RestHighLevelClient> restHighLevelClientMap;
+//
+//    public static void updateClientMap() {
+//        init = false;
+//        initClientMap();
+//    }
+//
+//    public static void initClientMap() {
+//        if (!init && CollectionUtils.isNotEmpty(ClusterConfig.nodes)) {
+//            restHighLevelClientMap = new ConcurrentHashMap<>();
+//            ClusterConfig.nodes.forEach(node ->
+//                    restHighLevelClientMap.put(node.getNodeId(), restHighLevelClient(node.getEsAddress())));
+//            init = true;
+//        }
+//    }
+//
+//    public static RestHighLevelClient restHighLevelClient(String esAddress) {
+//        return new RestHighLevelClient(RestClient.builder(createHttpHost(esAddress)));
+//    }
 
     @Override
     public SearchResponse search(SearchRequest searchRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).search(searchRequest, RequestOptions.DEFAULT);
+            return restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
             log.error("es query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -66,7 +70,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public SearchResponse scroll(SearchScrollRequest scrollRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).scroll(scrollRequest, RequestOptions.DEFAULT);
+            return restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es scroll error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -76,7 +80,7 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public CountResponse count(CountRequest countRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).count(countRequest, RequestOptions.DEFAULT);
+            return restHighLevelClient.count(countRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es count error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
@@ -86,28 +90,28 @@ public class RestHighLevelClientImpl implements IRestHighLevelClient{
     @Override
     public BulkByScrollResponse deleteByQuery(DeleteByQueryRequest deleteRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+            return restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es delete by query error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
 
-    @Override
-    public void allDeleteByQuery(DeleteByQueryRequest deleteRequest) {
-        restHighLevelClientMap.values().forEach(restHighLevelClient -> {
-            try {
-                restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
-            } catch (Exception e) {
-                log.error("es delete by query error: {}", ExceptionUtils.getStackTrace(e));
-            }
-        });
-    }
+//    @Override
+//    public void allDeleteByQuery(DeleteByQueryRequest deleteRequest) {
+//        restHighLevelClientMap.values().forEach(restHighLevelClient -> {
+//            try {
+//                restHighLevelClient.deleteByQuery(deleteRequest, RequestOptions.DEFAULT);
+//            } catch (Exception e) {
+//                log.error("es delete by query error: {}", ExceptionUtils.getStackTrace(e));
+//            }
+//        });
+//    }
 
     @Override
     public GetIndexResponse getIndices(GetIndexRequest getIndexRequest) {
         try {
-            return restHighLevelClientMap.get(ContextHolder.getContext().getGroupId()).indices().get(getIndexRequest, RequestOptions.DEFAULT);
+            return restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
         } catch (Exception e) {
             log.error("es get indices error: ", e);
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));

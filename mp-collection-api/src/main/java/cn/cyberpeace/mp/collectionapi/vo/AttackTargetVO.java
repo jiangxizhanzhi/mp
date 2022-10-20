@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class AttackTargetVO {
-    @ApiModelProperty(value = "设备名称")
+    @ApiModelProperty(value = "设备类型")
     private String name;
 
     @ApiModelProperty(value = "攻击次数")

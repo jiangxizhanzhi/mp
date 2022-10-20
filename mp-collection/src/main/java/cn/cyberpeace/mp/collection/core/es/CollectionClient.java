@@ -67,36 +67,6 @@ public class CollectionClient {
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
 
-    public static final String CACHE_KEY_FILE_EVENTS = "file_events";
-
-    public static final String CACHE_KEY_CUSTOM_PROBES = "custom_probes";
-
-    public static final String CACHE_KEY_VUL_INFOS = "vul_infos";
-
-    public static final String CACHE_KEY_VUL_COUNTS = "vul_counts";
-
-    public static final String CACHE_KEY_HOST_STATE = "host_states";
-
-    public static final String CACHE_KEY_NET_CONN = "net_conn";
-
-    public static final String CACHE_KEY_PROCESS = "process";
-
-    public static final String CACHE_KEY_USERS = "users";
-
-    public static final String CACHE_KEY_ENV_VAR_CHANGED_COUNT = "env_variable_changed_count";
-
-    public static final String CACHE_KEY_SYSTEM_USERS_CHANGED_COUNT = "sys_users_changed_count";
-
-    public static final String CACHE_KEY_PROCESS_CHANGED_COUNT = "processes_changed_count";
-
-    public static final String CACHE_KEY_NET_CONNS_CHANGED_COUNT = "net_conns_changed_count";
-
-    public static final String CACHE_KEY_AGGS_BY_AGENTNAME = "aggs_by_agentname";
-
-    public static final String CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME = "aggs_ruleids_by_agentname";
-
-    public static final String CACHE_KEY_COUNT_BY_AGENTNAME = "count_by_agentname";
-
     /**
      * 查询采集事件分页
      * @param request
@@ -522,14 +492,14 @@ public class CollectionClient {
         return response.getUpdated();
     }
 
-    /**
-     * 删除对应时间段内的全部es文档数据
-     * @param request
-     */
-    public void deleteDocByTime(WazuhEventRequest request) {
-        DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
-        restHighLevelClient.allDeleteByQuery(deleteRequest);
-    }
+//    /**
+//     * 删除对应时间段内的全部es文档数据
+//     * @param request
+//     */
+//    public void deleteDocByTime(WazuhEventRequest request) {
+//        DeleteByQueryRequest deleteRequest = buildDeleteRequest(request);
+//        restHighLevelClient.allDeleteByQuery(deleteRequest);
+//    }
 
     /**
      * 查询数据变动数通用方法

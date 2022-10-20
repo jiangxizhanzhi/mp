@@ -70,7 +70,7 @@ springfox:
 mp:
   situationaware:
     #moloch es节点地址
-    es-nodes: ${ip.moloch}:9205
+    es-node: ${ip.moloch}:9205
     wazuh:
       #wazuh 开放接口地址
       base-url: http://${ip.wazuh}:15500

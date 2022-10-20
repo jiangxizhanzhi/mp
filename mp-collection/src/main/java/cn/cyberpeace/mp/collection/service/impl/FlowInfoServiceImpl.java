@@ -7,14 +7,15 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
-import cn.cyberpeace.mp.collection.BO.FlowDetailInfo;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
+import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
+import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +28,6 @@ import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -130,16 +130,25 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         return new ServiceResult<>(flowDetail);
     }
 
-    /**
-     * 删除从开始时间到结束时间内的文档
-     * @param
-     * @return
-     */
     @Override
-    public void deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
-        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
-        restHighLevelClient.allDeleteByQuery(deleteByQueryRequest);
+    public ListObjServiceResult<FlowAttackBO> queryFlowAttack() {
+        var indexArray = getFlowIndex();
+        var searchRequest = new SearchRequest(indexArray);
+        var boolQueryBuilder = QueryBuilders.boolQuery();
+        var sourceBuilder = new SearchSourceBuilder();
+        return null;
     }
+
+    //    /**
+//     * 删除从开始时间到结束时间内的文档
+//     * @param
+//     * @return
+//     */
+//    @Override
+//    public void deleteDoc(LocalDateTime startTime, LocalDateTime endTime) {
+//        DeleteByQueryRequest deleteByQueryRequest = buildDeleteRequest(startTime, endTime);
+//        restHighLevelClient.allDeleteByQuery(deleteByQueryRequest);
+//    }
 
     private void buildFlowPageQueryBuilder(PageFlowRequest pageFlowRequest, BoolQueryBuilder boolQueryBuilder) {
         if (!CollectionUtils.isEmpty(pageFlowRequest.getSourceIps())) {
@@ -330,12 +339,16 @@ public class FlowInfoServiceImpl implements FlowInfoService {
         if (Objects.nonNull(start) && Objects.nonNull(end)) {
             return buildRequestIndex(start, end);
         } else {
-            IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
-            indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
-            GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
-            GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
-            return indices.getIndices();
+            return getFlowIndex();
         }
+    }
+
+    private String[] getFlowIndex() {
+        IndicesStatsRequest indicesStatsRequest = new IndicesStatsRequest();
+        indicesStatsRequest.indices(ARKIME_SESSIONS3_ + "*");
+        GetIndexRequest getIndexRequest = new GetIndexRequest(ARKIME_SESSIONS3_ + "*");
+        GetIndexResponse indices = restHighLevelClient.getIndices(getIndexRequest);
+        return indices.getIndices();
     }
 
     /**

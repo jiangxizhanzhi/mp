@@ -2,9 +2,10 @@ package cn.cyberpeace.mp.collection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
-import cn.cyberpeace.mp.collection.BO.TeamFlowInfo;
+import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -27,10 +28,12 @@ public interface FlowInfoService {
      */
     ServiceResult<Map<String, Object>> queryFlowDetail(FlowQueryRequest request);
 
-    /**
-     * 删除从开始时间到结束时间内的文档
-     * @param
-     * @return
-     */
-    void deleteDoc(LocalDateTime startTime, LocalDateTime endTime);
+//    /**
+//     * 删除从开始时间到结束时间内的文档
+//     * @param
+//     * @return
+//     */
+//    void deleteDoc(LocalDateTime startTime, LocalDateTime endTime);
+
+    ListObjServiceResult<FlowAttackBO> queryFlowAttack();
 }
