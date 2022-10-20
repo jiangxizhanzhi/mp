@@ -151,32 +151,28 @@ public class JwtUtils {
 
     public static UserInfo validateToken(String token) {
         var user = getUserInfo(token);
-        if (user == null) {
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_DECODE_ERROR);
-        }
-
         String jwtSecret = generateJwtSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
         } catch (AlgorithmMismatchException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(VERIFY_JWT_TOKEN_ERROR, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
         } catch (SignatureVerificationException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(VERIFY_JWT_TOKEN_ERROR, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
         } catch (TokenExpiredException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(VERIFY_JWT_TOKEN_ERROR, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         } catch (InvalidClaimException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(VERIFY_JWT_TOKEN_ERROR, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
         } catch (JWTDecodeException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(AuthConstant.DECODE_JWT_TOKEN_ERROR, token, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
         } catch (IllegalArgumentException e) {
-            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            log.error(VERIFY_JWT_TOKEN_ERROR, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
         }
         return user;
@@ -196,8 +192,8 @@ public class JwtUtils {
         try {
             jwt = JWT.decode(token);
         } catch (JWTDecodeException e) {
-            log.error("Decode jwt token {} error: {}", token, ExceptionUtils.getStackTrace(e));
-            return null;
+            log.error(AuthConstant.DECODE_JWT_TOKEN_ERROR, token, e.getMessage());
+            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
         }
 
         var user = new UserInfo();
