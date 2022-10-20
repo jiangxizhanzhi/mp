@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonConstant;
@@ -14,9 +15,9 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivMenuDTO;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
-import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
 import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
+import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
@@ -120,6 +121,10 @@ public class ActivMenuService {
             return false;
         }
         List<TargetModel> allTargets = targetService.listAllIgnoreVisible(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
+        if (CollectionUtil.isEmpty(allTargets)) {
+            log.error("targets is null! please check!");
+            throw new MpRuntimeException("targets is null!");
+        }
         List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
 
         processMenuVisibility(allTargets, menuExtraInfos, content);
@@ -163,6 +168,11 @@ public class ActivMenuService {
         QueryParams queryParams = new QueryParams();
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
+
+        if (CollectionUtil.isEmpty(optionModels)) {
+            log.error("optionModels is null! please check!");
+            throw new MpRuntimeException("optionModels is null!");
+        }
 
         List<OptionModel> toUpdateList = new ArrayList<>();
         LocalDateTime updatime = LocalDateTime.now();
