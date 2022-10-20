@@ -397,7 +397,7 @@ public class FlowInfoService {
 	 * @param ips
 	 * @return
 	 */
-	public long queryEquipmentAttackCount(List<String> ips) {
+	public ServiceResult<Long> queryEquipmentAttackCount(List<String> ips) {
 		log.info("{}", ips);
 
 		String[] indexArray = getFlowIndex();
@@ -416,7 +416,7 @@ public class FlowInfoService {
 		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 
-		return response.getHits().getTotalHits().value;
+		return new ServiceResult<>(response.getHits().getTotalHits().value);
 	}
 
 	/**
@@ -426,6 +426,7 @@ public class FlowInfoService {
 	 * @return
 	 */
 	public Map<String, Long> queryEquipmentAttackCountInfo(List<String> ips) {
+        // todo 返回service result 尽量不要返回map 返回对象
 		log.info("{}", ips);
 
 		String[] indexArray = getFlowIndex();
@@ -438,10 +439,10 @@ public class FlowInfoService {
 		}
 		buildSeverityQuery(0L, boolQueryBuilder);
 
-		String DES_IP_COUNT_TERM = "des_ip_count";
+		String deIpCountTerm = "des_ip_count";
 		sourceBuilder.size(0);
 		sourceBuilder.trackTotalHits(true);
-		sourceBuilder.aggregation(AggregationBuilders.terms(DES_IP_COUNT_TERM).field("destination.ip"));
+		sourceBuilder.aggregation(AggregationBuilders.terms(deIpCountTerm).field("destination.ip"));
 
 		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
@@ -450,7 +451,7 @@ public class FlowInfoService {
 		Map<String, Long> ipCountMap = Maps.newHashMap();
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 		Aggregations aggregations = response.getAggregations();
-		ParsedTerms parsedTerms = aggregations.get(DES_IP_COUNT_TERM);
+		ParsedTerms parsedTerms = aggregations.get(deIpCountTerm);
 		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
 		buckets.forEach(bucket -> {
 			ipCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());
@@ -466,6 +467,7 @@ public class FlowInfoService {
 	 * @return
 	 */
 	public Map<String, Long> queryEquipmentAttackTypeTop5(List<String> ips) {
+        // todo 返回service result 尽量不要返回map 返回对象
 		log.info("{}", ips);
 
 		String[] indexArray = getFlowIndex();
@@ -478,10 +480,10 @@ public class FlowInfoService {
 		}
 		buildSeverityQuery(0L, boolQueryBuilder);
 
-		String CATE_COUNT_TERM = "cate_count";
+		String cateCountTerm = "cate_count";
 		sourceBuilder.size(0);
 		sourceBuilder.trackTotalHits(true);
-		sourceBuilder.aggregation(AggregationBuilders.terms(CATE_COUNT_TERM).field("suricata.category")
+		sourceBuilder.aggregation(AggregationBuilders.terms(cateCountTerm).field("suricata.category")
 				.order(BucketOrder.count(false)).size(5));
 
 		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
@@ -491,7 +493,7 @@ public class FlowInfoService {
 		Map<String, Long> typeCountMap = Maps.newLinkedHashMap();
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 		Aggregations aggregations = response.getAggregations();
-		ParsedTerms parsedTerms = aggregations.get(CATE_COUNT_TERM);
+		ParsedTerms parsedTerms = aggregations.get(cateCountTerm);
 		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
 		buckets.forEach(bucket -> {
 			typeCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());

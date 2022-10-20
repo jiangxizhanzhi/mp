@@ -121,14 +121,13 @@ public class FlowController {
 	@GetMapping("equipment_attack_count")
 	@ApiOperation(value = "设备被攻击次数")
 	public ListObjServiceResult<AttackTargetVO> equipmentAttackCount(@RequestParam(required = false) String type) {
-		// todo 分为全部商用设备 全部拟态设备 具体的商用设备 具体的拟态设备 都会有多个ip 需要合并数据
 		List<AttackTargetVO> vos = Lists.newArrayList();
 		for (int useType = 0; useType < 2; useType++) {
 			// 0:商用 1:拟态
 			AttackTargetVO vo = new AttackTargetVO();
 			vo.setName(type);
 			vo.setUseType(useType);
-			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)));
+			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)).getSource());
 			vos.add(vo);
 		}
 
@@ -138,7 +137,6 @@ public class FlowController {
 	@GetMapping("equipment_attack_count_list")
 	@ApiOperation(value = "设备被攻击次数列表")
 	public ListObjServiceResult<AttackTargetListVO> equipmentAttackCountInfo() {
-		// todo 分为商用设备和拟态设备
 		List<AttackTargetListVO> vos = Lists.newArrayList();
 		for (int useType = 0; useType < 2; useType++) {
 			// 0:商用 1:拟态
@@ -185,12 +183,4 @@ public class FlowController {
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
 	}
-
-    @GetMapping("equipment_attack_type")
-    @ApiOperation(value = "设备被攻击手法top5")
-    public ListObjServiceResult<AttackTypeVO> equipmentAttackType(Integer useType) {
-        // todo 分为商用设备和拟态设备
-        return new ListObjServiceResult<>();
-    }
-    
 }
