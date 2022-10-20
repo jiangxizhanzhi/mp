@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -353,7 +354,7 @@ public class FlowInfoService {
     @VisibleForTesting
     public static List<String> indexListBuilder(LocalDateTime start, LocalDateTime end) {
         if (Objects.isNull(start) || Objects.isNull(end)) {
-            return null;
+            return new ArrayList<>();
         }
         List<String> dateStringList = fetchFormatterTime(start, end);
         return dateStringList.stream().map(dateString -> ARKIME_SESSIONS3_ + dateString).collect(Collectors.toList());
