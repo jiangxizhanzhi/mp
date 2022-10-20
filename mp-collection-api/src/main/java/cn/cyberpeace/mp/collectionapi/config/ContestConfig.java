@@ -31,6 +31,9 @@ public class ContestConfig {
 
         private String boxType;
 
+        // 0:商用 1:拟态
+        private Integer useType;
+
         private List<String> ips;
     }
 }
