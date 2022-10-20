@@ -2,6 +2,7 @@ dependencies {
     implementation project(':mp-base')
     implementation project(':mp-common')
     implementation project(':mp-devops-log')
+    implementation project(':mp-situation-aware')
 
     task wrapper() {}
 }
