@@ -38,9 +38,9 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
-    public final static String FDFS_PREFIX = "/fdfs";
+    public static final String FDFS_PREFIX = "/fdfs";
 
-    public final static String DEFAULT_IMAGE_PREFIX = "/api/mp";
+    public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
 
     /**
      * 逗号
@@ -51,6 +51,8 @@ public class AuthConstant {
     public static final Integer TARGET_FIELD_VALUE_VISIBLE_1 = 1;
 
     public static final Integer USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0 = 0;
+
+    public static final String VERIFY_JWT_TOKEN_ERROR = "Verify jwt token error: {}";
 
 
     private AuthConstant() {

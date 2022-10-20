@@ -8,10 +8,7 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.auth0.jwt.exceptions.TokenExpiredException;
+import com.auth0.jwt.exceptions.*;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,6 +31,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Objects;
+
+import static cn.cyberpeace.mp.auth.constant.AuthConstant.VERIFY_JWT_TOKEN_ERROR;
 
 /**
  * @Description:
@@ -161,13 +160,25 @@ public class JwtUtils {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
+        } catch (AlgorithmMismatchException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
+        } catch (SignatureVerificationException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
         } catch (TokenExpiredException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-        } catch (JWTVerificationException e) {
-            log.error("Verify jwt token error: {}", ExceptionUtils.getStackTrace(e));
-            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        } catch (InvalidClaimException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
+        } catch (JWTDecodeException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
+        } catch (IllegalArgumentException e) {
+            log.error(VERIFY_JWT_TOKEN_ERROR, ExceptionUtils.getStackTrace(e));
+            throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
         }
-
         return user;
     }
 

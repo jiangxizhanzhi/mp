@@ -12,7 +12,15 @@ public enum AuthErrorCode implements ErrorCode {
     NOT_CERTIFIED("MP-110001", "not_certified"),
     AUTHENTICATION_FAILED("MP-110002", "authentication_failed"),
     BAD_CREDENTIALS("MP-110003", "bad_credentials"),
-    TOKEN_EXPIRED("MP-110004", "token_expired"),
+
+    // verify token jwt error
+    ALGORITHM_MISMATCH("MP-110110", "token_algorithm_mismatch"),
+    SIGNATURE_VERIFICATION("MP-110111", "token_signature_verification"),
+    TOKEN_EXPIRED("MP-110112", "token_token_expired"),
+    INVALID_CLAIM("MP-110113", "token_invalid_claim"),
+    JWT_DECODE("MP-110114", "token_jwt_decode"),
+    ILLEGAL_ARGUMENT("MP-110115", "token_illegal_argument"),
+
     NEED_UPDATE_CREDENTIALS("MP-110005", "need_update_credentials"),
     ACCOUNT_NOT_LOGIN("MP-110006", "account_not_login"),
     ACCOUNT_CREDENTIALS_EXPIRED("MP-110007", "account_credentials_expired"),
