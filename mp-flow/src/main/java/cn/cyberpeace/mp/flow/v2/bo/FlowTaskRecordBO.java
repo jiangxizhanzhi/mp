@@ -29,6 +29,16 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     private List<String> filterProtocols;
     private List<TaskFlow> flows;
 
+    /**
+     * 流量运行时间
+     */
+    private Integer duration;
+
+    /**
+     * 平台当前时间 yyyy-MM-dd HH:mm:ss
+     */
+    private String time;
+
     @Override
     public FlowTaskRecordBO fromModel(FlowTaskRecordModel obj, String... ignoreFields) {
         super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
@@ -66,6 +76,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
         private String flowGeneratorId;
         private String flowGeneratorNicId;
         private Integer status;
+        private String flowId;
 
         private String name;
         private String description;
