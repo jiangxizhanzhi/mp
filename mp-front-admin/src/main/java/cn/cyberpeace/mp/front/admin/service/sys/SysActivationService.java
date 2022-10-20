@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -206,6 +207,10 @@ public class SysActivationService {
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
         }
+        if (Objects.isNull(sysActivCtlModel)) {
+            log.error("sysActivCtlModel is null!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
+        }
         String suffix = sysActivCtlModel.getSuffix();
 
         String uuid = "";
@@ -302,9 +307,9 @@ public class SysActivationService {
                 updateActivCtlModel.setId(validActivCtlModel.getId());
                 updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
                 sysActivCtlService.update(updateActivCtlModel);
+            } else {
+                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
             }
-
-            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
         }
     }
 
