@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.front.admin.service.sys;
 
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -80,66 +81,71 @@ public class SysActivationService {
      */
     public void activate(ActivationRequest activationRequest) {
         log.info("activationRequest:{}", activationRequest);
-
         ActivationResponse content = status();
-        SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
         boolean isSysActivited = false;
         if (Objects.nonNull(content) && Objects.equals(AdminConstant.STATUS_ACTIVITED, content.getIsActived())) {
             log.error("content status is actived!");
             isSysActivited = true;
         }
-        if (Objects.nonNull(validModel)) {
-            log.error("valid model existed!");
-            isSysActivited = true;
-        }
-        if (isSysActivited) {
-            log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
-        }
+
+        synchronized (this) {
+            if (!isSysActivited) {
+                SysActivCtlModel validModel = sysCtlService.getValidCtlModel();
+                if (Objects.nonNull(validModel)) {
+                    log.error("valid model existed!");
+                    isSysActivited = true;
+                }
+            }
+
+            if (isSysActivited) {
+                log.error("isSysActivited:{}, system activation status not cleanup! please Check!", isSysActivited);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_STATUS_ERROR);
+            }
 
 
-        SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
-        if (Objects.isNull(unusedActivCtlModel)) {
-            log.error("unused activctl not existed!");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
-        }
+            SysActivCtlModel unusedActivCtlModel = sysCtlService.getUnusedActivCtlModel();
+            if (Objects.isNull(unusedActivCtlModel)) {
+                log.error("unused activctl not existed!");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_ERROR);
+            }
 
-        String localSysUUID = querySysUUID();
-        if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
-            log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
-        }
+            String localSysUUID = querySysUUID();
+            if (!Objects.equals(activationRequest.getMachineCode(), localSysUUID)) {
+                log.error("sysuuid not match! request machine code is:{}, localSysUUID is:{}", activationRequest.getMachineCode(), localSysUUID);
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_SYSUUID_NOTMATCH);
+            }
 
-        // 拼接json串，调用licenseService验证
-        ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
-        verifyInfo.setDeadline(activationRequest.getDeadline());
-        verifyInfo.setMachinecode(activationRequest.getMachineCode());
+            // 拼接json串，调用licenseService验证
+            ActivationVerifyInfo verifyInfo = new ActivationVerifyInfo();
+            verifyInfo.setDeadline(activationRequest.getDeadline());
+            verifyInfo.setMachinecode(activationRequest.getMachineCode());
 
-        // 自定义信息
-        Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
-        verifyInfo.setInfo(infoMap);
+            // 自定义信息
+            Map<String, String> infoMap = convertActivationItems2CustomVerifyInfoMap(activationRequest.getItems());
+            verifyInfo.setInfo(infoMap);
 
-        String verifyStr = JSON.toJSONString(verifyInfo);
-        String verifyCode = activationRequest.getVerifyCode();
+            String verifyStr = JSON.toJSONString(verifyInfo);
+            String verifyCode = activationRequest.getVerifyCode();
 
-        // 校验激活码和激活配置项，是否匹配
-        boolean success = licenseService.verify(verifyStr, verifyCode);
+            // 校验激活码和激活配置项，是否匹配
+            boolean success = licenseService.verify(verifyStr, verifyCode);
 
-        if (success) {
-            // 校验通过，生成加密文件存储磁盘
-            ACTIVATION_CONTENT = null;
-            generateEncryptedFile(activationRequest);
+            if (success) {
+                // 校验通过，生成加密文件存储磁盘
+                ACTIVATION_CONTENT = null;
+                generateEncryptedFile(activationRequest);
 
-            // 更新数据库激活限制配置
-            processActivCtlAfterActivationSuccess(activationRequest);
+                // 更新数据库激活限制配置
+                processActivCtlAfterActivationSuccess(activationRequest);
 
-            ACTIVATION_CONTENT = status();
-            log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
-            activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
-            activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
-        } else {
-            log.error("license verify failed！");
-            throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+                ACTIVATION_CONTENT = status();
+                log.info("ACTIVATION_CONTENT:{}", ACTIVATION_CONTENT);
+                activMenuService.resetMenusVisibility(ACTIVATION_CONTENT);
+                activMenuService.resetOptionsVisibility(ACTIVATION_CONTENT);
+            } else {
+                log.error("license verify failed！");
+                throw new MpRuntimeException(AdminErrorCode.SYS_ACTIVATION_FAILED);
+            }
         }
 
     }
@@ -200,6 +206,10 @@ public class SysActivationService {
             sysActivCtlModel = sysCtlService.generateOrGetUnusedActivCtlModel();
         } else {
             sysActivCtlModel = sysCtlService.getValidCtlModel();
+        }
+        if (Objects.isNull(sysActivCtlModel)) {
+            log.error("sysActivCtlModel is null!");
+            throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
         String suffix = sysActivCtlModel.getSuffix();
 
@@ -297,9 +307,9 @@ public class SysActivationService {
                 updateActivCtlModel.setId(validActivCtlModel.getId());
                 updateActivCtlModel.setStatus(SysActivCtlModel.STATUS_INVALID);
                 sysActivCtlService.update(updateActivCtlModel);
+            } else {
+                ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
             }
-
-            ACTIVATION_CONTENT.setIsActived(AdminConstant.STATUS_ACTIVITED);
         }
     }
 

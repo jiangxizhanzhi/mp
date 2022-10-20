@@ -8,12 +8,15 @@ import cn.cyberpeace.mp.devops.cluster.dto.ImagePageDTO;
 import cn.cyberpeace.mp.devops.cluster.request.TargetSceneRequest;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneConfigElementPortBO;
+import cn.cyberpeace.mp.scene.core.bo.base.AccessMode;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneConfigElementPortBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.base.CloudAccessMode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,14 +37,14 @@ class DeviceInfoConverter implements IConverter {
 
     public void convert2BO(ConvertDataContainer container) {
         if (CollectionUtils.isNotEmpty(container.getNetworkElements())) {
-            this.doConvert(container.getNetworkElements(), container.getCloudPluginElements(), container.getCloudPluginPorts());
+            this.doConvert(container.getNetworkElements(), container.getCloudPluginElements(), container.getCloudPluginPorts(), container);
         }
         if (CollectionUtils.isNotEmpty(container.getNodeElements())) {
-            this.doConvert(container.getNodeElements(), container.getCloudPluginElements(), container.getCloudPluginPorts());
+            this.doConvert(container.getNodeElements(), container.getCloudPluginElements(), container.getCloudPluginPorts(), container);
         }
     }
 
-    private void doConvert(List<SceneConfigElementBO> list, Map<String, CloudPluginSceneConfigElementBO> pluginElements, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts) {
+    private void doConvert(List<SceneConfigElementBO> list, Map<String, CloudPluginSceneConfigElementBO> pluginElements, Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts, ConvertDataContainer container) {
         for (SceneConfigElementBO element : list) {
             CloudPluginSceneConfigElementBO elementBO = pluginElements.get(element.getId());
             if (elementBO == null || elementBO.getImage() == null) {
@@ -62,17 +65,17 @@ class DeviceInfoConverter implements IConverter {
                     continue;
                 } else {
                     Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
-                    this.loadDeviceInfo(params, devices.get(0));
+                    this.loadDeviceInfo(params, devices.get(0), container);
                 }
             } else {
                 List<Device> devices = targetSceneConvertModel.getList();
                 Params params = new Params(element, pluginElements.get(element.getId()), pluginPorts);
-                this.loadDeviceInfo(params, devices.get(0));
+                this.loadDeviceInfo(params, devices.get(0), container);
             }
         }
     }
 
-    private void loadDeviceInfo(Params params, Device device) {
+    private void loadDeviceInfo(Params params, Device device, ConvertDataContainer container) {
         SceneConfigElementBO element = params.element;
         CloudPluginSceneConfigElementBO pluginElement = params.pluginElement;
 
@@ -108,7 +111,7 @@ class DeviceInfoConverter implements IConverter {
         }
 
         if (CollectionUtils.isNotEmpty(device.getExtEntityAccess())) {
-            this.loadExtEntityAccesses(params, device.getExtEntityAccess());
+            this.loadExtEntityAccesses(params, device.getExtEntityAccess(), container);
         }
 
         if (device.getExtGateway() != null && CollectionUtils.isNotEmpty(device.getExtGateway().getPortConfigs())) {
@@ -120,7 +123,7 @@ class DeviceInfoConverter implements IConverter {
         }
     }
 
-    private void loadExtEntityAccesses(Params params, List<ExtEntityAccess> accesses) {
+    private void loadExtEntityAccesses(Params params, List<ExtEntityAccess> accesses, ConvertDataContainer container) {
         SceneConfigElementBO element = params.element;
         Map<String, CloudPluginSceneConfigElementPortBO> pluginPorts = params.pluginPorts;
 
@@ -133,9 +136,45 @@ class DeviceInfoConverter implements IConverter {
 
             port.setIp(access.getIp());
             port.setMacAddr(access.getMac());
-            port.setName(access.getPortName());
+            port.setName(access.getSwitchPort());
             pluginPort.setEntitySwitchName(access.getSwitchName());
             pluginPort.setEntitySwitchPort(access.getSwitchPort());
+            container.getEntityPortId2Name().put(port.getId(), port.getName());
+            if (CollectionUtils.isNotEmpty(access.getAccessProtocols())) {
+                if (port.getAccessModes() == null) {
+                    port.setAccessModes(new ArrayList<>());
+                }
+                if (pluginPort.getAccessModes() == null) {
+                    pluginPort.setAccessModes(new ArrayList<>());
+                }
+                for (var protocol : access.getAccessProtocols()) {
+                    var accessMode = new AccessMode();
+                    accessMode.setUsername(protocol.getUsername());
+                    accessMode.setPassword(protocol.getPassword());
+                    accessMode.setProtocol(protocol.getProtocol());
+                    accessMode.setDesc(protocol.getDescription());
+                    accessMode.setProxy(true);
+                    accessMode.setPort(protocol.getPort());
+                    accessMode.setPrivateKeyEnable(protocol.getPrivateKeyEnable());
+                    accessMode.setPrivateKeyPath(protocol.getPrivateKeyPath());
+                    accessMode.setPrivateKeyFileName(protocol.getPrivateKeyFileName());
+                    port.getAccessModes().add(accessMode);
+
+                    var pluginAccessMode = new CloudAccessMode();
+                    pluginAccessMode.setUsername(protocol.getUsername());
+                    pluginAccessMode.setPassword(protocol.getPassword());
+                    pluginAccessMode.setProtocol(protocol.getProtocol());
+                    pluginAccessMode.setDesc(protocol.getDescription());
+                    pluginAccessMode.setProxy(true);
+                    pluginAccessMode.setPort(protocol.getPort());
+                    pluginAccessMode.setPrivateKeyEnable(protocol.getPrivateKeyEnable());
+                    pluginAccessMode.setPrivateKeyPath(protocol.getPrivateKeyPath());
+                    pluginAccessMode.setPrivateKeyFileName(protocol.getPrivateKeyFileName());
+                    pluginAccessMode.setAccessIp(access.getIp());
+                    pluginAccessMode.setAccessPort(protocol.getPort());
+                    pluginPort.getAccessModes().add(pluginAccessMode);
+                }
+            }
         }
     }
 

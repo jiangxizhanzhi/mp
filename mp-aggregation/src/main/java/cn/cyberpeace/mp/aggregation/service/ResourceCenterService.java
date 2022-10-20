@@ -61,16 +61,6 @@ public class ResourceCenterService {
         }
         // 转换bo
         CsceneBO csceneBO = cSceneBoConverter.convert(ymlParseResult, imageInfos, fdfsSceneFilePath);
-        if (CollectionUtils.isNotEmpty(csceneBO.getSceneConfig().getTopology().getElements())) {
-            csceneBO.getSceneConfig().getTopology().getElements().forEach(e -> {
-                if (CollectionUtils.isNotEmpty(e.getPorts())) {
-                    String prefix = (e.getType() != null && e.getType() == BaseSceneElementModel.Type.TERMINAL) ? "eth0" : "E0";
-                    for (int i = 0; i < e.getPorts().size(); i++) {
-                        e.getPorts().get(i).setName(prefix + "/" + (i + 1));
-                    }
-                }
-            });
-        }
         // 保存
         return csceneService.syncWithoutCheckLimit(csceneBO, new CsceneContextBO());
     }

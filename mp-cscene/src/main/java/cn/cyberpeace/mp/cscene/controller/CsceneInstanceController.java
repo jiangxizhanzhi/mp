@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -83,7 +84,7 @@ public class CsceneInstanceController implements BaseModelListControllerBase {
 
     private CsceneFileService csceneFileService;
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     private CsceneInstanceActionRequest formatActionRequest(CsceneInstanceActionRequest request, String paramId) {

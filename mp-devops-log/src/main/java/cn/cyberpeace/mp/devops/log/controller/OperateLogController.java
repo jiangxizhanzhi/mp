@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class OperateLogController {
 
     private OperateLogServiceFactory operateLogServiceFactory;
 
-    @Autowired
+    @Resource(name = "sysOptionServiceImpl")
     private OptionService optionService;
 
     @Autowired

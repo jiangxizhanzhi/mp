@@ -18,8 +18,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +54,12 @@ class ConvertDataContainer {
 
     private Map<String, ImageInfoParseResult> imageInfos = new HashMap<>();
 
+    // 存区域信息
+    private List<SceneConfigAreaBO> areaBOS = new ArrayList<>();
+    private Map<String, SceneConfigElementPortBO> node2NodePort = new HashMap<>();
+    private Map<String, String> entityPortId2Name = new HashMap<>();
     private String sceneFilePath;
+    private Set<String> simpleLayer3Switch = new HashSet<>();
 
     public void putImageInfo(String image, ImageInfoParseResult result) {
         this.imageInfos.put(image, result);
@@ -68,6 +75,10 @@ class ConvertDataContainer {
 
     public void addNoNetworkNodeElements(SceneConfigElementBO element) {
         this.noNetworkNodeElements.add(element);
+    }
+
+    public void addAreaElement(SceneConfigAreaBO area) {
+        this.areaBOS.add(area);
     }
 
     public void putNode2NetworkPorts(String nodeId, String networkId, SceneConfigElementPortBO sceneConfigElementPortBO) {
@@ -97,7 +108,7 @@ class ConvertDataContainer {
         SceneConfigDataBO configDataBO = new SceneConfigDataBO();
         configDataBO.setTopology(this.getSceneConfigTopologyBO());
         configDataBO.setPlugins(this.getPlugins());
-
+        configDataBO.getTopology().setAreas(this.areaBOS);
         CsceneBO csceneBO = new CsceneBO();
         csceneBO.setSceneConfig(configDataBO);
         csceneBO.getSceneConfig().getTopology().getElements().forEach(element -> {
@@ -158,7 +169,15 @@ class ConvertDataContainer {
         return topology;
     }
 
+    public void addNode2NodePort(String fromNode, String toNode, SceneConfigElementPortBO fromPort) {
+        this.node2NodePort.put(fromNode + "_" + toNode, fromPort);
+    }
+
     public void setSceneFilePath(String sceneFilePath) {
         this.sceneFilePath = sceneFilePath;
+    }
+
+    public Set<String> getSimpleLayer3Switch() {
+        return simpleLayer3Switch;
     }
 }
