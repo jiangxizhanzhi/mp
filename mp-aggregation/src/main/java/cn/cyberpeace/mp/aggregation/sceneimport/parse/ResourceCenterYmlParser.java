@@ -117,7 +117,7 @@ public final class ResourceCenterYmlParser {
     }
 
     private static void addAllPrivateKey(Map<String, ImageInfoParseResult> servers, String path) {
-        if (!servers.isEmpty() && servers != null) {
+        if (servers != null && servers.isEmpty()) {
             var accessModes = servers.values().stream().findFirst().get().getAccessModes();
             var manageAccessModes = servers.values().stream().findFirst().get().getManageAccessModes();
 
