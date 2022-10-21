@@ -1,10 +1,12 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
 import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.dto.org.UserOrgBo;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
+import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
@@ -23,6 +25,7 @@ import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -139,19 +142,19 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
 
         // orgpaths
-        /*List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
-        List<UserOrgBo> userOrgBos = tenantUserService.listUserOrgByUserIds(userIds);
+        List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
+        List<UserOrgBo> userOrgBos = orgUserService.listUserOrgByUserIds(userIds);
         reportDtos.forEach(r -> {
-            List<OrgBO> orgBOList =
+            List<OrgModel> orgBOList =
                     userOrgBos.stream().filter(userOrgBo -> Objects.equals(userOrgBo.getUserId(), r.getUser())).map(dto-> {
-                        OrgBO orgBO = new OrgBO();
+                        OrgModel orgBO = new OrgModel();
                         BeanUtils.copyProperties(dto, orgBO);
                         return orgBO;
                     }).collect(Collectors.toList());
             if (CollectionUtils.isNotEmpty(orgBOList)) {
-                r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
+                r.setOrg(orgBOList.stream().map(OrgModel::getPath).collect(Collectors.joining(",")));
             }
-        });*/
+        });
 
         // 替换为reportDto
         pageInfo.setList(reportDtos);
