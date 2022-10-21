@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collectionapi.config.ContestConfig;
 import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
@@ -127,7 +128,7 @@ public class FlowController {
 			AttackTargetVO vo = new AttackTargetVO();
 			vo.setName(type);
 			vo.setUseType(useType);
-			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)).getSource());
+			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)));
 			vos.add(vo);
 		}
 
@@ -142,15 +143,15 @@ public class FlowController {
 			// 0:商用 1:拟态
 			List<String> ips = ContestConfig.getIpsByType(null, useType);
 			// 设备被攻击次数
-			Map<String, Long> ipCountMap = flowInfoService.queryEquipmentAttackCountInfo(ips);
+			List<CountBO> bos = flowInfoService.queryEquipmentAttackCountInfo(ips);
 			Map<String, Long> typeCountMap = Maps.newHashMap();
-			ipCountMap.entrySet().forEach(entry -> {
-				String type = ContestConfig.getTpyeByIp(entry.getKey());
+			bos.forEach(bo -> {
+				String type = ContestConfig.getTpyeByIp(bo.getKey());
 				if (type == null) {
 					return;
 				}
 				Long count = typeCountMap.get(type);
-				typeCountMap.put(type, count == null ? entry.getValue() : entry.getValue() + count);
+				typeCountMap.put(type, count == null ? bo.getCount() : bo.getCount() + count);
 			});
 
 			final int USE_TYPE = useType;
@@ -163,13 +164,13 @@ public class FlowController {
 			}).collect(Collectors.toList());
 
 			// 设备被攻击手法top5
-			Map<String, Long> attackTypeCountMap = flowInfoService.queryEquipmentAttackTypeTop5(ips);
-			double totalAttack = attackTypeCountMap.values().stream().reduce(Long::sum).orElse(0L);
-			List<AttackTypeVO> attackTypes = attackTypeCountMap.entrySet().stream().map(entry -> {
+			bos = flowInfoService.queryEquipmentAttackTypeTop5(ips);
+			double totalAttack = bos.stream().mapToLong(CountBO::getCount).sum();
+			List<AttackTypeVO> attackTypes = bos.stream().map(bo -> {
 				AttackTypeVO vo = new AttackTypeVO();
-				vo.setZhName(entry.getKey());
-				vo.setCount(entry.getValue());
-				vo.setPercent(entry.getValue() / totalAttack);
+				vo.setEnName(bo.getKey());
+				vo.setCount(bo.getCount());
+				vo.setPercent(bo.getCount() / totalAttack);
 				return vo;
 			}).collect(Collectors.toList());
 
