@@ -4,7 +4,8 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
-import cn.cyberpeace.mp.collectionapi.config.ContestConfig;
+import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
+import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetListVO;
@@ -128,7 +129,7 @@ public class FlowController {
 			AttackTargetVO vo = new AttackTargetVO();
 			vo.setName(type);
 			vo.setUseType(useType);
-			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfig.getIpsByType(type, useType)));
+			vo.setCount(flowInfoService.queryEquipmentAttackCount(ContestConfigUtil.getIpsByType(type, useType)));
 			vos.add(vo);
 		}
 
@@ -141,12 +142,12 @@ public class FlowController {
 		List<AttackTargetListVO> vos = Lists.newArrayList();
 		for (int useType = 0; useType < 2; useType++) {
 			// 0:商用 1:拟态
-			List<String> ips = ContestConfig.getIpsByType(null, useType);
+			List<String> ips = ContestConfigUtil.getIpsByType(null, useType);
 			// 设备被攻击次数
 			List<CountBO> bos = flowInfoService.queryEquipmentAttackCountInfo(ips);
 			Map<String, Long> typeCountMap = Maps.newHashMap();
 			bos.forEach(bo -> {
-				String type = ContestConfig.getTpyeByIp(bo.getKey());
+				String type = ContestConfigUtil.getTpyeByIp(bo.getKey());
 				if (type == null) {
 					return;
 				}
@@ -168,7 +169,7 @@ public class FlowController {
 			double totalAttack = bos.stream().mapToLong(CountBO::getCount).sum();
 			List<AttackTypeVO> attackTypes = bos.stream().map(bo -> {
 				AttackTypeVO vo = new AttackTypeVO();
-				vo.setEnName(bo.getKey());
+				vo.setName(MessageCommonUtil.convertMessage(bo.getKey()));
 				vo.setCount(bo.getCount());
 				vo.setPercent(bo.getCount() / totalAttack);
 				return vo;
