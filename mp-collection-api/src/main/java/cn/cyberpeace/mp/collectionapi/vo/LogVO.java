@@ -7,8 +7,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class LogVO {
-    @ApiModelProperty(value = "类型")
-    private String type;
+    @ApiModelProperty(value = "类型 0:正常 1:异常")
+    private Integer type;
 
     @ApiModelProperty(value = "时间")
     private LocalDateTime time;

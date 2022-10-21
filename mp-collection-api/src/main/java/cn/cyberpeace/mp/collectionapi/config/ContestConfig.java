@@ -30,12 +30,32 @@ public class ContestConfig {
 
         private String type;
 
-        private String boxType;
+        // 0:白盒 1:黑盒
+        private Integer boxType;
 
         // 0:商用 1:拟态
         private Integer useType;
 
         private List<String> ips;
     }
-    
+
+    public static class BoxType {
+        private BoxType() {
+
+        }
+
+        public static final Integer WHITE = 0;
+
+        public static final Integer BLACK = 1;
+    }
+
+    public static class UseType {
+        private UseType() {
+
+        }
+
+        public static final Integer COMMERCIAL = 0;
+
+        public static final Integer MIMETIC = 1;
+    }
 }
