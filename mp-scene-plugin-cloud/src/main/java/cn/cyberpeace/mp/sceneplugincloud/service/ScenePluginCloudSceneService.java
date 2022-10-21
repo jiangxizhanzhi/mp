@@ -658,9 +658,14 @@ public class ScenePluginCloudSceneService {
     }
 
     public ServiceResult<List<NodeLinkStatusBO>> linkStatus(String sceneId) {
-        var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
-        SceneInstanceLinkCacheUtil.tryStartCronRefresh();
-        return new ServiceResult<>(list);
+        try {
+            var list = SceneInstanceLinkCacheUtil.getCached(sceneId);
+            SceneInstanceLinkCacheUtil.tryStartCronRefresh();
+            return new ServiceResult<>(list);
+        } catch (Exception e) {
+            log.error("failed get link status for scene {} , message is {}", sceneId, e.getMessage());
+            return new ServiceResult<>(new ArrayList<>());
+        }
     }
 
     public ServiceResult<ElementCommandExecBO> execElementCommand(String sceneId, String nodeId, String command) {
