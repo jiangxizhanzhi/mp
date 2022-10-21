@@ -34,10 +34,14 @@ import cn.cyberpeace.mp.scene.model.SceneConfigModel;
 import cn.cyberpeace.mp.scene.model.SceneElementModel;
 import cn.cyberpeace.mp.scene.model.SceneModel;
 import cn.cyberpeace.mp.scene.model.base.BaseSceneElementModel;
+import cn.cyberpeace.mp.scene.repository.SceneElementMapper;
 import cn.cyberpeace.mp.scene.repository.SceneMapper;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneConfigElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.IResourceName;
 import cn.cyberpeace.mp.sceneplugincloud.util.resourcename.RsourceNameParams;
 import lombok.Data;
@@ -48,6 +52,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -69,6 +74,12 @@ public class CsceneSpecialService {
 
     @Autowired
     private SceneMapper sceneMapper;
+
+    @Autowired
+    private SceneElementMapper sceneElementMapper;
+
+    @Resource
+    private ScenePluginCloudSceneService cloudSceneService;
 
     @Autowired
     private CsceneInstanceMapper csceneInstanceMapper;
@@ -826,5 +837,54 @@ public class CsceneSpecialService {
             }
             return new ServiceResult<>(set);
         }
+    }
+
+    public ServiceResult<List<UserConnectionNumBO>> countUserConnections(List<String> users) {
+        return cloudSceneService.countUserConnections(users);
+    }
+
+    public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String user, boolean monitor, boolean assistance) {
+        var list = cloudSceneService.getUserNodeSessions(user, monitor, assistance).getSource();
+        if (CollectionUtils.isEmpty(list)) {
+            return new ServiceResult<>(new ArrayList<>());
+        }
+        Set<String> sceneIds = new HashSet<>();
+        Set<String> sceneElementIds = new HashSet<>();
+        list.forEach(l -> {
+            sceneIds.add(l.getSceneId());
+            sceneElementIds.add(l.getNodeId());
+        });
+        var nodes = sceneElementMapper.list(new HumanCondition()
+                .filterIn(SceneElementModel::getScene, sceneIds.toArray())
+                .filterIn(SceneElementModel::getNodeId, sceneElementIds.toArray()));
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            Map<String, SceneElementModel> key2Model = new HashMap<>();
+            nodes.forEach(m -> {
+                key2Model.put(m.getScene() + "_" + m.getNodeId(), m);
+            });
+            for (var nodeSession : list) {
+                String key = nodeSession.getSceneId() + "_" + nodeSession.getNodeId();
+                if (key2Model.containsKey(key)) {
+                    nodeSession.setNodeName(key2Model.get(key).getName());
+                }
+            }
+        }
+        var scenes = csceneInstanceMapper.list(new HumanCondition()
+                .filterIn(CsceneInstanceModel::getScene, sceneIds.toArray())
+        );
+        if (CollectionUtils.isNotEmpty(scenes)) {
+            Map<String, CsceneInstanceModel> key2Model = new HashMap<>();
+            scenes.forEach(s -> {
+                key2Model.put(s.getScene(), s);
+            });
+            for (var nodeSession : list) {
+                var m = key2Model.get(nodeSession.getSceneId());
+                if (m != null) {
+                    nodeSession.setSceneId(m.getId());
+                    nodeSession.setSceneName(m.getName());
+                }
+            }
+        }
+        return new ServiceResult<>(list);
     }
 }
