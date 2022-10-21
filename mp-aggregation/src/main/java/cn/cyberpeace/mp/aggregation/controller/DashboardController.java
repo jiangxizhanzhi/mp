@@ -2,20 +2,30 @@ package cn.cyberpeace.mp.aggregation.controller;
 
 import cn.cyberpeace.mp.aggregation.constant.ControllerConstant;
 import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.cluster.SystemClusterUsed;
 import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
 import cn.cyberpeace.mp.aggregation.service.DashboardService;
 import cn.cyberpeace.mp.aggregation.service.MockService;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.util.ResultUtils;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * @Description: Dashboard相关统计接口
@@ -63,6 +73,21 @@ public class DashboardController {
     public ServiceResult<UserSummarySceneResponse> userSummary() {
         UserSummarySceneResponse response = dashboardService.countActivityScene();
         return ServiceResult.success(response);
+    }
+
+    @ApiOperation(value = "用户在线记录", notes = "")
+    @GetMapping("/user_online_record")
+    public ListObjServiceResult<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
+        pageRequest.ensure();
+        PageInfo<UserOnlineReportMonitorBo> pageInfo = dashboardService.getUserOnlineMonitorRecords(pageRequest);
+        return ResultUtils.pageInfo2ObjServiceResult(pageInfo);
+    }
+
+    @ApiOperation(value = "用户监控会话", notes = "")
+    @ApiImplicitParam(name = "userId", value = "用户ID", dataTypeClass = String.class)
+    @GetMapping("/user_node_session")
+    public ServiceResult<List<NodeSessionBO>> userNodeSession(@RequestParam String userId) {
+        return dashboardService.getUserNodeSessions(userId);
     }
 
 

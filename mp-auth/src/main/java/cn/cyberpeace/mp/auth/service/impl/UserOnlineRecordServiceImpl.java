@@ -5,7 +5,7 @@ import cn.cyberpeace.mp.auth.dto.user.UserOnlineCntDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryDto;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
 import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
-import cn.cyberpeace.mp.auth.model.OrgModel;
+import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserOnlineRecordModel;
 import cn.cyberpeace.mp.auth.repository.UserOnlineRecordMapper;
 import cn.cyberpeace.mp.auth.service.OrgUserService;
@@ -23,7 +23,6 @@ import cn.hutool.core.util.NumberUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.cglib.core.Local;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -32,8 +31,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -73,14 +76,26 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
     @Override
     public PageInfo<UserOnlineReportDto> recordSummaryPage(UserOnlineRecordSummaryPageRequest req) {
-        req.ensure();
+        ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
+        List<String> onlinedUserIds = heartbeatMap.entrySet().stream()
+                .filter(entry -> CollectionUtil.isNotEmpty(entry.getValue()) && entry.getValue().size() > 0)
+                .map(entry -> entry.getKey().getId()).collect(Collectors.toList());
+
         PageHelper.startPage(req.getPage(), req.getPageSize());
-        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), req.getStartTime(), req.getEndTime());
+        List<UserOnlineRecordSummaryDto> recordSummaryDtoList = getModelMapper().listRecordSummary(req.getUserIds(), onlinedUserIds, req.getStartTime(), req.getEndTime());
         PageInfo pageInfo = new PageInfo(recordSummaryDtoList);
-
-        List<UserOnlineRecordModel> onlineRecordModels = listCurrentOnlined(null);
-
         List<UserOnlineRecordSummaryDto> summaryDtos = pageInfo.getList();
+        if (CollectionUtil.isEmpty(summaryDtos)) {
+            return pageInfo;
+        }
+
+        Map<String, Integer> heatbeatCntMap = new HashMap<String, Integer>();
+        for (Map.Entry<UserModel, CopyOnWriteArrayList<LocalDateTime>> entry : heartbeatMap.entrySet()) {
+            if (Objects.nonNull(entry.getKey().getId()) && Objects.nonNull(entry.getValue())) {
+                heatbeatCntMap.put(entry.getKey().getId(), entry.getValue().size());
+            }
+        }
+
         List<UserOnlineReportDto> reportDtos = new ArrayList<>();
         summaryDtos.forEach(r -> {
             UserOnlineReportDto reportDto = new UserOnlineReportDto();
@@ -92,11 +107,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 double totalHrs = totalMins / 60.0;
                 reportDto.setTotalOnlineHours(NumberUtil.round(totalHrs, 2).doubleValue());
             }
-
-            // orgpaths
-            List<OrgModel> orgs = orgUserService.listOrgsByUserId(r.getUser());
-            String orgpaths = orgs.stream().map(OrgModel::getPath).collect(Collectors.joining(","));
-            reportDto.setOrg(orgpaths);
 
             // 只获取最新的一条日志
             OperationLogPageRequest logPageRequest = new OperationLogPageRequest();
@@ -111,7 +121,13 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
                 reportDto.setSubject(logs.get(0).getOpTarget());
             }
 
-            boolean isOnline = onlineRecordModels.stream().filter(model -> model.getUser().equals(r.getUser())).findAny().isPresent();
+            boolean isOnline = false;
+            if (Objects.nonNull(heatbeatCntMap.get(r.getUser())) && heatbeatCntMap.get(r.getUser()) > 0) {
+                isOnline = true;
+            } else if (Objects.nonNull(r.getUnCompleteCnt()) && r.getUnCompleteCnt() > 0) {
+                isOnline = true;
+            }
+
             if (isOnline) {
                 reportDto.setIsOnline(1);
             } else {
@@ -120,6 +136,22 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
 
             reportDtos.add(reportDto);
         });
+
+
+        // orgpaths
+        /*List<String> userIds = summaryDtos.stream().map(UserOnlineRecordSummaryDto::getUser).collect(Collectors.toList());
+        List<UserOrgBo> userOrgBos = tenantUserService.listUserOrgByUserIds(userIds);
+        reportDtos.forEach(r -> {
+            List<OrgBO> orgBOList =
+                    userOrgBos.stream().filter(userOrgBo -> Objects.equals(userOrgBo.getUserId(), r.getUser())).map(dto-> {
+                        OrgBO orgBO = new OrgBO();
+                        BeanUtils.copyProperties(dto, orgBO);
+                        return orgBO;
+                    }).collect(Collectors.toList());
+            if (CollectionUtils.isNotEmpty(orgBOList)) {
+                r.setOrg(orgBOList.stream().map(OrgBO::getPath).collect(Collectors.joining(",")));
+            }
+        });*/
 
         // 替换为reportDto
         pageInfo.setList(reportDtos);

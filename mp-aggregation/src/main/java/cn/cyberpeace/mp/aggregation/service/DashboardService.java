@@ -2,9 +2,12 @@ package cn.cyberpeace.mp.aggregation.service;
 
 import cn.cyberpeace.mp.aggregation.SceneBusinessSummary;
 import cn.cyberpeace.mp.aggregation.dto.DailyUserActivityResponse;
+import cn.cyberpeace.mp.aggregation.dto.UserOnlineReportMonitorBo;
 import cn.cyberpeace.mp.aggregation.dto.UserResourceResponse;
 import cn.cyberpeace.mp.aggregation.dto.UserSummarySceneResponse;
 import cn.cyberpeace.mp.aggregation.dto.resource.ResourceStatisticsResponse;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineRecordSummaryPageRequest;
+import cn.cyberpeace.mp.auth.dto.user.UserOnlineReportDto;
 import cn.cyberpeace.mp.auth.service.UserOnlineRecordService;
 import cn.cyberpeace.mp.base.constant.BaseErrorCode;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
@@ -21,11 +24,14 @@ import cn.cyberpeace.mp.cscene.service.CsceneSpecialService;
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.DeviceService;
 import cn.cyberpeace.mp.devops.cluster.service.DevopsTargetService;
 import cn.cyberpeace.mp.scene.model.SceneModel;
+import cn.cyberpeace.mp.sceneplugincloud.bo.NodeSessionBO;
+import cn.cyberpeace.mp.sceneplugincloud.bo.UserConnectionNumBO;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.service.ScenePluginCloudSceneService;
 import cn.hutool.core.collection.CollectionUtil;
+import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -36,7 +42,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -209,6 +221,56 @@ public class DashboardService {
                 List.of(BaseCloudPluginSceneElementModel.VirtualType.CONTAINER),
                 List.of(BaseCloudPluginSceneElementModel.Role.VIRTUAL_TERMINAL)));
         return new ServiceResult<>(sceneBusinessSummary);
+    }
+
+    /**
+     * 整合在线报告和节点监控
+     */
+    public PageInfo<UserOnlineReportMonitorBo> getUserOnlineMonitorRecords(UserOnlineRecordSummaryPageRequest pageRequest) {
+        PageInfo<UserOnlineReportDto> pageInfo = userOnlineRecordService.recordSummaryPage(pageRequest);
+        List<UserOnlineReportDto> userOnlineReportDtoList = pageInfo.getList();
+
+        //List<String> onlinedUserIds = userOnlineReportDtoList.stream().filter(dto -> Objects.equals(dto.getIsOnline(), 1)).map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        List<String> onlinedUserIds = userOnlineReportDtoList.stream().map(UserOnlineReportDto::getUser).collect(Collectors.toList());
+        List<UserConnectionNumBO> userConnectionNumBOList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(onlinedUserIds)) {
+            ServiceResult<List<UserConnectionNumBO>> result = csceneSpecialService.countUserConnections(onlinedUserIds);
+            userConnectionNumBOList = result.getSource();
+        }
+
+        List<UserOnlineReportMonitorBo> monitorDtoList = new ArrayList<>();
+        for (UserOnlineReportDto userOnlineReportDto : userOnlineReportDtoList) {
+            UserOnlineReportMonitorBo monitorDto = new UserOnlineReportMonitorBo();
+            BeanUtils.copyProperties(userOnlineReportDto, monitorDto);
+
+            monitorDto.setNodeSessionCnt(0);
+            monitorDto.setHasNodeSession(false);
+
+            if (CollectionUtil.isNotEmpty(userConnectionNumBOList)) {
+                Optional<UserConnectionNumBO> boOptional = userConnectionNumBOList.stream().filter(bo -> Objects.equals(bo.getUser(), userOnlineReportDto.getUser())).findFirst();
+                if (boOptional.isPresent() && boOptional.get().getConnectionNum() > 0) {
+                    monitorDto.setNodeSessionCnt(boOptional.get().getConnectionNum());
+                    monitorDto.setHasNodeSession(true);
+                }
+            }
+
+            monitorDtoList.add(monitorDto);
+        }
+
+        PageInfo<UserOnlineReportMonitorBo> newPageInfo = new PageInfo();
+        BeanUtils.copyProperties(pageInfo, newPageInfo);
+        newPageInfo.setList(monitorDtoList);
+        return newPageInfo;
+    }
+
+    /**
+     * 查询用户会话
+     * @param userId
+     * @return
+     */
+    public ServiceResult<List<NodeSessionBO>> getUserNodeSessions(String userId) {
+        ServiceResult<List<NodeSessionBO>> serviceResult = csceneSpecialService.getUserNodeSessions(userId, true, false);
+        return serviceResult.asResult();
     }
 
     private int countByVirtualTypeAndRole(List<String> sceneIds, List<Integer> virtualTypes, List<Integer> roles) {
