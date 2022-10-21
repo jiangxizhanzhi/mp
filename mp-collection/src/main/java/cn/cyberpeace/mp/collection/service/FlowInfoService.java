@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
+import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
@@ -17,7 +18,7 @@ import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -397,8 +398,8 @@ public class FlowInfoService {
 	 * @param ips
 	 * @return
 	 */
-	public ServiceResult<Long> queryEquipmentAttackCount(List<String> ips) {
-		log.info("{}", ips);
+	public Long queryEquipmentAttackCount(List<String> ips) {
+		log.info("queryEquipmentAttackCount ips: {}", ips);
 
 		String[] indexArray = getFlowIndex();
 		var searchRequest = new SearchRequest(indexArray);
@@ -416,7 +417,7 @@ public class FlowInfoService {
 		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 
-		return new ServiceResult<>(response.getHits().getTotalHits().value);
+		return response.getHits().getTotalHits().value;
 	}
 
 	/**
@@ -425,9 +426,8 @@ public class FlowInfoService {
 	 * @param ips
 	 * @return
 	 */
-	public Map<String, Long> queryEquipmentAttackCountInfo(List<String> ips) {
-        // todo 返回service result 尽量不要返回map 返回对象
-		log.info("{}", ips);
+	public List<CountBO> queryEquipmentAttackCountInfo(List<String> ips) {
+		log.info("queryEquipmentAttackCountInfo ips: {}", ips);
 
 		String[] indexArray = getFlowIndex();
 		var searchRequest = new SearchRequest(indexArray);
@@ -439,25 +439,25 @@ public class FlowInfoService {
 		}
 		buildSeverityQuery(0L, boolQueryBuilder);
 
-		String deIpCountTerm = "des_ip_count";
+		String desIpCountTerm = "des_ip_count";
 		sourceBuilder.size(0);
 		sourceBuilder.trackTotalHits(true);
-		sourceBuilder.aggregation(AggregationBuilders.terms(deIpCountTerm).field("destination.ip"));
+		sourceBuilder.aggregation(AggregationBuilders.terms(desIpCountTerm).field("destination.ip"));
 
 		searchRequest.source(sourceBuilder.query(boolQueryBuilder));
 		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
-		Map<String, Long> ipCountMap = Maps.newHashMap();
+		List<CountBO> bos = Lists.newArrayList();
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 		Aggregations aggregations = response.getAggregations();
-		ParsedTerms parsedTerms = aggregations.get(deIpCountTerm);
+		ParsedTerms parsedTerms = aggregations.get(desIpCountTerm);
 		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
 		buckets.forEach(bucket -> {
-			ipCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());
+			bos.add(new CountBO(bucket.getKeyAsString(), bucket.getDocCount()));
 		});
 
-		return ipCountMap;
+		return bos;
 	}
 
 	/**
@@ -466,9 +466,8 @@ public class FlowInfoService {
 	 * @param ips
 	 * @return
 	 */
-	public Map<String, Long> queryEquipmentAttackTypeTop5(List<String> ips) {
-        // todo 返回service result 尽量不要返回map 返回对象
-		log.info("{}", ips);
+	public List<CountBO> queryEquipmentAttackTypeTop5(List<String> ips) {
+		log.info("queryEquipmentAttackTypeTop5 ips: {}", ips);
 
 		String[] indexArray = getFlowIndex();
 		var searchRequest = new SearchRequest(indexArray);
@@ -490,16 +489,16 @@ public class FlowInfoService {
 		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
 		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
 
-		Map<String, Long> typeCountMap = Maps.newLinkedHashMap();
+		List<CountBO> bos = Lists.newArrayList();
 		SearchResponse response = restHighLevelClient.search(searchRequest);
 		Aggregations aggregations = response.getAggregations();
 		ParsedTerms parsedTerms = aggregations.get(cateCountTerm);
 		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
 		buckets.forEach(bucket -> {
-			typeCountMap.put(bucket.getKeyAsString(), bucket.getDocCount());
+			bos.add(new CountBO(bucket.getKeyAsString(), bucket.getDocCount()));
 		});
 
-		return typeCountMap;
+		return bos;
 	}
     
 }
