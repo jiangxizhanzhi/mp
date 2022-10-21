@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.collection.utils;
+package cn.cyberpeace.mp.collection.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @Date：2022/7/14 19:51
  */
 @Slf4j
-public class AgentNameUtils {
+public class AgentNameUtil {
 
     /**
      * 剔除null

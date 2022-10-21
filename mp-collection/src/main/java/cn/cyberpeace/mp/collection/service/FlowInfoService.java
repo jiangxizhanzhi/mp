@@ -12,7 +12,7 @@ import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
 import cn.cyberpeace.mp.collection.request.PageFlowRequest;
-import cn.cyberpeace.mp.collection.utils.EsResponseParseUtils;
+import cn.cyberpeace.mp.collection.util.EsResponseParseUtil;
 import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
@@ -87,7 +87,7 @@ public class FlowInfoService {
         SearchResponse response = restHighLevelClient.search(searchRequest);
 
         List<TeamFlowInfo> teamFlowInfos = new ArrayList<>();
-        List<FlowFileRoot> flowFileRoots = EsResponseParseUtils.parseResponse(response, FlowFileRoot.class);
+        List<FlowFileRoot> flowFileRoots = EsResponseParseUtil.parseResponse(response, FlowFileRoot.class);
         if (CollectionUtil.isEmpty(flowFileRoots)) {
             return new ListObjServiceResult<>(new ListObjResult<>(teamFlowInfos, 0));
         }
