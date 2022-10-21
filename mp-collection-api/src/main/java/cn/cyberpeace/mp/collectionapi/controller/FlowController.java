@@ -2,9 +2,13 @@ package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import cn.cyberpeace.mp.collection.bo.CountBO;
+import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
+import cn.cyberpeace.mp.collectionapi.config.ContestConfig;
+import cn.cyberpeace.mp.collectionapi.config.ContestConfig.Team;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
@@ -44,12 +48,57 @@ public class FlowController {
     @ApiOperation(value = "查询每个设备的被攻击次数、流量大小、攻击手法占比")
     public ListObjServiceResult<FlowAttackVO> flowAttackInfo() {
         // todo 每个设备可能有多个ip 需要合并数据
-        return new ListObjServiceResult<>();
+    	List<FlowAttackBO> bos = flowInfoService.queryFlowAttackInfo(ContestConfigUtil.getIpsByType(null, null));
+    	Map<String, FlowAttackVO> vosMap = Maps.newHashMap();
+    	bos.forEach(bo -> {
+    		String name = ContestConfigUtil.getNameByIp(bo.getIp());
+    		FlowAttackVO vo = vosMap.computeIfAbsent(name, key -> new FlowAttackVO());
+    		vo.setEquipment(name);
+    		vo.setAttackCount(vo.getAttackCount() + bo.getCount());
+    		vo.setSize(vo.getSize() + bo.getSize());
+    		
+    		// 攻击手法合并
+    		List<AttackTypeVO> atVOs = vo.getAttackTypes();
+    		if(atVOs == null) {
+    			atVOs = Lists.newArrayList();
+    			vo.setAttackTypes(atVOs);
+    		}
+    		
+    		List<AttackTypeVO> tempAtVOs = Lists.newArrayList();
+    		for(AttackTypeBO atBO : bo.getAttackTypes()) {
+    			boolean merged = false;
+    			for(AttackTypeVO atVO : atVOs) {
+        			if(atVO.getName().equals(atBO.getEnName())) {
+        				atVO.setCount(atVO.getCount() + atBO.getCount());
+        				merged = true;
+        				break;
+        			}
+        		}
+    			if(!merged) {
+    				AttackTypeVO atVO = new AttackTypeVO();
+    				atVO.setName(atBO.getEnName());
+    				atVO.setCount(atBO.getCount());
+    				tempAtVOs.add(atVO);
+    			}
+    		}
+    		atVOs.addAll(tempAtVOs);
+    		
+    		// 攻击手法占比计算
+    		double total = atVOs.stream().mapToLong(AttackTypeVO::getCount).sum();
+    		atVOs.forEach(v -> {
+    			v.setPercent(v.getCount() / total);
+    		});
+    	});
+    	
+    	List<FlowAttackVO> vos = vosMap.values().stream().collect(Collectors.toList());
+    	return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
     }
 
     @GetMapping("/team_attack_count")
     @ApiOperation(value = "每个队伍的攻击次数(累计) top10")
     public ListObjServiceResult<TeamAttackCountVO> teamAttackCount() {
+    	Map<String, String> ip2TeamNameMap = ContestConfig.teams.stream().collect(Collectors.toMap(Team::getIp, Team::getName, (v1, v2) -> v2));
+    	
         // todo 每个战队一个ip
         return new ListObjServiceResult<>();
     }

@@ -50,13 +50,15 @@ public class ContestConfigUtil {
 			return Lists.newArrayList();
 		}
 
-		if (StringUtils.isBlank(type)) {
-			return ContestConfig.equipments.stream().filter(e -> useType.equals(e.getUseType())).map(Equipment::getIps)
-					.flatMap(Collection::stream).collect(Collectors.toList());
-		} else {
-			return ContestConfig.equipments.stream().filter(e -> type.equals(e.getType()) && useType.equals(e.getUseType()))
-					.map(Equipment::getIps).flatMap(Collection::stream).collect(Collectors.toList());
-		}
+		return ContestConfig.equipments.stream().filter(e -> {
+			if (StringUtils.isNotBlank(type) && !type.equals(e.getType())) {
+				return false;
+			}
+			if (useType != null && !useType.equals(e.getUseType())) {
+				return false;
+			}
+			return true;
+		}).map(Equipment::getIps).flatMap(Collection::stream).collect(Collectors.toList());
     }
     
     /**
@@ -73,6 +75,26 @@ public class ContestConfigUtil {
     	for(Equipment e : ContestConfig.equipments) {
     		if(e.getIps().contains(ip)) {
     			return e.getType();
+    		}
+    	}
+    	
+    	return null;
+    }
+    
+    /**
+     * 根据ip获取对应设备名称
+     * 
+     * @param ip
+     * @return
+     */
+    public static String getNameByIp(String ip) {
+    	if (CollectionUtil.isEmpty(ContestConfig.equipments)) {
+			return null;
+		}
+    	
+    	for(Equipment e : ContestConfig.equipments) {
+    		if(e.getIps().contains(ip)) {
+    			return e.getName();
     		}
     	}
     	
