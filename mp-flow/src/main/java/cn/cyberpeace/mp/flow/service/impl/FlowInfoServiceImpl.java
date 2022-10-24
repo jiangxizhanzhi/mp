@@ -1014,7 +1014,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             FlowInfoModel flowInfoModel = new FlowInfoModel();
             String fileName = readmeList.get(1);
-            flowInfoModel.setTitle(fileName);
+            flowInfoModel.setTitle(fileName.split(BaseConstants.SPOT)[0]);
 
             // 重名校验
             FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
@@ -1039,17 +1039,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             // 是否pcap
             boolean isPcap = pcapFile.getName().endsWith("pcap");
-//            boolean isAttackFlow = readmeList.get(13 - diffCount).contains("攻击流量");
             if (isPcap) {
-                // 背景流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
                 flowInfoModel.setPcapFile(fdfsPath);
             } else {
-                // 攻击流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
                 flowInfoModel.setScriptFile(fdfsPath);
+            }
+            boolean isBackFlow = readmeList.get(13 - diffCount).contains("背景流量");
+            if (isBackFlow) {
+                // 背景流量
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+            } else {
+                // 攻击流量
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
             }
             this.create(flowInfoModel);
 
