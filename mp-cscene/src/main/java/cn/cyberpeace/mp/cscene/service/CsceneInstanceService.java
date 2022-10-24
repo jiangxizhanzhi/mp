@@ -25,8 +25,6 @@ import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
 import cn.cyberpeace.mp.cscene.constant.CsceneErrorCode;
 import cn.cyberpeace.mp.cscene.context.CsceneContextHolder;
 import cn.cyberpeace.mp.cscene.core.CsceneInstanceHandler;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.scene.ElementCommandExecResult;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneInfo;
 import cn.cyberpeace.mp.cscene.dto.scene.SceneLinkStatusInfo;
@@ -40,6 +38,8 @@ import cn.cyberpeace.mp.cscene.report.rabbitmq.RabbitmqCsceneReporter;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneInstanceRoleMapper;
 import cn.cyberpeace.mp.cscene.repository.CsceneMapper;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.service.action.CsceneCallAction;
 import cn.cyberpeace.mp.cscene.service.impl.ScreenshotServiceImpl;
 import cn.cyberpeace.mp.cscene.service.taskpool.CsceneReportTaskPool;
@@ -47,6 +47,7 @@ import cn.cyberpeace.mp.cscene.util.NodeLimitUtils;
 import cn.cyberpeace.mp.cscene.util.ReentrantLockUtils;
 import cn.cyberpeace.mp.scene.core.bo.SceneDataBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
+import cn.cyberpeace.mp.scene.core.bo.SceneElementPortBO;
 import cn.cyberpeace.mp.scene.core.bo.SceneTopologyBO;
 import cn.cyberpeace.mp.scene.core.bo.base.ScenePluginDataBO;
 import cn.cyberpeace.mp.scene.core.event.base.EventStatus;
@@ -1268,6 +1269,15 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
     }
 
     private List<SceneElementBO> mergeElements(List<SceneElementBO> newElements, List<SceneElementBO> originElements, List<String> updateElementIds) {
+        Map<String, SceneElementBO> originElementsMap = new HashMap<>();
+        Map<String, SceneElementBO> newElementsMap = new HashMap<>();
+        for (var e : originElements) {
+            originElementsMap.put(e.getId(), e);
+        }
+        for (var e : newElements) {
+            newElementsMap.put(e.getId(), e);
+        }
+
         Set<String> originElementIds = new HashSet<>();
         originElements.forEach(e -> {
             if (e.getEvent() == SceneModel.Event.MODIFY && e.getEventStatus() == EventStatus.ABNORMAL) {
@@ -1289,12 +1299,41 @@ public class CsceneInstanceService extends BaseModelServiceImpl<CsceneInstanceMo
                 continue;
             }
             if (newElementIds.contains(e.getId())) {
+                var newPorts = newElementsMap.get(e.getId()).getPorts();
+                var originPorts = e.getPorts();
+                var mergedPorts = this.mergePorts(
+                        CollectionUtils.isEmpty(newPorts) ? new ArrayList<>() : newPorts,
+                        CollectionUtils.isEmpty(originPorts) ? new ArrayList<>() : originPorts
+                );
+                e.setPorts(mergedPorts);
                 result.add(e);
             }
         }
         newElementIds.removeAll(originElementIds);
         for (var e : newElements) {
             if (newElementIds.contains(e.getId())) {
+                result.add(e);
+            }
+        }
+        return result;
+    }
+
+    private List<SceneElementPortBO> mergePorts(List<SceneElementPortBO> newPorts, List<SceneElementPortBO> originPorts) {
+        Set<String> originPortIds = new HashSet<>();
+        originPorts.forEach(e -> {
+            originPortIds.add(e.getId());
+        });
+        Set<String> newPortIds = new HashSet<>();
+        newPorts.forEach(e -> newPortIds.add(e.getId()));
+        List<SceneElementPortBO> result = new ArrayList<>();
+        for (var e : originPorts) {
+            if (newPortIds.contains(e.getId())) {
+                result.add(e);
+            }
+        }
+        newPortIds.removeAll(originPortIds);
+        for (var e : newPorts) {
+            if (newPortIds.contains(e.getId())) {
                 result.add(e);
             }
         }
