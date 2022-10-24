@@ -26,6 +26,10 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     private Integer category;
     private Integer bandwidth;
     private String loadMode;
+    /**
+     * 负载矩阵集合
+     */
+    private List<LoadBandwidth> loadLists;
     private List<String> filterProtocols;
     private List<TaskFlow> flows;
 
@@ -176,6 +180,19 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
         private String valueType;
         private String defaultValue;
         private String value;
+    }
+
+    @Data
+    public static class LoadBandwidth {
+        /**
+         * 时间：秒
+         */
+        private Integer time;
+
+        /**
+         * 带宽：mbps
+         */
+        private Integer bandwidth;
     }
 
 }
