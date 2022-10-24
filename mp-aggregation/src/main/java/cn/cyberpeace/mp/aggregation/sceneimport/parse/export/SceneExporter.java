@@ -173,6 +173,7 @@ public class SceneExporter {
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
+                content = StringUtils.replace(content, "privateKey", "private-key");
                 this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
