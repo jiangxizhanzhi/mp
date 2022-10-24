@@ -53,6 +53,7 @@ public class FlowBizService {
         nic.setCpCloudNetworkId(networkId);
         var nicResult = flowGeneratorService.addFlowGeneratorNics(flowGeneratorId, List.of(nic)).getSource().get(0);
         String flowGeneratorNicId = nicResult.getResourceId();
+        String trexMac = nicResult.getMac();
 
         // 保存流量任务执行记录
         FlowTaskRecordBO taskRecord = new FlowTaskRecordBO();
@@ -65,6 +66,7 @@ public class FlowBizService {
         taskRecord.setTargetMac(mac);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
         taskRecord.setFlowGeneratorNicId(flowGeneratorNicId);
+        taskRecord.setTrexMac(trexMac);
 
         var flows = flowTaskBO.getFlows().stream().map(f -> {
             FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();

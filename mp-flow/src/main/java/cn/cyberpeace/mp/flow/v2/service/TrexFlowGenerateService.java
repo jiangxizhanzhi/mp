@@ -31,10 +31,16 @@ public class TrexFlowGenerateService {
                 protocolInfos.add(protocolInfo);
             }
         }
+        // 网卡已经创建过了，此处不再创建
+        var nic = trexClient.createNic();
+        // 初始化trex服务
+        TrexClient.InitInfo initInfo = new TrexClient.InitInfo();
+        initInfo.setMac(flowTaskRecordBO.getTrexMac());
+        // todo:taskId如何得到?
+        initInfo.setTaskId(flowTaskRecordBO.getFlowGeneratorId());
+        trexClient.initTrexServer(initInfo);
         // 上传 pcap
         trexClient.uploadResource(flowResources);
-        var nic = trexClient.createNic();
-        trexClient.initTrexServer();
         // 计算负载
         List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
         trexClient.startTask(protocolInfos, loadInfos);
