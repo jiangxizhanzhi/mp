@@ -30,7 +30,7 @@ public interface TenantUserMapper extends BaseModelMapper<TenantUserModel> {
                                      @Param("excludeRoleIds") List<String> excludeRoleIds,
                                      @Param("excludeUserIds") List<String> excludeUserIds);
 
-    List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
+//    List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
 
     List<UserOrgMapBo> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
 

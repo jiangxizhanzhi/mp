@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
 import cn.cyberpeace.mp.auth.model.RolePermissionModel;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.repository.RolePermissionMapper;
+import cn.cyberpeace.mp.auth.repository.TargetMapper;
 import cn.cyberpeace.mp.auth.service.RolePermissionModelService;
 import cn.cyberpeace.mp.auth.service.RoleService;
 import cn.cyberpeace.mp.auth.service.fields.RolePermissionFields;
@@ -50,14 +51,34 @@ public class RolePermissionModelServiceImpl extends BaseModelServiceImpl<RolePer
         setModelFields(modelFields);
     }
 
+    @Autowired
+    private RolePermissionMapper rolePermissionMapper;
+
+    @Autowired
+    private TargetMapper targetMapper;
+
     @Override
     @Cacheable(value = CACHE_TARGETS_BY_ROLES)
     public List<TargetModel> listTargetsByRoleIds(List<String> roleIds) {
         if (CollectionUtil.isEmpty(roleIds)) {
             throw new MpRuntimeException(AuthErrorCode.PARAMS_SHOULD_NOT_EMPTY.format(MessageCommon.get(AuthBasei18nCode.ROLE_ID)));
         }
-        List<TargetModel> targets = getModelMapper().listTargetsByRoleIds(AuthConstant.DEFAULT_TENANT, roleIds);
-        return targets;
+        HumanCondition rolePermissionCondition = new HumanCondition()
+                .filterEqual(RolePermissionModel::getTenant, AuthConstant.DEFAULT_TENANT)
+                .filterIn(RolePermissionModel::getOwner, roleIds.toArray())
+                .select("target");
+        List<RolePermissionModel> rolePermissionModels = rolePermissionMapper.list(rolePermissionCondition);
+        List<String> ids = new ArrayList<>();
+        rolePermissionModels.forEach(model -> ids.add(model.getTarget()));
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        HumanCondition targetCondition = new HumanCondition()
+                .filterIn(TargetModel::getId, ids.toArray())
+                .filterEqual(TargetModel::getVisible, 1)
+                .distinct();
+        List<TargetModel> targetModels = targetMapper.list(targetCondition);
+        return targetModels;
     }
 
     @Override

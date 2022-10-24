@@ -13,6 +13,7 @@ import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
@@ -29,6 +30,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -75,6 +77,9 @@ public class TenantUserServiceImpl
 
     @Autowired
     private UserCacheService userCacheService;
+
+    @Autowired
+    private OrgMapper orgMapper;
 
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
@@ -141,8 +146,7 @@ public class TenantUserServiceImpl
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<OrgBO> listOrgsByUserId(String userId) {
         ParamCheck.notBlank(userId, AuthBasei18nCode.USER_ID);
-        List<OrgModel> orgs = getModelMapper().listOrgsByUserId(userId);
-
+        List<OrgModel> orgs = SelectOrgsByUserId(userId);
         List<OrgBO> orgBOS =
                 orgs.stream().map(orgModel -> {
                     OrgBO orgBO = new OrgBO();
@@ -174,7 +178,7 @@ public class TenantUserServiceImpl
 
     @Override
     public List<OrgDto> listHierarchicalOrgsByUserId(String userId) {
-        List<OrgModel> orgModels = getModelMapper().listOrgsByUserId(userId);
+        List<OrgModel> orgModels = SelectOrgsByUserId(userId);
         List<OrgBO> orgBOS =
                 orgModels.stream().map(orgModel ->
                         orgService.orgModel2OrgBO(orgModel)
@@ -324,5 +328,24 @@ public class TenantUserServiceImpl
     public boolean deleteByTenantId(String tenantId) {
         // todo
         return true;
+    }
+
+    private List<OrgModel> SelectOrgsByUserId(String userId) {
+        HumanCondition tenantUserCondition = new HumanCondition()
+                .filterEqual(TenantUserModel::getUser, userId)
+                .select(TenantUserModel::getOrg);
+        List<Map<String, Object>> tenantUserMaps = getModelMapper().originList(tenantUserCondition);
+        List<String> ids = new ArrayList<>();
+        tenantUserMaps.forEach(map -> {
+            ids.add((String) map.get("org"));
+        });
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, ids.toArray())
+                .distinct();
+        List<OrgModel> list = orgMapper.list(orgCondition);
+        return list;
     }
 }

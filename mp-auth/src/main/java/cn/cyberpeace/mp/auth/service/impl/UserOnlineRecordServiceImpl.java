@@ -217,12 +217,6 @@ public class UserOnlineRecordServiceImpl extends BaseModelServiceImpl<UserOnline
     }
 
     @Override
-    public List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(String userId, LocalDateTime startTime, LocalDateTime endTime) {
-        List<UserOnlineRecordModel> list = getModelMapper().listOnlineHistoryTrackByUser(userId, startTime, endTime);
-        return list;
-    }
-
-    @Override
     @Cacheable(value = CACHE_KEY_USER_OL_CNT)
     public UserOnlineCntBo onlineUserCnt() {
         LocalDateTime now = LocalDateTime.now();

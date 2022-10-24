@@ -28,41 +28,6 @@
     </select>
 
 
-    <!--
-    <select id="listCurrentOnlinedUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select * from mp_auth_user_online_record
-        <where>
-            <if test="userId != null and userId != ''">
-                AND user = #{userId}
-            </if>
-            <if test="deadline != null">
-                AND end_time > #{deadline}
-            </if>
-            AND status = 0
-            group by user
-        </where>
-    </select>
-    -->
-
-    <!--
-    <select id="listOnlinedUserByPeriod" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select *
-        from mp_auth_user_online_record
-        where pk not in
-              (select pk from mp_auth_user_online_record where start_time &gt;= NOW()
-                 or end_time &lt;= NOW() - INTERVAL #{minutes} MINUTE group by user)
-    </select>
-
-
-    <select id="cntOnlinedUser" resultType="integer">
-        select count(pk)
-        from mp_auth_user_online_record
-        where pk not in
-              (select pk from mp_auth_user_online_record where start_time &gt;= NOW()
-                or end_time &lt;= NOW() - INTERVAL #{minutes} MINUTE group by user)
-    </select>
-    -->
-
     <select id="getOnlinedUserCntByPeriod" resultType="integer">
         select count(*)
         from (
@@ -76,19 +41,4 @@
              ) as tabA
     </select>
 
-    <select id="listOnlineHistoryTrackByUser" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select *
-        from mp_auth_user_online_record
-        where user = #{userId}
-          and pk not in
-              (select pk from mp_auth_user_online_record where start_time >= #{endTime} or end_time &lt;= #{startTime})
-    </select>
-
-    <!--
-    <select id="getByUserId" resultType="cn.cyberpeace.mp.auth.model.UserOnlineRecordModel">
-        select *
-        from mp_auth_user_online_record
-        where user = #{userId}
-    </select>
-    -->
 </mapper>

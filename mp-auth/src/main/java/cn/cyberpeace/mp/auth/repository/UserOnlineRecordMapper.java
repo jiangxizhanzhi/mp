@@ -55,14 +55,4 @@ public interface UserOnlineRecordMapper extends BaseModelMapper<UserOnlineRecord
      */
     Integer getOnlinedUserCntByPeriod(@Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
-    /**
-     * 查询一定时间段内单个用户的在线记录（在线活动轨迹）
-     * 如查询用户一个月内的活跃情况，now()-1M < period < now()
-     *
-     * @param
-     * @return
-     */
-    List<UserOnlineRecordModel> listOnlineHistoryTrackByUser(@Param("userId") String userId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
-
-
 }

@@ -29,11 +29,11 @@
         order by -update_time, username
     </select>
 
-    <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">
-        select distinct * from mp_auth_org where id in
-        (select org from mp_auth_tenant_user where user = #{userId})
-        order by mp_auth_org.pk
-    </select>
+<!--    <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">-->
+<!--        select distinct * from mp_auth_org where id in-->
+<!--        (select org from mp_auth_tenant_user where user = #{userId})-->
+<!--        order by mp_auth_org.pk-->
+<!--    </select>-->
 
 
     <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo">
