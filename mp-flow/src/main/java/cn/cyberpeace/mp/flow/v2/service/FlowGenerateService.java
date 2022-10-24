@@ -1,13 +1,34 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
 
 @Service
 public class FlowGenerateService {
 
+    @Resource
+    private FlowGeneratorService flowGeneratorService;
+
+    @Resource
+    private TrexFlowGenerateService trexFlowGenerateService ;
+
     public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
+
+        // 查询流量发生器详情
+        String flowGeneratorId = flowTaskRecordBO.getFlowGeneratorId();
+        var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
+        FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
+        flowGeneratorBO.fromModel(flowGenerator);
+        if ("trex".equals(flowGeneratorBO.getType())) {
+            return trexFlowGenerateService.startFlowTask(flowTaskRecordBO);
+        } else if ("ixia".equals(flowGeneratorBO.getType())) {
+
+        }
+
         return new ServiceResult<>(true);
     }
 
