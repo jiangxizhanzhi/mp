@@ -16,12 +16,11 @@ import java.util.List;
  */
 @Slf4j
 public class TrexClient {
+
     private String ip;
     private String port;
 
-    public TrexNic createNic() {
-        return new TrexNic();
-    }
+    private TrexHttpClient trexHttpClient = new TrexHttpClient("", 6000, 10);
 
     public void initTrexServer(InitInfo initInfo) {
         String server = ip + ":" + port;

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("flowTaskServiceV2")
 public class FlowTaskService extends BaseModelServiceImpl<FlowTaskModel, FlowTaskMapper, FlowTaskFields, FlowTaskQueryParams> {
     @Autowired
     public FlowTaskService(@Qualifier("v2FlowTaskMapper") FlowTaskMapper modelMapper, @Qualifier("v2FlowTaskFields") FlowTaskFields modelFields) {

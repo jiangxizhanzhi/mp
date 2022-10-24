@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/flow/")
-public class FlowController {
+public class CsceneFlowController {
     @Resource
     private FlowBizService flowTaskService;
 

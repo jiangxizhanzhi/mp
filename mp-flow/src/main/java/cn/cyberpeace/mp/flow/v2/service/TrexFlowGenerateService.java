@@ -2,8 +2,10 @@ package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
 import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
  * @Author maojun
  * @Date 2022/10/20
  */
+@Service
 public class TrexFlowGenerateService {
     public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
         TrexClient trexClient = new TrexClient();
@@ -32,15 +35,17 @@ public class TrexFlowGenerateService {
             }
         }
         // 网卡已经创建过了，此处不再创建
-        var nic = trexClient.createNic();
+//        var nic = trexClient.createNic();
         // 初始化trex服务
         TrexClient.InitInfo initInfo = new TrexClient.InitInfo();
-        initInfo.setMac(flowTaskRecordBO.getTrexMac());
+//        initInfo.setMac(flowTaskRecordBO.getTrexMac());
         // todo:taskId如何得到?
         initInfo.setTaskId(flowTaskRecordBO.getFlowGeneratorId());
         trexClient.initTrexServer(initInfo);
         // 上传 pcap
         trexClient.uploadResource(flowResources);
+//        var nic = trexClient.createNic();
+//        trexClient.initTrexServer();
         // 计算负载
         List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
         trexClient.startTask(protocolInfos, loadInfos);
