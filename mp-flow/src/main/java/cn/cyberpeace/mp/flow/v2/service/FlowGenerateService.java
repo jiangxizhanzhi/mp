@@ -27,11 +27,11 @@ public class FlowGenerateService {
         // 查询流量发生器详情
         String flowGeneratorId = flowTaskRecordBO.getFlowGeneratorId();
         var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
-        FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
-        flowGeneratorBO.fromModel(flowGenerator);
-        if ("trex".equals(flowGeneratorBO.getType())) {
+//        FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
+//        flowGeneratorBO.fromModel(flowGenerator);
+        if ("trex".equals(flowGenerator.getType())) {
             return trexFlowGenerateService.startFlowTask(flowTaskRecordBO);
-        } else if ("ixia".equals(flowGeneratorBO.getType())) {
+        } else if ("ixia".equals(flowGenerator.getType())) {
             FlowCallBackTask callBack = ixiaFlowGenerateService.startFlowTask(flowTaskRecordBO);
             flowStartPostProcessor.addTask(callBack);
         }

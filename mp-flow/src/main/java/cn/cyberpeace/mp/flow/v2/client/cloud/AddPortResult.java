@@ -12,5 +12,5 @@ import springfox.documentation.swagger2.mappers.LicenseMapper;
 @Getter
 @Setter
 public class AddPortResult {
-    private String macAddr;
+    private String macAddress;
 }

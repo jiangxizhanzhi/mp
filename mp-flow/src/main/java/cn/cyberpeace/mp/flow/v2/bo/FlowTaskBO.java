@@ -30,13 +30,13 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
 
     @Override
     public FlowTaskBO fromModel(FlowTaskModel obj, String... ignoreFields) {
-        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
-                BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFilterProtocols),
-                BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFlows)));
-        filterProtocols = StringUtils.isEmpty(obj.getFilterProtocols()) ? null
-                : JsonCommon.parse(obj.getFilterProtocols(), new TypeReference<>(){});
-        flows = StringUtils.isEmpty(obj.getFlows()) ? null
-                : JsonCommon.parse(obj.getFlows(), new TypeReference<>(){});
+//        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+//                BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFilterProtocols),
+//                BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFlows)));
+//        filterProtocols = StringUtils.isEmpty(obj.getFilterProtocols()) ? null
+//                : JsonCommon.parse(obj.getFilterProtocols(), new TypeReference<>(){});
+//        flows = StringUtils.isEmpty(obj.getFlows()) ? null
+//                : JsonCommon.parse(obj.getFlows(), new TypeReference<>(){});
         return this;
     }
 

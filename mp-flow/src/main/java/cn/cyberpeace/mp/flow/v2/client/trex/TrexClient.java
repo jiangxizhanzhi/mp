@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
+import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.flow.constant.BaseConstants;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,10 +22,10 @@ import java.util.List;
 public class TrexClient {
     private static final double standardInterval = 6;
 
-    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.1:11111", 6000, 10);
+    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.197:80", 6000, 10);
 
-    public void initTrexServer(InitInfoData initInfo) {
-        var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, initInfo, null,
+    public void initTrexServer(NetworkInfos networkInfos) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, networkInfos, null,
                 new TypeReference<TrexResponse<InitInfoData>>() {
                 });
         log.info("Initialization of trex virtual machine completed {}", reslut.getData());
@@ -30,10 +33,16 @@ public class TrexClient {
 
     public void uploadResource(List<FlowResourceData> resources) {
         resources.stream().forEach(resource -> {
-            var reslut = trexHttpClient.trexPost(TrexUrlConstant.UPLOAD_PCAP, resource, null,
-                    new TypeReference<TrexResponse<FlowResourceData>>() {
-                    });
-            log.info("Upload {} succeeded", reslut.getData());
+            JSONObject object = new JSONObject();
+            object.put("flowId", resource.getFlowId());
+            String pcapRsp = HttpUtils.postFile("http://10.100.7.197:80" + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
+            JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
+            log.info("upload pcap file response:{}", jsonObject.toJSONString());
+
+//            var reslut = trexHttpClient.trexPost(TrexUrlConstant.UPLOAD_PCAP, resource, null,
+//                    new TypeReference<TrexResponse<FlowResourceData>>() {
+//                    });
+//            log.info("Upload {} succeeded", reslut.getData());
         });
     }
 

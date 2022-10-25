@@ -76,7 +76,7 @@ public class FlowBizService {
         flowGeneratorBO.fromModel(flowGenerator);
         // 创建网卡
         VirtualMachine virtualMachine = new VirtualMachine();
-        var addPortResult = virtualMachine.addPort(targetId, flowGeneratorBO.getNics().get(0).getCpCloudNetworkId());
+        var addPortResult = virtualMachine.addPort(targetId, "1ac74c73-b296-45d7-a3b8-0d69ecdf60eb");
 
         // 保存流量任务执行记录
         FlowTaskRecordBO taskRecord = new FlowTaskRecordBO();
@@ -90,17 +90,17 @@ public class FlowBizService {
         taskRecord.setTargetMac(mac);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
         taskRecord.setFlowGeneratorNicId("");
-        taskRecord.setTrexMac(addPortResult.getMacAddr());
+        taskRecord.setTrexMac(addPortResult.getMacAddress());
 
-        var flows = flowTaskBO.getFlows().stream().map(f -> {
-            FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
-            taskFlow.setFlowId(f.getFlowId());
-            taskFlow.setFlowGeneratorId(flowGeneratorId);
-            return taskFlow;
-        }).collect(Collectors.toList());
-
-        taskRecord.setFlows(flows);
-        taskRecord.setFilterProtocols(flowTaskBO.getFilterProtocols());
+//        var flows = flowTaskBO.getFlows().stream().map(f -> {
+//            FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
+//            taskFlow.setFlowId(f.getFlowId());
+//            taskFlow.setFlowGeneratorId(flowGeneratorId);
+//            return taskFlow;
+//        }).collect(Collectors.toList());
+//
+//        taskRecord.setFlows(flows);
+//        taskRecord.setFilterProtocols(flowTaskBO.getFilterProtocols());
         // todo
         taskRecord.setStatus(0);
         flowGenerateService.startFlowTask(taskRecord);
