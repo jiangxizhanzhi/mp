@@ -17,6 +17,7 @@ import java.util.Map;
 @Setter
 public class FlowResourceData implements HttpData {
     private String flowId;
+    private String fileName;
     private byte[] file;
 
     @Override

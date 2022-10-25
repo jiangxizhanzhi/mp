@@ -54,6 +54,7 @@ public class TrexFlowGenerateService {
 
         File file = new File("D:\\data\\resource\\udp_flow2.pcap");
         FlowResourceData resource = new FlowResourceData();
+        resource.setFileName("udp_flow2.pcap");
         resource.setFlowId("123456789");
         try {
             resource.setFile(readOnce(file));
@@ -63,6 +64,7 @@ public class TrexFlowGenerateService {
 
         FlowResourceData resource1 = new FlowResourceData();
         resource1.setFlowId("987654321");
+        resource.setFileName("udp_flow1.pcap");
         try {
             resource1.setFile(readOnce(file));
         } catch (Exception e) {

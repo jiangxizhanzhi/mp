@@ -22,7 +22,7 @@ import java.util.List;
 public class TrexClient {
     private static final double standardInterval = 6;
 
-    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.197:80", 6000, 10);
+    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.143:80", 6000, 10);
 
     public void initTrexServer(NetworkInfos networkInfos) {
         var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, networkInfos, null,
@@ -34,15 +34,11 @@ public class TrexClient {
     public void uploadResource(List<FlowResourceData> resources) {
         resources.stream().forEach(resource -> {
             JSONObject object = new JSONObject();
-            object.put("flowId", resource.getFlowId());
-            String pcapRsp = HttpUtils.postFile("http://10.100.7.197:80" + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
+            object.put("fileName", resource.getFileName());
+            object.put("flow_id", resource.getFlowId());
+            String pcapRsp = HttpUtils.postFile("http://10.100.7.143:80" + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
             log.info("upload pcap file response:{}", jsonObject.toJSONString());
-
-//            var reslut = trexHttpClient.trexPost(TrexUrlConstant.UPLOAD_PCAP, resource, null,
-//                    new TypeReference<TrexResponse<FlowResourceData>>() {
-//                    });
-//            log.info("Upload {} succeeded", reslut.getData());
         });
     }
 
@@ -62,7 +58,7 @@ public class TrexClient {
 
     private void binomialDistributionLoad(List<LoadInfo> loadInfos, int time, double p, double maxLoad) {
         BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
-        double proportion = maxLoad * 2;
+        double proportion = maxLoad / binomialDistribution.probability(20);
         for (int i = 1; i <= time; i++) {
             LoadInfo loadInfo = new LoadInfo();
             loadInfo.setLoad((int) (binomialDistribution.probability(i) * proportion));
@@ -75,7 +71,7 @@ public class TrexClient {
         NormalDistribution normalDistribution = new NormalDistribution();
         double interval = standardInterval / time;
         double index = -(standardInterval / 2);
-        double proportion = maxLoad * 2;
+        double proportion = maxLoad / normalDistribution.density(0);
         for (int i = 1; i <= time; i++) {
             LoadInfo loadInfo = new LoadInfo();
             loadInfo.setTime(i);
