@@ -4,7 +4,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
-import cn.cyberpeace.mp.service.LogQueryService;
+import cn.cyberpeace.mp.collectionapi.service.LogQueryService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;

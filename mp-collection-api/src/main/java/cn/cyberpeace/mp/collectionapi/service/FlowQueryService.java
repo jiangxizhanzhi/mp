@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.service;
+package cn.cyberpeace.mp.collectionapi.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;

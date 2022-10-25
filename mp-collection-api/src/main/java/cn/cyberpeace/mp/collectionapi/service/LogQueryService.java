@@ -1,4 +1,4 @@
-package cn.cyberpeace.mp.service;
+package cn.cyberpeace.mp.collectionapi.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
