@@ -8,6 +8,9 @@ public class AttackEquipmentVO {
     @ApiModelProperty(value = "设备类型")
     private String type;
 
+    @ApiModelProperty(value = "数量")
+    private Long count;
+    
     @ApiModelProperty(value = "占比")
     private Double percent;
 }

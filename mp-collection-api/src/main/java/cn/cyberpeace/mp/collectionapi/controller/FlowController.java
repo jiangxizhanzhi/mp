@@ -7,8 +7,6 @@ import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
-import cn.cyberpeace.mp.collectionapi.config.ContestConfig;
-import cn.cyberpeace.mp.collectionapi.config.ContestConfig.Team;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
@@ -22,6 +20,7 @@ import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamFlowAggVO;
+import cn.cyberpeace.mp.service.FlowQueryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -43,6 +42,9 @@ public class FlowController {
 
     @Resource
     private FlowInfoService flowInfoService;
+    
+    @Resource
+    private FlowQueryService flowQueryService;
     
     @GetMapping("/flow_attack_info")
     @ApiOperation(value = "查询每个设备的被攻击次数、流量大小、攻击手法占比")
@@ -97,30 +99,28 @@ public class FlowController {
     @GetMapping("/team_attack_count")
     @ApiOperation(value = "每个队伍的攻击次数(累计) top10")
     public ListObjServiceResult<TeamAttackCountVO> teamAttackCount() {
-    	Map<String, String> ip2TeamNameMap = ContestConfig.teams.stream().collect(Collectors.toMap(Team::getIp, Team::getName, (v1, v2) -> v2));
-    	
         // todo 每个战队一个ip
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryTeamAttackCountTop10();
     }
 
     @GetMapping("/attack_type")
     @ApiOperation(value = "所有队伍的攻击类型占比top5")
     public ListObjServiceResult<AttackTypeVO> attackType() {
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryAttackTypeTop5();
     }
 
     @GetMapping("/attack_trend")
     @ApiOperation(value = "所有队伍的总体攻击趋势(每隔十分钟统计一次总攻击次数)")
     public ListObjServiceResult<FlowAttackVO> attackTrend() {
         // 默认分十段
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryAttackTrend();
     }
 
     @GetMapping("/attack_level_trend")
     @ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
     public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
         // 默认分五段
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryLevelTrend();
     }
 
     @GetMapping("/attack_total_count")
@@ -140,14 +140,14 @@ public class FlowController {
     @ApiOperation(value = "被攻击设备top5")
     public ListObjServiceResult<AttackEquipmentVO> equipment() {
         // todo 每种设备有多个ip 需要合并数据
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryEquipmentTypeTop5();
     }
 
     @GetMapping("/protocol")
     @ApiOperation(value = "攻击协议top5(应用层)")
     public ListObjServiceResult<AttackProtocolVO> protocol() {
         // todo 只需要应用层协议 过滤后少于五种则再次查询
-        return new ListObjServiceResult<>();
+        return flowQueryService.queryProtocolTop5();
     }
 
     @GetMapping("/team_flow_agg")
