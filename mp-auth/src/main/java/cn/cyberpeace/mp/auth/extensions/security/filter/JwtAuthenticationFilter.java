@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    public static String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+    public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -75,7 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             } catch (MpRuntimeException e) {
-                log.error("verify token failed for {}", e.getMessage());
+                log.info(e.getMessage());
                 response.setContentType("application/json;charset=UTF-8");
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
