@@ -6,5 +6,5 @@ package cn.cyberpeace.mp.flow.v2.service;
  * @Date 2022/10/25
  */
 public interface FlowCallBackTask {
-    void action();
+    boolean action();
 }

@@ -2,12 +2,11 @@ package cn.cyberpeace.mp.cscene.flow;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
-import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
-import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
-import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaClient;
+import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
+import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
 import cn.cyberpeace.mp.flow.v2.service.FlowGenerateService;
 import cn.cyberpeace.mp.flow.v2.service.FlowGeneratorService;
 import cn.cyberpeace.mp.flow.v2.service.FlowTaskService;
@@ -17,12 +16,10 @@ import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
 import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -47,6 +44,9 @@ public class FlowBizService {
 
     @Resource
     private CloudPluginSceneElementPortMapper portMapper;
+
+    @Resource
+    private FlowTaskRecordMapper flowTaskRecordMapper;
 
     public ServiceResult<Object> start(String flowTaskId, String flowGeneratorId, String targetId) {
 
@@ -75,22 +75,20 @@ public class FlowBizService {
         FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
         flowGeneratorBO.fromModel(flowGenerator);
         // 创建网卡
-        VirtualMachine virtualMachine = new VirtualMachine();
-        var addPortResult = virtualMachine.addPort(targetId, "1ac74c73-b296-45d7-a3b8-0d69ecdf60eb");
+//        VirtualMachine virtualMachine = new VirtualMachine();
+//        var addPortResult = virtualMachine.addPort(targetId, "1ac74c73-b296-45d7-a3b8-0d69ecdf60eb");
 
         // 保存流量任务执行记录
-        FlowTaskRecordBO taskRecord = new FlowTaskRecordBO();
-        taskRecord.setId(TextUtils.uuid());
+        FlowTaskRecordModel taskRecord = new FlowTaskRecordModel();
         taskRecord.setName(flowTaskBO.getName());
-        taskRecord.setDesc(flowTaskBO.getDescription());
+        taskRecord.setDescription(flowTaskBO.getDescription());
         taskRecord.setCategory(flowTaskBO.getCategory());
         taskRecord.setBandwidth(flowTaskBO.getBandwidth());
         taskRecord.setLoadMode(flowTaskBO.getLoadMode());
         taskRecord.setTargetIp(ip);
         taskRecord.setTargetMac(mac);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
-        taskRecord.setFlowGeneratorNicId("");
-        taskRecord.setTrexMac(addPortResult.getMacAddress());
+//        taskRecord.setTrexMac(addPortResult.getMacAddress());
 
 //        var flows = flowTaskBO.getFlows().stream().map(f -> {
 //            FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
@@ -103,7 +101,10 @@ public class FlowBizService {
 //        taskRecord.setFilterProtocols(flowTaskBO.getFilterProtocols());
         // todo
         taskRecord.setStatus(0);
-        flowGenerateService.startFlowTask(taskRecord);
+        flowTaskRecordMapper.create(taskRecord);
+        FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
+        recordBO.fromModel(taskRecord);
+        flowGenerateService.startFlowTask(recordBO);
         return new ServiceResult<>(true);
     }
 }

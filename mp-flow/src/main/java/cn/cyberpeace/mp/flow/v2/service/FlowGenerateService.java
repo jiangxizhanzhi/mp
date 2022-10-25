@@ -23,7 +23,6 @@ public class FlowGenerateService {
     private FlowStartPostProcessor flowStartPostProcessor;
 
     public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
-
         // 查询流量发生器详情
         String flowGeneratorId = flowTaskRecordBO.getFlowGeneratorId();
         var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
@@ -31,7 +30,7 @@ public class FlowGenerateService {
         flowGeneratorBO.fromModel(flowGenerator);
         if ("trex".equals(flowGenerator.getType())) {
             return trexFlowGenerateService.startFlowTask(flowTaskRecordBO, flowGeneratorBO);
-        } else if ("ixia".equals(flowGenerator.getType())) {
+        } else if ("cpcloud_ixia".equals(flowGenerator.getType())) {
             FlowCallBackTask callBack = ixiaFlowGenerateService.startFlowTask(flowTaskRecordBO, flowGeneratorBO);
             flowStartPostProcessor.addTask(callBack);
         }

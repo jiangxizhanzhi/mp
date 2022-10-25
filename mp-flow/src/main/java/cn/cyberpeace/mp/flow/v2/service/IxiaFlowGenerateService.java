@@ -13,11 +13,12 @@ import org.springframework.stereotype.Service;
 @Service
 class IxiaFlowGenerateService {
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
-        IxiaClient ixiaClient = new IxiaClient(generatorBO.getIp());
+        IxiaClient ixiaClient = new IxiaClient(generatorBO.getServer());
         // 登录
+        ixiaClient.login(generatorBO.getUsername(), generatorBO.getPassword());
         // 创建 neighborhood
         ixiaClient.createNeighbor();
-        ixiaClient.saveNeighborHood("");
+        ixiaClient.saveNeighborHood(flowTaskRecordBO.getId());
         // 保存 flows
         // 保存 pcap
         // 生成 application profile
@@ -29,6 +30,6 @@ class IxiaFlowGenerateService {
         // 选择 pcap
         // 执行test
         // 登出
-        return new IxiaFlowCallBackTask();
+        return new IxiaFlowCallBackTask(flowTaskRecordBO);
     }
 }

@@ -10,11 +10,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class IxiaClient {
     private IxiaHttpClient ixiaHttpClient;
 
-    private String ip;
+    private String server;
 
-    public IxiaClient(String ip) {
-        this.ip = ip;
-        this.ixiaHttpClient = new IxiaHttpClient("https://" + ip + ":443/bps", 6000, 10);
+    public IxiaClient(String server) {
+        this.server = server;
+        this.ixiaHttpClient = new IxiaHttpClient(server, 6000, 10);
     }
 
     public LoginResult login(String username, String password) {
