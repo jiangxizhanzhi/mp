@@ -13,7 +13,4 @@ public class AttackFlowTopVO {
 
     @ApiModelProperty(value = "占比")
     private Double percent;
-
-    @ApiModelProperty(value = "总数")
-    private long total;
 }

@@ -13,7 +13,7 @@ public class TeamAttackTrendVO {
 
     @Data
     public static class TeamAttackCount {
-        private long count;
+        private long size;
 
         private LocalDateTime time;
     }

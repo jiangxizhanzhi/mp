@@ -4,5 +4,5 @@ import lombok.Data;
 
 @Data
 public class AttackAggTopRequest extends AttackFlowBaseRequest {
-    private Integer topSize = 3;
+    private Integer topSize;
 }

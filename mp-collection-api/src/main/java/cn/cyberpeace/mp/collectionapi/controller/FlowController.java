@@ -8,6 +8,7 @@ import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
+import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
@@ -124,15 +125,20 @@ public class FlowController {
     @GetMapping("/attack_level_trend")
     @ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
     public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
-        // 默认分五段
+        // 默认分十段
         return flowQueryService.queryLevelTrend();
     }
 
     @GetMapping("/attack_total_count")
     @ApiOperation(value = "总攻击次数，可自定义放大速率")
-    public ListObjServiceResult<FlowAttackVO> attackTotalCount() {
-        // 默认分十段
-        return new ListObjServiceResult<>();
+    public ServiceResult<Long> attackTotalCount(Integer multiple) {
+        return new ServiceResult<>();
+    }
+
+    @GetMapping("/count_with_ip")
+    @ApiOperation(value = "根据ip集合查询总攻击次数")
+    public ServiceResult<Long> countWithIp(AttackFlowBaseRequest request) {
+        return new ServiceResult<>();
     }
 
     @GetMapping("/attack_flow_list")
@@ -242,7 +248,7 @@ public class FlowController {
 
     @GetMapping("/agg_attack_flow")
     @ApiOperation(value = "获取指定ip集合攻击次数与流量大小")
-    public ServiceResult<List<AggAttackFlowVO>> getAttackFlow(AttackFlowBaseRequest request) {
+    public ServiceResult<List<AggAttackFlowVO>> getAttackFlow(AttackAggTopRequest request) {
         return null;
     }
 
@@ -254,7 +260,7 @@ public class FlowController {
 
     @GetMapping("/attack_agg_top")
     @ApiOperation(value = "获取top聚合数据,(降序)默认前三")
-    public ServiceResult<List<TeamAttackCountVO>> getAttackAggTop(AttackFlowTopRequest request) {
+    public ServiceResult<List<TeamAttackCountVO>> getAttackAggTop(AttackAggTopRequest request) {
         return null;
     }
 }
