@@ -38,9 +38,9 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
-    public final static String FDFS_PREFIX = "/fdfs";
+    public static final String FDFS_PREFIX = "/fdfs";
 
-    public final static String DEFAULT_IMAGE_PREFIX = "/api/mp";
+    public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
 
     /**
      * 逗号
@@ -51,6 +51,20 @@ public class AuthConstant {
     public static final Integer TARGET_FIELD_VALUE_VISIBLE_1 = 1;
 
     public static final Integer USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0 = 0;
+
+    public static final String FAIL_VERIFY_JWT_TOKEN = "failed to verify jwt token, massage: userId={}, token={}";
+    public static final String FAIL_DECODE_JWT_TOKEN = "failed to decode jwt token, massage: token={}, error={}";
+    public static final String FAIL_CREATE_JWT_TOKEN = "Create jwt token error: {}";
+
+    public static final String JWT_ALGORITHM = "HmacSHA256";
+    public static final String JWT_CLAIM_ID = "id";
+    public static final String JWT_CLAIM_USERNAME = "username";
+    public static final String JWT_CLAIM_KEY = "key";
+
+    public static final long TOKEN_EXPIRE_TIME = 604800L;
+    public static final int MILLI_TO_SECOND = 1000;
+
+    public static final String SEPARATOR_CHAR_DOT = ".";
 
 
     private AuthConstant() {
