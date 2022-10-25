@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
@@ -26,7 +25,7 @@ public class TrexClient {
 
     public void initTrexServer(NetworkInfos networkInfos) {
         var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, networkInfos, null,
-                new TypeReference<TrexResponse<InitInfoData>>() {
+                new TypeReference<TrexResponse<NetworkInfos>>() {
                 });
         log.info("Initialization of trex virtual machine completed {}", reslut.getData());
     }
@@ -42,8 +41,11 @@ public class TrexClient {
         });
     }
 
-    public void startTask(List<ProtocolInfo> protocolInfos, List<LoadInfo> loadInfos) {
-
+    public void startTask(StartInfoData startInfoData) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.START_TASK, startInfoData, null,
+                new TypeReference<TrexResponse<StartInfoData>>() {
+                });
+        log.info("Initialization of trex virtual machine completed {}", reslut.getData());
     }
 
     public List<LoadInfo> calculateLoad(int time, double total, String loadMode) {
@@ -58,10 +60,10 @@ public class TrexClient {
 
     private void binomialDistributionLoad(List<LoadInfo> loadInfos, int time, double p, double maxLoad) {
         BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
-        double proportion = maxLoad / binomialDistribution.probability(20);
+        double proportion = maxLoad / binomialDistribution.probability(time / 2);
         for (int i = 1; i <= time; i++) {
             LoadInfo loadInfo = new LoadInfo();
-            loadInfo.setLoad((int) (binomialDistribution.probability(i) * proportion));
+            loadInfo.setBandwidth((int) (binomialDistribution.probability(i) * proportion));
             loadInfo.setTime(i);
             loadInfos.add(loadInfo);
         }
@@ -75,7 +77,7 @@ public class TrexClient {
         for (int i = 1; i <= time; i++) {
             LoadInfo loadInfo = new LoadInfo();
             loadInfo.setTime(i);
-            loadInfo.setLoad((int) (normalDistribution.density(index) * proportion));
+            loadInfo.setBandwidth((int) (normalDistribution.density(index) * proportion));
             loadInfos.add(loadInfo);
             index += interval;
         }
@@ -89,7 +91,7 @@ public class TrexClient {
     @Setter
     public static class LoadInfo {
         private Integer time;
-        private Integer load;
+        private Integer bandwidth;
     }
 
     @Getter

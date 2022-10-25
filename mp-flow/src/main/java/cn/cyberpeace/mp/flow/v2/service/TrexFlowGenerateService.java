@@ -7,6 +7,7 @@ import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.trex.FlowResourceData;
 import cn.cyberpeace.mp.flow.v2.client.trex.InitInfoData;
 import cn.cyberpeace.mp.flow.v2.client.trex.NetworkInfos;
+import cn.cyberpeace.mp.flow.v2.client.trex.StartInfoData;
 import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,17 +78,34 @@ public class TrexFlowGenerateService {
         trexClient.uploadResource(flowResources);
 
         // 计算负载
-        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(40, 1000, "BINOMIAL_DISTRIBUTION");
+        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(10, 10, "BINOMIAL_DISTRIBUTION");
         System.out.println("负载");
         for (var loadInfo : loadInfos) {
-            System.out.println(loadInfo.getLoad() + '\n');
+            System.out.println(loadInfo.getBandwidth() + '\n');
         }
-        List<TrexClient.LoadInfo> loadInfos1 = trexClient.calculateLoad(40, 1000, "");
+        List<TrexClient.LoadInfo> loadInfos1 = trexClient.calculateLoad(10, 10, "");
         System.out.println(loadInfos1);
         for (var loadInfo : loadInfos1) {
-            System.out.println(loadInfo.getLoad() + '\n');
+            System.out.println(loadInfo.getBandwidth() + '\n');
         }
-        trexClient.startTask(protocolInfos, loadInfos);
+
+        //启动流量
+        StartInfoData startInfoData = new StartInfoData();
+        startInfoData.setId("task111");
+        startInfoData.setAction(1);
+        startInfoData.setTime(LocalDateTime.now());
+        startInfoData.setDuration(10);
+        startInfoData.setBandwidth(10);
+        startInfoData.setTargetIp("10.100.7.179");
+        StartInfoData.Flow flow = new StartInfoData.Flow();
+        flow.setFlowId("flowid111");
+        flow.setWeight(1);
+        flow.setResourceType(0);
+        flow.setDelay(10);
+        startInfoData.getFlows().add(flow);
+        startInfoData.getLoadLists().addAll(loadInfos);
+
+        trexClient.startTask(startInfoData);
 
         return new ServiceResult<>(true);
     }
