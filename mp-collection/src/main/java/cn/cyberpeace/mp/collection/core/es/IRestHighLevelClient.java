@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.collection.core.es;
 
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
@@ -22,4 +24,6 @@ public interface IRestHighLevelClient {
 //    void allDeleteByQuery(DeleteByQueryRequest deleteRequest);
 
     GetIndexResponse getIndices(GetIndexRequest getIndexRequest);
+
+    IndexResponse index(IndexRequest indexRequest);
 }

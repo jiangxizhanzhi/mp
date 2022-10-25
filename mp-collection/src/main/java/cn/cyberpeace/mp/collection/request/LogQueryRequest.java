@@ -13,7 +13,7 @@ public class LogQueryRequest {
 
     private LocalDateTime endTime;
 
-    private Integer severity;
+    private List<Integer> severity;
 
     private List<String> attackIps;
 

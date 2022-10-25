@@ -6,13 +6,23 @@ import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.config.EsDateFormatConfig;
 import cn.cyberpeace.mp.collection.constant.SicLaunchConfig;
-import cn.cyberpeace.mp.collection.model.*;
+import cn.cyberpeace.mp.collection.model.FileEventModel;
+import cn.cyberpeace.mp.collection.model.WazuhEventRequest;
+import cn.cyberpeace.mp.collection.model.WazuhFileRoot;
+import cn.cyberpeace.mp.collection.model.WazuhHostMonitorPageRequest;
+import cn.cyberpeace.mp.collection.model.WazuhHostStateModel;
+import cn.cyberpeace.mp.collection.model.WazuhMonitorRoot;
+import cn.cyberpeace.mp.collection.model.WazuhNetworkConnectionModel;
+import cn.cyberpeace.mp.collection.model.WazuhProbeCommonModel;
+import cn.cyberpeace.mp.collection.model.WazuhProcessModel;
+import cn.cyberpeace.mp.collection.model.WazuhSystemUserModel;
+import cn.cyberpeace.mp.collection.model.WazuhVulnerabilityInfoCountModel;
+import cn.cyberpeace.mp.collection.model.WazuhVulnerabilityInfoModel;
 import cn.cyberpeace.mp.collection.model.enums.FileEventType;
 import cn.cyberpeace.mp.collection.model.sic.BaseChangeCountOutput;
 import cn.cyberpeace.mp.collection.model.sic.BaseInput;
 import cn.cyberpeace.mp.collection.model.sic.HostStateOutput;
 import cn.cyberpeace.mp.collection.model.sic.Launch;
-import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.util.AgentNameUtil;
 import cn.cyberpeace.mp.collection.util.EsResponseParseUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -56,7 +66,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -67,33 +84,6 @@ public class CollectionClient {
     private static final String WAZUH_ALERT_INDEX_PREFIX = "wazuh-alerts-4.x-";
 
     private static final String CUSTOM_PROBE_ID_PATH = "data.sic_launch_id";
-
-    public ListObjResult<ContestLogModel> queryContestLog(LogQueryRequest request) {
-        var sourceBuilder = buildSearchSourceBuilder(request);
-        var boolQueryBuilder = buildBoolQueryBuilder(request);
-        SearchRequest searchRequest = buildSearchRequest(request, sourceBuilder, boolQueryBuilder);
-
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<ContestLogModel> contestLogModels = new ArrayList<>();
-        if (Objects.isNull(response) || Objects.isNull(response.getHits()) || Objects.isNull(response.getHits().getHits())) {
-            return new ListObjResult<>(contestLogModels, 0);
-        }
-        for (var hit : response.getHits().getHits()) {
-            WazuhMonitorRoot<ContestLogModel> wazuhMonitorRoot = JSON.parseObject(hit.getSourceAsString(),
-                    new TypeReference<>() {
-                    });
-            if (Objects.nonNull(wazuhMonitorRoot.getData())) {
-                ContestLogModel contestLogModel = wazuhMonitorRoot.getData();
-                contestLogModel.setTime(TimeUtils.dateToLocalDateTime(wazuhMonitorRoot.getTimestamp()));
-                contestLogModels.add(contestLogModel);
-            }
-        }
-        long total = 0L;
-        if (Objects.nonNull(response.getHits()) && Objects.nonNull(response.getHits().getTotalHits())) {
-            total = response.getHits().getTotalHits().value;
-        }
-        return new ListObjResult<>(contestLogModels, BigDecimal.valueOf(total).intValue());
-    }
 
     /**
      * 查询采集事件分页
@@ -705,27 +695,6 @@ public class CollectionClient {
         }
     }
 
-    private void buildLogBoolQueryBuilder(LogQueryRequest request, BoolQueryBuilder boolQueryBuilder) {
-        if (CollectionUtils.isNotEmpty(request.getIps())) {
-            buildIpQuery(request.getIps(), boolQueryBuilder);
-        }
-
-        if (CollectionUtils.isNotEmpty(request.getAttackIps())) {
-            buildAttackIpQuery(request.getAttackIps(), boolQueryBuilder);
-        }
-
-        if (Objects.nonNull(request.getSeverity())) {
-            buildSeverityQuery(request.getSeverity(), boolQueryBuilder);
-        }
-
-        if (Objects.nonNull(request.getStartTime()) && Objects.nonNull(request.getEndTime())) {
-            //时间查询
-            boolQueryBuilder.must(QueryBuilders.rangeQuery("timestamp")
-                    .from(request.getStartTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter))
-                    .to(request.getEndTime().atZone(ZoneId.systemDefault()).format(EsDateFormatConfig.esDateTimeFormatter)));
-        }
-    }
-
     private void buildFileEventBoolQueryBuilder(WazuhEventRequest wazuhEventRequest, BoolQueryBuilder boolQueryBuilder) {
         // ruleGroups
         if (!CollectionUtils.isEmpty(wazuhEventRequest.getRuleGroups())) {
@@ -802,18 +771,6 @@ public class CollectionClient {
         boolQueryBuilder.filter(QueryBuilders.termsQuery("rule.level", levels));
     }
 
-    private void buildIpQuery(List<String> ips, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("data.ip", ips));
-    }
-
-    private void buildAttackIpQuery(List<String> attackIps, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("data.attack_ip", attackIps));
-    }
-
-    private void buildSeverityQuery(Integer severity, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.must(QueryBuilders.termQuery("data.severity", severity));
-    }
-
     private SearchRequest buildSearchRequest(WazuhEventRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
@@ -830,17 +787,6 @@ public class CollectionClient {
     }
 
     private SearchRequest buildSearchRequest(WazuhHostMonitorPageRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
-        String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
-        var searchRequest = new SearchRequest(indexArray);
-
-        searchRequest.source(sourceBuilder.query(boolQueryBuilder));
-
-        //配置索引为空
-        searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
-        return searchRequest;
-    }
-
-    private SearchRequest buildSearchRequest(LogQueryRequest request, SearchSourceBuilder sourceBuilder, BoolQueryBuilder boolQueryBuilder) {
         String[] indexArray = buildRequestIndex(request.getStartTime(), request.getEndTime());
         var searchRequest = new SearchRequest(indexArray);
 
@@ -880,15 +826,6 @@ public class CollectionClient {
         return sourceBuilder;
     }
 
-    private SearchSourceBuilder buildSearchSourceBuilder(LogQueryRequest request) {
-        var sourceBuilder = new SearchSourceBuilder();
-        // 按时间排序
-        sourceBuilder.sort("timestamp", SortOrder.DESC);
-        //处理分页
-        processPageable(request, sourceBuilder);
-        return sourceBuilder;
-    }
-
     private BoolQueryBuilder buildBoolQueryBuilder(WazuhEventRequest request) {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //构造查询条件
@@ -900,12 +837,6 @@ public class CollectionClient {
         var boolQueryBuilder = QueryBuilders.boolQuery();
         //构造查询条件
         buildHostMonitorBoolQueryBuilder(request, boolQueryBuilder);
-        return boolQueryBuilder;
-    }
-
-    private BoolQueryBuilder buildBoolQueryBuilder(LogQueryRequest request) {
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        //构造查询条件
         return boolQueryBuilder;
     }
 
@@ -969,16 +900,6 @@ public class CollectionClient {
             sourceBuilder.size(Math.max(10000 - offset, 0));
         } else {
             sourceBuilder.size(hostMonitorRequest.getPageSize());
-        }
-    }
-
-    private void processPageable(LogQueryRequest request, SearchSourceBuilder sourceBuilder) {
-        int offset = (request.getPageNum() - 1) * (request.getPageSize());
-        sourceBuilder.from(Math.min(offset, 10000));
-        if ((offset + request.getPageSize()) > 10000) {
-            sourceBuilder.size(Math.max(10000 - offset, 0));
-        } else {
-            sourceBuilder.size(request.getPageSize());
         }
     }
 
