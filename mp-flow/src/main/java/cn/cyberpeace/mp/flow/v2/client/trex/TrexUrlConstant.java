@@ -6,4 +6,6 @@ package cn.cyberpeace.mp.flow.v2.client.trex;
  * @Date 2022/10/24
  */
 public interface TrexUrlConstant {
+    String INITIALIZATION_TREX = "/api/v1/task/network/init";
+    String UPLOAD_PCAP = "/api/v1/resource/pcap/upload";
 }

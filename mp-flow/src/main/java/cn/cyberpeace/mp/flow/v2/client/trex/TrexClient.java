@@ -1,12 +1,13 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
-import cn.cyberpeace.mp.base.service.impl.FdfsRemoteFileServiceImpl;
-import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.json.JsonUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.distribution.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,37 +17,63 @@ import java.util.List;
  */
 @Slf4j
 public class TrexClient {
+    private static final double standardInterval = 6;
 
-    private String ip;
-    private String port;
+    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.1:11111", 6000, 10);
 
-    private TrexHttpClient trexHttpClient = new TrexHttpClient("", 6000, 10);
-
-    public void initTrexServer(InitInfo initInfo) {
-        String server = ip + ":" + port;
-        try {
-            var initTrexResponse = HttpUtils.sendPost("http://" + server + "/api/v1/task/network/init",
-                    JsonUtils.snakeStringify(initInfo));
-        } catch (Exception e) {
-            log.error("Failed to initialize trex virtual machine", e);
-        }
+    public void initTrexServer(InitInfoData initInfo) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, initInfo, null,
+                new TypeReference<TrexResponse<InitInfoData>>() {
+                });
+        log.info("Initialization of trex virtual machine completed {}", reslut.getData());
     }
 
-    public void uploadResource(List<FlowResource> resources) {
-        String server = ip + ":" + port;
+    public void uploadResource(List<FlowResourceData> resources) {
         resources.stream().forEach(resource -> {
-            try {
-                var uploadPcapResponse = HttpUtils.sendPost("http://" + server + "/api/v1/resource/pcap/upload",
-                        JsonUtils.snakeStringify(resource));
-                log.info(uploadPcapResponse);
-            } catch (Exception e) {
-                log.error("Failed to upload pcap file, pcapFile is {}, flowId is {}", resource.getPcapFile(), resource.getFlowId());
-            }
+            var reslut = trexHttpClient.trexPost(TrexUrlConstant.UPLOAD_PCAP, resource, null,
+                    new TypeReference<TrexResponse<FlowResourceData>>() {
+                    });
+            log.info("Upload {} succeeded", reslut.getData());
         });
     }
 
     public void startTask(List<ProtocolInfo> protocolInfos, List<LoadInfo> loadInfos) {
 
+    }
+
+    public List<LoadInfo> calculateLoad(int time, double total, String loadMode) {
+        List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
+        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals("BINOMIAL_DISTRIBUTION")) {
+            binomialDistributionLoad(loadInfos, time, 0.5, total);
+        } else {
+            normalDistributionLoad(loadInfos, time, total);
+        }
+        return loadInfos;
+    }
+
+    private void binomialDistributionLoad(List<LoadInfo> loadInfos, int time, double p, double maxLoad) {
+        BinomialDistribution binomialDistribution = new BinomialDistribution(time, p);
+        double proportion = maxLoad * 2;
+        for (int i = 1; i <= time; i++) {
+            LoadInfo loadInfo = new LoadInfo();
+            loadInfo.setLoad((int) (binomialDistribution.probability(i) * proportion));
+            loadInfo.setTime(i);
+            loadInfos.add(loadInfo);
+        }
+    }
+
+    private void normalDistributionLoad(List<LoadInfo> loadInfos, int time, double maxLoad) {
+        NormalDistribution normalDistribution = new NormalDistribution();
+        double interval = standardInterval / time;
+        double index = -(standardInterval / 2);
+        double proportion = maxLoad * 2;
+        for (int i = 1; i <= time; i++) {
+            LoadInfo loadInfo = new LoadInfo();
+            loadInfo.setTime(i);
+            loadInfo.setLoad((int) (normalDistribution.density(index) * proportion));
+            loadInfos.add(loadInfo);
+            index += interval;
+        }
     }
 
     public static class ProtocolInfo {
@@ -65,12 +92,5 @@ public class TrexClient {
     public static class FlowResource {
         private String flowId;
         private String pcapFile;
-    }
-
-    @Getter
-    @Setter
-    public static class InitInfo {
-        private String mac;
-        private String taskId;
     }
 }

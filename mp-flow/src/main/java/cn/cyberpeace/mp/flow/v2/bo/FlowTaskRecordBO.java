@@ -65,6 +65,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     @Data
     public static class TaskFlow {
         private String flowGeneratorId;
+        private String flowId;
         private String flowGeneratorNicId;
         private Integer status;
 

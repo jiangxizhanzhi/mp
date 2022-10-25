@@ -2,9 +2,11 @@ package cn.cyberpeace.mp.cscene.flow;
 
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaClient;
 import cn.cyberpeace.mp.flow.v2.service.FlowGenerateService;
 import cn.cyberpeace.mp.flow.v2.service.FlowGeneratorService;
@@ -72,10 +74,13 @@ public class FlowBizService {
         var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
         FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
         flowGeneratorBO.fromModel(flowGenerator);
-
+        // 创建网卡
+        VirtualMachine virtualMachine = new VirtualMachine();
+        var addPortResult = virtualMachine.addPort(targetId, flowGeneratorBO.getNics().get(0).getCpCloudNetworkId());
 
         // 保存流量任务执行记录
         FlowTaskRecordBO taskRecord = new FlowTaskRecordBO();
+        taskRecord.setId(TextUtils.uuid());
         taskRecord.setName(flowTaskBO.getName());
         taskRecord.setDesc(flowTaskBO.getDescription());
         taskRecord.setCategory(flowTaskBO.getCategory());
@@ -85,10 +90,11 @@ public class FlowBizService {
         taskRecord.setTargetMac(mac);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
         taskRecord.setFlowGeneratorNicId("");
-        taskRecord.setTrexMac("");
+        taskRecord.setTrexMac(addPortResult.getMacAddr());
 
         var flows = flowTaskBO.getFlows().stream().map(f -> {
             FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
+            taskFlow.setFlowId(f.getFlowId());
             taskFlow.setFlowGeneratorId(flowGeneratorId);
             return taskFlow;
         }).collect(Collectors.toList());

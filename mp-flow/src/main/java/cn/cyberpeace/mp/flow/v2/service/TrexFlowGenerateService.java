@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
-import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
+import cn.cyberpeace.mp.flow.v2.client.trex.FlowResourceData;
+import cn.cyberpeace.mp.flow.v2.client.trex.InitInfoData;
 import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -20,34 +22,32 @@ public class TrexFlowGenerateService {
     public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
         TrexClient trexClient = new TrexClient();
         // 上传flow配置
-        List<TrexClient.FlowResource> flowResources = new ArrayList<>();
+        List<FlowResourceData> flowResources = new ArrayList<>();
         List<TrexClient.ProtocolInfo> protocolInfos = new ArrayList<>();
 
         for (var flow : flowTaskRecordBO.getFlows()) {
             if (StringUtils.isNotEmpty(flow.getPcapFile())) {
-                TrexClient.FlowResource resource = new TrexClient.FlowResource();
-                resource.setPcapFile(flow.getPcapFile());
-                resource.setFlowId("");
+                FlowResourceData resource = new FlowResourceData();
+                byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
+                resource.setPcapFile(fileByte);
+                resource.setFlowId(flow.getFlowId());
                 flowResources.add(resource);
             } else {
                 TrexClient.ProtocolInfo protocolInfo = new TrexClient.ProtocolInfo();
                 protocolInfos.add(protocolInfo);
             }
         }
-        // 网卡已经创建过了，此处不再创建
-//        var nic = trexClient.createNic();
         // 初始化trex服务
-        TrexClient.InitInfo initInfo = new TrexClient.InitInfo();
-//        initInfo.setMac(flowTaskRecordBO.getTrexMac());
-        // todo:taskId如何得到?
-        initInfo.setTaskId(flowTaskRecordBO.getFlowGeneratorId());
+        InitInfoData initInfo = new InitInfoData();
+        initInfo.setMac(flowTaskRecordBO.getTrexMac());
+        initInfo.setTaskId(flowTaskRecordBO.getId());
         trexClient.initTrexServer(initInfo);
+
         // 上传 pcap
         trexClient.uploadResource(flowResources);
-//        var nic = trexClient.createNic();
-//        trexClient.initTrexServer();
+
         // 计算负载
-        List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
+        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(40, 100, "BINOMIAL_DISTRIBUTION");
         trexClient.startTask(protocolInfos, loadInfos);
 
         return new ServiceResult<>(true);
