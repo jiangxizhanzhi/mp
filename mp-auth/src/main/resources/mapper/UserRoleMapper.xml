@@ -7,15 +7,6 @@
             (select role from mp_auth_user_role where user = #{userId})
     </select>
 
-    <select id="listRolesByUserIds" resultType="cn.cyberpeace.mp.auth.model.RoleModel">
-        select distinct * from mp_auth_role where id in
-        (select role from mp_auth_user_role where user in
-            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-             #{userId}
-            </foreach>
-        )
-    </select>
-
     <select id="listUsersByRoleId" resultType="cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo">
         select distinct u.*,
         group_concat(distinct ou.org separator ',') as orgs,

@@ -10,8 +10,10 @@ import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
 import cn.cyberpeace.mp.auth.model.RoleModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.model.UserRoleModel;
+import cn.cyberpeace.mp.auth.repository.RoleMapper;
 import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.UserRolePageRequest;
+import cn.cyberpeace.mp.auth.request.role.UserRolesRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.UserRoleFields;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
@@ -31,6 +33,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -63,6 +66,9 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
     private UserCacheService userCacheService;
 
     @Autowired
+    private RoleMapper roleMapper;
+
+    @Autowired
     public UserRoleServiceImpl(UserRoleMapper modelMapper, UserRoleFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
@@ -76,12 +82,23 @@ public class UserRoleServiceImpl extends BaseModelServiceImpl<UserRoleModel, Use
         return roles;
     }
 
-
     @Override
     @Cacheable(value = CACHE_VAL_ROLES)
     public List<RoleModel> listByUserIds(List<String> userIds) {
         Assert.notEmpty(userIds, "userIds不能为空！");
-        List<RoleModel> roles = getModelMapper().listRolesByUserIds(userIds);
+        HumanCondition userRoleCondition = new HumanCondition()
+                .filterIn(UserRoleModel::getUser, userIds.toArray())
+                .select(UserRoleModel::getRole);
+        List<UserRoleModel> userRoleModels = getModelMapper().list(userRoleCondition);
+        List<String> roleIds = new ArrayList<>();
+        userRoleModels.forEach(userRoleModel -> roleIds.add(userRoleModel.getRole()));
+        if (roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        HumanCondition roleCondition = new HumanCondition()
+                .filterIn(RoleModel::getId, roleIds.toArray())
+                .distinct();
+        List<RoleModel> roles = roleMapper.list(roleCondition);
         return roles;
     }
 

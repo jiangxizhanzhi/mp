@@ -24,8 +24,6 @@ public interface UserRoleMapper extends BaseModelMapper<UserRoleModel> {
 
     List<RoleModel> listRolesByUserId(@Param("userId") String userId);
 
-    List<RoleModel> listRolesByUserIds(@Param("userIds") List<String> userIds);
-
     List<UserOrgRoleBo> listUsersByRoleId(@Param("roleId") String roleId);
 
     List<UserRoleStatisticBo> getUserRoleStatistics();
