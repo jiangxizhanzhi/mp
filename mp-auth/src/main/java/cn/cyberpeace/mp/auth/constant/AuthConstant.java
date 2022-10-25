@@ -66,6 +66,16 @@ public class AuthConstant {
 
     public static final String SEPARATOR_CHAR_DOT = ".";
 
+    /**
+     * 导入用户头像支持后缀类型：png，jfif，pjpeg，jpeg，pjp，jpg
+     */
+    public static final String[] UPLOAD_AVATAR_SUFFIX_TYPE = {
+            "png",
+            "jfif",
+            "jpeg",
+            "jpg"
+    };
+
 
     private AuthConstant() {
     }

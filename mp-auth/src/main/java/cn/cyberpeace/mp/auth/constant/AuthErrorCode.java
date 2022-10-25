@@ -116,7 +116,10 @@ public enum AuthErrorCode implements ErrorCode {
     COPY_FILE_ERROR("MP-110133", "copy_file_error"),
     FILE_NAME_ISNULL_ERROR("MP-110134", "file_name_isnull_error"),
 
-    PERMISSION_DENIED("MP-110140", "permission_denied");
+    PERMISSION_DENIED("MP-110140", "permission_denied"),
+
+    AVATAR_SUFFIX_TYPE_ERROR("MP-110150", "avatar_suffix_type_error"),
+    AVATAR_MAGIC_HEADER_ERROR("MP-110151", "avatar_magic_header_error");
 
 
     AuthErrorCode(String code, String message) {
