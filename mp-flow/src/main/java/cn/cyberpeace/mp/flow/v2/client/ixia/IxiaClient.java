@@ -8,13 +8,35 @@ import com.fasterxml.jackson.core.type.TypeReference;
  * @Date 2022/10/25
  */
 public class IxiaClient {
-    private IxiaHttpClient ixiaHttpClient = new IxiaHttpClient("http://10.100.7.199", 6000, 10);
+    private IxiaHttpClient ixiaHttpClient;
+
+    private String ip;
+
+    public IxiaClient(String ip) {
+        this.ip = ip;
+        this.ixiaHttpClient = new IxiaHttpClient("https://" + ip + ":443/bps", 6000, 10);
+    }
 
     public LoginResult login(String username, String password) {
         LoginData loginData = new LoginData();
         loginData.setUsername(username);
         loginData.setPassword(password);
         var result = ixiaHttpClient.ixiaPost(IxiaUrlConstant.LOGIN_URL, loginData, null, new TypeReference<LoginResult>() {
+        });
+        return result;
+    }
+
+    public CreateNeighborHoodResult createNeighbor() {
+        CreateNeighborHoodData data = new CreateNeighborHoodData();
+        var result = ixiaHttpClient.ixiaPost(IxiaUrlConstant.CREATE_NEIGHBORHOOD, data, null, new TypeReference<CreateNeighborHoodResult>() {
+        });
+        return result;
+    }
+
+    public SaveNeighborHoodResult saveNeighborHood(String name) {
+        SaveNeighborHoodData data = new SaveNeighborHoodData();
+        data.setName(name);
+        var result = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_NEIGHBORHOOD, data, null, new TypeReference<SaveNeighborHoodResult>() {
         });
         return result;
     }

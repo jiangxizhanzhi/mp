@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
-import cn.cyberpeace.mp.base.context.SysContextHolder;
 import cn.cyberpeace.mp.base.util.http.HttpClient;
 import cn.cyberpeace.mp.base.util.http.HttpData;
 import cn.cyberpeace.mp.base.util.http.HttpParam;
@@ -11,10 +10,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.i18n.LocaleContextHolder;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 @Slf4j
@@ -23,11 +27,36 @@ public class IxiaHttpClient {
     private final HttpClient httpClient;
 
     public IxiaHttpClient(String server, Integer timeout, Integer poolSize) {
+        SSLContext ctx = null;
+        try {
+            ctx = SSLContext.getInstance("SSL");
+            X509TrustManager tm = new X509TrustManager() {
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+                }
+
+                @Override
+                public void checkClientTrusted(X509Certificate[] arg0, String arg1) throws CertificateException {
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] arg0,
+                                               String arg1) throws CertificateException {
+                }
+            };
+            ctx.init(null, new TrustManager[]{ tm }, null);
+        } catch (Exception e) {
+
+        }
+        SSLConnectionSocketFactory ssf = new SSLConnectionSocketFactory(ctx, NoopHostnameVerifier.INSTANCE);
         httpClient = HttpClient.builder()
                 .configServer(server)
                 .configTimeout(timeout)
                 .configMaxConnTotal(poolSize)
                 .configMaxConnPerRoute(poolSize)
+                .config(ssf)
                 .build();
         httpClient.setLogRequest(true);
     }
@@ -61,7 +90,7 @@ public class IxiaHttpClient {
                                                       String method, String url, HttpData data, HttpParam param) {
 
         var objectMapper = new ObjectMapper();
-        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
+//        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             var response = objectMapper.readValue(result.getResult(), valueTypeRef);
@@ -125,14 +154,10 @@ public class IxiaHttpClient {
 
     private Map<String, String> getHeaders() {
         Map<String, String> headers = new HashMap<>();
-        // 国际化header的处理
-        Locale locale = LocaleContextHolder.getLocale();
-        if (locale != null) {
-            headers.put("Accept-Language", locale.getLanguage());
-        }
-        // 调用链id
-        String traceId = SysContextHolder.getCallChainId();
-        headers.put("X-Request-Id", traceId);
+        headers.put("X-API-KEY", "17045ab29fba48c18808e1f95c4c496b");
+//        headers.put("Host", "10.100.7.199");
+//        headers.put("Sec-Fetch-Mode", "cors");
+//        headers.put("Sec-Fetch-Site", "same-origin");
         return headers;
     }
 }

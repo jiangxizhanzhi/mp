@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.trex.FlowResourceData;
 import cn.cyberpeace.mp.flow.v2.client.trex.InitInfoData;
@@ -25,7 +26,7 @@ import java.util.List;
  */
 @Service
 public class TrexFlowGenerateService {
-    public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO){
+    public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient();
         // 上传flow配置
         List<FlowResourceData> flowResources = new ArrayList<>();
@@ -56,7 +57,7 @@ public class TrexFlowGenerateService {
         resource.setFlowId("123456789");
         try {
             resource.setFile(readOnce(file));
-        } catch (Exception e){
+        } catch (Exception e) {
 
         }
 
@@ -64,7 +65,7 @@ public class TrexFlowGenerateService {
         resource1.setFlowId("987654321");
         try {
             resource1.setFile(readOnce(file));
-        }catch (Exception e) {
+        } catch (Exception e) {
 
         }
         flowResources.add(resource);
@@ -75,12 +76,12 @@ public class TrexFlowGenerateService {
         // 计算负载
         List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(40, 1000, "BINOMIAL_DISTRIBUTION");
         System.out.println("负载");
-        for (var loadInfo : loadInfos){
+        for (var loadInfo : loadInfos) {
             System.out.println(loadInfo.getLoad() + '\n');
         }
         List<TrexClient.LoadInfo> loadInfos1 = trexClient.calculateLoad(40, 1000, "");
         System.out.println(loadInfos1);
-        for (var loadInfo : loadInfos1){
+        for (var loadInfo : loadInfos1) {
             System.out.println(loadInfo.getLoad() + '\n');
         }
         trexClient.startTask(protocolInfos, loadInfos);
@@ -116,6 +117,7 @@ public class TrexFlowGenerateService {
         }
         return buffer;
     }
+
     private static void checkFileExists(File file) throws FileNotFoundException {
         if (file == null || !file.exists()) {
             System.err.println("file is not null or exist !");

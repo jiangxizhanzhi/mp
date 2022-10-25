@@ -1,6 +1,8 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaClient;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,9 +12,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 class IxiaFlowGenerateService {
-    public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
+    public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        IxiaClient ixiaClient = new IxiaClient(generatorBO.getIp());
         // 登录
         // 创建 neighborhood
+        ixiaClient.createNeighbor();
+        ixiaClient.saveNeighborHood("");
         // 保存 flows
         // 保存 pcap
         // 生成 application profile

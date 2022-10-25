@@ -10,14 +10,19 @@ import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.socket.LayeredConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
-import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
 
 import java.io.File;
@@ -109,9 +114,9 @@ public class HttpClient {
             } else {
                 var stringEntity = new StringEntity(data.toContent(), charset);
                 stringEntity.setContentEncoding(charset.toString());
-                if(!StringUtils.isEmpty(data.contentType())){
+                if (!StringUtils.isEmpty(data.contentType())) {
                     stringEntity.setContentType(data.contentType());
-                }else{
+                } else {
                     stringEntity.setContentType(contentType);
                 }
                 entity = stringEntity;
@@ -169,6 +174,7 @@ public class HttpClient {
         private Integer maxConnTotal;
         private String username;
         private String password;
+        private LayeredConnectionSocketFactory sslSocketFactory;
 
         public HttpClientBuilder configServer(String server) {
             this.server = server;
@@ -196,13 +202,18 @@ public class HttpClient {
             return this;
         }
 
+        public HttpClientBuilder config(LayeredConnectionSocketFactory sslSocketFactory) {
+            this.sslSocketFactory = sslSocketFactory;
+            return this;
+        }
+
         public HttpClient build() {
-            return new HttpClient(server, timeout, maxConnPerRoute, maxConnTotal, username, password);
+            return new HttpClient(server, timeout, maxConnPerRoute, maxConnTotal, username, password, sslSocketFactory);
         }
     }
 
     private HttpClient(String server, Integer timeout, Integer maxConnPerRoute, Integer maxConnTotal,
-                      String username, String password) {
+                       String username, String password,LayeredConnectionSocketFactory sslSocketFactory) {
         this.server = server;
         var clientBuilder = HttpClients.custom().disableAutomaticRetries();
         if (maxConnPerRoute != null) {
@@ -210,6 +221,9 @@ public class HttpClient {
         }
         if (maxConnTotal != null) {
             clientBuilder.setMaxConnTotal(maxConnTotal);
+        }
+        if (sslSocketFactory != null) {
+            clientBuilder.setSSLSocketFactory(sslSocketFactory);
         }
         if (username != null && password != null) {
             var credentialsProvider = new BasicCredentialsProvider();
