@@ -1,13 +1,20 @@
 package cn.cyberpeace.mp.cscene.flow;
 
+import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
-import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
+import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaClient;
 import cn.cyberpeace.mp.flow.v2.service.FlowGenerateService;
 import cn.cyberpeace.mp.flow.v2.service.FlowGeneratorService;
 import cn.cyberpeace.mp.flow.v2.service.FlowTaskService;
+import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
+import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
+import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementMapper;
+import cn.cyberpeace.mp.sceneplugincloud.repository.CloudPluginSceneElementPortMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -33,18 +40,28 @@ public class FlowBizService {
     @Resource
     private FlowGenerateService flowGenerateService;
 
-    public ServiceResult<Object> start(String flowTaskId, String flowGeneratorId, String targetId) {
+    @Resource
+    private CloudPluginSceneElementMapper elementMapper;
 
-        // test用的
-        if (StringUtils.isNotEmpty(flowTaskId)) {
-            VirtualMachine virtualMachine = new VirtualMachine();
-            virtualMachine.addPort(flowTaskId, flowGeneratorId);
-            return new ServiceResult<>(true);
-        }
+    @Resource
+    private CloudPluginSceneElementPortMapper portMapper;
+
+    public ServiceResult<Object> start(String flowTaskId, String flowGeneratorId, String targetId) {
 
         // 启动流量任务,将 flowTaskId 的任务在 flowGeneratorId 执行,目标机器是 targetId
         // 查询靶机详情 ip、网络等
+        var element = elementMapper.first(new HumanCondition()
+                .filterEqual(CloudPluginSceneElementModel::getResourceId, targetId)
+        );
+        SceneHandler sceneHandler = new SceneHandler(element.getScene(), null, null);
+        CloudScenePluginHandler plugin = sceneHandler.getPluginHandler(PluginConstant.PLUGIN_KEY);
+        var e = plugin.getElement(element.getSceneElement());
+        var ports = plugin.getPorts(e);
         String networkId = "";
+        for (var p : ports) {
+            networkId = p.getAuxiliaryNetworkId();
+        }
+
         String ip = "";
         String mac = "";
         // 查询任务详情

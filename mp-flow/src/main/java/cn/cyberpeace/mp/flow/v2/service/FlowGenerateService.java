@@ -14,7 +14,13 @@ public class FlowGenerateService {
     private FlowGeneratorService flowGeneratorService;
 
     @Resource
-    private TrexFlowGenerateService trexFlowGenerateService ;
+    private TrexFlowGenerateService trexFlowGenerateService;
+
+    @Resource
+    private IxiaFlowGenerateService ixiaFlowGenerateService;
+
+    @Resource
+    private FlowStartPostProcessor flowStartPostProcessor;
 
     public ServiceResult<Boolean> startFlowTask(FlowTaskRecordBO flowTaskRecordBO) {
 
@@ -26,7 +32,8 @@ public class FlowGenerateService {
         if ("trex".equals(flowGeneratorBO.getType())) {
             return trexFlowGenerateService.startFlowTask(flowTaskRecordBO);
         } else if ("ixia".equals(flowGeneratorBO.getType())) {
-
+            FlowCallBackTask callBack = ixiaFlowGenerateService.startFlowTask(flowTaskRecordBO);
+            flowStartPostProcessor.addTask(callBack);
         }
 
         return new ServiceResult<>(true);
