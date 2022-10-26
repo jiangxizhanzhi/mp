@@ -218,6 +218,8 @@ mp:
     scene-handler-realtime-update: true
     scene-process-save-realtime: true
     element-process-save-realtime: true
+  aggregation:
+    export-image-timeout: 1200000
 
 
 ---

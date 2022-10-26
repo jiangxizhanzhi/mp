@@ -46,6 +46,11 @@ public abstract class CloudClient {
         return checkResponse(httpClient.cloudGet(url, param, valueTypeRef), throwException);
     }
 
+    public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef,
+                                         boolean throwException, Integer timeout) {
+        return checkResponse(httpClient.cloudGet(url, param, valueTypeRef, timeout), throwException);
+    }
+
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param,
                                           TypeReference<CloudResponse<T>> valueTypeRef, boolean throwException) {
         return checkResponse(httpClient.cloudPost(url, data, param, valueTypeRef), throwException);
