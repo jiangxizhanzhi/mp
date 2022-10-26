@@ -56,10 +56,10 @@ logging:
       max-history: ${MP_LOGFILE_MAX_HISTORY:15}
 springfox:
   documentation:
-    enabled: ${SWAGGER_DOC_ENABLED:false}
-    auto-startup: ${SWAGGER_DOC_STARTUP:false}
+    enabled: ${SWAGGER_DOC_ENABLED:true}
+    auto-startup: ${SWAGGER_DOC_STARTUP:true}
     swagger-ui:
-      enabled: ${SWAGGER_DOC_UI:false}
+      enabled: ${SWAGGER_DOC_UI:true}
 
 mybatis:
   mapper-locations: classpath*:mapper/*.xml

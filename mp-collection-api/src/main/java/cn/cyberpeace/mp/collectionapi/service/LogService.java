@@ -23,7 +23,7 @@ public class LogService {
     public void addContestLog(LogReportBO logReportBO) {
         ContestLogModel contestLogModel = new ContestLogModel();
         contestLogModel.setIp(logReportBO.getIp());
-        if (logReportBO.getAttackIp().contains(":")) {
+        if (StringUtils.isNotEmpty(logReportBO.getAttackIp()) && logReportBO.getAttackIp().contains(":")) {
             int index = logReportBO.getAttackIp().indexOf(":");
             contestLogModel.setAttackIp(logReportBO.getAttackIp().substring(0, index));
         } else {

@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
 import cn.cyberpeace.mp.collectionapi.service.LogService;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,6 +29,7 @@ public class LogController {
 
     @PostMapping("/report")
     @ApiOperation(value = "日志上报")
+    @ApiImplicitParam(name = "logReportBO", value = "请求体", dataTypeClass = LogReportBO.class)
     public void report(@RequestBody LogReportBO logReportBO) {
         logQueryService.addContestLog(logReportBO);
     }

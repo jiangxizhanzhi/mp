@@ -1,8 +1,10 @@
 package cn.cyberpeace.mp.collectionapi.request;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 public class AttackAggTopRequest extends AttackFlowBaseRequest {
-    private Integer topSize = 3;
+    @ApiModelProperty(value = "topSize")
+    private Integer topSize;
 }
