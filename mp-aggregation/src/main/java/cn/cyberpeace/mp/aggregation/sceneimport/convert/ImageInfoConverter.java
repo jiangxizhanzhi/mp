@@ -163,9 +163,10 @@ class ImageInfoConverter implements IConverter {
         for (AccessMode accessMode : list) {
             if (accessMode.getProtocol() != null) {
                 String key = StringUtils.joinWith(":", accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(), accessMode.getPassword());
-                if (!existAccessModeKey.contains(key)) {
+//                无需去重
+//                if (!existAccessModeKey.contains(key)) {
                     filterResults.add(accessMode);
-                }
+//                }
             }
         }
         return filterResults;
@@ -197,9 +198,10 @@ class ImageInfoConverter implements IConverter {
         for (CloudAccessMode accessMode : list) {
             if (accessMode.getProtocol() != null) {
                 String key = StringUtils.joinWith(":", accessMode.getProtocol(), accessMode.getPort(), accessMode.getUsername(), accessMode.getPassword());
-                if (!existAccessModeKey.contains(key)) {
+//                无需去重
+//                if (!existAccessModeKey.contains(key)) {
                     filterResults.add(accessMode);
-                }
+//                }
             }
         }
         return filterResults;
