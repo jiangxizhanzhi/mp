@@ -747,7 +747,9 @@ public class FlowInfoService {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleIpQuery(esipFieldBos, queryBuilder);
 
-		String srcIpTerm = "src_ip", cateTerm = "cate", desIpTerm = "des_ip";
+		String srcIpTerm = "src_ip";
+        String cateTerm = "cate";
+        String desIpTerm = "des_ip";
 		AggregationBuilder aggrBuilder = AggregationBuilders.terms(srcIpTerm)
 				.field(esipFieldBos.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.sum(desIpTerm).field("destination.ip"))
@@ -755,32 +757,31 @@ public class FlowInfoService {
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
-		List<TeamAttackCountBO> bos = parsedTermsIp.getBuckets().stream().map(bucketSrcIp -> {
-			ParsedTerms parsedTermsCate = bucketSrcIp.getAggregations().get(cateTerm);
-			List<CountBO> attackTargetIps = parsedTermsCate.getBuckets().stream().map(bucketCate -> {
-				CountBO bo = new CountBO();
-				bo.setKey(bucketCate.getKeyAsString());
-				bo.setCount(bucketCate.getDocCount());
-				return bo;
-			}).collect(Collectors.toList());
-			
-			ParsedTerms parsedTermsDesIp = bucketSrcIp.getAggregations().get(cateTerm);
-			List<CountBO> attackTypes = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
-				CountBO bo = new CountBO();
-				bo.setKey(bucketDesIp.getKeyAsString());
-				bo.setCount(bucketDesIp.getDocCount());
-				return bo;
-			}).collect(Collectors.toList());
-			
-			TeamAttackCountBO teamCountBo = new TeamAttackCountBO();
-			teamCountBo.setIp(bucketSrcIp.getKeyAsString());
-			teamCountBo.setCount(bucketSrcIp.getDocCount());
-			teamCountBo.setAttackTargetIps(attackTargetIps);
-			teamCountBo.setAttackTypes(attackTypes);
-			return teamCountBo;
-		}).collect(Collectors.toList());
 
-		return bos;
+        return parsedTermsIp.getBuckets().stream().map(bucketSrcIp -> {
+            ParsedTerms parsedTermsCate = bucketSrcIp.getAggregations().get(cateTerm);
+            List<CountBO> attackTargetIps = parsedTermsCate.getBuckets().stream().map(bucketCate -> {
+                CountBO bo = new CountBO();
+                bo.setKey(bucketCate.getKeyAsString());
+                bo.setCount(bucketCate.getDocCount());
+                return bo;
+            }).collect(Collectors.toList());
+
+            ParsedTerms parsedTermsDesIp = bucketSrcIp.getAggregations().get(desIpTerm);
+            List<CountBO> attackTypes = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
+                CountBO bo = new CountBO();
+                bo.setKey(bucketDesIp.getKeyAsString());
+                bo.setCount(bucketDesIp.getDocCount());
+                return bo;
+            }).collect(Collectors.toList());
+
+            TeamAttackCountBO teamCountBo = new TeamAttackCountBO();
+            teamCountBo.setIp(bucketSrcIp.getKeyAsString());
+            teamCountBo.setCount(bucketSrcIp.getDocCount());
+            teamCountBo.setAttackTargetIps(attackTargetIps);
+            teamCountBo.setAttackTypes(attackTypes);
+            return teamCountBo;
+        }).collect(Collectors.toList());
 	}
 	
 	/**

@@ -11,11 +11,13 @@ import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
+import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetListVO;
+import cn.cyberpeace.mp.collectionapi.vo.AttackTargetTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTypeVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowAttackVO;
@@ -249,4 +251,28 @@ public class FlowController {
     public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
         return null;
     }
+<<<<<<< HEAD
+=======
+
+    @GetMapping("/attack_top")
+    @ApiOperation(value = "获取top数据,(降序)默认全部")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowTopRequest.class)
+    public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
+        return flowQueryService.getAttackTop(request);
+    }
+
+    @GetMapping("/attack_agg_top")
+    @ApiOperation(value = "获取top聚合数据,(降序)默认全部")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackAggTopRequest.class)
+    public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
+        return flowQueryService.getTeamAttackAggTop(request);
+    }
+
+    @GetMapping("/attack_target_top")
+    @ApiOperation(value = "获取攻击目标top数据,默认全部")
+    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackTargetTopRequest.class)
+    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
+        return null;
+    }
+>>>>>>> branch 'feature/mimetic_competition' of git@git.cp.com:mg/cpmp/mp.git
 }
