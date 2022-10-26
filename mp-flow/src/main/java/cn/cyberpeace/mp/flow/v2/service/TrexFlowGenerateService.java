@@ -4,6 +4,7 @@ import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.cloud.VirtualMachine;
 import cn.cyberpeace.mp.flow.v2.client.trex.FlowResourceData;
 import cn.cyberpeace.mp.flow.v2.client.trex.InitInfoData;
 import cn.cyberpeace.mp.flow.v2.client.trex.NetworkInfos;
@@ -33,7 +34,7 @@ public class TrexFlowGenerateService {
         // 上传flow配置
         List<FlowResourceData> flowResources = new ArrayList<>();
         List<TrexClient.ProtocolInfo> protocolInfos = new ArrayList<>();
-
+        //todo：真的有fdfs地址之后再用下面注掉的代码
 //        for (var flow : flowTaskRecordBO.getFlows()) {
 //            if (StringUtils.isNotEmpty(flow.getPcapFile())) {
 //                FlowResourceData resource = new FlowResourceData();
@@ -46,10 +47,14 @@ public class TrexFlowGenerateService {
 //                protocolInfos.add(protocolInfo);
 //            }
 //        }
+        // 创建网卡
+        VirtualMachine virtualMachine = new VirtualMachine();
+        var addPortResult = virtualMachine.addPort(generatorBO.getResourceId(), generatorBO.getNics().get(0).getCpCloudNetworkId());
+
         // 初始化trex服务
         NetworkInfos networkInfos = new NetworkInfos();
         InitInfoData initInfo = new InitInfoData();
-        initInfo.setMac(flowTaskRecordBO.getTrexMac());
+        initInfo.setMac(addPortResult.getMacAddress());
         initInfo.setTaskId(flowTaskRecordBO.getId());
         networkInfos.getNetworkInfos().add(initInfo);
         trexClient.initTrexServer(networkInfos);

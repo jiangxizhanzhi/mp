@@ -17,7 +17,6 @@ import java.util.Map;
 public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecordBO> {
     private String flowGeneratorId;
     private String flowGeneratorNicId;
-    private String trexMac;
     private String targetIp;
     private String targetMac;
     private Integer status;

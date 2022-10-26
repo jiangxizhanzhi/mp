@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.cscene.flow;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -74,9 +76,6 @@ public class FlowBizService {
         var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
         FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
         flowGeneratorBO.fromModel(flowGenerator);
-        // 创建网卡
-//        VirtualMachine virtualMachine = new VirtualMachine();
-//        var addPortResult = virtualMachine.addPort(targetId, "1ac74c73-b296-45d7-a3b8-0d69ecdf60eb");
 
         // 保存流量任务执行记录
         FlowTaskRecordModel taskRecord = new FlowTaskRecordModel();
@@ -88,17 +87,16 @@ public class FlowBizService {
         taskRecord.setTargetIp(ip);
         taskRecord.setTargetMac(mac);
         taskRecord.setFlowGeneratorId(flowGeneratorId);
-//        taskRecord.setTrexMac(addPortResult.getMacAddress());
 
-//        var flows = flowTaskBO.getFlows().stream().map(f -> {
-//            FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
-//            taskFlow.setFlowId(f.getFlowId());
-//            taskFlow.setFlowGeneratorId(flowGeneratorId);
-//            return taskFlow;
-//        }).collect(Collectors.toList());
-//
-//        taskRecord.setFlows(flows);
-//        taskRecord.setFilterProtocols(flowTaskBO.getFilterProtocols());
+        var flows = flowTaskBO.getFlows().stream().map(f -> {
+            FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
+            taskFlow.setFlowId(f.getFlowId());
+            taskFlow.setFlowGeneratorId(flowGeneratorId);
+            return taskFlow;
+        }).collect(Collectors.toList());
+
+        taskRecord.setFlows(JsonCommon.stringify(flows));
+        taskRecord.setFilterProtocols(JsonCommon.stringify(flowTaskBO.getFilterProtocols()));
         // todo
         taskRecord.setStatus(0);
         flowTaskRecordMapper.create(taskRecord);
