@@ -67,12 +67,19 @@ public class AuthConstant {
     public static final String SEPARATOR_CHAR_DOT = ".";
 
     /**
-     * 导入用户头像支持后缀类型：png，jfif，pjpeg，jpeg，pjp，jpg
+     * 导入用户头像支持后缀类型：png，jpeg，jpg
      */
     public static final String[] UPLOAD_AVATAR_SUFFIX_TYPE = {
             "png",
-            "jfif",
             "jpeg",
+            "jpg"
+    };
+
+    /**
+     * 导入用户头像支持魔术头类型：png，jpg（对应后缀为：jpg和jpeg）
+     */
+    public static final String[] UPLOAD_AVATAR_MAGIC_HEADER_TYPE = {
+            "png",
             "jpg"
     };
 

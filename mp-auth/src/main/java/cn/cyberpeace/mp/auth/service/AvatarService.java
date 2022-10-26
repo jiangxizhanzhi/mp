@@ -64,7 +64,7 @@ public class AvatarService {
             throw new MpRuntimeException(e.getMessage());
         }
         String type = FileTypeUtil.getType(inputStream);
-        boolean typeMatch = Arrays.stream(AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE).anyMatch(x -> x.equalsIgnoreCase(type));
+        boolean typeMatch = Arrays.stream(AuthConstant.UPLOAD_AVATAR_MAGIC_HEADER_TYPE).anyMatch(x -> x.equalsIgnoreCase(type));
         if (!typeMatch) {
             return new ServiceResult<>(false, AuthErrorCode.AVATAR_SUFFIX_TYPE_ERROR);
         }
