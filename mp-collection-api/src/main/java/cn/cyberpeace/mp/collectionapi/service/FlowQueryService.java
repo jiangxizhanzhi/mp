@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.collectionapi.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<AttackFlowTopVO> getAttackTop(AttackFlowTopRequest request) {
-		Integer aggType = request.getAggType();
+		int aggType = request.getAggType();
 		if (aggType == AggType.ATTACK_COUNT) {
 			return queryTeamAttackCountTop5(request);
 		} else if (aggType == AggType.ATTACK_TYPE) {
@@ -236,7 +237,7 @@ public class FlowQueryService {
 		}
 
 		// 排序取top3
-		List<TeamAttackCountVO> vos = name2CountMap.values().stream().collect(Collectors.toList());
+		List<TeamAttackCountVO> vos = new ArrayList<>(name2CountMap.values());
 		vos.sort(Comparator.comparing(TeamAttackCountVO::getCount).reversed());
 		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
 
