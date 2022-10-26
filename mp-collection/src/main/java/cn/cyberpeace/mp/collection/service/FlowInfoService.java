@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.ESIPFieldBo;
 import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
+import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
 import cn.cyberpeace.mp.collection.request.FlowQueryRequest;
@@ -20,8 +21,11 @@ import cn.cyberpeace.mp.collection.bo.FlowDetailInfo;
 import cn.cyberpeace.mp.collection.bo.TeamAttackCountBO;
 import cn.cyberpeace.mp.collection.bo.TeamFlowInfo;
 import cn.hutool.core.collection.CollectionUtil;
+
+import com.alibaba.fastjson.JSON;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +38,7 @@ import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
@@ -41,6 +46,7 @@ import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInter
 import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -218,8 +224,8 @@ public class FlowInfoService {
         boolQueryBuilder.filter(QueryBuilders.rangeQuery("@timestamp").lte(endTime));
     }
     
-    private void buildSeverityQuery(List<Long> severities, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery("suricata.severity", severities));
+    private void buildSeverityQuery(BoolQueryBuilder boolQueryBuilder) {
+        boolQueryBuilder.filter(QueryBuilders.existsQuery("suricata.severity"));
     }
     
     private void buildRuleIpQuery(List<String> ips, String ipField, BoolQueryBuilder boolQueryBuilder) {
@@ -545,6 +551,12 @@ public class FlowInfoService {
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
+		// 第一个元素是总数
+		CountBO total = new CountBO();
+		total.setKey("total");
+		total.setCount(response.getHits().getTotalHits().value);
+		bos.add(total);
+		
 		ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
 		parsedTermsIp.getBuckets().forEach(bucketIp -> {
 			CountBO bo = new CountBO();
@@ -557,52 +569,58 @@ public class FlowInfoService {
 	}
 	
 	/**
-	 * 总体攻击趋势
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<CountBO> queryAttackTrend(List<ESIPFieldBo> esipFieldBos) {
-		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 6000000L; // 分10段，每段间隔10分钟
-
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(esipFieldBos, queryBuilder);
-		buildRuleStarTimeQuery(startTime, queryBuilder);
-		buildRuleEndTimeQuery(endTime, queryBuilder);
-
-		String typeTerm = "date_dis";
-		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(typeTerm).field("@timestamp")
-				.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm");
-		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
-
-		List<CountBO> bos = Lists.newArrayList();
-		ParsedTerms parsedTermsDate = response.getAggregations().get(typeTerm);
-		parsedTermsDate.getBuckets().forEach(bucketDate -> {
-			CountBO bo = new CountBO();
-			bo.setKey(bucketDate.getKeyAsString());
-			bo.setCount(bucketDate.getDocCount());
-			bos.add(bo);
-		});
-
-		return bos;
-	}
-	
-	/**
 	 * 攻击告警级别趋势
 	 * 
 	 * @param ips
 	 * @return
 	 */
-	public List<CountBO> queryAttackLevel(List<ESIPFieldBo> esipFieldBos, List<Long> severities) {
+	public Map<String, List<CountBO>> queryAttackLevel() {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 6000000L; // 分10段，每段间隔10分钟
+		long startTime = endTime - 4200000L; // 分7段，每段间隔10分钟
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(esipFieldBos, queryBuilder);
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
-		buildSeverityQuery(severities, queryBuilder);
+
+		String severityTerm = "severity", histogramTerm = "histogram";
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(severityTerm).field("suricata.severity")
+				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+						.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm"));
+		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
+
+		Map<String, List<CountBO>> severityMap = Maps.newHashMap();
+		ParsedTerms parsedTermsSeverity = response.getAggregations().get(severityTerm);
+		parsedTermsSeverity.getBuckets().forEach(bucketSeverity -> {
+			String severity = bucketSeverity.getKeyAsString();
+			
+			List<CountBO> bos = Lists.newArrayList();
+			ParsedTerms parsedTermsHistogram = bucketSeverity.getAggregations().get(histogramTerm);
+			parsedTermsHistogram.getBuckets().forEach(bucketHistogram -> {
+				CountBO bo = new CountBO();
+				bo.setKey(bucketHistogram.getKeyAsString());
+				bo.setCount(bucketHistogram.getDocCount());
+				bos.add(bo);
+			});
+			severityMap.put(severity, bos);
+		});
+		
+		return severityMap;
+	}
+	
+	/**
+	 * 总体攻击趋势
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public List<CountBO> queryAttackTrend() {
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		long startTime = endTime - 4200000L; // 分10段，每段间隔10分钟
+
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildRuleStarTimeQuery(startTime, queryBuilder);
+		buildRuleEndTimeQuery(endTime, queryBuilder);
+		buildSeverityQuery(queryBuilder);
 
 		String typeTerm = "date";
 		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(typeTerm).field("@timestamp").fixedInterval(
@@ -659,18 +677,28 @@ public class FlowInfoService {
 		
 		String typeTerm = "protocol";
 		AggregationBuilder aggrBuilder = AggregationBuilders.terms(typeTerm).field("protocol")
-				.order(BucketOrder.count(false)).size(topSize);
+				.order(BucketOrder.count(false));
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
+		List<String> ignoreProtocals = Lists.newArrayList("tcp", "udp");
 		List<CountBO> bos = Lists.newArrayList();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
-		parsedTermsIp.getBuckets().forEach(bucketIp -> {
+		for(Bucket bucket : parsedTermsIp.getBuckets()) {
+			String protocol = bucket.getKeyAsString();
+			if(ignoreProtocals.contains(protocol.toLowerCase())) {
+				continue;
+			}
+			
 			CountBO bo = new CountBO();
-			bo.setKey(bucketIp.getKeyAsString());
-			bo.setCount(bucketIp.getDocCount());
+			bo.setKey(protocol);
+			bo.setCount(bucket.getDocCount());
 			bos.add(bo);
-		});
-
+			
+			if(bos.size() == topSize) {
+				break;
+			}
+		}
+		
 		return bos;
 	}
 	
@@ -756,6 +784,26 @@ public class FlowInfoService {
 	}
 	
 	/**
+	 * 攻击流量列表
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public List<FlowBO> attackFlowList(Integer pageNum, Integer pageSize) {
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildSeverityQuery(queryBuilder);
+		SearchResponse response = esListQuery(queryBuilder, pageNum, pageSize);
+		
+		List<FlowBO> bos = Lists.newArrayList();
+		for (SearchHit hit : response.getHits().getHits()) {
+			FlowBO bo = JSON.parseObject(hit.getSourceAsString(), FlowBO.class);
+			bos.add(bo);
+	    }
+
+		return bos;
+	}
+	
+	/**
 	 * es 聚合查询
 	 * 
 	 * @param ips
@@ -767,13 +815,39 @@ public class FlowInfoService {
 		String[] indexArray = getFlowIndex();
 		var searchRequest = new SearchRequest(indexArray);
 		var sourceBuilder = new SearchSourceBuilder();
-		buildSeverityQuery(Lists.newArrayList(1L, 2L, 3L, 4L), queryBuilder);
+		buildSeverityQuery(queryBuilder);
 
 		sourceBuilder.size(0);
 		sourceBuilder.trackTotalHits(true);
 		if(aggrBuilder != null) {
 			sourceBuilder.aggregation(aggrBuilder);
 		}
+
+		searchRequest.source(sourceBuilder.query(queryBuilder));
+		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));
+		log.info("elasticsearch JSON query index:{}, DSL:\n{}", indexArray, searchRequest.source().toString());
+
+		return restHighLevelClient.search(searchRequest);
+	}
+	
+	/**
+	 * es 列表查询
+	 * 
+	 * @param ips
+	 * @param aggrTerm
+	 * @param aggrField
+	 * @return
+	 */
+	private SearchResponse esListQuery(BoolQueryBuilder queryBuilder, Integer pageNum, Integer pageSize){
+		String[] indexArray = getFlowIndex();
+		var searchRequest = new SearchRequest(indexArray);
+		
+		SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
+		if(pageNum != null) {
+			sourceBuilder.size(pageSize);
+			sourceBuilder.from((pageNum - 1) * pageSize);
+		}
+		sourceBuilder.trackTotalHits(true);
 
 		searchRequest.source(sourceBuilder.query(queryBuilder));
 		searchRequest.indicesOptions(IndicesOptions.fromOptions(true, true, true, false));

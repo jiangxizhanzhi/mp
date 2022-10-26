@@ -16,8 +16,10 @@ import com.google.common.collect.Maps;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.ESIPFieldBo;
+import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.bo.TeamAttackCountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
@@ -49,9 +51,8 @@ public class FlowQueryService {
 	 * 
 	 * @return
 	 */
-	public ListObjServiceResult<AttackFlowTopVO> queryAttackTrend(AttackFlowBaseRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
-		List<CountBO> bos = flowInfoService.queryAttackTrend(esipFieldBos);
+	public ListObjServiceResult<AttackFlowTopVO> queryAttackTrend() {
+		List<CountBO> bos = flowInfoService.queryAttackTrend();
 		List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
 			AttackFlowTopVO vo = new AttackFlowTopVO();
 			vo.setName(bo.getKey());
@@ -67,35 +68,36 @@ public class FlowQueryService {
 	 * 
 	 * @return
 	 */
-	public ListObjServiceResult<AttackLevelVO> queryLevelTrend(AttackFlowBaseRequest request) {
+	public ListObjServiceResult<AttackLevelVO> queryLevelTrend() {
 		List<AttackLevelVO> vos = Lists.newArrayList();
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
-		for (int i = 0; i < 3; i++) {
-			List<Long> severities = null;
-			String severity = null;
-			if (i == 0) {
-				severities = Lists.newArrayList(1L);
-				severity = "高级";
-			} else if (i == 1) {
-				severities = Lists.newArrayList(2L);
-				severity = "中级";
-			} else {
-				severities = Lists.newArrayList(3L, 4L);
-				severity = "低级";
+		Map<String, List<CountBO>> severityMap = flowInfoService.queryAttackLevel();
+		Map<String, AttackLevelVO> resultMap = Maps.newHashMap();
+
+		for (int level = 1; level <= 4; level++) {
+			String levelName = getSeverityDisplayName(String.valueOf(level));
+			AttackLevelVO vo = resultMap.computeIfAbsent(levelName, k -> new AttackLevelVO());
+			vo.setSeverity(levelName);
+
+			List<CountBO> bos = severityMap.get(String.valueOf(level));
+			if (bos != null) {
+				List<Count> countsAdd = bos.stream().map(bo -> {
+					Count c = new Count();
+					c.setTime(bo.getKey());
+					c.setNum(bo.getCount());
+					return c;
+				}).collect(Collectors.toList());
+
+				List<Count> countsOrig = vo.getCounts();
+				if (countsOrig == null) {
+					vo.setCounts(countsAdd);
+				} else {
+					int size = countsOrig.size();
+					for (int i = 0; i < size; i++) {
+						Count c = countsOrig.get(i);
+						c.setNum(c.getNum() + countsAdd.get(i).getNum());
+					}
+				}
 			}
-
-			List<CountBO> bos = flowInfoService.queryAttackLevel(esipFieldBos, severities);
-			List<Count> counts = bos.stream().map(bo -> {
-				Count vo = new Count();
-				vo.setTime(bo.getKey());
-				vo.setNum(bo.getCount());
-				return vo;
-			}).collect(Collectors.toList());
-
-			AttackLevelVO vo = new AttackLevelVO();
-			vo.setSeverity(severity);
-			vo.setCounts(counts);
-			vos.add(vo);
 		}
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
@@ -147,8 +149,8 @@ public class FlowQueryService {
 	private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
 		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
 		List<CountBO> bos = flowInfoService.queryAttackType(esipFieldBos, request.getTopSize());
-		double total = flowInfoService.attackTotalCount();
-		List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
+		double total = bos.get(0).getCount();
+		List<AttackFlowTopVO> vos = bos.subList(1, bos.size()).stream().map(bo -> {
 			AttackFlowTopVO vo = new AttackFlowTopVO();
 			vo.setName(bo.getKey());
 			vo.setPercent(bo.getCount() / total);
@@ -201,7 +203,7 @@ public class FlowQueryService {
 		vos.forEach(v -> {
 			v.setPercent(v.getCount() / total);
 		});
-		
+
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
 	}
 
@@ -249,10 +251,18 @@ public class FlowQueryService {
 	 * @param request
 	 * @return
 	 */
-	public ListObjServiceResult<FlowVO> attackFlowList(AttackFlowBaseRequest request) {
-		return null;
+	public ListObjServiceResult<FlowVO> attackFlowList(Integer pageNum, Integer pageSize) {
+		List<FlowBO> bos = flowInfoService.attackFlowList(pageNum, pageSize);
+		List<FlowVO> vos = bos.stream().map(bo -> {
+			FlowVO vo = new FlowVO();
+			BeanUtils.copyProperties(bo, vo);
+			vo.setSeverity(getSeverityDisplayName(vo.getSeverity()));
+			return vo;
+		}).collect(Collectors.toList());
+
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
 	}
-	
+
 	/**
 	 * 生成ip字段的搜索项
 	 * 
@@ -317,4 +327,21 @@ public class FlowQueryService {
 		return "";
 	}
 
+	/**
+	 * 告警级别显示名称
+	 * 
+	 * @param severity
+	 * @return
+	 */
+	private String getSeverityDisplayName(String severity) {
+		if ("1".equals(severity)) {
+			return "高级";
+		} else if ("2".equals(severity)) {
+			return "中级";
+		} else if ("3".equals(severity) || "4".equals(severity)) {
+			return "低级";
+		}
+
+		return "";
+	}
 }
