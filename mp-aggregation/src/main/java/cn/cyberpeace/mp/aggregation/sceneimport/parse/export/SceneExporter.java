@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
+import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
@@ -89,7 +90,7 @@ public class SceneExporter {
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
                 var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
-                }, true);
+                }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
                 var imageMap = result.getData();
                 if (imageMap.containsKey("Cloud-init")) {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
