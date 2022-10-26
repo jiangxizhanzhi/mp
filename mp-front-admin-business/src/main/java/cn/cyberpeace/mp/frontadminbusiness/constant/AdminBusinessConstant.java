@@ -9,5 +9,6 @@ public class AdminBusinessConstant {
 
     public static final String ERROR_CODE_PREFIX = "admin.business.error_code.";
 
+    public static final String SYSTEM_NAME_KEY = "system_name";
 
 }
