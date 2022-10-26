@@ -19,15 +19,26 @@ import java.util.List;
  */
 @Slf4j
 public class TrexClient {
+    private String server;
+    private TrexHttpClient trexHttpClient;
     private static final double standardInterval = 6;
+    private static final String RANDOM = "random";
+    private static final String BINOMIAL = "binomial";
+    private static final String UNIFORMITY = "uniformity";
+    private static final String INDEX = "index";
+    private static final String GAUSS = "gauss";
 
-    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.143:80", 6000, 10);
+    public TrexClient(String server) {
+        this.server = server;
+        this.trexHttpClient = new TrexHttpClient(server, 6000, 10);
+    }
+//    private TrexHttpClient trexHttpClient = new TrexHttpClient("http://10.100.7.143:80", 6000, 10);
 
     public void initTrexServer(NetworkInfos networkInfos) {
         var reslut = trexHttpClient.trexPost(TrexUrlConstant.INITIALIZATION_TREX, networkInfos, null,
                 new TypeReference<TrexResponse<NetworkInfos>>() {
                 });
-        log.info("Initialization of trex virtual machine completed {}", reslut.getData());
+        log.info("Initialization of trex virtual machine response:{}", reslut.getData());
     }
 
     public void uploadResource(List<FlowResourceData> resources) {
@@ -35,7 +46,7 @@ public class TrexClient {
             JSONObject object = new JSONObject();
             object.put("fileName", resource.getFileName());
             object.put("flow_id", resource.getFlowId());
-            String pcapRsp = HttpUtils.postFile("http://10.100.7.143:80" + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
+            String pcapRsp = HttpUtils.postFile(server + TrexUrlConstant.UPLOAD_PCAP, resource.getFile(), "file", object);
             JSONObject jsonObject = JSONObject.parseObject(pcapRsp);
             log.info("upload pcap file response:{}", jsonObject.toJSONString());
         });
@@ -48,12 +59,12 @@ public class TrexClient {
         log.info("Initialization of trex virtual machine completed {}", reslut.getData());
     }
 
-    public List<LoadInfo> calculateLoad(int time, double total, String loadMode) {
+    public List<LoadInfo> calculateLoad(int time, double maxLoad, String loadMode) {
         List<TrexClient.LoadInfo> loadInfos = new ArrayList<>();
-        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals("BINOMIAL_DISTRIBUTION")) {
-            binomialDistributionLoad(loadInfos, time, 0.5, total);
-        } else {
-            normalDistributionLoad(loadInfos, time, total);
+        if (StringUtils.isNotEmpty(loadMode) && loadMode.equals(BINOMIAL)) {
+            binomialDistributionLoad(loadInfos, time, 0.5, maxLoad);
+        } else if (StringUtils.isNotEmpty(loadMode) && loadMode.equals(GAUSS)){
+            normalDistributionLoad(loadInfos, time, maxLoad);
         }
         return loadInfos;
     }
@@ -65,6 +76,9 @@ public class TrexClient {
             LoadInfo loadInfo = new LoadInfo();
             loadInfo.setBandwidth((int) (binomialDistribution.probability(i) * proportion));
             loadInfo.setTime(i);
+            if (loadInfo.getBandwidth() <= 0){
+                loadInfo.setBandwidth(1);
+            }
             loadInfos.add(loadInfo);
         }
     }

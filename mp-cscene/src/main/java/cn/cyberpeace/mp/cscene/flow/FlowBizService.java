@@ -62,11 +62,12 @@ public class FlowBizService {
         var e = plugin.getElement(element.getSceneElement());
         var ports = plugin.getPorts(e);
         String networkId = "";
+        String ip = "";
         for (var p : ports) {
             networkId = p.getAuxiliaryNetworkId();
+            ip = p.getSrcPort().getIp();
         }
 
-        String ip = "";
         String mac = "";
         // 查询任务详情
         var flowTask = flowTaskService.get(flowTaskId).sourceObj();

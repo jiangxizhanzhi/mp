@@ -1,8 +1,13 @@
 package cn.cyberpeace.mp.flow.v2.bo;
 
+import cn.cyberpeace.mp.base.common.JsonCommon;
 import cn.cyberpeace.mp.base.service.bo.ModelBO;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.flow.v2.model.FlowGeneratorModel;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Data;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -31,5 +36,15 @@ public class FlowGeneratorBO extends ModelBO<FlowGeneratorModel, FlowGeneratorBO
         private String mac;
         private String resourceId;
         private String cpCloudNetworkId;
+    }
+
+    @Override
+    public FlowGeneratorBO fromModel(FlowGeneratorModel obj, String... ignoreFields) {
+        super.fromModel(obj, ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(FlowGeneratorModel::getNics)));
+        nics = StringUtils.isEmpty(obj.getNics()) ? null
+                : JsonCommon.parse(obj.getNics(), new TypeReference<>() {
+        });
+        return this;
     }
 }

@@ -29,7 +29,8 @@ public class FlowGenerateService {
         FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
         flowGeneratorBO.fromModel(flowGenerator);
         if ("cpcloud_trex".equals(flowGenerator.getType())) {
-            return trexFlowGenerateService.startFlowTask(flowTaskRecordBO, flowGeneratorBO);
+            FlowCallBackTask callBack = trexFlowGenerateService.startFlowTask(flowTaskRecordBO, flowGeneratorBO);
+            flowStartPostProcessor.addTask(callBack);
         } else if ("cpcloud_ixia".equals(flowGenerator.getType())) {
             FlowCallBackTask callBack = ixiaFlowGenerateService.startFlowTask(flowTaskRecordBO, flowGeneratorBO);
             flowStartPostProcessor.addTask(callBack);
