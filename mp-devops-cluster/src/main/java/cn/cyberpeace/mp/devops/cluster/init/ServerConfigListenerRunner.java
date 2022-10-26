@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.devops.cluster.init;
 
 import cn.cyberpeace.mp.devops.cluster.cloud.platform.service.InitRegisterService;
+import cn.cyberpeace.mp.devops.cluster.config.DevopsConfig;
 import cn.cyberpeace.mp.devops.cluster.config.IpAddressConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -19,9 +20,12 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
     @Autowired
     private IpAddressConfig ipAddressConfig;
 
+    @Autowired
+    private DevopsConfig devopsConfig;
+
 
     public String getUrl() {
-        return "http://" + ipAddressConfig.getMp();
+        return "http://" + ipAddressConfig.getMp() + ":" + devopsConfig.getMpPort();
     }
 
     @Override

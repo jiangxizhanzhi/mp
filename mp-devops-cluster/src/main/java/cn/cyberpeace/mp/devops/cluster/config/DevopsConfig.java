@@ -20,6 +20,11 @@ public class DevopsConfig {
     private String cpUrl;
 
     /**
+     * 中台端口
+     */
+    private String mpPort;
+
+    /**
      * 磁盘空间告警阈值
      */
     private Integer diskAlarmPercent;
