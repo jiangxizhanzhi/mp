@@ -24,7 +24,13 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
@@ -62,6 +68,13 @@ public class SysConfigController {
     public ServiceResult<List<SysConfigModel>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
         return ResultCommon.success(configs);
+    }
+
+    @ApiOperation(value = "查询系统名称", notes = "")
+    @GetMapping("/system_name")
+    public ServiceResult<String> getSystemName() {
+        SysConfigModel model = sysConfigService.getByKeyName(AdminBusinessConstant.SYSTEM_NAME_KEY);
+        return ResultCommon.success(model.getValue());
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")

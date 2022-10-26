@@ -40,6 +40,9 @@ public class AuthConfig {
     // 需要认证的url
     private List<String> authenticateUrls;
 
+    // 不需要认证的url
+    private List<String> authenticateExcludeUrls;
+
     private Integer authenticateEncoderIterations;
     private Integer authenticateEncoderHashWidth;
 }

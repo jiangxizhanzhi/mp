@@ -147,7 +147,8 @@ mp:
     authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
     authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:38effa66e5454c5d9dd79711fc6ffc4d}
     authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-    authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
+    authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/aggr/**}
+    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/system_name}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
   # mp-front-admin 模块
