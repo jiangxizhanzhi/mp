@@ -119,7 +119,8 @@ public enum AuthErrorCode implements ErrorCode {
     PERMISSION_DENIED("MP-110140", "permission_denied"),
 
     AVATAR_SUFFIX_TYPE_ERROR("MP-110150", "avatar_suffix_type_error"),
-    AVATAR_MAGIC_HEADER_ERROR("MP-110151", "avatar_magic_header_error");
+    AVATAR_MAGIC_HEADER_ERROR("MP-110151", "avatar_magic_header_error"),
+    AVATAR_OVERSIZE_ERROR("MP-110152", "avatar_oversize_error");
 
 
     AuthErrorCode(String code, String message) {

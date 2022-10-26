@@ -67,6 +67,11 @@ public class AuthConstant {
     public static final String SEPARATOR_CHAR_DOT = ".";
 
     /**
+     * 导入用户头像max size：20M
+     */
+    public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024;
+
+    /**
      * 导入用户头像支持后缀类型：png，jpeg，jpg
      */
     public static final String[] UPLOAD_AVATAR_SUFFIX_TYPE = {

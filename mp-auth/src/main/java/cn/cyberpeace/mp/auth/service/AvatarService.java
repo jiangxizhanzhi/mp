@@ -49,11 +49,16 @@ public class AvatarService {
     }
 
     public ServiceResult<Boolean> checkFileType(MultipartFile file) {
+        // 校验图片大小
+        long size = file.getSize();
+        if (size > AuthConstant.UPLOAD_AVATAR_MAX_SIZE) {
+            return new ServiceResult<>(false, AuthErrorCode.AVATAR_OVERSIZE_ERROR);
+        }
         String suffix = FileUtil.getSuffix(file.getOriginalFilename());
         // 校验文件后缀类型
         boolean suffixMatch = Arrays.stream(AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE).anyMatch(x -> x.equalsIgnoreCase(suffix));
         if (!suffixMatch) {
-            return new ServiceResult<>(false, AuthErrorCode.AVATAR_MAGIC_HEADER_ERROR);
+            return new ServiceResult<>(false, AuthErrorCode.AVATAR_SUFFIX_TYPE_ERROR);
         }
 
         // 根据文件头判断文件类型
@@ -66,7 +71,7 @@ public class AvatarService {
         String type = FileTypeUtil.getType(inputStream);
         boolean typeMatch = Arrays.stream(AuthConstant.UPLOAD_AVATAR_MAGIC_HEADER_TYPE).anyMatch(x -> x.equalsIgnoreCase(type));
         if (!typeMatch) {
-            return new ServiceResult<>(false, AuthErrorCode.AVATAR_SUFFIX_TYPE_ERROR);
+            return new ServiceResult<>(false, AuthErrorCode.AVATAR_MAGIC_HEADER_ERROR);
         }
 
         return new ServiceResult<>(true);
