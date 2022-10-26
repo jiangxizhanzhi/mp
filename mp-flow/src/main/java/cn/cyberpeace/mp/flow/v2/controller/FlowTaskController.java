@@ -44,4 +44,13 @@ public class FlowTaskController implements
     public ObjServiceResult<FlowTaskBO> create(@Validated FlowTaskBO bo, String[] fields) {
         return BaseModelCreateBOController.super.create(bo, fields);
     }
+    
+    @ApiOperation("根据id获取流量任务")
+    @Override
+    public ObjServiceResult<FlowTaskBO> get(String id, String[] fields) {
+    	ObjServiceResult<FlowTaskBO> boResult = BaseModelGetBOController.super.get(id, fields);
+    	getModelService().fillFlowInfo(boResult.getData());
+    	
+    	return boResult;
+    }
 }
