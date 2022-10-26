@@ -62,8 +62,7 @@ public class IxiaHttpClient {
     }
 
     public <T extends IxiaResponse> T ixiaPost(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
-
-        return ixiaResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
+            return ixiaResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
     }
 
     public <T extends IxiaResponse> T ixiaDelete(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
@@ -89,6 +88,9 @@ public class IxiaHttpClient {
     private <T extends IxiaResponse> T ixiaResultBean(HttpResult result, TypeReference<T> valueTypeRef,
                                                       String method, String url, HttpData data, HttpParam param) {
 
+        if (StringUtils.isEmpty(result.getResult())) {
+            return (T) new IxiaResponse();
+        }
         var objectMapper = new ObjectMapper();
 //        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {

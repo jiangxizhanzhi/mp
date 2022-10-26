@@ -50,7 +50,7 @@ public class FlowBizService {
     @Resource
     private FlowTaskRecordMapper flowTaskRecordMapper;
 
-    public ServiceResult<Object> start(String flowTaskId, String flowGeneratorId, String targetId) {
+    public ServiceResult<FlowTaskRecordBO> start(String flowTaskId, String flowGeneratorId, String targetId) {
 
         // 启动流量任务,将 flowTaskId 的任务在 flowGeneratorId 执行,目标机器是 targetId
         // 查询靶机详情 ip、网络等
@@ -104,6 +104,6 @@ public class FlowBizService {
         FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
         recordBO.fromModel(taskRecord);
         flowGenerateService.startFlowTask(recordBO);
-        return new ServiceResult<>(true);
+        return new ServiceResult<>(recordBO);
     }
 }

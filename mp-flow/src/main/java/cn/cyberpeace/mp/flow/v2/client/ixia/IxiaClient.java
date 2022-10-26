@@ -36,8 +36,15 @@ public class IxiaClient {
     public SaveNeighborHoodResult saveNeighborHood(String name) {
         SaveNeighborHoodData data = new SaveNeighborHoodData();
         data.setName(name);
-        var result = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_NEIGHBORHOOD, data, null, new TypeReference<SaveNeighborHoodResult>() {
-        });
-        return result;
+        try {
+            var result = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_NEIGHBORHOOD, data, null, new TypeReference<SaveNeighborHoodResult>() {
+            });
+            return result;
+        } catch (Exception e) {
+            if (!"Entity may not be null".equals(e.getMessage())) {
+                throw e;
+            }
+            return new SaveNeighborHoodResult();
+        }
     }
 }

@@ -2,9 +2,14 @@ package cn.cyberpeace.mp.cscene.flow;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.cscene.constant.ControllerConstant;
+import cn.cyberpeace.mp.cscene.request.flow.CsceneFlowTaskActionRequest;
+import cn.cyberpeace.mp.cscene.request.flow.CsceneFlowTaskStartRequest;
+import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,14 +24,38 @@ import javax.annotation.Resource;
 @Api(value = "流量发生", tags = "流量发生")
 @Slf4j
 @RestController
-@RequestMapping(ControllerConstant.BASE_API_PATH + "/flow/")
+@RequestMapping(ControllerConstant.BASE_API_PATH + "/flow")
 public class CsceneFlowController {
     @Resource
     private FlowBizService flowTaskService;
 
+    @ApiOperation("启动")
     @PostMapping("/start")
-    public ServiceResult<Object> start(String flowTaskId, String flowGeneratorId, String targetId) {
-        flowTaskService.start(flowTaskId, flowGeneratorId, targetId);
-        return new ServiceResult<>();
+    public ServiceResult<FlowTaskRecordBO> start(@RequestBody CsceneFlowTaskStartRequest request) {
+        return flowTaskService.start(request.getFlowTaskId(), request.getFlowGeneratorId(), request.getTargetId());
+    }
+
+    @ApiOperation("暂停")
+    @PostMapping("/pause")
+    public ServiceResult<Object> pause(@RequestBody CsceneFlowTaskActionRequest request) {
+        return new ServiceResult<>(true);
+    }
+
+    @ApiOperation("恢复")
+    @PostMapping("/recover")
+    public ServiceResult<Object> recover(@RequestBody CsceneFlowTaskActionRequest request) {
+        return new ServiceResult<>(true);
+    }
+
+    @ApiOperation("重启")
+    @PostMapping("/restart")
+    public ServiceResult<Object> restart(@RequestBody CsceneFlowTaskActionRequest request) {
+        return new ServiceResult<>(true);
+    }
+
+    @ApiOperation("停止")
+    @PostMapping("/stop")
+    public ServiceResult<Object> stop(@RequestBody CsceneFlowTaskActionRequest request) {
+        return new ServiceResult<>(true);
     }
 }
