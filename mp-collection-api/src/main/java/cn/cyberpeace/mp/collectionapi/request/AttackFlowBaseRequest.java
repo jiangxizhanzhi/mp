@@ -6,12 +6,12 @@ import java.util.List;
 
 @Data
 public class AttackFlowBaseRequest {
-    private List<Aggregate> sources;
+    private List<IPField> sources;
 
-    private List<Aggregate> targets;
+    private List<IPField> targets;
 
     @Data
-    public static class Aggregate {
+    public static class IPField {
         private String name;
 
         private List<String> ips;

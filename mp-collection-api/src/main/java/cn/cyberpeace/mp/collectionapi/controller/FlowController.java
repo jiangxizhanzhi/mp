@@ -13,7 +13,6 @@ import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackEquipmentVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetListVO;
@@ -21,7 +20,6 @@ import cn.cyberpeace.mp.collectionapi.vo.AttackTargetVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTypeVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowAttackVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackProtocolVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackVO;
@@ -102,37 +100,24 @@ public class FlowController {
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
     }
 
-    @GetMapping("/team_attack_count")
-    @ApiOperation(value = "每个队伍的攻击次数(累计) top10")
-    public ListObjServiceResult<TeamAttackCountVO> teamAttackCount() {
-        // todo 每个战队一个ip
-        return flowQueryService.queryTeamAttackCountTop10();
-    }
-
-    @GetMapping("/attack_type")
-    @ApiOperation(value = "所有队伍的攻击类型占比top5")
-    public ListObjServiceResult<AttackTypeVO> attackType() {
-        return flowQueryService.queryAttackTypeTop5();
-    }
-
     @GetMapping("/attack_trend")
     @ApiOperation(value = "所有队伍的总体攻击趋势(统计十分钟内的攻击次数)")
-    public ListObjServiceResult<FlowAttackVO> attackTrend() {
+    public ListObjServiceResult<AttackFlowTopVO> attackTrend(AttackFlowBaseRequest request) {
         // 默认分十段
-        return flowQueryService.queryAttackTrend();
+        return flowQueryService.queryAttackTrend(request);
     }
 
     @GetMapping("/attack_level_trend")
     @ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
-    public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
+    public ListObjServiceResult<AttackLevelVO> attackLevelTrend(AttackFlowBaseRequest request) {
         // 默认分十段
-        return flowQueryService.queryLevelTrend();
+        return flowQueryService.queryLevelTrend(request);
     }
 
     @GetMapping("/attack_total_count")
     @ApiOperation(value = "总攻击次数，可自定义放大速率")
     public ServiceResult<Long> attackTotalCount(Integer multiple) {
-        return new ServiceResult<>();
+        return flowQueryService.getAttackTotalCount(multiple);
     }
 
     @GetMapping("/count_with_ip")
@@ -143,22 +128,8 @@ public class FlowController {
 
     @GetMapping("/attack_flow_list")
     @ApiOperation(value = "攻击流量列表")
-    public ListObjServiceResult<FlowVO> attackFlowList() {
-        return new ListObjServiceResult<>();
-    }
-
-    @GetMapping("/equipment")
-    @ApiOperation(value = "被攻击设备top5")
-    public ListObjServiceResult<AttackEquipmentVO> equipment() {
-        // todo 每种设备有多个ip 需要合并数据
-        return flowQueryService.queryEquipmentTypeTop5();
-    }
-
-    @GetMapping("/protocol")
-    @ApiOperation(value = "攻击协议top5(应用层)")
-    public ListObjServiceResult<AttackProtocolVO> protocol() {
-        // todo 只需要应用层协议 过滤后少于五种则再次查询
-        return flowQueryService.queryProtocolTop5();
+    public ListObjServiceResult<FlowVO> attackFlowList(AttackFlowBaseRequest request) {
+        return flowQueryService.attackFlowList(request);
     }
 
     @GetMapping("/team_flow_agg")
@@ -254,13 +225,13 @@ public class FlowController {
 
     @GetMapping("/attack_top")
     @ApiOperation(value = "获取top数据,(降序)默认全部")
-    public ServiceResult<List<AttackFlowTopVO>> getAttackTop(AttackFlowTopRequest request) {
-        return null;
+    public ListObjServiceResult<AttackFlowTopVO> getAttackTop(AttackFlowTopRequest request) {
+        return flowQueryService.getAttackTop(request);
     }
 
     @GetMapping("/attack_agg_top")
     @ApiOperation(value = "获取top聚合数据,(降序)默认前三")
-    public ServiceResult<List<TeamAttackCountVO>> getAttackAggTop(AttackAggTopRequest request) {
-        return null;
+    public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(AttackAggTopRequest request) {
+        return flowQueryService.getTeamAttackAggTop(request);
     }
 }

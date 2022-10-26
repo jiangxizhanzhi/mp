@@ -1,10 +1,9 @@
 package cn.cyberpeace.mp.collectionapi.vo;
 
+import java.util.List;
+
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 public class AttackLevelVO {
@@ -20,6 +19,6 @@ public class AttackLevelVO {
         private long num;
 
         @ApiModelProperty(value = "时间")
-        private LocalDateTime time;
+        private String time;
     }
 }

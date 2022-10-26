@@ -3,9 +3,7 @@ package cn.cyberpeace.mp.collectionapi.request;
 import lombok.Data;
 
 @Data
-public class AttackFlowTopRequest extends AttackFlowBaseRequest {
-    private Integer topSize;
-
+public class AttackFlowTopRequest extends AttackAggTopRequest {
     private Integer aggType;
 
     public static class AggType{
