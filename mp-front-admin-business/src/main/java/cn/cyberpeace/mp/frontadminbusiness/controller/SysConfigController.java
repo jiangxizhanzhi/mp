@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -72,10 +73,14 @@ public class SysConfigController {
     }
 
     @ApiOperation(value = "查询系统名称", notes = "")
-    @GetMapping("/system_name")
-    public ServiceResult<String> getSystemName() {
-        SysConfigModel model = sysConfigService.getByKeyName(AdminBusinessConstant.SYSTEM_NAME_KEY);
-        return ResultCommon.success(model.getValue());
+    @GetMapping("/public")
+    public ServiceResult<List<SysConfigModel>> getSystemName() {
+        List<SysConfigModel> configs = new ArrayList<>();
+        for (String key : AdminBusinessConstant.UNAUTH_SYS_INFO_KEYS) {
+            SysConfigModel model = sysConfigService.getByKeyName(key);
+            configs.add(model);
+        }
+        return ResultCommon.success(configs);
     }
 
     @ApiOperation(value = "根据keyname更新单条sysconfig", notes = "")
