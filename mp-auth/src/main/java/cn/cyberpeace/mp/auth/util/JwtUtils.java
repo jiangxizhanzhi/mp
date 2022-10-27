@@ -8,7 +8,12 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.*;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.InvalidClaimException;
+import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -158,15 +163,15 @@ public class JwtUtils {
         } catch (AlgorithmMismatchException e) {
             throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
         } catch (SignatureVerificationException e) {
-            log.info(FAIL_VERIFY_JWT_TOKEN, user.getId(), shortenToken(token));
+            log.info(FAIL_VERIFY_JWT_TOKEN + " signature mismatch...", user.getId(), shortenToken(token));
             throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
         } catch (TokenExpiredException e) {
-            log.info(FAIL_VERIFY_JWT_TOKEN, user.getId(), shortenToken(token));
+            log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
         } catch (InvalidClaimException e) {
             throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
         } catch (JWTDecodeException e) {
-            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN, token, e.getMessage());
+            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN , token, e.getMessage());
             throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
         } catch (IllegalArgumentException e) {
             throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
