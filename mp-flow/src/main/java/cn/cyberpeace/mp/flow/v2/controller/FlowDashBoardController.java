@@ -54,7 +54,7 @@ public class FlowDashBoardController {
 
     @ApiOperation("流量执行器带宽统计")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "flowGeneratorId", value = "流量执行器id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
     })
     @GetMapping("/generator/bandwidth_count")
     public ServiceResult<FlowGeneratorBandwidthCountBO> countGeneratorBandwidth(
@@ -68,8 +68,8 @@ public class FlowDashBoardController {
 
     @ApiOperation("仿真任务带宽统计")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "flowGeneratorId", value = "流量执行器id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "recordId", value = "流量任务执行id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "record_id", value = "流量任务执行id", dataTypeClass = String.class),
     })
     @GetMapping("/generator/task/bandwidth_count")
     public ServiceResult<FlowTaskBandwidthCountBO> countTaskBandwidth(
@@ -84,9 +84,9 @@ public class FlowDashBoardController {
 
     @ApiOperation("仿真任务单个流带宽统计")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "flowGeneratorId", value = "流量执行器id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "recordId", value = "流量任务执行记录id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "flowId", value = "流量id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "record_id", value = "流量任务执行记录id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flow_id", value = "流量id", dataTypeClass = String.class),
     })
     @GetMapping("/generator/task/flow/bandwidth_count")
     public ServiceResult<FlowBandwidthCountBO> countFlowBandwidth(
@@ -101,7 +101,7 @@ public class FlowDashBoardController {
 
     @ApiOperation("流量执行器仿真任务查询")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "flowGeneratorId", value = "流量执行器id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
     })
     @GetMapping("/generator/task_list")
     public ListObjServiceResult<ListObjResult<FlowTaskRecordBO>> countGeneratorTaskList(@RequestParam(name = "flow_generator_id") String flowGeneratorId) {
