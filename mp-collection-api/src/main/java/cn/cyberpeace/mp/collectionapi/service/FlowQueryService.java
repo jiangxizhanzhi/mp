@@ -1,20 +1,5 @@
 package cn.cyberpeace.mp.collectionapi.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -22,7 +7,7 @@ import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.collection.bo.AttackFlowBO;
 import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import cn.cyberpeace.mp.collection.bo.CountBO;
-import cn.cyberpeace.mp.collection.bo.ESIPFieldBo;
+import cn.cyberpeace.mp.collection.bo.EsIpFieldBO;
 import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.bo.TeamAttackCountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
@@ -30,22 +15,34 @@ import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest.IPField;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
+import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest.AggType;
 import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest.Source;
-import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest.AggType;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.AttackCount;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO.Count;
-import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
-import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO.TeamAttackCount;
-import cn.hutool.core.collection.CollectionUtil;
+import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
+import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @Description:
@@ -123,18 +120,17 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTrend(esipFieldBos);
 		Map<String, TeamAttackTrendVO> resultMap = Maps.newHashMap();
 
 		List<TeamAttackTrendVO> vos = Lists.newArrayList();
-		ipMap.entrySet().forEach(entry -> {
-			String team = getNameByIp(request, entry.getKey());
+		ipMap.forEach((key, bos) -> {
+			String team = getNameByIp(request, key);
 			TeamAttackTrendVO vo = resultMap.computeIfAbsent(team, k -> new TeamAttackTrendVO());
 			vo.setName(team);
 			vos.add(vo);
 
-			List<CountBO> bos = entry.getValue();
 			if (bos != null) {
 				List<TeamAttackCount> countsAdd = bos.stream().map(bo -> {
 					TeamAttackCount c = new TeamAttackCount();
@@ -165,7 +161,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(AttackFlowBaseRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<AttackFlowBO> bos = flowInfoService.queryAttackFlow(esipFieldBos);
 
 		List<AggAttackFlowVO> vos = bos.stream().map(bo -> {
@@ -246,7 +242,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<CountBO> bos = flowInfoService.queryProtocolTop5(esipFieldBos, request.getTopSize());
 		double total = bos.stream().mapToLong(CountBO::getCount).sum();
 		List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
@@ -265,7 +261,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<CountBO> bos = flowInfoService.queryEquipmentIpAttackCount(esipFieldBos);
 		Map<String, AttackFlowTopVO> vosMap = Maps.newHashMap();
 		bos.forEach(bo -> {
@@ -276,8 +272,7 @@ public class FlowQueryService {
 		});
 
 		// // 排序取top5
-		List<AttackFlowTopVO> vos = vosMap.values().stream().collect(Collectors.toList());
-		vos.sort(Comparator.comparing(AttackFlowTopVO::getCount).reversed());
+		List<AttackFlowTopVO> vos = vosMap.values().stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
 		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
 		double total = vos.stream().mapToLong(AttackFlowTopVO::getCount).sum();
 		vos.forEach(v -> {
@@ -294,17 +289,17 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ServiceResult<Long> getAttackTotalCount(Integer multiple) {
-		return new ServiceResult<Long>(flowInfoService.attackTotalCount() * multiple);
+		return new ServiceResult<>(flowInfoService.attackTotalCount() * multiple);
 	}
 
 	/**
 	 * 总攻击次数
 	 * 
-	 * @param multiple 放大倍数
+	 * @param request
 	 * @return
 	 */
 	public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(AttackAggTopRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<TeamAttackCountBO> bos = flowInfoService.queryTeamAttackAgg(esipFieldBos);
 
 		Map<String, TeamAttackCountVO> name2CountMap = Maps.newHashMap();
@@ -328,7 +323,8 @@ public class FlowQueryService {
 	/**
 	 * 攻击流量列表
 	 * 
-	 * @param request
+	 * @param pageSize
+	 * @param pageNum
 	 * @return
 	 */
 	public ListObjServiceResult<FlowVO> attackFlowList(Integer pageNum, Integer pageSize) {
@@ -362,12 +358,12 @@ public class FlowQueryService {
 
 		AttackFlowBaseRequest baseRequest = new AttackFlowBaseRequest();
 		baseRequest.setSources(sourceFields);
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(baseRequest);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(baseRequest);
 		Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTarget(esipFieldBos);
 
 		Map<String, TeamTopVO> vosMap = Maps.newHashMap();
-		ipMap.entrySet().forEach(entry -> {
-			String team = getNameByIp(sourceFields, entry.getKey());
+		ipMap.forEach((key1, value) -> {
+			String team = getNameByIp(sourceFields, key1);
 			TeamTopVO vo = vosMap.computeIfAbsent(team, key -> new TeamTopVO());
 			vo.setName(team);
 
@@ -377,7 +373,7 @@ public class FlowQueryService {
 				vo.setEntries(entries);
 			}
 
-			for (CountBO bo : entry.getValue()) {
+			for (CountBO bo : value) {
 				String targetName = getNameByIp(targetFields, bo.getKey());
 				TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
 						.orElse(null);
@@ -407,7 +403,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
-		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
 
 		Map<String, TeamTopVO> vosMap = Maps.newHashMap();
@@ -451,24 +447,24 @@ public class FlowQueryService {
 	 * @param request
 	 * @return
 	 */
-	private List<ESIPFieldBo> genIPFieldBos(AttackFlowBaseRequest request) {
-		List<ESIPFieldBo> bos = Lists.newArrayList();
+	private List<EsIpFieldBO> genIPFieldBos(AttackFlowBaseRequest request) {
+		List<EsIpFieldBO> bos = Lists.newArrayList();
 
-		ESIPFieldBo.Field ipField = CollectionUtil.isNotEmpty(request.getSources()) ? ESIPFieldBo.Field.SOURCE
-				: ESIPFieldBo.Field.DESTINATION;
-		List<IPField> ipFields = CollectionUtil.isNotEmpty(request.getSources()) ? request.getSources()
+		EsIpFieldBO.Field ipField = CollectionUtils.isNotEmpty(request.getSources()) ? EsIpFieldBO.Field.SOURCE
+				: EsIpFieldBO.Field.DESTINATION;
+		List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
 				: request.getTargets();
 
 		for (IPField field : ipFields) {
-			ESIPFieldBo bo = new ESIPFieldBo();
+			EsIpFieldBO bo = new EsIpFieldBO();
 			bo.setField(ipField);
 			bos.add(bo);
 
-			if (CollectionUtil.isNotEmpty(field.getIps())) {
-				bo.setFilterType(ESIPFieldBo.FilterType.LIST);
+			if (CollectionUtils.isNotEmpty(field.getIps())) {
+				bo.setFilterType(EsIpFieldBO.FilterType.LIST);
 				bo.setIps(field.getIps());
 			} else {
-				bo.setFilterType(ESIPFieldBo.FilterType.PREFIX);
+				bo.setFilterType(EsIpFieldBO.FilterType.PREFIX);
 				bo.setIps(Lists.newArrayList(getIpPrefixByCidr(field.getCidr())));
 			}
 		}
@@ -494,7 +490,7 @@ public class FlowQueryService {
 	 * @return
 	 */
 	private String getNameByIp(AttackFlowBaseRequest request, String ip) {
-		List<IPField> ipFields = CollectionUtil.isNotEmpty(request.getSources()) ? request.getSources()
+		List<IPField> ipFields = CollectionUtils.isNotEmpty(request.getSources()) ? request.getSources()
 				: request.getTargets();
 		return getNameByIp(ipFields, ip);
 	}
@@ -502,13 +498,13 @@ public class FlowQueryService {
 	/**
 	 * 根据ip判断所属队伍
 	 * 
-	 * @param request
+	 * @param ipFields
 	 * @param ip
 	 * @return
 	 */
 	private String getNameByIp(List<IPField> ipFields, String ip) {
 		for (IPField field : ipFields) {
-			if (CollectionUtil.isNotEmpty(field.getIps()) && field.getIps().contains(ip)) {
+			if (CollectionUtils.isNotEmpty(field.getIps()) && field.getIps().contains(ip)) {
 				return field.getName();
 			}
 

@@ -11,7 +11,7 @@ import lombok.Data;
  */
 
 @Data
-public class ESIPFieldBo {
+public class EsIpFieldBO {
 
 	private Field field;
 	private FilterType filterType;

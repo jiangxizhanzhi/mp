@@ -45,11 +45,13 @@ public class MessageCommonUtil {
         if (!names.contains(name)) {
             return name;
         }
-        if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
-            return zhMap.get(name);
-        } else {
-            return enMap.get(name);
-        }
+        // 暂时只返回中文
+        return zhMap.get(name);
+//        if (LocaleContextHolder.getLocale().getLanguage().equals("zh")) {
+//            return zhMap.get(name);
+//        } else {
+//            return enMap.get(name);
+//        }
     }
 
     @Data
