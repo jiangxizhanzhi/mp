@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.auth.service;
 
 import cn.cyberpeace.mp.auth.common.FileCheckCommon;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
@@ -23,11 +24,12 @@ import java.io.IOException;
 public class AvatarService {
 
     public FileResponseData upload(MultipartFile file) {
-        // 校验文件大小、后缀、魔术头
-        ServiceResult<Boolean> uploadResult = FileCheckCommon.checkFile(file,
-                AuthConstant.UPLOAD_AVATAR_MAX_SIZE,
-                AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE,
-                AuthConstant.UPLOAD_AVATAR_MAGIC_HEADER_TYPE);
+        // 校验文件
+        FileCheckRequest fileCheckRequest = new FileCheckRequest();
+        fileCheckRequest.setMaxSize(AuthConstant.UPLOAD_AVATAR_MAX_SIZE);
+        fileCheckRequest.setSuffixList(AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE);
+        fileCheckRequest.setMagicHeaderList(AuthConstant.UPLOAD_AVATAR_MAGIC_HEADER_TYPE);
+        ServiceResult<Boolean> uploadResult = FileCheckCommon.checkFile(file,fileCheckRequest);
         if (!Boolean.TRUE.equals(uploadResult.getSource())) {
             throw new MpRuntimeException(uploadResult.getServiceCode());
         }
