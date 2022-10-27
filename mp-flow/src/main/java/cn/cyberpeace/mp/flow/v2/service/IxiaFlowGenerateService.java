@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
  * @Date 2022/10/20
  */
 @Service
-class IxiaFlowGenerateService {
+class IxiaFlowGenerateService implements IGenerateService {
+    @Override
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         IxiaClient ixiaClient = new IxiaClient(generatorBO.getServer());
         // 登录
@@ -31,5 +32,25 @@ class IxiaFlowGenerateService {
         // 执行test
         // 登出
         return new IxiaFlowCallBackTask(flowTaskRecordBO);
+    }
+
+    @Override
+    public FlowCallBackTask stopFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return new IxiaFlowCallBackTask(flowTaskRecordBO);
+    }
+
+    @Override
+    public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
+    }
+
+    @Override
+    public FlowCallBackTask unpauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
+    }
+
+    @Override
+    public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
     }
 }

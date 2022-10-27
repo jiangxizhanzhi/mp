@@ -26,7 +26,8 @@ import java.util.stream.Collectors;
  * @Date 2022/10/20
  */
 @Service
-public class TrexFlowGenerateService {
+public class TrexFlowGenerateService implements IGenerateService{
+    @Override
     public FlowCallBackTask startFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
         // 上传flow配置
@@ -125,6 +126,26 @@ public class TrexFlowGenerateService {
 //        trexClient.startTask(startInfoData);
 
         return new TrexFlowCallBackTask(flowTaskRecordBO, generatorBO);
+    }
+
+    @Override
+    public FlowCallBackTask stopFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
+    }
+
+    @Override
+    public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
+    }
+
+    @Override
+    public FlowCallBackTask unpauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
+    }
+
+    @Override
+    public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        return null;
     }
 
     public static byte[] readOnce(File file) throws IOException {
