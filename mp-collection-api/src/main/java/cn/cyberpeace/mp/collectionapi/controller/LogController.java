@@ -5,10 +5,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
+import cn.cyberpeace.mp.collectionapi.service.LogService;
 import cn.cyberpeace.mp.collectionapi.vo.CountVO;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
-import cn.cyberpeace.mp.collectionapi.service.LogService;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,7 +26,6 @@ public class LogController {
 
     @GetMapping("/list")
     @ApiOperation(value = "查询日志列表")
-    @ApiImplicitParam(name = "request", value = "查询条件", dataTypeClass = LogQueryPageRequest.class)
     public ListObjServiceResult<LogVO> list(LogQueryPageRequest request) {
         return logQueryService.queryContestLog(request).asResult();
     }
