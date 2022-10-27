@@ -8,7 +8,7 @@ import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
 import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopListVO;
+import cn.cyberpeace.mp.collectionapi.vo.TeamAttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackTargetTopVO;
@@ -89,12 +89,12 @@ public class FlowController {
     @GetMapping("/attack_target_top")
     @ApiOperation(value = "获取攻击目标top数据,默认全部")
     public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
-        return null;
+        return flowQueryService.getAttackTargetTop(request);
     }
 
 	@GetMapping("/attack_type_top")
 	@ApiOperation(value = "获取攻击手法top数据,默认全部")
-	public ListObjServiceResult<AttackFlowTopListVO> getAttackTypeTop(@RequestBody AttackTargetTopRequest request) {
-		return null;
+	public ListObjServiceResult<TeamAttackFlowTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
+		return flowQueryService.getAttackTypeTop(request);
 	}
 }

@@ -6,12 +6,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AttackFlowTopListVO {
+public class TeamAttackFlowTopVO {
     @ApiModelProperty(value = "名称,跟随请求")
     private String name;
 
     @ApiModelProperty(value = "攻击流量统计数据列表")
-    private List<AttackFlowData> attackFlowDataList;
+    private List<AttackFlowData> attackFlowDatas;
 
     @Data
     public static class AttackFlowData {
@@ -22,6 +22,6 @@ public class AttackFlowTopListVO {
         private Double percent;
 
         @ApiModelProperty(value = "统计字段名")
-        private Double filedName;
+        private String filedName;
     }
 }

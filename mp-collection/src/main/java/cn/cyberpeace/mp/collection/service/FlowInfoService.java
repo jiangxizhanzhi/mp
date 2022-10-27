@@ -689,9 +689,7 @@ public class FlowInfoService {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleIpQuery(esipFieldBos, queryBuilder);
 
-		String srcIpTerm = "src_ip";
-        String cateTerm = "cate";
-        String desIpTerm = "des_ip";
+		String srcIpTerm = "src_ip", cateTerm = "cate", desIpTerm = "des_ip";
 		AggregationBuilder aggrBuilder = AggregationBuilders.terms(srcIpTerm)
 				.field(esipFieldBos.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.sum(desIpTerm).field("destination.ip"))
@@ -699,10 +697,9 @@ public class FlowInfoService {
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
-
         return parsedTermsIp.getBuckets().stream().map(bucketSrcIp -> {
             ParsedTerms parsedTermsCate = bucketSrcIp.getAggregations().get(cateTerm);
-            List<CountBO> attackTargetIps = parsedTermsCate.getBuckets().stream().map(bucketCate -> {
+            List<CountBO> attackTypes = parsedTermsCate.getBuckets().stream().map(bucketCate -> {
                 CountBO bo = new CountBO();
                 bo.setKey(bucketCate.getKeyAsString());
                 bo.setCount(bucketCate.getDocCount());
@@ -710,7 +707,7 @@ public class FlowInfoService {
             }).collect(Collectors.toList());
 
             ParsedTerms parsedTermsDesIp = bucketSrcIp.getAggregations().get(desIpTerm);
-            List<CountBO> attackTypes = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
+            List<CountBO> attackTargetIps = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
                 CountBO bo = new CountBO();
                 bo.setKey(bucketDesIp.getKeyAsString());
                 bo.setCount(bucketDesIp.getDocCount());
@@ -724,6 +721,39 @@ public class FlowInfoService {
             teamCountBo.setAttackTypes(attackTypes);
             return teamCountBo;
         }).collect(Collectors.toList());
+	}
+	
+	/**
+	 * 攻击聚合（source + destination）
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public Map<String, List<CountBO>> queryTeamAttackTarget(List<ESIPFieldBo> esipFieldBos) {
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildRuleIpQuery(esipFieldBos, queryBuilder);
+
+		String srcIpTerm = "src_ip", desIpTerm = "des_ip";
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(srcIpTerm)
+				.field(esipFieldBos.get(0).getIPFieldName())
+				.subAggregation(AggregationBuilders.sum(desIpTerm).field("destination.ip"));
+		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
+
+		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
+		ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
+        parsedTermsIp.getBuckets().forEach(bucketSrcIp -> {
+            ParsedTerms parsedTermsDesIp = bucketSrcIp.getAggregations().get(desIpTerm);
+            List<CountBO> targets = parsedTermsDesIp.getBuckets().stream().map(bucketDesIp -> {
+                CountBO bo = new CountBO();
+                bo.setKey(bucketDesIp.getKeyAsString());
+                bo.setCount(bucketDesIp.getDocCount());
+                return bo;
+            }).collect(Collectors.toList());
+
+            ipMap.put(bucketSrcIp.getKeyAsString(), targets);
+        });
+        
+        return ipMap;
 	}
 	
 	/**
