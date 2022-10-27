@@ -495,20 +495,21 @@ public class FlowInfoService {
 	/**
 	 * 总体攻击趋势
 	 * 
-	 * @return
+	 * @param ips
+	 * @return 12:00表示[12:00, 12:10)的数据
 	 */
 	public List<CountBO> queryAttackTrend() {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 70 * 60000L; // 分7段，每段间隔10分钟
+		long startTime = endTime - 60 * 60000L; // 1小时，间隔10分钟
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
-		buildSeverityQuery(queryBuilder);
 
 		String histogramTerm = "histogram";
-		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp").fixedInterval(
-				DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm");
+		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+				.fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
+				.format("HH:mm").timeZone(ZoneId.systemDefault());
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
@@ -522,32 +523,34 @@ public class FlowInfoService {
 
 		return bos;
 	}
-	
+
 	/**
 	 * 攻击告警级别趋势
 	 * 
+	 * @param ips
 	 * @return
 	 */
 	public Map<String, List<CountBO>> queryAttackLevel() {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 70 * 60000L; // 分7段，每段间隔10分钟
+		long startTime = endTime - 60 * 60000L; // 1小时，间隔10分钟
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 
-		String severityTerm = "severity";
-        String histogramTerm = "histogram";
+		String severityTerm = "severity", histogramTerm = "histogram";
 		AggregationBuilder aggrBuilder = AggregationBuilders.terms(severityTerm).field("suricata.severity")
 				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-						.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm"));
+						.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
+						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+						.timeZone(ZoneId.systemDefault()));
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		Map<String, List<CountBO>> severityMap = Maps.newHashMap();
 		ParsedTerms parsedTermsSeverity = response.getAggregations().get(severityTerm);
 		parsedTermsSeverity.getBuckets().forEach(bucketSeverity -> {
 			String severity = bucketSeverity.getKeyAsString();
-			
+
 			List<CountBO> bos = Lists.newArrayList();
 			ParsedDateHistogram parsedHistogram = bucketSeverity.getAggregations().get(histogramTerm);
 			parsedHistogram.getBuckets().forEach(bucketHistogram -> {
@@ -558,44 +561,43 @@ public class FlowInfoService {
 			});
 			severityMap.put(severity, bos);
 		});
-		
+
 		return severityMap;
 	}
-	
+
 	/**
 	 * 战队攻击趋势
 	 * 
-	 * @param esIpFieldBOS
+	 * @param ips
 	 * @return
 	 */
-	public Map<String, List<CountBO>> queryTeamAttackTrend(List<EsIpFieldBO> esIpFieldBOS) {
+	public Map<String, List<CountBO>> queryTeamAttackTrend(List<EsIpFieldBO> esipFieldBos) {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 365 * 60000L; // 六小时, 五分钟间隔
+		long startTime = endTime - 360 * 60000L; // 六小时, 五分钟间隔
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 		buildSeverityQuery(queryBuilder);
 
-		String ipTerm = "target_ip";
-        String histogramTerm = "histogram";
-        String sumTerm = "flow_sum";
-		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
+		String ipTerm = "target_ip", histogramTerm = "histogram", sumTerm = "flow_sum";
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(esipFieldBos.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
-						.fixedInterval(DateHistogramInterval.minutes(5)).hardBounds(new LongBounds(startTime, endTime))
-						.format("HH:mm").subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes")));
+						.fixedInterval(DateHistogramInterval.minutes(5))
+						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
+						.timeZone(ZoneId.systemDefault()).subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes")));
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
 		parsedTermsIp.getBuckets().forEach(bucketIp -> {
 			String ip = bucketIp.getKeyAsString();
-			
+
 			List<CountBO> bos = Lists.newArrayList();
 			ParsedDateHistogram parsedHistogram = bucketIp.getAggregations().get(histogramTerm);
 			parsedHistogram.getBuckets().forEach(bucketHistogram -> {
 				ParsedSum sum = bucketHistogram.getAggregations().get(sumTerm);
-				
+
 				CountBO bo = new CountBO();
 				bo.setKey(bucketHistogram.getKeyAsString());
 				bo.setCount((long) sum.getValue());

@@ -79,7 +79,6 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<AttackLevelVO> queryLevelTrend() {
-		List<AttackLevelVO> vos = Lists.newArrayList();
 		Map<String, List<CountBO>> severityMap = flowInfoService.queryAttackLevel();
 		Map<String, AttackLevelVO> resultMap = Maps.newHashMap();
 
@@ -87,7 +86,6 @@ public class FlowQueryService {
 			String levelName = getSeverityDisplayName(String.valueOf(level));
 			AttackLevelVO vo = resultMap.computeIfAbsent(levelName, k -> new AttackLevelVO());
 			vo.setSeverity(levelName);
-			vos.add(vo);
 
 			List<CountBO> bos = severityMap.get(String.valueOf(level));
 			if (bos != null) {
@@ -111,6 +109,7 @@ public class FlowQueryService {
 			}
 		}
 
+		List<AttackLevelVO> vos = Lists.newArrayList(resultMap.values());
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
