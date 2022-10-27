@@ -44,6 +44,7 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
+import org.elasticsearch.search.aggregations.bucket.histogram.ParsedDateHistogram;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
@@ -508,14 +509,14 @@ public class FlowInfoService {
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 		buildSeverityQuery(queryBuilder);
 
-		String typeTerm = "date";
-		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(typeTerm).field("@timestamp").fixedInterval(
-				DateHistogramInterval.minutes(10)).hardBounds(new LongBounds(startTime, endTime)).format("HH:mm");
+		String histogramTerm = "histogram";
+		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp").fixedInterval(
+				DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm");
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
-		ParsedTerms parsedTermsDate = response.getAggregations().get(typeTerm);
-		parsedTermsDate.getBuckets().forEach(bucketDate -> {
+		ParsedDateHistogram parsedHistogram = response.getAggregations().get(histogramTerm);
+		parsedHistogram.getBuckets().forEach(bucketDate -> {
 			CountBO bo = new CountBO();
 			bo.setKey(bucketDate.getKeyAsString());
 			bo.setCount(bucketDate.getDocCount());
@@ -551,8 +552,8 @@ public class FlowInfoService {
 			String severity = bucketSeverity.getKeyAsString();
 			
 			List<CountBO> bos = Lists.newArrayList();
-			ParsedTerms parsedTermsHistogram = bucketSeverity.getAggregations().get(histogramTerm);
-			parsedTermsHistogram.getBuckets().forEach(bucketHistogram -> {
+			ParsedDateHistogram parsedHistogram = bucketSeverity.getAggregations().get(histogramTerm);
+			parsedHistogram.getBuckets().forEach(bucketHistogram -> {
 				CountBO bo = new CountBO();
 				bo.setKey(bucketHistogram.getKeyAsString());
 				bo.setCount(bucketHistogram.getDocCount());
@@ -592,8 +593,8 @@ public class FlowInfoService {
 			String ip = bucketIp.getKeyAsString();
 			
 			List<CountBO> bos = Lists.newArrayList();
-			ParsedTerms parsedTermsHistogram = bucketIp.getAggregations().get(histogramTerm);
-			parsedTermsHistogram.getBuckets().forEach(bucketHistogram -> {
+			ParsedDateHistogram parsedHistogram = bucketIp.getAggregations().get(histogramTerm);
+			parsedHistogram.getBuckets().forEach(bucketHistogram -> {
 				ParsedSum sum = bucketHistogram.getAggregations().get(sumTerm);
 				
 				CountBO bo = new CountBO();
