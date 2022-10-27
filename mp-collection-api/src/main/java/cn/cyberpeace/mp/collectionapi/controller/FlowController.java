@@ -131,7 +131,6 @@ public class FlowController {
 
 	@GetMapping("/team_attack_trend")
 	@ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowBaseRequest.class)
 	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
 		// todo 每个战队一个ip
 		return new ListObjServiceResult<>();
@@ -205,14 +204,12 @@ public class FlowController {
 
 	@GetMapping("/agg_attack_flow")
 	@ApiOperation(value = "获取指定ip集合攻击次数与流量大小")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackAggTopRequest.class)
 	public ServiceResult<List<AggAttackFlowVO>> getAttackFlow(@RequestBody AttackAggTopRequest request) {
 		return null;
 	}
 
 	@GetMapping("/attack_top")
 	@ApiOperation(value = "获取top数据,(降序)默认全部")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowTopRequest.class)
 	public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
 		return flowQueryService.getAttackTop(request);
 	}
@@ -226,8 +223,7 @@ public class FlowController {
 
     @GetMapping("/attack_target_top")
     @ApiOperation(value = "获取攻击目标top数据,默认全部")
-    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackTargetTopRequest.class)
-    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
+    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         return null;
     }
     
