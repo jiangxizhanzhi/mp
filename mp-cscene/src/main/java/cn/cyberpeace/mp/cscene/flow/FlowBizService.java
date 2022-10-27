@@ -111,4 +111,25 @@ public class FlowBizService {
         flowGenerateService.startFlowTask(recordBO);
         return new ServiceResult<>(recordBO);
     }
+
+    public ServiceResult<Boolean> pause(String taskRecordId) {
+        var result = flowTaskRecordMapper.get(taskRecordId);
+        FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
+        recordBO.fromModel(result);
+        return flowGenerateService.pauseFlowTask(recordBO);
+    }
+
+    public ServiceResult<Boolean> unpause(String taskRecordId) {
+        var result = flowTaskRecordMapper.get(taskRecordId);
+        FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
+        recordBO.fromModel(result);
+        return flowGenerateService.unpauseFlowTask(recordBO);
+    }
+
+    public ServiceResult<Boolean> restart(String taskRecordId) {
+        var result = flowTaskRecordMapper.get(taskRecordId);
+        FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
+        recordBO.fromModel(result);
+        return flowGenerateService.restartFlowTask(recordBO);
+    }
 }
