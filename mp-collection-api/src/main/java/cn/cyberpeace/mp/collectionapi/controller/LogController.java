@@ -33,14 +33,12 @@ public class LogController {
 
     @GetMapping("/query_disturbance_count")
     @ApiOperation(value = "查询扰动次数")
-    @ApiImplicitParam(name = "attacks", value = "请求体", dataTypeClass = AttackFlowBaseRequest.IPField.class)
     public ServiceResult<List<CountVO>> countByIp(@RequestBody List<AttackFlowBaseRequest.IPField> attacks) {
         return logQueryService.countContestLogBySeverity(attacks).asResult();
     }
 
     @PostMapping("/report")
     @ApiOperation(value = "日志上报")
-    @ApiImplicitParam(name = "logReportBO", value = "请求体", dataTypeClass = LogReportBO.class)
     public void report(@RequestBody LogReportBO logReportBO) {
         logQueryService.addContestLog(logReportBO);
     }
