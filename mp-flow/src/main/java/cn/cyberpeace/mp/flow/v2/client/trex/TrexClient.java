@@ -61,7 +61,6 @@ public class TrexClient {
     }
 
     public TaskStatusData queryTaskLastStatus(QueryTaskLastStatus queryTaskLastStatus) {
-        //todo : 待优化，此处body参数为空即可，但是不能传null,后续修改一下
         var reslut = trexHttpClient.trexPost(TrexUrlConstant.LAST_RECORDS, queryTaskLastStatus, null,
                 new TypeReference<TrexResponse<TaskStatusData>>() {
                 });

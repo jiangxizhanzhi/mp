@@ -95,6 +95,8 @@ public class FlowBizService {
             taskFlow.setFlowGeneratorId(flowGeneratorId);
             taskFlow.setDelay(f.getDelay());
             taskFlow.setWeight(f.getWeight());
+            taskFlow.setName(f.getName());
+            taskFlow.setPcapFile(f.getPcapFile());
             taskFlow.setResourceType(f.getResourceType());
             return taskFlow;
         }).collect(Collectors.toList());

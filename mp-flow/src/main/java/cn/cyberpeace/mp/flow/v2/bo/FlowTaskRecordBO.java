@@ -19,6 +19,7 @@ public class FlowTaskRecordBO extends ModelBO<FlowTaskRecordModel, FlowTaskRecor
     private String flowGeneratorNicId;
     private String targetIp;
     private String targetMac;
+    private String targetNetworkId;
     private Integer status;
 
     private String name;

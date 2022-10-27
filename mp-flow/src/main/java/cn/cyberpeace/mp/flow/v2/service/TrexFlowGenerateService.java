@@ -33,21 +33,23 @@ public class TrexFlowGenerateService {
         List<FlowResourceData> flowResources = new ArrayList<>();
         List<TrexClient.ProtocolInfo> protocolInfos = new ArrayList<>();
         //todo：真的有fdfs地址之后再用下面注掉的代码
-//        for (var flow : flowTaskRecordBO.getFlows()) {
-//            if (StringUtils.isNotEmpty(flow.getPcapFile())) {
-//                FlowResourceData resource = new FlowResourceData();
-//                byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
-//                resource.setPcapFile(fileByte);
-//                resource.setFlowId(flow.getFlowId());
-//                flowResources.add(resource);
-//            } else {
-//                TrexClient.ProtocolInfo protocolInfo = new TrexClient.ProtocolInfo();
-//                protocolInfos.add(protocolInfo);
-//            }
-//        }
+        for (var flow : flowTaskRecordBO.getFlows()) {
+            if (StringUtils.isNotEmpty(flow.getPcapFile())) {
+                FlowResourceData resource = new FlowResourceData();
+                byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
+                resource.setFile(fileByte);
+                resource.setFlowId(flow.getFlowId());
+                resource.setFileName(flow.getName());
+                flowResources.add(resource);
+            } else {
+                TrexClient.ProtocolInfo protocolInfo = new TrexClient.ProtocolInfo();
+                protocolInfos.add(protocolInfo);
+            }
+        }
         // 创建网卡
         VirtualMachine virtualMachine = new VirtualMachine();
-        //todo: 靶机的网络id还没获取
+
+        //flowTaskRecordBO.getTargetNetworkId()
 //        var addPortResult = virtualMachine.addPort(generatorBO.getResourceId(), "0bc3cb2f-4812-41b3-bcaa-744e05b12ae8");
 
         // 初始化trex服务
@@ -59,32 +61,32 @@ public class TrexFlowGenerateService {
         trexClient.initTrexServer(networkInfos);
 
         // 测试用的
-        File file = new File("D:\\data\\resource\\pcap\\qq音乐.pcap");
-        File file1 = new File("D:\\data\\resource\\pcap\\traffic.pcap");
-        FlowResourceData resource = new FlowResourceData();
-        resource.setFileName("qq音乐.pcap");
-        resource.setFlowId("8639vomdrgw4ibnf05es");
-        try {
-            resource.setFile(readOnce(file));
-        } catch (Exception e) {
-
-        }
-
-        FlowResourceData resource1 = new FlowResourceData();
-        resource1.setFlowId("1oizj8u79xch5bqgp64l");
-        resource1.setFileName("traffic.pcap");
-        try {
-            resource1.setFile(readOnce(file1));
-        } catch (Exception e) {
-
-        }
-        flowResources.add(resource);
-        flowResources.add(resource1);
+//        File file = new File("D:\\data\\resource\\pcap\\qq音乐.pcap");
+//        File file1 = new File("D:\\data\\resource\\pcap\\traffic.pcap");
+//        FlowResourceData resource = new FlowResourceData();
+//        resource.setFileName("qq音乐.pcap");
+//        resource.setFlowId("8639vomdrgw4ibnf05es");
+//        try {
+//            resource.setFile(readOnce(file));
+//        } catch (Exception e) {
+//
+//        }
+//
+//        FlowResourceData resource1 = new FlowResourceData();
+//        resource1.setFlowId("1oizj8u79xch5bqgp64l");
+//        resource1.setFileName("traffic.pcap");
+//        try {
+//            resource1.setFile(readOnce(file1));
+//        } catch (Exception e) {
+//
+//        }
+//        flowResources.add(resource);
+//        flowResources.add(resource1);
         // 上传 pcap
 //        trexClient.uploadResource(flowResources);
 
         // 计算负载
-        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(10, 10, flowTaskRecordBO.getLoadMode());
+        List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(50, 10, flowTaskRecordBO.getLoadMode());
         System.out.println("负载");
         for (var loadInfo : loadInfos) {
             System.out.println(loadInfo.getBandwidth());
@@ -96,7 +98,7 @@ public class TrexFlowGenerateService {
         startInfoData.setAction(1);
         startInfoData.setTime(LocalDateTime.now());
         // todo:持续时间是否可以指定
-        startInfoData.setDuration(100);
+        startInfoData.setDuration(50);
         startInfoData.setBandwidth(10);//flowTaskRecordBO.getBandwidth()
         startInfoData.setTargetIp(flowTaskRecordBO.getTargetIp());
 
@@ -120,7 +122,7 @@ public class TrexFlowGenerateService {
 
         startInfoData.getLoadLists().addAll(loadInfos);
 
-        trexClient.startTask(startInfoData);
+//        trexClient.startTask(startInfoData);
 
         return new TrexFlowCallBackTask(flowTaskRecordBO, generatorBO);
     }
