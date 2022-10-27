@@ -68,6 +68,7 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
         private String flowId;
         private Integer delay;
         private Integer weight;
+        private Integer resourceType;
         
         private String name;
         private String protocols;

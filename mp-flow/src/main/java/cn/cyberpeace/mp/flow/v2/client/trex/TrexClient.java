@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
+import cn.cyberpeace.mp.base.util.http.HttpData;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
@@ -57,6 +58,23 @@ public class TrexClient {
                 new TypeReference<TrexResponse<StartInfoData>>() {
                 });
         log.info("Initialization of trex virtual machine completed {}", reslut.getData());
+    }
+
+    public TaskStatusData queryTaskLastStatus(QueryTaskLastStatus queryTaskLastStatus) {
+        //todo : 待优化，此处body参数为空即可，但是不能传null,后续修改一下
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.LAST_RECORDS, queryTaskLastStatus, null,
+                new TypeReference<TrexResponse<TaskStatusData>>() {
+                });
+        log.info("Update all tasks status response:{}", reslut.getData());
+        return reslut.getData();
+    }
+
+    public List<TaskStatusResponseData> queryTaskStatus(QueryTaskStatusData queryTaskStatusData) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.TASK_STATUS, queryTaskStatusData, null,
+                new TypeReference<TrexResponse<List<TaskStatusResponseData>>>() {
+                });
+        log.info("Query single task status response:{}", reslut.getData());
+        return reslut.getData();
     }
 
     public List<LoadInfo> calculateLoad(int time, double maxLoad, String loadMode) {

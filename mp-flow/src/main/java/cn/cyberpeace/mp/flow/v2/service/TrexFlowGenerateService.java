@@ -47,12 +47,13 @@ public class TrexFlowGenerateService {
 //        }
         // 创建网卡
         VirtualMachine virtualMachine = new VirtualMachine();
-//        var addPortResult = virtualMachine.addPort(generatorBO.getResourceId(), "93ab1044-e785-4a58-84aa-0cc527b772c9");
+        //todo: 靶机的网络id还没获取
+//        var addPortResult = virtualMachine.addPort(generatorBO.getResourceId(), "0bc3cb2f-4812-41b3-bcaa-744e05b12ae8");
 
         // 初始化trex服务
         NetworkInfos networkInfos = new NetworkInfos();
         InitInfoData initInfo = new InitInfoData();
-        initInfo.setMac("fa:16:3e:40:e2:2e");//addPortResult.getMacAddress()
+        initInfo.setMac("fa:16:3e:af:4b:04");//addPortResult.getMacAddress()
         initInfo.setTaskId(flowTaskRecordBO.getId());
         networkInfos.getNetworkInfos().add(initInfo);
         trexClient.initTrexServer(networkInfos);
@@ -80,7 +81,7 @@ public class TrexFlowGenerateService {
         flowResources.add(resource);
         flowResources.add(resource1);
         // 上传 pcap
-        trexClient.uploadResource(flowResources);
+//        trexClient.uploadResource(flowResources);
 
         // 计算负载
         List<TrexClient.LoadInfo> loadInfos = trexClient.calculateLoad(10, 10, flowTaskRecordBO.getLoadMode());
@@ -94,7 +95,8 @@ public class TrexFlowGenerateService {
         startInfoData.setId(flowTaskRecordBO.getId());
         startInfoData.setAction(1);
         startInfoData.setTime(LocalDateTime.now());
-        startInfoData.setDuration(10);
+        // todo:持续时间是否可以指定
+        startInfoData.setDuration(100);
         startInfoData.setBandwidth(10);//flowTaskRecordBO.getBandwidth()
         startInfoData.setTargetIp(flowTaskRecordBO.getTargetIp());
 
@@ -109,9 +111,9 @@ public class TrexFlowGenerateService {
         var flows = flowTaskRecordBO.getFlows().stream().map(f -> {
             StartInfoData.Flow taskFlow = new StartInfoData.Flow();
             taskFlow.setFlowId(f.getFlowId());
-            taskFlow.setWeight(1);
-            taskFlow.setResourceType(0);;
-            taskFlow.setDelay(0);
+            taskFlow.setWeight(f.getWeight());
+            taskFlow.setResourceType(f.getResourceType());;
+            taskFlow.setDelay(f.getDelay());
             return taskFlow;
         }).collect(Collectors.toList());
         startInfoData.getFlows().addAll(flows);
@@ -120,7 +122,7 @@ public class TrexFlowGenerateService {
 
         trexClient.startTask(startInfoData);
 
-        return new TrexFlowCallBackTask(flowTaskRecordBO);
+        return new TrexFlowCallBackTask(flowTaskRecordBO, generatorBO);
     }
 
     public static byte[] readOnce(File file) throws IOException {

@@ -93,6 +93,9 @@ public class FlowBizService {
             FlowTaskRecordBO.TaskFlow taskFlow = new FlowTaskRecordBO.TaskFlow();
             taskFlow.setFlowId(f.getFlowId());
             taskFlow.setFlowGeneratorId(flowGeneratorId);
+            taskFlow.setDelay(f.getDelay());
+            taskFlow.setWeight(f.getWeight());
+            taskFlow.setResourceType(f.getResourceType());
             return taskFlow;
         }).collect(Collectors.toList());
 
