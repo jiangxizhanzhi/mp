@@ -11,7 +11,7 @@ public class AttackTargetListVO {
     private long count;
 
     @ApiModelProperty(value = "设备攻击次数列表")
-    private List<AttackTargetVO> attackTargets;
+    private List<TopEntry> attackTargets;
     
     @ApiModelProperty(value = "设备被攻击手法top5")
     private List<AttackTypeVO> attackTypes;

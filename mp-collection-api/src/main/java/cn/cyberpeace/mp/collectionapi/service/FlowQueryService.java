@@ -39,12 +39,10 @@ import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO.Count;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackFlowTopVO.AttackFlowData;
-import cn.cyberpeace.mp.collectionapi.vo.AttackTargetTopVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackTargetVO;
+import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
+import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO.TeamAttackCount;
 import cn.hutool.core.collection.CollectionUtil;
@@ -75,7 +73,7 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -116,7 +114,7 @@ public class FlowQueryService {
 			}
 		}
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -158,7 +156,7 @@ public class FlowQueryService {
 			}
 		});
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -183,7 +181,7 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -221,7 +219,7 @@ public class FlowQueryService {
 			return topVO;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(topVOs, topVOs.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(topVOs, topVOs.size()));
 	}
 
 	/**
@@ -239,7 +237,7 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -258,7 +256,7 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -286,7 +284,7 @@ public class FlowQueryService {
 			v.setPercent(v.getCount() / total);
 		});
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -324,7 +322,7 @@ public class FlowQueryService {
 		vos.sort(Comparator.comparing(TeamAttackCountVO::getCount).reversed());
 		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -342,7 +340,7 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -351,7 +349,7 @@ public class FlowQueryService {
 	 * @param request
 	 * @return
 	 */
-	public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
+	public ListObjServiceResult<TeamTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
 		// 转换数据结构
 		List<IPField> sourceFields = request.getSources().stream().map(s -> {
 			IPField ipField = new IPField();
@@ -367,40 +365,40 @@ public class FlowQueryService {
 		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(baseRequest);
 		Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTarget(esipFieldBos);
 
-		Map<String, AttackTargetTopVO> team2TargetMap = Maps.newHashMap();
+		Map<String, TeamTopVO> vosMap = Maps.newHashMap();
 		ipMap.entrySet().forEach(entry -> {
 			String team = getNameByIp(sourceFields, entry.getKey());
-			AttackTargetTopVO vo = team2TargetMap.computeIfAbsent(team, key -> new AttackTargetTopVO());
+			TeamTopVO vo = vosMap.computeIfAbsent(team, key -> new TeamTopVO());
 			vo.setName(team);
 
-			List<AttackTargetVO> targets = vo.getTargets();
-			if (targets == null) {
-				targets = Lists.newArrayList();
-				vo.setTargets(targets);
+			List<TopEntry> entries = vo.getEntries();
+			if (entries == null) {
+				entries = Lists.newArrayList();
+				vo.setEntries(entries);
 			}
 
 			for (CountBO bo : entry.getValue()) {
 				String targetName = getNameByIp(targetFields, bo.getKey());
-				AttackTargetVO targetVO = targets.stream().filter(t -> targetName.equals(t.getName())).findFirst()
+				TopEntry topEntry = entries.stream().filter(t -> targetName.equals(t.getName())).findFirst()
 						.orElse(null);
-				if (targetVO == null) {
-					targetVO = new AttackTargetVO();
-					targets.add(targetVO);
+				if (topEntry == null) {
+					topEntry = new TopEntry();
+					entries.add(topEntry);
 				}
-				targetVO.setCount(targetVO.getCount() + bo.getCount());
+				topEntry.setCount(topEntry.getCount() + bo.getCount());
 			}
 		});
 
 		// 排序取topSize
-		List<AttackTargetTopVO> vos = new ArrayList<>(team2TargetMap.values());
+		List<TeamTopVO> vos = new ArrayList<>(vosMap.values());
 		vos.forEach(vo -> {
-			List<AttackTargetVO> targets = vo.getTargets();
-			targets.sort(Comparator.comparing(AttackTargetVO::getCount).reversed());
-			targets = targets.size() < request.getTopSize() ? targets : targets.subList(0, request.getTopSize());
-			vo.setTargets(targets);
+			List<TopEntry> entries = vo.getEntries();
+			entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
+			entries = entries.size() < request.getTopSize() ? entries : entries.subList(0, request.getTopSize());
+			vo.setEntries(entries);
 		});
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**
@@ -408,43 +406,43 @@ public class FlowQueryService {
 	 * 
 	 * @return
 	 */
-	public ListObjServiceResult<TeamAttackFlowTopVO> getAttackTypeTop(AttackAggTopRequest request) {
+	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
 		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
 		List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
 
-		Map<String, TeamAttackFlowTopVO> vosMap = Maps.newHashMap();
+		Map<String, TeamTopVO> vosMap = Maps.newHashMap();
 		bos.forEach(bo -> {
 			String name = getNameByIp(request, bo.getIp());
-			TeamAttackFlowTopVO vo = vosMap.computeIfAbsent(name, key -> new TeamAttackFlowTopVO());
+			TeamTopVO vo = vosMap.computeIfAbsent(name, key -> new TeamTopVO());
 			vo.setName(name);
 			
-			List<AttackFlowData> attackFlowDatas = vo.getAttackFlowDatas();
-			if(attackFlowDatas == null) {
-				attackFlowDatas = Lists.newArrayList();
-				vo.setAttackFlowDatas(attackFlowDatas);
+			List<TopEntry> entries = vo.getEntries();
+			if (entries == null) {
+				entries = Lists.newArrayList();
+				vo.setEntries(entries);
 			}
 			
 			for(AttackTypeBO attackTypeBO : bo.getAttackTypes()) {
-				AttackFlowData data = attackFlowDatas.stream().filter(d -> attackTypeBO.getEnName().equals(d.getFiledName())).findFirst().orElse(null);
-				if(data == null) {
-					data = new AttackFlowData();
-					data.setFiledName(attackTypeBO.getEnName());
-					attackFlowDatas.add(data);
+				TopEntry topEntry = entries.stream().filter(t -> attackTypeBO.getEnName().equals(t.getName())).findFirst()
+						.orElse(null);
+				if (topEntry == null) {
+					topEntry = new TopEntry();
+					entries.add(topEntry);
 				}
-				data.setCount(data.getCount() + attackTypeBO.getCount());
+				topEntry.setCount(topEntry.getCount() + bo.getCount());
 			}
 		});
 
 		// 排序取topSize
-		List<TeamAttackFlowTopVO> vos = new ArrayList<>(vosMap.values());
+		List<TeamTopVO> vos = new ArrayList<>(vosMap.values());
 		vos.forEach(vo -> {
-			List<AttackFlowData> attackFlowDatas = vo.getAttackFlowDatas();
-			attackFlowDatas.sort(Comparator.comparing(AttackFlowData::getCount).reversed());
-			attackFlowDatas = attackFlowDatas.size() < request.getTopSize() ? attackFlowDatas : attackFlowDatas.subList(0, request.getTopSize());
-			vo.setAttackFlowDatas(attackFlowDatas);
+			List<TopEntry> entries = vo.getEntries();
+			entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
+			entries = entries.size() < request.getTopSize() ? entries : entries.subList(0, request.getTopSize());
+			vo.setEntries(entries);
 		});
 
-		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
 	/**

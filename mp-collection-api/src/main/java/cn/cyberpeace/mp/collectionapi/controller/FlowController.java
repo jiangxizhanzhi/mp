@@ -8,10 +8,9 @@ import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
 import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackTargetTopVO;
+import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
@@ -37,27 +36,27 @@ public class FlowController {
 	@ApiOperation(value = "所有队伍的总体攻击趋势(统计十分钟内的攻击次数)")
 	public ListObjServiceResult<AttackFlowTopVO> attackTrend() {
 		// 默认分十段
-		return flowQueryService.queryAttackTrend();
+		return flowQueryService.queryAttackTrend().asResult();
 	}
 
 	@GetMapping("/attack_level_trend")
 	@ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
 	public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
 		// 默认分十段
-		return flowQueryService.queryLevelTrend();
+		return flowQueryService.queryLevelTrend().asResult();
 	}
 	
 	@GetMapping("/team_attack_trend")
 	@ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
 	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
 		// todo 每个战队一个ip
-		return flowQueryService.teamAttackTrend(request);
+		return flowQueryService.teamAttackTrend(request).asResult();
 	}
 
 	@GetMapping("/attack_total_count")
 	@ApiOperation(value = "总攻击次数，可自定义放大速率")
 	public ServiceResult<Long> attackTotalCount(@RequestParam(required = false, defaultValue = "1") Integer multiple) {
-		return flowQueryService.getAttackTotalCount(multiple);
+		return flowQueryService.getAttackTotalCount(multiple).asResult();
 	}
 
 	@GetMapping("/attack_flow_list")
@@ -65,36 +64,36 @@ public class FlowController {
 	public ListObjServiceResult<FlowVO> attackFlowList(
 			@RequestParam(required = false, defaultValue = "1") Integer pageNum,
 			@RequestParam(required = false, defaultValue = "10") Integer pageSize) {
-		return flowQueryService.attackFlowList(pageNum, pageSize);
+		return flowQueryService.attackFlowList(pageNum, pageSize).asResult();
 	}
 
 	@GetMapping("/agg_attack_flow")
 	@ApiOperation(value = "获取指定ip集合攻击次数与流量大小")
 	public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
-		return flowQueryService.getAttackFlow(request);
+		return flowQueryService.getAttackFlow(request).asResult();
 	}
 
 	@GetMapping("/attack_top")
 	@ApiOperation(value = "获取top数据,(降序)默认全部")
 	public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
-		return flowQueryService.getAttackTop(request);
+		return flowQueryService.getAttackTop(request).asResult();
 	}
 
 	@GetMapping("/attack_agg_top")
 	@ApiOperation(value = "获取top聚合数据,(降序)默认全部")
 	public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
-		return flowQueryService.getTeamAttackAggTop(request);
+		return flowQueryService.getTeamAttackAggTop(request).asResult();
 	}
 
     @GetMapping("/attack_target_top")
     @ApiOperation(value = "获取攻击目标top数据,默认全部")
-    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
-        return flowQueryService.getAttackTargetTop(request);
+    public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
+        return flowQueryService.getAttackTargetTop(request).asResult();
     }
 
 	@GetMapping("/attack_type_top")
 	@ApiOperation(value = "获取攻击手法top数据,默认全部")
-	public ListObjServiceResult<TeamAttackFlowTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
-		return flowQueryService.getAttackTypeTop(request);
+	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
+		return flowQueryService.getAttackTypeTop(request).asResult();
 	}
 }
