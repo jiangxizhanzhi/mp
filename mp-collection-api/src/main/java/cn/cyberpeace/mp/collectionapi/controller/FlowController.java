@@ -24,8 +24,6 @@ import cn.cyberpeace.mp.collectionapi.vo.FlowAttackVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamFlowAggVO;
 import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -123,31 +121,12 @@ public class FlowController {
 		return flowQueryService.getAttackTotalCount(multiple);
 	}
 
-	@GetMapping("/count_with_ip")
-	@ApiOperation(value = "根据ip集合查询总攻击次数")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowBaseRequest.class)
-	public ServiceResult<Long> countWithIp(@RequestBody AttackFlowBaseRequest request) {
-		return new ServiceResult<>();
-	}
-
 	@GetMapping("/attack_flow_list")
 	@ApiOperation(value = "攻击流量列表")
 	public ListObjServiceResult<FlowVO> attackFlowList(
 			@RequestParam(required = false, defaultValue = "1") Integer pageNum,
 			@RequestParam(required = false, defaultValue = "10") Integer pageSize) {
 		return flowQueryService.attackFlowList(pageNum, pageSize);
-	}
-
-	@GetMapping("/team_flow_agg")
-	@ApiOperation(value = "所有战队的流量大小、攻击次数、扰动次数和占比")
-	public ListObjServiceResult<TeamFlowAggVO> teamFlowAgg() {
-		return new ListObjServiceResult<>();
-	}
-
-	@GetMapping("/team_attack_target")
-	@ApiOperation(value = "战队攻击目标top5和攻击手法top5")
-	public ListObjServiceResult<TeamAttackVO> teamAttackTarget() {
-		return new ListObjServiceResult<>();
 	}
 
 	@GetMapping("/team_attack_trend")
