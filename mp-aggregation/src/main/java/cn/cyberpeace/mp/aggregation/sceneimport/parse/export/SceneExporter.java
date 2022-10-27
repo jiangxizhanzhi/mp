@@ -252,6 +252,8 @@ public class SceneExporter {
         result.put("targetIP", "target-iP");
         result.put("targetPort", "target-port");
         result.put("virtualPlatform", "virtual-platform");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
         return result;
     }
 
