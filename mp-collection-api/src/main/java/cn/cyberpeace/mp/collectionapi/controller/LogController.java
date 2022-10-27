@@ -38,7 +38,8 @@ public class LogController {
 
     @PostMapping("/report")
     @ApiOperation(value = "日志上报")
-    public void report(@RequestBody LogReportBO logReportBO) {
+    public ServiceResult<Boolean> report(@RequestBody LogReportBO logReportBO) {
         logQueryService.addContestLog(logReportBO);
+        return new ServiceResult<>(true).asResult();
     }
 }
