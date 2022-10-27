@@ -536,7 +536,8 @@ public class FlowInfoService {
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 
-		String severityTerm = "severity", histogramTerm = "histogram";
+		String severityTerm = "severity";
+        String histogramTerm = "histogram";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(severityTerm).field("suricata.severity")
 				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
 						.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
@@ -566,10 +567,10 @@ public class FlowInfoService {
 	/**
 	 * 战队攻击趋势
 	 * 
-	 * @param ips
+	 * @param esIpFieldBOS
 	 * @return
 	 */
-	public Map<String, List<CountBO>> queryTeamAttackTrend(List<EsIpFieldBO> esipFieldBos) {
+	public Map<String, List<CountBO>> queryTeamAttackTrend(List<EsIpFieldBO> esIpFieldBOS) {
 		long endTime = Calendar.getInstance().getTimeInMillis();
 		long startTime = endTime - 360 * 60000L; // 六小时, 五分钟间隔
 
@@ -581,7 +582,7 @@ public class FlowInfoService {
 		String ipTerm = "target_ip";
         String histogramTerm = "histogram";
         String sumTerm = "flow_sum";
-		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esipFieldBos.get(0).getIPFieldName())
+		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
 						.fixedInterval(DateHistogramInterval.minutes(5))
 						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
@@ -624,12 +625,12 @@ public class FlowInfoService {
 				.order(BucketOrder.count(false));
 		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
 
-		List<String> ignoreProtocals = Lists.newArrayList("tcp", "udp");
+		List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
 		List<CountBO> bos = Lists.newArrayList();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
 		for(Bucket bucket : parsedTermsIp.getBuckets()) {
 			String protocol = bucket.getKeyAsString();
-			if(ignoreProtocals.contains(protocol.toLowerCase())) {
+			if(ignoreProtocols.contains(protocol.toLowerCase())) {
 				continue;
 			}
 
