@@ -114,7 +114,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
                 networkElementParseResult.setGateway(net.getNetwork().getGateway());
             }
             if (net.getNetwork().getDhcp() != null) {
-                networkElementParseResult.setDhcp(net.getNetwork().getDhcp().toString());
+                networkElementParseResult.setDhcp(Boolean.TRUE.equals(net.getNetwork().getDhcp()) ? SPECIAL_STR_ON : SPECIAL_STR_OFF);
             }
             if (StringUtils.isNotEmpty(net.getNetwork().getCidr())) {
                 networkElementParseResult.setCidr(net.getNetwork().getCidr());
@@ -210,7 +210,7 @@ public class SceneParseResourceCenterV1 extends BaseSceneParseResourceCenter {
     private NetworkElementParseResultV2 buildNetworkElementParseResultV2(SceneElementBO e, CloudPluginSceneElementBO pluginElement) {
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         if (BaseSceneElementModel.Type.SWITCH == e.getType()) {
-            networkElementParseResult.setDhcp(Boolean.TRUE.equals(pluginElement.getDhcp()) ? "on" : "off");
+            networkElementParseResult.setDhcp(Boolean.TRUE.equals(pluginElement.getDhcp()) ? SPECIAL_STR_ON : SPECIAL_STR_OFF);
             networkElementParseResult.setCidr(pluginElement.getCidr());
             networkElementParseResult.setGateway(pluginElement.getGateway());
             networkElementParseResult.setDns(pluginElement.getDnsNameservers());

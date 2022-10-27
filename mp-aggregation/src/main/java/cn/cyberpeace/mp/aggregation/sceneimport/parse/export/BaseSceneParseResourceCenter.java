@@ -43,6 +43,10 @@ import java.util.stream.Collectors;
  */
 public class BaseSceneParseResourceCenter {
 
+    public static String SPECIAL_STR_ON = "mp_special_str_on";
+
+    public static String SPECIAL_STR_OFF = "mp_special_str_off";
+
     protected void handleNodeFile(List<NodeElementParseResult> nodes, Map<String, String> file2Download) {
         Map<String, Integer> fileName2Index = new HashMap<>();
         fileName2Index.put("file", 1);
