@@ -18,6 +18,7 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.cyberpeace.mp.collection.bo.AttackFlowBO;
 import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.ESIPFieldBo;
 import cn.cyberpeace.mp.collection.bo.FlowBO;
@@ -28,11 +29,16 @@ import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest.IPField;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest.AggType;
+import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
+import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.AttackCount;
+import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO.Count;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
+import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
+import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO.TeamAttackCount;
 import cn.hutool.core.collection.CollectionUtil;
 
 /**
@@ -78,6 +84,7 @@ public class FlowQueryService {
 			String levelName = getSeverityDisplayName(String.valueOf(level));
 			AttackLevelVO vo = resultMap.computeIfAbsent(levelName, k -> new AttackLevelVO());
 			vo.setSeverity(levelName);
+			vos.add(vo);
 
 			List<CountBO> bos = severityMap.get(String.valueOf(level));
 			if (bos != null) {
@@ -100,6 +107,73 @@ public class FlowQueryService {
 				}
 			}
 		}
+
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+	}
+	
+	/**
+	 * 战队攻击趋势
+	 * 
+	 * @return
+	 */
+	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
+		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTrend(esipFieldBos);
+		Map<String, TeamAttackTrendVO> resultMap = Maps.newHashMap();
+		
+		List<TeamAttackTrendVO> vos = Lists.newArrayList();
+		ipMap.entrySet().forEach(entry -> {
+			String team = getNameByIp(request, entry.getKey());
+			TeamAttackTrendVO vo = resultMap.computeIfAbsent(team, k -> new TeamAttackTrendVO());
+			vo.setName(team);
+			vos.add(vo);
+
+			List<CountBO> bos = entry.getValue();
+			if (bos != null) {
+				List<TeamAttackCount> countsAdd = bos.stream().map(bo -> {
+					TeamAttackCount c = new TeamAttackCount();
+					c.setTime(bo.getKey());
+					c.setSize(bo.getCount());
+					return c;
+				}).collect(Collectors.toList());
+
+				List<TeamAttackCount> countsOrig = vo.getTeamAttackCounts();
+				if (countsOrig == null) {
+					vo.setTeamAttackCounts(countsAdd);
+				} else {
+					int size = countsOrig.size();
+					for (int i = 0; i < size; i++) {
+						TeamAttackCount c = countsOrig.get(i);
+						c.setSize(c.getSize() + countsAdd.get(i).getSize());
+					}
+				}
+			}
+		});
+
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+	}
+	
+	/**
+	 * 攻击次数与流量大小（战队 or 设备）
+	 * 
+	 * @return
+	 */
+	public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(AttackFlowBaseRequest request) {
+		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<AttackFlowBO> bos = flowInfoService.queryAttackFlow(esipFieldBos);
+		
+		List<AggAttackFlowVO> vos = bos.stream().map(bo -> {
+			AttackCount attackCount = new AttackCount();
+			attackCount.setAttackCount(bo.getCount());
+			FlowSize flowSize = new FlowSize();
+			flowSize.setSize(bo.getSize());
+			
+			AggAttackFlowVO vo = new AggAttackFlowVO();
+			vo.setName(getNameByIp(request, bo.getIp()));
+			vo.setAttackCount(attackCount);
+			vo.setFlowSize(flowSize);
+			return vo;
+		}).collect(Collectors.toList());
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
 	}
@@ -143,13 +217,17 @@ public class FlowQueryService {
 	}
 
 	/**
-	 * 攻击手段占比top5
+	 * 攻击手段占比top5（全部队伍）
 	 * 
 	 * @return
 	 */
 	private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
 		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
-		List<CountBO> bos = flowInfoService.queryAttackType(esipFieldBos, request.getTopSize());
+		if(CollectionUtil.isNotEmpty(esipFieldBos)) {
+			return queryAttackTypeTop5ByTeamGroup(request);
+		}
+		
+		List<CountBO> bos = flowInfoService.queryAttackType(request.getTopSize());
 		double total = bos.get(0).getCount();
 		List<AttackFlowTopVO> vos = bos.subList(1, bos.size()).stream().map(bo -> {
 			AttackFlowTopVO vo = new AttackFlowTopVO();
@@ -158,6 +236,35 @@ public class FlowQueryService {
 			return vo;
 		}).collect(Collectors.toList());
 
+		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
+	}
+	
+	/**
+	 * 攻击手段占比top5（指定队伍）
+	 * 
+	 * @return
+	 */
+	private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5ByTeamGroup(AttackFlowTopRequest request) {
+		List<ESIPFieldBo> esipFieldBos = genIPFieldBos(request);
+		List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
+		
+		Map<String, AttackFlowTopVO> vosMap = Maps.newHashMap();
+		bos.forEach(bo -> {
+			String name = getNameByIp(request, bo.getIp());
+			AttackFlowTopVO vo = vosMap.computeIfAbsent(name, key -> new AttackFlowTopVO());
+			vo.setName(name);
+			vo.setCount(vo.getCount() + bo.getCount());
+		});
+
+		// // 排序取top5
+		List<AttackFlowTopVO> vos = vosMap.values().stream().collect(Collectors.toList());
+		vos.sort(Comparator.comparing(AttackFlowTopVO::getCount).reversed());
+		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
+		double total = vos.stream().mapToLong(AttackFlowTopVO::getCount).sum();
+		vos.forEach(v -> {
+			v.setPercent(v.getCount() / total);
+		});
+		
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size())).asResult();
 	}
 

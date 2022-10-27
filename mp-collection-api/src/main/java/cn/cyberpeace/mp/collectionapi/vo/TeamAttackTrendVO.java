@@ -3,11 +3,14 @@ package cn.cyberpeace.mp.collectionapi.vo;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 public class TeamAttackTrendVO {
+	
+	@ApiModelProperty(value = "战队名称")
+	private String name;
+	
     @ApiModelProperty(value = "战队攻击趋势")
     private List<TeamAttackCount> teamAttackCounts;
 
@@ -15,6 +18,6 @@ public class TeamAttackTrendVO {
     public static class TeamAttackCount {
         private long size;
 
-        private LocalDateTime time;
+        private String time;
     }
 }
