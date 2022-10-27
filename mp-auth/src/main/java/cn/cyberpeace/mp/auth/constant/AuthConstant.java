@@ -68,6 +68,7 @@ public class AuthConstant {
     public static final int MILLI_TO_SECOND = 1000;
 
     public static final String SEPARATOR_CHAR_DOT = ".";
+    public static final String JOIN_TYPES_DELIMITER = ",";
 
     /**
      * 导入用户头像max size：20M
