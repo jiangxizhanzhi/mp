@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class FlowAttackBO {
+public class AttackFlowBO {
     private String ip;
 
     private long count;

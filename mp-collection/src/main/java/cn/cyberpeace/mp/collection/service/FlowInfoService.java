@@ -7,10 +7,10 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
-import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.bo.ESIPFieldBo;
-import cn.cyberpeace.mp.collection.bo.FlowAttackBO;
+import cn.cyberpeace.mp.collection.bo.AttackFlowBO;
+import cn.cyberpeace.mp.collection.bo.AttackTypeBO;
 import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.FlowFileRoot;
@@ -45,7 +45,6 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.histogram.DateHistogramInterval;
 import org.elasticsearch.search.aggregations.bucket.histogram.LongBounds;
 import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.metrics.ParsedSum;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -148,14 +147,6 @@ public class FlowInfoService {
         return new ServiceResult<>(flowDetail);
     }
 
-    public ListObjServiceResult<FlowAttackBO> queryFlowAttack() {
-        var indexArray = getFlowIndex();
-        var searchRequest = new SearchRequest(indexArray);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        var sourceBuilder = new SearchSourceBuilder();
-        return null;
-    }
-
     //    /**
 //     * 删除从开始时间到结束时间内的文档
 //     * @param
@@ -228,10 +219,6 @@ public class FlowInfoService {
         boolQueryBuilder.filter(QueryBuilders.existsQuery("suricata.severity"));
     }
     
-    private void buildRuleIpQuery(List<String> ips, String ipField, BoolQueryBuilder boolQueryBuilder) {
-        boolQueryBuilder.filter(QueryBuilders.termsQuery(ipField, ips));
-    }
-
     private DeleteByQueryRequest buildDeleteRequest(LocalDateTime startTime, LocalDateTime endTime) {
         String[] indexArray = buildEsIndex(startTime, endTime);
         var deleteRequest = new DeleteByQueryRequest(indexArray);
@@ -410,140 +397,42 @@ public class FlowInfoService {
     }
     
 	/**
-	 * 特定ip设备被攻击总次数
+	 * 攻击次数与流量大小（战队 or 设备）
 	 * 
 	 * @param ips
 	 * @return
 	 */
-	public Long queryEquipmentAttackCount(List<String> ips) {
+	public List<AttackFlowBO> queryAttackFlow(List<ESIPFieldBo> esipFieldBos) {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(ips, "destination.ip", queryBuilder);
+		buildRuleIpQuery(esipFieldBos, queryBuilder);
 		
-		SearchResponse response = esAggrQuery(queryBuilder, null);
-
-		return response.getHits().getTotalHits().value;
-	}
-
-	/**
-	 * 特定ip设备被攻击总次数
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<CountBO> queryEquipmentAttackCountInfo(List<String> ips) {
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(ips, "destination.ip", queryBuilder);
-		
-		String aggrTerm = "des_ip_count";
-		AggregationBuilder aggrBuilder = AggregationBuilders.terms(aggrTerm).field("destination.ip");
-		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
-		
-		ParsedTerms parsedTerms = response.getAggregations().get(aggrTerm);
-		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
-		return buckets.stream().map(bucket -> {
-			return new CountBO(bucket.getKeyAsString(), bucket.getDocCount());
-		}).collect(Collectors.toList());
-	}
-
-	/**
-	 * 设备被攻击手法top5
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<CountBO> queryEquipmentAttackTypeTop5(List<String> ips) {
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(ips, "destination.ip", queryBuilder);
-		
-		String aggrTerm = "cate_count";
-		AggregationBuilder aggrBuilder = AggregationBuilders.terms(aggrTerm).field("suricata.category")
-				.order(BucketOrder.count(false)).size(5);
-		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
-		
-		ParsedTerms parsedTerms = response.getAggregations().get(aggrTerm);
-		List<? extends Terms.Bucket> buckets = parsedTerms.getBuckets();
-		return buckets.stream().map(bucket -> {
-			return new CountBO(bucket.getKeyAsString(), bucket.getDocCount());
-		}).collect(Collectors.toList());
-	}
-	
-	/**
-	 * 设备被攻击次数、流量大小、攻击手法占比
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<FlowAttackBO> queryFlowAttackInfo(List<String> ips) {
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(ips, "destination.ip", queryBuilder);
-		
-		String ipTerm = "target_ip", typeTerm = "attack_type", sumTerm = "flow_sum";
-		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field("destination.ip")
-				.subAggregation(AggregationBuilders.terms(typeTerm).field("suricata.category"))
+		String ipTerm = "target_ip", sumTerm = "flow_sum", ipField = esipFieldBos.get(0).getIPFieldName();
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
 				.subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
-		List<FlowAttackBO> bos = Lists.newArrayList();
+		List<AttackFlowBO> bos = Lists.newArrayList();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
 		parsedTermsIp.getBuckets().forEach(bucketIp -> {
 			ParsedSum sum = bucketIp.getAggregations().get(sumTerm);
-			FlowAttackBO bo = new FlowAttackBO();
+			AttackFlowBO bo = new AttackFlowBO();
 			bo.setIp(bucketIp.getKeyAsString());
 			bo.setSize((long) sum.getValue());
 			bo.setCount(bucketIp.getDocCount());
 			bos.add(bo);
-
-			// 攻击类型列表
-			List<AttackTypeBO> attackTypes = Lists.newArrayList();
-			bo.setAttackTypes(attackTypes);
-			ParsedTerms parsedTermsType = bucketIp.getAggregations().get(typeTerm);
-			parsedTermsType.getBuckets().forEach(bucketType -> {
-				AttackTypeBO typeBO = new AttackTypeBO();
-				typeBO.setEnName(bucketType.getKeyAsString());
-				typeBO.setCount(bucketType.getDocCount());
-				attackTypes.add(typeBO);
-			});
 		});
 
 		return bos;
 	}
 	
 	/**
-	 * 每个队伍的攻击次数(累计) top10
+	 * 攻击类型占比top5（所有队伍）
 	 * 
 	 * @param ips
 	 * @return
 	 */
-	public List<CountBO> queryTeamAttackCount(List<String> ips) {
-		String ipTerm = "source_ip", ipField = "source.ip";
+	public List<CountBO> queryAttackType(int topSize) {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(ips, ipField, queryBuilder);
-		
-		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
-				.order(BucketOrder.count(false)).size(10);
-		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
-
-		List<CountBO> bos = Lists.newArrayList();
-		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
-		parsedTermsIp.getBuckets().forEach(bucketIp -> {
-			CountBO bo = new CountBO();
-			bo.setKey(bucketIp.getKeyAsString());
-			bo.setCount(bucketIp.getDocCount());
-			bos.add(bo);
-		});
-
-		return bos;
-	}
-	
-	/**
-	 * 所有队伍的攻击类型占比top5
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<CountBO> queryAttackType(List<ESIPFieldBo> esipFieldBos, int topSize) {
-		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-		buildRuleIpQuery(esipFieldBos, queryBuilder);
 		
 		String typeTerm = "cate";
 		AggregationBuilder aggrBuilder = AggregationBuilders.terms(typeTerm).field("suricata.category")
@@ -569,6 +458,74 @@ public class FlowInfoService {
 	}
 	
 	/**
+	 * 攻击类型占比top5（指定队伍）
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public List<AttackFlowBO> queryAttackType(List<ESIPFieldBo> esipFieldBos) {
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildRuleIpQuery(esipFieldBos, queryBuilder);
+		
+		String ipTerm = "target_ip", cateTerm = "cate";
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(esipFieldBos.get(0).getIPFieldName())
+				.subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
+		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
+
+		List<AttackFlowBO> bos = Lists.newArrayList();
+		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
+		parsedTermsIp.getBuckets().forEach(bucketIp -> {
+			AttackFlowBO attackFlowBO = new AttackFlowBO();
+			attackFlowBO.setIp(bucketIp.getKeyAsString());
+			List<AttackTypeBO> attackTypes = Lists.newArrayList();
+			attackFlowBO.setAttackTypes(attackTypes);
+			bos.add(attackFlowBO);
+			
+			ParsedTerms parsedTermsCate = bucketIp.getAggregations().get(cateTerm);
+			parsedTermsCate.getBuckets().forEach(bucketCate -> {
+				AttackTypeBO bo = new AttackTypeBO();
+				bo.setEnName(bucketCate.getKeyAsString());
+				bo.setCount(bucketIp.getDocCount());
+				attackTypes.add(bo);
+			});
+		});
+
+		return bos;
+	}
+	
+	/**
+	 * 总体攻击趋势
+	 * 
+	 * @param ips
+	 * @return
+	 */
+	public List<CountBO> queryAttackTrend() {
+		long endTime = Calendar.getInstance().getTimeInMillis();
+		long startTime = endTime - 70 * 60000L; // 分7段，每段间隔10分钟
+
+		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+		buildRuleStarTimeQuery(startTime, queryBuilder);
+		buildRuleEndTimeQuery(endTime, queryBuilder);
+		buildSeverityQuery(queryBuilder);
+
+		String typeTerm = "date";
+		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(typeTerm).field("@timestamp").fixedInterval(
+				DateHistogramInterval.minutes(10)).hardBounds(new LongBounds(startTime, endTime)).format("HH:mm");
+		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
+
+		List<CountBO> bos = Lists.newArrayList();
+		ParsedTerms parsedTermsDate = response.getAggregations().get(typeTerm);
+		parsedTermsDate.getBuckets().forEach(bucketDate -> {
+			CountBO bo = new CountBO();
+			bo.setKey(bucketDate.getKeyAsString());
+			bo.setCount(bucketDate.getDocCount());
+			bos.add(bo);
+		});
+
+		return bos;
+	}
+	
+	/**
 	 * 攻击告警级别趋势
 	 * 
 	 * @param ips
@@ -576,7 +533,7 @@ public class FlowInfoService {
 	 */
 	public Map<String, List<CountBO>> queryAttackLevel() {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 4200000L; // 分7段，每段间隔10分钟
+		long startTime = endTime - 70 * 60000L; // 分7段，每段间隔10分钟
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleStarTimeQuery(startTime, queryBuilder);
@@ -608,61 +565,46 @@ public class FlowInfoService {
 	}
 	
 	/**
-	 * 总体攻击趋势
+	 * 战队攻击趋势
 	 * 
 	 * @param ips
 	 * @return
 	 */
-	public List<CountBO> queryAttackTrend() {
+	public Map<String, List<CountBO>> queryTeamAttackTrend(List<ESIPFieldBo> esipFieldBos) {
 		long endTime = Calendar.getInstance().getTimeInMillis();
-		long startTime = endTime - 4200000L; // 分10段，每段间隔10分钟
+		long startTime = endTime - 365 * 60000L; // 六小时, 五分钟间隔
 
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleStarTimeQuery(startTime, queryBuilder);
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 		buildSeverityQuery(queryBuilder);
 
-		String typeTerm = "date";
-		AggregationBuilder aggrBuilder = AggregationBuilders.dateHistogram(typeTerm).field("@timestamp").fixedInterval(
-				DateHistogramInterval.minutes(10)).hardBounds(new LongBounds(startTime, endTime)).format("HH:mm");
+		String ipTerm = "target_ip", histogramTerm = "histogram", sumTerm = "flow_sum";
+		AggregationBuilder aggrBuilder = AggregationBuilders.terms(ipTerm).field(esipFieldBos.get(0).getIPFieldName())
+				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+						.fixedInterval(DateHistogramInterval.minutes(5)).hardBounds(new LongBounds(startTime, endTime))
+						.format("HH:mm").subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes")));
 		SearchResponse response = esAggrQuery(queryBuilder, aggrBuilder);
 
-		List<CountBO> bos = Lists.newArrayList();
-		ParsedTerms parsedTermsDate = response.getAggregations().get(typeTerm);
-		parsedTermsDate.getBuckets().forEach(bucketDate -> {
-			CountBO bo = new CountBO();
-			bo.setKey(bucketDate.getKeyAsString());
-			bo.setCount(bucketDate.getDocCount());
-			bos.add(bo);
+		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
+		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
+		parsedTermsIp.getBuckets().forEach(bucketIp -> {
+			String ip = bucketIp.getKeyAsString();
+			
+			List<CountBO> bos = Lists.newArrayList();
+			ParsedTerms parsedTermsHistogram = bucketIp.getAggregations().get(histogramTerm);
+			parsedTermsHistogram.getBuckets().forEach(bucketHistogram -> {
+				ParsedSum sum = bucketHistogram.getAggregations().get(sumTerm);
+				
+				CountBO bo = new CountBO();
+				bo.setKey(bucketHistogram.getKeyAsString());
+				bo.setCount((long) sum.getValue());
+				bos.add(bo);
+			});
+			ipMap.put(ip, bos);
 		});
 
-		return bos;
-	}
-	
-	/**
-	 * 攻击告警级别趋势
-	 * 
-	 * @param ips
-	 * @return
-	 */
-	public List<CountBO> queryLevelTrend(List<String> ips) {
-		List<CountBO> bos = Lists.newArrayList();
-		long endTime = Calendar.getInstance().getTimeInMillis();
-		for(int i = 0; i< 10; i++) {
-			endTime = endTime - i * 600000L; // 间隔10分钟
-			
-			BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-			buildRuleIpQuery(ips, "source.ip", queryBuilder);
-			buildRuleEndTimeQuery(endTime, queryBuilder);
-			SearchResponse response = esAggrQuery(queryBuilder, null);
-
-			CountBO bo = new CountBO();
-			bo.setKey(endTime + "");
-			bo.setCount(response.getHits().getTotalHits().value);
-			bos.add(bo);
-		}
-
-		return bos;
+		return ipMap;
 	}
 	
 	/**
