@@ -28,12 +28,17 @@ public class FlowStartPostProcessor {
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 FlowCallBackTask task = queue.poll();
-                boolean result = task.action();
-                if (!result) {
+                try {
+                    boolean result = task.action();
+                    if (!result) {
+                        addTask(task);
+                    }
+                } catch (Exception e) {
                     addTask(task);
+                    e.printStackTrace();
                 }
             }
-            System.out.println("============ 流量任务后置执行器 启动 =============");
+            System.out.println("============ 流量任务后置执行器 停止 =============");
         }, 10, 10, TimeUnit.SECONDS);
     }
 

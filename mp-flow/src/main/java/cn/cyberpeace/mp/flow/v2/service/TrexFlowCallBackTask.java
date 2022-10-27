@@ -1,8 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.common.BeanCommon;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultLong;
-import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.trex.QueryTaskLastStatus;
@@ -13,7 +11,6 @@ import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
-import jdk.dynalink.linker.LinkerServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +26,7 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
     private FlowTaskRecordBO flowTaskRecordBO;
     private FlowTaskCountService flowTaskCountService;
     private TrexClient trexClient;
+
     public TrexFlowCallBackTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         this.flowTaskRecordBO = flowTaskRecordBO;
         this.trexClient = new TrexClient(generatorBO.getServer());
@@ -57,21 +55,25 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
         var taskStatus = trexClient.queryTaskLastStatus(queryTaskLastStatus);
         Map<String, TaskStatusData.singleTask> allTaskStatus = new HashMap<>();
         taskStatus.getRows().stream().forEach(t -> {
-            allTaskStatus.put(t.getTaskUuid(),t);
+            allTaskStatus.put(t.getTaskUuid(), t);
         });
         var targetTask = allTaskStatus.get(flowTaskRecordBO.getId());
 
-        FlowTaskCountModel flowTaskCountModel = new FlowTaskCountModel();
-        flowTaskCountModel.setFlowId(targetTask.getFlowId());
-        flowTaskCountModel.setFlowTaskRecordId(flowTaskRecordBO.getId());
-        flowTaskCountModel.setFlowGeneratorId(flowTaskRecordBO.getFlowGeneratorId());
-        flowTaskCountModel.setBandwidth(1L);
-        flowTaskCountModel.setTcpConnectTry(1L);
-        flowTaskCountModel.setPackets(targetTask.getOpackets());
-        flowTaskCountModel.setTcp_connect_success(1L);
-        // todo : 此处可能有去重问题，暂时忽略
-        flowTaskCountMapper.create(flowTaskCountModel);
+        if (targetTask != null) {
+            FlowTaskCountModel flowTaskCountModel = new FlowTaskCountModel();
+            flowTaskCountModel.setFlowId(targetTask.getFlowId());
+            flowTaskCountModel.setFlowTaskRecordId(flowTaskRecordBO.getId());
+            flowTaskCountModel.setFlowGeneratorId(flowTaskRecordBO.getFlowGeneratorId());
+            flowTaskCountModel.setBandwidth(1L);
+            flowTaskCountModel.setTcpConnectTry(1L);
+            flowTaskCountModel.setPackets(targetTask.getOpackets());
+            flowTaskCountModel.setTcp_connect_success(1L);
+            // todo : 此处可能有去重问题，暂时忽略
+            flowTaskCountMapper.create(flowTaskCountModel);
+        }
         if (recordModel.getStatus() == 2) {
+            return true;
+        } else if (recordModel.getStatus() == 3) {
             return true;
         }
         return false;
