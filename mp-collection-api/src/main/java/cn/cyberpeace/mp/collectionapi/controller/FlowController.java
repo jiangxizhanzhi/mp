@@ -1,13 +1,5 @@
 package cn.cyberpeace.mp.collectionapi.controller;
 
-import javax.annotation.Resource;
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
@@ -23,8 +15,14 @@ import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/flow")
@@ -50,7 +48,6 @@ public class FlowController {
 	
 	@GetMapping("/team_attack_trend")
 	@ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowBaseRequest.class)
 	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
 		// todo 每个战队一个ip
 		return flowQueryService.teamAttackTrend(request);
@@ -72,29 +69,25 @@ public class FlowController {
 
 	@GetMapping("/agg_attack_flow")
 	@ApiOperation(value = "获取指定ip集合攻击次数与流量大小")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackAggTopRequest.class)
 	public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
 		return flowQueryService.getAttackFlow(request);
 	}
 
 	@GetMapping("/attack_top")
 	@ApiOperation(value = "获取top数据,(降序)默认全部")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackFlowTopRequest.class)
 	public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
 		return flowQueryService.getAttackTop(request);
 	}
 
 	@GetMapping("/attack_agg_top")
 	@ApiOperation(value = "获取top聚合数据,(降序)默认全部")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackAggTopRequest.class)
 	public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
 		return flowQueryService.getTeamAttackAggTop(request);
 	}
 
     @GetMapping("/attack_target_top")
     @ApiOperation(value = "获取攻击目标top数据,默认全部")
-    @ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackTargetTopRequest.class)
-    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(AttackTargetTopRequest request) {
+    public ListObjServiceResult<AttackTargetTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         return null;
     }
     
