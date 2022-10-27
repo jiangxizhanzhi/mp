@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
+import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
 import cn.cyberpeace.mp.collectionapi.util.ContestConfigUtil;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
@@ -24,21 +25,20 @@ import cn.cyberpeace.mp.collectionapi.vo.FlowAttackVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
-import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-
-import org.springframework.web.bind.annotation.*;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.annotation.Resource;
 
 @RestController
 @RequestMapping("/flow")
@@ -216,7 +216,6 @@ public class FlowController {
 
 	@GetMapping("/attack_agg_top")
 	@ApiOperation(value = "获取top聚合数据,(降序)默认全部")
-	@ApiImplicitParam(name = "request", value = "请求体", dataTypeClass = AttackAggTopRequest.class)
 	public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
 		return flowQueryService.getTeamAttackAggTop(request);
 	}
