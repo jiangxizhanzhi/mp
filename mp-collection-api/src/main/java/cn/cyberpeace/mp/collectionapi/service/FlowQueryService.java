@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.collection.bo.EsIpFieldBO;
 import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.bo.TeamAttackCountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
+import cn.cyberpeace.mp.collection.util.MessageCommonUtil;
 import cn.cyberpeace.mp.collectionapi.constant.CollectionApiConstant;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
@@ -351,6 +352,7 @@ public class FlowQueryService {
 			FlowVO vo = new FlowVO();
 			BeanUtils.copyProperties(bo, vo);
 			vo.setSeverity(getSeverityDisplayName(vo.getSeverity()));
+			vo.setAttackType(MessageCommonUtil.convertMessage(vo.getAttackType()));
 			return vo;
 		}).collect(Collectors.toList());
 
