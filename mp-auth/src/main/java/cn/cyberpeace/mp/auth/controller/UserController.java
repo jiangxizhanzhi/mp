@@ -164,18 +164,12 @@ public class UserController extends BaseModelController<UserModel, UserQueryPara
 
         log.info("login info userId: {}, institutedId: {}", userId, institutedId);
         BaseUserInfo userInfo = new BaseUserInfo();
-//        boolean canLogin = false;
         try {
             userInfo = UserInfoUtil.getLoginUserAndPrivileges(userId, institutedId, sysIdstr);
             log.info("getLoginUserAndPrivileges userInfo: {}", userInfo);
-//            canLogin = UserInfoUtil.authenticate(userInfo, userInfo.getPassword());
         } catch (Exception e) {
             log.error("get userInfo failed: ", e);
         }
-//        if (!canLogin) {
-//            log.error("this user can not login");
-//            return;
-//        }
         if (userInfo != null) {
             if (userInfo.getUser() != null && userInfo.getUser().getUsrId() != null) {
                 UserDto userDto = getModelService().getUserDto(userInfo.getUser().getUsrId());
