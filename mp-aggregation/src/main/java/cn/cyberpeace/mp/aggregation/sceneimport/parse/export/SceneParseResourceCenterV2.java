@@ -294,7 +294,7 @@ public class SceneParseResourceCenterV2 extends BaseSceneParseResourceCenter{
         NetworkElementParseResultV2 networkElementParseResult = new NetworkElementParseResultV2();
         networkElementParseResult.setName(e.getName());
         if (BaseSceneElementModel.Type.SWITCH == e.getType()) {
-            networkElementParseResult.setDhcp(Boolean.TRUE.equals(pluginElement.getDhcp()) ? "on" : "off");
+            networkElementParseResult.setDhcp(Boolean.TRUE.equals(pluginElement.getDhcp()) ? SPECIAL_STR_ON : SPECIAL_STR_OFF);
             networkElementParseResult.setCidr(pluginElement.getCidr());
             networkElementParseResult.setGateway(pluginElement.getGateway());
             networkElementParseResult.setDns(pluginElement.getDnsNameservers());

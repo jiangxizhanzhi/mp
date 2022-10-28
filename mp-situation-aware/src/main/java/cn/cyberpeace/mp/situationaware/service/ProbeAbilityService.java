@@ -38,7 +38,6 @@ public class ProbeAbilityService {
      * @return
      */
     public PageInfo<ProbeAbilityDto> page(ProbePageQueryRequest pageRequest) {
-        log.info("pageRequest:{}", pageRequest);
         pageRequest.ensure();
 
         ProbeSearchCondition condition = new ProbeSearchCondition();

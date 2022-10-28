@@ -1,11 +1,12 @@
 package cn.cyberpeace.mp.frontadmin.service.sys.activmenu;
 
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.bo.target.TargetActivBo;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.model.TargetModel;
 import cn.cyberpeace.mp.auth.service.TargetService;
 import cn.cyberpeace.mp.auth.service.UserCacheService;
 import cn.cyberpeace.mp.base.common.JsonCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.common.constant.CommonConstant;
@@ -14,9 +15,9 @@ import cn.cyberpeace.mp.common.service.OptionService;
 import cn.cyberpeace.mp.frontadmin.constant.AdminConstant;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivMenuDTO;
 import cn.cyberpeace.mp.frontadmin.dto.activation.ActivationItem;
-import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.dto.option.OptionMetaModel;
 import cn.cyberpeace.mp.frontadmin.model.MenuExtraInfoModel;
+import cn.cyberpeace.mp.frontadmin.response.activation.ActivationResponse;
 import cn.cyberpeace.mp.frontadmin.service.sys.SysActivationService;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
@@ -103,8 +104,6 @@ public class ActivMenuService {
             processMenuVisibility(targetModels, menuExtraInfoModels, content);
         }
 
-        log.info("targetModels.size:{}", targetModels.size());
-
         boolean success = reImportSupportService.rebuildAllMenusAndExtraInfos(targetModels, menuExtraInfoModels);
         evictCache();
         return success;
@@ -118,11 +117,14 @@ public class ActivMenuService {
      * @return
      */
     public boolean resetMenusVisibility(ActivationResponse content) {
-        log.info("resetMenusVisibility...");
         if (Objects.isNull(content)) {
             return false;
         }
         List<TargetModel> allTargets = targetService.listAllIgnoreVisible(AuthConstant.DEFAULT_TENANT, TargetModel.TYPE_MENU);
+        if (CollectionUtil.isEmpty(allTargets)) {
+            log.error("targets is null! please check!");
+            throw new MpRuntimeException("targets is null!");
+        }
         List<MenuExtraInfoModel> menuExtraInfos = menuExtraInfoService.listAll();
 
         processMenuVisibility(allTargets, menuExtraInfos, content);
@@ -140,7 +142,6 @@ public class ActivMenuService {
      * @return
      */
     public void resetOptionsVisibility(ActivationResponse content) {
-        log.info("resetOptionsVisibility...");
         if (Objects.isNull(content)) {
             return;
         }
@@ -167,6 +168,11 @@ public class ActivMenuService {
         QueryParams queryParams = new QueryParams();
         ListObjServiceResult<OptionModel> optionModelResult = optionService.list(queryParams);
         List<OptionModel> optionModels = optionModelResult.getSource().getObjs();
+
+        if (CollectionUtil.isEmpty(optionModels)) {
+            log.error("optionModels is null! please check!");
+            throw new MpRuntimeException("optionModels is null!");
+        }
 
         List<OptionModel> toUpdateList = new ArrayList<>();
         LocalDateTime updatime = LocalDateTime.now();
@@ -315,9 +321,6 @@ public class ActivMenuService {
      * 如果一个menu edition[]跟激活状态的edition对应得上，并且active[]内有激活项中value为1的key，或者no_auth的，则最终的visible=1
      */
     private void processMenuVisibility(List<TargetModel> targetModels, List<MenuExtraInfoModel> menuExtraInfos, ActivationResponse activationResponse) {
-        log.info("targetModels:{}", targetModels);
-        log.info("menuExtraInfos:{}", menuExtraInfos);
-        log.info("activationResponse:{}", activationResponse);
         List<ActivationItem> items = activationResponse.getItems();
 
         String edition = String.valueOf(activationResponse.getEdition());

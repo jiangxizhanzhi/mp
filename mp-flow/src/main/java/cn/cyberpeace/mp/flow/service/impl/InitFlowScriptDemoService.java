@@ -5,6 +5,7 @@ import cn.cyberpeace.mp.flow.model.FlowScriptDemoModel;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -45,7 +46,6 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
         try {
             List<FlowScriptDemoModel> demoList = flowScriptDemoService.listAll(null);
             if (CollectionUtils.isEmpty(demoList)) {
-                log.info("============ init script demo start ==============");
                 pyDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/flow/demo_py.py"));
                 shDemo = Objects.requireNonNull(this.getClass().getClassLoader().getResourceAsStream("scriptdemo/flow/demo_sh.sh"));
 
@@ -78,13 +78,11 @@ public class InitFlowScriptDemoService implements CommandLineRunner {
                 addDemoList.add(probePyModel);
                 addDemoList.add(probeBatModel);
                 flowScriptDemoService.bulkCreate(addDemoList);
-
-                log.info("============ init script demo end ==============");
             } else {
                 log.info("============ no need to init script demo ==============");
             }
         } catch (Exception e) {
-            log.error("init flow script demo error", e);
+            log.error("init flow script demo error, {}", ExceptionUtils.getStackTrace(e));
         } finally {
             IOUtils.closeQuietly(pyDemo);
             IOUtils.closeQuietly(shDemo);

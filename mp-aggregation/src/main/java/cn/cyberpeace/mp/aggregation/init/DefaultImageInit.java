@@ -28,7 +28,6 @@ public class DefaultImageInit implements ApplicationRunner {
         }
 
         TaskCommon.executeTask(() -> {
-            log.info("syncDir do DefaultImageInit start");
             String startWithFile = "file:";
             String staticLocation = AggregationSingleton.aggregationConfig.getStaticLocation();
             if (staticLocation.startsWith(startWithFile)) {
@@ -43,8 +42,6 @@ public class DefaultImageInit implements ApplicationRunner {
                     }
                 }
             }
-
-            log.info("syncDir do DefaultImageInit end");
         });
     }
 

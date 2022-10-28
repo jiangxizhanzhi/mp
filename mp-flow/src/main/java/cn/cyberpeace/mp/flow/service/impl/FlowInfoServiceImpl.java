@@ -31,6 +31,7 @@ import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.field.FlowInfoFields;
+import cn.cyberpeace.mp.situationaware.utils.MessageCommonUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -39,6 +40,7 @@ import com.alibaba.fastjson.JSONObject;
 import io.micrometer.core.instrument.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -244,6 +246,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                                         return scriptParam;
                                     }).filter(param -> model.getId().equals(param.getFlowId())).collect(Collectors.toList());
                         }
+                        this.internationalize(model);
                         FlowInfoResponse response = new FlowInfoResponse(model, currentFlowParamModels);
                         return response;
                     })
@@ -251,6 +254,23 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         }
 
         return new ListObjServiceResult<>(new ListObjResult<>(responseList, listObjServiceResult.getSource().getTotal())).asResult();
+    }
+
+    /**
+     * 流量包国际化处理
+     * @param flowInfoModel
+     */
+    private void internationalize(FlowInfoModel flowInfoModel) {
+        flowInfoModel.setTitle(MessageCommonUtil.convertMessage(flowInfoModel.getTitle()));
+        flowInfoModel.setFlowDesc(MessageCommonUtil.convertMessage(flowInfoModel.getFlowDesc()));
+        String fileName = flowInfoModel.getFileName();
+        if (fileName.endsWith(".pcap")) {
+            fileName = fileName.substring(0, fileName.length() - 5);
+            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".pcap"));
+        } else if (fileName.endsWith(".py")) {
+            fileName = fileName.substring(0, fileName.length() - 3);
+            flowInfoModel.setFileName(MessageCommonUtil.convertMessage(fileName).concat(".py"));
+        }
     }
 
     /**
@@ -287,6 +307,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
+            this.internationalize(flowInfoModel);
             if (InteractiveTypeEnum.BACKGROUND.toValue() != flowInfoModel.getInteractiveType()) {
                 return ResultCommon.fail(FlowErrorCode.NOT_BACKGROUND_FLOW);
             }
@@ -310,6 +331,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         ObjResult<FlowInfoModel> objResult = get(id).getSource();
         if (Objects.nonNull(objResult)) {
             FlowInfoModel flowInfoModel = objResult.getObj();
+            this.internationalize(flowInfoModel);
             if (InteractiveTypeEnum.ATTACK.toValue() != flowInfoModel.getInteractiveType()) {
                 return ResultCommon.fail(FlowErrorCode.NOT_ATTACK_FLOW);
             }
@@ -359,7 +381,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         try {
             filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
         } catch (IOException e) {
-            log.error("upload pcap file error", e);
+            log.error("upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
             return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
         }
         addRequest.setPcapFilePath(filePath);
@@ -449,7 +471,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 String filePath = FsCommon.upload(is, suffix);
                 addRequest.setFilePath(filePath);
             } catch (MpRuntimeException e) {
-                log.error("add attack flow error", e);
+                log.error("add attack flow error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.ADD_ATTACK_FLOW_ERROR);
             } finally {
                 IOUtils.closeQuietly(is);
@@ -490,7 +512,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             try {
                 filePath = FsCommon.upload(addRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
-                log.error("attack upload pcap file error", e);
+                log.error("attack upload pcap file error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             addRequest.setPcapFilePath(filePath);
@@ -545,7 +567,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             try {
                 filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
             } catch (IOException e) {
-                log.error("upload pcap file for update error", e);
+                log.error("upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                 return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
             }
             modifyRequest.setPcapFilePath(filePath);
@@ -630,7 +652,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                         String filePath = FsCommon.upload(is, suffix);
                         modifyRequest.setFilePath(filePath);
                     } catch (MpRuntimeException e) {
-                        log.error("modify attack flow error", e);
+                        log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                         return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                     } finally {
                         IOUtils.closeQuietly(is);
@@ -657,7 +679,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                     String filePath = FsCommon.upload(is, suffix);
                     modifyRequest.setFilePath(filePath);
                 } catch (MpRuntimeException e) {
-                    log.error("modify attack flow error", e);
+                    log.error("modify attack flow error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.MODIFY_ATTACK_FLOW_ERROR);
                 } finally {
                     IOUtils.closeQuietly(is);
@@ -699,7 +721,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                 try {
                     filePath = FsCommon.upload(modifyRequest.getPcapFile().getInputStream(), suffix);
                 } catch (IOException e) {
-                    log.error("attack upload pcap file for update error", e);
+                    log.error("attack upload pcap file for update error, {}", ExceptionUtils.getStackTrace(e));
                     return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
                 }
                 modifyRequest.setPcapFilePath(filePath);
@@ -828,20 +850,16 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      */
     public ServiceResult<Boolean> batchImportFlowInfo() {
         String pcapPath = PRE_PATH + "/pcap";
-        log.info("导入pcap文件开始,pcapPath:{}", pcapPath);
         File pcapFile = new File(pcapPath);
         if (!this.doImport(pcapFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入pcap文件结束");
 
         String scriptPath = PRE_PATH + "/scripts";
-        log.info("导入script文件开始,scriptPath:{}", scriptPath);
         File scriptFile = new File(scriptPath);
         if (!this.doImport(scriptFile)) {
             return new ServiceResult<>(false);
         }
-        log.info("导入script文件结束");
 
         return new ServiceResult<>(true);
     }
@@ -939,7 +957,6 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
      * @return
      */
     public ServiceResult<Boolean> flowImport(ImportFlowInfoRequest request) {
-        log.info("flow file import request: {}", request);
         String filePath = request.getPath();
         File fileFolder = new File(filePath);
         if (fileFolder.exists()) {
@@ -977,10 +994,10 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
                             // 过滤空行数据
                             readmeList = readmeList.stream().filter(text -> StringUtils.isNotBlank(text)).collect(Collectors.toList());
                         } catch (FileNotFoundException e) {
-                            log.error("flow info import error for FileNotFoundException", e);
+                            log.error("flow info import error for FileNotFoundException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
                         } catch (IOException e) {
-                            log.error("flow info import error for IOException", e);
+                            log.error("flow info import error for IOException, {}", ExceptionUtils.getStackTrace(e));
                             return ResultCommon.fail("flow file import error");
                         } finally {
                             IOUtils.closeQuietly(fileReader);
@@ -997,7 +1014,7 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             FlowInfoModel flowInfoModel = new FlowInfoModel();
             String fileName = readmeList.get(1);
-            flowInfoModel.setTitle(fileName);
+            flowInfoModel.setTitle(fileName.split(BaseConstants.SPOT)[0]);
 
             // 重名校验
             FlowInfoModel existFlowInfoModel = getModelMapper().selectByTitle(fileName);
@@ -1022,17 +1039,20 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
 
             // 是否pcap
             boolean isPcap = pcapFile.getName().endsWith("pcap");
-//            boolean isAttackFlow = readmeList.get(13 - diffCount).contains("攻击流量");
             if (isPcap) {
-                // 背景流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.PACP.toValue());
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
                 flowInfoModel.setPcapFile(fdfsPath);
             } else {
-                // 攻击流量
                 flowInfoModel.setResourceType(ResourceTypeEnum.SCRIPT.toValue());
-                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
                 flowInfoModel.setScriptFile(fdfsPath);
+            }
+            boolean isBackFlow = readmeList.get(13 - diffCount).contains("背景流量");
+            if (isBackFlow) {
+                // 背景流量
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.BACKGROUND.toValue());
+            } else {
+                // 攻击流量
+                flowInfoModel.setInteractiveType(InteractiveTypeEnum.ATTACK.toValue());
             }
             this.create(flowInfoModel);
 

@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +61,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
         try {
             t = super.sendPost(LIST_URL, JSONObject.toJSONString(new LogListParams()), CloudPlatformItemsResult.class);
         } catch (Exception e) {
-            log.error("list cp log error", e);
+            log.error("list cp log error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
         }
         if (Objects.isNull(t) || !t.isSuccess() ){
@@ -121,7 +122,7 @@ public class CpLogFileServiceImpl extends BaseCpHttpService implements LogFileSe
             }
             bos.flush();
         } catch (IOException e) {
-            log.error("download cp log error", e);
+            log.error("download cp log error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(LogErrorCode.REQUEST_CLOUD_INTERFACE_BUSINESS_ERROR.format("CP Service Error"));
         } finally {
             IOUtils.closeQuietly(inputStream);

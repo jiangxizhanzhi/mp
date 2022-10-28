@@ -21,7 +21,7 @@ public class ServerConfigListenerRunner implements ApplicationRunner {
 
 
     public String getUrl() {
-        return "http://" + devopsClusterConfig.getMpIp();
+        return "http://" + devopsClusterConfig.getMpIp() + ":" + devopsClusterConfig.getMpPort();
     }
 
     @Override

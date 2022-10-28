@@ -23,6 +23,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.MessageSource;
@@ -245,7 +246,7 @@ public class OperateLogSqlServiceImpl extends BaseModelServiceImpl<OperateLogSql
             return messageSource.getMessage(msgKey, params, locale);
         } catch (Exception e) {
             log.error("Get message by key `{}` params `{}` on locale {} failed: {}", msgKey, params,
-                    locale, e.getMessage());
+                    locale, ExceptionUtils.getStackTrace(e));
             return msgKey;
         }
     }

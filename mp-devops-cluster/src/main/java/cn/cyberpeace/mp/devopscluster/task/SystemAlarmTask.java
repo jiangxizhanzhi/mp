@@ -62,7 +62,6 @@ public class SystemAlarmTask {
      */
     @Scheduled(initialDelay = 1000 * 60, fixedRate = 1000 * 60 * 5)
     private void getSystemAlarm() {
-        log.info("====>>>>>>get systemAlarm info task start<<<<<========");
         List<SystemAlarmModel> alarmModels = new ArrayList<>();
         SystemAlarmVO systemAlarmVO = serviceMonitorService.getSystemAlarm();
 
@@ -130,15 +129,12 @@ public class SystemAlarmTask {
 
         // 生成告警统计信息
         this.genAlarmStatistics();
-
-        log.info("====>>>>>>get systemAlarm info task end<<<<<========");
     }
 
     /**
      * 生成告警统计信息
      */
     private void genAlarmStatistics() {
-        log.info("====>>>>>>gen alarmStatistics info task start<<<<<========");
         // 当前告警信息
         List<AlarmCountVO> alarmCountVOs = systemAlarmService.todayAlarmCount();
         // 已有告警数量统计信息
@@ -173,8 +169,6 @@ public class SystemAlarmTask {
         } else {
             this.addAlarmStatistics(alarmCountVOs);
         }
-
-        log.info("====>>>>>>gen alarmStatistics info task end<<<<<========");
     }
 
     /**

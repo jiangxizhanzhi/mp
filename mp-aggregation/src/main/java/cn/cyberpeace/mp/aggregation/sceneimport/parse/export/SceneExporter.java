@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.export;
 
+import cn.cyberpeace.mp.aggregation.constant.AggregationSingleton;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.InitCommandParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image.AccessModeParseResult;
 import cn.cyberpeace.mp.aggregation.sceneimport.parse.result.v2.YmlParseResultV2;
@@ -89,7 +90,7 @@ public class SceneExporter {
                 params.setImageName(device.getImage());
                 params.setDestPath(currentImageDir);
                 var result = new Remote().cloudGet(EXPORT_DEVICE_YML, params, new TypeReference<CloudResponse<Map>>() {
-                }, true);
+                }, true, AggregationSingleton.aggregationConfig.getExportImageTimeout());
                 var imageMap = result.getData();
                 if (imageMap.containsKey("Cloud-init")) {
                     imageMap.put("cloudInit", imageMap.get("Cloud-init"));
@@ -200,7 +201,7 @@ public class SceneExporter {
         try {
             FileUtils.writeByteArrayToFile(new File(filePath), content);
         } catch (Exception e) {
-            log.error("failed to write file ", ExceptionUtils.getStackTrace(e));
+            log.error("failed to write file:{} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
     }
@@ -209,7 +210,7 @@ public class SceneExporter {
         try {
             FileUtils.write(new File(filePath), content, "utf8");
         } catch (Exception e) {
-            log.error("failed to write yml file , yml content is {}", content, ExceptionUtils.getStackTrace(e));
+            log.error("failed to write yml file , yml content is {}, {}", content, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR);
         }
     }
@@ -267,6 +268,8 @@ public class SceneExporter {
         result.put("targetIP", "target-iP");
         result.put("targetPort", "target-port");
         result.put("virtualPlatform", "virtual-platform");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_OFF, "off");
+        result.put(BaseSceneParseResourceCenter.SPECIAL_STR_ON, "on");
         return result;
     }
 

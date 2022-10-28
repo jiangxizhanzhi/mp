@@ -394,8 +394,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
 
         UserModel userModified = result.getSource().getObj();
         String userId = userModified.getId();
-        log.info("user has been modified id:{}", userId);
-
 
         // 保存组织-用户关系
         if (CollectionUtil.isNotEmpty(modifyRequest.getOrgIds())) {
@@ -439,7 +437,6 @@ public class UserServiceImpl extends BaseModelServiceImpl<UserModel, UserMapper,
     @Override
     @Cacheable(value = CACHE_VAL_USERMODEL_BY_USERNAME)
     public UserModel getByUserName(String userName) {
-        log.info("userName:{}", userName);
         UserModel userModel = getModelMapper().first(new HumanCondition().filterEqual("username", userName));
         setDefaultIfNoAvatar(userModel);
         return userModel;

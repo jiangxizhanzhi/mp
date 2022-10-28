@@ -127,6 +127,11 @@ public class CloudHttpClient {
         return cloudResultBean(httpClient.get(url, param, this.getHeaders(), null), valueTypeRef, "get", url, null, param);
     }
 
+    public <T> CloudResponse<T> cloudGet(String url, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef, Integer timeout) {
+
+        return cloudResultBean(httpClient.get(url, param, this.getHeaders(), timeout), valueTypeRef, "get", url, null, param);
+    }
+
     public <T> CloudResponse<T> cloudPost(String url, HttpData data, HttpParam param, TypeReference<CloudResponse<T>> valueTypeRef) {
 
         return cloudResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);

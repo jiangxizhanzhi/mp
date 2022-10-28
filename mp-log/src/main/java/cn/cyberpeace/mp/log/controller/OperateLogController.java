@@ -48,7 +48,6 @@ public class OperateLogController {
     @PostMapping("/add")
     public ServiceResult add(@RequestBody OperationLogRequest request, HttpServletRequest httpServletRequest){
         request.setOpIp(SnUtils.getRealRemoteIp(httpServletRequest));
-        log.info("logRequest:{}", request);
         operateLogService.create(request);
         return ResultCommon.success();
     }

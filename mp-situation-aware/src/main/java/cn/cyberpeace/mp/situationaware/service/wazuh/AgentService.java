@@ -46,7 +46,6 @@ public class AgentService extends RequestProcessor {
     @Cacheable(cacheManager = SituationCacheConfig.CACHE_MANAGER, value = CACHE_KEY_AGENTS)
     public PageInfo<Agent> pageAgents(AgentRequest agentRequest) {
         agentRequest.ensure();
-        log.info("agentRequest:{}", agentRequest);
         var requestUri = "/agents";
         var requestUrl = situationAwareConfig.getWazuhBaseUrl() + requestUri;
         List<NameValuePair> params = processRequestParams(agentRequest);
@@ -100,7 +99,6 @@ public class AgentService extends RequestProcessor {
      * @return
      */
     public List<String> listAgentIds(List<String> agentNames) {
-        log.info("agentNames:{}", agentNames);
         AgentRequest agentRequest = new AgentRequest();
         if (CollectionUtil.isNotEmpty(agentNames)) {
             agentRequest.setName(agentNames.stream().collect(Collectors.joining(",")));
@@ -123,7 +121,6 @@ public class AgentService extends RequestProcessor {
      * @return
      */
     public String getSingleAgentId(String agentName) {
-        log.info("agentName:{}", agentName);
         if (StringUtils.isNotBlank(agentName)) {
             AgentRequest agentRequest = new AgentRequest();
             agentRequest.setName(agentName);

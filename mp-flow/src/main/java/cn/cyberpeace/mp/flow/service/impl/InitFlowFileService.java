@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.service.impl;
 
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ public class InitFlowFileService implements CommandLineRunner {
 
             flowInfoService.batchImportFlowInfo();
         } catch (Exception e) {
-            log.error("import flow file error", e);
+            log.error("import flow file error，{}", ExceptionUtils.getStackTrace(e));
         }
     }
 }

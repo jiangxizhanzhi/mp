@@ -295,8 +295,6 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         ParamCheck.notNull(modifyRequest, AuthBasei18nCode.REQUEST_PARAMS);
         String roleId = modifyRequest.getId();
         ParamCheck.notBlank(roleId, AuthBasei18nCode.ROLE_ID);
-
-        log.info("modify roleid:{}", roleId);
         if (Objects.equals(AuthConstant.ROLE_ADMIN_ID, roleId)) {
             log.error("ADMIN ROLE can not update！");
             throw new MpRuntimeException("ADMIN ROLE can not update!");

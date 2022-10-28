@@ -429,7 +429,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgDto> listAllChildIgnoreLevelExcludeSelf(String orgId) {
         // 展示所有层级的子组织，不包括自己
-        log.info("show all child orgs ignore level, orgId:{}", orgId);
         ObjServiceResult<OrgModel> result = get(orgId);
         if (Objects.nonNull(result.getSource())) {
             OrgModel parentOrg = result.getSource().getObj();
@@ -450,7 +449,6 @@ public class OrgServiceImpl extends BaseModelServiceImpl<OrgModel, OrgMapper, Or
     @Override
     public List<OrgDto> listAllParentIgnoreLevelExcludeSelf(String orgId) {
         // 展示所有层级的父组织，不包括自己
-        log.info("show all parent orgs ignore level, orgId:{}", orgId);
         OrgDto orgDto = getHierarchicalOrgsByOrgId(orgId);
 
         if (Objects.nonNull(orgDto)) {

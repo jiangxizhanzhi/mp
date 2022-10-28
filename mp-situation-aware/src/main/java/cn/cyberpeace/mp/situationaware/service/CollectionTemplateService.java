@@ -72,7 +72,6 @@ public class CollectionTemplateService {
      * @return
      */
     public PageInfo<CollectionTemplatePageItemDto> page(CollectionTemplatePageQueryRequest pageQueryRequest) {
-        log.info("pageQueryRequest:{}", pageQueryRequest);
         pageQueryRequest.ensure();
 
         CollectionTemplateSearchCondition condition = new CollectionTemplateSearchCondition();
@@ -177,7 +176,6 @@ public class CollectionTemplateService {
      * @return
      */
     public CollectionTemplateProbeDto getTemplateProbeDtoWithScriptContent(String templateId, String probeId) {
-        log.info("templateId:{}, probeId:{}", templateId, probeId);
         ProbeSearchCondition probeSearchCondition = generateCustomProbesCondition();
         probeSearchCondition.setIds(ArrayUtils.toArray(probeId));
         List<CollectionTemplateProbeDto> customProbeDtos = templateProbeMapper.listCollectionTemplateProbeDtos(templateId, probeSearchCondition);
@@ -208,7 +206,6 @@ public class CollectionTemplateService {
      * @return
      */
     public List<ProbeDto> listCustomProbesForTemplate(String templateId, Integer catetory, String name) {
-        log.info("templateId:{}, category:{}, name:{}", templateId, catetory, name);
         ProbeSearchCondition condition = new ProbeSearchCondition();
         condition.setTypes(ArrayUtils.toArray(ProbeModel.TYPE_CUSTOM));
         condition.setProbeCategories(ArrayUtils.toArray(catetory));
@@ -232,7 +229,6 @@ public class CollectionTemplateService {
      */
     @Transactional(rollbackFor = Exception.class)
     public String addTemplate(CollectionTemplateRequest addRequest) {
-        log.info("addRequest:{}", addRequest);
         addTemplateCheck(addRequest);
 
         CollectionTemplateModel colTempModelToCreate = new CollectionTemplateModel();
@@ -290,7 +286,6 @@ public class CollectionTemplateService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean modifyTemplate(CollectionTemplateRequest modifyRequest) {
-        log.info("modifyRequest:{}", modifyRequest);
         modifyTemplateCheck(modifyRequest);
 
         CollectionTemplateModel colTempModelToUpdate = new CollectionTemplateModel();
@@ -346,7 +341,6 @@ public class CollectionTemplateService {
 
     @Transactional(rollbackFor = Exception.class)
     public int deleteByIds(String[] ids) {
-        log.info("ids:{}", ids);
         int cnt = templateMapper.bulkDelete(ids).getSuccessCount();
 
         templateProbeMapper.deleteByTemplateIds(ids);
@@ -470,7 +464,6 @@ public class CollectionTemplateService {
     private void processColTempCommonProbeReqs(String templateId, List<ColTempCommonProbeRequest> colTempCommonProbeReqs,
                                                List<CollectionTemplateProbeModel> allColTempProbeList, int catagory) {
 
-        log.info("templateId:{},\ncolTempCommonProbeReqs:{},\nallColTempProbeList:{}", templateId, colTempCommonProbeReqs, allColTempProbeList);
         if (CollectionUtil.isEmpty(colTempCommonProbeReqs)) {
             return;
         }
@@ -512,8 +505,6 @@ public class CollectionTemplateService {
     private void processColTempCustomProbeReqs(String templateId, List<ColTempCustomProbeRequest> colTempCustomProbeReqs,
                                                List<CollectionTemplateProbeModel> allColTempProbeList,
                                                List<ProbeParamModel> allProbeParamList) {
-
-        log.info("templateId:{},\ncolTempCustomProbeReqs:{},\n allColTempProbeList:{},\nallProbeParamList:{}", templateId, colTempCustomProbeReqs, allColTempProbeList, allProbeParamList);
         if (CollectionUtil.isEmpty(colTempCustomProbeReqs)) {
             return;
         }

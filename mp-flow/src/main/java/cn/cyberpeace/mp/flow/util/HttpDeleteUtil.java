@@ -29,8 +29,6 @@ public class HttpDeleteUtil {
      * @throws IOException
      */
     public static String sendDelete(String url, String content) throws IOException {
-        log.info("请求地址================>{}", url);
-        log.info("请求参数================>{}", content);
         HttpClient httpClient = HttpClientBuilder.create().build();
         HttpDeleteWithBody httpDeleteWithBody = new HttpDeleteWithBody(url);
         //设置Content-Type

@@ -261,7 +261,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return bo;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return attackTimestampBOS;
     }
@@ -317,7 +317,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return bo;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return attackTimestampBOS;
     }
@@ -393,7 +393,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return bo;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return attackTimestampBOS;
     }
@@ -445,7 +445,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return bo;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return attackTimestampBOS;
     }
@@ -492,7 +492,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return flowLogBO;
             } ).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return flowLogBOList;
     }
@@ -536,7 +536,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return flowLogBO;
             } ).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return new ListObjResult<>(flowLogBOList, Integer.valueOf(totalHits + ""));
     }
@@ -640,7 +640,7 @@ public class FlowAnalysisService extends AbstractBaseService {
                 return bo;
             }).collect(Collectors.toList());
         } catch (IOException e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return Lists.newArrayList();
     }
@@ -679,7 +679,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             return parsedSum.getValue();
 
         } catch (IOException e) {
-            log.error("search attack way error",e);
+            log.error("search attack way error, {}",ExceptionUtils.getStackTrace(e));
         }
         return Double.valueOf("0");
     }
@@ -750,8 +750,7 @@ public class FlowAnalysisService extends AbstractBaseService {
             globalizedWithAttackWay(attackWayList);
             teamAttackResultVO.setAttackWayList(buildTeamAttackWayPercent(attackWayList));
         } catch (IOException e) {
-            log.error("query one team error : {}", ExceptionUtils.getMessage(e));
-            e.printStackTrace();
+            log.error("query one team error,{}",ExceptionUtils.getStackTrace(e));
         }
 
         return teamAttackResultVO;
@@ -773,7 +772,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             restHighLevelClient.indices().delete(deleteIndexRequest,RequestOptions.DEFAULT);
         } catch (IOException e) {
-            log.error("delete flow error : {},group:{}",e.getMessage(),e,groupList);
+            log.error("delete flow error : {},group:{}", ExceptionUtils.getStackTrace(e), groupList);
         }
         return Boolean.TRUE;
     }
@@ -923,7 +922,7 @@ public class FlowAnalysisService extends AbstractBaseService {
         try {
             getIndexResponse = restHighLevelClient.indices().get(getIndexRequest, RequestOptions.DEFAULT);
         } catch (IOException e) {
-            log.error("get all indices error : {}",e.getMessage(),e);
+            log.error("get all indices error : {}", ExceptionUtils.getStackTrace(e));
             return new String[]{};
         }
         return getIndexResponse.getIndices();
