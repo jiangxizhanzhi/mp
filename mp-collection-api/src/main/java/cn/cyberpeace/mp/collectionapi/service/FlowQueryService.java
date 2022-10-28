@@ -272,7 +272,9 @@ public class FlowQueryService {
 
 		// // 排序取top5
 		List<AttackFlowTopVO> vos = vosMap.values().stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
-		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
+		if(request.getTopSize() != null) {
+			vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
+		}
 		double total = vos.stream().mapToLong(AttackFlowTopVO::getCount).sum();
 		vos.forEach(v -> {
 			v.setPercent(v.getCount() / total);
@@ -292,7 +294,7 @@ public class FlowQueryService {
 	}
 
 	/**
-	 * 总攻击次数
+	 * 战队攻击排名
 	 * 
 	 * @param request
 	 * @return
@@ -314,7 +316,9 @@ public class FlowQueryService {
 		// 排序取top3
 		List<TeamAttackCountVO> vos = new ArrayList<>(name2CountMap.values());
 		vos.sort(Comparator.comparing(TeamAttackCountVO::getCount).reversed());
-		vos = vos.size() < request.getTopSize() ? vos : vos.subList(0, request.getTopSize());
+		if(request.getTopSize() != null) {
+			vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
+		}
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
@@ -389,7 +393,7 @@ public class FlowQueryService {
 		vos.forEach(vo -> {
 			List<TopEntry> entries = vo.getEntries();
 			entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
-			entries = entries.size() < request.getTopSize() ? entries : entries.subList(0, request.getTopSize());
+			entries = entries.subList(0, Math.min(entries.size(), request.getTopSize()));
 			vo.setEntries(entries);
 		});
 
@@ -433,7 +437,9 @@ public class FlowQueryService {
 		vos.forEach(vo -> {
 			List<TopEntry> entries = vo.getEntries();
 			entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
-			entries = entries.size() < request.getTopSize() ? entries : entries.subList(0, request.getTopSize());
+			if(request.getTopSize() != null) {
+				entries = entries.subList(0, Math.min(entries.size(), request.getTopSize()));
+			}
 			vo.setEntries(entries);
 		});
 
