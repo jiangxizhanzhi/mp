@@ -228,7 +228,7 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
             if (StringUtils.isBlank(pcapPath)) {
                 pcapPath  = PRE_PATH.concat("dingding.pcap");
             }
-            Process process = Runtime.getRuntime().exec(String.format("python3 %s %s", scriptPath, pcapPath));
+            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
             process.waitFor();
             pcapProtocols = "";
             BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
