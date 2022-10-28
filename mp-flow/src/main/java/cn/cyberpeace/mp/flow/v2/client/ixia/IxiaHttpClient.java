@@ -61,15 +61,37 @@ public class IxiaHttpClient {
         httpClient.setLogRequest(true);
     }
 
-    public <T extends IxiaResponse> T ixiaPost(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
+    public <T extends IxiaResponse> T ixiaPost(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
+        try {
             return ixiaResultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueTypeRef, "post", url, data, param);
+        } catch (Exception e) {
+            if (!"Entity may not be null".equals(e.getMessage())) {
+                throw e;
+            }
+            try {
+                return tClass.getConstructor().newInstance();
+            } catch (Exception ex) {
+                return null;
+            }
+        }
     }
 
-    public <T extends IxiaResponse> T ixiaDelete(String url, HttpData data, HttpParam param, TypeReference<T> valueTypeRef) {
-        return ixiaResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
+    public <T extends IxiaResponse> T ixiaDelete(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
+        try {
+            return ixiaResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);
+        } catch (Exception e) {
+            if (!"Entity may not be null".equals(e.getMessage())) {
+                throw e;
+            }
+            try {
+                return tClass.getConstructor().newInstance();
+            } catch (Exception ex) {
+                return null;
+            }
+        }
     }
 
-    public <T extends IxiaResponse> T post(String url, HttpData data, HttpParam param, Class<T> valueType) {
+    public <T extends IxiaResponse> T post(String url, HttpData data, HttpParam param, Class<T> valueType, TypeReference<T> valueTypeRef) {
         return resultBean(httpClient.post(url, data, param, this.getHeaders(), null), valueType, "post", url, data, param);
     }
 
@@ -87,10 +109,6 @@ public class IxiaHttpClient {
 
     private <T extends IxiaResponse> T ixiaResultBean(HttpResult result, TypeReference<T> valueTypeRef,
                                                       String method, String url, HttpData data, HttpParam param) {
-
-        if (StringUtils.isEmpty(result.getResult())) {
-            return (T) new IxiaResponse();
-        }
         var objectMapper = new ObjectMapper();
 //        objectMapper.setPropertyNamingStrategy(new PropertyNamingStrategy.SnakeCaseStrategy());
         try {

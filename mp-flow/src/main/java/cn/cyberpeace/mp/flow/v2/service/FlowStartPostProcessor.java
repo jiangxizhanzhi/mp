@@ -43,7 +43,9 @@ public class FlowStartPostProcessor {
     }
 
     public void addTask(FlowCallBackTask flowCallBackTask) {
-        queue.offer(flowCallBackTask);
+        if (flowCallBackTask != null) {
+            queue.offer(flowCallBackTask);
+        }
     }
 
 }

@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
+import cn.cyberpeace.mp.flow.v2.client.ixia.AddActionData;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaClient;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,19 @@ class IxiaFlowGenerateService implements IGenerateService {
         ixiaClient.createNeighbor();
         ixiaClient.saveNeighborHood(flowTaskRecordBO.getId());
         // 保存 flows
+        ixiaClient.createSuperflow();
+        for (int i = 1; i <= 3; i++) {
+            ixiaClient.addflow("plus050", "Server", "Client");
+            for (int j = 1; j < 3; j++) {
+                AddActionData addActionData = new AddActionData();
+                addActionData.setFlowid(i);
+                addActionData.setActionid(j);
+                addActionData.setType("tls_accept");
+                addActionData.setSource("server");
+                ixiaClient.addAction(addActionData);
+            }
+        }
+        ixiaClient.saveSuperflow("mp_" + flowTaskRecordBO.getId());
         // 保存 pcap
         // 生成 application profile
         // 创建 test
