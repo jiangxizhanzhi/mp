@@ -136,6 +136,9 @@ public class SceneExporter {
                         AccessModeParseResult accessModeParseResult = new AccessModeParseResult();
                         accessModeParseResult.setDesc(m.getDesc());
                         accessModeParseResult.setProtocol(m.getProtocol());
+                        accessModeParseResult.setPrivateKey(m.getPrivateKeyFileName());
+                        //下载密钥文件
+                        downloadPrivateKeyFile(m.getPrivateKeyPath(), currentImageDir, m.getPrivateKeyFileName());
                         if (m.getPort() != null) {
                             accessModeParseResult.setPort(String.valueOf(m.getPort()));
                         }
@@ -171,6 +174,7 @@ public class SceneExporter {
                 String content = yaml.dumpAs(serverYml, Tag.MAP, null);
                 content = StringUtils.replaceOnce(content, "mpYmlImageNameToChange", device.getImage());
                 content = StringUtils.replaceOnce(content, "cloudInit", "Cloud-init");
+                content = StringUtils.replace(content, "privateKey", "private-key");
                 this.createFile(content, currentImageDir + "/servers.yml");
 
                 if (StringUtils.isNotEmpty(singleImagePath)) {
@@ -221,6 +225,17 @@ public class SceneExporter {
             byte[] content = FdfsCommon.downloadRawContent(fdfsFilePath);
             try {
                 FileUtils.writeByteArrayToFile(new File(envPath + "/" + entry.getKey()), content);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void downloadPrivateKeyFile(String fdfsFilePath, String imagePath, String fileName) {
+        if (StringUtils.isNotEmpty(fdfsFilePath) && StringUtils.isNotEmpty(imagePath)) {
+            byte[] content = FdfsCommon.downloadRawContent(fdfsFilePath);
+            try {
+                FileUtils.writeByteArrayToFile(new File(imagePath + "/" + fileName), content);
             } catch (IOException e) {
                 e.printStackTrace();
             }
