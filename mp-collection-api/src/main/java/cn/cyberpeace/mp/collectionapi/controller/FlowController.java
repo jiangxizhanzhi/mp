@@ -55,9 +55,9 @@ public class FlowController {
 	}
 
 	@GetMapping("/attack_total_count")
-	@ApiOperation(value = "总攻击次数，可自定义放大速率")
-	public ServiceResult<Long> attackTotalCount(@RequestParam(required = false, defaultValue = "1") Integer multiple) {
-		return flowQueryService.getAttackTotalCount(multiple).asResult();
+	@ApiOperation(value = "总攻击次数")
+	public ServiceResult<Long> attackTotalCount() {
+		return flowQueryService.getAttackTotalCount().asResult();
 	}
 
 	@GetMapping("/attack_flow_list")
@@ -69,31 +69,31 @@ public class FlowController {
 	}
 
 	@GetMapping("/agg_attack_flow")
-	@ApiOperation(value = "获取指定ip集合攻击次数与流量大小")
+	@ApiOperation(value = "获取指定ip集合(队伍 or 设备)攻击次数与流量大小")
 	public ListObjServiceResult<AggAttackFlowVO> getAttackFlow(@RequestBody AttackFlowBaseRequest request) {
 		return flowQueryService.getAttackFlow(request).asResult();
 	}
 
 	@GetMapping("/attack_top")
-	@ApiOperation(value = "获取top数据,(降序)默认全部")
+	@ApiOperation(value = "全局攻防榜，获取4种top数据,(降序)默认全部")
 	public ListObjServiceResult<AttackFlowTopVO> getAttackTop(@RequestBody AttackFlowTopRequest request) {
 		return flowQueryService.getAttackTop(request).asResult();
 	}
 
 	@GetMapping("/attack_agg_top")
-	@ApiOperation(value = "获取top聚合数据,(降序)默认全部")
+	@ApiOperation(value = "全局攻防榜，获取战队top聚合数据,(降序)默认全部")
 	public ListObjServiceResult<TeamAttackCountVO> getTeamAttackAggTop(@RequestBody AttackAggTopRequest request) {
 		return flowQueryService.getTeamAttackAggTop(request).asResult();
 	}
 
     @GetMapping("/attack_target_top")
-    @ApiOperation(value = "获取攻击目标top数据,(降序)默认全部")
+    @ApiOperation(value = "选手攻击榜，获取攻击目标top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         return flowQueryService.getAttackTargetTop(request).asResult();
     }
 
 	@GetMapping("/attack_type_top")
-	@ApiOperation(value = "获取攻击手法top数据,(降序)默认全部")
+	@ApiOperation(value = "选手攻击榜，获取攻击手法top数据,(降序)默认全部")
 	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
 		return flowQueryService.getAttackTypeTop(request).asResult();
 	}

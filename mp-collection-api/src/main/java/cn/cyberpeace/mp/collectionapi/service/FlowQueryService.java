@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.collection.bo.EsIpFieldBO;
 import cn.cyberpeace.mp.collection.bo.FlowBO;
 import cn.cyberpeace.mp.collection.bo.TeamAttackCountBO;
 import cn.cyberpeace.mp.collection.service.FlowInfoService;
+import cn.cyberpeace.mp.collectionapi.constant.CollectionApiConstant;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest.IPField;
@@ -165,7 +166,7 @@ public class FlowQueryService {
 
 		List<AggAttackFlowVO> vos = bos.stream().map(bo -> {
 			AttackCount attackCount = new AttackCount();
-			attackCount.setAttackCount(bo.getCount());
+			attackCount.setAttackCount(bo.getCount() * CollectionApiConstant.multiple);
 			FlowSize flowSize = new FlowSize();
 			flowSize.setSize(bo.getSize());
 
@@ -210,7 +211,7 @@ public class FlowQueryService {
 		List<AttackFlowTopVO> topVOs = vos.stream().map(vo -> {
 			AttackFlowTopVO topVO = new AttackFlowTopVO();
 			topVO.setName(vo.getTeam());
-			topVO.setCount(vo.getCount());
+			topVO.setCount(vo.getCount() * CollectionApiConstant.multiple);
 			return topVO;
 		}).collect(Collectors.toList());
 
@@ -224,10 +225,12 @@ public class FlowQueryService {
 	 */
 	private ListObjServiceResult<AttackFlowTopVO> queryAttackTypeTop5(AttackFlowTopRequest request) {
 		List<CountBO> bos = flowInfoService.queryAttackType(request.getTopSize());
-		double total = bos.get(0).getCount();
-		List<AttackFlowTopVO> vos = bos.subList(1, bos.size()).stream().map(bo -> {
+		double total = bos.remove(0).getCount();
+		
+		List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
 			AttackFlowTopVO vo = new AttackFlowTopVO();
 			vo.setName(bo.getKey());
+			vo.setCount(bo.getCount());
 			vo.setPercent(bo.getCount() / total);
 			return vo;
 		}).collect(Collectors.toList());
@@ -243,10 +246,12 @@ public class FlowQueryService {
 	private ListObjServiceResult<AttackFlowTopVO> queryProtocolTop5(AttackFlowTopRequest request) {
 		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<CountBO> bos = flowInfoService.queryProtocolTop5(esipFieldBos, request.getTopSize());
-		double total = bos.stream().mapToLong(CountBO::getCount).sum();
+		double total = bos.remove(0).getCount();
+		
 		List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
 			AttackFlowTopVO vo = new AttackFlowTopVO();
 			vo.setName(bo.getKey());
+			vo.setCount(bo.getCount());
 			vo.setPercent(bo.getCount() / total);
 			return vo;
 		}).collect(Collectors.toList());
@@ -262,6 +267,8 @@ public class FlowQueryService {
 	private ListObjServiceResult<AttackFlowTopVO> queryEquipmentTypeTop5(AttackFlowTopRequest request) {
 		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		List<CountBO> bos = flowInfoService.queryEquipmentIpAttackCount(esipFieldBos);
+		double total = bos.remove(0).getCount();
+		
 		Map<String, AttackFlowTopVO> vosMap = Maps.newHashMap();
 		bos.forEach(bo -> {
 			String name = getNameByIp(request, bo.getKey());
@@ -275,7 +282,6 @@ public class FlowQueryService {
 		if(request.getTopSize() != null) {
 			vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
 		}
-		double total = vos.stream().mapToLong(AttackFlowTopVO::getCount).sum();
 		vos.forEach(v -> {
 			v.setPercent(v.getCount() / total);
 		});
@@ -289,8 +295,8 @@ public class FlowQueryService {
 	 * @param multiple 放大倍数
 	 * @return
 	 */
-	public ServiceResult<Long> getAttackTotalCount(Integer multiple) {
-		return new ServiceResult<>(flowInfoService.attackTotalCount() * multiple);
+	public ServiceResult<Long> getAttackTotalCount() {
+		return new ServiceResult<>(flowInfoService.attackTotalCount() * CollectionApiConstant.multiple);
 	}
 
 	/**
@@ -319,6 +325,11 @@ public class FlowQueryService {
 		if(request.getTopSize() != null) {
 			vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
 		}
+		
+		// 放大攻击次数
+		vos.forEach(vo -> {
+			vo.setCount(vo.getCount() * CollectionApiConstant.multiple);
+		});
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
