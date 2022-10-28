@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.collectionapi.constant.CollectionApiConstant;
 import cn.cyberpeace.mp.collectionapi.request.AttackAggTopRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowBaseRequest;
 import cn.cyberpeace.mp.collectionapi.request.AttackFlowTopRequest;
@@ -17,6 +18,7 @@ import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,21 +37,20 @@ public class FlowController {
 	@GetMapping("/attack_trend")
 	@ApiOperation(value = "所有队伍的总体攻击趋势(统计十分钟内的攻击次数)")
 	public ListObjServiceResult<AttackFlowTopVO> attackTrend() {
-		// 默认分十段
+		// 默认分六段
 		return flowQueryService.queryAttackTrend().asResult();
 	}
 
 	@GetMapping("/attack_level_trend")
 	@ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
 	public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
-		// 默认分十段
+		// 默认分六段
 		return flowQueryService.queryLevelTrend().asResult();
 	}
 	
 	@GetMapping("/team_attack_trend")
 	@ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
 	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
-		// todo 每个战队一个ip
 		return flowQueryService.teamAttackTrend(request).asResult();
 	}
 
@@ -86,14 +87,21 @@ public class FlowController {
 	}
 
     @GetMapping("/attack_target_top")
-    @ApiOperation(value = "获取攻击目标top数据,默认全部")
+    @ApiOperation(value = "获取攻击目标top数据,(降序)默认全部")
     public ListObjServiceResult<TeamTopVO> getAttackTargetTop(@RequestBody AttackTargetTopRequest request) {
         return flowQueryService.getAttackTargetTop(request).asResult();
     }
 
 	@GetMapping("/attack_type_top")
-	@ApiOperation(value = "获取攻击手法top数据,默认全部")
+	@ApiOperation(value = "获取攻击手法top数据,(降序)默认全部")
 	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(@RequestBody AttackAggTopRequest request) {
 		return flowQueryService.getAttackTypeTop(request).asResult();
+	}
+
+	@PostMapping("/update_multiple")
+	@ApiOperation(value = "更新攻击次数放大倍数")
+	public ServiceResult<Boolean> updateMultiple(@RequestParam Integer multiple) {
+		CollectionApiConstant.multiple = multiple;
+		return new ServiceResult<>(true).asResult();
 	}
 }

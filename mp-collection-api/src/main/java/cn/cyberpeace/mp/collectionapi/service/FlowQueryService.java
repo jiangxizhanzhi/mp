@@ -402,8 +402,8 @@ public class FlowQueryService {
 	 * @return
 	 */
 	public ListObjServiceResult<TeamTopVO> getAttackTypeTop(AttackAggTopRequest request) {
-		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
-		List<AttackFlowBO> bos = flowInfoService.queryAttackType(esipFieldBos);
+		List<EsIpFieldBO> esIpFieldBOS = genIPFieldBos(request);
+		List<AttackFlowBO> bos = flowInfoService.queryAttackType(esIpFieldBOS);
 
 		Map<String, TeamTopVO> vosMap = Maps.newHashMap();
 		bos.forEach(bo -> {
