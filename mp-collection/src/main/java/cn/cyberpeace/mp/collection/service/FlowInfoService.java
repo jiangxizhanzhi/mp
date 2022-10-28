@@ -429,12 +429,12 @@ public class FlowInfoService {
 	 * @param topSize
 	 * @return
 	 */
-	public List<CountBO> queryAttackType(int topSize) {
+	public List<CountBO> queryAttackType(Integer topSize) {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		
 		String typeTerm = "cate";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("suricata.category")
-				.order(BucketOrder.count(false)).size(topSize);
+				.order(BucketOrder.count(false)).size(topSize == null ? 1000 : topSize);
 		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
@@ -616,7 +616,7 @@ public class FlowInfoService {
 	 * @param topSize
 	 * @return
 	 */
-	public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS, int topSize) {
+	public List<CountBO> queryProtocolTop5(List<EsIpFieldBO> esiIpFieldBOS, Integer topSize) {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleIpQuery(esiIpFieldBOS, queryBuilder);
 
@@ -639,7 +639,7 @@ public class FlowInfoService {
 			bo.setCount(bucket.getDocCount());
 			bos.add(bo);
 
-			if(bos.size() == topSize) {
+			if(topSize != null && bos.size() == topSize) {
 				break;
 			}
 		}
