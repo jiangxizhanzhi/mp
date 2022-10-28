@@ -6,46 +6,31 @@ import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
 import cn.cyberpeace.mp.common.service.OptionService;
-import cn.cyberpeace.mp.log.annotation.OperateLog;
-import cn.cyberpeace.mp.log.enums.OpModuleEnums;
-import cn.cyberpeace.mp.log.enums.OpTargetEnums;
-import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.flow.constant.BaseConstants;
-import cn.cyberpeace.mp.flow.constant.ControllerConstant;
-import cn.cyberpeace.mp.flow.constant.FlowConstant;
-import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
-import cn.cyberpeace.mp.flow.constant.FlowPrefixConstant;
+import cn.cyberpeace.mp.flow.constant.*;
 import cn.cyberpeace.mp.flow.model.FlowInfoModel;
-import cn.cyberpeace.mp.flow.request.AddAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.AddBackgroundFlowRequest;
-import cn.cyberpeace.mp.flow.request.CheckNamesRequest;
-import cn.cyberpeace.mp.flow.request.ImportFlowInfoRequest;
-import cn.cyberpeace.mp.flow.request.ListByCollectionIdsRequest;
-import cn.cyberpeace.mp.flow.request.ModifyAttackFlowRequest;
-import cn.cyberpeace.mp.flow.request.ModifyBackgroundFlowRequest;
+import cn.cyberpeace.mp.flow.request.*;
 import cn.cyberpeace.mp.flow.request.queryparam.FlowInfoQueryParams;
 import cn.cyberpeace.mp.flow.response.AttackFlowResponse;
 import cn.cyberpeace.mp.flow.response.BackgroundFlowResponse;
 import cn.cyberpeace.mp.flow.response.FlowInfoResponse;
 import cn.cyberpeace.mp.flow.service.FlowInfoService;
 import cn.cyberpeace.mp.flow.service.impl.FlowInfoServiceImpl;
+import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.enums.OpModuleEnums;
+import cn.cyberpeace.mp.log.enums.OpTargetEnums;
+import cn.cyberpeace.mp.log.enums.OpTypeEnums;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
@@ -230,6 +215,33 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
     @PostMapping("/check_names")
     public ServiceResult<List<String>> checkNames(@RequestBody @Validated CheckNamesRequest request) {
         return flowServiceImpl.checkNamesExist(request);
+    }
+
+    @GetMapping("/pcapRead")
+    public ServiceResult<String> pcapRead(@RequestParam String scriptPath, @RequestParam String pcapPath) {
+        String pcapProtocols = null;
+        try {
+            String PRE_PATH = "/root/.mp/resources/flows/protocol/";
+            if (StringUtils.isBlank(scriptPath)) {
+                scriptPath  = PRE_PATH.concat("pcap_read.py");
+            }
+            if (StringUtils.isBlank(pcapPath)) {
+                pcapPath  = PRE_PATH.concat("dingding.pcap");
+            }
+            Process process = Runtime.getRuntime().exec(String.format("python3 %s %s", scriptPath, pcapPath));
+            process.waitFor();
+            pcapProtocols = "";
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line = "";
+            while ((line = input.readLine()) != null) {
+                pcapProtocols = line;
+            }
+            input.close();
+            log.info("============pcapRead result: {}", pcapProtocols);
+        } catch (Exception e) {
+            log.error("exec error:", e);
+        }
+        return ResultCommon.success(pcapProtocols);
     }
 
 }
