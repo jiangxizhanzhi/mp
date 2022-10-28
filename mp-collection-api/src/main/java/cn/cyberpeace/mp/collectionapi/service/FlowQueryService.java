@@ -24,12 +24,10 @@ import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.AttackCount;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO.Count;
+import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
+import cn.cyberpeace.mp.collectionapi.vo.TrendVO.Count;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO.TeamAttackCount;
 import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.TopEntry;
 import com.google.common.collect.Lists;
@@ -80,42 +78,24 @@ public class FlowQueryService {
 	 * 
 	 * @return
 	 */
-	public ListObjServiceResult<AttackLevelVO> queryLevelTrend() {
+	public ListObjServiceResult<TrendVO> queryLevelTrend() {
 		Map<String, List<CountBO>> severityMap = flowInfoService.queryAttackLevel();
-		Map<String, AttackLevelVO> resultMap = Maps.newHashMap();
+		Map<String, TrendVO> resultMap = Maps.newHashMap();
 
 		for (int level = 1; level <= 4; level++) {
 			String levelName = getSeverityDisplayName(String.valueOf(level));
-			AttackLevelVO vo = resultMap.computeIfAbsent(levelName, k -> new AttackLevelVO());
-			vo.setSeverity(levelName);
+			TrendVO vo = resultMap.computeIfAbsent(levelName, k -> new TrendVO());
+			vo.setName(levelName);
 
-			List<CountBO> bos = severityMap.get(String.valueOf(level));
-			if (bos != null) {
-				List<Count> countsAdd = bos.stream().map(bo -> {
-					Count c = new Count();
-					c.setTime(bo.getKey());
-					c.setNum(bo.getCount());
-					return c;
-				}).collect(Collectors.toList());
-
-				List<Count> countsOrig = vo.getCounts();
-				if (countsOrig == null) {
-					vo.setCounts(countsAdd);
-				} else {
-					int size = countsOrig.size();
-					for (int i = 0; i < size; i++) {
-						Count c = countsOrig.get(i);
-						c.setNum(c.getNum() + countsAdd.get(i).getNum());
-					}
-				}
-			}
+			mergeTrendData(vo, severityMap.get(String.valueOf(level)));
 		}
 
 		// 放大攻击次数
-		List<AttackLevelVO> vos = Lists.newArrayList(resultMap.values());
-		vos.stream().map(AttackLevelVO::getCounts).flatMap(Collection::stream).forEach(c -> {
+		List<TrendVO> vos = Lists.newArrayList(resultMap.values());
+		vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
 			c.setNum(c.getNum() * CollectionApiConstant.multiple);
 		});
+		
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
 	}
 
@@ -124,40 +104,55 @@ public class FlowQueryService {
 	 * 
 	 * @return
 	 */
-	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
+	public ListObjServiceResult<TrendVO> teamAttackTrend(AttackFlowBaseRequest request) {
 		List<EsIpFieldBO> esipFieldBos = genIPFieldBos(request);
 		Map<String, List<CountBO>> ipMap = flowInfoService.queryTeamAttackTrend(esipFieldBos);
-		Map<String, TeamAttackTrendVO> resultMap = Maps.newHashMap();
+		Map<String, TrendVO> resultMap = Maps.newHashMap();
 
-		List<TeamAttackTrendVO> vos = Lists.newArrayList();
+		List<TrendVO> vos = Lists.newArrayList();
 		ipMap.forEach((key, bos) -> {
 			String team = getNameByIp(request, key);
-			TeamAttackTrendVO vo = resultMap.computeIfAbsent(team, k -> new TeamAttackTrendVO());
+			TrendVO vo = resultMap.computeIfAbsent(team, k -> new TrendVO());
 			vo.setName(team);
 			vos.add(vo);
 
-			if (bos != null) {
-				List<TeamAttackCount> countsAdd = bos.stream().map(bo -> {
-					TeamAttackCount c = new TeamAttackCount();
-					c.setTime(bo.getKey());
-					c.setSize(bo.getCount());
-					return c;
-				}).collect(Collectors.toList());
-
-				List<TeamAttackCount> countsOrig = vo.getTeamAttackCounts();
-				if (countsOrig == null) {
-					vo.setTeamAttackCounts(countsAdd);
-				} else {
-					int size = countsOrig.size();
-					for (int i = 0; i < size; i++) {
-						TeamAttackCount c = countsOrig.get(i);
-						c.setSize(c.getSize() + countsAdd.get(i).getSize());
-					}
-				}
-			}
+			mergeTrendData(vo, bos);
+		});
+		
+		// 放大攻击次数
+		vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
+			c.setNum(c.getNum() * CollectionApiConstant.multiple);
 		});
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
+	}
+	
+	/**
+	 * 合并趋势数据点
+	 * 
+	 * @param vo
+	 * @param bos
+	 */
+	private void mergeTrendData(TrendVO vo, List<CountBO> bos) {
+		if (bos != null) {
+			List<Count> countsAdd = bos.stream().map(bo -> {
+				Count c = new Count();
+				c.setTime(bo.getKey());
+				c.setNum(bo.getCount());
+				return c;
+			}).collect(Collectors.toList());
+
+			List<Count> countsOrig = vo.getCounts();
+			if (countsOrig == null) {
+				vo.setCounts(countsAdd);
+			} else {
+				int size = countsOrig.size();
+				for (int i = 0; i < size; i++) {
+					Count c = countsOrig.get(i);
+					c.setNum(c.getNum() + countsAdd.get(i).getNum());
+				}
+			}
+		}
 	}
 
 	/**
@@ -412,6 +407,11 @@ public class FlowQueryService {
 			entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
 			entries = entries.subList(0, Math.min(entries.size(), request.getTopSize()));
 			vo.setEntries(entries);
+		});
+		
+		// 放大攻击次数
+		vos.stream().map(TeamTopVO::getEntries).flatMap(Collection::stream).forEach(c -> {
+			c.setCount(c.getCount() * CollectionApiConstant.multiple);
 		});
 
 		return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));

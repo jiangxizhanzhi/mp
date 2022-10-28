@@ -579,14 +579,12 @@ public class FlowInfoService {
 		buildRuleEndTimeQuery(endTime, queryBuilder);
 		buildSeverityQuery(queryBuilder);
 
-		String ipTerm = "target_ip";
-        String histogramTerm = "histogram";
-        String sumTerm = "flow_sum";
+		String ipTerm = "target_ip", histoTerm = "histo";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
-				.subAggregation(AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
+				.subAggregation(AggregationBuilders.dateHistogram(histoTerm).field("@timestamp")
 						.fixedInterval(DateHistogramInterval.minutes(5))
 						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
-						.timeZone(ZoneId.systemDefault()).subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes")));
+						.timeZone(ZoneId.systemDefault()));
 		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
@@ -595,13 +593,11 @@ public class FlowInfoService {
 			String ip = bucketIp.getKeyAsString();
 
 			List<CountBO> bos = Lists.newArrayList();
-			ParsedDateHistogram parsedHistogram = bucketIp.getAggregations().get(histogramTerm);
-			parsedHistogram.getBuckets().forEach(bucketHistogram -> {
-				ParsedSum sum = bucketHistogram.getAggregations().get(sumTerm);
-
+			ParsedDateHistogram parsedHistogram = bucketIp.getAggregations().get(histoTerm);
+			parsedHistogram.getBuckets().forEach(bucketHisto -> {
 				CountBO bo = new CountBO();
-				bo.setKey(bucketHistogram.getKeyAsString());
-				bo.setCount((long) sum.getValue());
+				bo.setKey(bucketHisto.getKeyAsString());
+				bo.setCount(bucketHisto.getDocCount());
 				bos.add(bo);
 			});
 			ipMap.put(ip, bos);

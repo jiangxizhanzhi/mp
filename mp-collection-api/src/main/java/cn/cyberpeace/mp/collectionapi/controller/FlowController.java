@@ -10,11 +10,10 @@ import cn.cyberpeace.mp.collectionapi.request.AttackTargetTopRequest;
 import cn.cyberpeace.mp.collectionapi.service.FlowQueryService;
 import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
-import cn.cyberpeace.mp.collectionapi.vo.AttackLevelVO;
+import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
-import cn.cyberpeace.mp.collectionapi.vo.TeamAttackTrendVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,14 +42,14 @@ public class FlowController {
 
 	@GetMapping("/attack_level_trend")
 	@ApiOperation(value = "攻击告警级别趋势(每十分钟统计一次)")
-	public ListObjServiceResult<AttackLevelVO> attackLevelTrend() {
+	public ListObjServiceResult<TrendVO> attackLevelTrend() {
 		// 默认分六段
 		return flowQueryService.queryLevelTrend().asResult();
 	}
 	
 	@GetMapping("/team_attack_trend")
 	@ApiOperation(value = "战队的攻击趋势(统计六小时数据,每五分钟统计一次)")
-	public ListObjServiceResult<TeamAttackTrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
+	public ListObjServiceResult<TrendVO> teamAttackTrend(@RequestBody AttackFlowBaseRequest request) {
 		return flowQueryService.teamAttackTrend(request).asResult();
 	}
 

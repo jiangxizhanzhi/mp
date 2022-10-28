@@ -6,9 +6,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class AttackLevelVO {
-    @ApiModelProperty(value = "级别")
-    private String severity;
+public class TrendVO {
+	
+    @ApiModelProperty(value = "名称")
+    private String name;
 
     @ApiModelProperty(value = "数量节点")
     private List<Count> counts;
@@ -21,4 +22,5 @@ public class AttackLevelVO {
         @ApiModelProperty(value = "时间")
         private String time;
     }
+    
 }
