@@ -37,7 +37,7 @@ public class ContestLogService {
     public static final String INDEX_MP_CONTEST_LOG = "mp_contest_log";
 
     public void addContestLog(ContestLogModel contestLogModel) {
-        Map<String,Object> source = JSON.parseObject(JSON.toJSONString(contestLogModel), Map.class);
+        Map<String, Object> source = JSON.parseObject(JSON.toJSONString(contestLogModel), Map.class);
         IndexRequest indexRequest = new IndexRequest(INDEX_MP_CONTEST_LOG).source(source);
         restHighLevelClient.index(indexRequest);
     }

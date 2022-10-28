@@ -9,7 +9,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 @Data
 public class FlowBO {
-	
+
     @ApiModelProperty(value = "时间")
     @JSONField(name = "@timestamp")
     private LocalDateTime time;
@@ -21,7 +21,7 @@ public class FlowBO {
     @ApiModelProperty(value = "目的IP")
     @JSONField(name = "destination.ip")
     private String targetIp;
-    
+
     @ApiModelProperty(value = "攻击方式")
     @JSONField(name = "suricata.category")
     private String attackType;
@@ -33,5 +33,5 @@ public class FlowBO {
     @ApiModelProperty(value = "协议")
     @JSONField(name = "protocol")
     private String protocol;
-    
+
 }

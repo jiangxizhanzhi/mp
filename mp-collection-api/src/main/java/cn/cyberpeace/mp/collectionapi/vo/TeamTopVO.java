@@ -7,11 +7,11 @@ import java.util.List;
 
 @Data
 public class TeamTopVO {
-	
-	@ApiModelProperty(value = "名称")
+
+    @ApiModelProperty(value = "名称")
     private String name;
-	
-	@ApiModelProperty(value = "目的列表")
+
+    @ApiModelProperty(value = "目的列表")
     private List<TopEntry> entries;
 
 }
