@@ -1,11 +1,9 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
 import cn.cyberpeace.mp.base.util.http.HttpData;
-import io.swagger.models.auth.In;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -15,7 +13,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class TaskStatusData implements HttpData {
+public class TaskLastStatusResponseData implements HttpData {
     private List<singleTask> rows;
 
     @Getter

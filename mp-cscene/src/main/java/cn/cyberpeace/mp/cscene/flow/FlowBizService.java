@@ -108,6 +108,7 @@ public class FlowBizService {
         flowTaskRecordMapper.create(taskRecord);
         FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
         recordBO.fromModel(taskRecord);
+        recordBO.setTargetNetworkId(networkId);
         flowGenerateService.startFlowTask(recordBO);
         return new ServiceResult<>(recordBO);
     }
@@ -117,6 +118,13 @@ public class FlowBizService {
         FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
         recordBO.fromModel(result);
         return flowGenerateService.pauseFlowTask(recordBO);
+    }
+
+    public ServiceResult<Boolean> stop(String taskRecordId) {
+        var result = flowTaskRecordMapper.get(taskRecordId);
+        FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
+        recordBO.fromModel(result);
+        return flowGenerateService.stopFlowTask(recordBO);
     }
 
     public ServiceResult<Boolean> unpause(String taskRecordId) {

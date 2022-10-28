@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
 import cn.cyberpeace.mp.base.util.HttpUtils;
-import cn.cyberpeace.mp.base.util.http.HttpData;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
@@ -53,16 +52,23 @@ public class TrexClient {
         });
     }
 
-    public void startTask(StartInfoData startInfoData) {
-        var reslut = trexHttpClient.trexPost(TrexUrlConstant.START_TASK, startInfoData, null,
-                new TypeReference<TrexResponse<StartInfoData>>() {
+    public void startTask(StartTaskData startInfoData) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.TASK_ACTION, startInfoData, null,
+                new TypeReference<TrexResponse<StartTaskData>>() {
                 });
-        log.info("Initialization of trex virtual machine completed {}", reslut.getData());
+        log.info("Start traffic task action completed {}", reslut.getData());
     }
 
-    public TaskStatusData queryTaskLastStatus(QueryTaskLastStatus queryTaskLastStatus) {
+    public void doTaskAction(TaskActionData taskActionData) {
+        var reslut = trexHttpClient.trexPost(TrexUrlConstant.TASK_ACTION, taskActionData, null,
+                new TypeReference<TrexResponse<TaskActionData>>() {
+                });
+        log.info("Traffic task action {} completed {}", taskActionData.getAction(), reslut.getData());
+    }
+
+    public TaskLastStatusResponseData queryTaskLastStatus(QueryTaskLastStatusData queryTaskLastStatus) {
         var reslut = trexHttpClient.trexPost(TrexUrlConstant.LAST_RECORDS, queryTaskLastStatus, null,
-                new TypeReference<TrexResponse<TaskStatusData>>() {
+                new TypeReference<TrexResponse<TaskLastStatusResponseData>>() {
                 });
         log.info("Update all tasks status response:{}", reslut.getData());
         return reslut.getData();

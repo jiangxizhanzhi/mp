@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class StartInfoData implements HttpData {
+public class StartTaskData implements HttpData {
     private String id;
     private Integer action;
     private LocalDateTime time;

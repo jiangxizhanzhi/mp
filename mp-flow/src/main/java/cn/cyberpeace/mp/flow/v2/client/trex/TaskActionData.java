@@ -7,11 +7,11 @@ import lombok.Setter;
 /**
  * @Description
  * @Author zhanglin
- * @Date 2022/10/24
+ * @Date 2022/10/27
  */
 @Getter
 @Setter
-public class InitInfoData implements HttpData {
-    private String mac;
-    private String taskId;
+public class TaskActionData implements HttpData {
+    private String id;
+    private Integer action;
 }

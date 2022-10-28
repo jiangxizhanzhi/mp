@@ -12,7 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class QueryTaskLastStatus implements HttpData {
+public class QueryTaskLastStatusData implements HttpData {
     private String taskId;
 
     @Override

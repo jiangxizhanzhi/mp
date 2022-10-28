@@ -18,6 +18,13 @@ import java.util.List;
 public class NetworkInfos implements HttpData {
     private List<InitInfoData> networkInfos = new ArrayList<>();
 
+    @Getter
+    @Setter
+    public static class InitInfoData {
+        private String mac;
+        private String taskId;
+    }
+
     @Override
     public String toContent() {
         return JsonUtils.snakeStringify(this);

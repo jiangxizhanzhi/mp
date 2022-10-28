@@ -3,9 +3,9 @@ package cn.cyberpeace.mp.flow.v2.service;
 import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
-import cn.cyberpeace.mp.flow.v2.client.trex.QueryTaskLastStatus;
+import cn.cyberpeace.mp.flow.v2.client.trex.QueryTaskLastStatusData;
 import cn.cyberpeace.mp.flow.v2.client.trex.QueryTaskStatusData;
-import cn.cyberpeace.mp.flow.v2.client.trex.TaskStatusData;
+import cn.cyberpeace.mp.flow.v2.client.trex.TaskLastStatusResponseData;
 import cn.cyberpeace.mp.flow.v2.client.trex.TrexClient;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountModel;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
@@ -24,7 +24,6 @@ import java.util.Map;
  */
 public class TrexFlowCallBackTask implements FlowCallBackTask {
     private FlowTaskRecordBO flowTaskRecordBO;
-    private FlowTaskCountService flowTaskCountService;
     private TrexClient trexClient;
 
     public TrexFlowCallBackTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
@@ -50,10 +49,10 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
         recordMapper.update(recordModel);
         System.out.println(flowTaskRecordBO.getId() + "状态：" + status.get(0).getStatus());
         // 查询任务状态 包括流量、速率、包数量、tcp数量等
-        QueryTaskLastStatus queryTaskLastStatus = new QueryTaskLastStatus();
+        QueryTaskLastStatusData queryTaskLastStatus = new QueryTaskLastStatusData();
         queryTaskLastStatus.setTaskId(flowTaskRecordBO.getId());
         var taskStatus = trexClient.queryTaskLastStatus(queryTaskLastStatus);
-        Map<String, TaskStatusData.singleTask> allTaskStatus = new HashMap<>();
+        Map<String, TaskLastStatusResponseData.singleTask> allTaskStatus = new HashMap<>();
         taskStatus.getRows().stream().forEach(t -> {
             allTaskStatus.put(t.getTaskUuid(), t);
         });
@@ -74,6 +73,8 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
         if (recordModel.getStatus() == 2) {
             return true;
         } else if (recordModel.getStatus() == 3) {
+            return true;
+        } else if (recordModel.getStatus() == 4) {
             return true;
         }
         return false;

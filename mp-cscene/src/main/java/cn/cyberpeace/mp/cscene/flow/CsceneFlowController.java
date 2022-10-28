@@ -37,25 +37,25 @@ public class CsceneFlowController {
 
     @ApiOperation("暂停")
     @PostMapping("/pause")
-    public ServiceResult<Object> pause(@RequestBody CsceneFlowTaskActionRequest request) {
-        return new ServiceResult<>(true);
+    public ServiceResult<Boolean> pause(@RequestBody CsceneFlowTaskActionRequest request) {
+        return flowTaskService.pause(request.getRecordId());
     }
 
     @ApiOperation("恢复")
     @PostMapping("/recover")
-    public ServiceResult<Object> recover(@RequestBody CsceneFlowTaskActionRequest request) {
-        return new ServiceResult<>(true);
+    public ServiceResult<Boolean> recover(@RequestBody CsceneFlowTaskActionRequest request) {
+        return flowTaskService.unpause(request.getRecordId());
     }
 
     @ApiOperation("重启")
     @PostMapping("/restart")
-    public ServiceResult<Object> restart(@RequestBody CsceneFlowTaskActionRequest request) {
-        return new ServiceResult<>(true);
+    public ServiceResult<Boolean> restart(@RequestBody CsceneFlowTaskActionRequest request) {
+        return flowTaskService.restart(request.getRecordId());
     }
 
     @ApiOperation("停止")
     @PostMapping("/stop")
-    public ServiceResult<Object> stop(@RequestBody CsceneFlowTaskActionRequest request) {
-        return new ServiceResult<>(true);
+    public ServiceResult<Boolean> stop(@RequestBody CsceneFlowTaskActionRequest request) {
+        return flowTaskService.stop(request.getRecordId());
     }
 }
