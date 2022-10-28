@@ -407,7 +407,7 @@ public class FlowInfoService {
         String ipField = esIpFieldBOS.get(0).getIPFieldName();
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(ipField)
 				.subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes"));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<AttackFlowBO> bos = Lists.newArrayList();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
@@ -435,7 +435,7 @@ public class FlowInfoService {
 		String typeTerm = "cate";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("suricata.category")
 				.order(BucketOrder.count(false)).size(topSize == null ? 1000 : topSize);
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
 		// 第一个元素是总数
@@ -447,7 +447,7 @@ public class FlowInfoService {
 		ParsedTerms parsedTermsIp = response.getAggregations().get(typeTerm);
 		parsedTermsIp.getBuckets().forEach(bucketIp -> {
 			CountBO bo = new CountBO();
-			bo.setKey(bucketIp.getKeyAsString());
+			bo.setKey(MessageCommonUtil.convertMessage(bucketIp.getKeyAsString()));
 			bo.setCount(bucketIp.getDocCount());
 			bos.add(bo);
 		});
@@ -469,7 +469,7 @@ public class FlowInfoService {
         String cateTerm = "cate";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field(esIpFieldBOS.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<AttackFlowBO> bos = Lists.newArrayList();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
@@ -509,7 +509,7 @@ public class FlowInfoService {
 		AggregationBuilder aggBuilder = AggregationBuilders.dateHistogram(histogramTerm).field("@timestamp")
 				.fixedInterval(DateHistogramInterval.minutes(10)).extendedBounds(new LongBounds(startTime, endTime))
 				.format("HH:mm").timeZone(ZoneId.systemDefault());
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
 		ParsedDateHistogram parsedHistogram = response.getAggregations().get(histogramTerm);
@@ -543,7 +543,7 @@ public class FlowInfoService {
 						.fixedInterval(DateHistogramInterval.minutes(10)).format("HH:mm")
 						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
 						.timeZone(ZoneId.systemDefault()));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		Map<String, List<CountBO>> severityMap = Maps.newHashMap();
 		ParsedTerms parsedTermsSeverity = response.getAggregations().get(severityTerm);
@@ -587,7 +587,7 @@ public class FlowInfoService {
 						.fixedInterval(DateHistogramInterval.minutes(5))
 						.extendedBounds(new LongBounds(startTime, endTime)).format("HH:mm")
 						.timeZone(ZoneId.systemDefault()).subAggregation(AggregationBuilders.sum(sumTerm).field("network.bytes")));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(ipTerm);
@@ -623,7 +623,7 @@ public class FlowInfoService {
 		String typeTerm = "protocol";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(typeTerm).field("protocol")
 				.order(BucketOrder.count(false));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<String> ignoreProtocols = Lists.newArrayList("tcp", "udp");
 		List<CountBO> bos = Lists.newArrayList();
@@ -665,7 +665,7 @@ public class FlowInfoService {
 		
 		String ipTerm = "target_ip";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(ipTerm).field("destination.ip");
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		List<CountBO> bos = Lists.newArrayList();
 		// 第一个元素是总数
@@ -690,7 +690,7 @@ public class FlowInfoService {
 	 * @return
 	 */
 	public long attackTotalCount() {
-		SearchResponse response = esAggrQuery(QueryBuilders.boolQuery(), null);
+		SearchResponse response = esAggQuery(QueryBuilders.boolQuery(), null);
 		return response.getHits().getTotalHits().value;
 	}
 	
@@ -704,12 +704,14 @@ public class FlowInfoService {
 		BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
 		buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
-		String srcIpTerm = "src_ip", desIpTerm = "des_ip", cateTerm = "cate";
+		String srcIpTerm = "src_ip";
+        String desIpTerm = "des_ip";
+        String cateTerm = "cate";
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
 				.field(esIpFieldBOS.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"))
 				.subAggregation(AggregationBuilders.terms(cateTerm).field("suricata.category"));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
         return parsedTermsIp.getBuckets().stream().map(bucketSrcIp -> {
@@ -753,7 +755,7 @@ public class FlowInfoService {
 		AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
 				.field(esIpFieldBOS.get(0).getIPFieldName())
 				.subAggregation(AggregationBuilders.sum(desIpTerm).field("destination.ip"));
-		SearchResponse response = esAggrQuery(queryBuilder, aggBuilder);
+		SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
 		Map<String, List<CountBO>> ipMap = Maps.newHashMap();
 		ParsedTerms parsedTermsIp = response.getAggregations().get(srcIpTerm);
@@ -800,7 +802,7 @@ public class FlowInfoService {
 	 * @param queryBuilder
 	 * @return
 	 */
-	private SearchResponse esAggrQuery(BoolQueryBuilder queryBuilder, AggregationBuilder aggBuilder){
+	private SearchResponse esAggQuery(BoolQueryBuilder queryBuilder, AggregationBuilder aggBuilder){
 		String[] indexArray = getFlowIndex();
 		var searchRequest = new SearchRequest(indexArray);
 		var sourceBuilder = new SearchSourceBuilder();

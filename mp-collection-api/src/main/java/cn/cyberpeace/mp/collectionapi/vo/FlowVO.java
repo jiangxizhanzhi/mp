@@ -17,7 +17,7 @@ public class FlowVO {
     private String targetIp;
 
     @ApiModelProperty(value = "攻击方式")
-    private AttackTypeVO attackType;
+    private String attackType;
 
     @ApiModelProperty(value = "告警级别")
     private String severity;
