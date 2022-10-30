@@ -12,6 +12,7 @@ import cn.cyberpeace.mp.flow.v2.service.FlowGenerateService;
 import cn.cyberpeace.mp.flow.v2.service.FlowGeneratorService;
 import cn.cyberpeace.mp.flow.v2.service.FlowTaskService;
 import cn.cyberpeace.mp.scene.core.scene.SceneHandler;
+import cn.cyberpeace.mp.sceneplugincloud.bo.CloudPluginSceneElementBO;
 import cn.cyberpeace.mp.sceneplugincloud.constant.PluginConstant;
 import cn.cyberpeace.mp.sceneplugincloud.model.CloudPluginSceneElementModel;
 import cn.cyberpeace.mp.sceneplugincloud.plugin.CloudScenePluginHandler;
@@ -73,7 +74,8 @@ public class FlowBizService {
         var flowTask = flowTaskService.get(flowTaskId).sourceObj();
         FlowTaskBO flowTaskBO = new FlowTaskBO();
         flowTaskBO.fromModel(flowTask);
-        // 查询流量发生器详情
+        // 查询流量发生器详情 需要根据id 目标机器和任务 自动选择
+        // 改用 chooseGenerator 方法
         var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
         FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
         flowGeneratorBO.fromModel(flowGenerator);
@@ -139,5 +141,9 @@ public class FlowBizService {
         FlowTaskRecordBO recordBO = new FlowTaskRecordBO();
         recordBO.fromModel(result);
         return flowGenerateService.restartFlowTask(recordBO);
+    }
+
+    private FlowGeneratorBO chooseGenerator(FlowTaskBO task, CloudPluginSceneElementBO target) {
+        return new FlowGeneratorBO();
     }
 }
