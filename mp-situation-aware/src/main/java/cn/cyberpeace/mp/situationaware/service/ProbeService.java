@@ -316,7 +316,6 @@ public class ProbeService {
      * @param sceneInstanceStartTime
      */
     public void cleanProbeData(List<String> agentNames, LocalDateTime sceneInstanceStartTime) {
-        log.info("agentNames:{}, deleteTime:{}", agentNames, sceneInstanceStartTime);
         if (Objects.isNull(sceneInstanceStartTime)) {
             log.error("scene instance startTime should not be null!");
             throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);

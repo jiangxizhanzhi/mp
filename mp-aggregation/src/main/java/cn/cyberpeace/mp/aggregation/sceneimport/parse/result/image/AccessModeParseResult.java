@@ -16,6 +16,8 @@ public class AccessModeParseResult {
     private String path;
     private String username;
     private String password;
+    private String privateKey;
+    private String privateKeyPath;
     private String desc;
     private String mode;
     private String isproxy;

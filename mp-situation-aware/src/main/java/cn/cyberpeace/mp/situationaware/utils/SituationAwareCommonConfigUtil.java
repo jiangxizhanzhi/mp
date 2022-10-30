@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.utils;
 import com.google.common.io.CharStreams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -48,7 +49,7 @@ public class SituationAwareCommonConfigUtil {
                 String content = CharStreams.toString(new InputStreamReader(resource.getInputStream()));
                 CONFIG_MAP.put(config, content);
             } catch (Exception e) {
-                log.error("failed to read config : {}", config, e);
+                log.error("failed to read config : {}, {}", config, ExceptionUtils.getStackTrace(e));
             }
         }
         LOADED = true;

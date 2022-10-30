@@ -77,6 +77,7 @@ public class CsceneController implements BaseModelListControllerBase {
         CsceneDataModifier.handlerInputEnableRecording(csceneBO);
         CsceneDataModifier.checkFlowNum(csceneBO);
         CsceneDataModifier.checkVlanId(csceneBO);
+        CsceneDataModifier.check(csceneBO);
         CsceneDataModifier.checkIngressAndEgress(csceneBO);
         CsceneDataModifier.correctQuickCreateSupport(csceneBO);
         CsceneDataModifier.checkFirewallRules(csceneBO);

@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.aggregation.sceneimport.parse.result.image;
 
 import cn.cyberpeace.mp.sceneplugincloud.model.base.BaseCloudPluginSceneElementModel;
+import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,6 +16,7 @@ import java.util.Map;
  * @Date 2021/11/2
  */
 @Setter
+@Getter
 public class ImageInfoParseResult {
     private String 描述;
     private String 系统类型;

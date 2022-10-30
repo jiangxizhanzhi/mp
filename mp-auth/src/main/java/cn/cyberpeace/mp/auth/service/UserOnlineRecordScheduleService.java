@@ -54,7 +54,6 @@ public class UserOnlineRecordScheduleService {
         if (threadPool == null) {
             threadPool = getSingletonThreadPool();
         }
-        log.info("start online record task...");
         ConcurrentHashMap<UserModel, CopyOnWriteArrayList<LocalDateTime>> heartbeatMap = heartbeatService.getHeartbeatMap();
         List<Map<UserModel, LocalDateTime>> userModel2LastTsMapList = new ArrayList<>();
         int i = 0;
@@ -92,8 +91,6 @@ public class UserOnlineRecordScheduleService {
                 heartbeatMap.remove(userModel);
             }
         }
-
-        log.info("finish online record task...");
     }
 
 

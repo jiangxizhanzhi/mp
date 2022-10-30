@@ -12,7 +12,15 @@ public enum AuthErrorCode implements ErrorCode {
     NOT_CERTIFIED("MP-110001", "not_certified"),
     AUTHENTICATION_FAILED("MP-110002", "authentication_failed"),
     BAD_CREDENTIALS("MP-110003", "bad_credentials"),
-    TOKEN_EXPIRED("MP-110004", "token_expired"),
+
+    // verify token jwt error
+    ALGORITHM_MISMATCH("MP-110110", "token_algorithm_mismatch"),
+    SIGNATURE_VERIFICATION("MP-110111", "token_signature_verification"),
+    TOKEN_EXPIRED("MP-110112", "token_token_expired"),
+    INVALID_CLAIM("MP-110113", "token_invalid_claim"),
+    JWT_DECODE("MP-110114", "token_jwt_decode"),
+    ILLEGAL_ARGUMENT("MP-110115", "token_illegal_argument"),
+
     NEED_UPDATE_CREDENTIALS("MP-110005", "need_update_credentials"),
     ACCOUNT_NOT_LOGIN("MP-110006", "account_not_login"),
     ACCOUNT_CREDENTIALS_EXPIRED("MP-110007", "account_credentials_expired"),
@@ -51,7 +59,6 @@ public enum AuthErrorCode implements ErrorCode {
     MOBILE_INVALID("MP-110046", "mobile_invalid"),
     INCORRECT_OLD_CREDENTIALS("MP-110047", "incorrect_old_credentials"),
     TOKEN_EMPTY_ERROR("MP-110048", "token_empty_error"),
-    TOKEN_DECODE_ERROR("MP-110049", "token_decode_error"),
 
 
     // org
@@ -109,7 +116,11 @@ public enum AuthErrorCode implements ErrorCode {
     COPY_FILE_ERROR("MP-110133", "copy_file_error"),
     FILE_NAME_ISNULL_ERROR("MP-110134", "file_name_isnull_error"),
 
-    PERMISSION_DENIED("MP-110140", "permission_denied");
+    PERMISSION_DENIED("MP-110140", "permission_denied"),
+
+    FILE_OVERSIZE_ERROR("MP-110150", "file_oversize_error"),
+    FILE_SUFFIX_TYPE_ERROR("MP-110151", "file_suffix_type_error"),
+    FILE_MAGIC_HEADER_ERROR("MP-110152", "file_magic_header_error");
 
 
     AuthErrorCode(String code, String message) {

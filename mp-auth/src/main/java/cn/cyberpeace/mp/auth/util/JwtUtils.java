@@ -8,9 +8,11 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.AlgorithmMismatchException;
+import com.auth0.jwt.exceptions.InvalidClaimException;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.AllArgsConstructor;
@@ -18,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -33,6 +36,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Objects;
+
+import static cn.cyberpeace.mp.auth.constant.AuthConstant.FAIL_VERIFY_JWT_TOKEN;
 
 /**
  * @Description:
@@ -72,14 +77,13 @@ public class JwtUtils {
 
     private static String generateJwtSecret(UserInfo user) {
         String secret = getSecret(user);
-        var algorithm = "HmacSHA256";
         final Mac mac;
         try {
-            mac = Mac.getInstance(algorithm);
+            mac = Mac.getInstance(AuthConstant.JWT_ALGORITHM);
             //mac.init(new SecretKeySpec(AuthConstant.JWT_SECRET_KEY.getBytes(StandardCharsets.UTF_8), algorithm));
-            mac.init(new SecretKeySpec(jwtUtils.authConfig.getAuthenticateJwtSecret().getBytes(StandardCharsets.UTF_8), algorithm));
+            mac.init(new SecretKeySpec(jwtUtils.authConfig.getAuthenticateJwtSecret().getBytes(StandardCharsets.UTF_8), AuthConstant.JWT_ALGORITHM));
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Generate Jwt Secret error: {}", e.getMessage());
+            log.error("Generate Jwt Secret error: {}", ExceptionUtils.getStackTrace(e));
             return jwtUtils.authConfig.getAuthenticateJwtSecret();
         }
 
@@ -114,16 +118,16 @@ public class JwtUtils {
         String jwtSecret = generateJwtSecret(user);
         Long expireSeconds = jwtUtils.authConfig.getAuthenticateJwtExpires();
         if (Objects.isNull(expireSeconds)) {
-            expireSeconds = 604800L;
+            expireSeconds = AuthConstant.TOKEN_EXPIRE_TIME;
         }
-        var expireDate = new Date(System.currentTimeMillis() + expireSeconds * 1000);
+        var expireDate = new Date(System.currentTimeMillis() + expireSeconds * AuthConstant.MILLI_TO_SECOND);
         String secret = getSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
-            return JWT.create().withExpiresAt(expireDate).withClaim("id", user.getId())
-                    .withClaim("username", user.getUsername()).withClaim("key", secret).sign(algorithm);
+            return JWT.create().withExpiresAt(expireDate).withClaim(AuthConstant.JWT_CLAIM_ID, user.getId())
+                    .withClaim(AuthConstant.JWT_CLAIM_USERNAME, user.getUsername()).withClaim(AuthConstant.JWT_CLAIM_KEY, secret).sign(algorithm);
         } catch (JWTCreationException e) {
-            log.error("Create jwt token error: {}", e.getMessage());
+            log.error(AuthConstant.FAIL_CREATE_JWT_TOKEN, e.getMessage());
             return null;
         }
     }
@@ -151,22 +155,27 @@ public class JwtUtils {
 
     public static UserInfo validateToken(String token) {
         var user = getUserInfo(token);
-        if (user == null) {
-            throw new MpRuntimeException(AuthErrorCode.TOKEN_DECODE_ERROR);
-        }
-
         String jwtSecret = generateJwtSecret(user);
         try {
             var algorithm = Algorithm.HMAC256(jwtSecret);
             JWTVerifier verifier = JWT.require(algorithm).build();
             verifier.verify(token);
+        } catch (AlgorithmMismatchException e) {
+            throw new MpRuntimeException(AuthErrorCode.ALGORITHM_MISMATCH);
+        } catch (SignatureVerificationException e) {
+            log.info(FAIL_VERIFY_JWT_TOKEN + " signature mismatch...", user.getId(), shortenToken(token));
+            throw new MpRuntimeException(AuthErrorCode.SIGNATURE_VERIFICATION);
         } catch (TokenExpiredException e) {
+            log.info(FAIL_VERIFY_JWT_TOKEN + " token expired...", user.getId(), shortenToken(token));
             throw new MpRuntimeException(AuthErrorCode.TOKEN_EXPIRED);
-        } catch (JWTVerificationException e) {
-            log.error("Verify jwt token error: {}", e.getMessage());
-            throw new MpRuntimeException(AuthErrorCode.AUTHENTICATION_FAILED);
+        } catch (InvalidClaimException e) {
+            throw new MpRuntimeException(AuthErrorCode.INVALID_CLAIM);
+        } catch (JWTDecodeException e) {
+            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN , token, e.getMessage());
+            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
+        } catch (IllegalArgumentException e) {
+            throw new MpRuntimeException(AuthErrorCode.ILLEGAL_ARGUMENT);
         }
-
         return user;
     }
 
@@ -184,17 +193,24 @@ public class JwtUtils {
         try {
             jwt = JWT.decode(token);
         } catch (JWTDecodeException e) {
-            log.error("Decode jwt token {} error: {}", token, e.getMessage());
-            return null;
+            log.info(AuthConstant.FAIL_DECODE_JWT_TOKEN, token, e.getMessage());
+            throw new MpRuntimeException(AuthErrorCode.JWT_DECODE);
         }
 
         var user = new UserInfo();
-        user.setId(jwt.getClaim("id").asString());
-        user.setUsername(jwt.getClaim("username").asString());
-        user.setTokenSecret(jwt.getClaim("key").asString());
+        user.setId(jwt.getClaim(AuthConstant.JWT_CLAIM_ID).asString());
+        user.setUsername(jwt.getClaim(AuthConstant.JWT_CLAIM_USERNAME).asString());
+        user.setTokenSecret(jwt.getClaim(AuthConstant.JWT_CLAIM_KEY).asString());
         return user;
     }
 
+    public static String shortenToken(String token) {
+        String[] tokenParts = StringUtils.split(token, AuthConstant.SEPARATOR_CHAR_DOT);
+        if (tokenParts.length > 0) {
+            return tokenParts[tokenParts.length - 1];
+        }
+        return token;
+    }
 
 
 }

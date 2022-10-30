@@ -83,9 +83,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             authenticateUrls = authConfig.getAuthenticateUrls().toArray(new String[authConfig.getAuthenticateUrls().size()]);
         }
 
+        String[] authenticateExcludeUrls = {};
+        if (CollectionUtil.isNotEmpty(authConfig.getAuthenticateExcludeUrls())) {
+            authenticateExcludeUrls = authConfig.getAuthenticateExcludeUrls().toArray(new String[authConfig.getAuthenticateExcludeUrls().size()]);
+        }
+
         http.authorizeRequests()
+                .antMatchers(authenticateExcludeUrls).permitAll()
                 .antMatchers(authenticateUrls).authenticated()
-                .antMatchers("/unauth/**").permitAll()
                 .anyRequest().permitAll()
                 .and()
                 .csrf().disable()

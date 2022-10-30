@@ -47,7 +47,6 @@ public class UploadUrlAuthListener extends AnalysisEventListener<ImportUrlAuth> 
      */
     @Override
     public void invoke(ImportUrlAuth data, AnalysisContext context) {
-        log.info("got one data:{}", JSON.toJSONString(data));
         list.add(data);
 
         if (list.size() > MAX_COUNT) {
@@ -77,8 +76,6 @@ public class UploadUrlAuthListener extends AnalysisEventListener<ImportUrlAuth> 
      * 角色：必填， 属于已有角色可以导入，不属于已有角色导入失败。
      */
     private void saveData() {
-        log.info("list size:{}！", list.size());
-
         //List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
         //List<String> targetIds = allTargets.stream().map(TargetModel::getId).collect(Collectors.toList());
         //List<ImportUrlAuth> list1 = list.stream().filter(u -> !targetIds.contains(u.getMenuId())).collect(Collectors.toList());

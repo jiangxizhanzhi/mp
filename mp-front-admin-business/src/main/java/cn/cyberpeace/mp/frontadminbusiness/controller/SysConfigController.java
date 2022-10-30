@@ -9,14 +9,15 @@ import cn.cyberpeace.mp.common.constant.FileSuffixConstant;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.cyberpeace.mp.common.service.FileService;
 import cn.cyberpeace.mp.common.util.SuffixCheckUtil;
+import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
+import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
+import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
+import cn.cyberpeace.mp.frontadminbusiness.constant.AdminBusinessConstant;
+import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
-import cn.cyberpeace.mp.frontadmin.constant.AdminErrorCode;
-import cn.cyberpeace.mp.frontadmin.model.SysConfigModel;
-import cn.cyberpeace.mp.frontadmin.service.sys.SysConfigService;
-import cn.cyberpeace.mp.frontadminbusiness.service.SysConfigCheckService;
 import cn.hutool.core.collection.CollectionUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,10 +25,17 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -61,6 +69,17 @@ public class SysConfigController {
     @GetMapping("/all")
     public ServiceResult<List<SysConfigModel>> listAll() {
         List<SysConfigModel> configs = sysConfigService.listAll();
+        return ResultCommon.success(configs);
+    }
+
+    @ApiOperation(value = "查询系统名称", notes = "")
+    @GetMapping("/public")
+    public ServiceResult<List<SysConfigModel>> getSystemName() {
+        List<SysConfigModel> configs = new ArrayList<>();
+        for (String key : AdminBusinessConstant.UNAUTH_SYS_INFO_KEYS) {
+            SysConfigModel model = sysConfigService.getByKeyName(key);
+            configs.add(model);
+        }
         return ResultCommon.success(configs);
     }
 

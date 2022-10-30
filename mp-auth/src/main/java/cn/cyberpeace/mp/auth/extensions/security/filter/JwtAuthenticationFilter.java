@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.mapper = messageConverter.getObjectMapper();
     }
 
-    public static String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
+    public static final String SKIP_JWT_FILTER = "SKIP_JWT_FILTER";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -61,10 +61,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Object skipJwtFilter = request.getAttribute(JwtAuthenticationFilter.SKIP_JWT_FILTER);
         boolean skip = Objects.nonNull(skipJwtFilter) && (Boolean) skipJwtFilter;
         if (!skip) {
-            try {
+
                 String token = JwtCommon.getToken(request);
                 if (StringUtils.isNotBlank(token)) {
-                    UserModel user = JwtCommon.verifyToken(token);
+                    UserModel user;
+                    try {
+                        user = JwtCommon.verifyToken(token);
+                    } catch (MpRuntimeException e) {
+                        log.info(e.getMessage());
+                        response.setContentType("application/json;charset=UTF-8");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
+                        PrintWriter writer = response.getWriter();
+                        mapper.writeValue(writer, result);
+                        writer.flush();
+                        return;
+                    }
                     if (Objects.nonNull(user)) {
                         // 第一步就要将请求类型塞入request attribute，否则后面的loadAuthorities()就可能出问题，参见浙能定制版commit id:f7cdf17f6c7e0bbc36e771a79db981a0ffd4990f
                         UserUtils.setLoginUser2RequestAttr(request, user.getId(), user.getUsername(), LogConstant.USER_TYPE_USER);
@@ -74,16 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         refreshToken(response, token, user);
                     }
                 }
-            } catch (MpRuntimeException e) {
-                log.error("verify token failed for {}", e.getMessage());
-                response.setContentType("application/json;charset=UTF-8");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                ServiceResult<Object> result = ServiceResult.builder().serviceCode(e.getServiceCode()).build().asResult();
-                PrintWriter writer = response.getWriter();
-                mapper.writeValue(writer, result);
-                writer.flush();
-                return;
-            }
+
         }
 
         filterChain.doFilter(request, response);

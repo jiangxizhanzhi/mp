@@ -134,7 +134,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_FILE_EVENTS)
     public ListObjResult<FileEventModel> queryFileEvents(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -179,7 +178,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult(fileEventModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryFileEvents error: {} ", e);
+            log.error("es queryFileEvents error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -194,7 +193,6 @@ public class DataCollectionService extends CollectionBaseService {
         final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(11L));
         SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
         scrollRequest.scroll(scroll);
-        log.info("elasticsearch scroll query, scrollId:\n{}", scrollId);
         try {
             SearchResponse response = restHighLevelClient.scroll(scrollRequest, RequestOptions.DEFAULT);
             List<WazuhFileRoot> wazuhFileRootList = Arrays.stream(response.getHits().getHits()).map(hit -> JSONObject.parseObject(hit.getSourceAsString(), WazuhFileRoot.class)).collect(Collectors.toList());
@@ -218,7 +216,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<WazuhProbeCommonModel>
      */
     public ListObjResult<WazuhProbeCommonModel> queryCustomProbeData(WazuhEventRequest wazuhEventRequest, List<String> probeIds) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -267,7 +264,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryCustomProbeData error", e);
+            log.error("es queryCustomProbeData error, {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -280,7 +277,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return ListObjResult<WazuhVulnerabilityInfoModel>
      */
     public ListObjResult<WazuhVulnerabilityInfoModel> queryVulnerabilityInfo(WazuhEventRequest wazuhEventRequest, boolean desc) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ListObjResult<>(Collections.emptyList(), 0);
         }
@@ -332,7 +328,7 @@ public class DataCollectionService extends CollectionBaseService {
             }
             return new ListObjResult<>(wazuhModelList, BigDecimal.valueOf(total).intValue());
         } catch (IOException e) {
-            log.error("es queryVulnerabilityInfo error:", e);
+            log.error("es queryVulnerabilityInfo error:{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -349,7 +345,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     public List<WazuhVulnerabilityInfoCountModel> queryVulnerabilityCountInfo(WazuhEventRequest wazuhEventRequest,
                                                                               boolean isTop, String fieldPath, String fieldName) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return new ArrayList<>();
         }
@@ -389,7 +384,7 @@ public class DataCollectionService extends CollectionBaseService {
             }).collect(Collectors.toList());
             return vulnerabilityInfoCounts;
         } catch (IOException e) {
-            log.error("es queryVulnerabilityCountInfo error:", e);
+            log.error("es queryVulnerabilityCountInfo error:{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -454,7 +449,7 @@ public class DataCollectionService extends CollectionBaseService {
                 return new ListObjResult<>(Lists.newArrayList(), wazuhModelList.size());
             }
         } catch (IOException e) {
-            log.error("es 查询监控事件分页失败 {}", e);
+            log.error("es 查询监控事件分页失败 {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -499,7 +494,7 @@ public class DataCollectionService extends CollectionBaseService {
                 return dataCollectionEventModel;
             }).collect(Collectors.toList());
         } catch (Exception e) {
-            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getMessage(e));
+            log.error(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR.getMessage() + "{}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(SituationalAwareErrorCode.WAZUH_AGENTS_QUERY_EVENT_ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -867,7 +862,7 @@ public class DataCollectionService extends CollectionBaseService {
 
             return changedCount;
         } catch (IOException e) {
-            log.error("es queryMonitorEventsWithTimeRange error: {}", e);
+            log.error("es queryMonitorEventsWithTimeRange error: {}", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1008,7 +1003,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_AGGS_BY_AGENTNAME)
     public Map<String, Long> aggsCountByAgentNamesBucket(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
@@ -1051,7 +1045,7 @@ public class DataCollectionService extends CollectionBaseService {
             return map;
 
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1064,7 +1058,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_AGGS_RULEIDS_BY_AGENTNAME)
     public Map<String, Long> aggsRuleIdsByAgentName(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         Map<String, Long> map = new LinkedHashMap<>();
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return map;
@@ -1106,7 +1099,7 @@ public class DataCollectionService extends CollectionBaseService {
             return map;
 
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1119,7 +1112,6 @@ public class DataCollectionService extends CollectionBaseService {
      */
     @Cacheable(value = CACHE_KEY_COUNT_BY_AGENTNAME)
     public long countByAgentNames(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0;
         }
@@ -1144,7 +1136,7 @@ public class DataCollectionService extends CollectionBaseService {
             long count = response.getCount();
             return count;
         } catch (IOException e) {
-            log.error("es query error: {} ", e);
+            log.error("es query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1154,7 +1146,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @param wazuhEventRequest
      */
     public Long deleteDocByAgentNames(WazuhEventRequest wazuhEventRequest) {
-        log.info("{}", wazuhEventRequest);
         if (isAgentNamesEmpty(wazuhEventRequest.getAgentNames())) {
             return 0L;
         }
@@ -1177,7 +1168,7 @@ public class DataCollectionService extends CollectionBaseService {
             BulkByScrollResponse response = restHighLevelClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
             return response.getUpdated();
         } catch (IOException e) {
-            log.error("es delete by query error: {} ", e);
+            log.error("es delete by query error: {} ", ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException(BaseErrorCode.ERROR, ExceptionUtils.getStackTrace(e));
         }
     }
@@ -1437,7 +1428,6 @@ public class DataCollectionService extends CollectionBaseService {
      * @return List<String>
      */
     public static List<String> fetchFormatterTime(LocalDateTime startTime, LocalDateTime endTime) {
-        log.info("startTime:{}, endTime:{}", startTime, endTime);
         LocalDate startDate = startTime.toLocalDate();
         LocalDate endDate = endTime.toLocalDate();
         List<String> dayList = new ArrayList<>();

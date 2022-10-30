@@ -1,7 +1,11 @@
 package cn.cyberpeace.mp.auth.service;
 
+import cn.cyberpeace.mp.auth.common.FileCheckCommon;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.request.common.FileCheckRequest;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.deprecated.FileResponseData;
 import cn.hutool.core.io.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +24,20 @@ import java.io.IOException;
 public class AvatarService {
 
     public FileResponseData upload(MultipartFile file) {
+        // 校验文件
+        FileCheckRequest fileCheckRequest = new FileCheckRequest();
+        fileCheckRequest.setMaxSize(AuthConstant.UPLOAD_AVATAR_MAX_SIZE);
+        fileCheckRequest.setSuffixList(AuthConstant.UPLOAD_AVATAR_SUFFIX_TYPE);
+        fileCheckRequest.setMagicHeaderList(AuthConstant.UPLOAD_AVATAR_MAGIC_HEADER_TYPE);
+        ServiceResult<Boolean> uploadResult = FileCheckCommon.checkFile(file,fileCheckRequest);
+        if (!Boolean.TRUE.equals(uploadResult.getSource())) {
+            throw new MpRuntimeException(uploadResult.getServiceCode());
+        }
         FileResponseData responseData = new FileResponseData();
         try {
             // 上传到服务器
             String suffix = FileUtil.getSuffix(file.getOriginalFilename());
             String filepath = FdfsCommon.upload(file.getInputStream(), suffix);
-
             responseData.setFileName(file.getOriginalFilename());
             responseData.setFilePath(filepath);
             responseData.setFileType(suffix);
@@ -35,8 +47,6 @@ public class AvatarService {
             responseData.setSuccess(false);
             responseData.setMessage(e.getMessage());
         }
-
         return responseData;
     }
-
 }

@@ -68,6 +68,7 @@ subprojects {
         implementation 'io.github.hakky54:sslcontext-kickstart:6.6.0'
         implementation 'io.springfox:springfox-swagger2:3.0.0'
         implementation 'net.oschina.zcx7878:fastdfs-client-java:1.27.0.0'
+        implementation 'net.sf.jmimemagic:jmimemagic:0.1.5'
         implementation 'org.apache.commons:commons-collections4:4.1'
         implementation 'org.apache.commons:commons-lang3:3.11'
         implementation 'org.apache.commons:commons-pool2:2.4.2'

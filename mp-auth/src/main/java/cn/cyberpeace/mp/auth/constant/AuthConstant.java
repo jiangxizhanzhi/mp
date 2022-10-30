@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.auth.constant;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @Description: 全局变量
  * @Author zhouxinghuai
@@ -38,9 +41,9 @@ public class AuthConstant {
 
     public static final String ORG_PATH_SEPARATOR = "/";
 
-    public final static String FDFS_PREFIX = "/fdfs";
+    public static final String FDFS_PREFIX = "/fdfs";
 
-    public final static String DEFAULT_IMAGE_PREFIX = "/api/mp";
+    public static final String DEFAULT_IMAGE_PREFIX = "/api/mp";
 
     /**
      * 逗号
@@ -51,6 +54,36 @@ public class AuthConstant {
     public static final Integer TARGET_FIELD_VALUE_VISIBLE_1 = 1;
 
     public static final Integer USER_ONLINE_RECORD_FIELD_VALUE_STATUS_0 = 0;
+
+    public static final String FAIL_VERIFY_JWT_TOKEN = "failed to verify jwt token, massage: userId={}, token={}";
+    public static final String FAIL_DECODE_JWT_TOKEN = "failed to decode jwt token, massage: token={}, error={}";
+    public static final String FAIL_CREATE_JWT_TOKEN = "Create jwt token error: {}";
+
+    public static final String JWT_ALGORITHM = "HmacSHA256";
+    public static final String JWT_CLAIM_ID = "id";
+    public static final String JWT_CLAIM_USERNAME = "username";
+    public static final String JWT_CLAIM_KEY = "key";
+
+    public static final long TOKEN_EXPIRE_TIME = 604800L;
+    public static final int MILLI_TO_SECOND = 1000;
+
+    public static final String SEPARATOR_CHAR_DOT = ".";
+    public static final String JOIN_TYPES_DELIMITER = ",";
+
+    /**
+     * 导入用户头像max size：20M
+     */
+    public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024;
+
+    /**
+     * 导入用户头像支持后缀类型：png，jpeg，jpg
+     */
+    public static final List<String> UPLOAD_AVATAR_SUFFIX_TYPE = Arrays.asList("png", "jpeg", "jpg");
+
+    /**
+     * 导入用户头像支持魔术头类型：png，jpg（对应后缀为：jpg和jpeg）
+     */
+    public static final List<String> UPLOAD_AVATAR_MAGIC_HEADER_TYPE = Arrays.asList("png", "jpg");
 
 
     private AuthConstant() {

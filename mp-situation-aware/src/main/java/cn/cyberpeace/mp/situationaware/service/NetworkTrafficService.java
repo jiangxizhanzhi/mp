@@ -195,7 +195,7 @@ public class NetworkTrafficService extends AbstractBaseService{
         try {
             molochUrl = SituationalAwareConstant.groupIdSessionUrlCache.get(groupId);
         } catch (ExecutionException e) {
-            log.error("查询缓存异常 groupId {}" + e, groupId);
+            log.error("查询缓存异常 groupId {}, {}", groupId, ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
 
@@ -205,7 +205,7 @@ public class NetworkTrafficService extends AbstractBaseService{
             httpResponse =  HttpUtils.sendGetDownLoadWithDigestAuth(molochUrl,
                 situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (IOException e) {
-            log.error("查询缓存异常 groupId {}" + e, groupId);
+            log.error("查询缓存异常 groupId {}, {}", groupId , ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException("查询缓存异常 groupId: "+ groupId);
         }
         return httpResponse;
@@ -221,7 +221,7 @@ public class NetworkTrafficService extends AbstractBaseService{
         try {
             molochUrl = SituationalAwareConstant.groupIdSessionUrlCache.get(spiViewRequest.getGroupId());
         } catch (ExecutionException e) {
-            log.error("查询缓存异常 groupId {}" + e, spiViewRequest.getGroupId());
+            log.error("查询缓存异常 groupId {}", spiViewRequest.getGroupId(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException("查询缓存异常 groupId: "+ spiViewRequest.getGroupId());
         }
 
@@ -237,7 +237,7 @@ public class NetworkTrafficService extends AbstractBaseService{
         try {
            return HttpUtils.sendGet(spiMolochUrlBuilder.toString(), situationAwareConfig.getArkimeUsername(), situationAwareConfig.getArkimePassword());
         } catch (Exception e) {
-            log.error("查询spi视图异常 groupId {}" + e, spiViewRequest.getGroupId());
+            log.error("查询spi视图异常 groupId {}, {}", spiViewRequest.getGroupId(), ExceptionUtils.getStackTrace(e));
             throw new MpRuntimeException("查询spi视图异常 groupId: " + spiViewRequest.getGroupId());
         }
     }

@@ -78,7 +78,6 @@ public class MenuReImportSupportService {
     private boolean cleanAllMenus() {
         boolean re1 = targetService.deleteAll();
         if (re1) {
-            log.info("clean all menus success!");
             return true;
         }
         log.error("clean all menus failed!");
@@ -94,7 +93,6 @@ public class MenuReImportSupportService {
     private boolean reInsertAllMenus(List<TargetModel> targets) {
         ServiceResult<Integer> result = targetService.bulkCreate(targets);
         if (Objects.nonNull(result.getSource()) && result.getSource() > 0) {
-            log.info("rebuild all menus success!");
             return true;
         }
         log.error("rebuild all menus failed!");
@@ -110,7 +108,6 @@ public class MenuReImportSupportService {
         boolean re1 = targetService.deleteAll();
         boolean re2 = menuExtraInfoService.deleteAll();
         if (re1 && re2) {
-            log.info("clean all menus and menus extra infos success!");
             return true;
         }
         log.error("clean all menus and menus extra infos failed!");

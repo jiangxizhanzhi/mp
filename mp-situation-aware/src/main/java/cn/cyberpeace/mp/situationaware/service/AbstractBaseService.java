@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.situationaware.service;
 import cn.cyberpeace.mp.situationaware.utils.LocalDateUtils;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.util.CollectionUtils;
@@ -92,7 +93,7 @@ public abstract class AbstractBaseService {
             return messageSource.getMessage(msgKey, params, locale);
         } catch (Exception e) {
             log.error("Get message by key `{}` params `{}` on locale {} failed: {}", msgKey, params,
-                    locale, e.getMessage());
+                    locale, ExceptionUtils.getStackTrace(e));
             return msgKey;
         }
     }

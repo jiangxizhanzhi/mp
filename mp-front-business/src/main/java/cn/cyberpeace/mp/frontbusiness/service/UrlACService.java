@@ -61,7 +61,6 @@ public class UrlACService {
      * @return
      */
     public List<UrlAccessCtlDto> listByTargetIds(List<String> targetIds) {
-        log.info("targetIds:{}", targetIds);
         if (CollectionUtil.isEmpty(targetIds)) {
             return Collections.emptyList();
         }
@@ -83,7 +82,6 @@ public class UrlACService {
      * @return
      */
     public List<UrlAccessCtlDto> listByUrlFuzzyQuery(List<String> urls) {
-        log.info("urls:{}", urls);
         if (CollectionUtil.isEmpty(urls)) {
             return Collections.emptyList();
         }

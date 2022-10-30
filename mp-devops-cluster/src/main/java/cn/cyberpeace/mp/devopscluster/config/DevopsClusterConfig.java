@@ -64,7 +64,17 @@ public class DevopsClusterConfig {
     private String cpIp;
 
     /**
+     * 云平台端口
+     */
+    private String cpPort;
+
+    /**
      * MP接口IP
      */
     private String mpIp;
+
+    /**
+     * MP端口
+     */
+    private String mpPort;
 }

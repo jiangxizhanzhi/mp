@@ -15,8 +15,6 @@ public class TargetTask {
 
     @Scheduled(fixedRate = 1000 * 60 * 5)
     private void processProbeStatus() {
-        log.info("====>>>>>>updateReferenceAndUseStatus task start<<<<<========");
         targetAggregationService.updateReferenceAndUseStatus();
-        log.info("====>>>>>>updateReferenceAndUseStatus task end<<<<<========");
     }
 }
