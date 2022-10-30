@@ -51,6 +51,8 @@ public class ContainerFileUtils {
                 unzipFileInstaller = new ApkUnzipFileInstaller();
             } else if (Centos6UnzipFileInstaller.UNZIP_EXECUTOR_NAME.equals(unzipExecutorName)) {
                 unzipFileInstaller = new Centos6UnzipFileInstaller();
+            } else if (Centos5UnzipFileInstaller.UNZIP_EXECUTOR_NAME.equals(unzipExecutorName)) {
+                unzipFileInstaller = new Centos5UnzipFileInstaller();
             }
         }
         return unzipFileInstaller.prepareUnzip(containerClient, containerId);
@@ -172,4 +174,26 @@ public class ContainerFileUtils {
             return flag;
         }
     }
+
+    private static class Centos5UnzipFileInstaller extends UnzipFileInstaller {
+        public static final String UNZIP_DST_PATH = "/usr/bin/";
+
+        public static final String UNZIP_EXECUTOR_NAME = "unzip_centos5";
+
+        public Centos5UnzipFileInstaller() {
+            super(UNZIP_DST_PATH, UNZIP_EXECUTOR_NAME);
+        }
+
+        @Override
+        public boolean prepareUnzip(Container containerClient, String containerId) {
+            var unzipLocalFilepath = getUnzipLocalFilepath();
+            if (StringUtils.isEmpty(unzipLocalFilepath)) {
+                return false;
+            }
+            var flag = containerClient.copyFile(containerId, unzipLocalFilepath, getUnzipDstPath() + "unzip");
+            containerClient.executeCommand(containerId, String.format("chmod +x %s", getUnzipDstPath() + "unzip"));
+            return flag;
+        }
+    }
+
 }
