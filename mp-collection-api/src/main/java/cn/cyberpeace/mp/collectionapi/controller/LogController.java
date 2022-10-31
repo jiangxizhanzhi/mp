@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collectionapi.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
+import cn.cyberpeace.mp.collectionapi.bo.RuntimeLogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
 import cn.cyberpeace.mp.collectionapi.service.LogService;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
@@ -31,6 +32,13 @@ public class LogController {
     @ApiOperation(value = "日志上报")
     public ServiceResult<Boolean> report(@RequestBody LogReportBO logReportBO) {
         logQueryService.addContestLog(logReportBO);
+        return new ServiceResult<>(true).asResult();
+    }
+
+    @PostMapping("/report_run")
+    @ApiOperation(value = "内部日志上报")
+    public ServiceResult<Boolean> report(@RequestBody RuntimeLogReportBO runtimeLogReportBO) {
+        logQueryService.addRuntimeLog(runtimeLogReportBO);
         return new ServiceResult<>(true).asResult();
     }
 }

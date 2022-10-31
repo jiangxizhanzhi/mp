@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.collection.service;
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
+import cn.cyberpeace.mp.collection.model.contest.RuntimeLogModel;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.util.EsResponseParseUtil;
 import com.alibaba.fastjson.JSON;
@@ -34,6 +35,13 @@ public class ContestLogService {
     public void addContestLog(ContestLogModel contestLogModel) {
         Map<String, Object> source = JSON.parseObject(JSON.toJSONString(contestLogModel), Map.class);
         IndexRequest indexRequest = new IndexRequest(INDEX_MP_CONTEST_LOG).source(source);
+        restHighLevelClient.index(indexRequest);
+    }
+
+    public void addRuntimeLog(RuntimeLogModel runtimeLogModel) {
+        String index = runtimeLogModel.getIp() + "_" + runtimeLogModel.getType();
+        Map<String, Object> source = JSON.parseObject(JSON.toJSONString(runtimeLogModel), Map.class);
+        IndexRequest indexRequest = new IndexRequest(index).source(source);
         restHighLevelClient.index(indexRequest);
     }
 

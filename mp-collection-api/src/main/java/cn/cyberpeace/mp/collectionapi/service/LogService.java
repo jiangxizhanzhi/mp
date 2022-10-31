@@ -4,15 +4,18 @@ import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
+import cn.cyberpeace.mp.collection.model.contest.RuntimeLogModel;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
 import cn.cyberpeace.mp.collection.service.ContestLogService;
 import cn.cyberpeace.mp.collectionapi.bo.LogReportBO;
+import cn.cyberpeace.mp.collectionapi.bo.RuntimeLogReportBO;
 import cn.cyberpeace.mp.collectionapi.request.LogQueryPageRequest;
 import cn.cyberpeace.mp.collectionapi.vo.LogVO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,4 +62,13 @@ public class LogService {
         return new ListObjServiceResult<>(new ListObjResult<>(res, result.getTotal()));
     }
 
+    public void addRuntimeLog(RuntimeLogReportBO runtimeLogReportBO) {
+        RuntimeLogModel runtimeLogModel = new RuntimeLogModel();
+        runtimeLogModel.setIp(runtimeLogReportBO.getIp());
+        runtimeLogModel.setType(runtimeLogReportBO.getType());
+        LocalDateTime time = runtimeLogReportBO.getTime() == null ? LocalDateTime.now() : TimeUtils.stringToLocalDateTime(runtimeLogReportBO.getTime());
+        runtimeLogModel.setTime(time);
+        runtimeLogModel.setMessage(runtimeLogReportBO.getMessage());
+        contestLogService.addRuntimeLog(runtimeLogModel);
+    }
 }
