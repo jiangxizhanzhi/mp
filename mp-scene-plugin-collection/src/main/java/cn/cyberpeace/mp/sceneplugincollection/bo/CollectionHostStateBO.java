@@ -76,12 +76,21 @@ public class CollectionHostStateBO {
     @ApiModelProperty("下载速度")
     private String downloadSpeed;
 
+    @ApiModelProperty("下行带宽/总带宽占比")
+    private Double downloadPercent;
+
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("上行带宽/总带宽占比")
+    private Double uploadPercent;
 
     @ApiModelProperty("磁盘读速度")
     private Long diskReadBytes;
 
     @ApiModelProperty("磁盘写速度")
     private Long diskWriteBytes;
+
+    @ApiModelProperty("磁盘IO利用率")
+    private Double diskIoPercent;
 }

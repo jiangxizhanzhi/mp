@@ -60,18 +60,27 @@ public class HostState {
     @ApiModelProperty("磁盘未使用空间")
     private Long diskUnused;
 
-    @ApiModelProperty("磁盘使用率")
+    @ApiModelProperty("磁盘使用率 百分比")
     private Double diskPercent;
 
     @ApiModelProperty("下载速度")
     private String downloadSpeed;
 
+    @ApiModelProperty("下行带宽/总带宽占比")
+    private Double downloadPercent;
+
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("上行带宽/总带宽占比")
+    private Double uploadPercent;
 
     @ApiModelProperty("磁盘读速度 Bytes")
     private Long diskReadBytes;
 
     @ApiModelProperty("磁盘写速度 Bytes")
     private Long diskWriteBytes;
+
+    @ApiModelProperty("磁盘IO利用率 百分比")
+    private Double diskIoPercent;
 }
