@@ -1161,13 +1161,13 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(input);
 
-//            if (Objects.nonNull(tmp_file) && tmp_file.exists()) {
-//                try {
-//                    tmp_file.delete();
-//                } catch (Exception e) {
-//                    log.error(pcapPath + "delete error");
-//                }
-//            }
+            if (Objects.nonNull(tmp_file) && tmp_file.exists()) {
+                try {
+                    tmp_file.delete();
+                } catch (Exception e) {
+                    log.error(pcapPath + "delete error");
+                }
+            }
         }
 
         return protocolList;
