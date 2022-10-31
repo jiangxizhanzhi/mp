@@ -2,6 +2,7 @@ package cn.cyberpeace.mp.flow.controller;
 
 import cn.cyberpeace.mp.base.controller.BaseModelController;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.common.bo.OptionBO;
@@ -19,6 +20,7 @@ import cn.cyberpeace.mp.log.annotation.OperateLog;
 import cn.cyberpeace.mp.log.enums.OpModuleEnums;
 import cn.cyberpeace.mp.log.enums.OpTargetEnums;
 import cn.cyberpeace.mp.log.enums.OpTypeEnums;
+import cn.hutool.core.io.FileUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -214,31 +217,21 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.checkNamesExist(request);
     }
 
-//    @GetMapping("/pcapRead")
-//    public ServiceResult<String> pcapRead(@RequestParam String scriptPath, @RequestParam String pcapPath) {
-//        String pcapProtocols = null;
-//        try {
-//            String PRE_PATH = "/root/.mp/resources/flows/protocol/";
-//            if (StringUtils.isBlank(scriptPath)) {
-//                scriptPath  = PRE_PATH.concat("pcap_read.py");
-//            }
-//            if (StringUtils.isBlank(pcapPath)) {
-//                pcapPath  = PRE_PATH.concat("dingding.pcap");
-//            }
-//            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
-//            process.waitFor();
-//            pcapProtocols = "";
-//            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-//            String line = "";
-//            while ((line = input.readLine()) != null) {
-//                pcapProtocols = line;
-//            }
-//            input.close();
-//            log.info("============pcapRead result: {}", pcapProtocols);
-//        } catch (Exception e) {
-//            log.error("exec error:", e);
-//        }
-//        return ResultCommon.success(pcapProtocols);
-//    }
+    @GetMapping("/pcapRead")
+    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
+        if (Objects.isNull(file)) {
+            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
+        }
+
+        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+        if (!BaseConstants.STR_PCAP.equals(suffix)) {
+            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
+        }
+
+        // 解析流量包包含的协议内容
+        List<String> protocolList = flowServiceImpl.pcapAnalyse(file);
+        return ResultCommon.success(protocolList);
+    }
+
 
 }
