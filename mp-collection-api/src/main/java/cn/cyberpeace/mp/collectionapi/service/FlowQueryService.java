@@ -406,6 +406,7 @@ public class FlowQueryService {
     public ListObjServiceResult<FlowVO> attackFlowList(Integer pageNum, Integer pageSize) {
         List<FlowBO> bos = flowInfoService.attackFlowList(pageNum, pageSize);
         List<FlowVO> vos = bos.stream().map(bo -> {
+            bo.fillProperties();
             FlowVO vo = new FlowVO();
             BeanUtils.copyProperties(bo, vo);
             vo.setSeverity(getSeverityDisplayName(vo.getSeverity()));
