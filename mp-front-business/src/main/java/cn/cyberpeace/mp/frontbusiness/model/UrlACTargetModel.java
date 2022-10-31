@@ -1,13 +1,13 @@
 package cn.cyberpeace.mp.frontbusiness.model;
 
 import cn.cyberpeace.mp.base.model.BaseModel;
+import cn.cyberpeace.mp.base.model.stereotype.DefaultStr;
 import cn.cyberpeace.mp.base.model.stereotype.Table;
 import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
@@ -27,5 +27,8 @@ public class UrlACTargetModel extends BaseModel implements Serializable {
     private String urlacId;
 
     private String target;
+
+    @DefaultStr
+    private String group;
 
 }
