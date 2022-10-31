@@ -439,13 +439,15 @@ public class FlowQueryService {
             }
 
             for (AttackTypeBO attackTypeBO : bo.getAttackTypes()) {
-                TopEntry topEntry = entries.stream().filter(t -> attackTypeBO.getEnName().equals(t.getName())).findFirst()
+                String attackTypeName = attackTypeBO.getEnName();
+                TopEntry topEntry = entries.stream().filter(t -> attackTypeName.equals(t.getName())).findFirst()
                         .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
+                    topEntry.setName(attackTypeName);
                     entries.add(topEntry);
                 }
-                topEntry.setCount(topEntry.getCount() + bo.getCount());
+                topEntry.setCount(topEntry.getCount() + attackTypeBO.getCount());
             }
         });
 
