@@ -1123,13 +1123,14 @@ public class FlowInfoServiceImpl extends BaseModelServiceImpl<FlowInfoModel, Flo
         BufferedReader input = null;
         File tmp_file = null;
 
+        String prePath = "/root/.mp/resources/flows/protocol/";
         try {
             if (StringUtils.isBlank(scriptPath)) {
-                scriptPath  = PRE_PATH.concat("protocol_analyse.py");
+                scriptPath  = prePath.concat("protocol_analyse.py");
             }
 
             String fileName = System.currentTimeMillis() + multipartFile.getOriginalFilename();
-            pcapPath = PRE_PATH.concat(fileName);
+            pcapPath = prePath.concat(fileName);
             tmp_file = new File(pcapPath);
             out = new FileOutputStream(tmp_file);
             byte[] ss = multipartFile.getBytes();
