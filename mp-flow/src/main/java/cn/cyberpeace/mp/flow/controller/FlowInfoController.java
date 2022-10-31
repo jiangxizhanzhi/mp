@@ -23,14 +23,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
@@ -217,31 +214,31 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.checkNamesExist(request);
     }
 
-    @GetMapping("/pcapRead")
-    public ServiceResult<String> pcapRead(@RequestParam String scriptPath, @RequestParam String pcapPath) {
-        String pcapProtocols = null;
-        try {
-            String PRE_PATH = "/root/.mp/resources/flows/protocol/";
-            if (StringUtils.isBlank(scriptPath)) {
-                scriptPath  = PRE_PATH.concat("pcap_read.py");
-            }
-            if (StringUtils.isBlank(pcapPath)) {
-                pcapPath  = PRE_PATH.concat("dingding.pcap");
-            }
-            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
-            process.waitFor();
-            pcapProtocols = "";
-            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line = "";
-            while ((line = input.readLine()) != null) {
-                pcapProtocols = line;
-            }
-            input.close();
-            log.info("============pcapRead result: {}", pcapProtocols);
-        } catch (Exception e) {
-            log.error("exec error:", e);
-        }
-        return ResultCommon.success(pcapProtocols);
-    }
+//    @GetMapping("/pcapRead")
+//    public ServiceResult<String> pcapRead(@RequestParam String scriptPath, @RequestParam String pcapPath) {
+//        String pcapProtocols = null;
+//        try {
+//            String PRE_PATH = "/root/.mp/resources/flows/protocol/";
+//            if (StringUtils.isBlank(scriptPath)) {
+//                scriptPath  = PRE_PATH.concat("pcap_read.py");
+//            }
+//            if (StringUtils.isBlank(pcapPath)) {
+//                pcapPath  = PRE_PATH.concat("dingding.pcap");
+//            }
+//            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
+//            process.waitFor();
+//            pcapProtocols = "";
+//            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+//            String line = "";
+//            while ((line = input.readLine()) != null) {
+//                pcapProtocols = line;
+//            }
+//            input.close();
+//            log.info("============pcapRead result: {}", pcapProtocols);
+//        } catch (Exception e) {
+//            log.error("exec error:", e);
+//        }
+//        return ResultCommon.success(pcapProtocols);
+//    }
 
 }
