@@ -55,14 +55,23 @@ public class WazuhHostStateModel {
     @ApiModelProperty("下载速度")
     private String downloadSpeed;
 
+    @ApiModelProperty("下行带宽/总带宽占比")
+    private Double downloadPercent;
+
     @ApiModelProperty("上传速度")
     private String uploadSpeed;
+
+    @ApiModelProperty("上行带宽/总带宽占比")
+    private Double uploadPercent;
 
     @ApiModelProperty("磁盘读取速度 Bytes")
     private long diskReadBytes;
 
-    @ApiModelProperty("底盘写速度 Bytes")
+    @ApiModelProperty("磁盘写速度 Bytes")
     private long diskWriteBytes;
+
+    @ApiModelProperty("磁盘IO利用率")
+    private double diskIoPercent;
 
     @ApiModelProperty("agentId")
     private String agentId;

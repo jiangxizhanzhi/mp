@@ -38,12 +38,21 @@ public class HostStateOutput {
     @JSONField(name = "DownLoadSpeed")
     private String downloadSpeed;
 
+    @JSONField(name = "DownLoadPercent")
+    private String downloadPercent;
+
     @JSONField(name = "UploadSpeed")
     private String uploadSpeed;
+
+    @JSONField(name = "UploadPercent")
+    private String uploadPercent;
 
     @JSONField(name = "DiskReadBytes")
     private String diskReadBytes;
 
     @JSONField(name = "DiskWriteBytes")
     private String diskWriteBytes;
+
+    @JSONField(name = "DiskIOPercent")
+    private String diskIoPercent;
 }

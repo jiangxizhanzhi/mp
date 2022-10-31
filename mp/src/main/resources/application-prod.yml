@@ -95,7 +95,9 @@ mp:
     max-target-size: 100  # 承诺最大支持靶标的磁盘大小(G)
     disk-alarm-percent: ${MP_DEVOPS_DISK_ALARM_PERCENT:80} # 磁盘空间告警阈值
     cp-ip: ${CP_IP:10.100.7.1}                # 云平台适配层接口地址
+    cp-port: ${CP_PORT:11111}                # 云平台适配层接口地址
     mp-ip: ${MP_API_IP:10.100.1.12}          # MP中台地址
+    mp-port: ${MP_API_PORT:8001}          # MP中台地址
   # mp-situationaware 模块配置
   situationaware:
     # monitor
@@ -147,7 +149,8 @@ mp:
     authenticate-use-individual-token-secret: ${MP_AUTH_USE_INDIVIDUAL_TOKEN_SECRET:true}
     authenticate-jwt-secret: ${MP_AUTH_JWT_SECRET:38effa66e5454c5d9dd79711fc6ffc4d}
     authenticate-jwt-expires: ${MP_AUTH_JWT_EXPIRES:604800}
-    authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/notice/**,/systemOperation/**,/flow/**,/cscene/**,/devops/**}
+    authenticate-urls: ${MP_AUTH_URLS:/auth/**,/sys/**,/flow/**,/cscene/**,/devops/**,/aggr/**}
+    authenticate-exclude-urls: ${MP_AUTH_EXCLUDE_URLS:/unauth/**,/sys/activation,/sys/activation/license_status,/sys/activation/machinecode,/sys/config/public}
     authenticate-encoder-iterations: ${MP_AUTH_ENCODER_ITERATIONS:}
     authenticate-encoder-hash-width: ${MP_AUTH_ENCODER_HASHWIDTH:}
   # mp-front-admin 模块
@@ -218,6 +221,8 @@ mp:
     scene-handler-realtime-update: ${MP_SCENE_HANDLER_REALTIME_UPDATE:true}
     scene-process-save-realtime: ${MP_SCENE_PROCESS_SAVE_REALTIME:true}
     element-process-save-realtime: ${MP_ELEMENT_PROCESS_SAVE_REALTIME:true}
+  aggregation:
+    export-image-timeout: ${MP_EXPORT_IMAGE_TIMEOUT:1200000}
 
 
 ---
