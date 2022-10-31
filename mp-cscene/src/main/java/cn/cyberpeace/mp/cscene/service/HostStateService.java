@@ -329,6 +329,7 @@ public class HostStateService {
             hs.setUploadSpeed(hostStateBO.getUploadSpeed());
             hs.setDiskReadBytes(hostStateBO.getDiskReadBytes());
             hs.setDiskWriteBytes(hostStateBO.getDiskWriteBytes());
+            hs.setDiskIoPercent(hostStateBO.getDiskIoPercent());
             return hs;
         }).collect(Collectors.toList());
 

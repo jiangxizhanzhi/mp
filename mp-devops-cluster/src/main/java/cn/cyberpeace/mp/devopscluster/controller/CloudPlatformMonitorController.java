@@ -11,18 +11,37 @@ import cn.cyberpeace.mp.cscene.request.agent.AgentNameBasedRequest;
 import cn.cyberpeace.mp.cscene.service.HostStateService;
 import cn.cyberpeace.mp.cscene.service.cron.clearjob.ClearService;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
-import cn.cyberpeace.mp.devopscluster.converter.*;
+import cn.cyberpeace.mp.devopscluster.converter.ContainerConverter;
+import cn.cyberpeace.mp.devopscluster.converter.FirewallConverter;
+import cn.cyberpeace.mp.devopscluster.converter.HypervisorConverter;
+import cn.cyberpeace.mp.devopscluster.converter.ImagesConverter;
+import cn.cyberpeace.mp.devopscluster.converter.NetworkConverter;
+import cn.cyberpeace.mp.devopscluster.converter.NpcConverter;
+import cn.cyberpeace.mp.devopscluster.converter.RealEquipmentConverter;
+import cn.cyberpeace.mp.devopscluster.converter.RouterConverter;
+import cn.cyberpeace.mp.devopscluster.converter.SwitchConverter;
+import cn.cyberpeace.mp.devopscluster.converter.VmConverter;
 import cn.cyberpeace.mp.devopscluster.converter.bo.HypervisorBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.VirtualRealSwitchBO;
 import cn.cyberpeace.mp.devopscluster.converter.bo.common.BasePageBO;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorServiceStateConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorStatisticsConvertModel;
 import cn.cyberpeace.mp.devopscluster.converter.model.HypervisorWeightAndMaxInstanceConvertModel;
-import cn.cyberpeace.mp.devopscluster.dto.*;
+import cn.cyberpeace.mp.devopscluster.dto.BasePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.ContainerPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.HypervisorActionDTO;
+import cn.cyberpeace.mp.devopscluster.dto.HypervisorWeightAndMaxInstanceDTO;
+import cn.cyberpeace.mp.devopscluster.dto.InstancePageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.NetworkPageDTO;
+import cn.cyberpeace.mp.devopscluster.dto.RouterPageDTO;
 import cn.cyberpeace.mp.devopscluster.enums.HypervisorActionEnum;
 import cn.cyberpeace.mp.devopscluster.model.CloudPlatformPageResult;
 import cn.cyberpeace.mp.devopscluster.model.common.ServiceStatus;
-import cn.cyberpeace.mp.devopscluster.request.*;
+import cn.cyberpeace.mp.devopscluster.request.BasePageRequest;
+import cn.cyberpeace.mp.devopscluster.request.CloudPlatformPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.HypervisorRequest;
+import cn.cyberpeace.mp.devopscluster.request.RealEquipmentPageRequest;
+import cn.cyberpeace.mp.devopscluster.request.ServerRestartRequest;
 import cn.cyberpeace.mp.devopscluster.service.MonitorScriptControlService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.vo.HypervisorPageVO;
@@ -33,6 +52,7 @@ import cn.cyberpeace.mp.devopscluster.vo.common.ListResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.PageResult;
 import cn.cyberpeace.mp.devopscluster.vo.common.Result;
 import cn.cyberpeace.mp.situationaware.model.dto.monitor.ServiceMonitorDto;
+import cn.hutool.core.util.NumberUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -43,7 +63,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -310,7 +334,39 @@ public class CloudPlatformMonitorController {
         List<HostState> hostStates = hostStateService.listHostStatesByAgentName(request);
         List<HypervisorPageVO> hypervisorPageVOList = new ArrayList<>();
         hostStates.forEach(hostState -> {
-            HypervisorPageVO hypervisorPageVO  = HypervisorPageVO.builder()
+
+            // todo 上下行带宽占比
+            Double downloadPercent = 0.00;
+            Double uploadPercent = 0.00;
+            if (StringUtils.isNotBlank(hostState.getDownloadSpeed())) {
+                String downloadSpeed = hostState.getDownloadSpeed();
+                downloadSpeed = downloadSpeed.replace("KB/s", "");
+                double ds = Double.parseDouble(downloadSpeed);
+                BigDecimal decimal =  NumberUtil.round(ds * 8 / (1024 * 1024), 2);
+
+                if (ds > 0 && decimal.doubleValue() == 0.00) {
+                    downloadPercent = 0.01;
+                } else {
+                    downloadPercent = decimal.doubleValue();
+                    downloadPercent = downloadPercent > 100 ? 100.00 : downloadPercent;
+                }
+            }
+
+            if (StringUtils.isNotBlank(hostState.getUploadSpeed())) {
+                String uploadSpeed = hostState.getUploadSpeed();
+                uploadSpeed = uploadSpeed.replace("KB/s", "");
+                double us = Double.parseDouble(uploadSpeed);
+                BigDecimal decimal =  NumberUtil.round(us * 8 / (1024 * 1024), 2);
+
+                if (us > 0 && decimal.doubleValue() == 0.00) {
+                    uploadPercent = 0.01;
+                } else {
+                    uploadPercent = decimal.doubleValue();
+                    uploadPercent = uploadPercent > 100 ? 100.00 : uploadPercent;
+                }
+            }
+
+            HypervisorPageVO hypervisorPageVO = HypervisorPageVO.builder()
                     .name(hostState.getAgentName())
                     .cpu(hostState.getCpuCount())
                     .cpuPercent(Objects.isNull(hostState.getCpuPercent()) ? BigDecimal.ZERO : BigDecimal.valueOf(hostState.getCpuPercent()))
@@ -322,7 +378,11 @@ public class CloudPlatformMonitorController {
                     .uploadSpeed(hostState.getUploadSpeed())
                     .diskReadBytes(hostState.getDiskReadBytes())
                     .diskWriteBytes(hostState.getDiskWriteBytes())
+                    .diskIoPercent(hostState.getDiskIoPercent())
+                    .downloadPercent(downloadPercent)
+                    .uploadPercent(uploadPercent)
                     .build();
+
             hypervisorPageVOList.add(hypervisorPageVO);
         });
         return ResultCommon.success(hypervisorPageVOList);

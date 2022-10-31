@@ -295,6 +295,7 @@ public class ScenePluginCollectionSceneService {
             hostState.setUploadSpeed(srcHostState.getUploadSpeed());
             hostState.setDiskReadBytes(srcHostState.getDiskReadBytes());
             hostState.setDiskWriteBytes(srcHostState.getDiskWriteBytes());
+            hostState.setDiskIoPercent(srcHostState.getDiskIoPercent());
             // todo 进程，端口，网络连接，磁盘使用率
             if (CollectionUtil.isNotEmpty(agentName2Element)) {
                 var srcElement = agentName2Element.getOrDefault(srcHostState.getAgentName(), null);

@@ -8,12 +8,9 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.cscene.bo.CsceneInstanceBO;
 import cn.cyberpeace.mp.cscene.constant.CsceneBizConstant;
-import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
-import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ConnectionState;
 import cn.cyberpeace.mp.cscene.dto.element.ElementHistogramInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementMonitorBasicInfo;
-import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.dto.element.ElementPort;
 import cn.cyberpeace.mp.cscene.dto.element.ElementRTInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityCountInfo;
@@ -21,6 +18,9 @@ import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityInfo;
 import cn.cyberpeace.mp.cscene.dto.element.ElementVulnerabilityPieChartInfo;
 import cn.cyberpeace.mp.cscene.dto.element.HostState;
 import cn.cyberpeace.mp.cscene.dto.scene.UserNodeSessionInfo;
+import cn.cyberpeace.mp.cscene.request.common.BaseSceneElementRequest;
+import cn.cyberpeace.mp.cscene.request.element.BaseSceneElementPageRequest;
+import cn.cyberpeace.mp.cscene.request.element.ElementMonitorRequest;
 import cn.cyberpeace.mp.cscene.util.BaseRequestUtil;
 import cn.cyberpeace.mp.cscene.util.SegmentCount2IntervalSecondsUtil;
 import cn.cyberpeace.mp.scene.core.bo.SceneElementBO;
@@ -278,6 +278,9 @@ public class SceneElementMonitorService {
                 resource.setUploadSpeed(hostState.getUploadSpeed());
                 resource.setDiskReadBytes(hostState.getDiskReadBytes());
                 resource.setDiskWriteBytes(hostState.getDiskWriteBytes());
+                resource.setDiskIoPercent(hostState.getDiskIoPercent());
+                resource.setDiskIoPercent(hostState.getDiskIoPercent());
+                resource.setDiskIoPercent(hostState.getDiskIoPercent());
             } else {
                 // 如果从探针中查不到， 从拓扑图中获取数据
                 resource.setCpuCount(sceneElementBO.getCpu());
