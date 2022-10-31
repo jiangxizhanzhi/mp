@@ -34,8 +34,8 @@ public class FlowController {
     private FlowQueryService flowQueryService;
 
     @GetMapping("/attack_trend")
-    @ApiOperation(value = "所有队伍的总体攻击趋势(统计十分钟内的攻击次数)")
-    public ListObjServiceResult<AttackFlowTopVO> attackTrend() {
+    @ApiOperation(value = "总体攻击趋势(统计十分钟内的攻击次数)")
+    public ServiceResult<TrendVO> attackTrend() {
         // 默认分六段
         return flowQueryService.queryAttackTrend().asResult();
     }

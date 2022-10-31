@@ -580,6 +580,7 @@ public class FlowInfoService {
         long startTime = endTime - 360 * 60000L; // 六小时, 五分钟间隔
 
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        buildRuleIpQuery(esIpFieldBOS, queryBuilder);
         buildRuleStarTimeQuery(startTime, queryBuilder);
         buildRuleEndTimeQuery(endTime, queryBuilder);
         buildSeverityQuery(queryBuilder);
@@ -752,11 +753,10 @@ public class FlowInfoService {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         buildRuleIpQuery(esIpFieldBOS, queryBuilder);
 
-        String srcIpTerm = "src_ip";
-        String desIpTerm = "des_ip";
+        String srcIpTerm = "src_ip", desIpTerm = "des_ip";
         AggregationBuilder aggBuilder = AggregationBuilders.terms(srcIpTerm)
                 .field(esIpFieldBOS.get(0).getIPFieldName())
-                .subAggregation(AggregationBuilders.sum(desIpTerm).field("destination.ip"));
+                .subAggregation(AggregationBuilders.terms(desIpTerm).field("destination.ip"));
         SearchResponse response = esAggQuery(queryBuilder, aggBuilder);
 
         Map<String, List<CountBO>> ipMap = Maps.newHashMap();

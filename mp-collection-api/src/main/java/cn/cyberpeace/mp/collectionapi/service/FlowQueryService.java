@@ -26,6 +26,7 @@ import cn.cyberpeace.mp.collectionapi.vo.AggAttackFlowVO.FlowSize;
 import cn.cyberpeace.mp.collectionapi.vo.AttackFlowTopVO;
 import cn.cyberpeace.mp.collectionapi.vo.TrendVO;
 import cn.cyberpeace.mp.collectionapi.vo.TrendVO.Count;
+import cn.hutool.core.date.DateUtil;
 import cn.cyberpeace.mp.collectionapi.vo.FlowVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamAttackCountVO;
 import cn.cyberpeace.mp.collectionapi.vo.TeamTopVO;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -61,16 +63,26 @@ public class FlowQueryService {
      *
      * @return
      */
-    public ListObjServiceResult<AttackFlowTopVO> queryAttackTrend() {
+    public ServiceResult<TrendVO> queryAttackTrend() {
         List<CountBO> bos = flowInfoService.queryAttackTrend();
-        List<AttackFlowTopVO> vos = bos.stream().map(bo -> {
-            AttackFlowTopVO vo = new AttackFlowTopVO();
-            vo.setName(bo.getKey());
-            vo.setCount(bo.getCount() * CollectionApiConstant.multiple);
-            return vo;
+        
+        List<Count> counts = bos.stream().map(bo -> {
+            Count c = new Count();
+            c.setTime(bo.getKey());
+            c.setNum(bo.getCount() * CollectionApiConstant.multiple);
+            return c;
         }).collect(Collectors.toList());
+        
+        TrendVO vo = new TrendVO();
+        vo.setName("");
+        vo.setCounts(counts);
+        
+        // 填充空记录
+        List<TrendVO> vos = Lists.newArrayList(vo);
+        List<String> lines = Lists.newArrayList("");;
+        fillEmptyTrendVO(vos, lines, 7, 10);
 
-        return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
+        return new ServiceResult<>(vo);
     }
 
     /**
@@ -89,9 +101,13 @@ public class FlowQueryService {
 
             mergeTrendData(vo, severityMap.get(String.valueOf(level)));
         }
+        
+        // 填充空记录
+        List<TrendVO> vos = Lists.newArrayList(resultMap.values());
+        List<String> lines = resultMap.keySet().stream().collect(Collectors.toList());
+        fillEmptyTrendVO(vos, lines, 7, 10);
 
         // 放大攻击次数
-        List<TrendVO> vos = Lists.newArrayList(resultMap.values());
         vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
             c.setNum(c.getNum() * CollectionApiConstant.multiple);
         });
@@ -119,12 +135,58 @@ public class FlowQueryService {
             mergeTrendData(vo, bos);
         });
 
+        // 填充空记录
+        List<String> lines = request.getSources().stream().map(IPField::getName).collect(Collectors.toList());
+        fillEmptyTrendVO(vos, lines, 73, 5);
+        
         // 放大攻击次数
         vos.stream().map(TrendVO::getCounts).flatMap(Collection::stream).forEach(c -> {
             c.setNum(c.getNum() * CollectionApiConstant.multiple);
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
+    }
+    
+    /**
+     * 
+     * @param vos
+     * @param pointsNum 时间点
+     * @param interval 时间间隔（分钟）
+     */
+    private void fillEmptyTrendVO(List<TrendVO> vos, List<String> lines, int pointsNum, int interval) {
+        final char LAST_CHAR = (char) ((interval % 10) + '0');
+        List<String> timePoints = Lists.newArrayList();
+        if(vos.size() > 0) {
+            timePoints = vos.get(0).getCounts().stream().map(Count::getTime).collect(Collectors.toList());
+        } else {
+            Calendar now = Calendar.getInstance();
+            for(int i = 0; i < pointsNum; i++) {
+                now.add(Calendar.MINUTE, i > 0 ? -5 : 0);
+                String time = DateUtil.format(now.getTime(), "HH:mm");
+                char lastChar = time.charAt(time.length() - 1);
+                lastChar = lastChar >= LAST_CHAR ? LAST_CHAR : '0';
+                timePoints.add(0, time.substring(0, time.length() - 1) + lastChar);
+            }
+        }
+        for(String lineName : lines) {
+            TrendVO vo = vos.stream().filter(v -> v.getName().equals(lineName)).findFirst().orElse(null);
+            if(vo == null) {
+                vo = new TrendVO();
+                vo.setName(lineName);
+                vos.add(vo);
+            }
+            
+            if(CollectionUtils.isEmpty(vo.getCounts())) {
+                List<Count> counts = timePoints.stream().map(t -> {
+                    Count c = new Count();
+                    c.setNum(0);
+                    c.setTime(t);
+                    return c;
+                }).collect(Collectors.toList());
+                
+                vo.setCounts(counts);
+            }
+        }
     }
 
     /**
@@ -394,6 +456,7 @@ public class FlowQueryService {
                         .orElse(null);
                 if (topEntry == null) {
                     topEntry = new TopEntry();
+                    topEntry.setName(targetName);
                     entries.add(topEntry);
                 }
                 topEntry.setCount(topEntry.getCount() + bo.getCount());
@@ -402,10 +465,13 @@ public class FlowQueryService {
 
         // 排序取topSize
         List<TeamTopVO> vos = new ArrayList<>(vosMap.values());
+        Integer topSize = request.getTopSize();
         vos.forEach(vo -> {
             List<TopEntry> entries = vo.getEntries();
             entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
-            entries = entries.subList(0, Math.min(entries.size(), request.getTopSize()));
+            if(topSize != null) {
+                entries = entries.subList(0, Math.min(entries.size(), topSize));
+            }
             vo.setEntries(entries);
         });
 
@@ -453,11 +519,12 @@ public class FlowQueryService {
 
         // 排序取topSize
         List<TeamTopVO> vos = new ArrayList<>(vosMap.values());
+        Integer topSize = request.getTopSize();
         vos.forEach(vo -> {
             List<TopEntry> entries = vo.getEntries();
             entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
-            if (request.getTopSize() != null) {
-                entries = entries.subList(0, Math.min(entries.size(), request.getTopSize()));
+            if (topSize != null) {
+                entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
             vo.setEntries(entries);
         });
