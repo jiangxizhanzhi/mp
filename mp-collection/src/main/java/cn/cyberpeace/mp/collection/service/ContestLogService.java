@@ -1,7 +1,6 @@
 package cn.cyberpeace.mp.collection.service;
 
 import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.collection.bo.CountBO;
 import cn.cyberpeace.mp.collection.core.es.IRestHighLevelClient;
 import cn.cyberpeace.mp.collection.model.contest.ContestLogModel;
 import cn.cyberpeace.mp.collection.request.LogQueryRequest;
@@ -14,10 +13,6 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedTerms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
@@ -58,30 +53,6 @@ public class ContestLogService {
             total = response.getHits().getTotalHits().value;
         }
         return new ListObjResult<>(contestLogModels, BigDecimal.valueOf(total).intValue());
-    }
-
-    public List<CountBO> countContestLogBySeverity() {
-        String countTerm = "count_term";
-        AggregationBuilder aggregationBuilder = AggregationBuilders.terms(countTerm).field("attackIp").order(BucketOrder.count(false));
-        var sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.aggregation(aggregationBuilder);
-        var boolQueryBuilder = QueryBuilders.boolQuery();
-        boolQueryBuilder.filter(QueryBuilders.rangeQuery("severity").gt(0));
-        SearchRequest searchRequest = buildSearchRequest(sourceBuilder, boolQueryBuilder);
-
-        SearchResponse response = restHighLevelClient.search(searchRequest);
-        List<CountBO> counts = new ArrayList<>();
-        ParsedTerms parsedTermsIp = response.getAggregations().get(countTerm);
-        if (Objects.isNull(parsedTermsIp)) {
-            return counts;
-        }
-        parsedTermsIp.getBuckets().forEach(bucket -> {
-            CountBO countBO = new CountBO();
-            countBO.setKey(bucket.getKeyAsString());
-            countBO.setCount(bucket.getDocCount());
-            counts.add(countBO);
-        });
-        return counts;
     }
 
     private SearchSourceBuilder buildSearchSourceBuilder(LogQueryRequest request) {
