@@ -15,4 +15,7 @@ public interface IxiaUrlConstant {
     String ADD_ACTION = "/api/v2/core/superflow/operations/addAction";
     String UPDATE_ACTION = "/api/v2/core/superflow/actions/{actionId}";
     String SAVE_SUPERFLOW = "/api/v2/core/superflow/operations/save";
+    String CREATE_APPLICATION_PROFILE = "/api/v2/core/appProfile/operations/new";
+    String ADD_SUPERFLOW_TO_APPLICATION_PROFILE = "/api/v2/core/appProfile/operations/add";
+    String SAVE_APPLICATION_PROFILE = "/api/v2/core/appProfile/operations/save";
 }

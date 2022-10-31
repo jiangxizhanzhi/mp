@@ -17,6 +17,7 @@ public class IxiaSession {
     private IxiaSupperFlowsClient supperFlowsClient;
     private IxiaCaptureManagerClient captureManagerClient;
     private IxiaTestClient testClient;
+    private IxiaApplicationProfileClient applicationProfileClient;
 
     public IxiaSession(String server, String usrname, String password) {
         this.server = server;
@@ -27,6 +28,7 @@ public class IxiaSession {
         this.supperFlowsClient = new IxiaSupperFlowsClient(httpClient);
         this.captureManagerClient = new IxiaCaptureManagerClient(httpClient);
         this.testClient = new IxiaTestClient(httpClient);
+        this.applicationProfileClient = new IxiaApplicationProfileClient(httpClient);
     }
 
     public void open() {
@@ -58,6 +60,21 @@ public class IxiaSession {
         // 选择 协议流 并设置权重
         // 保存application profile
         return "";
+    }
+
+    public void addApplicationProfile() {
+        this.applicationProfileClient.CreateApplicationProfile();
+        AddSuperFlowData addSuperFlowData = new AddSuperFlowData();
+        AddSuperFlowData.AddSuperFlowInfo addSuperFlowInfo = new AddSuperFlowData.AddSuperFlowInfo();
+        addSuperFlowInfo.setSuperflow("zl_super_flow_test_1");
+        addSuperFlowInfo.setWeight(100);
+        List<AddSuperFlowData.AddSuperFlowInfo> addSuperFlowInfos = new ArrayList<>();
+        addSuperFlowInfos.add(addSuperFlowInfo);
+        addSuperFlowData.setAdd(addSuperFlowInfos);
+        this.applicationProfileClient.addSuperFlow(addSuperFlowData);
+        BaseSaveData baseSaveData = new BaseSaveData();
+        baseSaveData.setName("zl_app_pro_test_4");
+        this.applicationProfileClient.saveSuperFlow(baseSaveData);
     }
 
     public List<String> createCaptureManager(List<PcapFlow> pcapFlows) {

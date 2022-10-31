@@ -41,6 +41,7 @@ class IxiaFlowGenerateService implements IGenerateService {
             }
         }
         String profileName = ixiaSession.createApplicationProfile(protocolFlows);
+        ixiaSession.addApplicationProfile();
         List<String> captureNames = ixiaSession.createCaptureManager(pcapFlows);
         String testName = ixiaSession.createTest(neighborhood, profileName, captureNames);
         ixiaSession.startTest(testName);
