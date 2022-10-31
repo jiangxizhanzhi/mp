@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
@@ -8,6 +9,7 @@ import cn.cyberpeace.mp.flow.v2.repository.FlowMapper;
 import cn.cyberpeace.mp.flow.v2.service.fields.FlowFields;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowQueryParams;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,28 +61,27 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
      */
     public List<String> pcapAnalyse(MultipartFile multipartFile) {
         List<String> protocolList = new ArrayList<>();
-        String strProtocols = null;
-        String scriptPath = "";
+        String strProtocols;
+        String scriptPath = PRE_PATH.concat("protocol_analyse.py");
         String pcapPath = "";
         OutputStream out = null;
         BufferedReader input = null;
-        File tmp_file = null;
+        File tmpFile = null;
 
         try {
-            if (StringUtils.isBlank(scriptPath)) {
-                scriptPath  = PRE_PATH.concat("protocol_analyse.py");
-            }
-
-            String fileName = System.currentTimeMillis() + multipartFile.getOriginalFilename();
+            String fileName = System.currentTimeMillis() + BaseConstants.SHORT_DASH + multipartFile.getOriginalFilename();
             pcapPath = PRE_PATH.concat(fileName);
-            tmp_file = new File(pcapPath);
-            out = new FileOutputStream(tmp_file);
+            tmpFile = new File(pcapPath);
+            out = new FileOutputStream(tmpFile);
             byte[] ss = multipartFile.getBytes();
             for (byte s : ss) {
                 out.write(s);
             }
 
-            Process process = Runtime.getRuntime().exec(String.format("python %s %s", scriptPath, pcapPath));
+            String pythonCmd = String.format("python %s %s", scriptPath, pcapPath);
+            log.info("============python analyse cmd: {}", pythonCmd);
+
+            Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
             strProtocols = "";
             input = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -100,9 +101,9 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
             IOUtils.closeQuietly(out);
             IOUtils.closeQuietly(input);
 
-            if (Objects.nonNull(tmp_file) && tmp_file.exists()) {
+            if (Objects.nonNull(tmpFile) && tmpFile.exists()) {
                 try {
-                    tmp_file.delete();
+                    tmpFile.delete();
                 } catch (Exception e) {
                     log.error(pcapPath + "delete error");
                 }
@@ -111,5 +112,66 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
 
         return protocolList;
     }
+
+    /**
+     * 根据协议结合过滤pcap包
+     * @param pcapPath 原pcap的fdfs地址
+     * @param protocolList 保留的协议集合
+     * @return 过滤后的pcap包fdfs地址
+     */
+    public String pcapFilter(String pcapPath, List<String> protocolList) {
+        String outPcapPath = "";
+        String scriptPath = PRE_PATH.concat("protocol_filter.py");
+        BufferedOutputStream bos = null;
+        FileOutputStream fos = null;
+        File srcFile = null;
+        File dstFile = null;
+        String strProtocols = StringUtils.join(protocolList, BaseConstants.COMMA);
+
+        try {
+            // 下载原pcap文件
+            byte[] pcapByte = FdfsCommon.downloadRawContent(pcapPath);
+            String fileName = FilenameUtils.getName(pcapPath);;
+            String srcPcapPath = PRE_PATH.concat(fileName);
+            srcFile = new File(srcPcapPath);
+            fos = new FileOutputStream(srcFile);
+            bos = new BufferedOutputStream(fos);
+            bos.write(pcapByte);
+
+            // 根据协议过滤pcap生成新的包
+            String dstPcapPath = "dst_".concat(fileName);
+            String pythonCmd = String.format("python %s %s %s %s", scriptPath, srcPcapPath, dstPcapPath, strProtocols);
+            log.info("============python filter cmd: {}", pythonCmd);
+            Process process = Runtime.getRuntime().exec(pythonCmd);
+            process.waitFor();
+            dstFile = new File(dstPcapPath);
+            // 上传新pcap包
+            outPcapPath = FdfsCommon.upload(dstPcapPath);
+        } catch (Exception e) {
+            log.error("pcap file filter error", e);
+        } finally {
+            IOUtils.closeQuietly(fos);
+            IOUtils.closeQuietly(bos);
+
+            if (Objects.nonNull(srcFile) && srcFile.exists()) {
+                try {
+                    srcFile.delete();
+                } catch (Exception e) {
+                    log.error("pcap src file delete error");
+                }
+            }
+
+            if (Objects.nonNull(dstFile) && dstFile.exists()) {
+                try {
+                    dstFile.delete();
+                } catch (Exception e) {
+                    log.error("pcap dst file delete error");
+                }
+            }
+        }
+
+        return outPcapPath;
+    }
+
 
 }
