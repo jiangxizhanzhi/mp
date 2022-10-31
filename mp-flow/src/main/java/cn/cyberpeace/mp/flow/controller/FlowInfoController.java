@@ -217,21 +217,21 @@ public class FlowInfoController extends BaseModelController<FlowInfoModel, FlowI
         return flowServiceImpl.checkNamesExist(request);
     }
 
-    @GetMapping("/pcapRead")
-    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
-        if (Objects.isNull(file)) {
-            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
-        }
-
-        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
-        if (!BaseConstants.STR_PCAP.equals(suffix)) {
-            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
-        }
-
-        // 解析流量包包含的协议内容
-        List<String> protocolList = flowServiceImpl.pcapAnalyse(file);
-        return ResultCommon.success(protocolList);
-    }
+//    @GetMapping("/pcapRead")
+//    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
+//        if (Objects.isNull(file)) {
+//            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
+//        }
+//
+//        String suffix = FileUtil.getSuffix(file.getOriginalFilename());
+//        if (!BaseConstants.STR_PCAP.equals(suffix)) {
+//            throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
+//        }
+//
+//        // 解析流量包包含的协议内容
+//        List<String> protocolList = flowServiceImpl.pcapAnalyse(file);
+//        return ResultCommon.success(protocolList);
+//    }
 
 
 }
