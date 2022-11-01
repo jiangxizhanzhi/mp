@@ -237,7 +237,7 @@ public class SceneExporter {
             try {
                 FileUtils.writeByteArrayToFile(new File(imagePath + "/" + fileName), content);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Download the private key file error:{}", e.getMessage());
             }
         }
     }
