@@ -339,7 +339,7 @@ public class FlowQueryService {
             vo.setCount(vo.getCount() + bo.getCount());
         });
 
-        // // 排序取top5
+        // 排序取top5
         List<AttackFlowTopVO> vos = vosMap.values().stream().sorted(Comparator.comparing(AttackFlowTopVO::getCount).reversed()).collect(Collectors.toList());
         if (request.getTopSize() != null) {
             vos = vos.subList(0, Math.min(vos.size(), request.getTopSize()));
@@ -523,11 +523,16 @@ public class FlowQueryService {
         Integer topSize = request.getTopSize();
         vos.forEach(vo -> {
             List<TopEntry> entries = vo.getEntries();
+            double total = entries.stream().mapToLong(TopEntry::getCount).sum();
             entries.sort(Comparator.comparing(TopEntry::getCount).reversed());
             if (topSize != null) {
                 entries = entries.subList(0, Math.min(entries.size(), topSize));
             }
             vo.setEntries(entries);
+            
+            entries.forEach(e -> {
+               e.setPercent(e.getCount() / total); 
+            });
         });
 
         return new ListObjServiceResult<>(new ListObjResult<>(vos, vos.size()));
