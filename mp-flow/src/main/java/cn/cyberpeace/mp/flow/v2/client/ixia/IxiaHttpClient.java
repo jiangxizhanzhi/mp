@@ -76,6 +76,21 @@ public class IxiaHttpClient {
         }
     }
 
+    public <T extends IxiaResponse> T ixiaPatch(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
+        try {
+            return ixiaResultBean(httpClient.patch(url, data, param, this.getHeaders(), null), valueTypeRef, "patch", url, data, param);
+        } catch (Exception e) {
+            if (!"Entity may not be null".equals(e.getMessage())) {
+                throw e;
+            }
+            try {
+                return tClass.getConstructor().newInstance();
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    }
+
     public <T extends IxiaResponse> T ixiaDelete(String url, HttpData data, HttpParam param, Class<T> tClass, TypeReference<T> valueTypeRef) {
         try {
             return ixiaResultBean(httpClient.delete(url, data, param, this.getHeaders(), null), valueTypeRef, "delete", url, data, param);

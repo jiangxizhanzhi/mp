@@ -3,6 +3,7 @@ package cn.cyberpeace.mp.flow.v2.client.ixia;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @Description
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
+@Slf4j
 public class IxiaApplicationProfileClient {
     private IxiaHttpClient ixiaHttpClient;
 
@@ -26,14 +28,14 @@ public class IxiaApplicationProfileClient {
     }
 
     public void addSuperFlow(AddSuperFlowData addSuperFlowData) {
-        var data = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_SUPERFLOW_TO_APPLICATION_PROFILE, addSuperFlowData, null, AddSuperFlowResult.class, new TypeReference<AddSuperFlowResult>() {
+        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.ADD_SUPERFLOW_TO_APPLICATION_PROFILE, addSuperFlowData, null, AddSuperFlowResult.class, new TypeReference<AddSuperFlowResult>() {
         });
-        int a = 1;
+        log.info("Adding super flow to application profile completed:{}", response);
     }
 
     public void saveSuperFlow(BaseSaveData baseSaveData) {
-        var data = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_APPLICATION_PROFILE, baseSaveData, null, AddSuperFlowResult.class, new TypeReference<AddSuperFlowResult>() {
+        var response = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_APPLICATION_PROFILE, baseSaveData, null, AddSuperFlowResult.class, new TypeReference<AddSuperFlowResult>() {
         });
-        int a = 1;
+        log.info("Save application profile completed:{}", response);
     }
 }

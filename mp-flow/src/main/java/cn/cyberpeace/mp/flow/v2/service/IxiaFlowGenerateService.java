@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaSession;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @Description
@@ -32,7 +34,12 @@ class IxiaFlowGenerateService implements IGenerateService {
         for (var flow : flowTaskRecordBO.getFlows()) {
             if (StringUtils.isNotEmpty(flow.getPcapFile())) {
                 PcapFlow pcapFlow = new PcapFlow();
-                pcapFlow.setName(flow.getName());
+                PcapFlow.FileInfo fileInfo = new PcapFlow.FileInfo();
+                //todo 此处为方便测试，用随机值作为上传的pcap包名
+                fileInfo.setName(getNumber(15).toString());
+                pcapFlow.setFileInfo(fileInfo);
+                byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
+                pcapFlow.setFile(fileByte);
                 pcapFlows.add(pcapFlow);
             } else {
                 ProtocolFlow protocolFlow = new ProtocolFlow();
@@ -40,10 +47,14 @@ class IxiaFlowGenerateService implements IGenerateService {
                 protocolFlows.add(protocolFlow);
             }
         }
-        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
-        ixiaSession.addApplicationProfile();
+        // todo 此处返回的profileName作为要添加到TEST中的application profile的名
+//        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
+        // todo neighborhood只能用已有的来创建新的，而且不能配置
+//        ixiaSession.addNeighborhood();
         List<String> captureNames = ixiaSession.createCaptureManager(pcapFlows);
-        String testName = ixiaSession.createTest(neighborhood, profileName, captureNames);
+        ixiaSession.createTest(neighborhood, "profileName", captureNames);
+        String testName = getNumber(15).toString();
+
         ixiaSession.startTest(testName);
         ixiaSession.close();
 
@@ -99,4 +110,14 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         return null;
     }
+    //num为随机数字字符串的长度
+    public static StringBuilder getNumber(int num){
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < num; i++){
+            sb.append(random.nextInt(10));
+        }
+        return sb;
+    }
+
 }
