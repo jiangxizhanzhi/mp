@@ -14,6 +14,9 @@ public class RuntimeLogReportBO {
     @ApiModelProperty(value = "日志时间")
     private String time;
 
+    @ApiModelProperty(value = "日志类型")
+    private String logType;
+
     @ApiModelProperty(value = "原始日志信息")
     private String message;
 }

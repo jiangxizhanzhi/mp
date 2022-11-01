@@ -12,5 +12,7 @@ public class RuntimeLogModel {
 
     private String message;
 
+    private String logType;
+
     private LocalDateTime time;
 }

@@ -41,8 +41,11 @@ public class LogService {
         LogQueryRequest logQueryRequest = new LogQueryRequest();
         logQueryRequest.setPageNum(request.getPageNum());
         logQueryRequest.setPageSize(request.getPageSize());
-        if (StringUtils.isNotEmpty(request.getStartTime()) && StringUtils.isNotEmpty(request.getEndTime())) {
+        if (StringUtils.isNotEmpty(request.getStartTime())) {
             logQueryRequest.setStartTime(TimeUtils.stringToLocalDateTime(request.getStartTime()));
+
+        }
+        if (StringUtils.isNotEmpty(request.getEndTime())) {
             logQueryRequest.setEndTime(TimeUtils.stringToLocalDateTime(request.getEndTime()));
         }
         logQueryRequest.setSeverity(request.getSeverity());
@@ -69,6 +72,7 @@ public class LogService {
         LocalDateTime time = runtimeLogReportBO.getTime() == null ? LocalDateTime.now() : TimeUtils.stringToLocalDateTime(runtimeLogReportBO.getTime());
         runtimeLogModel.setTime(time);
         runtimeLogModel.setMessage(runtimeLogReportBO.getMessage());
+        runtimeLogModel.setLogType(runtimeLogReportBO.getLogType());
         contestLogService.addRuntimeLog(runtimeLogModel);
     }
 }
