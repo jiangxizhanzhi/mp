@@ -9,6 +9,7 @@ CREATE TABLE `mp_flow_flow`
     `resource_type`     tinyint(2)          NOT NULL COMMENT '资源类型：0 pcap包，1 脚本, 2 协议流量, 3 IXIA流量',
     `protocols`         varchar(255)        NOT NULL COMMENT '协议',
     `pcap_file`         varchar(255)        NOT NULL COMMENT 'pcap文件地址',
+    `file_name`         varchar(128)        NOT NULL COMMENT '文件名称',
     `protocol_configs`  text                NOT NULL COMMENT '协议配置',
     `protocol_flow_units` text                NOT NULL COMMENT '协议流量单元',
     `script_type`       varchar(10)         NOT NULL COMMENT '脚本类型: python, shell',

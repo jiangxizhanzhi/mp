@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.controller;
 
+import cn.cyberpeace.mp.base.common.FsCommon;
 import cn.cyberpeace.mp.base.controller.*;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.controller.stereotype.ModelBOClass;
@@ -10,6 +11,7 @@ import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.v2.bo.FlowBO;
+import cn.cyberpeace.mp.flow.v2.controller.response.PcapAnalyseResponse;
 import cn.cyberpeace.mp.flow.v2.model.FlowModel;
 import cn.cyberpeace.mp.flow.v2.service.FlowService;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowQueryParams;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,7 +71,8 @@ public class FlowController implements
 
     @ApiOperation(value = "流量包解析", notes = "获取流量包包含的协议集合")
     @PostMapping("/analyse")
-    public ServiceResult<List<String>> flowAnalyse(MultipartFile file) {
+    public ServiceResult<PcapAnalyseResponse> flowAnalyse(MultipartFile file) {
+        PcapAnalyseResponse response = new PcapAnalyseResponse();
         if (Objects.isNull(file)) {
             throw new MpRuntimeException(FlowErrorCode.PARAMS_SHOULD_NOT_EMPTY.format("file"));
         }
@@ -78,9 +82,20 @@ public class FlowController implements
             throw new MpRuntimeException(FlowErrorCode.NOT_PCAP_FILE);
         }
 
+        // 上传文件获取路径
+        String filePath = null;
+        try {
+            filePath = FsCommon.upload(file.getInputStream(), suffix);
+            response.setPcapFile(filePath);
+        } catch (IOException e) {
+            log.error("analyse upload pcap file error", e);
+            return ResultCommon.fail(FlowErrorCode.FLOW_FILE_UPLOAD_ERROR);
+        }
+
         // 解析流量包包含的协议内容
         List<String> protocolList = getModelService().pcapAnalyse(file);
-        return ResultCommon.success(protocolList);
+        response.setProtocolList(protocolList);
+        return ResultCommon.success(response);
     }
 
 }

@@ -31,6 +31,7 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private Integer resourceType;
     private List<String> protocols;
     private String pcapFile;
+    private String fileName;
     private List<ProtocolConfig> protocolConfigs;
     private List<ProtocolFlowUnit> protocolFlowUnits;
     private String scriptType;
