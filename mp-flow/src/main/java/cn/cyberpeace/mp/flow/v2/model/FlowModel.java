@@ -32,6 +32,8 @@ public class FlowModel extends BaseModel {
     @DefaultStr
     private String pcapFile;
     @DefaultStr
+    private String fileName;
+    @DefaultStr
     private String protocolConfigs;
     @DefaultStr
     private String protocolFlowUnits;

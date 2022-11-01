@@ -34,11 +34,9 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
                 BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFilterProtocols),
                 BeanUtils.getBeanGetterFieldName(FlowTaskModel::getFlows)));
         filterProtocols = StringUtils.isEmpty(obj.getFilterProtocols()) ? null
-                : JsonCommon.parse(obj.getFilterProtocols(), new TypeReference<>() {
-        });
+                : JsonCommon.parse(obj.getFilterProtocols(), new TypeReference<>(){});
         flows = StringUtils.isEmpty(obj.getFlows()) ? null
-                : JsonCommon.parse(obj.getFlows(), new TypeReference<>() {
-        });
+                : JsonCommon.parse(obj.getFlows(), new TypeReference<>(){});
         return this;
     }
 
@@ -70,7 +68,7 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
         private Integer weight;
         private Integer resourceType;
         private String pcapFile;
-        
+
         private String name;
         private String protocols;
         private String weightRatio;
