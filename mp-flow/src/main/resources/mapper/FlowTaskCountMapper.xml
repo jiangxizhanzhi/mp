@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper">
+    <select id="countTask" parameterType="java.util.Map"
+            resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel">
+        <foreach collection="list" item="item" open="" close="" separator="union">
+            select
+            flow_task_record_id as flowTaskRecordId, #{item.startTime} as time, sum(bandwidth) as bandwidth
+            ,sum(packets) as packets,
+            sum(tcp_connect_success) as tcpConnectSuccess ,sum(tcp_connect_try) as tcpConnectTry
+            from mp_flow_flow_task_count where flow_generator_id = #{flowGeneratorId}
+            and create_time &gt;= #{item.startTime} and create_time &lt; #{item.endTime} group by flow_task_record_id
+        </foreach>
+    </select>
+</mapper>
