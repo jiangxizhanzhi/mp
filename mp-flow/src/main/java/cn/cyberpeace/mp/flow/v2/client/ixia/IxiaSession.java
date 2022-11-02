@@ -21,6 +21,8 @@ public class IxiaSession {
     private IxiaTestClient testClient;
     private IxiaApplicationProfileClient applicationProfileClient;
     private IxiaNeighborhoodClient neighborhoodClient;
+    private IxiaTestStateClient testStateClient;
+
     public IxiaSession(String server, String usrname, String password) {
         this.server = server;
         this.usrname = usrname;
@@ -32,6 +34,7 @@ public class IxiaSession {
         this.testClient = new IxiaTestClient(httpClient);
         this.applicationProfileClient = new IxiaApplicationProfileClient(httpClient);
         this.neighborhoodClient = new IxiaNeighborhoodClient(httpClient);
+        this.testStateClient = new IxiaTestStateClient(httpClient);
     }
 
     public void open() {
@@ -152,6 +155,15 @@ public class IxiaSession {
         runTestData.setGroup("1");
         runTestData.setModelname(name);
         this.testClient.saveAndRunTest(saveTestData, runTestData);
+    }
+
+    public void pauseTest() {
+        this.testClient.pauseTest();
+    }
+
+    public void getTestState() {
+        GetTestStateData getTestStateData = new GetTestStateData();
+        this.testStateClient.getTestState(getTestStateData);
     }
 
     public void close() {

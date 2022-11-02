@@ -70,4 +70,10 @@ public class IxiaTestClient {
         });
         log.info("Start executing TEST:{}", runTestTes);
     }
+
+    public void pauseTest() {
+        var pauseTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.PAUSE_TEST, null, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        });
+        log.info("Pause TEST response:{}", pauseTestRes);
+    }
 }

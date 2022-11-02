@@ -27,4 +27,6 @@ public interface IxiaUrlConstant {
     String UPLOAD_PCAP_CAPTURE = "/api/v2/core/capture/operations/importCapture";
     String CREATE_RECREATE = "/api/v2/core/testmodel/operations/add";
     String ADD_PCAP_TO_RECREATE = "/api/v2/core/testmodel/component/recreate_";
+    String PAUSE_TEST = "/api/v2/core/testmodel/operations/stopRun";
+    String GET_TEST_STATE = "/api/v2/core/testmodel/operations/realTimeStats";
 }

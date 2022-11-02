@@ -98,6 +98,11 @@ class IxiaFlowGenerateService implements IGenerateService {
 
     @Override
     public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
+        IxiaSession ixiaSession = new IxiaSession(generatorBO.getServer(), generatorBO.getUsername(), generatorBO.getPassword());
+        ixiaSession.open();
+        // todo 暂停TEST没参数？等可以测试了看下怎么用
+        ixiaSession.pauseTest();
+        ixiaSession.close();
         return null;
     }
 
