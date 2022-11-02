@@ -1,6 +1,5 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.bo.user.UserOlReportCntBo;
 import cn.cyberpeace.mp.auth.model.UserHeartbeatModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.repository.UserHeartbeatMapper;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,11 +33,6 @@ public class UserHeartbeatServiceImpl extends BaseModelServiceImpl<UserHeartbeat
     public UserHeartbeatServiceImpl(UserHeartbeatMapper modelMapper, UserHeartbeatFields modelFields) {
         setModelMapper(modelMapper);
         setModelFields(modelFields);
-    }
-
-    public List<UserOlReportCntBo> groupCntByUserId(LocalDateTime time) {
-        List<UserOlReportCntBo> list = getModelMapper().groupCntByUserId(time);
-        return list;
     }
 
     @Override

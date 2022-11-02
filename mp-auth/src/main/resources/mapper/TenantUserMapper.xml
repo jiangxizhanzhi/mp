@@ -2,69 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.auth.repository.TenantUserMapper">
 
-
-    <select id="listUsersByOrgId" resultType="cn.cyberpeace.mp.auth.model.UserModel">
-        select distinct * from mp_auth_user where id in
-        (select user from mp_auth_tenant_user where org = #{orgId})
-        <if test="excludeRoleIds != null and excludeRoleIds.size() > 0">
-            AND id not in
-            (select distinct user from mp_auth_user_role
-            <where>
-                role in
-                <foreach item="roleId" index="index" collection="excludeRoleIds" open="(" separator="," close=")">
-                    #{roleId}
-                </foreach>
-                <if test="selfUserId != null and selfUserId != ''">
-                    and user != #{selfUserId}
-                </if>
-            </where>
-            )
-        </if>
-        <if test="excludeUserIds != null and excludeUserIds.size() > 0">
-            AND id not in
-            <foreach item="excludeUserId" index="index" collection="excludeUserIds" open="(" separator="," close=")">
-                #{excludeUserId}
-            </foreach>
-        </if>
-        order by -update_time, username
-    </select>
-
 <!--    <select id="listOrgsByUserId" resultType="cn.cyberpeace.mp.auth.model.OrgModel">-->
 <!--        select distinct * from mp_auth_org where id in-->
 <!--        (select org from mp_auth_tenant_user where user = #{userId})-->
 <!--        order by mp_auth_org.pk-->
 <!--    </select>-->
-
-
-    <select id="listUserOrgMapDtosByUserIds" resultType="cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo">
-        select ou.user as userId, group_concat(distinct o.id separator ',') as orgIds,
-        group_concat(distinct o.name separator ',') as orgNames
-        from mp_auth_org o
-        left join mp_auth_tenant_user ou
-        on ou.org = o.id
-        where ou.user != ''
-        <if test="userIds != null and userIds.size() > 0">
-            AND ou.user in
-            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                #{userId}
-            </foreach>
-        </if>
-        group by ou.user
-    </select>
-
-    <select id="listUserOrgByUserIds" resultType="cn.cyberpeace.mp.auth.bo.org.UserOrgBo">
-        select distinct o.*, ou.user as userId
-        from mp_auth_org o
-        left join mp_auth_tenant_user ou
-        on ou.org = o.id
-        where ou.user != ''
-        <if test="userIds != null and userIds.size() > 0">
-            AND ou.user in
-            <foreach item="userId" index="index" collection="userIds" open="(" separator="," close=")">
-                #{userId}
-            </foreach>
-        </if>
-    </select>
 
     <select id="listUsers" resultType="cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo">
         select

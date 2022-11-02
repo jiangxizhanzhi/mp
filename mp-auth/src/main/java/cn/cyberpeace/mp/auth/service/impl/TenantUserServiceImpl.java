@@ -1,20 +1,23 @@
 package cn.cyberpeace.mp.auth.service.impl;
 
-import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
-import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
-import cn.cyberpeace.mp.auth.constant.AuthConstant;
-import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.bo.org.OrgBO;
 import cn.cyberpeace.mp.auth.bo.org.OrgDto;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
+import cn.cyberpeace.mp.auth.config.AuthCacheConfig;
+import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
+import cn.cyberpeace.mp.auth.constant.AuthConstant;
+import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
 import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.UserRoleModel;
 import cn.cyberpeace.mp.auth.repository.OrgMapper;
 import cn.cyberpeace.mp.auth.repository.TenantUserMapper;
+import cn.cyberpeace.mp.auth.repository.UserMapper;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.org.OrgUserPageRequest;
 import cn.cyberpeace.mp.auth.service.*;
 import cn.cyberpeace.mp.auth.service.fields.TenantUserFields;
@@ -25,12 +28,14 @@ import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.text.StrBuilder;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Param;
+import org.elasticsearch.common.util.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
@@ -81,6 +86,15 @@ public class TenantUserServiceImpl
     @Autowired
     private OrgMapper orgMapper;
 
+    @Autowired
+    private TenantUserMapper tenantUserMapper;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
+
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public List<UserModel> listUsersByOrgId(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
@@ -92,8 +106,7 @@ public class TenantUserServiceImpl
 
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
-
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
+        List<UserModel> users = getUsersByOrgId(orgId, selfUserId, excludeRoleIds, excludeUserIds);
         users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
@@ -101,8 +114,7 @@ public class TenantUserServiceImpl
     @Override
     public List<UserModel> listUsersByOrgIdNoRestrict(String orgId) {
         ParamCheck.notBlank(orgId, AuthBasei18nCode.ORG_ID);
-
-        List<UserModel> users = getModelMapper().listUsersByOrgId(orgId, null, null, null);
+        List<UserModel> users = getUsersByOrgId(orgId, null, null, null);
         users.forEach(userModel -> userService.setDefaultIfNoAvatar(userModel));
         return users;
     }
@@ -161,18 +173,80 @@ public class TenantUserServiceImpl
     @Cacheable(value = CACHE_VAL_ORGS_BY_USERID)
     public List<UserOrgMapBo> listUserOrgMapDtosByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgMapBo> userOrgMapBos = getModelMapper().listUserOrgMapDtosByUserIds(userIds);
+
+        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
+        Map<String, List<String>> userOrgMap = new HashMap<>(tenantUserModels.size());
+        Set<String> orgIds = new HashSet<>(tenantUserModels.size());
+        for (TenantUserModel model : tenantUserModels) {
+            String userId = model.getUser();
+            String orgId = model.getOrg();
+            List<String> orgs = Objects.isNull(userOrgMap.get(userId)) ? new ArrayList<>() : userOrgMap.get(userId);
+            orgs.add(orgId);
+            userOrgMap.put(userId, orgs);
+            orgIds.add(orgId);
+        }
+        if (CollUtil.isEmpty(orgIds)) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, orgIds.toArray())
+                .select(OrgModel::getId)
+                .select(OrgModel::getName)
+                .distinct();
+        List<OrgModel> orgModels = orgMapper.list(orgCondition);
+        Map<String, String> orgMap = new HashMap<>(orgModels.size());
+        orgModels.stream().forEach(orgModel -> {
+            orgMap.put(orgModel.getId(), orgModel.getName());
+        });
+
+        List<UserOrgMapBo> userOrgMapBos = new ArrayList<>(userOrgMap.size());
+        userOrgMap.forEach((userId, orgs) -> {
+            UserOrgMapBo userOrgMapBo = new UserOrgMapBo();
+            userOrgMapBo.setUserId(userId);
+            userOrgMapBo.setOrgIds(StringUtils.join(orgs, ','));
+            StrBuilder orgNames = new StrBuilder();
+            int i = 0;
+            for (String org : orgs) {
+                if (i > 0) {
+                    orgNames.append(",");
+                }
+                orgNames.append(orgMap.get(org));
+            }
+            userOrgMapBo.setOrgNames(orgNames.toString());
+            userOrgMapBos.add(userOrgMapBo);
+        });
+
         return userOrgMapBos;
     }
 
     @Override
     public List<UserOrgBo> listUserOrgByUserIds(List<String> userIds) {
         ParamCheck.notEmpty(userIds, AuthBasei18nCode.USER_ID);
-        List<UserOrgBo> userOrgBos = getModelMapper().listUserOrgByUserIds(userIds);
-        for (UserOrgBo userOrgBo : userOrgBos) {
+
+        List<TenantUserModel> tenantUserModels = getTenantUserModelsByUserIds(userIds);
+        Map<String, String> orgUserMap = new HashMap<>(tenantUserModels.size());
+        List<String> orgIds = new ArrayList<>(tenantUserModels.size());
+        for (TenantUserModel model : tenantUserModels) {
+            orgUserMap.put(model.getOrg(), model.getUser());
+            orgIds.add(model.getOrg());
+        }
+        if (CollUtil.isEmpty(orgIds)) {
+            return new ArrayList<>();
+        }
+        HumanCondition orgCondition = new HumanCondition()
+                .filterIn(OrgModel::getId, orgIds.toArray())
+                .distinct();
+        List<OrgModel> orgModels = orgMapper.list(orgCondition);
+        List<UserOrgBo> userOrgBos = new ArrayList<>(orgModels.size());
+        for (OrgModel orgModel : orgModels) {
+            UserOrgBo userOrgBo = new UserOrgBo();
+            BeanUtils.copyProperties(orgModel, userOrgBo);
+            userOrgBo.setUserId(orgUserMap.get(orgModel.getId()));
             String path = orgService.getPath(userOrgBo);
             userOrgBo.setPath(path);
+            userOrgBos.add(userOrgBo);
         }
+
         return userOrgBos;
     }
 
@@ -347,5 +421,51 @@ public class TenantUserServiceImpl
                 .distinct();
         List<OrgModel> list = orgMapper.list(orgCondition);
         return list;
+    }
+
+    private List<UserModel> getUsersByOrgId(String orgId, String selfUserId, List<String> excludeRoleIds, List<String> excludeUserIds) {
+        HumanCondition humanCondition = new HumanCondition();
+
+        HumanCondition tenantCondition = new HumanCondition()
+                .filterEqual(TenantUserModel::getOrg, orgId)
+                .select(TenantUserModel::getUser);
+        List<TenantUserModel> tenantUserModels = tenantUserMapper.list(tenantCondition);
+        List<String> tenantUserIds = tenantUserModels.stream().map(TenantUserModel::getUser).collect(Collectors.toList());
+        if (CollUtil.isEmpty(tenantUserIds)) {
+            return new ArrayList<>();
+        }
+        humanCondition.filterIn(UserModel::getId, tenantUserIds.toArray());
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            HumanCondition userRoleCondition = new HumanCondition()
+                    .filterIn(UserRoleModel::getRole, excludeRoleIds.toArray());
+            if (StringUtils.isNotBlank(selfUserId)) {
+                userRoleCondition.filterNotEqual(UserRoleModel::getUser, selfUserId);
+            }
+            userRoleCondition.select(UserRoleModel::getUser).distinct();
+            List<UserRoleModel> userRoleModels = userRoleMapper.list(userRoleCondition);
+            List<String> roleUserIds = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(roleUserIds)) {
+                humanCondition.filterNotIn(UserModel::getId, roleUserIds.toArray());
+            }
+        }
+
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            humanCondition.filterNotIn(UserModel::getId, excludeUserIds.toArray());
+        }
+        humanCondition.orderBy(UserModel::getUpdateTime, true).orderBy(UserModel::getUsername);
+        List<UserModel> userModels = userMapper.list(humanCondition);
+        return userModels;
+    }
+
+    private List<TenantUserModel> getTenantUserModelsByUserIds(List<String> userIds) {
+        HumanCondition tenantCondition = new HumanCondition()
+                .filterNotEqual(TenantUserModel::getUser, "");
+        if (CollUtil.isNotEmpty(userIds)) {
+            tenantCondition.filterIn(TenantUserModel::getUser, userIds.toArray());
+        }
+        tenantCondition.select(TenantUserModel::getUser)
+                .select(TenantUserModel::getOrg)
+                .distinct();
+        return tenantUserMapper.list(tenantCondition);
     }
 }

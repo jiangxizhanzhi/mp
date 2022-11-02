@@ -19,9 +19,4 @@ import java.util.List;
 @Repository
 @ModelClass(RoleModel.class)
 public interface RoleMapper extends BaseModelMapper<RoleModel> {
-
-
-
-    List<RoleBo> listWithUserCnt(@Param("roleName") String roleName, @Param("orders") List<String> orders, @Param("excludeRoleIds") List<String> excludeRoleIds);
-
 }

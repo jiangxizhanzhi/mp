@@ -4,9 +4,7 @@ import cn.cyberpeace.mp.auth.bo.org.UserOrgBo;
 import cn.cyberpeace.mp.auth.bo.org.UserOrgMapBo;
 import cn.cyberpeace.mp.auth.bo.user.UserBo;
 import cn.cyberpeace.mp.auth.bo.user.UserOrgRoleBo;
-import cn.cyberpeace.mp.auth.model.OrgModel;
 import cn.cyberpeace.mp.auth.model.TenantUserModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.base.repository.BaseModelMapper;
 import cn.cyberpeace.mp.base.repository.stereotype.ModelClass;
 import org.apache.ibatis.annotations.Mapper;
@@ -26,16 +24,7 @@ import java.util.List;
 @ModelClass(TenantUserModel.class)
 public interface TenantUserMapper extends BaseModelMapper<TenantUserModel> {
 
-    List<UserModel> listUsersByOrgId(@Param("orgId") String orgId, @Param("selfUserId") String selfUserId,
-                                     @Param("excludeRoleIds") List<String> excludeRoleIds,
-                                     @Param("excludeUserIds") List<String> excludeUserIds);
-
 //    List<OrgModel> listOrgsByUserId(@Param("userId") String userId);
-
-    List<UserOrgMapBo> listUserOrgMapDtosByUserIds(@Param("userIds") List<String> userIds);
-
-    List<UserOrgBo> listUserOrgByUserIds(@Param("userIds") List<String> userIds);
-
     /**
      * @param orgIds
      * @param userIds
