@@ -78,7 +78,7 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
                 out.write(s);
             }
 
-            String pythonCmd = String.format("python %s %s", scriptPath, pcapPath);
+            String pythonCmd = String.format("python3 %s %s", scriptPath, pcapPath);
             log.info("============python analyse cmd: {}", pythonCmd);
 
             Process process = Runtime.getRuntime().exec(pythonCmd);
@@ -140,7 +140,7 @@ public class FlowService extends BaseModelServiceImpl<FlowModel, FlowMapper, Flo
 
             // 根据协议过滤pcap生成新的包
             String dstPcapPath = "dst_".concat(fileName);
-            String pythonCmd = String.format("python %s %s %s %s", scriptPath, srcPcapPath, dstPcapPath, strProtocols);
+            String pythonCmd = String.format("python3 %s %s %s %s", scriptPath, srcPcapPath, dstPcapPath, strProtocols);
             log.info("============python filter cmd: {}", pythonCmd);
             Process process = Runtime.getRuntime().exec(pythonCmd);
             process.waitFor();
