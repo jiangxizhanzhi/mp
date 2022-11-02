@@ -1,7 +1,9 @@
 package cn.cyberpeace.mp.log.service.impl;
 
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
+import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.log.annotation.OperateLog;
+import cn.cyberpeace.mp.log.dto.ExportOperateLogBo;
 import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
 import cn.cyberpeace.mp.log.request.OperationLogRequest;
 import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
@@ -12,7 +14,9 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -36,6 +40,21 @@ public class OperateLogServiceImpl implements OperateLogService {
         Locale locale = LocaleContextHolder.getLocale();
         ListObjServiceResult<OperationLogPageResponse> result = operateLogDbService.search(request, locale);
         return result;
+    }
+
+    public List<ExportOperateLogBo> toExportBOList(List<OperationLogPageResponse> list) {
+
+        List<ExportOperateLogBo> boList =
+            list.stream().map(log -> {
+                        return ExportOperateLogBo.builder()
+                                .ip(log.getOpIp())
+                                .username(log.getUserName())
+                                .time(TimeUtils.localDateTimeToString(log.getOpTime()))
+                                .build();
+                    }
+            ).collect(Collectors.toList());
+
+        return boList;
     }
 
     @Override

@@ -14,6 +14,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description:
@@ -109,5 +110,7 @@ public interface UserService extends BaseModelService<UserModel, UserQueryParams
     void batchSetDefaultIfNoAvatar(List<UserBo> userBos);
 
     ServiceResult<Integer> bulkCreateWithPasswordPreSet(List<UserModel> objs);
+
+    Map<String, String> listAll();
 
 }

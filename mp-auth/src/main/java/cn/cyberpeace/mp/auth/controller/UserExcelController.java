@@ -1,23 +1,33 @@
 package cn.cyberpeace.mp.auth.controller;
 
 
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
+import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
+import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.config.AuthConfig;
 import cn.cyberpeace.mp.auth.constant.AuthBasei18nCode;
 import cn.cyberpeace.mp.auth.constant.AuthConstant;
 import cn.cyberpeace.mp.auth.constant.AuthErrorCode;
 import cn.cyberpeace.mp.auth.constant.ControllerConstant;
-import cn.cyberpeace.mp.auth.bo.excel.ExportUserBo;
-import cn.cyberpeace.mp.auth.bo.excel.ExportUserEnBo;
-import cn.cyberpeace.mp.auth.bo.excel.ImportUserBo;
 import cn.cyberpeace.mp.auth.model.UserModel;
 import cn.cyberpeace.mp.auth.request.user.UserExportRequest;
-import cn.cyberpeace.mp.auth.service.*;
+import cn.cyberpeace.mp.auth.service.OperateUserPermissionService;
+import cn.cyberpeace.mp.auth.service.OrgService;
+import cn.cyberpeace.mp.auth.service.RoleService;
+import cn.cyberpeace.mp.auth.service.TenantUserService;
+import cn.cyberpeace.mp.auth.service.UploadDataListener;
+import cn.cyberpeace.mp.auth.service.UserService;
 import cn.cyberpeace.mp.auth.util.ExcelCheck;
 import cn.cyberpeace.mp.auth.util.ParamCheck;
 import cn.cyberpeace.mp.base.common.MessageCommon;
 import cn.cyberpeace.mp.base.controller.common.ResultCommon;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.log.dto.ExportOperateLogBo;
+import cn.cyberpeace.mp.log.request.OperationLogPageRequest;
+import cn.cyberpeace.mp.log.response.OperationLogPageResponse;
+import cn.cyberpeace.mp.log.service.OperateLogService;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.exceptions.ExceptionUtil;
 import com.alibaba.excel.EasyExcel;
@@ -33,7 +43,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -41,6 +55,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -71,6 +86,9 @@ public class UserExcelController {
 
     @Autowired
     private TenantUserService tenantUserService;
+
+    @Autowired
+    private OperateLogService operateLogService;
 
 
     @ApiOperation(value = "导出用户数据excel", notes = "")
@@ -132,6 +150,32 @@ public class UserExcelController {
     @PreAuthorize("hasAnyAuthority('ROLE_" + AuthConstant.ROLE_ADMIN + "')")
     public void downloadExcelTemplate() {
         userService.downloadExcelTemplate();
+    }
+
+
+
+    @ApiOperation(value = "导出审计日志")
+    @GetMapping("/operatelog/export")
+    public void export(OperationLogPageRequest request, HttpServletResponse response) throws IOException {
+        request.ensure();
+        request.setPerPage(10000);
+        request.setPage(1);
+        Map<String, String> map = userService.listAll();
+
+        ListObjServiceResult<OperationLogPageResponse> ret = operateLogService.search(request);
+
+        List<OperationLogPageResponse> list = ret.getSource().getObjs();
+        List<ExportOperateLogBo> boList = operateLogService.toExportBOList(list);
+
+        boList.forEach(bo -> {
+            bo.setName(map.get(bo.getUsername()));
+        });
+
+        response.setContentType("application/vnd.ms-excel");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("登录日志", "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), ExportOperateLogBo.class).sheet("登录日志").doWrite(boList);
     }
 
 }
