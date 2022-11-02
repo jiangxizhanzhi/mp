@@ -63,10 +63,10 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
             flowTaskCountModel.setFlowId(targetTask.getFlowId());
             flowTaskCountModel.setFlowTaskRecordId(flowTaskRecordBO.getId());
             flowTaskCountModel.setFlowGeneratorId(flowTaskRecordBO.getFlowGeneratorId());
-            flowTaskCountModel.setBandwidth(1L);
-            flowTaskCountModel.setTcpConnectTry(1L);
+            flowTaskCountModel.setBandwidth(targetTask.getTxBps());
+            flowTaskCountModel.setTcpConnectTry(targetTask.getCpsTotal());
             flowTaskCountModel.setPackets(targetTask.getOpackets());
-            flowTaskCountModel.setTcpConnectSuccess(1L);
+            flowTaskCountModel.setTcpConnectSuccess(targetTask.getCpsSuccess());
             // todo : 此处可能有去重问题，暂时忽略
             flowTaskCountMapper.create(flowTaskCountModel);
         }

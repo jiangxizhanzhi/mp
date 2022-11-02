@@ -26,11 +26,11 @@ public class TaskLastStatusResponseData implements HttpData {
         private String portName;
         private String flowId;
         private Integer second;
-        private Integer cpsSuccess;
-        private Integer cpsTotal;
+        private Long cpsSuccess;
+        private Long cpsTotal;
         private Long opackets;
         private Integer obytes;
-        private Double txBps;
+        private Long txBps;
         private Integer oerrors;
         private Integer status;
         private String recordTime;

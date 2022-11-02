@@ -1,5 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.client.trex;
 
+import cn.cyberpeace.mp.base.constant.BaseErrorCode;
+import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.util.HttpUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -57,6 +59,9 @@ public class TrexClient {
                 new TypeReference<TrexResponse<StartTaskData>>() {
                 });
         log.info("Start traffic task action completed {}", reslut.getData());
+        if (!reslut.isSuccess()) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR, reslut.getMsg());
+        }
     }
 
     public void doTaskAction(TaskActionData taskActionData) {
@@ -64,6 +69,9 @@ public class TrexClient {
                 new TypeReference<TrexResponse<TaskActionData>>() {
                 });
         log.info("Traffic task action {} completed {}", taskActionData.getAction(), reslut.getData());
+        if (!reslut.isSuccess()) {
+            throw new MpRuntimeException(BaseErrorCode.ERROR, reslut.getMsg());
+        }
     }
 
     public TaskLastStatusResponseData queryTaskLastStatus(QueryTaskLastStatusData queryTaskLastStatus) {
