@@ -14,4 +14,6 @@ public class FlowTaskQueryParams extends QueryParams {
 
     private List<Integer> categories;
 
+    private List<Integer> interactiveTypes;
+
 }

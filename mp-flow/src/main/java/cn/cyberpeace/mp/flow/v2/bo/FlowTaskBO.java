@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,6 +21,8 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
     private String description;
     @NotNull(message = "category can not be empty")
     private Integer category;
+    @NotNull(message = "interactiveType can not be empty")
+    private Integer interactiveType;
     @NotNull(message = "bandwidth can not be empty")
     private Integer bandwidth;
     @NotEmpty(message = "loadMode can not be empty")
@@ -27,6 +30,7 @@ public class FlowTaskBO extends ModelBO<FlowTaskModel, FlowTaskBO> {
     @NotNull(message = "filterProtocols can not be empty")
     private List<String> filterProtocols;
     private List<TaskFlow> flows;
+    private LocalDateTime createTime;
 
     @Override
     public FlowTaskBO fromModel(FlowTaskModel obj, String... ignoreFields) {

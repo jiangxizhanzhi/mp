@@ -11,10 +11,10 @@ public class FlowTaskFields extends BaseModelFields {
     public static final DynamicFields allFields = new DynamicFields(ClassUtils.getBeanClassFields(FlowTaskModel.class));
 
     public static final DynamicFields availableFields = new DynamicFields(
-            FlowTaskModel::getName, FlowTaskModel::getDescription, FlowTaskModel::getCategory,
+            FlowTaskModel::getName, FlowTaskModel::getDescription, FlowTaskModel::getCategory, FlowTaskModel::getInteractiveType,
             FlowTaskModel::getBandwidth, FlowTaskModel::getLoadMode, FlowTaskModel::getFilterProtocols,
             FlowTaskModel::getFlows
-            ).merge(BaseModelFields.availableFields);
+    ).merge(BaseModelFields.availableFields);
 
     public static final DynamicFields hiddenFields = allFields.subtract(availableFields);
 

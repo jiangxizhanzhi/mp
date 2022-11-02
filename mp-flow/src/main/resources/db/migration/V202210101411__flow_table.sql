@@ -31,6 +31,7 @@ CREATE TABLE `mp_flow_flow_task`
     `name`             varchar(128)        NOT NULL COMMENT '流量任务名称',
     `description`      varchar(320)        NOT NULL COMMENT '流量任务描述',
     `category`         tinyint(2)          NOT NULL COMMENT '流量任务分类',
+    `interactive_type` tinyint(2)          NOT NULL COMMENT '交互类型：0 背景流量，1 攻击流量',
     `bandwidth`        bigint(20)          NOT NULL COMMENT '带宽',
     `load_mode`         varchar(20)         NOT NULL COMMENT '负载模式：随机负载 random，二项分布 binomial，均匀分布 uniformity，指数分布
 index，高斯分布 gauss',

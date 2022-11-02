@@ -35,11 +35,15 @@ public class FlowTaskService extends BaseModelServiceImpl<FlowTaskModel, FlowTas
     }
 
     @Override
-    public void loadListFilterCondition(HumanCondition humanCondition, FlowTaskQueryParams queryParams) {
-        var categories = queryParams.getCategories();
-        if (categories != null && !categories.isEmpty()) {
-            humanCondition.filterIn(FlowModel::getCategory, categories.toArray());
-        }
+	public void loadListFilterCondition(HumanCondition humanCondition, FlowTaskQueryParams queryParams) {
+		var categories = queryParams.getCategories();
+		if (categories != null && !categories.isEmpty()) {
+			humanCondition.filterIn(FlowTaskModel::getCategory, categories.toArray());
+		}
+		var interactiveTypes = queryParams.getInteractiveTypes();
+		if (interactiveTypes != null && !interactiveTypes.isEmpty()) {
+			humanCondition.filterIn(FlowTaskModel::getInteractiveType, interactiveTypes.toArray());
+		}
     }
 
 	/**

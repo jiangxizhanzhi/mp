@@ -22,6 +22,8 @@ public class FlowTaskModel extends BaseModel {
     @DefaultInt
     private Integer category;
     @DefaultInt
+    private Integer interactiveType;
+    @DefaultInt
     private Integer bandwidth;
     /**
      * 负载模式：随机负载 random，二项分布 binomial， 均匀分布 uniformity， 指数分布 index， 高斯分布 gauss
