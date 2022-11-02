@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
@@ -192,16 +193,16 @@ public class FlowDashBoardService {
      * 
      * @return
      */
-    public PageInfo<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
+    public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
         
-        List<FlowTaskRecordModel> tasks = flowTaskRecordMapper.generatorTaskList();
-        List<FlowTaskRecordBO> taskBOs = tasks.stream().map(t -> {
+        PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<FlowTaskRecordModel>(flowTaskRecordMapper.generatorTaskList());
+        List<FlowTaskRecordBO> taskBOs = pageInfo.getList().stream().map(t -> {
             FlowTaskRecordBO bo = new FlowTaskRecordBO();
             BeanUtils.copyProperties(t, bo);
             return bo;
         }).collect(Collectors.toList());
         
-        return new PageInfo<FlowTaskRecordBO>(taskBOs);
+        return new ListObjServiceResult<FlowTaskRecordBO>(taskBOs, (int) pageInfo.getTotal());
     }
 }
