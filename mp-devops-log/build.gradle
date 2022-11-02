@@ -1,5 +1,0 @@
-dependencies {
-    implementation project(':mp-base')
-    implementation project(':mp-common')
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.4.2.Final'
-}
