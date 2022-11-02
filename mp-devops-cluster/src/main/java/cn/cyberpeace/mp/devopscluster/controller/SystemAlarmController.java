@@ -9,9 +9,11 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.devopscluster.constant.ControllerConstant;
 import cn.cyberpeace.mp.devopscluster.enums.AlarmStatusEnum;
 import cn.cyberpeace.mp.devopscluster.model.SystemAlarmModel;
+import cn.cyberpeace.mp.devopscluster.request.alarm.AlarmTrendRequest;
 import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devopscluster.service.ServiceMonitorService;
 import cn.cyberpeace.mp.devopscluster.service.SystemAlarmService;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 import cn.cyberpeace.mp.devopscluster.vo.SystemAlarmVO;
 import io.swagger.annotations.Api;
@@ -105,6 +107,25 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
             systemAlarm.setServerAlarmList(serverAlarmList);
         }
         return ResultCommon.success(systemAlarm);
+    }
+
+
+    /**
+     * 系统告警统计信息
+     * @return
+     */
+    @ApiOperation("系统告警统计信息")
+    @GetMapping("/trend")
+    public ServiceResult<List<AlarmStatisticsTrendVO>> getSystemAlarmTrend(AlarmTrendRequest trendRequest) {
+        // 告警趋势
+        //List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
+        //if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
+        //    systemAlarm.setServiceAlarmList(serviceAlarmList);
+        //}
+
+        //Integer[] types = {0, 1};
+        var result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(), trendRequest.getCount(), null, null);
+        return ResultCommon.success(result);
     }
 
 }

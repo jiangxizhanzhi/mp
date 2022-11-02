@@ -3,8 +3,10 @@ package cn.cyberpeace.mp.devopscluster.service;
 import cn.cyberpeace.mp.base.service.BaseModelService;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel;
+import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -31,6 +33,12 @@ public interface AlarmStatisticsService extends BaseModelService<AlarmStatistics
      * @return
      */
     List<AlarmStatisticsVO> serverAlarmStatistics(int days);
+
+    /**
+     * 告警趋势
+     * @return
+     */
+    List<AlarmStatisticsTrendVO> alarmTrend(Integer[] types, String unit, Integer count, LocalDateTime startTime, LocalDateTime endTime);
 
 }
 
