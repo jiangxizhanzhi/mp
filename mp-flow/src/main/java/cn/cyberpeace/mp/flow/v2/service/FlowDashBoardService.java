@@ -1,16 +1,25 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
+import cn.cyberpeace.mp.base.util.basic.BeanUtils;
 import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowBandwidthCountBO;
+import cn.cyberpeace.mp.flow.v2.bo.FlowDashBoardCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskCountQueryBO;
+import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.bo.ValueBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel;
+import cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowTaskCountMapper;
+import cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -19,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @Description
@@ -29,6 +39,9 @@ import java.util.Objects;
 public class FlowDashBoardService {
     @Resource
     private FlowTaskCountMapper flowTaskCountMapper;
+    
+    @Resource
+    private FlowTaskRecordMapper flowTaskRecordMapper;
 
     public ServiceResult<FlowGeneratorBandwidthCountBO> countFlowGenerator(String flowGeneratorId, String start, String end) {
         var queryList = getQueryList(start, end);
@@ -148,5 +161,47 @@ public class FlowDashBoardService {
             startTime = startTime.plusSeconds(5);
         }
         return queryList;
+    }
+    
+    /**
+     * 实时仿真数量统计
+     * 
+     * @return
+     */
+    public ServiceResult<FlowDashBoardCountBO> countStartTask() {
+        FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
+        countBO.setCount(flowTaskRecordMapper.countStartTask());
+        
+        return new ServiceResult<>(countBO);
+    }
+    
+    /**
+     * 实时总带宽统计
+     * 
+     * @return
+     */
+    public ServiceResult<FlowDashBoardCountBO> sumBandwidth() {
+        FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
+        countBO.setCount(flowTaskCountMapper.sumBandwidth());
+        
+        return new ServiceResult<>(countBO);
+    }
+    
+    /**
+     * 流量执行器仿真任务查询
+     * 
+     * @return
+     */
+    public PageInfo<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+        
+        List<FlowTaskRecordModel> tasks = flowTaskRecordMapper.generatorTaskList();
+        List<FlowTaskRecordBO> taskBOs = tasks.stream().map(t -> {
+            FlowTaskRecordBO bo = new FlowTaskRecordBO();
+            BeanUtils.copyProperties(t, bo);
+            return bo;
+        }).collect(Collectors.toList());
+        
+        return new PageInfo<FlowTaskRecordBO>(taskBOs);
     }
 }

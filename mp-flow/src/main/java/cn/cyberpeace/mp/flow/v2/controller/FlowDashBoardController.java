@@ -1,7 +1,5 @@
 package cn.cyberpeace.mp.flow.v2.controller;
 
-import cn.cyberpeace.mp.base.service.result.ListObjResult;
-import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.v2.bo.FlowBandwidthCountBO;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
 
 import javax.annotation.Resource;
 
@@ -44,18 +44,14 @@ public class FlowDashBoardController {
     @ApiOperation("实时仿真数量统计")
     @GetMapping("/task_count")
     public ServiceResult<FlowDashBoardCountBO> countTask() {
-        var result = new FlowDashBoardCountBO();
-        result.setCount(10L);
-        return new ServiceResult<>(result);
+        return flowDashBoardService.countStartTask().asResult();
     }
 
     @ApiOperation("实时总带宽统计")
     @GetMapping("/bandwidth_count")
     public ServiceResult<FlowDashBoardCountBO> countBandwidth() {
         // 单位字节？
-        var result = new FlowDashBoardCountBO();
-        result.setCount(10L);
-        return new ServiceResult<>(result);
+        return flowDashBoardService.sumBandwidth().asResult();
     }
 
     @ApiOperation("流量执行器带宽统计")
@@ -112,10 +108,12 @@ public class FlowDashBoardController {
             @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
     })
     @GetMapping("/generator/task_list")
-    public ListObjServiceResult<ListObjResult<FlowTaskRecordBO>> countGeneratorTaskList(@RequestParam(name = "flow_generator_id") String flowGeneratorId) {
+    public PageInfo<FlowTaskRecordBO> generatorTaskList(
+            @RequestParam(name = "flow_generator_id", required = false) String flowGeneratorId,
+            @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
+            @RequestParam(name = "page_size", required = false, defaultValue = "10") Integer pageSize) {
         // 单位字节？
-        ListObjResult<FlowTaskRecordBO> result = new ListObjResult<>();
-        return new ListObjServiceResult(result);
+        return flowDashBoardService.generatorTaskList(page, pageSize);
     }
 
 }
