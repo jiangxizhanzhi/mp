@@ -34,9 +34,6 @@ import javax.annotation.Resource;
 @RequestMapping(ControllerConstant.BASE_API_PATH + "/dashboard")
 public class FlowDashBoardController {
 
-    @Autowired
-    private FlowTaskCountService flowTaskCountService;
-
     @Resource
     private FlowDashBoardService flowDashBoardService;
 
@@ -49,7 +46,6 @@ public class FlowDashBoardController {
     @ApiOperation("实时总带宽统计")
     @GetMapping("/bandwidth_count")
     public ServiceResult<FlowDashBoardCountBO> countBandwidth() {
-        // 单位字节？
         return flowDashBoardService.sumBandwidth().asResult();
     }
 
@@ -85,23 +81,6 @@ public class FlowDashBoardController {
         return flowDashBoardService.countFlowRecord(flowGeneratorId, recordId, start, end).asResult();
     }
 
-    @ApiOperation("仿真任务单个流带宽统计")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "record_id", value = "流量任务执行记录id", dataTypeClass = String.class),
-            @ApiImplicitParam(name = "flow_id", value = "流量id", dataTypeClass = String.class),
-    })
-    @GetMapping("/generator/task/flow/bandwidth_count")
-    public ServiceResult<FlowBandwidthCountBO> countFlowBandwidth(
-            @RequestParam(name = "flow_generator_id") String flowGeneratorId,
-            @RequestParam(name = "record_id") String recordId,
-            @RequestParam(name = "flow_id") String flowId
-    ) {
-        // 单位字节？
-        var result = new FlowBandwidthCountBO();
-        return new ServiceResult<>(result);
-    }
-
     @ApiOperation("流量执行器仿真任务查询")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
@@ -111,7 +90,6 @@ public class FlowDashBoardController {
             @RequestParam(name = "flow_generator_id", required = false) String flowGeneratorId,
             @RequestParam(name = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(name = "page_size", required = false, defaultValue = "10") Integer pageSize) {
-        // 单位字节？
         return flowDashBoardService.generatorTaskList(page, pageSize).asResult();
     }
 
