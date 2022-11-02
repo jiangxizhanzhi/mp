@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +39,7 @@ public class FlowBO extends ModelBO<FlowModel, FlowBO> {
     private String scriptFile;
     private List<ScriptParam> scriptParams;
     private String ixiaFlowName;
+    private LocalDateTime createTime;
 
     @Override
     public FlowBO fromModel(FlowModel obj, String... ignoreFields) {
