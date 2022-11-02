@@ -26,5 +26,5 @@ public class FlowTaskCountModel extends BaseModel {
     @DefaultLong
     private Long packets;
     @DefaultLong
-    private Long tcp_connect_success;
+    private Long tcpConnectSuccess;
 }

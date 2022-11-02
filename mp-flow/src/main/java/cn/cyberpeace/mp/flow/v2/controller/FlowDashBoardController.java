@@ -16,7 +16,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @Description
@@ -65,37 +61,33 @@ public class FlowDashBoardController {
     @ApiOperation("流量执行器带宽统计")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "start", value = "开始时间", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "end", value = "结束时间", dataTypeClass = String.class)
     })
     @GetMapping("/generator/bandwidth_count")
     public ServiceResult<FlowGeneratorBandwidthCountBO> countGeneratorBandwidth(
-            @RequestParam(name = "flow_generator_id") String flowGeneratorId
+            @RequestParam(name = "flow_generator_id") String flowGeneratorId,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end
     ) {
-        // 单位字节？
-        var result = new FlowGeneratorBandwidthCountBO();
-        result.setTotal(10L);
-        return new ServiceResult<>(result);
+        return flowDashBoardService.countFlowGenerator(flowGeneratorId, start, end).asResult();
     }
 
     @ApiOperation("仿真任务带宽统计")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "flow_generator_id", value = "流量执行器id", dataTypeClass = String.class),
             @ApiImplicitParam(name = "record_id", value = "流量任务执行id", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "start", value = "开始时间", dataTypeClass = String.class),
+            @ApiImplicitParam(name = "end", value = "结束时间", dataTypeClass = String.class)
     })
     @GetMapping("/generator/task/bandwidth_count")
     public ServiceResult<FlowTaskBandwidthCountBO> countTaskBandwidth(
             @RequestParam(name = "flow_generator_id") String flowGeneratorId,
-            @RequestParam(name = "record_id") String recordId
-    ) throws Exception {
-        // 单位字节？
-        List<Date> dates = new ArrayList<>();
-        dates.add(DateUtils.parseDate("2022-11-01 11:41:10", "YYYY-MM-dd HH:mm:ss"));
-        dates.add(DateUtils.parseDate("2022-11-01 11:41:20", "YYYY-MM-dd HH:mm:ss"));
-        dates.add(DateUtils.parseDate("2022-11-01 11:41:30", "YYYY-MM-dd HH:mm:ss"));
-        dates.add(DateUtils.parseDate("2022-11-01 11:41:40", "YYYY-MM-dd HH:mm:ss"));
-        flowDashBoardService.count(flowGeneratorId, recordId, dates);
-        var result = new FlowTaskBandwidthCountBO();
-        result.setTotal(10L);
-        return new ServiceResult<>(result);
+            @RequestParam(name = "record_id") String recordId,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end
+    ) {
+        return flowDashBoardService.countFlowRecord(flowGeneratorId, recordId, start, end).asResult();
     }
 
     @ApiOperation("仿真任务单个流带宽统计")

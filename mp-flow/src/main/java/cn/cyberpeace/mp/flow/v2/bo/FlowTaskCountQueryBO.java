@@ -2,7 +2,7 @@ package cn.cyberpeace.mp.flow.v2.bo;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @Description
@@ -11,6 +11,6 @@ import java.util.Date;
  */
 @Data
 public class FlowTaskCountQueryBO {
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 }

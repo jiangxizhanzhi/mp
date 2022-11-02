@@ -14,5 +14,7 @@ import java.util.List;
 @Repository
 @ModelClass(FlowTaskCountModel.class)
 public interface FlowTaskCountMapper extends BaseModelMapper<FlowTaskCountModel> {
-    List<FlowTaskCountResultModel> countTask(String flowGeneratorId, String taskRecordId, List<FlowTaskCountQueryBO> list);
+    List<FlowTaskCountResultModel> countTask(String flowGeneratorId, List<FlowTaskCountQueryBO> list);
+
+    List<FlowTaskCountResultModel> countFlow(String flowGeneratorId, String taskRecordId, List<FlowTaskCountQueryBO> list);
 }
