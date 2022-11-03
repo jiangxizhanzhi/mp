@@ -140,7 +140,7 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleBo> users = listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        List<UserOrgRoleBo> users = listUsers(orgIds, userIds, null, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime, null, null);
 
         List<UserModel> userModels = users.stream().map(u -> {
             UserModel userModel = new UserModel();
@@ -368,7 +368,7 @@ public class TenantUserServiceImpl
         List<String> excludeRoleIds = opUserPermService.getExcludeRoleIdsByLoginUserForSearchingUsers();
         List<String> excludeUserIds = opUserPermService.getExcludeUserIdsByLoginUserForSearchingUsers();
         LocalDateTime currentDateTime = LocalDateTime.now();
-        List<UserOrgRoleBo> userOrgRoleBos = listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime);
+        List<UserOrgRoleBo> userOrgRoleBos = listUsers(orgIds, idsList, orders, userCondition, selfUserId, excludeRoleIds, excludeUserIds, currentDateTime, req.getPage(), req.getPageSize());
         PageInfo pageInfo = new PageInfo(userOrgRoleBos);
         List<UserBo> userBos = userService.userOrgRoleDtos2UserDtos(userOrgRoleBos);
 
@@ -474,7 +474,9 @@ public class TenantUserServiceImpl
                                          String selfUserId,
                                          List<String> excludeRoleIds,
                                          List<String> excludeUserIds,
-                                         LocalDateTime currentDateTime
+                                         LocalDateTime currentDateTime,
+                                         Integer page,
+                                         Integer pageSize
     ) {
         HumanCondition humanCondition = new HumanCondition();
 
@@ -563,7 +565,9 @@ public class TenantUserServiceImpl
             userRoleMap.put(userId, roles);
         });
 
-
+        if (Objects.nonNull(page) && Objects.nonNull(pageSize)) {
+            PageHelper.startPage(page, pageSize);
+        }
         List<UserModel> userModels = userMapper.list(humanCondition);
         List<UserOrgRoleBo> userOrgRoleBos = new ArrayList<>(userModels.size());
         for (UserModel model : userModels) {
