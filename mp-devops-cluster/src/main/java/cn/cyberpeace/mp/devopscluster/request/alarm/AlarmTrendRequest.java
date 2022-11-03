@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * @Description 告警趋势请求
@@ -29,13 +31,27 @@ public class AlarmTrendRequest extends BaseRequest implements Serializable {
     /**
      * 统计单位
      */
-    @ApiModelProperty(value = "单位: 年(year)，月份(month)，星期(week)， 天数(date), 默认为月份(month)")
+    @ApiModelProperty(value = "单位: 年(year)，月份(month)，天数(date), 小时(hour)")
     private String unit;
 
     /**
      * 默认显示数量
      */
-    @ApiModelProperty(value = "数量: 年(10)，月份(12)，星期(10)，天数(30)， 默认为月份(12)")
+    @ApiModelProperty(value = "数量: 年(10)，月份(12)，天数(30)，小时(24)")
     private Integer count;
+
+    /**
+     * 开始时间
+     */
+    @ApiModelProperty(value = "开始时间")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime startTime;
+
+    /**
+     * 结束时间
+     */
+    @ApiModelProperty(value = "结束时间")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime endTime;
 
 }

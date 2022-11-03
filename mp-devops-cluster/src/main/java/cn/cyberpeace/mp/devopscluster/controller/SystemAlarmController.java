@@ -117,14 +117,8 @@ public class SystemAlarmController extends BaseModelController<SystemAlarmModel,
     @ApiOperation("系统告警统计信息")
     @GetMapping("/trend")
     public ServiceResult<List<AlarmStatisticsTrendVO>> getSystemAlarmTrend(AlarmTrendRequest trendRequest) {
-        // 告警趋势
-        //List<AlarmStatisticsVO> serviceAlarmList = alarmStatisticsService.serviceAlarmStatistics(days);
-        //if (CollectionUtils.isNotEmpty(serviceAlarmList)) {
-        //    systemAlarm.setServiceAlarmList(serviceAlarmList);
-        //}
-
-        //Integer[] types = {0, 1};
-        var result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(), trendRequest.getCount(), null, null);
+        var result = alarmStatisticsService.alarmTrend(trendRequest.getTypes(), trendRequest.getUnit(),
+                trendRequest.getCount(), trendRequest.getStartTime(), trendRequest.getEndTime());
         return ResultCommon.success(result);
     }
 

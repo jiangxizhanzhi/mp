@@ -9,8 +9,10 @@ import java.util.Arrays;
  */
 public enum TimeSlotEnums {
 
+    HOUR("hour", 24),
     DAY("day", 30),
-    WEEK("week", 10),
+    // 暂不支持周，Java跟mysql中对周日属于前一周还是后一周判断不一
+    //WEEK("week", 10),
     MONTH("month", 12),
     YEAR("year", 10);
 

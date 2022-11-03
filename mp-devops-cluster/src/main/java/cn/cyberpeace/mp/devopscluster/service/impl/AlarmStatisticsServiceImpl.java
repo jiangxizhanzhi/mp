@@ -8,7 +8,6 @@ import cn.cyberpeace.mp.base.repository.condition.aggregation.Sum;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
-import cn.cyberpeace.mp.base.util.basic.TimeUtils;
 import cn.cyberpeace.mp.base.util.define.SerializableFunction;
 import cn.cyberpeace.mp.devopscluster.enums.TimeSlotEnums;
 import cn.cyberpeace.mp.devopscluster.model.AlarmStatisticsModel;
@@ -17,13 +16,19 @@ import cn.cyberpeace.mp.devopscluster.service.AlarmStatisticsService;
 import cn.cyberpeace.mp.devopscluster.service.fields.AlarmStatisticsFields;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsTrendVO;
 import cn.cyberpeace.mp.devopscluster.vo.AlarmStatisticsVO;
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,18 +42,20 @@ import java.util.function.Function;
 public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatisticsModel, AlarmStatisticsMapper, AlarmStatisticsFields,
         QueryParams> implements AlarmStatisticsService {
 
-    private static final Map<String, String> TIME_UNIT_DATEFORMAT_MAP = new HashMap<>();
+    private static final Map<String, DateProcessor> DATE_PROCESSOR_MAP = new HashMap<>();
 
     public AlarmStatisticsServiceImpl(AlarmStatisticsMapper stuMapper, AlarmStatisticsFields stuFields) {
         setModelFields(stuFields);
         setModelMapper(stuMapper);
     }
 
-    static void init() {
-        TIME_UNIT_DATEFORMAT_MAP.put(TimeSlotEnums.DAY.getUnit(), "%Y-%m-%d");
-        TIME_UNIT_DATEFORMAT_MAP.put(TimeSlotEnums.WEEK.getUnit(), "%u");
-        TIME_UNIT_DATEFORMAT_MAP.put(TimeSlotEnums.MONTH.getUnit(), "%Y-%m");
-        TIME_UNIT_DATEFORMAT_MAP.put(TimeSlotEnums.YEAR.getUnit(), "%Y");
+    @PostConstruct
+    public void init() {
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.HOUR.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM-dd HH").sqlDateFormatter("%Y-%m-%d %H").dateProcessFunc(date -> date.minusHours(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.DAY.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM-dd").sqlDateFormatter("%Y-%m-%d").dateProcessFunc(date -> date.minusDays(1)).build());
+        //DATE_PROCESSOR_MAP.put(TimeSlotEnums.WEEK.getUnit(), DateProcessor.builder().dateFormatter("w").sqlDateFormatter("%u").dateProcessFunc(date -> date.minusWeeks(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.MONTH.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM").sqlDateFormatter("%Y-%m").dateProcessFunc(date -> date.minusMonths(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.YEAR.getUnit(), DateProcessor.builder().dateFormatter("yyyy").sqlDateFormatter("%Y").dateProcessFunc(date -> date.minusYears(1)).build());
     }
 
     /**
@@ -113,16 +120,6 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
      */
     @Override
     public List<AlarmStatisticsTrendVO> alarmTrend(Integer[] types, String unit, Integer count, LocalDateTime startTime, LocalDateTime endTime) {
-        //var list = this.getModelMapper().serverAlarmStatistics(LocalDateTime.now(), days);
-
-        //getModelMapper().list(new HumanCondition().)
-
-        //HumanCondition orgUserCondition = new HumanCondition()
-        //        .filterIn(TenantUserModel::getUser, userIds)
-        //        .select(TenantUserModel::getUser)
-        //        .selectAs(DateFormatAggr.f(TenantUserModel::getOrg).distinct(), UserOrgRoleBo.FIELD_ORGS)
-        //        .groupBy(TenantUserModel::getUser);
-
         TimeSlotEnums timeSlotEnum = TimeSlotEnums.fromUnit(unit);
         if (Objects.isNull(timeSlotEnum)) {
             log.info("unit:{} invalid!", unit);
@@ -133,27 +130,120 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
             count = timeSlotEnum.getCount();
         }
 
-        startTime = TimeUtils.stringToLocalDateTime("2022-10-01 10:00:00");
-        endTime = TimeUtils.stringToLocalDateTime("2022-11-02 20:00:00");
+        // todo
+        if (Objects.nonNull(startTime) && Objects.nonNull(endTime) && startTime.isAfter(endTime)) {
+            log.error("start time is not before end time!");
+            throw new MpRuntimeException(BaseErrorCode.PARAMS_INVALID);
+        }
 
+        if (Objects.isNull(endTime)) {
+            endTime = LocalDateTime.now();
+        }
+
+        if (Objects.isNull(startTime)) {
+            LocalDateTime processedStartTime = processStartTime(endTime, timeSlotEnum, count);
+            startTime = processedStartTime;
+        }
+
+        DateProcessor dateProcessor = DATE_PROCESSOR_MAP.get(unit);
         HumanCondition condition = new HumanCondition()
                 .selectAs(Sum.f(AlarmStatisticsModel::getAlarmCount), AlarmStatisticsVO::getAlarmCount)
-                //.selectAs(AlarmStatisticsModel::getAlarmDate, AlarmStatisticsVO::getAlarmDate)
-                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getAlarmDate, TIME_UNIT_DATEFORMAT_MAP.get(unit)), StrUtil.toUnderlineCase(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
+                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getCreateTime, dateProcessor.getSqlDateFormatter()), StrUtil.toUnderlineCase(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
+                .filterIn(AlarmStatisticsModel::getAlarmType, types)
                 .filterGreaterThanOrEqual(AlarmStatisticsModel::getCreateTime, startTime)
                 .filterLessThanOrEqual(AlarmStatisticsModel::getCreateTime, endTime)
                 .groupBy(AlarmStatisticsTrendVO::getTimeBucket);
 
-
-        var result = getModelMapper().list(condition, AlarmStatisticsTrendVO.class);
-        if (CollectionUtils.isEmpty(result)) {
-            return new ArrayList<>();
-        }
-        return result;
-        //return processTrend(list, days);
+        List<AlarmStatisticsTrendVO> trendVOList = getModelMapper().list(condition, AlarmStatisticsTrendVO.class);
+        return processTrendByDateProcessor(trendVOList, dateProcessor, startTime, endTime);
     }
 
 
+    private LocalDateTime processStartTime(LocalDateTime processedEndTime, TimeSlotEnums timeSlotEnum, Integer count) {
+        LocalDateTime processedStartTime = null;
+
+        if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
+            // 按天统计
+            processedStartTime = LocalDateTime.of(processedEndTime.minusDays(count).toLocalDate(), LocalTime.MAX);
+        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
+        //    // 按星期统计
+        //    LocalDate firstDayOfBeginWeek = processedEndTime.minusWeeks(count).toLocalDate().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+        //    processedStartTime = LocalDateTime.of(firstDayOfBeginWeek, LocalTime.MAX);
+        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
+            // 按月统计
+            LocalDate firstDayOfBeginMonth = processedEndTime.minusMonths(count).toLocalDate().with(TemporalAdjusters.lastDayOfMonth());
+            processedStartTime = LocalDateTime.of(firstDayOfBeginMonth, LocalTime.MAX);
+        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
+            // 按年统计
+            LocalDate firstDayOfBeginYear = processedEndTime.minusYears(count).toLocalDate().with(TemporalAdjusters.lastDayOfYear());
+            processedStartTime = LocalDateTime.of(firstDayOfBeginYear, LocalTime.MAX);
+        }
+
+        return processedStartTime;
+    }
+
+
+    /**
+     * 计算endtime
+     * @param endTime
+     * @param timeSlotEnum
+     * @return
+     */
+    private LocalDateTime processEndTime(LocalDateTime endTime, TimeSlotEnums timeSlotEnum) {
+
+        LocalDateTime processedEndTime = null;
+
+        if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
+            // 按天统计
+            processedEndTime = LocalDateTime.of(endTime.plusDays(1).toLocalDate(), LocalTime.MIN);
+        //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
+        //    // 按星期统计
+        //    LocalDate firstDayOfNextWeek = endTime.toLocalDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
+        //    processedEndTime = LocalDateTime.of(firstDayOfNextWeek, LocalTime.MIN);
+        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.MONTH)) {
+            // 按月统计
+            LocalDate firstDayOfNextMonth = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextMonth());
+            processedEndTime = LocalDateTime.of(firstDayOfNextMonth, LocalTime.MIN);
+        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.YEAR)) {
+            // 按年统计
+            LocalDate firstDayOfNextYear = endTime.toLocalDate().with(TemporalAdjusters.firstDayOfNextYear());
+            processedEndTime = LocalDateTime.of(firstDayOfNextYear, LocalTime.MIN);
+        }
+
+        return processedEndTime;
+    }
+
+
+    private List<AlarmStatisticsTrendVO> processTrendByDateProcessor(List<AlarmStatisticsTrendVO> trendVOList, DateProcessor dateProcessor, LocalDateTime startTime, LocalDateTime endTime) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateProcessor.getDateFormatter());
+        List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();
+        while (!endTime.isBefore(startTime)) {
+            String calculatedTimeBucket = dtf.format(endTime);
+            Optional<AlarmStatisticsTrendVO> optional = trendVOList.stream().filter(vo -> Objects.equals(vo.getTimeBucket(), calculatedTimeBucket)).findFirst();
+            if (optional.isPresent()) {
+                finalList.add(optional.get());
+            } else {
+                AlarmStatisticsTrendVO vo = new AlarmStatisticsTrendVO();
+                vo.setTimeBucket(calculatedTimeBucket);
+                vo.setAlarmCount(0);
+                finalList.add(vo);
+            }
+            endTime = dateProcessor.getDateProcessFunc().apply(endTime);
+        }
+
+        finalList = CollectionUtil.reverse(finalList);
+        return finalList;
+    }
+
+    @Data
+    @Builder
+    static class DateProcessor {
+        private String sqlDateFormatter;
+
+        private String dateFormatter;
+
+        Function<LocalDateTime, LocalDateTime> dateProcessFunc;
+    }
 
     static class DateFormatAggr extends Aggregation<DateFormatAggr> {
 
