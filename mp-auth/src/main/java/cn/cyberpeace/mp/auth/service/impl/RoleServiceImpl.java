@@ -8,11 +8,9 @@ import cn.cyberpeace.mp.auth.bo.role.RoleBo;
 import cn.cyberpeace.mp.auth.bo.role.RolePermBo;
 import cn.cyberpeace.mp.auth.bo.target.PermissionBo;
 import cn.cyberpeace.mp.auth.bo.target.TargetRoleBo;
-import cn.cyberpeace.mp.auth.model.RoleModel;
-import cn.cyberpeace.mp.auth.model.RolePermissionModel;
-import cn.cyberpeace.mp.auth.model.TargetModel;
-import cn.cyberpeace.mp.auth.model.UserModel;
+import cn.cyberpeace.mp.auth.model.*;
 import cn.cyberpeace.mp.auth.repository.RoleMapper;
+import cn.cyberpeace.mp.auth.repository.UserRoleMapper;
 import cn.cyberpeace.mp.auth.request.role.RolePageRequest;
 import cn.cyberpeace.mp.auth.request.role.RoleRequest;
 import cn.cyberpeace.mp.auth.service.*;
@@ -22,27 +20,27 @@ import cn.cyberpeace.mp.auth.util.ResultUtils;
 import cn.cyberpeace.mp.auth.util.SQLUtils;
 import cn.cyberpeace.mp.base.exception.MpRuntimeException;
 import cn.cyberpeace.mp.base.repository.condition.HumanCondition;
+import cn.cyberpeace.mp.base.repository.condition.aggregation.Count;
 import cn.cyberpeace.mp.base.service.impl.BaseModelServiceImpl;
 import cn.cyberpeace.mp.base.service.param.QueryParams;
 import cn.cyberpeace.mp.base.service.result.ObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.IdUtils;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +66,9 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
     @Autowired
     private UserRoleService userRoleService;
+
+    @Autowired
+    private UserRoleMapper userRoleMapper;
 
     @Autowired
     private OperateRolePermissionService opRolePermCheckService;
@@ -184,7 +185,7 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
 
         PageHelper.startPage(rolePageRequest.getPage(), rolePageRequest.getPageSize());
         String likeRoleName = SQLUtils.escapeLike(rolePageRequest.getName());
-        List<RoleBo> roleDtos = getModelMapper().listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
+        List<RoleBo> roleDtos = listWithUserCnt(likeRoleName, orders, opRolePermCheckService.getExcludeRoleIdsByLoginUserForSearchingRoles());
         PageInfo pageInfo = new PageInfo(roleDtos);
         List<TargetModel> allTargets = targetService.listAll(AuthConstant.DEFAULT_TENANT, null);
 
@@ -423,6 +424,46 @@ public class RoleServiceImpl extends BaseModelServiceImpl<RoleModel, RoleMapper,
         if (Objects.equals(AuthConstant.ROLE_ADMIN, roleModel.getIdentifier())) {
             throw new MpRuntimeException(AuthErrorCode.ROLE_IDENT_CANNOT_BE_ADMIN);
         }
+    }
+
+    public List<RoleBo> listWithUserCnt(String roleName, List<String> orders, List<String> excludeRoleIds) {
+        HumanCondition roleCondition = new HumanCondition();
+        if (CollUtil.isNotEmpty(excludeRoleIds)) {
+            roleCondition.filterNotIn(RoleModel::getId, excludeRoleIds.toArray());
+        }
+        if (StringUtils.isNotBlank(roleName)) {
+            roleCondition.filterContains(RoleModel::getName, roleName);
+        }
+        if (CollUtil.isNotEmpty(orders)) {
+            for (String order : orders) {
+                roleCondition.orderBy(order);
+            }
+        }
+        List<RoleModel> roleModels = getModelMapper().list(roleCondition);
+        List<String> roleIds = roleModels.stream().map(RoleModel::getId).collect(Collectors.toList());
+
+        if (CollUtil.isEmpty(roleIds)) {
+            roleIds.add("");
+        }
+        HumanCondition userRoleCondition = new HumanCondition()
+                .filterIn(UserRoleModel::getRole, roleIds.toArray())
+                .select(UserRoleModel::getRole)
+                .selectAs(Count.f(UserRoleModel::getUser).distinct(), "userCnt")
+                .groupBy(UserRoleModel::getRole);
+        List<Map<String, Object>> maps = userRoleMapper.originList(userRoleCondition);
+        Map<String, Integer> roleCountMap = new HashMap<>(maps.size());
+        maps.stream().forEach(map -> {
+            roleCountMap.put((String) map.get("role"), ((Long) map.get("userCnt")).intValue());
+        });
+
+        List<RoleBo> roleBos = new ArrayList<>();
+        for (RoleModel roleModel : roleModels) {
+            RoleBo roleBo = new RoleBo();
+            BeanUtils.copyProperties(roleModel, roleBo);
+            roleBo.setUserCnt(roleCountMap.getOrDefault(roleModel.getId(), 0));
+            roleBos.add(roleBo);
+        }
+        return roleBos;
     }
 
 }
