@@ -504,7 +504,10 @@ public class TenantUserServiceImpl
             }
             excludeRoleCondition.select(UserRoleModel::getUser);
             List<UserRoleModel> userRoleModels = userRoleMapper.list(excludeRoleCondition);
-            userRoleModels.forEach(model -> excludeRoleIds.add(model.getUser()));
+            List<String> ids = userRoleModels.stream().map(UserRoleModel::getUser).collect(Collectors.toList());
+            if (CollUtil.isNotEmpty(ids)) {
+                humanCondition.filterNotIn(UserModel::getId, ids.toArray());
+            }
         }
 
         if (CollUtil.isNotEmpty(excludeUserIds)) {
