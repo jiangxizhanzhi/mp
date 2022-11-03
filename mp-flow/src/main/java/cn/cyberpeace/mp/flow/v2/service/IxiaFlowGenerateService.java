@@ -32,6 +32,7 @@ class IxiaFlowGenerateService implements IGenerateService {
         // 取任务详情
         List<ProtocolFlow> protocolFlows = new ArrayList<>();
         List<PcapFlow> pcapFlows = new ArrayList<>();
+        List<PcapFlow.RecreateData> recreateDatas = new ArrayList<>();
         for (var flow : flowTaskRecordBO.getFlows()) {
             if (StringUtils.isNotEmpty(flow.getPcapFile())) {
                 PcapFlow pcapFlow = new PcapFlow();
@@ -39,6 +40,12 @@ class IxiaFlowGenerateService implements IGenerateService {
                 // todo pcap包上传后的名字？
                 fileInfo.setName(TextUtils.uuid());
                 pcapFlow.setFileInfo(fileInfo);
+
+                PcapFlow.RecreateData recreateData = new PcapFlow.RecreateData();
+                recreateData.setName(fileInfo.getName());
+                recreateData.setDelay("00:00:10");
+                recreateDatas.add(recreateData);
+
                 byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
                 pcapFlow.setFile(fileByte);
                 pcapFlows.add(pcapFlow);
@@ -50,8 +57,8 @@ class IxiaFlowGenerateService implements IGenerateService {
         }
         // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
-        List<String> captureNames = ixiaSession.createCaptureManager(pcapFlows);
-        String testName = ixiaSession.createTest(neighborhood, "profileName", captureNames);
+        ixiaSession.createCaptureManager(pcapFlows);
+        String testName = ixiaSession.createTest(neighborhood, "profileName", recreateDatas);
         ixiaSession.startTest(testName);
         ixiaSession.close();
 
@@ -112,14 +119,36 @@ class IxiaFlowGenerateService implements IGenerateService {
     public FlowCallBackTask restartFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         return null;
     }
-    //num为随机数字字符串的长度
-    public static StringBuilder getNumber(int num){
-        StringBuilder sb = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < num; i++){
-            sb.append(random.nextInt(10));
+
+    // 秒数转xx:xx:xx
+    public static String secToTime(int time) {
+        String timeStr = null;
+        int hour = 0;
+        int minute = 0;
+        int second = 0;
+        if (time <= 0) return "00:00:00";
+        else {
+            minute = time / 60;
+            if (minute < 60) {
+                second = time % 60;
+                timeStr = "00:" + unitFormat(minute) + ":" + unitFormat(second);
+            } else {
+                hour = minute / 60;
+                if (hour > 99) {
+                    return "99:59:59";
+                }
+                minute = minute % 60;
+                second = time - hour * 3600 - minute * 60;
+                timeStr = unitFormat(hour) + ":" + unitFormat(minute) + ":" + unitFormat(second);
+            }
         }
-        return sb;
+        return timeStr;
     }
 
+    public static String unitFormat(int i) {
+        String retStr = null;
+        if (i >= 0 && i < 10) retStr = "0" + Integer.toString(i);
+        else retStr = "" + i;
+        return retStr;
+    }
 }

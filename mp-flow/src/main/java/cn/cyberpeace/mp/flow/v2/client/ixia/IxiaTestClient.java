@@ -47,17 +47,18 @@ public class IxiaTestClient {
         log.info("Adding super flow to application simulator completed:{}", addSuperFlowRes);
     }
 
-    public void configRecreates(List<String> capureNames) {
-        if (capureNames != null) {
-            for (int i = 0; i < capureNames.size(); i++) {
+    public void configRecreates(List<PcapFlow.RecreateData> recreateDatas) {
+        if (recreateDatas != null) {
+            for (int i = 0; i < recreateDatas.size(); i++) {
                 AddRecreateToTestData addRecreateToTestData = new AddRecreateToTestData();
                 addRecreateToTestData.setActive(true);
-                addRecreateToTestData.setName(capureNames.get(i));
+                addRecreateToTestData.setName(recreateDatas.get(i).getName());
                 addRecreateToTestData.setType("playback");
                 addRecreateToTestData.setComponent("recreate");
 
                 AddPcapToRecreateData addPcapToRecreateData = new AddPcapToRecreateData();
-                addPcapToRecreateData.setFile(capureNames.get(i));
+                addPcapToRecreateData.setFile(recreateDatas.get(i).getName());
+                addPcapToRecreateData.setDelayStart(recreateDatas.get(i).getDelay());
                 var createRecreateRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.CREATE_RECREATE, addRecreateToTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
                 });
                 log.info("Create recreate completed:{}", createRecreateRes);

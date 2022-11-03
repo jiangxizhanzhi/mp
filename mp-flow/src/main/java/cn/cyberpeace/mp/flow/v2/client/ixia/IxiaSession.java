@@ -101,14 +101,11 @@ public class IxiaSession {
         return "zl_app_pro_test_999";
     }
 
-    public List<String> createCaptureManager(List<PcapFlow> pcapFlows) {
+    public void createCaptureManager(List<PcapFlow> pcapFlows) {
         // 创建pcap流量
-        List<String> captureNames = new ArrayList<>();
         for (int i = 0; i < pcapFlows.size(); i++) {
             var result = this.captureManagerClient.createPcapCapture(pcapFlows.get(i));
-            captureNames.add(result.getName());
         }
-        return captureNames;
     }
 
     public String createNeighborhood() {
@@ -165,7 +162,7 @@ public class IxiaSession {
         return createNeighborHoodData.getName();
     }
 
-    public String createTest(String neighborhood, String profileName, List<String> capureNames) {
+    public String createTest(String neighborhood, String profileName, List<PcapFlow.RecreateData> recreateDatas) {
         //创建TEST
         BaseCreateData baseCreateData = new BaseCreateData();
         this.testClient.createTest(baseCreateData);
@@ -181,7 +178,7 @@ public class IxiaSession {
         addSuperFlowToAppSimData.setProfile(profileName);
 //        this.testClient.configApplicationSimular(addApplicationProfileToTestData, addSuperFlowToAppSimData);
         //向TEST中添加pcap包
-        this.testClient.configRecreates(capureNames);
+        this.testClient.configRecreates(recreateDatas);
         //保存TEST
         SaveTestData saveTestData = new SaveTestData();
         saveTestData.setForce(true);

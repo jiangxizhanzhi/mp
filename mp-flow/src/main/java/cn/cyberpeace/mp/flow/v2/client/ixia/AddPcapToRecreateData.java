@@ -13,4 +13,5 @@ import lombok.Setter;
 @Setter
 public class AddPcapToRecreateData implements HttpData {
     private String file;
+    private String delayStart;
 }

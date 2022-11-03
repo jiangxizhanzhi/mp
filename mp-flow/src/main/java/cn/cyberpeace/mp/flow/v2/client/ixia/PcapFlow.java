@@ -30,4 +30,11 @@ public class PcapFlow implements HttpData {
     public static class FileInfo {
         private String name;
     }
+
+    @Getter
+    @Setter
+    public static class RecreateData {
+        private String name;
+        private String delay;
+    }
 }
