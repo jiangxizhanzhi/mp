@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.flow.config.FlowConfig;
 import cn.cyberpeace.mp.flow.constant.BaseConstants;
 import cn.cyberpeace.mp.flow.constant.FlowErrorCode;
 import cn.cyberpeace.mp.flow.request.AddVmRequest;
+import cn.cyberpeace.mp.flow.v2.bo.CountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowGeneratorModel;
 import cn.cyberpeace.mp.flow.v2.repository.FlowGeneratorMapper;
@@ -18,12 +19,17 @@ import cn.cyberpeace.mp.flow.v2.service.fields.FlowGeneratorFields;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowGeneratorQueryParams;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -192,4 +198,19 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
         return new ServiceResult<>(nicIds.size());
     }
 
+    public ServiceResult<List<CountBO>> statisticsFlowGenerator() {
+        HumanCondition humanCondition = new HumanCondition();
+        List<FlowGeneratorModel> models = getModelMapper().list(humanCondition);
+        Map<String, CountBO> type2CountBO = new HashMap<>();
+        models.forEach(flowGeneratorModel -> {
+            String type = flowGeneratorModel.getType();
+            if (Objects.isNull(type2CountBO.get(type))) {
+                type2CountBO.put(type, new CountBO());
+            }
+            var countBO = type2CountBO.get(type);
+            countBO.setName(type);
+            countBO.setCount(countBO.getCount() == null ? 1 : countBO.getCount() + 1);
+        });
+        return new ServiceResult<>(new ArrayList<>(type2CountBO.values()));
+    }
 }

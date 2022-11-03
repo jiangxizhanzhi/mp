@@ -67,7 +67,7 @@ public class TrexFlowGenerateService implements IGenerateService{
         // 启动流量
         StartTaskData startInfoData = new StartTaskData();
         startInfoData.setId(flowTaskRecordBO.getId());
-        startInfoData.setAction(1);
+        startInfoData.setAction(TaskActionData.Action.START);
         startInfoData.setTime(LocalDateTime.now());
 //        startInfoData.setDuration(DURATION);
         startInfoData.setBandwidth(flowTaskRecordBO.getBandwidth());
@@ -94,7 +94,7 @@ public class TrexFlowGenerateService implements IGenerateService{
     public FlowCallBackTask stopFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
         TaskActionData taskActionData = new TaskActionData();
-        taskActionData.setAction(2);
+        taskActionData.setAction(TaskActionData.Action.STOP);
         taskActionData.setId(flowTaskRecordBO.getId());
         trexClient.doTaskAction(taskActionData);
         return null;
@@ -104,7 +104,7 @@ public class TrexFlowGenerateService implements IGenerateService{
     public FlowCallBackTask pauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
         TaskActionData taskActionData = new TaskActionData();
-        taskActionData.setAction(3);
+        taskActionData.setAction(TaskActionData.Action.PAUSE);
         taskActionData.setId(flowTaskRecordBO.getId());
         trexClient.doTaskAction(taskActionData);
         return null;
@@ -114,7 +114,7 @@ public class TrexFlowGenerateService implements IGenerateService{
     public FlowCallBackTask unpauseFlowTask(FlowTaskRecordBO flowTaskRecordBO, FlowGeneratorBO generatorBO) {
         TrexClient trexClient = new TrexClient(generatorBO.getServer());
         TaskActionData taskActionData = new TaskActionData();
-        taskActionData.setAction(4);
+        taskActionData.setAction(TaskActionData.Action.UNPAUSE);
         taskActionData.setId(flowTaskRecordBO.getId());
         trexClient.doTaskAction(taskActionData);
 

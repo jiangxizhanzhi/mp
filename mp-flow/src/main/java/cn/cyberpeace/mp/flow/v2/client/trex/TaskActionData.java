@@ -14,4 +14,11 @@ import lombok.Setter;
 public class TaskActionData implements HttpData {
     private String id;
     private Integer action;
+
+    public static class Action {
+        public static final int START = 1;
+        public static final int STOP = 2;
+        public static final int PAUSE = 3;
+        public static final int UNPAUSE = 4;
+    }
 }

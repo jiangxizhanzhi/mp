@@ -80,6 +80,7 @@ public class FlowDashBoardService {
         }
         countBO.setTasks(new ArrayList<>(taskId2Task.values()));
         countBO.setTotal(total);
+        countBO.setValues(new ArrayList<>(time2Value.values()));
         countBO.getTasks().forEach(flowTaskBandwidthCountBO -> flowTaskBandwidthCountBO.getValues().forEach(valueBO -> {
             String time = valueBO.getTime();
             var value = time2Value.get(time);
