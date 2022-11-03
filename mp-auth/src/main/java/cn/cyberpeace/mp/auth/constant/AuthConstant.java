@@ -1,5 +1,8 @@
 package cn.cyberpeace.mp.auth.constant;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @Description: 全局变量
  * @Author zhouxinghuai
@@ -46,6 +49,23 @@ public class AuthConstant {
      * 逗号
      */
     public static final String COMMA = ",";
+    public static final String JOIN_TYPES_DELIMITER = ",";
+
+    /**
+     * 导入用户头像max size：20M
+     */
+    public static final long UPLOAD_AVATAR_MAX_SIZE = 20 * 1024 * 1024;
+
+    /**
+     * 导入用户头像支持后缀类型：png，jpeg，jpg
+     */
+    public static final List<String> UPLOAD_AVATAR_SUFFIX_TYPE = Arrays.asList("png", "jpeg", "jpg");
+
+    /**
+     * 导入用户头像支持魔术头类型：png，jpg（对应后缀为：jpg和jpeg）
+     */
+    public static final List<String> UPLOAD_AVATAR_MAGIC_HEADER_TYPE = Arrays.asList("png", "jpg");
+
 
     public static final Integer TARGET_FIELD_VALUE_PK_0 = 0;
     public static final Integer TARGET_FIELD_VALUE_VISIBLE_1 = 1;
