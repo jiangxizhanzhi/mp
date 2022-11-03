@@ -42,7 +42,7 @@ import java.util.function.Function;
 public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatisticsModel, AlarmStatisticsMapper, AlarmStatisticsFields,
         QueryParams> implements AlarmStatisticsService {
 
-    private static final Map<String, DateProcessor> DATE_PROCESSOR_MAP = new HashMap<>();
+    private static final Map<String, TimeUnitProcessor> DATE_PROCESSOR_MAP = new HashMap<>();
 
     public AlarmStatisticsServiceImpl(AlarmStatisticsMapper stuMapper, AlarmStatisticsFields stuFields) {
         setModelFields(stuFields);
@@ -51,11 +51,11 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
 
     @PostConstruct
     public void init() {
-        DATE_PROCESSOR_MAP.put(TimeSlotEnums.HOUR.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM-dd HH").sqlDateFormatter("%Y-%m-%d %H").dateProcessFunc(date -> date.minusHours(1)).build());
-        DATE_PROCESSOR_MAP.put(TimeSlotEnums.DAY.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM-dd").sqlDateFormatter("%Y-%m-%d").dateProcessFunc(date -> date.minusDays(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.HOUR.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM-dd HH").sqlDateFormatter("%Y-%m-%d %H").previousTimeCalcFunc(date -> date.minusHours(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.DAY.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM-dd").sqlDateFormatter("%Y-%m-%d").previousTimeCalcFunc(date -> date.minusDays(1)).build());
         //DATE_PROCESSOR_MAP.put(TimeSlotEnums.WEEK.getUnit(), DateProcessor.builder().dateFormatter("w").sqlDateFormatter("%u").dateProcessFunc(date -> date.minusWeeks(1)).build());
-        DATE_PROCESSOR_MAP.put(TimeSlotEnums.MONTH.getUnit(), DateProcessor.builder().dateFormatter("yyyy-MM").sqlDateFormatter("%Y-%m").dateProcessFunc(date -> date.minusMonths(1)).build());
-        DATE_PROCESSOR_MAP.put(TimeSlotEnums.YEAR.getUnit(), DateProcessor.builder().dateFormatter("yyyy").sqlDateFormatter("%Y").dateProcessFunc(date -> date.minusYears(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.MONTH.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy-MM").sqlDateFormatter("%Y-%m").previousTimeCalcFunc(date -> date.minusMonths(1)).build());
+        DATE_PROCESSOR_MAP.put(TimeSlotEnums.YEAR.getUnit(), TimeUnitProcessor.builder().dateFormatter("yyyy").sqlDateFormatter("%Y").previousTimeCalcFunc(date -> date.minusYears(1)).build());
     }
 
     /**
@@ -145,24 +145,28 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
             startTime = processedStartTime;
         }
 
-        DateProcessor dateProcessor = DATE_PROCESSOR_MAP.get(unit);
+        TimeUnitProcessor timeUnitProcessor = DATE_PROCESSOR_MAP.get(unit);
         HumanCondition condition = new HumanCondition()
                 .selectAs(Sum.f(AlarmStatisticsModel::getAlarmCount), AlarmStatisticsVO::getAlarmCount)
-                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getCreateTime, dateProcessor.getSqlDateFormatter()), StrUtil.toUnderlineCase(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
+                .selectAs(DateFormatAggr.f(AlarmStatisticsModel::getCreateTime, timeUnitProcessor.getSqlDateFormatter()), StrUtil.toUnderlineCase(BeanUtils.getBeanGetterFieldName(AlarmStatisticsTrendVO::getTimeBucket)))
                 .filterIn(AlarmStatisticsModel::getAlarmType, types)
                 .filterGreaterThanOrEqual(AlarmStatisticsModel::getCreateTime, startTime)
                 .filterLessThanOrEqual(AlarmStatisticsModel::getCreateTime, endTime)
                 .groupBy(AlarmStatisticsTrendVO::getTimeBucket);
 
         List<AlarmStatisticsTrendVO> trendVOList = getModelMapper().list(condition, AlarmStatisticsTrendVO.class);
-        return processTrendByDateProcessor(trendVOList, dateProcessor, startTime, endTime);
+        return processTrendByDateProcessor(trendVOList, timeUnitProcessor, startTime, endTime);
     }
 
 
     private LocalDateTime processStartTime(LocalDateTime processedEndTime, TimeSlotEnums timeSlotEnum, Integer count) {
         LocalDateTime processedStartTime = null;
 
-        if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
+        if (Objects.equals(timeSlotEnum, TimeSlotEnums.HOUR)) {
+            // 按小时统计
+            LocalDateTime startHour = processedEndTime.minusHours(count - 1);
+            processedStartTime = startHour.toLocalDate().atTime(startHour.getHour(), 0, 0);
+        } else if (Objects.equals(timeSlotEnum, TimeSlotEnums.DAY)) {
             // 按天统计
             processedStartTime = LocalDateTime.of(processedEndTime.minusDays(count).toLocalDate(), LocalTime.MAX);
         //} else if (Objects.equals(timeSlotEnum, TimeSlotEnums.WEEK)) {
@@ -214,8 +218,8 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
     }
 
 
-    private List<AlarmStatisticsTrendVO> processTrendByDateProcessor(List<AlarmStatisticsTrendVO> trendVOList, DateProcessor dateProcessor, LocalDateTime startTime, LocalDateTime endTime) {
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateProcessor.getDateFormatter());
+    private List<AlarmStatisticsTrendVO> processTrendByDateProcessor(List<AlarmStatisticsTrendVO> trendVOList, TimeUnitProcessor timeUnitProcessor, LocalDateTime startTime, LocalDateTime endTime) {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern(timeUnitProcessor.getDateFormatter());
         List<AlarmStatisticsTrendVO> finalList = new ArrayList<>();
         while (!endTime.isBefore(startTime)) {
             String calculatedTimeBucket = dtf.format(endTime);
@@ -228,7 +232,7 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
                 vo.setAlarmCount(0);
                 finalList.add(vo);
             }
-            endTime = dateProcessor.getDateProcessFunc().apply(endTime);
+            endTime = timeUnitProcessor.getPreviousTimeCalcFunc().apply(endTime);
         }
 
         finalList = CollectionUtil.reverse(finalList);
@@ -237,12 +241,12 @@ public class AlarmStatisticsServiceImpl extends BaseModelServiceImpl<AlarmStatis
 
     @Data
     @Builder
-    static class DateProcessor {
+    static class TimeUnitProcessor {
         private String sqlDateFormatter;
 
         private String dateFormatter;
 
-        Function<LocalDateTime, LocalDateTime> dateProcessFunc;
+        Function<LocalDateTime, LocalDateTime> previousTimeCalcFunc;
     }
 
     static class DateFormatAggr extends Aggregation<DateFormatAggr> {
