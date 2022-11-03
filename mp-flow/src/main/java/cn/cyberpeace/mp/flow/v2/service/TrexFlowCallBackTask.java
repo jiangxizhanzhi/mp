@@ -85,7 +85,6 @@ public class TrexFlowCallBackTask implements FlowCallBackTask {
             taskActionData.setAction(TaskActionData.Action.STOP);
             taskActionData.setId(flowTaskRecordBO.getId());
             trexClient.doTaskAction(taskActionData);
-            return true;
         }
         return false;
     }
