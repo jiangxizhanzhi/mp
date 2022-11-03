@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class FlowTaskCountResultModel {
+    private String flowGeneratorId;
     private String flowTaskRecordId;
     private String flowId;
     private LocalDateTime time;
@@ -18,4 +19,5 @@ public class FlowTaskCountResultModel {
     private Long packets;
     private Long tcpConnectSuccess;
     private Long tcpConnectTry;
+    private Long count;
 }

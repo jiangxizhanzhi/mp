@@ -11,6 +11,7 @@ import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
 import cn.cyberpeace.mp.flow.v2.bo.CountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
+import cn.cyberpeace.mp.flow.v2.bo.NodeBO;
 import cn.cyberpeace.mp.flow.v2.model.FlowGeneratorModel;
 import cn.cyberpeace.mp.flow.v2.service.FlowGeneratorService;
 import cn.cyberpeace.mp.flow.v2.service.param.FlowGeneratorQueryParams;
@@ -24,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Api(value = "流量发生器管理接口", tags = "流量发生器管理接口")
@@ -79,5 +81,31 @@ public class FlowGeneratorController implements
     @GetMapping("/statistics")
     public ServiceResult<List<CountBO>> statistics() {
         return getModelService().statisticsFlowGenerator().asResult();
+    }
+
+    @ApiOperation("查询流量发生目标节点")
+    @GetMapping("/nodes")
+    public ServiceResult<List<NodeBO>> getNodes() {
+        List<NodeBO> nodeBOList = new ArrayList<>();
+        NodeBO nodeBO1 = new NodeBO();
+        nodeBO1.setName("target_1");
+        nodeBO1.setResourceId("9345f211-264b-4fa2-84ea-97338b430454");
+        nodeBOList.add(nodeBO1);
+
+        NodeBO nodeBO2 = new NodeBO();
+        nodeBO2.setName("target_2");
+        nodeBO2.setResourceId("97e0fc80-5fb1-4f1a-bcca-64b0ecec43ee");
+        nodeBOList.add(nodeBO2);
+
+        NodeBO nodeBO3 = new NodeBO();
+        nodeBO3.setName("target_3");
+        nodeBO3.setResourceId("28de2fde-ce4d-479b-a176-407437637dd1");
+        nodeBOList.add(nodeBO3);
+
+        NodeBO nodeBO4 = new NodeBO();
+        nodeBO4.setName("target_4");
+        nodeBO4.setResourceId("4f792ffe-41b8-4320-b58f-955ae0d647ba");
+        nodeBOList.add(nodeBO4);
+        return new ServiceResult<>(nodeBOList).asResult();
     }
 }

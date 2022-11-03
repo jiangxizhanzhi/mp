@@ -3,25 +3,23 @@ package cn.cyberpeace.mp.flow.v2.controller;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.flow.constant.ControllerConstant;
-import cn.cyberpeace.mp.flow.v2.bo.FlowBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowDashBoardCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskBandwidthCountBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.service.FlowDashBoardService;
-import cn.cyberpeace.mp.flow.v2.service.FlowTaskCountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @Description
@@ -39,13 +37,13 @@ public class FlowDashBoardController {
 
     @ApiOperation("实时仿真数量统计")
     @GetMapping("/task_count")
-    public ServiceResult<FlowDashBoardCountBO> countTask() {
+    public ServiceResult<List<FlowDashBoardCountBO>> countTask() {
         return flowDashBoardService.countStartTask().asResult();
     }
 
     @ApiOperation("实时总带宽统计")
     @GetMapping("/bandwidth_count")
-    public ServiceResult<FlowDashBoardCountBO> countBandwidth() {
+    public ServiceResult<List<FlowDashBoardCountBO>> countBandwidth() {
         return flowDashBoardService.sumBandwidth().asResult();
     }
 

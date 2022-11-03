@@ -17,6 +17,6 @@ public interface FlowTaskCountMapper extends BaseModelMapper<FlowTaskCountModel>
     List<FlowTaskCountResultModel> countTask(String flowGeneratorId, List<FlowTaskCountQueryBO> list);
 
     List<FlowTaskCountResultModel> countFlow(String flowGeneratorId, String taskRecordId, List<FlowTaskCountQueryBO> list);
-    
-    Long sumBandwidth();
+
+    List<FlowTaskCountResultModel> sumBandwidth(FlowTaskCountQueryBO queryBO);
 }

@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.service.result.ListObjResult;
 import cn.cyberpeace.mp.base.service.result.ListObjServiceResult;
 import cn.cyberpeace.mp.base.service.result.ServiceResult;
 import cn.cyberpeace.mp.base.util.basic.BeanUtils;
@@ -141,6 +142,62 @@ public class FlowDashBoardService {
         return new ServiceResult<>(countBO);
     }
 
+    /**
+     * 实时仿真数量统计
+     *
+     * @return
+     */
+    public ServiceResult<List<FlowDashBoardCountBO>> countStartTask() {
+        var resultModels = flowTaskRecordMapper.countStartTask();
+        List<FlowDashBoardCountBO> result = new ArrayList<>();
+        resultModels.forEach(flowTaskCountResultModel -> {
+            FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
+            countBO.setName(flowTaskCountResultModel.getFlowGeneratorId());
+            countBO.setCount(flowTaskCountResultModel.getCount());
+            result.add(countBO);
+        });
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 实时总带宽统计
+     *
+     * @return
+     */
+    public ServiceResult<List<FlowDashBoardCountBO>> sumBandwidth() {
+        FlowTaskCountQueryBO queryBO = new FlowTaskCountQueryBO();
+        LocalDateTime endTime = LocalDateTime.now();
+        queryBO.setEndTime(endTime);
+        queryBO.setStartTime(endTime.plusSeconds(-5));
+        var resultModels = flowTaskCountMapper.sumBandwidth(queryBO);
+        List<FlowDashBoardCountBO> result = new ArrayList<>();
+        resultModels.forEach(flowTaskCountResultModel -> {
+            FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
+            countBO.setName(flowTaskCountResultModel.getFlowGeneratorId());
+            countBO.setCount(flowTaskCountResultModel.getBandwidth());
+            result.add(countBO);
+        });
+        return new ServiceResult<>(result);
+    }
+
+    /**
+     * 流量执行器仿真任务查询
+     *
+     * @return
+     */
+    public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+
+        PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<FlowTaskRecordModel>(flowTaskRecordMapper.generatorTaskList());
+        List<FlowTaskRecordBO> taskBOs = pageInfo.getList().stream().map(t -> {
+            FlowTaskRecordBO bo = new FlowTaskRecordBO();
+            BeanUtils.copyProperties(t, bo);
+            return bo;
+        }).collect(Collectors.toList());
+
+        return new ListObjServiceResult<>(new ListObjResult<>(taskBOs, (int) pageInfo.getTotal()));
+    }
+
     private List<FlowTaskCountQueryBO> getQueryList(String start, String end) {
         LocalDateTime startTime;
         LocalDateTime endTime;
@@ -164,46 +221,5 @@ public class FlowDashBoardService {
         }
         return queryList;
     }
-    
-    /**
-     * 实时仿真数量统计
-     * 
-     * @return
-     */
-    public ServiceResult<FlowDashBoardCountBO> countStartTask() {
-        FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
-        countBO.setCount(flowTaskRecordMapper.countStartTask());
-        
-        return new ServiceResult<>(countBO);
-    }
-    
-    /**
-     * 实时总带宽统计
-     * 
-     * @return
-     */
-    public ServiceResult<FlowDashBoardCountBO> sumBandwidth() {
-        FlowDashBoardCountBO countBO = new FlowDashBoardCountBO();
-        countBO.setCount(flowTaskCountMapper.sumBandwidth());
-        
-        return new ServiceResult<>(countBO);
-    }
-    
-    /**
-     * 流量执行器仿真任务查询
-     * 
-     * @return
-     */
-    public ListObjServiceResult<FlowTaskRecordBO> generatorTaskList(Integer page, Integer pageSize) {
-        PageHelper.startPage(page, pageSize);
-        
-        PageInfo<FlowTaskRecordModel> pageInfo = new PageInfo<FlowTaskRecordModel>(flowTaskRecordMapper.generatorTaskList());
-        List<FlowTaskRecordBO> taskBOs = pageInfo.getList().stream().map(t -> {
-            FlowTaskRecordBO bo = new FlowTaskRecordBO();
-            BeanUtils.copyProperties(t, bo);
-            return bo;
-        }).collect(Collectors.toList());
-        
-        return new ListObjServiceResult<FlowTaskRecordBO>(taskBOs, (int) pageInfo.getTotal());
-    }
+
 }

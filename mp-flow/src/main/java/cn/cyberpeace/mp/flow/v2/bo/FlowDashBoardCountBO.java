@@ -12,4 +12,7 @@ import lombok.Data;
 public class FlowDashBoardCountBO {
     @ApiModelProperty("统计结果")
     private Long count;
+
+    @ApiModelProperty("仪表名称")
+    private String name;
 }

@@ -24,8 +24,12 @@
             and create_time &gt;= #{item.startTime} and create_time &lt; #{item.endTime} group by flow_id
         </foreach>
     </select>
-    
-    <select id="sumBandwidth" resultType="java.lang.Long">
-    	select sum(bandwidth) as bandwidth from mp_flow_flow_task_count
+
+    <select id="sumBandwidth" parameterType="cn.cyberpeace.mp.flow.v2.bo.FlowTaskCountQueryBO"
+            resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel">
+        select sum(bandwidth) as bandwidth,mffg.name as flowGeneratorId from mp_flow_flow_task_count mfftc
+        join mp_flow_flow_generator mffg
+        where mfftc.flow_generator_id = mffg.id and mfftc.create_time &gt;= #{startTime}
+        and mfftc.create_time &lt; #{endTime} group by mfftc.flow_generator_id
     </select>
 </mapper>

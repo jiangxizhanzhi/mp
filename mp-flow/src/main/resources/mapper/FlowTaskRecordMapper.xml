@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="cn.cyberpeace.mp.flow.v2.repository.FlowTaskRecordMapper">
-    <select id="countStartTask" resultType="java.lang.Long">
-    	select count(*) from mp_flow_flow_task_record where status != 3
+    <select id="countStartTask" resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskCountResultModel">
+    	select count(*) as count,mffg.name as flowGeneratorId from mp_flow_flow_task_record mfftr
+    	join mp_flow_flow_generator mffg
+    	where status != 3 and mfftr.flow_generator_id = mffg.id group by mfftr.flow_generator_id
     </select>
     
     <select id="generatorTaskList" resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel">
