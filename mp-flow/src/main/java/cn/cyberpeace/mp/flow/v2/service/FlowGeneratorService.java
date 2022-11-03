@@ -23,6 +23,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +40,8 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
 
     @Autowired
     private FlowConfig flowConfig;
+    @Resource
+    private FlowGeneratorService flowGeneratorService;
 
     @Autowired
     public FlowGeneratorService(FlowGeneratorMapper modelMapper, FlowGeneratorFields modelFields) {
@@ -131,7 +134,7 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
     }
 
     public ServiceResult<List<FlowGeneratorBO.Nic>> addFlowGeneratorNics(String id, List<FlowGeneratorBO.Nic> nics) {
-        var bo = getBO(id, FlowGeneratorBO.class).sourceObj();
+        var bo = getFlowGeneratorBO(id);
 
         String resourceId = bo.getResourceId();
         nics.forEach(nic -> {
@@ -166,7 +169,15 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
         });
 
         // 添加对应网卡，注意同步问题
-        bo.setNics(nics);
+        if (bo != null) {
+            if (bo.getNics() != null) {
+                bo.getNics().addAll(nics);
+            } else {
+                bo.setNics(nics);
+            }
+        } else {
+            log.error("Flow generator does not exist!");
+        }
         updateBO(bo, FlowGeneratorBO.class);
         return new ServiceResult<>(nics);
     }
@@ -212,5 +223,12 @@ public class FlowGeneratorService extends BaseModelServiceImpl<FlowGeneratorMode
             countBO.setCount(countBO.getCount() == null ? 1 : countBO.getCount() + 1);
         });
         return new ServiceResult<>(new ArrayList<>(type2CountBO.values()));
+    }
+
+    private FlowGeneratorBO getFlowGeneratorBO(String flowGeneratorId) {
+        var flowGenerator = flowGeneratorService.get(flowGeneratorId).sourceObj();
+        FlowGeneratorBO flowGeneratorBO = new FlowGeneratorBO();
+        flowGeneratorBO.fromModel(flowGenerator);
+        return flowGeneratorBO;
     }
 }

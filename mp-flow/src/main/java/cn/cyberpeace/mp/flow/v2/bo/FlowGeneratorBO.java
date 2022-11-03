@@ -47,4 +47,14 @@ public class FlowGeneratorBO extends ModelBO<FlowGeneratorModel, FlowGeneratorBO
         });
         return this;
     }
+
+    @Override
+    public FlowGeneratorModel toModel(String... ignoreFields) {
+        var obj = super.toModel(ArrayUtils.addAll(ignoreFields,
+                BeanUtils.getBeanGetterFieldName(FlowGeneratorModel::getNics)));
+        if (nics != null) {
+            obj.setNics(JsonCommon.stringify(nics));
+        }
+        return obj;
+    }
 }

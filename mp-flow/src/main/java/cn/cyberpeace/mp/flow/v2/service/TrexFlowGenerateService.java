@@ -1,5 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
+import cn.cyberpeace.mp.base.common.BeanCommon;
 import cn.cyberpeace.mp.base.common.FdfsCommon;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
@@ -46,15 +47,35 @@ public class TrexFlowGenerateService implements IGenerateService{
             }
         }
         // 创建网卡
-        VirtualMachine virtualMachine = new VirtualMachine();
-
-        var addPortResult = virtualMachine.addPort(generatorBO.getResourceId(), flowTaskRecordBO.getTargetNetworkId());
-
+        // 判断是否需要创建网卡 如果已经有网卡了，不再重复创建
+        boolean needCreateNet = true;
+        String portMac = null;
+        if (generatorBO != null && !generatorBO.getNics().isEmpty()) {
+            for (int i = 0; i < generatorBO.getNics().size(); i++) {
+                if (generatorBO.getNics().get(i).getCpCloudNetworkId().equals(flowTaskRecordBO.getTargetNetworkId())) {
+                    needCreateNet = false;
+                    portMac = generatorBO.getNics().get(i).getMac();
+                }
+            }
+        }
         // 初始化trex服务
         NetworkInfos networkInfos = new NetworkInfos();
         NetworkInfos.InitInfoData initInfoData = new NetworkInfos.InitInfoData();
-        initInfoData.setTaskId(flowTaskRecordBO.getId());
-        initInfoData.setMac(addPortResult.getMacAddress());//addPortResult.getMacAddress()
+        if (needCreateNet) {
+            var flowGeneratorService = BeanCommon.getBean(FlowGeneratorService.class);
+            List<FlowGeneratorBO.Nic> nics = new ArrayList<>();
+            FlowGeneratorBO.Nic nic = new FlowGeneratorBO.Nic();
+            nic.setCpCloudNetworkId(flowTaskRecordBO.getTargetNetworkId());
+            nics.add(nic);
+            var addPortResult = flowGeneratorService.addFlowGeneratorNics(generatorBO.getId(), nics);
+            if (addPortResult != null && !addPortResult.getSource().isEmpty()) {
+                initInfoData.setTaskId(flowTaskRecordBO.getId());
+                initInfoData.setMac(addPortResult.getSource().get(0).getMac());
+            }
+        } else {
+            initInfoData.setTaskId(flowTaskRecordBO.getId());
+            initInfoData.setMac(portMac);
+        }
         networkInfos.getNetworkInfos().add(initInfoData);
         trexClient.initTrexServer(networkInfos);
 
