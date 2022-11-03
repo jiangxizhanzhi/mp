@@ -8,7 +8,14 @@ package cn.cyberpeace.mp.flow.v2.client.ixia;
 public interface IxiaUrlConstant {
     String LOGIN_URL = "/api/v1/auth/session";
     String CREATE_NEIGHBORHOOD = "/api/v2/core/network/operations/load";
-    String SAVE_NEIGHBORHOOD = "/api/v2/sessions/0/bps/network/operations/saveAs";
+    String SAVE_NEIGHBORHOOD = "/api/v2/core/network/operations/saveAs";
+    String ADD_IP_ROUTER_TO_NEIGHBORHOOD = "/api/v2/core/network/networkModel/ip_router";
+    String ADD_INTERFACE_TO_NEIGHBORHOOD = "/api/v2/core/network/networkModel/interface";
+    String ADD_STATIC_HOSTS_TO_NEIGHBORHOOD = "/api/v2/core/network/networkModel/ip_static_hosts";
+    String ADD_EXTERNAL_HOSTS_TO_NEIGHBORHOOD = "/api/v2/core/network/networkModel/ip_external_hosts";
+    String CONFIG_INTERFACE = "/api/v2/core/network/networkModel/interface/Interface_1";
+    String CONFIG_STATIC_HOSTS = "/api/v2/core/network/networkModel/ip_static_hosts/Static_Hosts_i1_default";
+    String CONFIG_EXTERNAL_HOSTS = "/api/v2/core/network/networkModel/ip_external_hosts/External_Hosts_ext_default";
     String CREATE_SUPERFLOW = "/api/v2/core/superflow/operations/new";
     String ADD_SUPERFLOW = "/api/v2/core/superflow/operations/addFlow";
     String UPDATE_SUPERFLOW = "/api/v2/core/superflow/flows/{flowId}";

@@ -1,6 +1,6 @@
 package cn.cyberpeace.mp.flow.v2.client.ixia;
 
-import org.checkerframework.checker.units.qual.A;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,9 +80,9 @@ public class IxiaSession {
         this.applicationProfileClient.addSuperFlow(addSuperFlowData);
         BaseSaveData baseSaveData = new BaseSaveData();
         // todo application profile名称如何定义？
-        baseSaveData.setName("zl_app_pro_test_999");
+        baseSaveData.setName(TextUtils.uuid());
         this.applicationProfileClient.saveSuperFlow(baseSaveData);
-        return "zl_app_pro_test_999";
+        return baseSaveData.getName();
     }
 
     public String addApplicationProfile(String superFlowName) {
@@ -101,15 +101,6 @@ public class IxiaSession {
         return "zl_app_pro_test_999";
     }
 
-    public void addNeighborhood() {
-        BaseCreateData baseCreateData = new BaseCreateData();
-        baseCreateData.setTemplate("00_neighborhood_server");
-        BaseSaveData baseSaveData = new BaseSaveData();
-        baseSaveData.setName("zl_nei_test_999");
-        this.neighborhoodClient.addNeighborhood(baseCreateData);
-        this.neighborhoodClient.saveNeighborhood(baseSaveData);
-    }
-
     public List<String> createCaptureManager(List<PcapFlow> pcapFlows) {
         // 创建pcap流量
         List<String> captureNames = new ArrayList<>();
@@ -121,8 +112,57 @@ public class IxiaSession {
     }
 
     public String createNeighborhood() {
-        //todo:暂时用这个，后续再改
-        return "BreakingPoint Switching";
+        // 新建neighborhood
+        BaseCreateData baseCreateData = new BaseCreateData();
+        // todo 暂时写死要加载的模板
+        baseCreateData.setTemplate("zl_nei_tem_1");
+        this.neighborhoodClient.addNeighborhood(baseCreateData);
+        // 配置neighborhood
+//        IpRouterData addIpRouterToNeighborhoodData = new IpRouterData();
+//        addIpRouterToNeighborhoodData.setId("99999");
+//        addIpRouterToNeighborhoodData.setIpAddress("192.168.1.1");
+//        this.neighborhoodClient.addIpRouterToNeighborhood(addIpRouterToNeighborhoodData);
+        InterfaceData interfaceData = new InterfaceData();
+//        addInterfaceToNeighborhoodData.setId("Interface 2");
+//        addInterfaceToNeighborhoodData.setMacAddress("52:52:52:00:00:00");
+        interfaceData.setMtu(1200);
+//        addInterfaceToNeighborhoodData.setUseVnicMacAddress(true);
+//        addInterfaceToNeighborhoodData.setVlanKey("outer_vlan");
+//        addInterfaceToNeighborhoodData.setDuplicateMacAddress(true);
+//        addInterfaceToNeighborhoodData.setIgnorePauseFrames(false);
+//        addInterfaceToNeighborhoodData.setNumber(2);
+//        this.neighborhoodClient.addInterfaceToNeighborhood(addInterfaceToNeighborhoodData);
+//        this.neighborhoodClient.changeInterface(interfaceData);
+        StaticHostsData staticHostsData = new StaticHostsData();
+//        staticHostsData.setId("77777");
+        staticHostsData.setTags("i2_default");
+        staticHostsData.setIpAddress("192.168.1.2");
+        staticHostsData.setGatewayIpAddress("192.168.1.254");
+//        staticHostsData.setDefaultContainer("Interface 2");
+//        staticHostsData.setCount(66534);
+//        staticHostsData.setIpSelectionType("random_ip");
+//        staticHostsData.setProxy(false);
+//        staticHostsData.setPsnNetmask(8);
+//        staticHostsData.setGatewayIpAddress("192.168.1.254");
+//        staticHostsData.setEnableStats(false);
+//        staticHostsData.setBehindSnapt(false);
+//        staticHostsData.setNetmask(8);
+//        this.neighborhoodClient.addStaticHostsToNeighborhood(addStaticHostsToNeighborhoodData);
+        this.neighborhoodClient.changeStaticHosts(staticHostsData);
+        ExternalHostsData externalHostsData = new ExternalHostsData();
+//        externalHostsData.setId("66666");
+//        externalHostsData.setIpAddress("192.168.1.3");
+        externalHostsData.setIpAddress("192.168.1.3");
+        externalHostsData.setTags("i1_default");
+//        this.neighborhoodClient.addExternalHostsToNeighborhood(addExternalHostsToNeighborhoodData);
+        this.neighborhoodClient.changeExternalHosts(externalHostsData);
+        // 保存neighborhood
+        CreateNeighborHoodData createNeighborHoodData = new CreateNeighborHoodData();
+        createNeighborHoodData.setName(TextUtils.uuid());
+        createNeighborHoodData.setForce(true);
+        createNeighborHoodData.setRegenerateOldStyle(true);
+        this.neighborhoodClient.saveNeighborhood(createNeighborHoodData);
+        return createNeighborHoodData.getName();
     }
 
     public String createTest(String neighborhood, String profileName, List<String> capureNames) {
@@ -131,30 +171,30 @@ public class IxiaSession {
         this.testClient.createTest(baseCreateData);
         //向TEST中添加neighborhood
         this.testClient.configNeighborhood(neighborhood);
-
+        // 向TEST中添加Application Simular
         AddAppSimToTestData addApplicationProfileToTestData = new AddAppSimToTestData();
         addApplicationProfileToTestData.setName(profileName);
         addApplicationProfileToTestData.setComponent("appsim");
         addApplicationProfileToTestData.setType("appsim");
         addApplicationProfileToTestData.setActive(true);
         AddSuperFlowToAppSimData addSuperFlowToAppSimData = new AddSuperFlowToAppSimData();
-        addSuperFlowToAppSimData.setProfile("zl_test_1");
-        //todo 协议流先不做
+        addSuperFlowToAppSimData.setProfile(profileName);
 //        this.testClient.configApplicationSimular(addApplicationProfileToTestData, addSuperFlowToAppSimData);
         //向TEST中添加pcap包
         this.testClient.configRecreates(capureNames);
-        return "123";
+        //保存TEST
+        SaveTestData saveTestData = new SaveTestData();
+        saveTestData.setForce(true);
+        saveTestData.setName(TextUtils.uuid());
+        this.testClient.saveTest(saveTestData);
+        return saveTestData.getName();
     }
 
     public void startTest(String name) {
-        SaveTestData saveTestData = new SaveTestData();
         RunTestData runTestData = new RunTestData();
-        saveTestData.setForce(true);
-        saveTestData.setName(name);
-
         runTestData.setGroup("1");
         runTestData.setModelname(name);
-        this.testClient.saveAndRunTest(saveTestData, runTestData);
+        this.testClient.startTest(runTestData);
     }
 
     public void pauseTest() {

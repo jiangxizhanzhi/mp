@@ -24,6 +24,12 @@ public class IxiaTestClient {
         log.info("New TEST completed:{}", response);
     }
 
+    public void saveTest(SaveTestData saveTestData) {
+        var saveTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_TEST, saveTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+        });
+        log.info("Save TEST completed:{}", saveTestRes);
+    }
+
     public void configNeighborhood(String neighborhood) {
         AddNeighborhoodToTestData addNeighborhoodToTestData = new AddNeighborhoodToTestData();
         addNeighborhoodToTestData.setNeighborhood(neighborhood);
@@ -62,13 +68,10 @@ public class IxiaTestClient {
         }
     }
 
-    public void saveAndRunTest(SaveTestData saveTestData, RunTestData runTestData) {
-        var saveTestRes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.SAVE_TEST, saveTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
-        });
-        log.info("Save TEST completed:{}", saveTestRes);
-        var runTestTes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.RUN_TEST, runTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
-        });
-        log.info("Start executing TEST:{}", runTestTes);
+    public void startTest(RunTestData runTestData) {
+//        var runTestTes = ixiaHttpClient.ixiaPost(IxiaUrlConstant.RUN_TEST, runTestData, null, IxiaResponse.class, new TypeReference<IxiaResponse>() {
+//        });
+//        log.info("Start executing TEST:{}", runTestTes);
     }
 
     public void pauseTest() {

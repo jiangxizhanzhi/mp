@@ -10,5 +10,7 @@ import lombok.Data;
  */
 @Data
 public class CreateNeighborHoodData implements HttpData {
-    private String template = "";
+    private String name;
+    private Boolean regenerateOldStyle;
+    private Boolean force;
 }

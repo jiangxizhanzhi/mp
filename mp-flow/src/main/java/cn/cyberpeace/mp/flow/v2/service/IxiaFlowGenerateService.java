@@ -1,6 +1,7 @@
 package cn.cyberpeace.mp.flow.v2.service;
 
 import cn.cyberpeace.mp.base.common.FdfsCommon;
+import cn.cyberpeace.mp.base.util.basic.TextUtils;
 import cn.cyberpeace.mp.flow.v2.bo.FlowGeneratorBO;
 import cn.cyberpeace.mp.flow.v2.bo.FlowTaskRecordBO;
 import cn.cyberpeace.mp.flow.v2.client.ixia.IxiaSession;
@@ -35,8 +36,8 @@ class IxiaFlowGenerateService implements IGenerateService {
             if (StringUtils.isNotEmpty(flow.getPcapFile())) {
                 PcapFlow pcapFlow = new PcapFlow();
                 PcapFlow.FileInfo fileInfo = new PcapFlow.FileInfo();
-                //todo 此处为方便测试，用随机值作为上传的pcap包名
-                fileInfo.setName(getNumber(15).toString());
+                // todo pcap包上传后的名字？
+                fileInfo.setName(TextUtils.uuid());
                 pcapFlow.setFileInfo(fileInfo);
                 byte[] fileByte = FdfsCommon.downloadRawContent(flow.getPcapFile());
                 pcapFlow.setFile(fileByte);
@@ -49,12 +50,8 @@ class IxiaFlowGenerateService implements IGenerateService {
         }
         // todo 此处返回的profileName作为要添加到TEST中的application profile的名
 //        String profileName = ixiaSession.createApplicationProfile(protocolFlows);
-        // todo neighborhood只能用已有的来创建新的，而且不能配置
-//        ixiaSession.addNeighborhood();
         List<String> captureNames = ixiaSession.createCaptureManager(pcapFlows);
-        ixiaSession.createTest(neighborhood, "profileName", captureNames);
-        String testName = getNumber(15).toString();
-
+        String testName = ixiaSession.createTest(neighborhood, "profileName", captureNames);
         ixiaSession.startTest(testName);
         ixiaSession.close();
 
