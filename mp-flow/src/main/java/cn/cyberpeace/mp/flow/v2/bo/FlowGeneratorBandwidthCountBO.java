@@ -18,6 +18,9 @@ public class FlowGeneratorBandwidthCountBO {
     @ApiModelProperty("实时总带宽")
     private Long total;
 
+    @ApiModelProperty("带宽值")
+    private List<ValueBO> values;
+
     @ApiModelProperty("仿真任务带宽统计")
     private List<FlowTaskBandwidthCountBO> tasks;
 }
