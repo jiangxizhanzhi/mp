@@ -70,7 +70,7 @@ management:
         include: health, info
   info:
     git:
-      mode: full
+      mode: simple
   health:
     elasticsearch:
       enabled: false
