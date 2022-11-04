@@ -9,6 +9,11 @@
 
     <select id="generatorTaskList" parameterType="java.util.Map"
             resultType="cn.cyberpeace.mp.flow.v2.model.FlowTaskRecordModel">
-    	select * from mp_flow_flow_task_record where status != 3 and flow_generator_id = #{flowGeneratorId}
+        select * from mp_flow_flow_task_record
+        <where>
+            <if test="flowGeneratorId!=null">
+                status != 3 AND flow_generator_id = #{flowGeneratorId}
+            </if>
+        </where>
     </select>
 </mapper>
