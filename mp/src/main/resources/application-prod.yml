@@ -279,10 +279,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, mappings, caches, env, scheduledtasks
+        include: health, info
   info:
     git:
-      mode: full
+      mode: simple
   health:
     elasticsearch:
       enabled: false
